@@ -188,10 +188,37 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
         raw = self.rfile.read(length).decode("utf-8")
         return json.loads(raw) if raw else {}
 
-    def do_GET(self) -> None:
+    def _resolve_path_and_qs(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         qs = urllib.parse.parse_qs(parsed.query)
+        if "__vercel_path" in qs and qs["__vercel_path"]:
+            raw_vpath = qs["__vercel_path"][0]
+            v_parsed = urllib.parse.urlparse(raw_vpath)
+            path = v_parsed.path or "/"
+            if v_parsed.query:
+                extra_qs = urllib.parse.parse_qs(v_parsed.query)
+                for k, v in extra_qs.items():
+                    if k not in qs:
+                        qs[k] = v
+        elif path == "/api/index.py":
+            hdr_path = (
+                self.headers.get("x-forwarded-uri")
+                or self.headers.get("x-original-url")
+                or self.headers.get("x-rewrite-url")
+                or "/"
+            )
+            h_parsed = urllib.parse.urlparse(hdr_path)
+            if h_parsed.path and h_parsed.path != "/api/index.py":
+                path = h_parsed.path
+            else:
+                path = "/"
+        if not path.startswith("/"):
+            path = "/" + path
+        return path, qs
+
+    def do_GET(self) -> None:
+        path, qs = self._resolve_path_and_qs()
 
         try:
             if path == "/api/heroes":
@@ -313,8 +340,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             self._send_json({"ok": False, "error": str(e)}, status=500)
 
     def do_POST(self) -> None:
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path
+        path, qs = self._resolve_path_and_qs()
 
         try:
             if path == "/api/pregame_plan":
