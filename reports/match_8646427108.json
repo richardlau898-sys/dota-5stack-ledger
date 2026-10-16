@@ -637,7 +637,1175 @@
     "rubick_steal_ledger": [],
     "key_spell_targets": [],
     "courier_graveyard": [],
-    "ping_pressure_rank": []
+    "ping_pressure_rank": [],
+    "focus_fire_matrix": {
+      "dire": {
+        "side": "dire",
+        "grand_total": 0,
+        "max_cell": 1,
+        "targets": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          }
+        ],
+        "rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "verdict": "集火分布：敌方 1/2 号位双核承伤占 0.0%，三号位『宙斯』吃下 0.0% 伤害，4/5 号位辅助吃下 0.0% 伤害。建议团战开打前先标定第一集火目标（先秒救人酱油或未开BKB主核）。"
+      },
+      "radiant": {
+        "side": "radiant",
+        "grand_total": 0,
+        "max_cell": 1,
+        "targets": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "col_total": 0,
+            "col_share_pct": 0.0
+          }
+        ],
+        "rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "row_total": 0,
+            "cells": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "verdict": "集火分布：敌方 1/2 号位双核承伤占 0.0%，三号位『帕吉』吃下 0.0% 伤害，4/5 号位辅助吃下 0.0% 伤害。建议团战开打前先标定第一集火目标（先秒救人酱油或未开BKB主核）。"
+      }
+    },
+    "teamfight_forensics": [],
+    "hero_execution_by_side": {
+      "dire": [
+        {
+          "pos": 1,
+          "player_slot": 130,
+          "side": "dire",
+          "hero_id": 35,
+          "hero_short_zh": "狙击手",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": []
+        },
+        {
+          "pos": 2,
+          "player_slot": 132,
+          "side": "dire",
+          "hero_id": 23,
+          "hero_short_zh": "昆卡",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": []
+        },
+        {
+          "pos": 3,
+          "player_slot": 131,
+          "side": "dire",
+          "hero_id": 14,
+          "hero_short_zh": "帕吉",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [
+            {
+              "ability_key": "pudge_dismember",
+              "ability_zh": "肢解 (屠夫咬)",
+              "casts": 0,
+              "hits": 0,
+              "avg_hits": 0.0,
+              "unit_label": "段吞噬",
+              "damage": 0,
+              "tf_casts_count": 0,
+              "tf_casts_waves": [],
+              "tf_held_death_count": 0,
+              "tf_held_death_waves": [],
+              "victim_breakdown": [],
+              "grade": "bad",
+              "verdict_text": "整局比赛 肢解 (屠夫咬) 释放记录为 0！"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "肢解 (屠夫咬): 0释放",
+              "tone": "bad"
+            }
+          ],
+          "special_insights": [
+            "整局比赛 肢解 (屠夫咬) 释放记录为 0！"
+          ]
+        },
+        {
+          "pos": 4,
+          "player_slot": 128,
+          "side": "dire",
+          "hero_id": 88,
+          "hero_short_zh": "司夜刺客",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": []
+        },
+        {
+          "pos": 5,
+          "player_slot": 129,
+          "side": "dire",
+          "hero_id": 105,
+          "hero_short_zh": "工程师",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": []
+        }
+      ],
+      "radiant": [
+        {
+          "pos": 1,
+          "player_slot": 4,
+          "side": "radiant",
+          "hero_id": 8,
+          "hero_short_zh": "主宰",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [
+            {
+              "ability_key": "juggernaut_omni_slash",
+              "ability_zh": "无敌斩 (剑圣大)",
+              "casts": 0,
+              "hits": 0,
+              "avg_hits": 0.0,
+              "unit_label": "刀斩击",
+              "damage": 0,
+              "tf_casts_count": 0,
+              "tf_casts_waves": [],
+              "tf_held_death_count": 0,
+              "tf_held_death_waves": [],
+              "victim_breakdown": [],
+              "grade": "bad",
+              "verdict_text": "整局比赛 无敌斩 (剑圣大) 释放记录为 0！"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "无敌斩 (剑圣大): 0释放",
+              "tone": "bad"
+            },
+            {
+              "text": "治疗守卫: 0根(奶队友9,798)",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "整局比赛 无敌斩 (剑圣大) 释放记录为 0！",
+            "《治疗守卫 & 剑刃风暴》审计：全场插下 0 根治疗图腾（为队友治疗 9,798 点），转出 0 次剑刃风暴规避控制并打满 AOE。"
+          ]
+        },
+        {
+          "pos": 2,
+          "player_slot": 3,
+          "side": "radiant",
+          "hero_id": 67,
+          "hero_short_zh": "幽鬼",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+          "personaname": "Tulok",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": []
+        },
+        {
+          "pos": 3,
+          "player_slot": 0,
+          "side": "radiant",
+          "hero_id": 22,
+          "hero_short_zh": "宙斯",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": []
+        },
+        {
+          "pos": 4,
+          "player_slot": 2,
+          "side": "radiant",
+          "hero_id": 64,
+          "hero_short_zh": "杰奇洛",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": []
+        },
+        {
+          "pos": 5,
+          "player_slot": 1,
+          "side": "radiant",
+          "hero_id": 112,
+          "hero_short_zh": "寒冬飞龙",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+          "personaname": "匿名玩家",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": []
+        }
+      ]
+    },
+    "support_vision_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_zh": "夜魇",
+        "total_obs": 0,
+        "total_sen": 0,
+        "avg_lifespan_sec": 0,
+        "posture_counts": {
+          "aggressive": 0,
+          "river_roshan": 0,
+          "defensive": 0
+        },
+        "posture_pcts": {
+          "aggressive": 0.0,
+          "river_roshan": 0.0,
+          "defensive": 0.0
+        },
+        "phase_posture": {
+          "lane": {
+            "label": "对线期 (0-10m)",
+            "aggressive": 0,
+            "river_roshan": 0,
+            "defensive": 0
+          },
+          "mid": {
+            "label": "中期节奏 (10-25m)",
+            "aggressive": 0,
+            "river_roshan": 0,
+            "defensive": 0
+          },
+          "late": {
+            "label": "后期决战 (25m+)",
+            "aggressive": 0,
+            "river_roshan": 0,
+            "defensive": 0
+          }
+        },
+        "posture_verdict": "⚖️ 眼位攻守结构均衡：全场 0 颗假眼中，⚔️ 进攻深入眼 0 颗（0.0%）、⚖️ 河道/肉山眼 0 颗（0.0%）、🛡️ 防守保护眼 0 颗（0.0%），假眼平均存活寿命 0 秒（满分 360 秒）。",
+        "per_support_vision": [
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "obs_total": 0,
+            "sen_total": 0,
+            "obs_killed": 0,
+            "sen_killed": 0,
+            "aggressive_cnt": 0,
+            "river_cnt": 0,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 0,
+            "dewarded_cnt": 0,
+            "style_note": "全场 0 真假眼投放。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "obs_total": 0,
+            "sen_total": 0,
+            "obs_killed": 0,
+            "sen_killed": 0,
+            "aggressive_cnt": 0,
+            "river_cnt": 0,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 0,
+            "dewarded_cnt": 0,
+            "style_note": "全场 0 真假眼投放。"
+          }
+        ],
+        "instant_dewards": [],
+        "cliff_spots": []
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_zh": "天辉",
+        "total_obs": 0,
+        "total_sen": 0,
+        "avg_lifespan_sec": 0,
+        "posture_counts": {
+          "aggressive": 0,
+          "river_roshan": 0,
+          "defensive": 0
+        },
+        "posture_pcts": {
+          "aggressive": 0.0,
+          "river_roshan": 0.0,
+          "defensive": 0.0
+        },
+        "phase_posture": {
+          "lane": {
+            "label": "对线期 (0-10m)",
+            "aggressive": 0,
+            "river_roshan": 0,
+            "defensive": 0
+          },
+          "mid": {
+            "label": "中期节奏 (10-25m)",
+            "aggressive": 0,
+            "river_roshan": 0,
+            "defensive": 0
+          },
+          "late": {
+            "label": "后期决战 (25m+)",
+            "aggressive": 0,
+            "river_roshan": 0,
+            "defensive": 0
+          }
+        },
+        "posture_verdict": "⚖️ 眼位攻守结构均衡：全场 0 颗假眼中，⚔️ 进攻深入眼 0 颗（0.0%）、⚖️ 河道/肉山眼 0 颗（0.0%）、🛡️ 防守保护眼 0 颗（0.0%），假眼平均存活寿命 0 秒（满分 360 秒）。",
+        "per_support_vision": [
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "obs_total": 0,
+            "sen_total": 0,
+            "obs_killed": 0,
+            "sen_killed": 0,
+            "aggressive_cnt": 0,
+            "river_cnt": 0,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 0,
+            "dewarded_cnt": 0,
+            "style_note": "全场 0 真假眼投放。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "obs_total": 0,
+            "sen_total": 0,
+            "obs_killed": 0,
+            "sen_killed": 0,
+            "aggressive_cnt": 0,
+            "river_cnt": 0,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 0,
+            "dewarded_cnt": 0,
+            "style_note": "全场 0 真假眼投放。"
+          }
+        ],
+        "instant_dewards": [],
+        "cliff_spots": []
+      }
+    },
+    "stacking_and_smoke_by_side": {
+      "dire": {
+        "side": "dire",
+        "total_stacks": 0,
+        "total_creeps_stacked": 0,
+        "support_stacks": 0,
+        "core_stacks": 0,
+        "enemy_total_stacks": 0,
+        "stack_verdict": "全队累计堆野 0 波（0 只野怪，辅助 0 波 / 核心 0 波；敌方 0 波）。建议 4/5 号位在 6~18 分钟控符与插眼路过三角区时多帮主C屯远古与大野。",
+        "stack_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          }
+        ],
+        "own_smoke_uses": 0,
+        "enemy_smoke_uses": 0,
+        "smoke_verdict": "🚨 全场几乎不开雾找节奏：本方 36 分钟累计仅开雾 0 次（敌方开雾 0 次）！10~25 分钟中期节奏期极度缺乏主动买雾抓单与控盾意识，全靠走明牌视野硬撞。",
+        "per_player_smokes": [
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "personaname": "匿名玩家",
+            "bought": 0,
+            "used": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "personaname": "匿名玩家",
+            "bought": 0,
+            "used": 0
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "personaname": "匿名玩家",
+            "bought": 0,
+            "used": 0
+          }
+        ],
+        "smoke_events": []
+      },
+      "radiant": {
+        "side": "radiant",
+        "total_stacks": 0,
+        "total_creeps_stacked": 0,
+        "support_stacks": 0,
+        "core_stacks": 0,
+        "enemy_total_stacks": 0,
+        "stack_verdict": "全队累计堆野 0 波（0 只野怪，辅助 0 波 / 核心 0 波；敌方 0 波）。建议 4/5 号位在 6~18 分钟控符与插眼路过三角区时多帮主C屯远古与大野。",
+        "stack_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          }
+        ],
+        "own_smoke_uses": 0,
+        "enemy_smoke_uses": 0,
+        "smoke_verdict": "🚨 全场几乎不开雾找节奏：本方 36 分钟累计仅开雾 0 次（敌方开雾 0 次）！10~25 分钟中期节奏期极度缺乏主动买雾抓单与控盾意识，全靠走明牌视野硬撞。",
+        "per_player_smokes": [
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "personaname": "匿名玩家",
+            "bought": 0,
+            "used": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "personaname": "匿名玩家",
+            "bought": 0,
+            "used": 0
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "personaname": "匿名玩家",
+            "bought": 0,
+            "used": 0
+          }
+        ],
+        "smoke_events": []
+      }
+    },
+    "laning_mechanics_by_side": {
+      "dire": {
+        "side": "dire",
+        "pulling_rows": [
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "pull_ticks": 0,
+            "pull_ratio_pct": 0.0,
+            "dn10": 0,
+            "lh10": 0,
+            "early_sentries": 0,
+            "status_tag": "🟡 占线偏多/拉野偏少",
+            "comment": "前10分钟拉野区活动权重仅 0（反补 0 刀，前9分钟真眼 0 颗），更多时间站在兵线上耗血或游走，拉野消兵频率偏低。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "pull_ticks": 0,
+            "pull_ratio_pct": 0.0,
+            "dn10": 0,
+            "lh10": 0,
+            "early_sentries": 0,
+            "status_tag": "🟡 占线偏多/拉野偏少",
+            "comment": "前10分钟拉野区活动权重仅 0（反补 0 刀，前9分钟真眼 0 颗），更多时间站在兵线上耗血或游走，拉野消兵频率偏低。"
+          }
+        ],
+        "own_lotus_total": 0,
+        "opp_lotus_total": 0,
+        "lotus_verdict": "双方疗伤莲花平分秋色：本方吃下 0 朵（0） vs 敌方 0 朵。",
+        "own_gate_total": 0,
+        "opp_gate_total": 0,
+        "own_lamp_total": 0,
+        "opp_lamp_total": 0,
+        "own_wisdom_cnt": 0,
+        "opp_wisdom_cnt": 0,
+        "wisdom_verdict": "⚠️ 智慧经验符落后：本方仅吃到 0 颗经验符 vs 敌方吃到 0 颗！07:00 与 14:00 必须提前 15 秒去劣势路祭坛蹲守经验符。",
+        "wisdom_timeline": [],
+        "water_runes_timeline": [],
+        "map_interact_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "pulling_rows": [
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "pull_ticks": 0,
+            "pull_ratio_pct": 0.0,
+            "dn10": 0,
+            "lh10": 0,
+            "early_sentries": 0,
+            "status_tag": "🟡 占线偏多/拉野偏少",
+            "comment": "前10分钟拉野区活动权重仅 0（反补 0 刀，前9分钟真眼 0 颗），更多时间站在兵线上耗血或游走，拉野消兵频率偏低。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "pull_ticks": 0,
+            "pull_ratio_pct": 0.0,
+            "dn10": 0,
+            "lh10": 0,
+            "early_sentries": 0,
+            "status_tag": "🟡 占线偏多/拉野偏少",
+            "comment": "前10分钟拉野区活动权重仅 0（反补 0 刀，前9分钟真眼 0 颗），更多时间站在兵线上耗血或游走，拉野消兵频率偏低。"
+          }
+        ],
+        "own_lotus_total": 0,
+        "opp_lotus_total": 0,
+        "lotus_verdict": "双方疗伤莲花平分秋色：本方吃下 0 朵（0） vs 敌方 0 朵。",
+        "own_gate_total": 0,
+        "opp_gate_total": 0,
+        "own_lamp_total": 0,
+        "opp_lamp_total": 0,
+        "own_wisdom_cnt": 0,
+        "opp_wisdom_cnt": 0,
+        "wisdom_verdict": "⚠️ 智慧经验符落后：本方仅吃到 0 颗经验符 vs 敌方吃到 0 颗！07:00 与 14:00 必须提前 15 秒去劣势路祭坛蹲守经验符。",
+        "wisdom_timeline": [],
+        "water_runes_timeline": [],
+        "map_interact_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          }
+        ]
+      }
+    },
+    "tp_rotation_by_side": {
+      "dire": {
+        "side": "dire",
+        "player_tp_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          }
+        ],
+        "rotation_highlights": [],
+        "absent_warnings": []
+      },
+      "radiant": {
+        "side": "radiant",
+        "player_tp_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "tp_bought": 0,
+            "tp_used": 0,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 0,
+            "tf_total_cnt": 0,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          }
+        ],
+        "rotation_highlights": [],
+        "absent_warnings": []
+      }
+    }
   },
   "phases_data": [
     {
@@ -2245,7 +3413,50 @@
           "tier": "mid"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 1,
+        "player_slot": 4,
+        "side": "radiant",
+        "hero_id": 8,
+        "hero_short_zh": "主宰",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [
+          {
+            "ability_key": "juggernaut_omni_slash",
+            "ability_zh": "无敌斩 (剑圣大)",
+            "casts": 0,
+            "hits": 0,
+            "avg_hits": 0.0,
+            "unit_label": "刀斩击",
+            "damage": 0,
+            "tf_casts_count": 0,
+            "tf_casts_waves": [],
+            "tf_held_death_count": 0,
+            "tf_held_death_waves": [],
+            "victim_breakdown": [],
+            "grade": "bad",
+            "verdict_text": "整局比赛 无敌斩 (剑圣大) 释放记录为 0！"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "无敌斩 (剑圣大): 0释放",
+            "tone": "bad"
+          },
+          {
+            "text": "治疗守卫: 0根(奶队友9,798)",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "整局比赛 无敌斩 (剑圣大) 释放记录为 0！",
+          "《治疗守卫 & 剑刃风暴》审计：全场插下 0 根治疗图腾（为队友治疗 9,798 点），转出 0 次剑刃风暴规避控制并打满 AOE。"
+        ]
+      }
     },
     {
       "player_slot": 3,
@@ -2497,7 +3708,21 @@
           "tier": "mid"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 3,
+        "side": "radiant",
+        "hero_id": 67,
+        "hero_short_zh": "幽鬼",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+        "personaname": "Tulok",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      }
     },
     {
       "player_slot": 0,
@@ -2757,7 +3982,21 @@
           "tier": "top"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 0,
+        "side": "radiant",
+        "hero_id": 22,
+        "hero_short_zh": "宙斯",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      }
     },
     {
       "player_slot": 2,
@@ -3007,7 +4246,21 @@
           "tier": "low"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 2,
+        "side": "radiant",
+        "hero_id": 64,
+        "hero_short_zh": "杰奇洛",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      }
     },
     {
       "player_slot": 1,
@@ -3265,7 +4518,21 @@
           "tier": "low"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 1,
+        "side": "radiant",
+        "hero_id": 112,
+        "hero_short_zh": "寒冬飞龙",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      }
     }
   ],
   "dire_pos_1_to_5": [
@@ -3519,7 +4786,21 @@
           "tier": "top"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 1,
+        "player_slot": 130,
+        "side": "dire",
+        "hero_id": 35,
+        "hero_short_zh": "狙击手",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      }
     },
     {
       "player_slot": 132,
@@ -3766,7 +5047,21 @@
           "tier": "mid"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 132,
+        "side": "dire",
+        "hero_id": 23,
+        "hero_short_zh": "昆卡",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      }
     },
     {
       "player_slot": 131,
@@ -4021,7 +5316,45 @@
           "tier": "top"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 131,
+        "side": "dire",
+        "hero_id": 14,
+        "hero_short_zh": "帕吉",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [
+          {
+            "ability_key": "pudge_dismember",
+            "ability_zh": "肢解 (屠夫咬)",
+            "casts": 0,
+            "hits": 0,
+            "avg_hits": 0.0,
+            "unit_label": "段吞噬",
+            "damage": 0,
+            "tf_casts_count": 0,
+            "tf_casts_waves": [],
+            "tf_held_death_count": 0,
+            "tf_held_death_waves": [],
+            "victim_breakdown": [],
+            "grade": "bad",
+            "verdict_text": "整局比赛 肢解 (屠夫咬) 释放记录为 0！"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "肢解 (屠夫咬): 0释放",
+            "tone": "bad"
+          }
+        ],
+        "special_insights": [
+          "整局比赛 肢解 (屠夫咬) 释放记录为 0！"
+        ]
+      }
     },
     {
       "player_slot": 128,
@@ -4252,7 +5585,21 @@
           "tier": "mid"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 128,
+        "side": "dire",
+        "hero_id": 88,
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      }
     },
     {
       "player_slot": 129,
@@ -4492,7 +5839,21 @@
           "tier": "top"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 129,
+        "side": "dire",
+        "hero_id": 105,
+        "hero_short_zh": "工程师",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      }
     }
   ]
 }

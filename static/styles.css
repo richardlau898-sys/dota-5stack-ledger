@@ -3496,3 +3496,468 @@ select:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================================
+   V4.0 赛后复盘全面去重 & 录像级战术显微镜 (Tactical Microscope) 专属样式
+   ========================================================================= */
+
+/* Modern Web Guidance: defer-rendering-heavy-content
+   Must pair content-visibility: auto with contain-intrinsic-size */
+.charts-hub-section,
+.phase-review-section,
+.windows-section,
+.players-forensics-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 520px;
+}
+
+/* 1. 跨比赛多局惯犯档案 <details> 默认折叠，支持页内搜索自动展开 */
+.squad-ledger-details {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+
+.squad-ledger-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 16px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  background: linear-gradient(90deg, rgba(205, 164, 94, 0.08), rgba(24, 26, 22, 0.95));
+}
+
+.squad-ledger-summary::-webkit-details-marker {
+  display: none;
+}
+
+.squad-ledger-summary-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.squad-ledger-summary-arrow {
+  font-size: 12px;
+  color: var(--gold-light);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.squad-ledger-details[open] .squad-ledger-summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.squad-ledger-details .squad-ledger-section {
+  border: none;
+  margin-bottom: 0;
+  padding: 14px 16px;
+}
+
+/* 2. 赛后复盘六大去重模块快速电梯导航 */
+.postgame-jump-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px dashed #35382e;
+}
+
+.jump-nav-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.jump-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text);
+  background: #171915;
+  border: 1px solid #383b31;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.jump-chip:hover {
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+.jump-chip.highlight {
+  background: rgba(205, 164, 94, 0.14);
+  border-color: var(--gold);
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+/* 3. 录像级战术显微镜主容器与标签栏 */
+.tactical-microscope-section {
+  background: var(--panel);
+  border: 1px solid #4a4534;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.microscope-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.microscope-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.microscope-tab-btn {
+  appearance: none;
+  background: #151714;
+  color: var(--muted);
+  border: 1px solid #35382f;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.microscope-tab-btn:hover {
+  color: var(--text);
+  border-color: #575342;
+}
+
+.microscope-tab-btn.active {
+  background: linear-gradient(180deg, #2d281d, #1f1c15);
+  color: var(--gold-light);
+  border-color: var(--gold);
+  box-shadow: inset 0 1px 0 rgba(255, 224, 150, 0.2);
+}
+
+.tactical-microscope-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.micro-pane-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.micro-pane-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 15px;
+  background: linear-gradient(90deg, rgba(205, 164, 94, 0.12), rgba(22, 24, 20, 0.95));
+  border-left: 3px solid var(--gold);
+  border-top: 1px solid #3a372b;
+  border-right: 1px solid #3a372b;
+  border-bottom: 1px solid #3a372b;
+}
+
+.micro-pane-banner h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: var(--gold-light);
+}
+
+.micro-pane-banner p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+/* Tab 1: 英雄绝活与大招审判卡片网格 */
+.micro-hero-exec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.micro-hero-card {
+  background: #141613;
+  border: 1px solid #32352c;
+  padding: 14px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.micro-hero-card.culprit-border {
+  border-color: #7c3b32;
+}
+
+.micro-hero-card.mvp-border {
+  border-color: #4b704e;
+}
+
+.micro-hero-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #282b23;
+}
+
+.micro-hero-id {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.micro-hero-id img {
+  width: 44px;
+  height: 25px;
+  object-fit: cover;
+  border: 1px solid #524b3a;
+  flex-shrink: 0;
+}
+
+.micro-hero-id strong {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.micro-hero-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.micro-badges-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.micro-exec-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: #20231d;
+  border: 1px solid #44473a;
+  color: #e6dfd1;
+  font-variant-numeric: tabular-nums;
+}
+
+.micro-exec-badge.warn {
+  background: #2b1a18;
+  border-color: #824036;
+  color: #f4b7ad;
+}
+
+.micro-exec-badge.good {
+  background: #19271c;
+  border-color: #3f6a47;
+  color: #b7e2be;
+}
+
+.micro-ult-box {
+  background: #1a1c18;
+  border: 1px solid #35382e;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.micro-ult-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.micro-ult-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+.micro-ult-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.micro-tf-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.micro-tf-pill {
+  font-size: 11px;
+  padding: 2px 7px;
+  background: #1c251d;
+  border: 1px solid #3d5b41;
+  color: #b8dcbe;
+}
+
+.micro-tf-pill.held-die {
+  background: #2d1917;
+  border-color: #8c3f35;
+  color: #f7b6ac;
+  font-weight: 600;
+}
+
+.micro-insights-list {
+  margin: 0;
+  padding-left: 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.52;
+}
+
+/* Tab 2: 辅助眼位进攻/防守与寿命 */
+.micro-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.micro-card {
+  background: #141613;
+  border: 1px solid #32352c;
+  padding: 14px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.micro-card h4 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--gold-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.posture-bar-stack {
+  display: flex;
+  height: 22px;
+  width: 100%;
+  border: 1px solid #3c3f34;
+  overflow: hidden;
+  background: #0f100e;
+}
+
+.posture-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.posture-seg.agg {
+  background: linear-gradient(90deg, #91382d, #b5493b);
+}
+
+.posture-seg.mid {
+  background: linear-gradient(90deg, #8b6d2f, #b08b3c);
+}
+
+.posture-seg.def {
+  background: linear-gradient(90deg, #2f6073, #3c7b94);
+}
+
+.micro-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.micro-kpi-cell {
+  background: #1a1d18;
+  border: 1px solid #2e3128;
+  padding: 7px 9px;
+}
+
+.micro-kpi-cell span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.micro-kpi-cell strong {
+  font-size: 14px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.micro-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #2e3128;
+}
+
+.micro-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+.micro-data-table th {
+  background: #1b1e19;
+  color: var(--gold-light);
+  padding: 8px 10px;
+  border-bottom: 1px solid #34382d;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.micro-data-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #252820;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.micro-data-table tr:hover td {
+  background: rgba(205, 164, 94, 0.05);
+}
+
+@media (max-width: 1024px) {
+  .micro-hero-exec-grid,
+  .micro-grid-2col {
+    grid-template-columns: 1fr;
+  }
+  .micro-kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

@@ -14314,7 +14314,2980 @@
         "personaname": "Paphets",
         "pings": 2
       }
-    ]
+    ],
+    "focus_fire_matrix": {
+      "dire": {
+        "side": "dire",
+        "grand_total": 168632,
+        "max_cell": 15755,
+        "targets": [
+          {
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên",
+            "col_total": 34011,
+            "col_share_pct": 20.2
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM",
+            "col_total": 48847,
+            "col_share_pct": 29.0
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý",
+            "col_total": 35372,
+            "col_share_pct": 21.0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp",
+            "col_total": 24632,
+            "col_share_pct": 14.6
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "col_total": 25770,
+            "col_share_pct": 15.3
+          }
+        ],
+        "rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Petarung Amoral",
+            "row_total": 53761,
+            "cells": [
+              10480,
+              15755,
+              11932,
+              7276,
+              8318
+            ]
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ",
+            "row_total": 32189,
+            "cells": [
+              4541,
+              14387,
+              4263,
+              3464,
+              5534
+            ]
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets",
+            "row_total": 28931,
+            "cells": [
+              7136,
+              5443,
+              4662,
+              6785,
+              4905
+            ]
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana",
+            "row_total": 33142,
+            "cells": [
+              5782,
+              7563,
+              9779,
+              6283,
+              3735
+            ]
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "row_total": 20609,
+            "cells": [
+              6072,
+              5699,
+              4736,
+              824,
+              3278
+            ]
+          }
+        ],
+        "verdict": "✓ 集火目标明确：全队有 49.2% 的火力精准倾泻在敌方 1/2 号位双核身上，另有 29.9% 伤害用于秒杀敌方 4/5 号位后排酱油，没有在敌方三号位『编织者』(21.0%) 身上无脑刮痧。"
+      },
+      "radiant": {
+        "side": "radiant",
+        "grand_total": 142100,
+        "max_cell": 13585,
+        "targets": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Petarung Amoral",
+            "col_total": 35876,
+            "col_share_pct": 25.2
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ",
+            "col_total": 21058,
+            "col_share_pct": 14.8
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets",
+            "col_total": 34094,
+            "col_share_pct": 24.0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana",
+            "col_total": 27115,
+            "col_share_pct": 19.1
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "col_total": 23957,
+            "col_share_pct": 16.9
+          }
+        ],
+        "rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên",
+            "row_total": 40556,
+            "cells": [
+              5635,
+              6987,
+              13585,
+              5239,
+              9110
+            ]
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM",
+            "row_total": 30841,
+            "cells": [
+              9776,
+              7693,
+              4693,
+              5687,
+              2992
+            ]
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý",
+            "row_total": 26597,
+            "cells": [
+              8961,
+              2626,
+              4041,
+              6239,
+              4730
+            ]
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp",
+            "row_total": 20429,
+            "cells": [
+              6348,
+              1258,
+              6577,
+              4734,
+              1512
+            ]
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "row_total": 23677,
+            "cells": [
+              5156,
+              2494,
+              5198,
+              5216,
+              5613
+            ]
+          }
+        ],
+        "verdict": "集火分布：敌方 1/2 号位双核承伤占 40.0%，三号位『潮汐猎人』吃下 24.0% 伤害，4/5 号位辅助吃下 36.0% 伤害。建议团战开打前先标定第一集火目标（先秒救人酱油或未开BKB主核）。"
+      }
+    },
+    "teamfight_forensics": [
+      {
+        "tf_index": 1,
+        "start_sec": 766,
+        "end_sec": 813,
+        "time_range": "12:46–13:33",
+        "rad_kills": 2,
+        "dire_kills": 3,
+        "gold_swing_rad": -48,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 167.0,
+            "y": 121.0,
+            "nx": 80.5,
+            "ny": 55.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "x": 77.0,
+            "y": 145.0,
+            "nx": 10.2,
+            "ny": 36.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý"
+          },
+          {
+            "x": 162.0,
+            "y": 125.0,
+            "nx": 76.6,
+            "ny": 52.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "x": 159.0,
+            "y": 124.0,
+            "nx": 74.2,
+            "ny": 53.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "x": 156.0,
+            "y": 134.0,
+            "nx": 71.9,
+            "ny": 45.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ"
+          }
+        ]
+      },
+      {
+        "tf_index": 2,
+        "start_sec": 891,
+        "end_sec": 924,
+        "time_range": "14:51–15:24",
+        "rad_kills": 2,
+        "dire_kills": 1,
+        "gold_swing_rad": 813,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 107.0,
+            "y": 107.0,
+            "nx": 33.6,
+            "ny": 66.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "x": 112.0,
+            "y": 110.0,
+            "nx": 37.5,
+            "ny": 64.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana"
+          },
+          {
+            "x": 108.0,
+            "y": 112.0,
+            "nx": 34.4,
+            "ny": 62.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ"
+          }
+        ]
+      },
+      {
+        "tf_index": 3,
+        "start_sec": 1023,
+        "end_sec": 1065,
+        "time_range": "17:03–17:45",
+        "rad_kills": 3,
+        "dire_kills": 1,
+        "gold_swing_rad": 704,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 127.0,
+            "y": 161.0,
+            "nx": 49.2,
+            "ny": 24.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 134.0,
+            "y": 159.0,
+            "nx": 54.7,
+            "ny": 25.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana"
+          },
+          {
+            "x": 134.0,
+            "y": 167.0,
+            "nx": 54.7,
+            "ny": 19.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "x": 133.0,
+            "y": 163.0,
+            "nx": 53.9,
+            "ny": 22.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ"
+          }
+        ]
+      },
+      {
+        "tf_index": 4,
+        "start_sec": 1130,
+        "end_sec": 1175,
+        "time_range": "18:50–19:35",
+        "rad_kills": 2,
+        "dire_kills": 1,
+        "gold_swing_rad": -107,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 171.0,
+            "y": 115.0,
+            "nx": 83.6,
+            "ny": 60.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 169.0,
+            "y": 99.0,
+            "nx": 82.0,
+            "ny": 72.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana"
+          },
+          {
+            "x": 180.0,
+            "y": 124.0,
+            "nx": 90.6,
+            "ny": 53.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          }
+        ]
+      },
+      {
+        "tf_index": 5,
+        "start_sec": 1201,
+        "end_sec": 1241,
+        "time_range": "20:01–20:41",
+        "rad_kills": 0,
+        "dire_kills": 3,
+        "gold_swing_rad": -1301,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 113.0,
+            "y": 113.0,
+            "nx": 38.3,
+            "ny": 61.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "x": 117.0,
+            "y": 122.0,
+            "nx": 41.4,
+            "ny": 54.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 123.0,
+            "y": 123.0,
+            "nx": 46.1,
+            "ny": 53.9,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          }
+        ]
+      },
+      {
+        "tf_index": 6,
+        "start_sec": 1421,
+        "end_sec": 1467,
+        "time_range": "23:41–24:27",
+        "rad_kills": 4,
+        "dire_kills": 1,
+        "gold_swing_rad": 3424,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 108.0,
+            "y": 158.0,
+            "nx": 34.4,
+            "ny": 26.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên"
+          },
+          {
+            "x": 109.0,
+            "y": 158.0,
+            "nx": 35.2,
+            "ny": 26.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Petarung Amoral"
+          },
+          {
+            "x": 99.0,
+            "y": 144.0,
+            "nx": 27.3,
+            "ny": 37.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana"
+          },
+          {
+            "x": 115.0,
+            "y": 158.0,
+            "nx": 39.8,
+            "ny": 26.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets"
+          },
+          {
+            "x": 111.0,
+            "y": 158.0,
+            "nx": 36.7,
+            "ny": 26.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          }
+        ]
+      },
+      {
+        "tf_index": 7,
+        "start_sec": 1560,
+        "end_sec": 1592,
+        "time_range": "26:00–26:32",
+        "rad_kills": 0,
+        "dire_kills": 4,
+        "gold_swing_rad": -3172,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 138.0,
+            "y": 132.0,
+            "nx": 57.8,
+            "ny": 46.9,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "x": 130.0,
+            "y": 129.0,
+            "nx": 51.6,
+            "ny": 49.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 130.0,
+            "y": 128.0,
+            "nx": 51.6,
+            "ny": 50.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý"
+          },
+          {
+            "x": 131.0,
+            "y": 129.0,
+            "nx": 52.3,
+            "ny": 49.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          }
+        ]
+      },
+      {
+        "tf_index": 8,
+        "start_sec": 1806,
+        "end_sec": 1847,
+        "time_range": "30:06–30:47",
+        "rad_kills": 1,
+        "dire_kills": 3,
+        "gold_swing_rad": -2287,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 107.0,
+            "y": 127.0,
+            "nx": 33.6,
+            "ny": 50.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "x": 118.0,
+            "y": 135.0,
+            "nx": 42.2,
+            "ny": 44.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 107.0,
+            "y": 137.0,
+            "nx": 33.6,
+            "ny": 43.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên"
+          },
+          {
+            "x": 118.0,
+            "y": 130.0,
+            "nx": 42.2,
+            "ny": 48.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana"
+          }
+        ]
+      },
+      {
+        "tf_index": 9,
+        "start_sec": 1877,
+        "end_sec": 1918,
+        "time_range": "31:17–31:58",
+        "rad_kills": 1,
+        "dire_kills": 2,
+        "gold_swing_rad": -1557,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 91.0,
+            "y": 109.0,
+            "nx": 21.1,
+            "ny": 64.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 95.0,
+            "y": 102.0,
+            "nx": 24.2,
+            "ny": 70.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "x": 101.0,
+            "y": 106.0,
+            "nx": 28.9,
+            "ny": 67.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          }
+        ]
+      },
+      {
+        "tf_index": 10,
+        "start_sec": 2016,
+        "end_sec": 2066,
+        "time_range": "33:36–34:26",
+        "rad_kills": 3,
+        "dire_kills": 1,
+        "gold_swing_rad": 5045,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 114.0,
+            "y": 164.0,
+            "nx": 39.1,
+            "ny": 21.9,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 113.0,
+            "y": 176.0,
+            "nx": 38.3,
+            "ny": 12.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Petarung Amoral"
+          },
+          {
+            "x": 108.0,
+            "y": 169.0,
+            "nx": 34.4,
+            "ny": 18.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "x": 110.0,
+            "y": 159.0,
+            "nx": 35.9,
+            "ny": 25.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ"
+          }
+        ]
+      },
+      {
+        "tf_index": 11,
+        "start_sec": 2143,
+        "end_sec": 2197,
+        "time_range": "35:43–36:37",
+        "rad_kills": 0,
+        "dire_kills": 3,
+        "gold_swing_rad": -3476,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 129.0,
+            "y": 111.0,
+            "nx": 50.8,
+            "ny": 63.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "x": 126.0,
+            "y": 114.0,
+            "nx": 48.4,
+            "ny": 60.9,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 156.0,
+            "y": 89.0,
+            "nx": 71.9,
+            "ny": 80.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý"
+          }
+        ]
+      },
+      {
+        "tf_index": 12,
+        "start_sec": 2273,
+        "end_sec": 2310,
+        "time_range": "37:53–38:30",
+        "rad_kills": 1,
+        "dire_kills": 2,
+        "gold_swing_rad": -1140,
+        "buybacks": [
+          "斧王(BOOM)"
+        ],
+        "deaths_coords": [
+          {
+            "x": 86.0,
+            "y": 76.0,
+            "nx": 17.2,
+            "ny": 90.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 103.0,
+            "y": 78.0,
+            "nx": 30.5,
+            "ny": 89.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên"
+          },
+          {
+            "x": 97.0,
+            "y": 71.0,
+            "nx": 25.8,
+            "ny": 94.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets"
+          }
+        ]
+      },
+      {
+        "tf_index": 13,
+        "start_sec": 2635,
+        "end_sec": 2676,
+        "time_range": "43:55–44:36",
+        "rad_kills": 0,
+        "dire_kills": 3,
+        "gold_swing_rad": -3221,
+        "buybacks": [
+          "撼地者(Super Bóp)"
+        ],
+        "deaths_coords": [
+          {
+            "x": 133.0,
+            "y": 97.0,
+            "nx": 53.9,
+            "ny": 74.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "x": 131.0,
+            "y": 98.0,
+            "nx": 52.3,
+            "ny": 73.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "x": 126.0,
+            "y": 89.0,
+            "nx": 48.4,
+            "ny": 80.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          }
+        ]
+      },
+      {
+        "tf_index": 14,
+        "start_sec": 2693,
+        "end_sec": 2735,
+        "time_range": "44:53–45:35",
+        "rad_kills": 0,
+        "dire_kills": 3,
+        "gold_swing_rad": -7955,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 79.0,
+            "y": 79.0,
+            "nx": 11.7,
+            "ny": 88.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý"
+          },
+          {
+            "x": 85.0,
+            "y": 79.0,
+            "nx": 16.4,
+            "ny": 88.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên"
+          },
+          {
+            "x": 84.0,
+            "y": 80.0,
+            "nx": 15.6,
+            "ny": 87.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          }
+        ]
+      }
+    ],
+    "hero_execution_by_side": {
+      "dire": [
+        {
+          "pos": 1,
+          "player_slot": 128,
+          "side": "dire",
+          "hero_id": 8,
+          "hero_short_zh": "主宰",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+          "personaname": "Petarung Amoral",
+          "stuns_sec": 0.0,
+          "ult_audits": [
+            {
+              "ability_key": "juggernaut_omni_slash",
+              "ability_zh": "无敌斩 (剑圣大)",
+              "casts": 10,
+              "hits": 55,
+              "avg_hits": 5.5,
+              "unit_label": "刀斩击",
+              "damage": 8777,
+              "tf_casts_count": 7,
+              "tf_casts_waves": [
+                "23:41–24:27(×1)",
+                "26:00–26:32(×1)",
+                "30:06–30:47(×1)",
+                "33:36–34:26(×1)",
+                "35:43–36:37(×1)",
+                "37:53–38:30(×1)",
+                "43:55–44:36(×1)"
+              ],
+              "tf_held_death_count": 0,
+              "tf_held_death_waves": [],
+              "victim_breakdown": [
+                "齐天大圣(3,689伤)",
+                "天怒法师(1,898伤)",
+                "斧王(1,393伤)",
+                "撼地者(1,256伤)",
+                "编织者(541伤)"
+              ],
+              "grade": "warn",
+              "verdict_text": "大招中规中矩：全场释放 10 次，累计 55 刀斩击（场均每大 5.5 刀斩击，伤害 8,777）。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "无敌斩 (剑圣大): 场均5.5刀斩击",
+              "tone": "warn"
+            },
+            {
+              "text": "治疗守卫: 20根(奶队友19,227)",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招中规中矩：全场释放 10 次，累计 55 刀斩击（场均每大 5.5 刀斩击，伤害 8,777）。",
+            "《治疗守卫 & 剑刃风暴》审计：全场插下 20 根治疗图腾（为队友治疗 19,227 点，另为自身恢复 30,045 点生命），转出 33 次剑刃风暴规避控制并打满 AOE。"
+          ]
+        },
+        {
+          "pos": 2,
+          "player_slot": 132,
+          "side": "dire",
+          "hero_id": 13,
+          "hero_short_zh": "帕克",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+          "personaname": "loiverever౨ৎ",
+          "stuns_sec": 36.9,
+          "ult_audits": [
+            {
+              "ability_key": "puck_dream_coil",
+              "ability_zh": "梦境缠绕 (帕克大)",
+              "casts": 14,
+              "hits": 45,
+              "avg_hits": 3.21,
+              "unit_label": "人次",
+              "damage": 6634,
+              "tf_casts_count": 5,
+              "tf_casts_waves": [
+                "17:03–17:45(×1)",
+                "18:50–19:35(×1)",
+                "30:06–30:47(×1)",
+                "31:17–31:58(×1)",
+                "37:53–38:30(×1)"
+              ],
+              "tf_held_death_count": 3,
+              "tf_held_death_waves": [
+                "12:46–13:33",
+                "14:51–15:24",
+                "33:36–34:26"
+              ],
+              "victim_breakdown": [
+                "斧王(3,051伤)",
+                "齐天大圣(985伤)",
+                "编织者(973伤)",
+                "天怒法师(933伤)",
+                "撼地者(692伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 14 次，累计打出 45 人次（场均每大 3.21 人次，造成 6,634 点伤害），在 17:03–17:45(×1), 18:50–19:35(×1), 30:06–30:47(×1), 31:17–31:58(×1) 团战完美兑现；主要灌伤目标：斧王(3,051伤)、齐天大圣(985伤)、编织者(973伤)。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "梦境缠绕 (帕克大): 14放/45人次(均3.21)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 36.9秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 14 次，累计打出 45 人次（场均每大 3.21 人次，造成 6,634 点伤害），在 17:03–17:45(×1), 18:50–19:35(×1), 30:06–30:47(×1), 31:17–31:58(×1) 团战完美兑现；主要灌伤目标：斧王(3,051伤)、齐天大圣(985伤)、编织者(973伤)。",
+            "全场累计对敌方英雄造成 36.9 秒硬控眩晕（平均每分钟控制 0.79 秒）。"
+          ]
+        },
+        {
+          "pos": 3,
+          "player_slot": 130,
+          "side": "dire",
+          "hero_id": 29,
+          "hero_short_zh": "潮汐猎人",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+          "personaname": "Paphets",
+          "stuns_sec": 49.7,
+          "ult_audits": [
+            {
+              "ability_key": "tidehunter_ravage",
+              "ability_zh": "毁灭 (潮汐大)",
+              "casts": 9,
+              "hits": 29,
+              "avg_hits": 3.22,
+              "unit_label": "人次",
+              "damage": 5080,
+              "tf_casts_count": 4,
+              "tf_casts_waves": [
+                "12:46–13:33(×1)",
+                "26:00–26:32(×1)",
+                "30:06–30:47(×1)",
+                "43:55–44:36(×1)"
+              ],
+              "tf_held_death_count": 2,
+              "tf_held_death_waves": [
+                "23:41–24:27",
+                "37:53–38:30"
+              ],
+              "victim_breakdown": [
+                "齐天大圣(1,327伤)",
+                "斧王(1,190伤)",
+                "撼地者(1,053伤)",
+                "编织者(942伤)",
+                "天怒法师(568伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 9 次，累计打出 29 人次（场均每大 3.22 人次，造成 5,080 点伤害），在 12:46–13:33(×1), 26:00–26:32(×1), 30:06–30:47(×1), 43:55–44:36(×1) 团战完美兑现；主要灌伤目标：齐天大圣(1,327伤)、斧王(1,190伤)、撼地者(1,053伤)。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "毁灭 (潮汐大): 9放/29人次(均3.22)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 49.7秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 9 次，累计打出 29 人次（场均每大 3.22 人次，造成 5,080 点伤害），在 12:46–13:33(×1), 26:00–26:32(×1), 30:06–30:47(×1), 43:55–44:36(×1) 团战完美兑现；主要灌伤目标：齐天大圣(1,327伤)、斧王(1,190伤)、撼地者(1,053伤)。",
+            "全场累计对敌方英雄造成 49.7 秒硬控眩晕（平均每分钟控制 1.07 秒）。"
+          ]
+        },
+        {
+          "pos": 4,
+          "player_slot": 129,
+          "side": "dire",
+          "hero_id": 88,
+          "hero_short_zh": "司夜刺客",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+          "personaname": "Nanana",
+          "stuns_sec": 137.7,
+          "ult_audits": [],
+          "skillshot_audits": [
+            {
+              "ability_zh": "穿刺 (小强戳)",
+              "casts": 61,
+              "hits": 49,
+              "hit_pct": 80.3,
+              "damage": 8883,
+              "grade": "good",
+              "detail": "《穿刺 (小强戳)》全场施放 61 次，命中敌方英雄 49 人次（有效命中比 80.3%，造成 8,883 伤害），手感火热！"
+            },
+            {
+              "ability_zh": "尖刺外壳 (开壳反晕)",
+              "casts": 41,
+              "hits": 35,
+              "hit_pct": 85.4,
+              "damage": 3954,
+              "grade": "good",
+              "detail": "《尖刺外壳 (开壳反晕)》全场施放 41 次，命中敌方英雄 35 人次（有效命中比 85.4%，造成 3,954 伤害），手感火热！"
+            }
+          ],
+          "headline_badges": [
+            {
+              "text": "穿刺: 61放/49中(80.3%)",
+              "tone": "good"
+            },
+            {
+              "text": "尖刺外壳: 41放/35中(85.4%)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 137.7秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "《穿刺 (小强戳)》全场施放 61 次，命中敌方英雄 49 人次（有效命中比 80.3%，造成 8,883 伤害），手感火热！",
+            "《尖刺外壳 (开壳反晕)》全场施放 41 次，命中敌方英雄 35 人次（有效命中比 85.4%，造成 3,954 伤害），手感火热！",
+            "全场累计对敌方英雄造成 137.7 秒硬控眩晕（平均每分钟控制 2.96 秒）。"
+          ]
+        },
+        {
+          "pos": 5,
+          "player_slot": 131,
+          "side": "dire",
+          "hero_id": 131,
+          "hero_short_zh": "环轨百戏王",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+          "personaname": "Flame = ez mute",
+          "stuns_sec": 53.3,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 53.3秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 53.3 秒硬控眩晕（平均每分钟控制 1.15 秒）。"
+          ]
+        }
+      ],
+      "radiant": [
+        {
+          "pos": 1,
+          "player_slot": 3,
+          "side": "radiant",
+          "hero_id": 114,
+          "hero_short_zh": "齐天大圣",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+          "personaname": "Me and 4 sinh viên",
+          "stuns_sec": 25.9,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 25.9秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 25.9 秒硬控眩晕（平均每分钟控制 0.56 秒）。"
+          ]
+        },
+        {
+          "pos": 2,
+          "player_slot": 1,
+          "side": "radiant",
+          "hero_id": 2,
+          "hero_short_zh": "斧王",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+          "personaname": "BOOM",
+          "stuns_sec": 96.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 96.0秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 96.0 秒硬控眩晕（平均每分钟控制 2.06 秒）。"
+          ]
+        },
+        {
+          "pos": 3,
+          "player_slot": 2,
+          "side": "radiant",
+          "hero_id": 63,
+          "hero_short_zh": "编织者",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+          "personaname": "Đỗ Ngọc Quý",
+          "stuns_sec": 5.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [],
+          "special_insights": [
+            "核心技能释放与转化：《weaver_shukuchi》释放 210 次(命中 73 人次 / 9,604 伤害)；《The Swarm》释放 18 次(命中 179 人次 / 3,447 伤害)；《Time Lapse》释放 6 次(命中 0 人次 / 0 伤害)。"
+          ]
+        },
+        {
+          "pos": 4,
+          "player_slot": 4,
+          "side": "radiant",
+          "hero_id": 7,
+          "hero_short_zh": "撼地者",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+          "personaname": "Super Bóp",
+          "stuns_sec": 108.7,
+          "ult_audits": [
+            {
+              "ability_key": "earthshaker_echo_slam",
+              "ability_zh": "回音击 (牛头大)",
+              "casts": 7,
+              "hits": 73,
+              "avg_hits": 10.43,
+              "unit_label": "人次",
+              "damage": 5410,
+              "tf_casts_count": 5,
+              "tf_casts_waves": [
+                "12:46–13:33(×1)",
+                "20:01–20:41(×1)",
+                "23:41–24:27(×1)",
+                "26:00–26:32(×1)",
+                "43:55–44:36(×1)"
+              ],
+              "tf_held_death_count": 3,
+              "tf_held_death_waves": [
+                "14:51–15:24",
+                "31:17–31:58",
+                "44:53–45:35"
+              ],
+              "victim_breakdown": [
+                "潮汐猎人(2,140伤)",
+                "主宰(1,914伤)",
+                "司夜刺客(864伤)",
+                "环轨百戏王(294伤)",
+                "帕克(198伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 7 次，累计打出 73 人次（场均每大 10.43 人次，造成 5,410 点伤害），在 12:46–13:33(×1), 20:01–20:41(×1), 23:41–24:27(×1), 26:00–26:32(×1) 团战完美兑现；主要灌伤目标：潮汐猎人(2,140伤)、主宰(1,914伤)、司夜刺客(864伤)。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "回音击 (牛头大): 7放/73人次(均10.43)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 108.7秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 7 次，累计打出 73 人次（场均每大 10.43 人次，造成 5,410 点伤害），在 12:46–13:33(×1), 20:01–20:41(×1), 23:41–24:27(×1), 26:00–26:32(×1) 团战完美兑现；主要灌伤目标：潮汐猎人(2,140伤)、主宰(1,914伤)、司夜刺客(864伤)。",
+            "全场累计对敌方英雄造成 108.7 秒硬控眩晕（平均每分钟控制 2.34 秒）。"
+          ]
+        },
+        {
+          "pos": 5,
+          "player_slot": 0,
+          "side": "radiant",
+          "hero_id": 101,
+          "hero_short_zh": "天怒法师",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+          "personaname": "Roti Jala Mak Limah Biadab",
+          "stuns_sec": 21.8,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 21.8秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 21.8 秒硬控眩晕（平均每分钟控制 0.47 秒）。"
+          ]
+        }
+      ]
+    },
+    "support_vision_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_zh": "夜魇",
+        "total_obs": 22,
+        "total_sen": 23,
+        "avg_lifespan_sec": 264,
+        "posture_counts": {
+          "aggressive": 9,
+          "river_roshan": 5,
+          "defensive": 8
+        },
+        "posture_pcts": {
+          "aggressive": 40.9,
+          "river_roshan": 22.7,
+          "defensive": 36.4
+        },
+        "phase_posture": {
+          "lane": {
+            "label": "对线期 (0-10m)",
+            "aggressive": 3,
+            "river_roshan": 2,
+            "defensive": 1
+          },
+          "mid": {
+            "label": "中期节奏 (10-25m)",
+            "aggressive": 0,
+            "river_roshan": 0,
+            "defensive": 4
+          },
+          "late": {
+            "label": "后期决战 (25m+)",
+            "aggressive": 6,
+            "river_roshan": 3,
+            "defensive": 3
+          }
+        },
+        "posture_verdict": "⚖️ 眼位攻守结构均衡：全场 22 颗假眼中，⚔️ 进攻深入眼 9 颗（40.9%）、⚖️ 河道/肉山眼 5 颗（22.7%）、🛡️ 防守保护眼 8 颗（36.4%），假眼平均存活寿命 264 秒（满分 360 秒）。",
+        "per_support_vision": [
+          {
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ",
+            "obs_total": 2,
+            "sen_total": 1,
+            "obs_killed": 1,
+            "sen_killed": 0,
+            "aggressive_cnt": 1,
+            "river_cnt": 1,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 360,
+            "dewarded_cnt": 0,
+            "style_note": "2号位核心自备视野：顺手插下 2 颗假眼 / 1 颗真眼（进攻 1 / 河道 1 / 防守保护 0），平均存活 360s。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana",
+            "obs_total": 1,
+            "sen_total": 5,
+            "obs_killed": 0,
+            "sen_killed": 2,
+            "aggressive_cnt": 1,
+            "river_cnt": 0,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 131,
+            "dewarded_cnt": 1,
+            "style_note": "做眼风格偏【激进深插】（⚔️进攻眼 1 颗 / ⚖️河道眼 0 颗 / 🛡️防守眼 0 颗），平均寿命 131s。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "obs_total": 19,
+            "sen_total": 17,
+            "obs_killed": 3,
+            "sen_killed": 6,
+            "aggressive_cnt": 7,
+            "river_cnt": 4,
+            "defensive_cnt": 8,
+            "avg_lifespan_sec": 261,
+            "dewarded_cnt": 6,
+            "style_note": "做眼攻守均衡（⚔️进攻眼 7 颗 / ⚖️河道肉山眼 4 颗 / 🛡️防守眼 8 颗），平均寿命 261s。"
+          }
+        ],
+        "instant_dewards": [
+          {
+            "time_str": "00:20",
+            "planter_hero": "司夜刺客",
+            "planter_player": "Nanana",
+            "pos": 4,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(80,157)",
+            "lifespan_sec": 131,
+            "dewarded_by": "编织者"
+          },
+          {
+            "time_str": "02:30",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 5,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "coords": "(170,90)",
+            "lifespan_sec": 64,
+            "dewarded_by": "天怒法师"
+          },
+          {
+            "time_str": "09:15",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 5,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(85,157)",
+            "lifespan_sec": 95,
+            "dewarded_by": "编织者"
+          },
+          {
+            "time_str": "27:03",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 5,
+            "zone_zh": "天辉中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(126,120)",
+            "lifespan_sec": 30,
+            "dewarded_by": "编织者"
+          },
+          {
+            "time_str": "41:06",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 5,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "coords": "(148,119)",
+            "lifespan_sec": 21,
+            "dewarded_by": "撼地者"
+          }
+        ],
+        "cliff_spots": [
+          {
+            "zone_zh": "夜魇中路野区腹地",
+            "coords": "(136,156)",
+            "total_count": 6,
+            "obs_count": 3,
+            "sen_count": 3,
+            "planters": "环轨百戏王",
+            "times_str": "16:33、27:45、41:18、16:31、25:26",
+            "comment": "在【夜魇中路野区腹地 (136,156)】同一个眼位重复插了 6 颗眼（3假/3真，时间：16:33、27:45、41:18、16:31、25:26），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "coords": "(148,118)",
+            "total_count": 4,
+            "obs_count": 3,
+            "sen_count": 1,
+            "planters": "环轨百戏王",
+            "times_str": "14:05、20:46、41:06、42:54",
+            "comment": "在【夜魇下路三角区 / 二塔高台 (148,118)】同一个眼位重复插了 4 颗眼（3假/1真，时间：14:05、20:46、41:06、42:54），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "中路河道高坡 / 符点",
+            "coords": "(131,126)",
+            "total_count": 3,
+            "obs_count": 1,
+            "sen_count": 2,
+            "planters": "司夜刺客 / 帕克",
+            "times_str": "-00:56、06:08、25:52",
+            "comment": "在【中路河道高坡 / 符点 (131,126)】同一个眼位重复插了 3 颗眼（1假/2真，时间：-00:56、06:08、25:52），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "coords": "(80,157)",
+            "total_count": 3,
+            "obs_count": 2,
+            "sen_count": 1,
+            "planters": "司夜刺客 / 环轨百戏王",
+            "times_str": "00:20、09:15、09:14",
+            "comment": "在【天辉上路三角区 / 二塔高台 (80,157)】同一个眼位重复插了 3 颗眼（2假/1真，时间：00:20、09:15、09:14），属于典型的固定高台死磕！"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_zh": "天辉",
+        "total_obs": 20,
+        "total_sen": 40,
+        "avg_lifespan_sec": 314,
+        "posture_counts": {
+          "aggressive": 6,
+          "river_roshan": 3,
+          "defensive": 11
+        },
+        "posture_pcts": {
+          "aggressive": 30.0,
+          "river_roshan": 15.0,
+          "defensive": 55.0
+        },
+        "phase_posture": {
+          "lane": {
+            "label": "对线期 (0-10m)",
+            "aggressive": 1,
+            "river_roshan": 0,
+            "defensive": 3
+          },
+          "mid": {
+            "label": "中期节奏 (10-25m)",
+            "aggressive": 2,
+            "river_roshan": 2,
+            "defensive": 2
+          },
+          "late": {
+            "label": "后期决战 (25m+)",
+            "aggressive": 3,
+            "river_roshan": 1,
+            "defensive": 6
+          }
+        },
+        "posture_verdict": "⚠️ 眼位整体偏保守缩家：本方全场 20 颗假眼中，有 11 颗（55.0%）插在己方半场，河道/肉山争夺眼 3 颗（15.0%），深入敌方野区的进攻眼仅有 6 颗（30.0%）。当队伍需要过河抓人或压制敌方主野区时，缺乏提前铺设的侵略视野。",
+        "per_support_vision": [
+          {
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM",
+            "obs_total": 4,
+            "sen_total": 2,
+            "obs_killed": 0,
+            "sen_killed": 2,
+            "aggressive_cnt": 0,
+            "river_cnt": 2,
+            "defensive_cnt": 2,
+            "avg_lifespan_sec": 208,
+            "dewarded_cnt": 3,
+            "style_note": "做眼攻守均衡（⚔️进攻眼 0 颗 / ⚖️河道肉山眼 2 颗 / 🛡️防守眼 2 颗），平均寿命 208s。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp",
+            "obs_total": 7,
+            "sen_total": 22,
+            "obs_killed": 2,
+            "sen_killed": 3,
+            "aggressive_cnt": 1,
+            "river_cnt": 0,
+            "defensive_cnt": 6,
+            "avg_lifespan_sec": 317,
+            "dewarded_cnt": 1,
+            "style_note": "做眼风格偏【保守缩家】（🛡️防守保护眼 6 颗 / ⚖️河道眼 0 颗 / ⚔️进攻眼仅 1 颗），平均寿命 317s。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "obs_total": 9,
+            "sen_total": 16,
+            "obs_killed": 2,
+            "sen_killed": 2,
+            "aggressive_cnt": 5,
+            "river_cnt": 1,
+            "defensive_cnt": 3,
+            "avg_lifespan_sec": 360,
+            "dewarded_cnt": 0,
+            "style_note": "做眼风格偏【激进深插】（⚔️进攻眼 5 颗 / ⚖️河道眼 1 颗 / 🛡️防守眼 3 颗），平均寿命 360s。"
+          }
+        ],
+        "instant_dewards": [
+          {
+            "time_str": "11:12",
+            "planter_hero": "斧王",
+            "planter_player": "BOOM",
+            "pos": 2,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "coords": "(132,126)",
+            "lifespan_sec": 37,
+            "dewarded_by": "环轨百戏王"
+          },
+          {
+            "time_str": "41:38",
+            "planter_hero": "撼地者",
+            "planter_player": "Super Bóp",
+            "pos": 4,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(164,134)",
+            "lifespan_sec": 56,
+            "dewarded_by": "环轨百戏王"
+          }
+        ],
+        "cliff_spots": [
+          {
+            "zone_zh": "天辉中路野区腹地",
+            "coords": "(118,94)",
+            "total_count": 6,
+            "obs_count": 3,
+            "sen_count": 3,
+            "planters": "天怒法师 / 撼地者",
+            "times_str": "29:09、35:43、18:26、29:11、43:07",
+            "comment": "在【天辉中路野区腹地 (118,94)】同一个眼位重复插了 6 颗眼（3假/3真，时间：29:09、35:43、18:26、29:11、43:07），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "中路河道高坡 / 符点",
+            "coords": "(132,126)",
+            "total_count": 3,
+            "obs_count": 2,
+            "sen_count": 1,
+            "planters": "斧王",
+            "times_str": "11:12、15:44、15:41",
+            "comment": "在【中路河道高坡 / 符点 (132,126)】同一个眼位重复插了 3 颗眼（2假/1真，时间：11:12、15:44、15:41），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "coords": "(84,152)",
+            "total_count": 3,
+            "obs_count": 0,
+            "sen_count": 3,
+            "planters": "天怒法师 / 撼地者",
+            "times_str": "10:46、14:15、33:20",
+            "comment": "在【天辉上路三角区 / 二塔高台 (84,152)】同一个眼位重复插了 3 颗眼（0假/3真，时间：10:46、14:15、33:20），属于典型的固定高台死磕！"
+          }
+        ]
+      }
+    },
+    "stacking_and_smoke_by_side": {
+      "dire": {
+        "side": "dire",
+        "total_stacks": 20,
+        "total_creeps_stacked": 72,
+        "support_stacks": 15,
+        "core_stacks": 5,
+        "enemy_total_stacks": 2,
+        "stack_verdict": "✓ 辅助屯野合格：本方全队累计堆野 20 波（72 只野怪，其中双辅助贡献 15 波、核心自堆 5 波），对比敌方全队 2 波，有效加速了本方核心中期经济起飞。",
+        "stack_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Petarung Amoral",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ",
+            "camps_stacked": 1,
+            "creeps_stacked": 2,
+            "stack_mins": [
+              "34:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets",
+            "camps_stacked": 4,
+            "creeps_stacked": 12,
+            "stack_mins": [
+              "11:00",
+              "16:00",
+              "18:00",
+              "29:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "camps_stacked": 15,
+            "creeps_stacked": 58,
+            "stack_mins": [
+              "3:00(×2)",
+              "5:00",
+              "6:00",
+              "8:00",
+              "9:00",
+              "10:00(×2)",
+              "11:00",
+              "12:00",
+              "15:00(×2)",
+              "20:00(×2)",
+              "29:00"
+            ],
+            "role_tag": "辅助本职"
+          }
+        ],
+        "own_smoke_uses": 3,
+        "enemy_smoke_uses": 8,
+        "smoke_verdict": "⚠️ 中期（10–25m）零开雾真空：本方全场共开雾 3 次（敌方 8 次），但最关键的 10~25 分钟跳刀/大招节奏期竟然没有组织起有效的买雾抓人！",
+        "per_player_smokes": [
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "personaname": "Paphets",
+            "bought": 0,
+            "used": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "personaname": "Nanana",
+            "bought": 3,
+            "used": 1
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "personaname": "Flame = ez mute",
+            "bought": 1,
+            "used": 2
+          }
+        ],
+        "smoke_events": [
+          {
+            "time_sec": 1504,
+            "time_str": "25:04",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "司夜刺客",
+            "initiator_player": "Nanana",
+            "initiator_pos": 4,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (5换1)",
+            "detail": "买雾/开雾后迅速打开节奏：26:15 抓死斧王、26:15 抓死撼地者、26:32 抓死天怒法师。"
+          },
+          {
+            "time_sec": 2452,
+            "time_str": "40:52",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "司夜刺客",
+            "initiator_player": "Nanana",
+            "initiator_pos": 4,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (0换1)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 帕克 阵亡。"
+          },
+          {
+            "time_sec": 2625,
+            "time_str": "43:45",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "环轨百戏王",
+            "initiator_player": "Flame = ez mute",
+            "initiator_pos": 5,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (6换0)",
+            "detail": "买雾/开雾后迅速打开节奏：44:10 抓死天怒法师、45:08 抓死齐天大圣、45:09 抓死撼地者。"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "total_stacks": 2,
+        "total_creeps_stacked": 4,
+        "support_stacks": 0,
+        "core_stacks": 2,
+        "enemy_total_stacks": 20,
+        "stack_verdict": "🚨 辅助 0 堆野警告：本方全场共堆野 2 波（4 只野怪），竟然全部是 1~3 号位大哥自己动手堆的（2 波），4/5 号位双辅助堆野记录为 0！对比敌方全队堆野 20 波。",
+        "stack_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên",
+            "camps_stacked": 1,
+            "creeps_stacked": 2,
+            "stack_mins": [
+              "11:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM",
+            "camps_stacked": 1,
+            "creeps_stacked": 2,
+            "stack_mins": [
+              "11:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          }
+        ],
+        "own_smoke_uses": 8,
+        "enemy_smoke_uses": 3,
+        "smoke_verdict": "本方全场累计激活诡计之雾 8 次（敌方 3 次），共捕获 7 波买雾节奏，其中 1 波在 100 秒内直接转化为击杀破局。",
+        "per_player_smokes": [
+          {
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "personaname": "BOOM",
+            "bought": 2,
+            "used": 2
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "personaname": "Đỗ Ngọc Quý",
+            "bought": 0,
+            "used": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "personaname": "Super Bóp",
+            "bought": 4,
+            "used": 4
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "bought": 2,
+            "used": 2
+          }
+        ],
+        "smoke_events": [
+          {
+            "time_sec": 607,
+            "time_str": "10:07",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "撼地者",
+            "initiator_player": "Super Bóp",
+            "initiator_pos": 4,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (0换2)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 斧王、斧王 阵亡。"
+          },
+          {
+            "time_sec": 735,
+            "time_str": "12:15",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "天怒法师",
+            "initiator_player": "Roti Jala Mak Limah Biadab",
+            "initiator_pos": 5,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (2换4)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 斧王、编织者、撼地者 阵亡。"
+          },
+          {
+            "time_sec": 1318,
+            "time_str": "21:58",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "撼地者",
+            "initiator_player": "Super Bóp",
+            "initiator_pos": 4,
+            "outcome": "trade",
+            "outcome_label": "⚖️ 破雾互换 (1换1)",
+            "detail": "开雾遭遇战双方打出 1 换 1 人头互换。"
+          },
+          {
+            "time_sec": 1496,
+            "time_str": "24:56",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "天怒法师",
+            "initiator_player": "Roti Jala Mak Limah Biadab",
+            "initiator_pos": 5,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (1换5)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 齐天大圣、斧王、编织者 阵亡。"
+          },
+          {
+            "time_sec": 1872,
+            "time_str": "31:12",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "斧王",
+            "initiator_player": "BOOM",
+            "initiator_pos": 2,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (1换2)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 斧王、撼地者 阵亡。"
+          },
+          {
+            "time_sec": 2354,
+            "time_str": "39:14",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "撼地者",
+            "initiator_player": "Super Bóp",
+            "initiator_pos": 4,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (1换0)",
+            "detail": "买雾/开雾后迅速打开节奏：39:26 抓死环轨百戏王。"
+          },
+          {
+            "time_sec": 2743,
+            "time_str": "45:43",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "斧王",
+            "initiator_player": "BOOM",
+            "initiator_pos": 2,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (0换3)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 齐天大圣、斧王、天怒法师 阵亡。"
+          }
+        ]
+      }
+    },
+    "laning_mechanics_by_side": {
+      "dire": {
+        "side": "dire",
+        "pulling_rows": [
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana",
+            "pull_ticks": 364,
+            "pull_ratio_pct": 52.8,
+            "dn10": 0,
+            "lh10": 8,
+            "early_sentries": 2,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 52.8%（驻留权重 364），配合插下 2 颗对线封野/反封真眼，贡献 8 正补 / 0 反补。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "pull_ticks": 207,
+            "pull_ratio_pct": 30.0,
+            "dn10": 2,
+            "lh10": 3,
+            "early_sentries": 2,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 30.0%（驻留权重 207），配合插下 2 颗对线封野/反封真眼，贡献 3 正补 / 2 反补。"
+          }
+        ],
+        "own_lotus_total": 7,
+        "opp_lotus_total": 5,
+        "lotus_verdict": "✓ 边路莲花池掌控出色：本方累计控下 7 朵疗伤莲花（主宰(1朵)、帕克(1朵)、潮汐猎人(2朵)、司夜刺客(3朵)），压制了敌方的 5 朵（编织者(2朵)、撼地者(2朵)、天怒法师(1朵)），线上换血续航占优。",
+        "own_gate_total": 4,
+        "opp_gate_total": 8,
+        "own_lamp_total": 21,
+        "opp_lamp_total": 24,
+        "own_wisdom_cnt": 5,
+        "opp_wisdom_cnt": 7,
+        "wisdom_verdict": "⚠️ 智慧经验符落后：本方仅吃到 5 颗经验符 vs 敌方吃到 7 颗！07:00 与 14:00 必须提前 15 秒去劣势路祭坛蹲守经验符。",
+        "wisdom_timeline": [
+          {
+            "time_sec": 433,
+            "time_str": "07:13",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 457,
+            "time_str": "07:37",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý"
+          },
+          {
+            "time_sec": 846,
+            "time_str": "14:06",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "time_sec": 859,
+            "time_str": "14:19",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 1263,
+            "time_str": "21:03",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "time_sec": 1265,
+            "time_str": "21:05",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 1683,
+            "time_str": "28:03",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "time_sec": 1690,
+            "time_str": "28:10",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 2106,
+            "time_str": "35:06",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "time_sec": 2124,
+            "time_str": "35:24",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 2527,
+            "time_str": "42:07",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "time_sec": 2541,
+            "time_str": "42:21",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          }
+        ],
+        "water_runes_timeline": [
+          {
+            "time_sec": 168,
+            "time_str": "02:48",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ"
+          },
+          {
+            "time_sec": 223,
+            "time_str": "03:43",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "time_sec": 252,
+            "time_str": "04:12",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "time_sec": 307,
+            "time_str": "05:07",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          }
+        ],
+        "map_interact_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Petarung Amoral",
+            "twin_gate": 1,
+            "watcher_lamp": 2,
+            "outpost_capture": 0,
+            "lotus_used": 1,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 0
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 1,
+            "wisdom_runes": 0,
+            "water_runes": 1,
+            "bounty_runes": 4,
+            "power_runes": 8
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets",
+            "twin_gate": 0,
+            "watcher_lamp": 4,
+            "outpost_capture": 1,
+            "lotus_used": 2,
+            "wisdom_runes": 2,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana",
+            "twin_gate": 2,
+            "watcher_lamp": 3,
+            "outpost_capture": 0,
+            "lotus_used": 3,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 1,
+            "power_runes": 1
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "twin_gate": 1,
+            "watcher_lamp": 12,
+            "outpost_capture": 1,
+            "lotus_used": 0,
+            "wisdom_runes": 3,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 1
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "pulling_rows": [
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp",
+            "pull_ticks": 246,
+            "pull_ratio_pct": 35.7,
+            "dn10": 4,
+            "lh10": 1,
+            "early_sentries": 3,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 35.7%（驻留权重 246），配合插下 3 颗对线封野/反封真眼，贡献 1 正补 / 4 反补。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "pull_ticks": 405,
+            "pull_ratio_pct": 58.7,
+            "dn10": 1,
+            "lh10": 10,
+            "early_sentries": 3,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 58.7%（驻留权重 405），配合插下 3 颗对线封野/反封真眼，贡献 10 正补 / 1 反补。"
+          }
+        ],
+        "own_lotus_total": 5,
+        "opp_lotus_total": 7,
+        "lotus_verdict": "⚠️ 边路莲花池被压制：本方全队仅吃下 5 朵疗伤莲花（编织者(2朵)、撼地者(2朵)、天怒法师(1朵)），而敌方抢下了 7 朵莲花（主宰(1朵)、帕克(1朵)、潮汐猎人(2朵)、司夜刺客(3朵)）！03:00 / 06:00 / 09:00 整点莲花池争夺吃亏。",
+        "own_gate_total": 8,
+        "opp_gate_total": 4,
+        "own_lamp_total": 24,
+        "opp_lamp_total": 21,
+        "own_wisdom_cnt": 7,
+        "opp_wisdom_cnt": 5,
+        "wisdom_verdict": "✓ 智慧经验符控制占优：本方抢下 7 颗经验符 vs 敌方 5 颗，辅助等级与天赋节点没有落入下风。",
+        "wisdom_timeline": [
+          {
+            "time_sec": 433,
+            "time_str": "07:13",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 457,
+            "time_str": "07:37",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý"
+          },
+          {
+            "time_sec": 846,
+            "time_str": "14:06",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "time_sec": 859,
+            "time_str": "14:19",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 1263,
+            "time_str": "21:03",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "time_sec": 1265,
+            "time_str": "21:05",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 1683,
+            "time_str": "28:03",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab"
+          },
+          {
+            "time_sec": 1690,
+            "time_str": "28:10",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 2106,
+            "time_str": "35:06",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "time_sec": 2124,
+            "time_str": "35:24",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 2527,
+            "time_str": "42:07",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          },
+          {
+            "time_sec": 2541,
+            "time_str": "42:21",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp"
+          }
+        ],
+        "water_runes_timeline": [
+          {
+            "time_sec": 168,
+            "time_str": "02:48",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ"
+          },
+          {
+            "time_sec": 223,
+            "time_str": "03:43",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "time_sec": 252,
+            "time_str": "04:12",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          },
+          {
+            "time_sec": 307,
+            "time_str": "05:07",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM"
+          }
+        ],
+        "map_interact_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên",
+            "twin_gate": 2,
+            "watcher_lamp": 4,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 2
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM",
+            "twin_gate": 1,
+            "watcher_lamp": 2,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 3,
+            "bounty_runes": 1,
+            "power_runes": 2
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý",
+            "twin_gate": 2,
+            "watcher_lamp": 3,
+            "outpost_capture": 0,
+            "lotus_used": 2,
+            "wisdom_runes": 1,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp",
+            "twin_gate": 2,
+            "watcher_lamp": 4,
+            "outpost_capture": 1,
+            "lotus_used": 2,
+            "wisdom_runes": 4,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 1
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "twin_gate": 1,
+            "watcher_lamp": 11,
+            "outpost_capture": 2,
+            "lotus_used": 1,
+            "wisdom_runes": 2,
+            "water_runes": 0,
+            "bounty_runes": 7,
+            "power_runes": 3
+          }
+        ]
+      }
+    },
+    "tp_rotation_by_side": {
+      "dire": {
+        "side": "dire",
+        "player_tp_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Petarung Amoral",
+            "tp_bought": 6,
+            "tp_used": 9,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "全场使用 9 次 TP（主动购买 6 张，团战亮 TP 2 次），参战 14/14 波关键团。"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ",
+            "tp_bought": 8,
+            "tp_used": 17,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 12,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [
+              "41:02"
+            ],
+            "grade": "good",
+            "verdict": "全场使用 17 次 TP（主动购买 8 张，团战亮 TP 1 次），参战 12/14 波关键团，注意在 41:02 刚买 TP 后不久即阵亡。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets",
+            "tp_bought": 2,
+            "tp_used": 5,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：47 分钟仅使用 5 次 TP（主动买 2 张，团战亮 TP 1 次），在 1 波队友阵亡的团战中未能及时赶到！"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana",
+            "tp_bought": 2,
+            "tp_used": 12,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [
+              "14:01"
+            ],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 12 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 74.5%。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "tp_bought": 2,
+            "tp_used": 11,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [
+              "31:32"
+            ],
+            "grade": "good",
+            "verdict": "全场使用 11 次 TP（主动购买 2 张，团战亮 TP 1 次），参战 14/14 波关键团，注意在 31:32 刚买 TP 后不久即阵亡。"
+          }
+        ],
+        "rotation_highlights": [
+          {
+            "time_range": "14:51–15:24",
+            "responders": "主宰(Petarung Amoral)",
+            "trade_str": "打成 1 换 2",
+            "detail": "在 14:51–15:24 交战中，主宰(Petarung Amoral) 第一时间亮 TP 落地支援参战（该波 1 换 2）。"
+          },
+          {
+            "time_range": "23:41–24:27",
+            "responders": "司夜刺客(Nanana)、潮汐猎人(Paphets)",
+            "trade_str": "打成 1 换 4",
+            "detail": "在 23:41–24:27 交战中，司夜刺客(Nanana)、潮汐猎人(Paphets) 第一时间亮 TP 落地支援参战（该波 1 换 4）。"
+          },
+          {
+            "time_range": "30:06–30:47",
+            "responders": "环轨百戏王(Flame = ez mute)",
+            "trade_str": "打成 3 换 1",
+            "detail": "在 30:06–30:47 交战中，环轨百戏王(Flame = ez mute) 第一时间亮 TP 落地支援参战（该波 3 换 1）。"
+          },
+          {
+            "time_range": "31:17–31:58",
+            "responders": "司夜刺客(Nanana)",
+            "trade_str": "打成 2 换 1",
+            "detail": "在 31:17–31:58 交战中，司夜刺客(Nanana) 第一时间亮 TP 落地支援参战（该波 2 换 1）。"
+          },
+          {
+            "time_range": "33:36–34:26",
+            "responders": "主宰(Petarung Amoral)",
+            "trade_str": "打成 1 换 3",
+            "detail": "在 33:36–34:26 交战中，主宰(Petarung Amoral) 第一时间亮 TP 落地支援参战（该波 1 换 3）。"
+          }
+        ],
+        "absent_warnings": [
+          {
+            "time_range": "23:41–24:27",
+            "victims": "主宰、司夜刺客、潮汐猎人、环轨百戏王",
+            "spectators": "2号位帕克",
+            "detail": "⚠️ 23:41–24:27 我方【主宰、司夜刺客、潮汐猎人、环轨百戏王】遭围剿阵亡时，2号位帕克 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
+            "time_range": "33:36–34:26",
+            "victims": "主宰、环轨百戏王、帕克",
+            "spectators": "4号位司夜刺客、3号位潮汐猎人",
+            "detail": "⚠️ 33:36–34:26 我方【主宰、环轨百戏王、帕克】遭围剿阵亡时，4号位司夜刺客、3号位潮汐猎人 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "player_tp_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên",
+            "tp_bought": 5,
+            "tp_used": 10,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 10 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 56.8%。"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM",
+            "tp_bought": 1,
+            "tp_used": 12,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "全场使用 12 次 TP（主动购买 1 张，团战亮 TP 1 次），参战 13/14 波关键团。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý",
+            "tp_bought": 1,
+            "tp_used": 8,
+            "tf_tp_cnt": 3,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "全场使用 8 次 TP（主动购买 1 张，团战亮 TP 3 次），参战 13/14 波关键团。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp",
+            "tp_bought": 0,
+            "tp_used": 7,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：47 分钟仅使用 7 次 TP（主动买 0 张，团战亮 TP 1 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "tp_bought": 2,
+            "tp_used": 10,
+            "tf_tp_cnt": 4,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 10 次 TP，其中 4 波团战直接亮 TP 落地救人/反打，参团率 70.3%。"
+          }
+        ],
+        "rotation_highlights": [
+          {
+            "time_range": "12:46–13:33",
+            "responders": "天怒法师(Roti Jala Mak Limah Biadab)、编织者(Đỗ Ngọc Quý)",
+            "trade_str": "打成 2 换 3",
+            "detail": "在 12:46–13:33 交战中，天怒法师(Roti Jala Mak Limah Biadab)、编织者(Đỗ Ngọc Quý) 第一时间亮 TP 落地支援参战（该波 2 换 3）。"
+          },
+          {
+            "time_range": "14:51–15:24",
+            "responders": "齐天大圣(Me and 4 sinh viên)",
+            "trade_str": "打成 2 换 1",
+            "detail": "在 14:51–15:24 交战中，齐天大圣(Me and 4 sinh viên) 第一时间亮 TP 落地支援参战（该波 2 换 1）。"
+          },
+          {
+            "time_range": "17:03–17:45",
+            "responders": "天怒法师(Roti Jala Mak Limah Biadab)",
+            "trade_str": "打成 3 换 1",
+            "detail": "在 17:03–17:45 交战中，天怒法师(Roti Jala Mak Limah Biadab) 第一时间亮 TP 落地支援参战（该波 3 换 1）。"
+          },
+          {
+            "time_range": "18:50–19:35",
+            "responders": "齐天大圣(Me and 4 sinh viên)",
+            "trade_str": "打成 2 换 1",
+            "detail": "在 18:50–19:35 交战中，齐天大圣(Me and 4 sinh viên) 第一时间亮 TP 落地支援参战（该波 2 换 1）。"
+          },
+          {
+            "time_range": "20:01–20:41",
+            "responders": "天怒法师(Roti Jala Mak Limah Biadab)",
+            "trade_str": "打成 0 换 3",
+            "detail": "在 20:01–20:41 交战中，天怒法师(Roti Jala Mak Limah Biadab) 第一时间亮 TP 落地支援参战（该波 0 换 3）。"
+          }
+        ],
+        "absent_warnings": [
+          {
+            "time_range": "31:17–31:58",
+            "victims": "斧王、撼地者",
+            "spectators": "3号位编织者",
+            "detail": "⚠️ 31:17–31:58 我方【斧王、撼地者】遭围剿阵亡时，3号位编织者 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
+            "time_range": "44:53–45:35",
+            "victims": "编织者、齐天大圣、撼地者",
+            "spectators": "5号位天怒法师、2号位斧王",
+            "detail": "⚠️ 44:53–45:35 我方【编织者、齐天大圣、撼地者】遭围剿阵亡时，5号位天怒法师、2号位斧王 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ]
+      }
+    }
   },
   "phases_data": [
     {
@@ -18711,7 +21684,28 @@
           "tier": "mid"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 1,
+        "player_slot": 3,
+        "side": "radiant",
+        "hero_id": 114,
+        "hero_short_zh": "齐天大圣",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+        "personaname": "Me and 4 sinh viên",
+        "stuns_sec": 25.9,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 25.9秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 25.9 秒硬控眩晕（平均每分钟控制 0.56 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 1,
@@ -19345,7 +22339,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 1,
+        "side": "radiant",
+        "hero_id": 2,
+        "hero_short_zh": "斧王",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+        "personaname": "BOOM",
+        "stuns_sec": 96.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 96.0秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 96.0 秒硬控眩晕（平均每分钟控制 2.06 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 2,
@@ -19861,7 +22876,23 @@
           "tier": "low"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 2,
+        "side": "radiant",
+        "hero_id": 63,
+        "hero_short_zh": "编织者",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+        "personaname": "Đỗ Ngọc Quý",
+        "stuns_sec": 5.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": [
+          "核心技能释放与转化：《weaver_shukuchi》释放 210 次(命中 73 人次 / 9,604 伤害)；《The Swarm》释放 18 次(命中 179 人次 / 3,447 伤害)；《Time Lapse》释放 6 次(命中 0 人次 / 0 伤害)。"
+        ]
+      }
     },
     {
       "player_slot": 4,
@@ -20425,7 +23456,66 @@
           "tier": "low"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 4,
+        "side": "radiant",
+        "hero_id": 7,
+        "hero_short_zh": "撼地者",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+        "personaname": "Super Bóp",
+        "stuns_sec": 108.7,
+        "ult_audits": [
+          {
+            "ability_key": "earthshaker_echo_slam",
+            "ability_zh": "回音击 (牛头大)",
+            "casts": 7,
+            "hits": 73,
+            "avg_hits": 10.43,
+            "unit_label": "人次",
+            "damage": 5410,
+            "tf_casts_count": 5,
+            "tf_casts_waves": [
+              "12:46–13:33(×1)",
+              "20:01–20:41(×1)",
+              "23:41–24:27(×1)",
+              "26:00–26:32(×1)",
+              "43:55–44:36(×1)"
+            ],
+            "tf_held_death_count": 3,
+            "tf_held_death_waves": [
+              "14:51–15:24",
+              "31:17–31:58",
+              "44:53–45:35"
+            ],
+            "victim_breakdown": [
+              "潮汐猎人(2,140伤)",
+              "主宰(1,914伤)",
+              "司夜刺客(864伤)",
+              "环轨百戏王(294伤)",
+              "帕克(198伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 7 次，累计打出 73 人次（场均每大 10.43 人次，造成 5,410 点伤害），在 12:46–13:33(×1), 20:01–20:41(×1), 23:41–24:27(×1), 26:00–26:32(×1) 团战完美兑现；主要灌伤目标：潮汐猎人(2,140伤)、主宰(1,914伤)、司夜刺客(864伤)。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "回音击 (牛头大): 7放/73人次(均10.43)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 108.7秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 7 次，累计打出 73 人次（场均每大 10.43 人次，造成 5,410 点伤害），在 12:46–13:33(×1), 20:01–20:41(×1), 23:41–24:27(×1), 26:00–26:32(×1) 团战完美兑现；主要灌伤目标：潮汐猎人(2,140伤)、主宰(1,914伤)、司夜刺客(864伤)。",
+          "全场累计对敌方英雄造成 108.7 秒硬控眩晕（平均每分钟控制 2.34 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 0,
@@ -21056,7 +24146,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 0,
+        "side": "radiant",
+        "hero_id": 101,
+        "hero_short_zh": "天怒法师",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+        "personaname": "Roti Jala Mak Limah Biadab",
+        "stuns_sec": 21.8,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 21.8秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 21.8 秒硬控眩晕（平均每分钟控制 0.47 秒）。"
+        ]
+      }
     }
   ],
   "dire_pos_1_to_5": [
@@ -21661,7 +24772,64 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 1,
+        "player_slot": 128,
+        "side": "dire",
+        "hero_id": 8,
+        "hero_short_zh": "主宰",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+        "personaname": "Petarung Amoral",
+        "stuns_sec": 0.0,
+        "ult_audits": [
+          {
+            "ability_key": "juggernaut_omni_slash",
+            "ability_zh": "无敌斩 (剑圣大)",
+            "casts": 10,
+            "hits": 55,
+            "avg_hits": 5.5,
+            "unit_label": "刀斩击",
+            "damage": 8777,
+            "tf_casts_count": 7,
+            "tf_casts_waves": [
+              "23:41–24:27(×1)",
+              "26:00–26:32(×1)",
+              "30:06–30:47(×1)",
+              "33:36–34:26(×1)",
+              "35:43–36:37(×1)",
+              "37:53–38:30(×1)",
+              "43:55–44:36(×1)"
+            ],
+            "tf_held_death_count": 0,
+            "tf_held_death_waves": [],
+            "victim_breakdown": [
+              "齐天大圣(3,689伤)",
+              "天怒法师(1,898伤)",
+              "斧王(1,393伤)",
+              "撼地者(1,256伤)",
+              "编织者(541伤)"
+            ],
+            "grade": "warn",
+            "verdict_text": "大招中规中矩：全场释放 10 次，累计 55 刀斩击（场均每大 5.5 刀斩击，伤害 8,777）。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "无敌斩 (剑圣大): 场均5.5刀斩击",
+            "tone": "warn"
+          },
+          {
+            "text": "治疗守卫: 20根(奶队友19,227)",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招中规中矩：全场释放 10 次，累计 55 刀斩击（场均每大 5.5 刀斩击，伤害 8,777）。",
+          "《治疗守卫 & 剑刃风暴》审计：全场插下 20 根治疗图腾（为队友治疗 19,227 点，另为自身恢复 30,045 点生命），转出 33 次剑刃风暴规避控制并打满 AOE。"
+        ]
+      }
     },
     {
       "player_slot": 132,
@@ -22229,7 +25397,66 @@
           "tier": "mid"
         }
       ],
-      "ability_targets_list": []
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 132,
+        "side": "dire",
+        "hero_id": 13,
+        "hero_short_zh": "帕克",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+        "personaname": "loiverever౨ৎ",
+        "stuns_sec": 36.9,
+        "ult_audits": [
+          {
+            "ability_key": "puck_dream_coil",
+            "ability_zh": "梦境缠绕 (帕克大)",
+            "casts": 14,
+            "hits": 45,
+            "avg_hits": 3.21,
+            "unit_label": "人次",
+            "damage": 6634,
+            "tf_casts_count": 5,
+            "tf_casts_waves": [
+              "17:03–17:45(×1)",
+              "18:50–19:35(×1)",
+              "30:06–30:47(×1)",
+              "31:17–31:58(×1)",
+              "37:53–38:30(×1)"
+            ],
+            "tf_held_death_count": 3,
+            "tf_held_death_waves": [
+              "12:46–13:33",
+              "14:51–15:24",
+              "33:36–34:26"
+            ],
+            "victim_breakdown": [
+              "斧王(3,051伤)",
+              "齐天大圣(985伤)",
+              "编织者(973伤)",
+              "天怒法师(933伤)",
+              "撼地者(692伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 14 次，累计打出 45 人次（场均每大 3.21 人次，造成 6,634 点伤害），在 17:03–17:45(×1), 18:50–19:35(×1), 30:06–30:47(×1), 31:17–31:58(×1) 团战完美兑现；主要灌伤目标：斧王(3,051伤)、齐天大圣(985伤)、编织者(973伤)。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "梦境缠绕 (帕克大): 14放/45人次(均3.21)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 36.9秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 14 次，累计打出 45 人次（场均每大 3.21 人次，造成 6,634 点伤害），在 17:03–17:45(×1), 18:50–19:35(×1), 30:06–30:47(×1), 31:17–31:58(×1) 团战完美兑现；主要灌伤目标：斧王(3,051伤)、齐天大圣(985伤)、编织者(973伤)。",
+          "全场累计对敌方英雄造成 36.9 秒硬控眩晕（平均每分钟控制 0.79 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 130,
@@ -22877,7 +26104,64 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 130,
+        "side": "dire",
+        "hero_id": 29,
+        "hero_short_zh": "潮汐猎人",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+        "personaname": "Paphets",
+        "stuns_sec": 49.7,
+        "ult_audits": [
+          {
+            "ability_key": "tidehunter_ravage",
+            "ability_zh": "毁灭 (潮汐大)",
+            "casts": 9,
+            "hits": 29,
+            "avg_hits": 3.22,
+            "unit_label": "人次",
+            "damage": 5080,
+            "tf_casts_count": 4,
+            "tf_casts_waves": [
+              "12:46–13:33(×1)",
+              "26:00–26:32(×1)",
+              "30:06–30:47(×1)",
+              "43:55–44:36(×1)"
+            ],
+            "tf_held_death_count": 2,
+            "tf_held_death_waves": [
+              "23:41–24:27",
+              "37:53–38:30"
+            ],
+            "victim_breakdown": [
+              "齐天大圣(1,327伤)",
+              "斧王(1,190伤)",
+              "撼地者(1,053伤)",
+              "编织者(942伤)",
+              "天怒法师(568伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 9 次，累计打出 29 人次（场均每大 3.22 人次，造成 5,080 点伤害），在 12:46–13:33(×1), 26:00–26:32(×1), 30:06–30:47(×1), 43:55–44:36(×1) 团战完美兑现；主要灌伤目标：齐天大圣(1,327伤)、斧王(1,190伤)、撼地者(1,053伤)。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "毁灭 (潮汐大): 9放/29人次(均3.22)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 49.7秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 9 次，累计打出 29 人次（场均每大 3.22 人次，造成 5,080 点伤害），在 12:46–13:33(×1), 26:00–26:32(×1), 30:06–30:47(×1), 43:55–44:36(×1) 团战完美兑现；主要灌伤目标：齐天大圣(1,327伤)、斧王(1,190伤)、撼地者(1,053伤)。",
+          "全场累计对敌方英雄造成 49.7 秒硬控眩晕（平均每分钟控制 1.07 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 129,
@@ -23494,7 +26778,57 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 129,
+        "side": "dire",
+        "hero_id": 88,
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "personaname": "Nanana",
+        "stuns_sec": 137.7,
+        "ult_audits": [],
+        "skillshot_audits": [
+          {
+            "ability_zh": "穿刺 (小强戳)",
+            "casts": 61,
+            "hits": 49,
+            "hit_pct": 80.3,
+            "damage": 8883,
+            "grade": "good",
+            "detail": "《穿刺 (小强戳)》全场施放 61 次，命中敌方英雄 49 人次（有效命中比 80.3%，造成 8,883 伤害），手感火热！"
+          },
+          {
+            "ability_zh": "尖刺外壳 (开壳反晕)",
+            "casts": 41,
+            "hits": 35,
+            "hit_pct": 85.4,
+            "damage": 3954,
+            "grade": "good",
+            "detail": "《尖刺外壳 (开壳反晕)》全场施放 41 次，命中敌方英雄 35 人次（有效命中比 85.4%，造成 3,954 伤害），手感火热！"
+          }
+        ],
+        "headline_badges": [
+          {
+            "text": "穿刺: 61放/49中(80.3%)",
+            "tone": "good"
+          },
+          {
+            "text": "尖刺外壳: 41放/35中(85.4%)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 137.7秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "《穿刺 (小强戳)》全场施放 61 次，命中敌方英雄 49 人次（有效命中比 80.3%，造成 8,883 伤害），手感火热！",
+          "《尖刺外壳 (开壳反晕)》全场施放 41 次，命中敌方英雄 35 人次（有效命中比 85.4%，造成 3,954 伤害），手感火热！",
+          "全场累计对敌方英雄造成 137.7 秒硬控眩晕（平均每分钟控制 2.96 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 131,
@@ -24139,7 +27473,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 131,
+        "side": "dire",
+        "hero_id": 131,
+        "hero_short_zh": "环轨百戏王",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+        "personaname": "Flame = ez mute",
+        "stuns_sec": 53.3,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 53.3秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 53.3 秒硬控眩晕（平均每分钟控制 1.15 秒）。"
+        ]
+      }
     }
   ]
 }

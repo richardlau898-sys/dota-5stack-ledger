@@ -1039,7 +1039,8 @@ def call_llm_coach_review(
             "error": "尚未检测到 API Key。可在配置中填入 xAI Grok / Gemini / OpenAI Key。",
         }
 
-    focus_side = report.get("focus_side") or report.get("user_team_side") or ("radiant" if report.get("radiant_win") else "dire")
+    raw_side = report.get("focus_side") or report.get("user_team_side") or ("radiant" if report.get("radiant_win") else "dire")
+    focus_side = "radiant" if raw_side in ("radiant", "天辉") else "dire"
     own_team = report.get("radiant_pos_1_to_5", []) if focus_side == "radiant" else report.get("dire_pos_1_to_5", [])
     opp_team = report.get("dire_pos_1_to_5", []) if focus_side == "radiant" else report.get("radiant_pos_1_to_5", [])
 
@@ -1077,11 +1078,18 @@ def call_llm_coach_review(
                 "key_item_timings": p.get("key_item_timings"),
                 "active_item_uses": {k: v["count"] for k, v in (p.get("active_item_uses") or {}).items()},
                 "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:6]},
+                "hero_execution_audit": p.get("hero_execution_audit"),
                 "killed_by": p.get("killed_by_breakdown"),
                 "blame_share_pct": p.get("blame_share_pct"),
             }
             for p in own_team
         ],
+        "tactical_microscope": {
+            "support_vision": ((report.get("deep_forensics") or {}).get("support_vision_by_side") or {}).get(focus_side),
+            "stacking_and_smoke": ((report.get("deep_forensics") or {}).get("stacking_and_smoke_by_side") or {}).get(focus_side),
+            "laning_mechanics": ((report.get("deep_forensics") or {}).get("laning_mechanics_by_side") or {}).get(focus_side),
+            "tp_rotation": ((report.get("deep_forensics") or {}).get("tp_rotation_by_side") or {}).get(focus_side),
+        },
         "opp_team": [
             {
                 "slot": p.get("player_slot"),
@@ -1092,13 +1100,20 @@ def call_llm_coach_review(
                 "net_worth": p.get("net_worth"),
                 "hero_damage": p.get("hero_damage"),
                 "tower_damage": p.get("tower_damage"),
+                "hero_execution_audit": p.get("hero_execution_audit"),
             }
             for p in opp_team
         ],
     }
 
     system_prompt = (
-        "你是懂 Dota 2 的开黑老哥，给车队五人做赛后算账复盘。中文，像损友聊天：有数据的问题直接点名说，可以调侃操作、出装节点和少按的主动道具，但不要用【四字成语】标题模板、不要发表情包、不要鸡汤鼓励。\n"
+        "你是懂 Dota 2 高端局细节的开黑老哥，给车队五人做赛后算账复盘。中文，像损友聊天：有数据的问题直接点名说，拒绝空洞套话与重复数据罗列。\n"
+        "必须重点结合 tactical_microscope 与 hero_execution_audit 中的硬核细节：\n"
+        "1) 英雄本身机制与大招质量：如猛犸两极反转大到几个人（场均命中人数）、哪几波团憋大暴毙、授予力量给主C套了几次；白虎箭命中率；骨法棒子电了谁多少血；剑圣奶棒与无敌斩质量；拉比克偷了什么大招。\n"
+        "2) 辅助眼位质量：插眼是过于激进深入还是过于保守缩家？假眼平均存活寿命、哪颗眼刚插下就被秒排、有没有在同一个高台头铁连插死磕。\n"
+        "3) 辅助堆野与开雾找节奏：辅助堆了几波野 vs 大哥自己动手堆了几波野？全场开了几次雾、哪波雾抓死人破局、哪波雾撞墙送团。\n"
+        "4) 对线期细节：4/5号位有没有拉野消兵、边路3/6/9分钟疗伤莲花抢了几朵、7/14/21分钟智慧经验符被谁吃了、有没有走双生门游走和点灯塔。\n"
+        "5) TP 救人及时性：谁在团战第一时间亮 TP 落地救人、谁在队友被干时全程 0 伤害 0 技能挂机旁观、谁全靠死后系统送的免费抚恤 TP 过日子。\n"
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"
         '  "title": "一句话点透本局胜负关键与最大槽点",\n'
@@ -1107,12 +1122,12 @@ def call_llm_coach_review(
         '  "team_practice": "下一局开黑最该统一执行的一个具体配合动作",\n'
         '  "mvp": {"slot": 132, "runner_up_slot": 130, "confidence": "高", "reason": "为何选他当MVP", "comparison": "对比亚军胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
         '  "players": [\n'
-        '    {"slot": 132, "headline": "一句犀利判词", "assessment": "结合对线、出装时间、技能与道具按键次数的具体算账", "good": ["亮点1", "亮点2"], "bad": ["问题或待回看1", "问题或待回看2"], "practice": "下一局改进动作"}\n'
+        '    {"slot": 132, "headline": "一句犀利判词", "assessment": "结合英雄专属机制(大招命中人数/憋大/Buff覆盖)、对线细节(拉野/莲花/经验符/走门)、眼位进攻防守质量、堆野开雾与TP支援的具体算账", "good": ["亮点1", "亮点2"], "bad": ["问题或待回看1", "问题或待回看2"], "practice": "下一局改进动作"}\n'
         "  ],\n"
         '  "phases": [\n'
-        '    {"key": "lane", "label": "前期对线", "time_label": "00:00–10:00", "summary": "本阶段团队判断", "turning_point": "本阶段关键节点", "players": [{"slot": 132, "assessment": "本阶段表现", "good": ["阶段亮点"], "bad": ["阶段问题"], "focus": "阶段改法"}]},\n'
-        '    {"key": "mid", "label": "中期运营", "time_label": "10:00–25:00", "summary": "...", "turning_point": "...", "players": [...]},\n'
-        '    {"key": "late", "label": "后期决策", "time_label": "25:00–终局", "summary": "...", "turning_point": "...", "players": [...]}\n'
+        '    {"key": "lane", "label": "前期对线", "time_label": "00:00–10:00", "summary": "本阶段团队判断(含拉野/莲花/圣水符/经验符/走门)", "turning_point": "本阶段关键节点", "players": [{"slot": 132, "assessment": "本阶段表现", "good": ["阶段亮点"], "bad": ["阶段问题"], "focus": "阶段改法"}]},\n'
+        '    {"key": "mid", "label": "中期运营", "time_label": "10:00–25:00", "summary": "本阶段团队判断(含开雾找节奏/堆野收矿/眼位进攻防守/TP支援)", "turning_point": "...", "players": [...]},\n'
+        '    {"key": "late", "label": "后期决策", "time_label": "25:00–终局", "summary": "本阶段团队判断(含关键大招释放/买活/高地肉山决策)", "turning_point": "...", "players": [...]}\n'
         "  ],\n"
         '  "windows": [\n'
         '    {"time_label": "团战时间段", "title": "这波为什么关键", "detail": "具体技能、伤害、阵亡与得失分析"}\n'

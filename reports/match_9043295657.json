@@ -16026,7 +16026,3151 @@
         "personaname": "Replica",
         "pings": 5
       }
-    ]
+    ],
+    "focus_fire_matrix": {
+      "dire": {
+        "side": "dire",
+        "grand_total": 238524,
+        "max_cell": 16986,
+        "targets": [
+          {
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets",
+            "col_total": 64155,
+            "col_share_pct": 26.9
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica",
+            "col_total": 52939,
+            "col_share_pct": 22.2
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice",
+            "col_total": 48471,
+            "col_share_pct": 20.3
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "col_total": 30167,
+            "col_share_pct": 12.6
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside",
+            "col_total": 42792,
+            "col_share_pct": 17.9
+          }
+        ],
+        "rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa",
+            "row_total": 56410,
+            "cells": [
+              15883,
+              10506,
+              12461,
+              7610,
+              9950
+            ]
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O",
+            "row_total": 60548,
+            "cells": [
+              13690,
+              16986,
+              9058,
+              6175,
+              14639
+            ]
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage",
+            "row_total": 43261,
+            "cells": [
+              14398,
+              9300,
+              11369,
+              5373,
+              2821
+            ]
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING",
+            "row_total": 56315,
+            "cells": [
+              15073,
+              8323,
+              12237,
+              9687,
+              10995
+            ]
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风",
+            "row_total": 21990,
+            "cells": [
+              5111,
+              7824,
+              3346,
+              1322,
+              4387
+            ]
+          }
+        ],
+        "verdict": "✓ 集火目标明确：全队有 49.1% 的火力精准倾泻在敌方 1/2 号位双核身上，另有 30.5% 伤害用于秒杀敌方 4/5 号位后排酱油，没有在敌方三号位『潮汐猎人』(20.3%) 身上无脑刮痧。"
+      },
+      "radiant": {
+        "side": "radiant",
+        "grand_total": 226132,
+        "max_cell": 26057,
+        "targets": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa",
+            "col_total": 63442,
+            "col_share_pct": 28.1
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O",
+            "col_total": 44449,
+            "col_share_pct": 19.7
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage",
+            "col_total": 49732,
+            "col_share_pct": 22.0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING",
+            "col_total": 31264,
+            "col_share_pct": 13.8
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风",
+            "col_total": 37245,
+            "col_share_pct": 16.5
+          }
+        ],
+        "rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets",
+            "row_total": 90395,
+            "cells": [
+              26057,
+              11484,
+              24751,
+              15083,
+              13020
+            ]
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica",
+            "row_total": 53984,
+            "cells": [
+              12580,
+              15970,
+              7375,
+              7804,
+              10255
+            ]
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice",
+            "row_total": 36760,
+            "cells": [
+              11457,
+              7199,
+              7020,
+              3909,
+              7175
+            ]
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "row_total": 30360,
+            "cells": [
+              8934,
+              5701,
+              8320,
+              3433,
+              3972
+            ]
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside",
+            "row_total": 14633,
+            "cells": [
+              4414,
+              4095,
+              2266,
+              1035,
+              2823
+            ]
+          }
+        ],
+        "verdict": "✓ 集火目标明确：全队有 47.8% 的火力精准倾泻在敌方 1/2 号位双核身上，另有 30.3% 伤害用于秒杀敌方 4/5 号位后排酱油，没有在敌方三号位『哈斯卡』(22.0%) 身上无脑刮痧。"
+      }
+    },
+    "teamfight_forensics": [
+      {
+        "tf_index": 1,
+        "start_sec": 846,
+        "end_sec": 908,
+        "time_range": "14:06–15:08",
+        "rad_kills": 4,
+        "dire_kills": 2,
+        "gold_swing_rad": 2092,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 130.0,
+            "y": 107.0,
+            "nx": 51.6,
+            "ny": 66.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "x": 139.0,
+            "y": 103.0,
+            "nx": 58.6,
+            "ny": 69.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 154.0,
+            "y": 119.0,
+            "nx": 70.3,
+            "ny": 57.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风"
+          },
+          {
+            "x": 142.0,
+            "y": 110.0,
+            "nx": 60.9,
+            "ny": 64.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING"
+          },
+          {
+            "x": 138.0,
+            "y": 104.0,
+            "nx": 57.8,
+            "ny": 68.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage"
+          },
+          {
+            "x": 136.0,
+            "y": 102.0,
+            "nx": 56.2,
+            "ny": 70.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          }
+        ]
+      },
+      {
+        "tf_index": 2,
+        "start_sec": 1223,
+        "end_sec": 1271,
+        "time_range": "20:23–21:11",
+        "rad_kills": 1,
+        "dire_kills": 3,
+        "gold_swing_rad": -1209,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 151.0,
+            "y": 155.0,
+            "nx": 68.0,
+            "ny": 28.9,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "x": 151.0,
+            "y": 151.0,
+            "nx": 68.0,
+            "ny": 32.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 139.0,
+            "y": 151.0,
+            "nx": 58.6,
+            "ny": 32.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice"
+          },
+          {
+            "x": 151.0,
+            "y": 156.0,
+            "nx": 68.0,
+            "ny": 28.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          }
+        ]
+      },
+      {
+        "tf_index": 3,
+        "start_sec": 1405,
+        "end_sec": 1450,
+        "time_range": "23:25–24:10",
+        "rad_kills": 4,
+        "dire_kills": 0,
+        "gold_swing_rad": 5933,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 177.0,
+            "y": 133.0,
+            "nx": 88.3,
+            "ny": 46.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风"
+          },
+          {
+            "x": 177.0,
+            "y": 146.0,
+            "nx": 88.3,
+            "ny": 35.9,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "x": 181.0,
+            "y": 134.0,
+            "nx": 91.4,
+            "ny": 45.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING"
+          },
+          {
+            "x": 176.0,
+            "y": 130.0,
+            "nx": 87.5,
+            "ny": 48.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          }
+        ]
+      },
+      {
+        "tf_index": 4,
+        "start_sec": 1569,
+        "end_sec": 1626,
+        "time_range": "26:09–27:06",
+        "rad_kills": 1,
+        "dire_kills": 4,
+        "gold_swing_rad": -2829,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 126.0,
+            "y": 98.0,
+            "nx": 48.4,
+            "ny": 73.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets"
+          },
+          {
+            "x": 129.0,
+            "y": 94.0,
+            "nx": 50.8,
+            "ny": 76.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "x": 148.0,
+            "y": 101.0,
+            "nx": 65.6,
+            "ny": 71.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 146.0,
+            "y": 108.0,
+            "nx": 64.1,
+            "ny": 65.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice"
+          },
+          {
+            "x": 149.0,
+            "y": 108.0,
+            "nx": 66.4,
+            "ny": 65.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage"
+          }
+        ]
+      },
+      {
+        "tf_index": 5,
+        "start_sec": 1802,
+        "end_sec": 1845,
+        "time_range": "30:02–30:45",
+        "rad_kills": 3,
+        "dire_kills": 0,
+        "gold_swing_rad": 4538,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 165.0,
+            "y": 166.0,
+            "nx": 78.9,
+            "ny": 20.3,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风"
+          },
+          {
+            "x": 154.0,
+            "y": 164.0,
+            "nx": 70.3,
+            "ny": 21.9,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "x": 162.0,
+            "y": 155.0,
+            "nx": 76.6,
+            "ny": 28.9,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING"
+          }
+        ]
+      },
+      {
+        "tf_index": 6,
+        "start_sec": 1991,
+        "end_sec": 2022,
+        "time_range": "33:11–33:42",
+        "rad_kills": 3,
+        "dire_kills": 1,
+        "gold_swing_rad": 3659,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 178.0,
+            "y": 108.0,
+            "nx": 89.1,
+            "ny": 65.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "x": 187.0,
+            "y": 113.0,
+            "nx": 96.0,
+            "ny": 61.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "x": 147.0,
+            "y": 131.0,
+            "nx": 64.8,
+            "ny": 47.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING"
+          },
+          {
+            "x": 179.0,
+            "y": 104.0,
+            "nx": 89.8,
+            "ny": 68.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          }
+        ]
+      },
+      {
+        "tf_index": 7,
+        "start_sec": 2085,
+        "end_sec": 2132,
+        "time_range": "34:45–35:32",
+        "rad_kills": 0,
+        "dire_kills": 3,
+        "gold_swing_rad": -6871,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 179.0,
+            "y": 139.0,
+            "nx": 89.8,
+            "ny": 41.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets"
+          },
+          {
+            "x": 178.0,
+            "y": 131.0,
+            "nx": 89.1,
+            "ny": 47.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "x": 177.0,
+            "y": 138.0,
+            "nx": 88.3,
+            "ny": 42.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice"
+          }
+        ]
+      },
+      {
+        "tf_index": 8,
+        "start_sec": 2620,
+        "end_sec": 2659,
+        "time_range": "43:40–44:19",
+        "rad_kills": 2,
+        "dire_kills": 1,
+        "gold_swing_rad": 1338,
+        "buybacks": [
+          "水晶室女(八级小狂风)",
+          "拉比克(MAD O.O)"
+        ],
+        "deaths_coords": [
+          {
+            "x": 181.0,
+            "y": 159.0,
+            "nx": 91.4,
+            "ny": 25.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 183.0,
+            "y": 162.0,
+            "nx": 93.0,
+            "ny": 23.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风"
+          },
+          {
+            "x": 181.0,
+            "y": 149.0,
+            "nx": 91.4,
+            "ny": 33.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          }
+        ]
+      },
+      {
+        "tf_index": 9,
+        "start_sec": 2673,
+        "end_sec": 2709,
+        "time_range": "44:33–45:09",
+        "rad_kills": 0,
+        "dire_kills": 3,
+        "gold_swing_rad": -6153,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 185.0,
+            "y": 163.0,
+            "nx": 94.5,
+            "ny": 22.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "x": 176.0,
+            "y": 149.0,
+            "nx": 87.5,
+            "ny": 33.6,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "x": 175.0,
+            "y": 148.0,
+            "nx": 86.7,
+            "ny": 34.4,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice"
+          }
+        ]
+      },
+      {
+        "tf_index": 10,
+        "start_sec": 3215,
+        "end_sec": 3263,
+        "time_range": "53:35–54:23",
+        "rad_kills": 2,
+        "dire_kills": 2,
+        "gold_swing_rad": 650,
+        "buybacks": [
+          "哈斯卡(NEver.RamPage)"
+        ],
+        "deaths_coords": [
+          {
+            "x": 138.0,
+            "y": 154.0,
+            "nx": 57.8,
+            "ny": 29.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "x": 157.0,
+            "y": 168.0,
+            "nx": 72.7,
+            "ny": 18.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 142.0,
+            "y": 170.0,
+            "nx": 60.9,
+            "ny": 17.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage"
+          },
+          {
+            "x": 147.0,
+            "y": 161.0,
+            "nx": 64.8,
+            "ny": 24.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage"
+          }
+        ]
+      },
+      {
+        "tf_index": 11,
+        "start_sec": 3248,
+        "end_sec": 3283,
+        "time_range": "54:08–54:43",
+        "rad_kills": 1,
+        "dire_kills": 3,
+        "gold_swing_rad": -4868,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 141.0,
+            "y": 170.0,
+            "nx": 60.2,
+            "ny": 17.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets"
+          },
+          {
+            "x": 143.0,
+            "y": 167.0,
+            "nx": 61.7,
+            "ny": 19.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "x": 157.0,
+            "y": 168.0,
+            "nx": 72.7,
+            "ny": 18.8,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 142.0,
+            "y": 170.0,
+            "nx": 60.9,
+            "ny": 17.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage"
+          }
+        ]
+      },
+      {
+        "tf_index": 12,
+        "start_sec": 3355,
+        "end_sec": 3397,
+        "time_range": "55:55–56:37",
+        "rad_kills": 2,
+        "dire_kills": 1,
+        "gold_swing_rad": 5068,
+        "buybacks": [
+          "死亡先知(Replica)"
+        ],
+        "deaths_coords": [
+          {
+            "x": 119.0,
+            "y": 78.0,
+            "nx": 43.0,
+            "ny": 89.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 117.0,
+            "y": 73.0,
+            "nx": 41.4,
+            "ny": 93.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "x": 117.0,
+            "y": 81.0,
+            "nx": 41.4,
+            "ny": 86.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          }
+        ]
+      },
+      {
+        "tf_index": 13,
+        "start_sec": 3436,
+        "end_sec": 3483,
+        "time_range": "57:16–58:03",
+        "rad_kills": 0,
+        "dire_kills": 4,
+        "gold_swing_rad": -10255,
+        "buybacks": [
+          "环轨百戏王(Flame = ez mute)",
+          "潮汐猎人(Make Your Choice)",
+          "主宰(Ya Ah Waaaaa)"
+        ],
+        "deaths_coords": [
+          {
+            "x": 180.0,
+            "y": 137.0,
+            "nx": 90.6,
+            "ny": 43.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets"
+          },
+          {
+            "x": 179.0,
+            "y": 153.0,
+            "nx": 89.8,
+            "ny": 30.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "x": 174.0,
+            "y": 161.0,
+            "nx": 85.9,
+            "ny": 24.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 177.0,
+            "y": 154.0,
+            "nx": 88.3,
+            "ny": 29.7,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice"
+          }
+        ]
+      },
+      {
+        "tf_index": 14,
+        "start_sec": 3578,
+        "end_sec": 3626,
+        "time_range": "59:38–60:26",
+        "rad_kills": 2,
+        "dire_kills": 2,
+        "gold_swing_rad": -2319,
+        "buybacks": [],
+        "deaths_coords": [
+          {
+            "x": 74.0,
+            "y": 101.0,
+            "nx": 7.8,
+            "ny": 71.1,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "x": 80.0,
+            "y": 96.0,
+            "nx": 12.5,
+            "ny": 75.0,
+            "count": 1,
+            "deaths": 1,
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice"
+          },
+          {
+            "x": 78.0,
+            "y": 115.0,
+            "nx": 10.9,
+            "ny": 60.2,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING"
+          },
+          {
+            "x": 76.0,
+            "y": 89.0,
+            "nx": 9.4,
+            "ny": 80.5,
+            "count": 1,
+            "deaths": 1,
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage"
+          }
+        ]
+      }
+    ],
+    "hero_execution_by_side": {
+      "dire": [
+        {
+          "pos": 1,
+          "player_slot": 129,
+          "side": "dire",
+          "hero_id": 8,
+          "hero_short_zh": "主宰",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+          "personaname": "Ya Ah Waaaaa",
+          "stuns_sec": 6.4,
+          "ult_audits": [
+            {
+              "ability_key": "juggernaut_omni_slash",
+              "ability_zh": "无敌斩 (剑圣大)",
+              "casts": 14,
+              "hits": 132,
+              "avg_hits": 9.43,
+              "unit_label": "刀斩击",
+              "damage": 23882,
+              "tf_casts_count": 9,
+              "tf_casts_waves": [
+                "20:23–21:11(×1)",
+                "26:09–27:06(×1)",
+                "30:02–30:45(×1)",
+                "34:45–35:32(×1)",
+                "43:40–44:19(×1)",
+                "53:35–54:23(×1)",
+                "55:55–56:37(×1)",
+                "57:16–58:03(×1)",
+                "59:38–60:26(×1)"
+              ],
+              "tf_held_death_count": 2,
+              "tf_held_death_waves": [
+                "23:25–24:10",
+                "33:11–33:42"
+              ],
+              "victim_breakdown": [
+                "幽鬼(8,183伤)",
+                "潮汐猎人(5,786伤)",
+                "死亡先知(4,387伤)",
+                "环轨百戏王(2,928伤)",
+                "赏金猎人(2,598伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 14 次，累计打出 132 刀斩击（场均每大 9.43 刀斩击，造成 23,882 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1), 30:02–30:45(×1), 34:45–35:32(×1) 团战完美兑现；主要灌伤目标：幽鬼(8,183伤)、潮汐猎人(5,786伤)、死亡先知(4,387伤)。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "无敌斩 (剑圣大): 14放/132刀斩击(均9.43)",
+              "tone": "good"
+            },
+            {
+              "text": "治疗守卫: 27根(奶队友18,224)",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 14 次，累计打出 132 刀斩击（场均每大 9.43 刀斩击，造成 23,882 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1), 30:02–30:45(×1), 34:45–35:32(×1) 团战完美兑现；主要灌伤目标：幽鬼(8,183伤)、潮汐猎人(5,786伤)、死亡先知(4,387伤)。",
+            "《治疗守卫 & 剑刃风暴》审计：全场插下 27 根治疗图腾（为队友治疗 18,224 点，另为自身恢复 62,050 点生命），转出 33 次剑刃风暴规避控制并打满 AOE。"
+          ]
+        },
+        {
+          "pos": 2,
+          "player_slot": 132,
+          "side": "dire",
+          "hero_id": 86,
+          "hero_short_zh": "拉比克",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+          "personaname": "MAD O.O",
+          "stuns_sec": 94.3,
+          "ult_audits": [
+            {
+              "ability_key": "tidehunter_ravage",
+              "ability_zh": "毁灭 (潮汐大)",
+              "casts": 2,
+              "hits": 6,
+              "avg_hits": 3.0,
+              "unit_label": "人次",
+              "damage": 1926,
+              "tf_casts_count": 2,
+              "tf_casts_waves": [
+                "20:23–21:11(×1)",
+                "26:09–27:06(×1)"
+              ],
+              "tf_held_death_count": 5,
+              "tf_held_death_waves": [
+                "14:06–15:08",
+                "23:25–24:10",
+                "33:11–33:42",
+                "43:40–44:19",
+                "55:55–56:37"
+              ],
+              "victim_breakdown": [
+                "潮汐猎人(588伤)",
+                "赏金猎人(364伤)",
+                "环轨百戏王(346伤)",
+                "死亡先知(339伤)",
+                "幽鬼(289伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 2 次，累计打出 6 人次（场均每大 3.0 人次，造成 1,926 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1) 团战完美兑现；主要灌伤目标：潮汐猎人(588伤)、赏金猎人(364伤)、环轨百戏王(346伤)。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "毁灭 (潮汐大): 2放/6人次(均3.0)",
+              "tone": "good"
+            },
+            {
+              "text": "偷技能: 57次",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 94.3秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 2 次，累计打出 6 人次（场均每大 3.0 人次，造成 1,926 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1) 团战完美兑现；主要灌伤目标：潮汐猎人(588伤)、赏金猎人(364伤)、环轨百戏王(346伤)。",
+            "《技能窃取》实战审计：全场大招偷取 57 次，成功用出的敌方核心技能包括：偷《巨浪》放 109 次(中57人/12,393伤)、偷《Carrion Swarm》放 42 次(中16人/4,118伤)、偷《Spectral Dagger》放 21 次(中15人/2,315伤)、偷《The Beasts》放 17 次(中10人/3,217伤)、偷《Hunter Track》放 14 次！",
+            "全场累计对敌方英雄造成 94.3 秒硬控眩晕（平均每分钟控制 1.46 秒）。"
+          ]
+        },
+        {
+          "pos": 3,
+          "player_slot": 131,
+          "side": "dire",
+          "hero_id": 59,
+          "hero_short_zh": "哈斯卡",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+          "personaname": "NEver.RamPage",
+          "stuns_sec": 49.3,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 49.3秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 49.3 秒硬控眩晕（平均每分钟控制 0.77 秒）。"
+          ]
+        },
+        {
+          "pos": 4,
+          "player_slot": 130,
+          "side": "dire",
+          "hero_id": 35,
+          "hero_short_zh": "狙击手",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+          "personaname": "I AM COMING",
+          "stuns_sec": 44.5,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 44.5秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 44.5 秒硬控眩晕（平均每分钟控制 0.69 秒）。"
+          ]
+        },
+        {
+          "pos": 5,
+          "player_slot": 128,
+          "side": "dire",
+          "hero_id": 5,
+          "hero_short_zh": "水晶室女",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+          "personaname": "八级小狂风",
+          "stuns_sec": 137.8,
+          "ult_audits": [
+            {
+              "ability_key": "crystal_maiden_freezing_field",
+              "ability_zh": "极寒领域 (冰女大)",
+              "casts": 9,
+              "hits": 62,
+              "avg_hits": 6.89,
+              "unit_label": "段冰爆",
+              "damage": 7166,
+              "tf_casts_count": 7,
+              "tf_casts_waves": [
+                "20:23–21:11(×1)",
+                "26:09–27:06(×1)",
+                "34:45–35:32(×1)",
+                "43:40–44:19(×1)",
+                "53:35–54:23(×1)",
+                "55:55–56:37(×1)",
+                "59:38–60:26(×1)"
+              ],
+              "tf_held_death_count": 3,
+              "tf_held_death_waves": [
+                "14:06–15:08",
+                "23:25–24:10",
+                "30:02–30:45"
+              ],
+              "victim_breakdown": [
+                "死亡先知(2,999伤)",
+                "幽鬼(1,948伤)",
+                "赏金猎人(1,465伤)",
+                "潮汐猎人(754伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 9 次，累计打出 62 段冰爆（场均每大 6.89 段冰爆，造成 7,166 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1), 34:45–35:32(×1), 43:40–44:19(×1) 团战完美兑现；主要灌伤目标：死亡先知(2,999伤)、幽鬼(1,948伤)、赏金猎人(1,465伤)。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "极寒领域 (冰女大): 9放/62段冰爆(均6.89)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 137.8秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 9 次，累计打出 62 段冰爆（场均每大 6.89 段冰爆，造成 7,166 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1), 34:45–35:32(×1), 43:40–44:19(×1) 团战完美兑现；主要灌伤目标：死亡先知(2,999伤)、幽鬼(1,948伤)、赏金猎人(1,465伤)。",
+            "全场累计对敌方英雄造成 137.8 秒硬控眩晕（平均每分钟控制 2.14 秒）。"
+          ]
+        }
+      ],
+      "radiant": [
+        {
+          "pos": 1,
+          "player_slot": 0,
+          "side": "radiant",
+          "hero_id": 67,
+          "hero_short_zh": "幽鬼",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+          "personaname": "Paphets",
+          "stuns_sec": 26.7,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 26.7秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 26.7 秒硬控眩晕（平均每分钟控制 0.41 秒）。"
+          ]
+        },
+        {
+          "pos": 2,
+          "player_slot": 3,
+          "side": "radiant",
+          "hero_id": 43,
+          "hero_short_zh": "死亡先知",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+          "personaname": "Replica",
+          "stuns_sec": 31.7,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 31.7秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 31.7 秒硬控眩晕（平均每分钟控制 0.49 秒）。"
+          ]
+        },
+        {
+          "pos": 3,
+          "player_slot": 4,
+          "side": "radiant",
+          "hero_id": 29,
+          "hero_short_zh": "潮汐猎人",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+          "personaname": "Make Your Choice",
+          "stuns_sec": 89.7,
+          "ult_audits": [
+            {
+              "ability_key": "tidehunter_ravage",
+              "ability_zh": "毁灭 (潮汐大)",
+              "casts": 14,
+              "hits": 34,
+              "avg_hits": 2.43,
+              "unit_label": "人次",
+              "damage": 8546,
+              "tf_casts_count": 9,
+              "tf_casts_waves": [
+                "14:06–15:08(×1)",
+                "23:25–24:10(×1)",
+                "26:09–27:06(×1)",
+                "30:02–30:45(×1)",
+                "33:11–33:42(×1)",
+                "43:40–44:19(×2)",
+                "53:35–54:23(×1)",
+                "55:55–56:37(×1)",
+                "59:38–60:26(×1)"
+              ],
+              "tf_held_death_count": 4,
+              "tf_held_death_waves": [
+                "20:23–21:11",
+                "34:45–35:32",
+                "44:33–45:09",
+                "57:16–58:03"
+              ],
+              "victim_breakdown": [
+                "水晶室女(2,525伤)",
+                "主宰(2,247伤)",
+                "拉比克(1,938伤)",
+                "哈斯卡(934伤)",
+                "狙击手(902伤)"
+              ],
+              "grade": "warn",
+              "verdict_text": "大招中规中矩：全场释放 14 次，累计 34 人次（场均每大 2.43 人次，伤害 8,546）；但在 20:23–21:11, 34:45–35:32, 44:33–45:09 团战中未放出大招即阵亡！"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "毁灭 (潮汐大): 场均2.43人次",
+              "tone": "warn"
+            },
+            {
+              "text": "总硬控: 89.7秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招中规中矩：全场释放 14 次，累计 34 人次（场均每大 2.43 人次，伤害 8,546）；但在 20:23–21:11, 34:45–35:32, 44:33–45:09 团战中未放出大招即阵亡！",
+            "全场累计对敌方英雄造成 89.7 秒硬控眩晕（平均每分钟控制 1.39 秒）。"
+          ]
+        },
+        {
+          "pos": 4,
+          "player_slot": 1,
+          "side": "radiant",
+          "hero_id": 131,
+          "hero_short_zh": "环轨百戏王",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+          "personaname": "Flame = ez mute",
+          "stuns_sec": 122.6,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 122.6秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 122.6 秒硬控眩晕（平均每分钟控制 1.90 秒）。"
+          ]
+        },
+        {
+          "pos": 5,
+          "player_slot": 2,
+          "side": "radiant",
+          "hero_id": 62,
+          "hero_short_zh": "赏金猎人",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+          "personaname": "Mr. Brightside",
+          "stuns_sec": 36.0,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 36.0秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 36.0 秒硬控眩晕（平均每分钟控制 0.56 秒）。"
+          ]
+        }
+      ]
+    },
+    "support_vision_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_zh": "夜魇",
+        "total_obs": 30,
+        "total_sen": 56,
+        "avg_lifespan_sec": 288,
+        "posture_counts": {
+          "aggressive": 12,
+          "river_roshan": 10,
+          "defensive": 8
+        },
+        "posture_pcts": {
+          "aggressive": 40.0,
+          "river_roshan": 33.3,
+          "defensive": 26.7
+        },
+        "phase_posture": {
+          "lane": {
+            "label": "对线期 (0-10m)",
+            "aggressive": 2,
+            "river_roshan": 2,
+            "defensive": 0
+          },
+          "mid": {
+            "label": "中期节奏 (10-25m)",
+            "aggressive": 4,
+            "river_roshan": 4,
+            "defensive": 0
+          },
+          "late": {
+            "label": "后期决战 (25m+)",
+            "aggressive": 6,
+            "river_roshan": 4,
+            "defensive": 8
+          }
+        },
+        "posture_verdict": "⚖️ 眼位攻守结构均衡：全场 30 颗假眼中，⚔️ 进攻深入眼 12 颗（40.0%）、⚖️ 河道/肉山眼 10 颗（33.3%）、🛡️ 防守保护眼 8 颗（26.7%），假眼平均存活寿命 288 秒（满分 360 秒）。",
+        "per_support_vision": [
+          {
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O",
+            "obs_total": 2,
+            "sen_total": 1,
+            "obs_killed": 1,
+            "sen_killed": 1,
+            "aggressive_cnt": 1,
+            "river_cnt": 1,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 180,
+            "dewarded_cnt": 2,
+            "style_note": "2号位核心自备视野：顺手插下 2 颗假眼 / 1 颗真眼（进攻 1 / 河道 1 / 防守保护 0），平均存活 180s。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING",
+            "obs_total": 5,
+            "sen_total": 16,
+            "obs_killed": 3,
+            "sen_killed": 6,
+            "aggressive_cnt": 1,
+            "river_cnt": 2,
+            "defensive_cnt": 2,
+            "avg_lifespan_sec": 292,
+            "dewarded_cnt": 1,
+            "style_note": "做眼攻守均衡（⚔️进攻眼 1 颗 / ⚖️河道肉山眼 2 颗 / 🛡️防守眼 2 颗），平均寿命 292s。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风",
+            "obs_total": 23,
+            "sen_total": 39,
+            "obs_killed": 4,
+            "sen_killed": 8,
+            "aggressive_cnt": 10,
+            "river_cnt": 7,
+            "defensive_cnt": 6,
+            "avg_lifespan_sec": 296,
+            "dewarded_cnt": 2,
+            "style_note": "做眼攻守均衡（⚔️进攻眼 10 颗 / ⚖️河道肉山眼 7 颗 / 🛡️防守眼 6 颗），平均寿命 296s。"
+          }
+        ],
+        "instant_dewards": [
+          {
+            "time_str": "-00:42",
+            "planter_hero": "拉比克",
+            "planter_player": "MAD O.O",
+            "pos": 2,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "coords": "(124,130)",
+            "lifespan_sec": 57,
+            "dewarded_by": "环轨百戏王"
+          },
+          {
+            "time_str": "13:51",
+            "planter_hero": "狙击手",
+            "planter_player": "I AM COMING",
+            "pos": 4,
+            "zone_zh": "天辉中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(132,110)",
+            "lifespan_sec": 21,
+            "dewarded_by": "赏金猎人"
+          },
+          {
+            "time_str": "43:04",
+            "planter_hero": "水晶室女",
+            "planter_player": "八级小狂风",
+            "pos": 5,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "coords": "(194,130)",
+            "lifespan_sec": 28,
+            "dewarded_by": "赏金猎人"
+          },
+          {
+            "time_str": "45:39",
+            "planter_hero": "水晶室女",
+            "planter_player": "八级小狂风",
+            "pos": 5,
+            "zone_zh": "天辉中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(118,94)",
+            "lifespan_sec": 93,
+            "dewarded_by": "环轨百戏王"
+          }
+        ],
+        "cliff_spots": [
+          {
+            "zone_zh": "夜魇中路野区腹地",
+            "coords": "(136,156)",
+            "total_count": 7,
+            "obs_count": 2,
+            "sen_count": 5,
+            "planters": "水晶室女 / 狙击手",
+            "times_str": "36:04、54:34、21:00、28:55、47:17",
+            "comment": "在【夜魇中路野区腹地 (136,156)】同一个眼位重复插了 7 颗眼（2假/5真，时间：36:04、54:34、21:00、28:55、47:17），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "夜魇中路野区腹地",
+            "coords": "(164,134)",
+            "total_count": 5,
+            "obs_count": 1,
+            "sen_count": 4,
+            "planters": "水晶室女 / 狙击手",
+            "times_str": "35:25、35:24、45:34、51:47、24:44",
+            "comment": "在【夜魇中路野区腹地 (164,134)】同一个眼位重复插了 5 颗眼（1假/4真，时间：35:25、35:24、45:34、51:47、24:44），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "中路河道高坡 / 符点",
+            "coords": "(122,138)",
+            "total_count": 3,
+            "obs_count": 2,
+            "sen_count": 1,
+            "planters": "水晶室女 / 狙击手",
+            "times_str": "21:11、39:25、13:13",
+            "comment": "在【中路河道高坡 / 符点 (122,138)】同一个眼位重复插了 3 颗眼（2假/1真，时间：21:11、39:25、13:13），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "上路河道 / 肉山坑口",
+            "coords": "(96,155)",
+            "total_count": 3,
+            "obs_count": 2,
+            "sen_count": 1,
+            "planters": "水晶室女",
+            "times_str": "14:09、21:56、04:48",
+            "comment": "在【上路河道 / 肉山坑口 (96,155)】同一个眼位重复插了 3 颗眼（2假/1真，时间：14:09、21:56、04:48），属于典型的固定高台死磕！"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_zh": "天辉",
+        "total_obs": 26,
+        "total_sen": 53,
+        "avg_lifespan_sec": 239,
+        "posture_counts": {
+          "aggressive": 14,
+          "river_roshan": 5,
+          "defensive": 7
+        },
+        "posture_pcts": {
+          "aggressive": 53.8,
+          "river_roshan": 19.2,
+          "defensive": 26.9
+        },
+        "phase_posture": {
+          "lane": {
+            "label": "对线期 (0-10m)",
+            "aggressive": 2,
+            "river_roshan": 4,
+            "defensive": 0
+          },
+          "mid": {
+            "label": "中期节奏 (10-25m)",
+            "aggressive": 3,
+            "river_roshan": 0,
+            "defensive": 3
+          },
+          "late": {
+            "label": "后期决战 (25m+)",
+            "aggressive": 9,
+            "river_roshan": 1,
+            "defensive": 4
+          }
+        },
+        "posture_verdict": "⚔️ 眼位极具进攻侵略性：本方 26 颗假眼中有 14 颗（53.8%）直接插进敌方半场野区/三角区，另有 5 颗（19.2%）控制河道与肉山，防守眼仅 7 颗（26.9%）。但要注意其中有 7 颗假眼被敌方快速排掉，深入做眼最好配合开雾推进！",
+        "per_support_vision": [
+          {
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "obs_total": 13,
+            "sen_total": 18,
+            "obs_killed": 2,
+            "sen_killed": 4,
+            "aggressive_cnt": 8,
+            "river_cnt": 3,
+            "defensive_cnt": 2,
+            "avg_lifespan_sec": 209,
+            "dewarded_cnt": 6,
+            "style_note": "做眼风格偏【激进深插】（⚔️进攻眼 8 颗 / ⚖️河道眼 3 颗 / 🛡️防守眼 2 颗），平均寿命 209s。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside",
+            "obs_total": 13,
+            "sen_total": 35,
+            "obs_killed": 4,
+            "sen_killed": 13,
+            "aggressive_cnt": 6,
+            "river_cnt": 2,
+            "defensive_cnt": 5,
+            "avg_lifespan_sec": 268,
+            "dewarded_cnt": 3,
+            "style_note": "做眼攻守均衡（⚔️进攻眼 6 颗 / ⚖️河道肉山眼 2 颗 / 🛡️防守眼 5 颗），平均寿命 268s。"
+          }
+        ],
+        "instant_dewards": [
+          {
+            "time_str": "09:30",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 4,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "coords": "(172,87)",
+            "lifespan_sec": 79,
+            "dewarded_by": "拉比克"
+          },
+          {
+            "time_str": "20:52",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 4,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(136,156)",
+            "lifespan_sec": 13,
+            "dewarded_by": "水晶室女"
+          },
+          {
+            "time_str": "23:13",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 4,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(164,134)",
+            "lifespan_sec": 96,
+            "dewarded_by": "水晶室女"
+          },
+          {
+            "time_str": "38:02",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 4,
+            "zone_zh": "夜魇上路主野区高台 / 一塔林区",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(122,158)",
+            "lifespan_sec": 88,
+            "dewarded_by": "主宰"
+          },
+          {
+            "time_str": "43:31",
+            "planter_hero": "环轨百戏王",
+            "planter_player": "Flame = ez mute",
+            "pos": 4,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(164,134)",
+            "lifespan_sec": 124,
+            "dewarded_by": "狙击手"
+          },
+          {
+            "time_str": "14:08",
+            "planter_hero": "赏金猎人",
+            "planter_player": "Mr. Brightside",
+            "pos": 5,
+            "zone_zh": "天辉中路野区腹地",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "coords": "(132,106)",
+            "lifespan_sec": 4,
+            "dewarded_by": "狙击手"
+          }
+        ],
+        "cliff_spots": [
+          {
+            "zone_zh": "夜魇中路野区腹地",
+            "coords": "(136,156)",
+            "total_count": 6,
+            "obs_count": 2,
+            "sen_count": 4,
+            "planters": "环轨百戏王 / 赏金猎人",
+            "times_str": "20:52、48:49、20:51、48:40、42:38",
+            "comment": "在【夜魇中路野区腹地 (136,156)】同一个眼位重复插了 6 颗眼（2假/4真，时间：20:52、48:49、20:51、48:40、42:38），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "夜魇中路野区腹地",
+            "coords": "(164,134)",
+            "total_count": 6,
+            "obs_count": 2,
+            "sen_count": 4,
+            "planters": "环轨百戏王 / 赏金猎人",
+            "times_str": "23:13、43:31、23:12、43:09、49:54",
+            "comment": "在【夜魇中路野区腹地 (164,134)】同一个眼位重复插了 6 颗眼（2假/4真，时间：23:13、43:31、23:12、43:09、49:54），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "coords": "(134,103)",
+            "total_count": 5,
+            "obs_count": 2,
+            "sen_count": 3,
+            "planters": "环轨百戏王 / 赏金猎人",
+            "times_str": "16:07、14:08、16:08、29:26、14:10",
+            "comment": "在【天辉下路主野区高台 / 一塔林区 (134,103)】同一个眼位重复插了 5 颗眼（2假/3真，时间：16:07、14:08、16:08、29:26、14:10），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "夜魇中路野区腹地",
+            "coords": "(134,171)",
+            "total_count": 5,
+            "obs_count": 1,
+            "sen_count": 4,
+            "planters": "环轨百戏王 / 赏金猎人",
+            "times_str": "-00:16、38:12、40:27、48:28、48:57",
+            "comment": "在【夜魇中路野区腹地 (134,171)】同一个眼位重复插了 5 颗眼（1假/4真，时间：-00:16、38:12、40:27、48:28、48:57），属于典型的固定高台死磕！"
+          }
+        ]
+      }
+    },
+    "stacking_and_smoke_by_side": {
+      "dire": {
+        "side": "dire",
+        "total_stacks": 8,
+        "total_creeps_stacked": 22,
+        "support_stacks": 3,
+        "core_stacks": 5,
+        "enemy_total_stacks": 21,
+        "stack_verdict": "⚠️ 大哥比辅助还会堆野：本方全队堆野 8 波（22 只怪），其中 1~3 号位核心自己顺手堆了 5 波，而 4/5 号位双辅助合计仅堆了 3 波（敌方全队堆野 21 波）。辅助路过三角区与主野区整点 53~55 秒拉野屯矿的肌肉记忆还不够强！",
+        "stack_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa",
+            "camps_stacked": 3,
+            "creeps_stacked": 7,
+            "stack_mins": [
+              "3:00",
+              "15:00",
+              "23:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O",
+            "camps_stacked": 1,
+            "creeps_stacked": 3,
+            "stack_mins": [
+              "26:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage",
+            "camps_stacked": 1,
+            "creeps_stacked": 3,
+            "stack_mins": [
+              "19:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING",
+            "camps_stacked": 1,
+            "creeps_stacked": 3,
+            "stack_mins": [
+              "58:00"
+            ],
+            "role_tag": "辅助本职"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风",
+            "camps_stacked": 2,
+            "creeps_stacked": 6,
+            "stack_mins": [
+              "7:00",
+              "17:00"
+            ],
+            "role_tag": "辅助本职"
+          }
+        ],
+        "own_smoke_uses": 4,
+        "enemy_smoke_uses": 6,
+        "smoke_verdict": "本方全场累计激活诡计之雾 4 次（敌方 6 次），共捕获 3 波买雾节奏，其中 2 波在 100 秒内直接转化为击杀破局。",
+        "per_player_smokes": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "personaname": "Ya Ah Waaaaa",
+            "bought": 1,
+            "used": 0
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "personaname": "NEver.RamPage",
+            "bought": 1,
+            "used": 1
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "personaname": "I AM COMING",
+            "bought": 3,
+            "used": 3
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "personaname": "八级小狂风",
+            "bought": 0,
+            "used": 0
+          }
+        ],
+        "smoke_events": [
+          {
+            "time_sec": 1328,
+            "time_str": "22:08",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "哈斯卡",
+            "initiator_player": "NEver.RamPage",
+            "initiator_pos": 3,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (0换4)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 拉比克、拉比克、狙击手 阵亡。"
+          },
+          {
+            "time_sec": 2731,
+            "time_str": "45:31",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "狙击手",
+            "initiator_player": "I AM COMING",
+            "initiator_pos": 4,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (1换0)",
+            "detail": "买雾/开雾后迅速打开节奏：45:56 抓死赏金猎人。"
+          },
+          {
+            "time_sec": 3153,
+            "time_str": "52:33",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "主宰",
+            "initiator_player": "Ya Ah Waaaaa",
+            "initiator_pos": 1,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (2换1)",
+            "detail": "买雾/开雾后迅速打开节奏：54:08 抓死死亡先知、53:50 抓死环轨百戏王。"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "total_stacks": 21,
+        "total_creeps_stacked": 77,
+        "support_stacks": 16,
+        "core_stacks": 5,
+        "enemy_total_stacks": 8,
+        "stack_verdict": "✓ 辅助屯野合格：本方全队累计堆野 21 波（77 只野怪，其中双辅助贡献 16 波、核心自堆 5 波），对比敌方全队 8 波，有效加速了本方核心中期经济起飞。",
+        "stack_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets",
+            "camps_stacked": 3,
+            "creeps_stacked": 9,
+            "stack_mins": [
+              "23:00(×2)",
+              "49:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica",
+            "camps_stacked": 2,
+            "creeps_stacked": 4,
+            "stack_mins": [
+              "23:00",
+              "48:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "camps_stacked": 15,
+            "creeps_stacked": 60,
+            "stack_mins": [
+              "3:00",
+              "7:00",
+              "9:00(×2)",
+              "10:00(×2)",
+              "12:00",
+              "15:00",
+              "17:00(×2)",
+              "19:00",
+              "20:00",
+              "23:00(×2)",
+              "26:00"
+            ],
+            "role_tag": "辅助本职"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside",
+            "camps_stacked": 1,
+            "creeps_stacked": 4,
+            "stack_mins": [
+              "9:00"
+            ],
+            "role_tag": "辅助本职"
+          }
+        ],
+        "own_smoke_uses": 6,
+        "enemy_smoke_uses": 4,
+        "smoke_verdict": "本方全场累计激活诡计之雾 6 次（敌方 4 次），共捕获 7 波买雾节奏，其中 4 波在 100 秒内直接转化为击杀破局。",
+        "per_player_smokes": [
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "personaname": "Make Your Choice",
+            "bought": 1,
+            "used": 1
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "personaname": "Flame = ez mute",
+            "bought": 5,
+            "used": 5
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "personaname": "Mr. Brightside",
+            "bought": 2,
+            "used": 0
+          }
+        ],
+        "smoke_events": [
+          {
+            "time_sec": -89,
+            "time_str": "-01:29",
+            "phase_tag": "出门一级团雾",
+            "initiator_hero": "环轨百戏王",
+            "initiator_player": "Flame = ez mute",
+            "initiator_pos": 4,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (1换0)",
+            "detail": "买雾/开雾后迅速打开节奏：00:05 抓死拉比克。"
+          },
+          {
+            "time_sec": 731,
+            "time_str": "12:11",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "环轨百戏王",
+            "initiator_player": "Flame = ez mute",
+            "initiator_pos": 4,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (0换2)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 环轨百戏王、赏金猎人 阵亡。"
+          },
+          {
+            "time_sec": 1088,
+            "time_str": "18:08",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "环轨百戏王",
+            "initiator_player": "Flame = ez mute",
+            "initiator_pos": 4,
+            "outcome": "dry",
+            "outcome_label": "🟡 哑火空雾 (0击杀)",
+            "detail": "买雾/屯雾后 100 秒内未产生任何击杀（蹲人落空或仅用于安全做视野）。"
+          },
+          {
+            "time_sec": 1334,
+            "time_str": "22:14",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "环轨百戏王",
+            "initiator_player": "Flame = ez mute",
+            "initiator_pos": 4,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (5换0)",
+            "detail": "买雾/开雾后迅速打开节奏：23:41 抓死水晶室女、23:55 抓死主宰、23:40 抓死拉比克。"
+          },
+          {
+            "time_sec": 1683,
+            "time_str": "28:03",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "环轨百戏王",
+            "initiator_player": "Flame = ez mute",
+            "initiator_pos": 4,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (1换0)",
+            "detail": "买雾/开雾后迅速打开节奏：29:47 抓死拉比克。"
+          },
+          {
+            "time_sec": 3109,
+            "time_str": "51:49",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "赏金猎人",
+            "initiator_player": "Mr. Brightside",
+            "initiator_pos": 5,
+            "outcome": "dry",
+            "outcome_label": "🟡 哑火空雾 (0击杀)",
+            "detail": "买雾/屯雾后 100 秒内未产生任何击杀（蹲人落空或仅用于安全做视野）。"
+          },
+          {
+            "time_sec": 3533,
+            "time_str": "58:53",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "潮汐猎人",
+            "initiator_player": "Make Your Choice",
+            "initiator_pos": 3,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (3换2)",
+            "detail": "买雾/开雾后迅速打开节奏：60:00 抓死狙击手、60:11 抓死哈斯卡、60:30 抓死水晶室女。"
+          }
+        ]
+      }
+    },
+    "laning_mechanics_by_side": {
+      "dire": {
+        "side": "dire",
+        "pulling_rows": [
+          {
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING",
+            "pull_ticks": 413,
+            "pull_ratio_pct": 59.9,
+            "dn10": 6,
+            "lh10": 19,
+            "early_sentries": 2,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 59.9%（驻留权重 413），配合插下 2 颗对线封野/反封真眼，贡献 19 正补 / 6 反补。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风",
+            "pull_ticks": 445,
+            "pull_ratio_pct": 64.5,
+            "dn10": 2,
+            "lh10": 9,
+            "early_sentries": 4,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 64.5%（驻留权重 445），配合插下 4 颗对线封野/反封真眼，贡献 9 正补 / 2 反补。"
+          }
+        ],
+        "own_lotus_total": 12,
+        "opp_lotus_total": 11,
+        "lotus_verdict": "✓ 边路莲花池掌控出色：本方累计控下 12 朵疗伤莲花（主宰(3朵)、水晶室女(9朵)），压制了敌方的 11 朵（幽鬼(4朵)、死亡先知(4朵)、潮汐猎人(2朵)、环轨百戏王(1朵)），线上换血续航占优。",
+        "own_gate_total": 5,
+        "opp_gate_total": 3,
+        "own_lamp_total": 46,
+        "opp_lamp_total": 42,
+        "own_wisdom_cnt": 8,
+        "opp_wisdom_cnt": 8,
+        "wisdom_verdict": "✓ 智慧经验符控制占优：本方抢下 8 颗经验符 vs 敌方 8 颗，辅助等级与天赋节点没有落入下风。",
+        "wisdom_timeline": [
+          {
+            "time_sec": 423,
+            "time_str": "07:03",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "time_sec": 428,
+            "time_str": "07:08",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 908,
+            "time_str": "15:08",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "time_sec": 932,
+            "time_str": "15:32",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "time_sec": 1300,
+            "time_str": "21:40",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          },
+          {
+            "time_sec": 1406,
+            "time_str": "23:26",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风"
+          },
+          {
+            "time_sec": 1690,
+            "time_str": "28:10",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "time_sec": 1723,
+            "time_str": "28:43",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "time_sec": 2139,
+            "time_str": "35:39",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 2184,
+            "time_str": "36:24",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "time_sec": 2561,
+            "time_str": "42:41",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风"
+          },
+          {
+            "time_sec": 2841,
+            "time_str": "47:21",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "time_sec": 2960,
+            "time_str": "49:20",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          },
+          {
+            "time_sec": 2988,
+            "time_str": "49:48",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 3423,
+            "time_str": "57:03",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "time_sec": 3741,
+            "time_str": "62:21",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          }
+        ],
+        "water_runes_timeline": [
+          {
+            "time_sec": 139,
+            "time_str": "02:19",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          },
+          {
+            "time_sec": 159,
+            "time_str": "02:39",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "time_sec": 243,
+            "time_str": "04:03",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          },
+          {
+            "time_sec": 314,
+            "time_str": "05:14",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          }
+        ],
+        "map_interact_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa",
+            "twin_gate": 5,
+            "watcher_lamp": 2,
+            "outpost_capture": 0,
+            "lotus_used": 3,
+            "wisdom_runes": 4,
+            "water_runes": 0,
+            "bounty_runes": 1,
+            "power_runes": 2
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O",
+            "twin_gate": 0,
+            "watcher_lamp": 29,
+            "outpost_capture": 3,
+            "lotus_used": 0,
+            "wisdom_runes": 2,
+            "water_runes": 2,
+            "bounty_runes": 6,
+            "power_runes": 9
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage",
+            "twin_gate": 0,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING",
+            "twin_gate": 0,
+            "watcher_lamp": 6,
+            "outpost_capture": 1,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 2,
+            "power_runes": 1
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风",
+            "twin_gate": 0,
+            "watcher_lamp": 9,
+            "outpost_capture": 4,
+            "lotus_used": 9,
+            "wisdom_runes": 2,
+            "water_runes": 0,
+            "bounty_runes": 5,
+            "power_runes": 2
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "pulling_rows": [
+          {
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "pull_ticks": 315,
+            "pull_ratio_pct": 45.7,
+            "dn10": 0,
+            "lh10": 4,
+            "early_sentries": 3,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 45.7%（驻留权重 315），配合插下 3 颗对线封野/反封真眼，贡献 4 正补 / 0 反补。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside",
+            "pull_ticks": 427,
+            "pull_ratio_pct": 61.9,
+            "dn10": 1,
+            "lh10": 8,
+            "early_sentries": 1,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 61.9%（驻留权重 427），配合插下 1 颗对线封野/反封真眼，贡献 8 正补 / 1 反补。"
+          }
+        ],
+        "own_lotus_total": 11,
+        "opp_lotus_total": 12,
+        "lotus_verdict": "⚠️ 边路莲花池被压制：本方全队仅吃下 11 朵疗伤莲花（幽鬼(4朵)、死亡先知(4朵)、潮汐猎人(2朵)、环轨百戏王(1朵)），而敌方抢下了 12 朵莲花（主宰(3朵)、水晶室女(9朵)）！03:00 / 06:00 / 09:00 整点莲花池争夺吃亏。",
+        "own_gate_total": 3,
+        "opp_gate_total": 5,
+        "own_lamp_total": 42,
+        "opp_lamp_total": 46,
+        "own_wisdom_cnt": 8,
+        "opp_wisdom_cnt": 8,
+        "wisdom_verdict": "✓ 智慧经验符控制占优：本方抢下 8 颗经验符 vs 敌方 8 颗，辅助等级与天赋节点没有落入下风。",
+        "wisdom_timeline": [
+          {
+            "time_sec": 423,
+            "time_str": "07:03",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "time_sec": 428,
+            "time_str": "07:08",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 908,
+            "time_str": "15:08",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "time_sec": 932,
+            "time_str": "15:32",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "time_sec": 1300,
+            "time_str": "21:40",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          },
+          {
+            "time_sec": 1406,
+            "time_str": "23:26",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风"
+          },
+          {
+            "time_sec": 1690,
+            "time_str": "28:10",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa"
+          },
+          {
+            "time_sec": 1723,
+            "time_str": "28:43",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "time_sec": 2139,
+            "time_str": "35:39",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          },
+          {
+            "time_sec": 2184,
+            "time_str": "36:24",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "time_sec": 2561,
+            "time_str": "42:41",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风"
+          },
+          {
+            "time_sec": 2841,
+            "time_str": "47:21",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "time_sec": 2960,
+            "time_str": "49:20",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          },
+          {
+            "time_sec": 2988,
+            "time_str": "49:48",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 3423,
+            "time_str": "57:03",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside"
+          },
+          {
+            "time_sec": 3741,
+            "time_str": "62:21",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute"
+          }
+        ],
+        "water_runes_timeline": [
+          {
+            "time_sec": 139,
+            "time_str": "02:19",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          },
+          {
+            "time_sec": 159,
+            "time_str": "02:39",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          },
+          {
+            "time_sec": 243,
+            "time_str": "04:03",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O"
+          },
+          {
+            "time_sec": 314,
+            "time_str": "05:14",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica"
+          }
+        ],
+        "map_interact_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets",
+            "twin_gate": 2,
+            "watcher_lamp": 5,
+            "outpost_capture": 1,
+            "lotus_used": 4,
+            "wisdom_runes": 1,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 2
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica",
+            "twin_gate": 0,
+            "watcher_lamp": 5,
+            "outpost_capture": 0,
+            "lotus_used": 4,
+            "wisdom_runes": 1,
+            "water_runes": 2,
+            "bounty_runes": 4,
+            "power_runes": 8
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice",
+            "twin_gate": 1,
+            "watcher_lamp": 7,
+            "outpost_capture": 3,
+            "lotus_used": 2,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 2,
+            "power_runes": 2
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "twin_gate": 0,
+            "watcher_lamp": 11,
+            "outpost_capture": 1,
+            "lotus_used": 1,
+            "wisdom_runes": 3,
+            "water_runes": 0,
+            "bounty_runes": 5,
+            "power_runes": 2
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside",
+            "twin_gate": 0,
+            "watcher_lamp": 14,
+            "outpost_capture": 4,
+            "lotus_used": 0,
+            "wisdom_runes": 3,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 1
+          }
+        ]
+      }
+    },
+    "tp_rotation_by_side": {
+      "dire": {
+        "side": "dire",
+        "player_tp_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Ya Ah Waaaaa",
+            "tp_bought": 14,
+            "tp_used": 19,
+            "tf_tp_cnt": 5,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 19 次 TP，其中 5 波团战直接亮 TP 落地救人/反打，参团率 70.8%。"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "MAD O.O",
+            "tp_bought": 1,
+            "tp_used": 10,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 10 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 89.6%。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "哈斯卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+            "personaname": "NEver.RamPage",
+            "tp_bought": 4,
+            "tp_used": 11,
+            "tf_tp_cnt": 3,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 11 次 TP，其中 3 波团战直接亮 TP 落地救人/反打，参团率 50.0%。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "I AM COMING",
+            "tp_bought": 4,
+            "tp_used": 11,
+            "tf_tp_cnt": 4,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 11 次 TP，其中 4 波团战直接亮 TP 落地救人/反打，参团率 77.1%。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "水晶室女",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+            "personaname": "八级小狂风",
+            "tp_bought": 6,
+            "tp_used": 15,
+            "tf_tp_cnt": 4,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [
+              "23:41"
+            ],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 15 次 TP，其中 4 波团战直接亮 TP 落地救人/反打，参团率 60.4%。"
+          }
+        ],
+        "rotation_highlights": [
+          {
+            "time_range": "14:06–15:08",
+            "responders": "水晶室女(八级小狂风)、主宰(Ya Ah Waaaaa)、狙击手(I AM COMING)",
+            "trade_str": "打成 2 换 4",
+            "detail": "在 14:06–15:08 交战中，水晶室女(八级小狂风)、主宰(Ya Ah Waaaaa)、狙击手(I AM COMING) 第一时间亮 TP 落地支援参战（该波 2 换 4）。"
+          },
+          {
+            "time_range": "20:23–21:11",
+            "responders": "水晶室女(八级小狂风)、哈斯卡(NEver.RamPage)",
+            "trade_str": "打成 3 换 1",
+            "detail": "在 20:23–21:11 交战中，水晶室女(八级小狂风)、哈斯卡(NEver.RamPage) 第一时间亮 TP 落地支援参战（该波 3 换 1）。"
+          },
+          {
+            "time_range": "23:25–24:10",
+            "responders": "主宰(Ya Ah Waaaaa)、狙击手(I AM COMING)、拉比克(MAD O.O)",
+            "trade_str": "打成 0 换 4",
+            "detail": "在 23:25–24:10 交战中，主宰(Ya Ah Waaaaa)、狙击手(I AM COMING)、拉比克(MAD O.O) 第一时间亮 TP 落地支援参战（该波 0 换 4）。"
+          },
+          {
+            "time_range": "34:45–35:32",
+            "responders": "主宰(Ya Ah Waaaaa)",
+            "trade_str": "打成 3 换 0",
+            "detail": "在 34:45–35:32 交战中，主宰(Ya Ah Waaaaa) 第一时间亮 TP 落地支援参战（该波 3 换 0）。"
+          },
+          {
+            "time_range": "43:40–44:19",
+            "responders": "哈斯卡(NEver.RamPage)",
+            "trade_str": "打成 1 换 2",
+            "detail": "在 43:40–44:19 交战中，哈斯卡(NEver.RamPage) 第一时间亮 TP 落地支援参战（该波 1 换 2）。"
+          }
+        ],
+        "absent_warnings": [
+          {
+            "time_range": "30:02–30:45",
+            "victims": "水晶室女、主宰、狙击手",
+            "spectators": "2号位拉比克",
+            "detail": "⚠️ 30:02–30:45 我方【水晶室女、主宰、狙击手】遭围剿阵亡时，2号位拉比克 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
+            "time_range": "33:11–33:42",
+            "victims": "主宰、狙击手、拉比克",
+            "spectators": "5号位水晶室女",
+            "detail": "⚠️ 33:11–33:42 我方【主宰、狙击手、拉比克】遭围剿阵亡时，5号位水晶室女 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "player_tp_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Paphets",
+            "tp_bought": 4,
+            "tp_used": 11,
+            "tf_tp_cnt": 6,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [
+              "14:04"
+            ],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 11 次 TP，其中 6 波团战直接亮 TP 落地救人/反打，参团率 85.4%。"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "死亡先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+            "personaname": "Replica",
+            "tp_bought": 2,
+            "tp_used": 9,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：64 分钟仅使用 9 次 TP（主动买 2 张，团战亮 TP 1 次），在 1 波队友阵亡的团战中未能及时赶到！"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Make Your Choice",
+            "tp_bought": 6,
+            "tp_used": 13,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 13 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 68.3%。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "tp_bought": 6,
+            "tp_used": 14,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 13,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 1,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 14 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 73.2%。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "赏金猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+            "personaname": "Mr. Brightside",
+            "tp_bought": 2,
+            "tp_used": 9,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 14,
+            "tf_total_cnt": 14,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：64 分钟仅使用 9 次 TP（主动买 2 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          }
+        ],
+        "rotation_highlights": [
+          {
+            "time_range": "14:06–15:08",
+            "responders": "幽鬼(Paphets)、死亡先知(Replica)、潮汐猎人(Make Your Choice)",
+            "trade_str": "打成 4 换 2",
+            "detail": "在 14:06–15:08 交战中，幽鬼(Paphets)、死亡先知(Replica)、潮汐猎人(Make Your Choice) 第一时间亮 TP 落地支援参战（该波 4 换 2）。"
+          },
+          {
+            "time_range": "20:23–21:11",
+            "responders": "环轨百戏王(Flame = ez mute)",
+            "trade_str": "打成 1 换 3",
+            "detail": "在 20:23–21:11 交战中，环轨百戏王(Flame = ez mute) 第一时间亮 TP 落地支援参战（该波 1 换 3）。"
+          },
+          {
+            "time_range": "23:25–24:10",
+            "responders": "幽鬼(Paphets)",
+            "trade_str": "打成 4 换 0",
+            "detail": "在 23:25–24:10 交战中，幽鬼(Paphets) 第一时间亮 TP 落地支援参战（该波 4 换 0）。"
+          },
+          {
+            "time_range": "44:33–45:09",
+            "responders": "幽鬼(Paphets)",
+            "trade_str": "打成 0 换 3",
+            "detail": "在 44:33–45:09 交战中，幽鬼(Paphets) 第一时间亮 TP 落地支援参战（该波 0 换 3）。"
+          },
+          {
+            "time_range": "53:35–54:23",
+            "responders": "幽鬼(Paphets)",
+            "trade_str": "打成 2 换 2",
+            "detail": "在 53:35–54:23 交战中，幽鬼(Paphets) 第一时间亮 TP 落地支援参战（该波 2 换 2）。"
+          }
+        ],
+        "absent_warnings": [
+          {
+            "time_range": "44:33–45:09",
+            "victims": "环轨百戏王、赏金猎人、潮汐猎人",
+            "spectators": "2号位死亡先知",
+            "detail": "⚠️ 44:33–45:09 我方【环轨百戏王、赏金猎人、潮汐猎人】遭围剿阵亡时，2号位死亡先知 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
+            "time_range": "54:08–54:43",
+            "victims": "幽鬼、赏金猎人、死亡先知",
+            "spectators": "4号位环轨百戏王",
+            "detail": "⚠️ 54:08–54:43 我方【幽鬼、赏金猎人、死亡先知】遭围剿阵亡时，4号位环轨百戏王 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ]
+      }
+    }
   },
   "phases_data": [
     {
@@ -21102,7 +24246,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 1,
+        "player_slot": 0,
+        "side": "radiant",
+        "hero_id": 67,
+        "hero_short_zh": "幽鬼",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+        "personaname": "Paphets",
+        "stuns_sec": 26.7,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 26.7秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 26.7 秒硬控眩晕（平均每分钟控制 0.41 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 3,
@@ -21804,7 +24969,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 3,
+        "side": "radiant",
+        "hero_id": 43,
+        "hero_short_zh": "死亡先知",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/death_prophet.png",
+        "personaname": "Replica",
+        "stuns_sec": 31.7,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 31.7秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 31.7 秒硬控眩晕（平均每分钟控制 0.49 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 4,
@@ -22508,7 +25694,71 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 4,
+        "side": "radiant",
+        "hero_id": 29,
+        "hero_short_zh": "潮汐猎人",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+        "personaname": "Make Your Choice",
+        "stuns_sec": 89.7,
+        "ult_audits": [
+          {
+            "ability_key": "tidehunter_ravage",
+            "ability_zh": "毁灭 (潮汐大)",
+            "casts": 14,
+            "hits": 34,
+            "avg_hits": 2.43,
+            "unit_label": "人次",
+            "damage": 8546,
+            "tf_casts_count": 9,
+            "tf_casts_waves": [
+              "14:06–15:08(×1)",
+              "23:25–24:10(×1)",
+              "26:09–27:06(×1)",
+              "30:02–30:45(×1)",
+              "33:11–33:42(×1)",
+              "43:40–44:19(×2)",
+              "53:35–54:23(×1)",
+              "55:55–56:37(×1)",
+              "59:38–60:26(×1)"
+            ],
+            "tf_held_death_count": 4,
+            "tf_held_death_waves": [
+              "20:23–21:11",
+              "34:45–35:32",
+              "44:33–45:09",
+              "57:16–58:03"
+            ],
+            "victim_breakdown": [
+              "水晶室女(2,525伤)",
+              "主宰(2,247伤)",
+              "拉比克(1,938伤)",
+              "哈斯卡(934伤)",
+              "狙击手(902伤)"
+            ],
+            "grade": "warn",
+            "verdict_text": "大招中规中矩：全场释放 14 次，累计 34 人次（场均每大 2.43 人次，伤害 8,546）；但在 20:23–21:11, 34:45–35:32, 44:33–45:09 团战中未放出大招即阵亡！"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "毁灭 (潮汐大): 场均2.43人次",
+            "tone": "warn"
+          },
+          {
+            "text": "总硬控: 89.7秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招中规中矩：全场释放 14 次，累计 34 人次（场均每大 2.43 人次，伤害 8,546）；但在 20:23–21:11, 34:45–35:32, 44:33–45:09 团战中未放出大招即阵亡！",
+          "全场累计对敌方英雄造成 89.7 秒硬控眩晕（平均每分钟控制 1.39 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 1,
@@ -23234,7 +26484,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 1,
+        "side": "radiant",
+        "hero_id": 131,
+        "hero_short_zh": "环轨百戏王",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+        "personaname": "Flame = ez mute",
+        "stuns_sec": 122.6,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 122.6秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 122.6 秒硬控眩晕（平均每分钟控制 1.90 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 2,
@@ -23948,7 +27219,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 2,
+        "side": "radiant",
+        "hero_id": 62,
+        "hero_short_zh": "赏金猎人",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/bounty_hunter.png",
+        "personaname": "Mr. Brightside",
+        "stuns_sec": 36.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 36.0秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 36.0 秒硬控眩晕（平均每分钟控制 0.56 秒）。"
+        ]
+      }
     }
   ],
   "dire_pos_1_to_5": [
@@ -24717,7 +28009,69 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 1,
+        "player_slot": 129,
+        "side": "dire",
+        "hero_id": 8,
+        "hero_short_zh": "主宰",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+        "personaname": "Ya Ah Waaaaa",
+        "stuns_sec": 6.4,
+        "ult_audits": [
+          {
+            "ability_key": "juggernaut_omni_slash",
+            "ability_zh": "无敌斩 (剑圣大)",
+            "casts": 14,
+            "hits": 132,
+            "avg_hits": 9.43,
+            "unit_label": "刀斩击",
+            "damage": 23882,
+            "tf_casts_count": 9,
+            "tf_casts_waves": [
+              "20:23–21:11(×1)",
+              "26:09–27:06(×1)",
+              "30:02–30:45(×1)",
+              "34:45–35:32(×1)",
+              "43:40–44:19(×1)",
+              "53:35–54:23(×1)",
+              "55:55–56:37(×1)",
+              "57:16–58:03(×1)",
+              "59:38–60:26(×1)"
+            ],
+            "tf_held_death_count": 2,
+            "tf_held_death_waves": [
+              "23:25–24:10",
+              "33:11–33:42"
+            ],
+            "victim_breakdown": [
+              "幽鬼(8,183伤)",
+              "潮汐猎人(5,786伤)",
+              "死亡先知(4,387伤)",
+              "环轨百戏王(2,928伤)",
+              "赏金猎人(2,598伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 14 次，累计打出 132 刀斩击（场均每大 9.43 刀斩击，造成 23,882 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1), 30:02–30:45(×1), 34:45–35:32(×1) 团战完美兑现；主要灌伤目标：幽鬼(8,183伤)、潮汐猎人(5,786伤)、死亡先知(4,387伤)。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "无敌斩 (剑圣大): 14放/132刀斩击(均9.43)",
+            "tone": "good"
+          },
+          {
+            "text": "治疗守卫: 27根(奶队友18,224)",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 14 次，累计打出 132 刀斩击（场均每大 9.43 刀斩击，造成 23,882 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1), 30:02–30:45(×1), 34:45–35:32(×1) 团战完美兑现；主要灌伤目标：幽鬼(8,183伤)、潮汐猎人(5,786伤)、死亡先知(4,387伤)。",
+          "《治疗守卫 & 剑刃风暴》审计：全场插下 27 根治疗图腾（为队友治疗 18,224 点，另为自身恢复 62,050 点生命），转出 33 次剑刃风暴规避控制并打满 AOE。"
+        ]
+      }
     },
     {
       "player_slot": 132,
@@ -25558,7 +28912,70 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 132,
+        "side": "dire",
+        "hero_id": 86,
+        "hero_short_zh": "拉比克",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+        "personaname": "MAD O.O",
+        "stuns_sec": 94.3,
+        "ult_audits": [
+          {
+            "ability_key": "tidehunter_ravage",
+            "ability_zh": "毁灭 (潮汐大)",
+            "casts": 2,
+            "hits": 6,
+            "avg_hits": 3.0,
+            "unit_label": "人次",
+            "damage": 1926,
+            "tf_casts_count": 2,
+            "tf_casts_waves": [
+              "20:23–21:11(×1)",
+              "26:09–27:06(×1)"
+            ],
+            "tf_held_death_count": 5,
+            "tf_held_death_waves": [
+              "14:06–15:08",
+              "23:25–24:10",
+              "33:11–33:42",
+              "43:40–44:19",
+              "55:55–56:37"
+            ],
+            "victim_breakdown": [
+              "潮汐猎人(588伤)",
+              "赏金猎人(364伤)",
+              "环轨百戏王(346伤)",
+              "死亡先知(339伤)",
+              "幽鬼(289伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 2 次，累计打出 6 人次（场均每大 3.0 人次，造成 1,926 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1) 团战完美兑现；主要灌伤目标：潮汐猎人(588伤)、赏金猎人(364伤)、环轨百戏王(346伤)。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "毁灭 (潮汐大): 2放/6人次(均3.0)",
+            "tone": "good"
+          },
+          {
+            "text": "偷技能: 57次",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 94.3秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 2 次，累计打出 6 人次（场均每大 3.0 人次，造成 1,926 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1) 团战完美兑现；主要灌伤目标：潮汐猎人(588伤)、赏金猎人(364伤)、环轨百戏王(346伤)。",
+          "《技能窃取》实战审计：全场大招偷取 57 次，成功用出的敌方核心技能包括：偷《巨浪》放 109 次(中57人/12,393伤)、偷《Carrion Swarm》放 42 次(中16人/4,118伤)、偷《Spectral Dagger》放 21 次(中15人/2,315伤)、偷《The Beasts》放 17 次(中10人/3,217伤)、偷《Hunter Track》放 14 次！",
+          "全场累计对敌方英雄造成 94.3 秒硬控眩晕（平均每分钟控制 1.46 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 131,
@@ -26168,7 +29585,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 131,
+        "side": "dire",
+        "hero_id": 59,
+        "hero_short_zh": "哈斯卡",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/huskar.png",
+        "personaname": "NEver.RamPage",
+        "stuns_sec": 49.3,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 49.3秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 49.3 秒硬控眩晕（平均每分钟控制 0.77 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 130,
@@ -26792,7 +30230,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 130,
+        "side": "dire",
+        "hero_id": 35,
+        "hero_short_zh": "狙击手",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+        "personaname": "I AM COMING",
+        "stuns_sec": 44.5,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 44.5秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 44.5 秒硬控眩晕（平均每分钟控制 0.69 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 128,
@@ -27475,7 +30934,67 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 128,
+        "side": "dire",
+        "hero_id": 5,
+        "hero_short_zh": "水晶室女",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/crystal_maiden.png",
+        "personaname": "八级小狂风",
+        "stuns_sec": 137.8,
+        "ult_audits": [
+          {
+            "ability_key": "crystal_maiden_freezing_field",
+            "ability_zh": "极寒领域 (冰女大)",
+            "casts": 9,
+            "hits": 62,
+            "avg_hits": 6.89,
+            "unit_label": "段冰爆",
+            "damage": 7166,
+            "tf_casts_count": 7,
+            "tf_casts_waves": [
+              "20:23–21:11(×1)",
+              "26:09–27:06(×1)",
+              "34:45–35:32(×1)",
+              "43:40–44:19(×1)",
+              "53:35–54:23(×1)",
+              "55:55–56:37(×1)",
+              "59:38–60:26(×1)"
+            ],
+            "tf_held_death_count": 3,
+            "tf_held_death_waves": [
+              "14:06–15:08",
+              "23:25–24:10",
+              "30:02–30:45"
+            ],
+            "victim_breakdown": [
+              "死亡先知(2,999伤)",
+              "幽鬼(1,948伤)",
+              "赏金猎人(1,465伤)",
+              "潮汐猎人(754伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 9 次，累计打出 62 段冰爆（场均每大 6.89 段冰爆，造成 7,166 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1), 34:45–35:32(×1), 43:40–44:19(×1) 团战完美兑现；主要灌伤目标：死亡先知(2,999伤)、幽鬼(1,948伤)、赏金猎人(1,465伤)。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "极寒领域 (冰女大): 9放/62段冰爆(均6.89)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 137.8秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 9 次，累计打出 62 段冰爆（场均每大 6.89 段冰爆，造成 7,166 点伤害），在 20:23–21:11(×1), 26:09–27:06(×1), 34:45–35:32(×1), 43:40–44:19(×1) 团战完美兑现；主要灌伤目标：死亡先知(2,999伤)、幽鬼(1,948伤)、赏金猎人(1,465伤)。",
+          "全场累计对敌方英雄造成 137.8 秒硬控眩晕（平均每分钟控制 2.14 秒）。"
+        ]
+      }
     }
   ]
 }

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=3.5" />
+  <link rel="stylesheet" href="/styles.css?v=4.0" />
 </head>
 <body>
   <header class="site-header">
@@ -128,20 +128,24 @@
       </div>
     </section>
 
-    <!-- 新增模块：五黑车队多局惯犯档案 & 历史总账本 -->
-    <section id="squad-ledger-section" class="squad-ledger-section" aria-labelledby="squad-ledger-heading">
-      <div class="section-heading compact">
-        <div>
-          <h2 id="squad-ledger-heading">五黑车队多局惯犯档案 · 跨比赛累计分锅总账与绝活红黑榜</h2>
-          <p class="section-caption">自动汇总已审理的多局五黑比赛与近期战绩：谁是长期真大腿、谁是固定头号战犯、哪些英雄选出来就赢、哪些应该永久关进小黑屋</p>
+    <!-- 跨比赛多局惯犯档案：默认收起在 <details> 中，避免干扰单局深度复盘，同时支持页内搜索自动展开 -->
+    <details id="squad-ledger-details" class="squad-ledger-details">
+      <summary class="squad-ledger-summary">
+        <div class="squad-ledger-summary-left">
+          <span class="status-pill connected" id="squad-ledger-badge">跨比赛历史档案</span>
+          <strong>五黑车队多局惯犯档案 · 跨比赛累计分锅总账与绝活红黑榜</strong>
+          <span class="section-caption">（点击展开查看多局累计大腿/战犯排行，单局复盘已在下方去重呈现）</span>
         </div>
-        <span id="squad-ledger-badge" class="status-pill connected">多局档案汇总中</span>
-      </div>
-      <div id="squad-ledger-container"></div>
-    </section>
+        <span class="squad-ledger-summary-arrow">展开历史总账 ▾</span>
+      </summary>
+      <section id="squad-ledger-section" class="squad-ledger-section" aria-labelledby="squad-ledger-heading">
+        <h2 id="squad-ledger-heading" class="sr-only">五黑车队多局惯犯档案</h2>
+        <div id="squad-ledger-container"></div>
+      </section>
+    </details>
 
-    <!-- 比赛总览横幅 -->
-    <section id="match-overview-section" class="match-overview" aria-labelledby="match-Overview-title">
+    <!-- 比赛总览横幅 + 6大无重叠复盘模块快速跳转栏 -->
+    <section id="match-overview-section" class="match-overview" aria-labelledby="match-overview-title">
       <div class="overview-top-row">
         <div>
           <div id="match-meta-line" class="match-meta">加载中...</div>
@@ -163,26 +167,37 @@
       </div>
 
       <div id="match-kpi-strip" class="match-stats"></div>
+
+      <!-- 六大去重核心模块电梯导航 -->
+      <nav class="postgame-jump-nav" aria-label="赛后复盘模块快速跳转">
+        <span class="jump-nav-label">复盘目录 (已全面去重)：</span>
+        <a href="#draft-combo-section" class="jump-chip">① 阵容BP与配合</a>
+        <a href="#verdict-and-blame-section" class="jump-chip">② 红黑榜与100%分锅</a>
+        <a href="#tactical-microscope-section" class="jump-chip highlight">③ 🔬 战术显微镜 (大招/眼位/堆野开雾/对线/TP)</a>
+        <a href="#charts-hub-section" class="jump-chip">④ 全局曲线与集火矩阵</a>
+        <a href="#phase-review-section" class="jump-chip">⑤ 前中后期三阶段</a>
+        <a href="#players-forensics-section" class="jump-chip">⑥ 1~5号位个人卷宗</a>
+      </nav>
     </section>
 
-    <!-- 新增前置模块：阵容选择与核心配合算账 (选得如何 & 有什么配合可以打) -->
+    <!-- 模块一：阵容选择与核心配合算账 (纯粹聚焦 BP 成色、克制与 Combo 兑现，移除重复的基础经济表) -->
     <section id="draft-combo-section" class="draft-combo-section" aria-labelledby="draft-combo-heading">
       <div class="section-heading">
         <div>
-          <h2 id="draft-combo-heading">阵容选择与配合诊断 · 选得如何 &amp; 有什么配合可以打</h2>
-          <p class="section-caption">评估双方 1~5 号位阵容六维成色、先天优劣势与克制关系，拆解本方必打的核心技能 Combo 以及本局实战兑现度</p>
+          <h2 id="draft-combo-heading">① 阵容选择与配合诊断 · 选得如何 &amp; 有什么配合可以打</h2>
+          <p class="section-caption">专注评估双方 1~5 号位阵容六维成色、先天克制关系与本方必打的核心技能 Combo 实战兑现度</p>
         </div>
         <span id="draft-grade-badge" class="status-pill connected">阵容评级核算中</span>
       </div>
       <div id="draft-combo-container"></div>
     </section>
 
-    <!-- 模块一：MVP 真大腿 vs 头号战犯 + 五人分锅账本 (修复一切文字裁切与换行问题) -->
-    <section class="verdict-and-blame-section" aria-labelledby="verdict-heading">
+    <!-- 模块二：MVP 真大腿 vs 头号战犯 + 五人分锅账本 -->
+    <section id="verdict-and-blame-section" class="verdict-and-blame-section" aria-labelledby="verdict-heading">
       <div class="section-heading">
         <div>
-          <h2 id="verdict-heading">这把谁在干活，谁在犯罪</h2>
-          <p class="section-caption">综合对线期、经济伤害转化率、推进拆塔、主动装备按键次数与阵亡读秒时长量化核算</p>
+          <h2 id="verdict-heading">② 这把谁在干活，谁在犯罪 · 五人分锅定责总表</h2>
+          <p class="section-caption">一屏看清全场真大腿、头号战犯与 100% 责任切分（具体技能机制、眼位、拉野与 TP 细节已归入下方「战术显微镜」）</p>
         </div>
         <span id="parse-quality-badge" class="status-pill">录像解析核对中</span>
       </div>
@@ -213,7 +228,7 @@
         </article>
       </div>
 
-      <!-- 五人分锅比例条与清晰排行账本 (绝不裁切窄条文字) -->
+      <!-- 五人分锅比例条与清晰排行账本 -->
       <article class="blame-ledger-panel" aria-labelledby="blame-ledger-title">
         <div class="blame-ledger-header">
           <h3 id="blame-ledger-title">本方五人分锅占比账本 (100% 责任切分)</h3>
@@ -224,11 +239,50 @@
       </article>
     </section>
 
-    <!-- 模块二：四大可视化战术图表中心 + 5v5 集火流向矩阵 -->
-    <section class="charts-hub-section" aria-labelledby="charts-hub-heading">
+    <!-- 模块三（全新核心）：🔬 录像级战术显微镜 —— 专治英雄大招时机、辅助眼位进攻/防守、堆野与开雾找节奏、对线拉野走门莲花经验符、TP救人及时性 -->
+    <section id="tactical-microscope-section" class="tactical-microscope-section" aria-labelledby="tactical-microscope-heading">
       <div class="section-heading">
         <div>
-          <h2 id="charts-hub-heading">全局战术图表与地图取证</h2>
+          <h2 id="tactical-microscope-heading">③ 🔬 录像级战术显微镜 · 英雄大招审判 / 辅助眼位深浅 / 堆野开雾 / 对线细节 / TP救人</h2>
+          <p class="section-caption">直击录像底层事件流：猛犸/潮汐大招大到几个人及憋大暴毙团战、辅助每颗假眼的进攻/防守坐标与存活秒数、辅助堆野与每次开雾 90 秒战果、对线拉野/莲花/智慧符/走门、以及 TP 救人及时性与见死不救抓包</p>
+        </div>
+        <div class="microscope-header-controls">
+          <div class="team-tab-group" role="group" aria-label="显微镜阵营切换">
+            <button type="button" class="team-tab active" data-micro-side="own">看本方车队</button>
+            <button type="button" class="team-tab" data-micro-side="opp">看对手阵营</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜五大维度">
+        <button type="button" class="microscope-tab-btn active" data-micro-tab="hero_ult" role="tab" aria-selected="true">
+          🎯 1. 英雄绝活与大招审判
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="vision" role="tab" aria-selected="false">
+          👁️ 2. 辅助眼位进攻/防守与寿命
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="stack_smoke" role="tab" aria-selected="false">
+          🌾 3. 辅助堆野 &amp; 开雾找节奏
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="laning" role="tab" aria-selected="false">
+          🌱 4. 对线拉野·走门·莲花·经验符
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="tp_save" role="tab" aria-selected="false">
+          🆘 5. TP 救人及时性与缺席抓包
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="all" role="tab" aria-selected="false">
+          📑 同屏展开全部 5 项
+        </button>
+      </div>
+
+      <div id="tactical-microscope-body" class="tactical-microscope-body"></div>
+    </section>
+
+    <!-- 模块四：四大可视化战术图表中心 + 5v5 集火流向矩阵 -->
+    <section id="charts-hub-section" class="charts-hub-section" aria-labelledby="charts-hub-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="charts-hub-heading">④ 全局战术图表与 5v5 集火伤害矩阵</h2>
           <p class="section-caption">团队经济/经验走势、十人分钟级净资产曲线、2D 眼位/对线热力/团战阵亡坐标小地图、十人三维横评与 5v5 集火伤害矩阵</p>
         </div>
       </div>
@@ -306,7 +360,7 @@
         </article>
       </div>
 
-      <!-- 新增图表 5: 5v5 集火流向与互相伤害矩阵 (谁在切C位 / 谁在给肉盾刮痧) -->
+      <!-- 图表 5: 5v5 集火流向与互相伤害矩阵 (谁在切C位 / 谁在给肉盾刮痧) -->
       <article id="focus-fire-matrix-box" class="chart-box focus-fire-box" aria-labelledby="focus-fire-title">
         <div class="chart-box-header">
           <div>
@@ -322,12 +376,12 @@
       </article>
     </section>
 
-    <!-- 模块三：按时间阶段把账算清楚 (前期对线 0-10m / 中期运营 10-25m / 后期决策 25m+) -->
-    <section class="phase-review-section" aria-labelledby="phase-heading">
+    <!-- 模块五：按时间阶段把账算清楚 (前期对线 0-10m / 中期运营 10-25m / 后期决策 25m+) -->
+    <section id="phase-review-section" class="phase-review-section" aria-labelledby="phase-heading">
       <div class="section-heading">
         <div>
-          <h2 id="phase-heading">按时间分段，把每一期的账算清楚（含个人得失与团队三期进化指南）</h2>
-          <p class="section-caption">切分前期对线 (00:00–10:00)、中期运营 (10:00–25:00)、后期决策 (25:00–终局)，逐一评价 1~5 号位每个人每阶段哪里做得好、哪里做得不好，以及团队每个阶段该怎么配合进步</p>
+          <h2 id="phase-heading">⑤ 前·中·后期三阶段进化指南与分段表现矩阵</h2>
+          <p class="section-caption">切分前期对线 (00:00–10:00)、中期运营 (10:00–25:00)、后期决策 (25:00–终局)，精炼呈现团队三期战术处方与 1~5 号位阶段横向对比表</p>
         </div>
       </div>
 
@@ -338,23 +392,23 @@
       <div id="phase-active-panel" class="phase-panel-box"></div>
     </section>
 
-    <!-- 模块四：该回看的几波关键团战与转折窗口 -->
-    <section class="windows-section" aria-labelledby="windows-heading">
+    <!-- 模块五点五：该回看的几波关键团战与转折窗口 -->
+    <section id="windows-section" class="windows-section" aria-labelledby="windows-heading">
       <div class="section-heading">
         <div>
-          <h2 id="windows-heading">该回看的几波关键交战与经济拐点</h2>
+          <h2 id="windows-heading">关键胜负手团战与经济拐点回放</h2>
           <p class="section-caption">结合录像团战日志与 Grok 复盘定位最关键的胜负手窗口，展开可查看十人技能与道具释放明细，或点击「在地图定位墓碑」还原团战阵亡坐标</p>
         </div>
       </div>
       <div id="key-windows-grid" class="windows-grid"></div>
     </section>
 
-    <!-- 模块五：1~5 号位逐一拉出来处刑 (本方五人 + 对方五人全解：含六神装图标、按键次数、技能图标、六维雷达图、提款关系) -->
-    <section class="players-forensics-section" aria-labelledby="players-forensics-heading">
+    <!-- 模块六：1~5 号位逐一拉出来算账 (去重精简版：聚焦个人出装时间轴、主动按键审计、六维雷达、提款关系与下把处方) -->
+    <section id="players-forensics-section" class="players-forensics-section" aria-labelledby="players-forensics-heading">
       <div class="section-heading">
         <div>
-          <h2 id="players-forensics-heading">1~5 号位逐一拉出来算账</h2>
-          <p class="section-caption">包含官方装备图标与出装时间点、主动道具按键次数审计、核心技能释放次数、六维能力雷达图、天敌提款记录与改进动作</p>
+          <h2 id="players-forensics-heading">⑥ 1~5 号位个人装备时间轴、主动按键与能力卷宗</h2>
+          <p class="section-caption">聚焦每位玩家独有的装备合成节点、主动道具按键审计、英雄绝活徽章、六维能力雷达图、天敌提款记录与下把专属处方</p>
         </div>
         <div class="team-tab-group" role="tablist" aria-label="切换查看阵营">
           <button type="button" class="team-tab active" data-team-tab="own" role="tab" aria-selected="true">本方五人详单</button>
@@ -482,6 +536,6 @@
     <span>有据才喷，数据来自 OpenDota 录像解析与 xAI Grok 4.7</span>
   </footer>
 
-  <script src="/app.js?v=3.5" defer></script>
+  <script src="/app.js?v=4.0" defer></script>
 </body>
 </html>

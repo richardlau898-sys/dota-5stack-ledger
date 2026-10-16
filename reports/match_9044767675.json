@@ -15208,7 +15208,10 @@
           {
             "x": 160.0,
             "y": 87.0,
+            "nx": 75.0,
+            "ny": 82.0,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 5,
@@ -15219,7 +15222,10 @@
           {
             "x": 168.0,
             "y": 77.0,
+            "nx": 81.2,
+            "ny": 89.8,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 1,
@@ -15230,7 +15236,10 @@
           {
             "x": 170.0,
             "y": 95.0,
+            "nx": 82.8,
+            "ny": 75.8,
             "count": 1,
+            "deaths": 1,
             "side": "dire",
             "side_zh": "dire",
             "pos": 5,
@@ -15253,7 +15262,10 @@
           {
             "x": 173.0,
             "y": 77.0,
+            "nx": 85.2,
+            "ny": 89.8,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 4,
@@ -15264,7 +15276,10 @@
           {
             "x": 66.0,
             "y": 173.0,
+            "nx": 4.0,
+            "ny": 14.8,
             "count": 1,
+            "deaths": 1,
             "side": "dire",
             "side_zh": "dire",
             "pos": 1,
@@ -15275,7 +15290,10 @@
           {
             "x": 87.0,
             "y": 157.0,
+            "nx": 18.0,
+            "ny": 27.3,
             "count": 1,
+            "deaths": 1,
             "side": "dire",
             "side_zh": "dire",
             "pos": 4,
@@ -15298,7 +15316,10 @@
           {
             "x": 139.0,
             "y": 96.0,
+            "nx": 58.6,
+            "ny": 75.0,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 5,
@@ -15309,7 +15330,10 @@
           {
             "x": 139.0,
             "y": 96.0,
+            "nx": 58.6,
+            "ny": 75.0,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 1,
@@ -15320,7 +15344,10 @@
           {
             "x": 144.0,
             "y": 92.0,
+            "nx": 62.5,
+            "ny": 78.1,
             "count": 1,
+            "deaths": 1,
             "side": "dire",
             "side_zh": "dire",
             "pos": 5,
@@ -15331,7 +15358,10 @@
           {
             "x": 129.0,
             "y": 91.0,
+            "nx": 50.8,
+            "ny": 78.9,
             "count": 1,
+            "deaths": 1,
             "side": "dire",
             "side_zh": "dire",
             "pos": 4,
@@ -15354,7 +15384,10 @@
           {
             "x": 138.0,
             "y": 84.0,
+            "nx": 57.8,
+            "ny": 84.4,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 2,
@@ -15365,7 +15398,10 @@
           {
             "x": 148.0,
             "y": 77.0,
+            "nx": 65.6,
+            "ny": 89.8,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 4,
@@ -15376,7 +15412,10 @@
           {
             "x": 139.0,
             "y": 87.0,
+            "nx": 58.6,
+            "ny": 82.0,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 3,
@@ -15387,7 +15426,10 @@
           {
             "x": 138.0,
             "y": 82.0,
+            "nx": 57.8,
+            "ny": 85.9,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 5,
@@ -15398,7 +15440,10 @@
           {
             "x": 147.0,
             "y": 80.0,
+            "nx": 64.8,
+            "ny": 87.5,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 1,
@@ -15421,7 +15466,10 @@
           {
             "x": 105.0,
             "y": 136.0,
+            "nx": 32.0,
+            "ny": 43.8,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 2,
@@ -15432,7 +15480,10 @@
           {
             "x": 98.0,
             "y": 143.0,
+            "nx": 26.6,
+            "ny": 38.3,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 4,
@@ -15443,7 +15494,10 @@
           {
             "x": 105.0,
             "y": 136.0,
+            "nx": 32.0,
+            "ny": 43.8,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 3,
@@ -15454,7 +15508,10 @@
           {
             "x": 99.0,
             "y": 135.0,
+            "nx": 27.3,
+            "ny": 44.5,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 5,
@@ -15465,7 +15522,10 @@
           {
             "x": 101.0,
             "y": 138.0,
+            "nx": 28.9,
+            "ny": 42.2,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 1,
@@ -15488,7 +15548,10 @@
           {
             "x": 109.0,
             "y": 103.0,
+            "nx": 35.2,
+            "ny": 69.5,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 2,
@@ -15499,7 +15562,10 @@
           {
             "x": 101.0,
             "y": 103.0,
+            "nx": 28.9,
+            "ny": 69.5,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 4,
@@ -15510,7 +15576,10 @@
           {
             "x": 116.0,
             "y": 97.0,
+            "nx": 40.6,
+            "ny": 74.2,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 3,
@@ -15521,7 +15590,10 @@
           {
             "x": 109.0,
             "y": 103.0,
+            "nx": 35.2,
+            "ny": 69.5,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 5,
@@ -15532,7 +15604,10 @@
           {
             "x": 109.0,
             "y": 103.0,
+            "nx": 35.2,
+            "ny": 69.5,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 1,
@@ -15543,7 +15618,10 @@
           {
             "x": 115.0,
             "y": 96.0,
+            "nx": 39.8,
+            "ny": 75.0,
             "count": 1,
+            "deaths": 1,
             "side": "dire",
             "side_zh": "dire",
             "pos": 5,
@@ -15569,7 +15647,10 @@
           {
             "x": 84.0,
             "y": 77.0,
+            "nx": 15.6,
+            "ny": 89.8,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 2,
@@ -15580,7 +15661,10 @@
           {
             "x": 87.0,
             "y": 81.0,
+            "nx": 18.0,
+            "ny": 86.7,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 4,
@@ -15591,7 +15675,10 @@
           {
             "x": 89.0,
             "y": 83.0,
+            "nx": 19.5,
+            "ny": 85.2,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 4,
@@ -15602,7 +15689,10 @@
           {
             "x": 83.0,
             "y": 79.0,
+            "nx": 14.8,
+            "ny": 88.3,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 3,
@@ -15613,7 +15703,10 @@
           {
             "x": 85.0,
             "y": 77.0,
+            "nx": 16.4,
+            "ny": 89.8,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 5,
@@ -15624,7 +15717,10 @@
           {
             "x": 87.0,
             "y": 79.0,
+            "nx": 18.0,
+            "ny": 88.3,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 5,
@@ -15635,7 +15731,10 @@
           {
             "x": 96.0,
             "y": 81.0,
+            "nx": 25.0,
+            "ny": 86.7,
             "count": 1,
+            "deaths": 1,
             "side": "radiant",
             "side_zh": "radiant",
             "pos": 1,
@@ -15646,7 +15745,10 @@
           {
             "x": 86.0,
             "y": 79.0,
+            "nx": 17.2,
+            "ny": 88.3,
             "count": 1,
+            "deaths": 1,
             "side": "dire",
             "side_zh": "dire",
             "pos": 2,
@@ -15657,7 +15759,10 @@
           {
             "x": 90.0,
             "y": 74.0,
+            "nx": 20.3,
+            "ny": 92.2,
             "count": 1,
+            "deaths": 1,
             "side": "dire",
             "side_zh": "dire",
             "pos": 3,
@@ -15667,7 +15772,1892 @@
           }
         ]
       }
-    ]
+    ],
+    "hero_execution_by_side": {
+      "dire": [
+        {
+          "pos": 1,
+          "player_slot": 131,
+          "side": "dire",
+          "hero_id": 73,
+          "hero_short_zh": "炼金术士",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
+          "personaname": "𐂃Tiny dela rosa",
+          "stuns_sec": 15.4,
+          "ult_audits": [],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "总硬控: 15.4秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "全场累计对敌方英雄造成 15.4 秒硬控眩晕（平均每分钟控制 0.42 秒）。"
+          ]
+        },
+        {
+          "pos": 2,
+          "player_slot": 128,
+          "side": "dire",
+          "hero_id": 26,
+          "hero_short_zh": "莱恩",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+          "personaname": "palwa sa lubi",
+          "stuns_sec": 101.2,
+          "ult_audits": [
+            {
+              "ability_key": "lion_finger_of_death",
+              "ability_zh": "死亡一指 (莱恩大)",
+              "casts": 20,
+              "hits": 21,
+              "avg_hits": 1.05,
+              "unit_label": "人次",
+              "damage": 10080,
+              "tf_casts_count": 5,
+              "tf_casts_waves": [
+                "07:59–08:41(×1)",
+                "18:51–19:37(×1)",
+                "26:06–27:05(×2)",
+                "30:01–30:40(×1)",
+                "31:00–31:57(×1)"
+              ],
+              "tf_held_death_count": 0,
+              "tf_held_death_waves": [],
+              "victim_breakdown": [
+                "主宰(2,955伤)",
+                "龙骑士(2,550伤)",
+                "帕格纳(1,924伤)",
+                "巫妖(1,749伤)",
+                "半人马战行者(902伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 20 次，累计打出 21 人次（场均每大 1.05 人次，造成 10,080 点伤害），在 07:59–08:41(×1), 18:51–19:37(×1), 26:06–27:05(×2), 30:01–30:40(×1) 团战完美兑现；主要灌伤目标：主宰(2,955伤)、龙骑士(2,550伤)、帕格纳(1,924伤)。"
+            }
+          ],
+          "skillshot_audits": [
+            {
+              "ability_zh": "裂地尖刺 (莱恩穿刺)",
+              "casts": 60,
+              "hits": 39,
+              "hit_pct": 65.0,
+              "damage": 7311,
+              "grade": "warn",
+              "detail": "《裂地尖刺 (莱恩穿刺)》全场施放 60 次，命中敌方英雄 39 人次（有效命中比 65.0%，造成 7,311 伤害）。"
+            }
+          ],
+          "headline_badges": [
+            {
+              "text": "死亡一指 (莱恩大): 20放/21人次(均1.05)",
+              "tone": "good"
+            },
+            {
+              "text": "裂地尖刺: 60放/39中(65.0%)",
+              "tone": "warn"
+            },
+            {
+              "text": "总硬控: 101.2秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 20 次，累计打出 21 人次（场均每大 1.05 人次，造成 10,080 点伤害），在 07:59–08:41(×1), 18:51–19:37(×1), 26:06–27:05(×2), 30:01–30:40(×1) 团战完美兑现；主要灌伤目标：主宰(2,955伤)、龙骑士(2,550伤)、帕格纳(1,924伤)。",
+            "《裂地尖刺 (莱恩穿刺)》全场施放 60 次，命中敌方英雄 39 人次（有效命中比 65.0%，造成 7,311 伤害）。",
+            "全场累计对敌方英雄造成 101.2 秒硬控眩晕（平均每分钟控制 2.77 秒）。"
+          ]
+        },
+        {
+          "pos": 3,
+          "player_slot": 129,
+          "side": "dire",
+          "hero_id": 97,
+          "hero_short_zh": "马格纳斯",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+          "personaname": "Tuwalya",
+          "stuns_sec": 62.8,
+          "ult_audits": [
+            {
+              "ability_key": "magnataur_reverse_polarity",
+              "ability_zh": "两极反转 (猛犸大)",
+              "casts": 8,
+              "hits": 11,
+              "avg_hits": 1.38,
+              "unit_label": "人次",
+              "damage": 1382,
+              "tf_casts_count": 4,
+              "tf_casts_waves": [
+                "16:32–17:13(×1)",
+                "18:51–19:37(×1)",
+                "26:06–27:05(×1)",
+                "30:01–30:40(×1)"
+              ],
+              "tf_held_death_count": 1,
+              "tf_held_death_waves": [
+                "31:00–31:57"
+              ],
+              "victim_breakdown": [
+                "主宰(510伤)",
+                "龙骑士(413伤)",
+                "半人马战行者(233伤)",
+                "巫妖(226伤)"
+              ],
+              "grade": "bad",
+              "verdict_text": "⚠️ 大招严重低效/空大频发：全场放了 8 次《两极反转 (猛犸大)》，累计仅命中 11 人次（场均每次大招仅 1.38 人次！），且在 31:00–31:57 等 1 波关键团战中没按出大招就躺下读秒！"
+            }
+          ],
+          "skillshot_audits": [
+            {
+              "ability_zh": "巨角冲撞 (猛犸拱人)",
+              "casts": 32,
+              "hits": 26,
+              "hit_pct": 81.2,
+              "damage": 7389,
+              "grade": "good",
+              "detail": "《巨角冲撞 (猛犸拱人)》全场施放 32 次，命中敌方英雄 26 人次（有效命中比 81.2%，造成 7,389 伤害），手感火热！"
+            },
+            {
+              "ability_zh": "震荡波",
+              "casts": 62,
+              "hits": 51,
+              "hit_pct": 82.3,
+              "damage": 9108,
+              "grade": "good",
+              "detail": "《震荡波》全场施放 62 次，命中敌方英雄 51 人次（有效命中比 82.3%，造成 9,108 伤害），手感火热！"
+            }
+          ],
+          "headline_badges": [
+            {
+              "text": "🚨 两极反转 (猛犸大): 8大仅11人次(均1.38)",
+              "tone": "bad"
+            },
+            {
+              "text": "巨角冲撞: 32放/26中(81.2%)",
+              "tone": "good"
+            },
+            {
+              "text": "震荡波: 62放/51中(82.3%)",
+              "tone": "good"
+            },
+            {
+              "text": "授予力量: 20次(分均0.55)",
+              "tone": "bad"
+            }
+          ],
+          "special_insights": [
+            "⚠️ 大招严重低效/空大频发：全场放了 8 次《两极反转 (猛犸大)》，累计仅命中 11 人次（场均每次大招仅 1.38 人次！），且在 31:00–31:57 等 1 波关键团战中没按出大招就躺下读秒！",
+            "《巨角冲撞 (猛犸拱人)》全场施放 32 次，命中敌方英雄 26 人次（有效命中比 81.2%，造成 7,389 伤害），手感火热！",
+            "《震荡波》全场施放 62 次，命中敌方英雄 51 人次（有效命中比 82.3%，造成 9,108 伤害），手感火热！",
+            "《授予力量》Buff 覆盖审计：37 分钟比赛共施放 20 次（分均仅 0.55 次），帮助队友打出 炼金术士(溅射1刀/37伤)、马格纳斯(溅射1刀/48伤)。⚠️ 作为工具人猛犸，中后期给主C续 Buff 的频率偏低，刷钱与打团前务必保持主C身上常驻分裂！"
+          ]
+        },
+        {
+          "pos": 4,
+          "player_slot": 132,
+          "side": "dire",
+          "hero_id": 123,
+          "hero_short_zh": "森海飞霞",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+          "personaname": "X!",
+          "stuns_sec": 71.7,
+          "ult_audits": [],
+          "skillshot_audits": [
+            {
+              "ability_zh": "一击必杀 (松鼠狙击大)",
+              "casts": 13,
+              "hits": 10,
+              "hit_pct": 76.9,
+              "damage": 4373,
+              "grade": "good",
+              "detail": "《一击必杀 (松鼠狙击大)》全场施放 13 次，命中敌方英雄 10 人次（有效命中比 76.9%，造成 4,373 伤害），手感火热！"
+            },
+            {
+              "ability_zh": "橡果栗鼠",
+              "casts": 46,
+              "hits": 31,
+              "hit_pct": 67.4,
+              "damage": 3538,
+              "grade": "good",
+              "detail": "《橡果栗鼠》全场施放 46 次，命中敌方英雄 31 人次（有效命中比 67.4%，造成 3,538 伤害），手感火热！"
+            }
+          ],
+          "headline_badges": [
+            {
+              "text": "一击必杀: 13放/10中(76.9%)",
+              "tone": "good"
+            },
+            {
+              "text": "橡果栗鼠: 46放/31中(67.4%)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 71.7秒",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "《一击必杀 (松鼠狙击大)》全场施放 13 次，命中敌方英雄 10 人次（有效命中比 76.9%，造成 4,373 伤害），手感火热！",
+            "《橡果栗鼠》全场施放 46 次，命中敌方英雄 31 人次（有效命中比 67.4%，造成 3,538 伤害），手感火热！",
+            "全场累计对敌方英雄造成 71.7 秒硬控眩晕（平均每分钟控制 1.96 秒）。"
+          ]
+        },
+        {
+          "pos": 5,
+          "player_slot": 130,
+          "side": "dire",
+          "hero_id": 68,
+          "hero_short_zh": "远古冰魄",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+          "personaname": "Sansan",
+          "stuns_sec": 36.9,
+          "ult_audits": [
+            {
+              "ability_key": "ancient_apparition_ice_blast",
+              "ability_zh": "冰晶爆轰 (冰魂大)",
+              "casts": 17,
+              "hits": 125,
+              "avg_hits": 7.35,
+              "unit_label": "段命中",
+              "damage": 4659,
+              "tf_casts_count": 5,
+              "tf_casts_waves": [
+                "11:19–12:09(×1)",
+                "18:51–19:37(×1)",
+                "26:06–27:05(×1)",
+                "30:01–30:40(×1)",
+                "31:00–31:57(×1)"
+              ],
+              "tf_held_death_count": 2,
+              "tf_held_death_waves": [
+                "07:59–08:41",
+                "16:32–17:13"
+              ],
+              "victim_breakdown": [
+                "主宰(1,239伤)",
+                "巫妖(1,085伤)",
+                "龙骑士(1,051伤)",
+                "半人马战行者(898伤)",
+                "帕格纳(386伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 17 次，累计打出 125 段命中（场均每大 7.35 段命中，造成 4,659 点伤害），在 11:19–12:09(×1), 18:51–19:37(×1), 26:06–27:05(×1), 30:01–30:40(×1) 团战完美兑现；主要灌伤目标：主宰(1,239伤)、巫妖(1,085伤)、龙骑士(1,051伤)。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "冰晶爆轰 (冰魂大): 17放/125段命中(均7.35)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 36.9秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 17 次，累计打出 125 段命中（场均每大 7.35 段命中，造成 4,659 点伤害），在 11:19–12:09(×1), 18:51–19:37(×1), 26:06–27:05(×1), 30:01–30:40(×1) 团战完美兑现；主要灌伤目标：主宰(1,239伤)、巫妖(1,085伤)、龙骑士(1,051伤)。",
+            "全场累计对敌方英雄造成 36.9 秒硬控眩晕（平均每分钟控制 1.01 秒）。"
+          ]
+        }
+      ],
+      "radiant": [
+        {
+          "pos": 1,
+          "player_slot": 4,
+          "side": "radiant",
+          "hero_id": 8,
+          "hero_short_zh": "主宰",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+          "personaname": "Flame = ez mute",
+          "stuns_sec": 0.0,
+          "ult_audits": [
+            {
+              "ability_key": "juggernaut_omni_slash",
+              "ability_zh": "无敌斩 (剑圣大)",
+              "casts": 3,
+              "hits": 15,
+              "avg_hits": 5.0,
+              "unit_label": "刀斩击",
+              "damage": 1765,
+              "tf_casts_count": 0,
+              "tf_casts_waves": [],
+              "tf_held_death_count": 6,
+              "tf_held_death_waves": [
+                "07:59–08:41",
+                "16:32–17:13",
+                "18:51–19:37",
+                "26:06–27:05",
+                "30:01–30:40",
+                "31:00–31:57"
+              ],
+              "victim_breakdown": [
+                "森海飞霞(1,765伤)"
+              ],
+              "grade": "warn",
+              "verdict_text": "大招中规中矩：全场释放 3 次，累计 15 刀斩击（场均每大 5.0 刀斩击，伤害 1,765）；但在 07:59–08:41, 16:32–17:13, 18:51–19:37 团战中未放出大招即阵亡！"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "无敌斩 (剑圣大): 场均5.0刀斩击",
+              "tone": "warn"
+            },
+            {
+              "text": "治疗守卫: 11根(奶队友833)",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "大招中规中矩：全场释放 3 次，累计 15 刀斩击（场均每大 5.0 刀斩击，伤害 1,765）；但在 07:59–08:41, 16:32–17:13, 18:51–19:37 团战中未放出大招即阵亡！",
+            "《治疗守卫 & 剑刃风暴》审计：全场插下 11 根治疗图腾（为队友治疗 833 点，另为自身恢复 15,412 点生命），转出 20 次剑刃风暴规避控制并打满 AOE。"
+          ]
+        },
+        {
+          "pos": 2,
+          "player_slot": 0,
+          "side": "radiant",
+          "hero_id": 49,
+          "hero_short_zh": "龙骑士",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+          "personaname": "Paphets",
+          "stuns_sec": 39.3,
+          "ult_audits": [],
+          "skillshot_audits": [
+            {
+              "ability_zh": "神龙摆尾 (龙骑拍晕)",
+              "casts": 21,
+              "hits": 20,
+              "hit_pct": 95.2,
+              "damage": 1404,
+              "grade": "good",
+              "detail": "《神龙摆尾 (龙骑拍晕)》全场施放 21 次，命中敌方英雄 20 人次（有效命中比 95.2%，造成 1,404 伤害），手感火热！"
+            },
+            {
+              "ability_zh": "魔晶火球",
+              "casts": 14,
+              "hits": 56,
+              "hit_pct": 400.0,
+              "damage": 1766,
+              "grade": "good",
+              "detail": "《魔晶火球》全场施放 14 次，命中敌方英雄 56 人次（有效命中比 400.0%，造成 1,766 伤害），手感火热！"
+            }
+          ],
+          "headline_badges": [
+            {
+              "text": "神龙摆尾: 21放/20中(95.2%)",
+              "tone": "good"
+            },
+            {
+              "text": "魔晶火球: 14放/56中(400.0%)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 39.3秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "《神龙摆尾 (龙骑拍晕)》全场施放 21 次，命中敌方英雄 20 人次（有效命中比 95.2%，造成 1,404 伤害），手感火热！",
+            "《魔晶火球》全场施放 14 次，命中敌方英雄 56 人次（有效命中比 400.0%，造成 1,766 伤害），手感火热！",
+            "全场累计对敌方英雄造成 39.3 秒硬控眩晕（平均每分钟控制 1.07 秒）。"
+          ]
+        },
+        {
+          "pos": 3,
+          "player_slot": 2,
+          "side": "radiant",
+          "hero_id": 96,
+          "hero_short_zh": "半人马战行者",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+          "personaname": "Make Your Choice",
+          "stuns_sec": 33.5,
+          "ult_audits": [
+            {
+              "ability_key": "centaur_stampede",
+              "ability_zh": "奔袭冲撞 (人马大)",
+              "casts": 12,
+              "hits": 5,
+              "avg_hits": 0.42,
+              "unit_label": "人次",
+              "damage": 1015,
+              "tf_casts_count": 4,
+              "tf_casts_waves": [
+                "16:32–17:13(×1)",
+                "18:51–19:37(×1)",
+                "26:06–27:05(×1)",
+                "30:01–30:40(×1)"
+              ],
+              "tf_held_death_count": 1,
+              "tf_held_death_waves": [
+                "31:00–31:57"
+              ],
+              "victim_breakdown": [
+                "炼金术士(609伤)",
+                "远古冰魄(221伤)",
+                "莱恩(185伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "全场释放 12 次（平均每 3.0 分钟开大 1 次），其中 4 波关键团战开启大招掩护/冲阵。"
+            }
+          ],
+          "skillshot_audits": [
+            {
+              "ability_zh": "马蹄践踏 (人马踩)",
+              "casts": 51,
+              "hits": 18,
+              "hit_pct": 35.3,
+              "damage": 2604,
+              "grade": "warn",
+              "detail": "《马蹄践踏 (人马踩)》全场施放 51 次，命中敌方英雄 18 人次（有效命中比 35.3%，造成 2,604 伤害）。"
+            }
+          ],
+          "headline_badges": [
+            {
+              "text": "奔袭冲撞 (人马大): 12次",
+              "tone": "good"
+            },
+            {
+              "text": "马蹄践踏: 51放/18中(35.3%)",
+              "tone": "warn"
+            },
+            {
+              "text": "总硬控: 33.5秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "全场释放 12 次（平均每 3.0 分钟开大 1 次），其中 4 波关键团战开启大招掩护/冲阵。",
+            "《马蹄践踏 (人马踩)》全场施放 51 次，命中敌方英雄 18 人次（有效命中比 35.3%，造成 2,604 伤害）。",
+            "全场累计对敌方英雄造成 33.5 秒硬控眩晕（平均每分钟控制 0.92 秒）。"
+          ]
+        },
+        {
+          "pos": 4,
+          "player_slot": 1,
+          "side": "radiant",
+          "hero_id": 45,
+          "hero_short_zh": "帕格纳",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+          "personaname": "Replica",
+          "stuns_sec": 0.0,
+          "ult_audits": [],
+          "skillshot_audits": [
+            {
+              "ability_zh": "幽冥守卫 (骨法插棒子电人)",
+              "casts": 8,
+              "hits": 28,
+              "hit_pct": 350.0,
+              "damage": 5127,
+              "grade": "good",
+              "detail": "《幽冥守卫》阵地威慑拉满：全场插下 8 根法力棒，累计电击敌方施法者 28 次，轰出 5,127 点反伤（重点电麻：森海飞霞(1,764血)、马格纳斯(1,489血)、莱恩(1,058血)）！"
+            },
+            {
+              "ability_zh": "幽冥爆轰 (爆塔/爆人)",
+              "casts": 76,
+              "hits": 25,
+              "hit_pct": 32.9,
+              "damage": 4713,
+              "grade": "warn",
+              "detail": "《幽冥爆轰 (爆塔/爆人)》全场施放 76 次，命中敌方英雄 25 人次（有效命中比 32.9%，造成 4,713 伤害）。"
+            }
+          ],
+          "headline_badges": [
+            {
+              "text": "幽冥棒: 8根电28次(5,127伤)",
+              "tone": "good"
+            },
+            {
+              "text": "幽冥爆轰: 76放/25中(32.9%)",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "《幽冥守卫》阵地威慑拉满：全场插下 8 根法力棒，累计电击敌方施法者 28 次，轰出 5,127 点反伤（重点电麻：森海飞霞(1,764血)、马格纳斯(1,489血)、莱恩(1,058血)）！",
+            "《幽冥爆轰 (爆塔/爆人)》全场施放 76 次，命中敌方英雄 25 人次（有效命中比 32.9%，造成 4,713 伤害）。",
+            "《生命汲取 & 衰老》机制审计：全场吸星大法开启 22 次，不仅打出高额法系输出，还给队友输血续命：半人马战行者(+825血)、巫妖(+225血)；全场释放《衰老》22 次救人/加深法伤。"
+          ]
+        },
+        {
+          "pos": 5,
+          "player_slot": 3,
+          "side": "radiant",
+          "hero_id": 31,
+          "hero_short_zh": "巫妖",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+          "personaname": "Mr. Brightside",
+          "stuns_sec": 18.5,
+          "ult_audits": [
+            {
+              "ability_key": "lich_chain_frost",
+              "ability_zh": "连环霜冻 (巫妖冰球)",
+              "casts": 5,
+              "hits": 21,
+              "avg_hits": 4.2,
+              "unit_label": "次弹射",
+              "damage": 5497,
+              "tf_casts_count": 3,
+              "tf_casts_waves": [
+                "11:19–12:09(×1)",
+                "16:32–17:13(×1)",
+                "31:00–31:57(×1)"
+              ],
+              "tf_held_death_count": 4,
+              "tf_held_death_waves": [
+                "07:59–08:41",
+                "18:51–19:37",
+                "26:06–27:05",
+                "30:01–30:40"
+              ],
+              "victim_breakdown": [
+                "森海飞霞(2,680伤)",
+                "马格纳斯(1,526伤)",
+                "远古冰魄(568伤)",
+                "莱恩(546伤)",
+                "炼金术士(177伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 5 次，累计打出 21 次弹射（场均每大 4.2 次弹射，造成 5,497 点伤害），在 11:19–12:09(×1), 16:32–17:13(×1), 31:00–31:57(×1) 团战完美兑现；主要灌伤目标：森海飞霞(2,680伤)、马格纳斯(1,526伤)、远古冰魄(568伤)。"
+            }
+          ],
+          "skillshot_audits": [],
+          "headline_badges": [
+            {
+              "text": "连环霜冻 (巫妖冰球): 5放/21次弹射(均4.2)",
+              "tone": "good"
+            },
+            {
+              "text": "总硬控: 18.5秒",
+              "tone": "warn"
+            }
+          ],
+          "special_insights": [
+            "大招质量极高！全场释放 5 次，累计打出 21 次弹射（场均每大 4.2 次弹射，造成 5,497 点伤害），在 11:19–12:09(×1), 16:32–17:13(×1), 31:00–31:57(×1) 团战完美兑现；主要灌伤目标：森海飞霞(2,680伤)、马格纳斯(1,526伤)、远古冰魄(568伤)。",
+            "全场累计对敌方英雄造成 18.5 秒硬控眩晕（平均每分钟控制 0.51 秒）。"
+          ]
+        }
+      ]
+    },
+    "support_vision_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_zh": "夜魇",
+        "total_obs": 17,
+        "total_sen": 31,
+        "avg_lifespan_sec": 232,
+        "posture_counts": {
+          "aggressive": 12,
+          "river_roshan": 4,
+          "defensive": 1
+        },
+        "posture_pcts": {
+          "aggressive": 70.6,
+          "river_roshan": 23.5,
+          "defensive": 5.9
+        },
+        "phase_posture": {
+          "lane": {
+            "label": "对线期 (0-10m)",
+            "aggressive": 1,
+            "river_roshan": 2,
+            "defensive": 1
+          },
+          "mid": {
+            "label": "中期节奏 (10-25m)",
+            "aggressive": 5,
+            "river_roshan": 2,
+            "defensive": 0
+          },
+          "late": {
+            "label": "后期决战 (25m+)",
+            "aggressive": 6,
+            "river_roshan": 0,
+            "defensive": 0
+          }
+        },
+        "posture_verdict": "⚔️ 眼位极具进攻侵略性：本方 17 颗假眼中有 12 颗（70.6%）直接插进敌方半场野区/三角区，另有 4 颗（23.5%）控制河道与肉山，防守眼仅 1 颗（5.9%）。但要注意其中有 4 颗假眼被敌方快速排掉，深入做眼最好配合开雾推进！",
+        "per_support_vision": [
+          {
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi",
+            "obs_total": 2,
+            "sen_total": 0,
+            "obs_killed": 0,
+            "sen_killed": 0,
+            "aggressive_cnt": 0,
+            "river_cnt": 2,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 360,
+            "dewarded_cnt": 0,
+            "style_note": "2号位核心自备视野：顺手插下 2 颗假眼 / 0 颗真眼（进攻 0 / 河道 2 / 防守保护 0），平均存活 360s。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "马格纳斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+            "personaname": "Tuwalya",
+            "obs_total": 7,
+            "sen_total": 3,
+            "obs_killed": 1,
+            "sen_killed": 4,
+            "aggressive_cnt": 5,
+            "river_cnt": 1,
+            "defensive_cnt": 1,
+            "avg_lifespan_sec": 296,
+            "dewarded_cnt": 2,
+            "style_note": "做眼风格偏【激进深插】（⚔️进攻眼 5 颗 / ⚖️河道眼 1 颗 / 🛡️防守眼 1 颗），平均寿命 296s。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "X!",
+            "obs_total": 2,
+            "sen_total": 16,
+            "obs_killed": 1,
+            "sen_killed": 2,
+            "aggressive_cnt": 2,
+            "river_cnt": 0,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 26,
+            "dewarded_cnt": 2,
+            "style_note": "做眼风格偏【激进深插】（⚔️进攻眼 2 颗 / ⚖️河道眼 0 颗 / 🛡️防守眼 0 颗），平均寿命 26s。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "personaname": "Sansan",
+            "obs_total": 6,
+            "sen_total": 12,
+            "obs_killed": 0,
+            "sen_killed": 3,
+            "aggressive_cnt": 5,
+            "river_cnt": 1,
+            "defensive_cnt": 0,
+            "avg_lifespan_sec": 184,
+            "dewarded_cnt": 1,
+            "style_note": "做眼风格偏【激进深插】（⚔️进攻眼 5 颗 / ⚖️河道眼 1 颗 / 🛡️防守眼 0 颗），平均寿命 184s。"
+          }
+        ],
+        "instant_dewards": [
+          {
+            "time_str": "18:04",
+            "planter_hero": "马格纳斯",
+            "planter_player": "Tuwalya",
+            "pos": 3,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(136,65)",
+            "lifespan_sec": 60,
+            "dewarded_by": "帕格纳"
+          },
+          {
+            "time_str": "12:57",
+            "planter_hero": "森海飞霞",
+            "planter_player": "X!",
+            "pos": 4,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(93,131)",
+            "lifespan_sec": 44,
+            "dewarded_by": "巫妖"
+          },
+          {
+            "time_str": "19:52",
+            "planter_hero": "森海飞霞",
+            "planter_player": "X!",
+            "pos": 4,
+            "zone_zh": "天辉基地高地 / 三塔内",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(102,75)",
+            "lifespan_sec": 7,
+            "dewarded_by": "巫妖"
+          },
+          {
+            "time_str": "27:34",
+            "planter_hero": "远古冰魄",
+            "planter_player": "Sansan",
+            "pos": 5,
+            "zone_zh": "天辉基地高地 / 三塔内",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "coords": "(85,103)",
+            "lifespan_sec": 15,
+            "dewarded_by": "龙骑士"
+          }
+        ],
+        "cliff_spots": [
+          {
+            "zone_zh": "天辉中路野区腹地",
+            "coords": "(94,120)",
+            "total_count": 4,
+            "obs_count": 1,
+            "sen_count": 3,
+            "planters": "森海飞霞 / 远古冰魄",
+            "times_str": "35:46、26:55、13:07、35:43",
+            "comment": "在【天辉中路野区腹地 (94,120)】同一个眼位重复插了 4 颗眼（1假/3真，时间：35:46、26:55、13:07、35:43），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "coords": "(93,131)",
+            "total_count": 3,
+            "obs_count": 1,
+            "sen_count": 2,
+            "planters": "森海飞霞 / 远古冰魄",
+            "times_str": "12:57、12:59、27:17",
+            "comment": "在【天辉上路三角区 / 二塔高台 (93,131)】同一个眼位重复插了 3 颗眼（1假/2真，时间：12:57、12:59、27:17），属于典型的固定高台死磕！"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_zh": "天辉",
+        "total_obs": 12,
+        "total_sen": 24,
+        "avg_lifespan_sec": 330,
+        "posture_counts": {
+          "aggressive": 1,
+          "river_roshan": 3,
+          "defensive": 8
+        },
+        "posture_pcts": {
+          "aggressive": 8.3,
+          "river_roshan": 25.0,
+          "defensive": 66.7
+        },
+        "phase_posture": {
+          "lane": {
+            "label": "对线期 (0-10m)",
+            "aggressive": 0,
+            "river_roshan": 2,
+            "defensive": 2
+          },
+          "mid": {
+            "label": "中期节奏 (10-25m)",
+            "aggressive": 0,
+            "river_roshan": 1,
+            "defensive": 5
+          },
+          "late": {
+            "label": "后期决战 (25m+)",
+            "aggressive": 1,
+            "river_roshan": 0,
+            "defensive": 1
+          }
+        },
+        "posture_verdict": "⚠️ 眼位整体偏保守缩家：本方全场 12 颗假眼中，有 8 颗（66.7%）插在己方半场，河道/肉山争夺眼 3 颗（25.0%），深入敌方野区的进攻眼仅有 1 颗（8.3%）。当队伍需要过河抓人或压制敌方主野区时，缺乏提前铺设的侵略视野。",
+        "per_support_vision": [
+          {
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets",
+            "obs_total": 1,
+            "sen_total": 0,
+            "obs_killed": 1,
+            "sen_killed": 1,
+            "aggressive_cnt": 0,
+            "river_cnt": 0,
+            "defensive_cnt": 1,
+            "avg_lifespan_sec": 360,
+            "dewarded_cnt": 0,
+            "style_note": "2号位核心自备视野：顺手插下 1 颗假眼 / 0 颗真眼（进攻 0 / 河道 0 / 防守保护 1），平均存活 360s。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica",
+            "obs_total": 5,
+            "sen_total": 8,
+            "obs_killed": 1,
+            "sen_killed": 1,
+            "aggressive_cnt": 1,
+            "river_cnt": 1,
+            "defensive_cnt": 3,
+            "avg_lifespan_sec": 289,
+            "dewarded_cnt": 1,
+            "style_note": "做眼风格偏【保守缩家】（🛡️防守保护眼 3 颗 / ⚖️河道眼 1 颗 / ⚔️进攻眼仅 1 颗），平均寿命 289s。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "巫妖",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "personaname": "Mr. Brightside",
+            "obs_total": 6,
+            "sen_total": 16,
+            "obs_killed": 3,
+            "sen_killed": 3,
+            "aggressive_cnt": 0,
+            "river_cnt": 2,
+            "defensive_cnt": 4,
+            "avg_lifespan_sec": 358,
+            "dewarded_cnt": 0,
+            "style_note": "做眼风格偏【保守缩家】（🛡️防守保护眼 4 颗 / ⚖️河道眼 2 颗 / ⚔️进攻眼仅 0 颗），平均寿命 358s。"
+          }
+        ],
+        "instant_dewards": [
+          {
+            "time_str": "18:03",
+            "planter_hero": "帕格纳",
+            "planter_player": "Replica",
+            "pos": 4,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "coords": "(137,65)",
+            "lifespan_sec": 7,
+            "dewarded_by": "森海飞霞"
+          }
+        ],
+        "cliff_spots": [
+          {
+            "zone_zh": "天辉中路野区腹地",
+            "coords": "(118,94)",
+            "total_count": 3,
+            "obs_count": 1,
+            "sen_count": 2,
+            "planters": "巫妖 / 龙骑士",
+            "times_str": "09:53、15:08、21:07",
+            "comment": "在【天辉中路野区腹地 (118,94)】同一个眼位重复插了 3 颗眼（1假/2真，时间：09:53、15:08、21:07），属于典型的固定高台死磕！"
+          },
+          {
+            "zone_zh": "中路河道高坡 / 符点",
+            "coords": "(131,116)",
+            "total_count": 3,
+            "obs_count": 1,
+            "sen_count": 2,
+            "planters": "巫妖 / 帕格纳",
+            "times_str": "16:12、16:10、23:27",
+            "comment": "在【中路河道高坡 / 符点 (131,116)】同一个眼位重复插了 3 颗眼（1假/2真，时间：16:12、16:10、23:27），属于典型的固定高台死磕！"
+          }
+        ]
+      }
+    },
+    "stacking_and_smoke_by_side": {
+      "dire": {
+        "side": "dire",
+        "total_stacks": 7,
+        "total_creeps_stacked": 20,
+        "support_stacks": 1,
+        "core_stacks": 6,
+        "enemy_total_stacks": 10,
+        "stack_verdict": "⚠️ 大哥比辅助还会堆野：本方全队堆野 7 波（20 只怪），其中 1~3 号位核心自己顺手堆了 6 波，而 4/5 号位双辅助合计仅堆了 1 波（敌方全队堆野 10 波）。辅助路过三角区与主野区整点 53~55 秒拉野屯矿的肌肉记忆还不够强！",
+        "stack_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "炼金术士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
+            "personaname": "𐂃Tiny dela rosa",
+            "camps_stacked": 5,
+            "creeps_stacked": 15,
+            "stack_mins": [
+              "9:00",
+              "17:00",
+              "29:00",
+              "34:00",
+              "35:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi",
+            "camps_stacked": 1,
+            "creeps_stacked": 3,
+            "stack_mins": [
+              "29:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "马格纳斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+            "personaname": "Tuwalya",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "X!",
+            "camps_stacked": 1,
+            "creeps_stacked": 2,
+            "stack_mins": [
+              "23:00"
+            ],
+            "role_tag": "辅助本职"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "personaname": "Sansan",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          }
+        ],
+        "own_smoke_uses": 6,
+        "enemy_smoke_uses": 4,
+        "smoke_verdict": "本方全场累计激活诡计之雾 6 次（敌方 4 次），共捕获 6 波买雾节奏，其中 5 波在 100 秒内直接转化为击杀破局。",
+        "per_player_smokes": [
+          {
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "personaname": "palwa sa lubi",
+            "bought": 1,
+            "used": 1
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "马格纳斯",
+            "personaname": "Tuwalya",
+            "bought": 4,
+            "used": 3
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "personaname": "X!",
+            "bought": 1,
+            "used": 1
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "personaname": "Sansan",
+            "bought": 1,
+            "used": 1
+          }
+        ],
+        "smoke_events": [
+          {
+            "time_sec": 439,
+            "time_str": "07:19",
+            "phase_tag": "对线期游走雾",
+            "initiator_hero": "远古冰魄",
+            "initiator_player": "Sansan",
+            "initiator_pos": 5,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (2换1)",
+            "detail": "买雾/开雾后迅速打开节奏：08:26 抓死主宰、08:50 抓死帕格纳。"
+          },
+          {
+            "time_sec": 719,
+            "time_str": "11:59",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "森海飞霞",
+            "initiator_player": "X!",
+            "initiator_pos": 4,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (2换1)",
+            "detail": "买雾/开雾后迅速打开节奏：12:36 抓死半人马战行者、12:26 抓死龙骑士。"
+          },
+          {
+            "time_sec": 925,
+            "time_str": "15:25",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "马格纳斯",
+            "initiator_player": "Tuwalya",
+            "initiator_pos": 3,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (3换2)",
+            "detail": "买雾/开雾后迅速打开节奏：16:14 抓死龙骑士、16:52 抓死主宰、16:53 抓死巫妖。"
+          },
+          {
+            "time_sec": 1303,
+            "time_str": "21:43",
+            "phase_tag": "中期抓人/推进雾",
+            "initiator_hero": "马格纳斯",
+            "initiator_player": "Tuwalya",
+            "initiator_pos": 3,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (2换0)",
+            "detail": "买雾/开雾后迅速打开节奏：22:58 抓死帕格纳、23:18 抓死龙骑士。"
+          },
+          {
+            "time_sec": 1736,
+            "time_str": "28:56",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "马格纳斯",
+            "initiator_player": "Tuwalya",
+            "initiator_pos": 3,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (5换1)",
+            "detail": "买雾/开雾后迅速打开节奏：30:16 抓死主宰、30:16 抓死巫妖、30:21 抓死帕格纳。"
+          },
+          {
+            "time_sec": 2144,
+            "time_str": "35:44",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "马格纳斯",
+            "initiator_player": "Tuwalya",
+            "initiator_pos": 3,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (0换1)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 远古冰魄 阵亡。"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "total_stacks": 10,
+        "total_creeps_stacked": 27,
+        "support_stacks": 1,
+        "core_stacks": 9,
+        "enemy_total_stacks": 7,
+        "stack_verdict": "⚠️ 大哥比辅助还会堆野：本方全队堆野 10 波（27 只怪），其中 1~3 号位核心自己顺手堆了 9 波，而 4/5 号位双辅助合计仅堆了 1 波（敌方全队堆野 7 波）。辅助路过三角区与主野区整点 53~55 秒拉野屯矿的肌肉记忆还不够强！",
+        "stack_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Flame = ez mute",
+            "camps_stacked": 5,
+            "creeps_stacked": 12,
+            "stack_mins": [
+              "6:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "23:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets",
+            "camps_stacked": 4,
+            "creeps_stacked": 13,
+            "stack_mins": [
+              "9:00",
+              "11:00",
+              "26:00",
+              "27:00"
+            ],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "personaname": "Make Your Choice",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "大哥自力更生"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica",
+            "camps_stacked": 0,
+            "creeps_stacked": 0,
+            "stack_mins": [],
+            "role_tag": "辅助本职"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "巫妖",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "personaname": "Mr. Brightside",
+            "camps_stacked": 1,
+            "creeps_stacked": 2,
+            "stack_mins": [
+              "9:00"
+            ],
+            "role_tag": "辅助本职"
+          }
+        ],
+        "own_smoke_uses": 4,
+        "enemy_smoke_uses": 6,
+        "smoke_verdict": "⚠️ 中期（10–25m）零开雾真空：本方全场共开雾 4 次（敌方 6 次），但最关键的 10~25 分钟跳刀/大招节奏期竟然没有组织起有效的买雾抓人！",
+        "per_player_smokes": [
+          {
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "personaname": "Make Your Choice",
+            "bought": 0,
+            "used": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "personaname": "Replica",
+            "bought": 0,
+            "used": 0
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "巫妖",
+            "personaname": "Mr. Brightside",
+            "bought": 4,
+            "used": 4
+          }
+        ],
+        "smoke_events": [
+          {
+            "time_sec": -89,
+            "time_str": "-01:29",
+            "phase_tag": "出门一级团雾",
+            "initiator_hero": "巫妖",
+            "initiator_player": "Mr. Brightside",
+            "initiator_pos": 5,
+            "outcome": "success",
+            "outcome_label": "🟢 破雾奏效 (1换0)",
+            "detail": "买雾/开雾后迅速打开节奏：00:15 抓死森海飞霞。"
+          },
+          {
+            "time_sec": 1518,
+            "time_str": "25:18",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "巫妖",
+            "initiator_player": "Mr. Brightside",
+            "initiator_pos": 5,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (0换7)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 主宰、主宰、龙骑士 阵亡。"
+          },
+          {
+            "time_sec": 1737,
+            "time_str": "28:57",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "巫妖",
+            "initiator_player": "Mr. Brightside",
+            "initiator_pos": 5,
+            "outcome": "backfire",
+            "outcome_label": "🔴 开雾撞墙 (1换5)",
+            "detail": "开雾切入后反遭敌方反打，导致我方 主宰、龙骑士、半人马战行者 阵亡。"
+          },
+          {
+            "time_sec": 2001,
+            "time_str": "33:21",
+            "phase_tag": "后期决胜/控盾雾",
+            "initiator_hero": "巫妖",
+            "initiator_player": "Mr. Brightside",
+            "initiator_pos": 5,
+            "outcome": "dry",
+            "outcome_label": "🟡 哑火空雾 (0击杀)",
+            "detail": "买雾/屯雾后 100 秒内未产生任何击杀（蹲人落空或仅用于安全做视野）。"
+          }
+        ]
+      }
+    },
+    "laning_mechanics_by_side": {
+      "dire": {
+        "side": "dire",
+        "pulling_rows": [
+          {
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "X!",
+            "pull_ticks": 377,
+            "pull_ratio_pct": 54.7,
+            "dn10": 1,
+            "lh10": 6,
+            "early_sentries": 3,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 54.7%（驻留权重 377），配合插下 3 颗对线封野/反封真眼，贡献 6 正补 / 1 反补。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "personaname": "Sansan",
+            "pull_ticks": 398,
+            "pull_ratio_pct": 57.8,
+            "dn10": 0,
+            "lh10": 4,
+            "early_sentries": 1,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 57.8%（驻留权重 398），配合插下 1 颗对线封野/反封真眼，贡献 4 正补 / 0 反补。"
+          }
+        ],
+        "own_lotus_total": 9,
+        "opp_lotus_total": 1,
+        "lotus_verdict": "✓ 边路莲花池掌控出色：本方累计控下 9 朵疗伤莲花（马格纳斯(1朵)、森海飞霞(5朵)、远古冰魄(3朵)），压制了敌方的 1 朵（帕格纳(1朵)），线上换血续航占优。",
+        "own_gate_total": 5,
+        "opp_gate_total": 8,
+        "own_lamp_total": 20,
+        "opp_lamp_total": 8,
+        "own_wisdom_cnt": 3,
+        "opp_wisdom_cnt": 6,
+        "wisdom_verdict": "⚠️ 智慧经验符落后：本方仅吃到 3 颗经验符 vs 敌方吃到 6 颗！07:00 与 14:00 必须提前 15 秒去劣势路祭坛蹲守经验符。",
+        "wisdom_timeline": [
+          {
+            "time_sec": 423,
+            "time_str": "07:03",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "personaname": "Make Your Choice"
+          },
+          {
+            "time_sec": 445,
+            "time_str": "07:25",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "personaname": "Sansan"
+          },
+          {
+            "time_sec": 875,
+            "time_str": "14:35",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica"
+          },
+          {
+            "time_sec": 885,
+            "time_str": "14:45",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi"
+          },
+          {
+            "time_sec": 1274,
+            "time_str": "21:14",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "personaname": "Make Your Choice"
+          },
+          {
+            "time_sec": 1324,
+            "time_str": "22:04",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "X!"
+          },
+          {
+            "time_sec": 1689,
+            "time_str": "28:09",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 2076,
+            "time_str": "34:36",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 2117,
+            "time_str": "35:17",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          }
+        ],
+        "water_runes_timeline": [
+          {
+            "time_sec": 140,
+            "time_str": "02:20",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 251,
+            "time_str": "04:11",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 251,
+            "time_str": "04:11",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi"
+          },
+          {
+            "time_sec": 303,
+            "time_str": "05:03",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi"
+          }
+        ],
+        "map_interact_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "炼金术士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
+            "personaname": "𐂃Tiny dela rosa",
+            "twin_gate": 2,
+            "watcher_lamp": 2,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 0
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi",
+            "twin_gate": 0,
+            "watcher_lamp": 6,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 1,
+            "water_runes": 2,
+            "bounty_runes": 5,
+            "power_runes": 7
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "马格纳斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+            "personaname": "Tuwalya",
+            "twin_gate": 0,
+            "watcher_lamp": 2,
+            "outpost_capture": 0,
+            "lotus_used": 1,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 1,
+            "power_runes": 0
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "X!",
+            "twin_gate": 2,
+            "watcher_lamp": 2,
+            "outpost_capture": 0,
+            "lotus_used": 5,
+            "wisdom_runes": 1,
+            "water_runes": 0,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "personaname": "Sansan",
+            "twin_gate": 1,
+            "watcher_lamp": 8,
+            "outpost_capture": 1,
+            "lotus_used": 3,
+            "wisdom_runes": 1,
+            "water_runes": 0,
+            "bounty_runes": 2,
+            "power_runes": 1
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "pulling_rows": [
+          {
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica",
+            "pull_ticks": 275,
+            "pull_ratio_pct": 39.9,
+            "dn10": 3,
+            "lh10": 2,
+            "early_sentries": 1,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 39.9%（驻留权重 275），配合插下 1 颗对线封野/反封真眼，贡献 2 正补 / 3 反补。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "巫妖",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "personaname": "Mr. Brightside",
+            "pull_ticks": 441,
+            "pull_ratio_pct": 63.9,
+            "dn10": 7,
+            "lh10": 4,
+            "early_sentries": 1,
+            "status_tag": "🟢 积极拉野/封野控线",
+            "comment": "前10分钟在边路拉野/野店区域活动占比 63.9%（驻留权重 441），配合插下 1 颗对线封野/反封真眼，贡献 4 正补 / 7 反补。"
+          }
+        ],
+        "own_lotus_total": 1,
+        "opp_lotus_total": 9,
+        "lotus_verdict": "⚠️ 边路莲花池被压制：本方全队仅吃下 1 朵疗伤莲花（帕格纳(1朵)），而敌方抢下了 9 朵莲花（马格纳斯(1朵)、森海飞霞(5朵)、远古冰魄(3朵)）！03:00 / 06:00 / 09:00 整点莲花池争夺吃亏。",
+        "own_gate_total": 8,
+        "opp_gate_total": 5,
+        "own_lamp_total": 8,
+        "opp_lamp_total": 20,
+        "own_wisdom_cnt": 6,
+        "opp_wisdom_cnt": 3,
+        "wisdom_verdict": "✓ 智慧经验符控制占优：本方抢下 6 颗经验符 vs 敌方 3 颗，辅助等级与天赋节点没有落入下风。",
+        "wisdom_timeline": [
+          {
+            "time_sec": 423,
+            "time_str": "07:03",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "personaname": "Make Your Choice"
+          },
+          {
+            "time_sec": 445,
+            "time_str": "07:25",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "personaname": "Sansan"
+          },
+          {
+            "time_sec": 875,
+            "time_str": "14:35",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica"
+          },
+          {
+            "time_sec": 885,
+            "time_str": "14:45",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi"
+          },
+          {
+            "time_sec": 1274,
+            "time_str": "21:14",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "personaname": "Make Your Choice"
+          },
+          {
+            "time_sec": 1324,
+            "time_str": "22:04",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "X!"
+          },
+          {
+            "time_sec": 1689,
+            "time_str": "28:09",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 2076,
+            "time_str": "34:36",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 2117,
+            "time_str": "35:17",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          }
+        ],
+        "water_runes_timeline": [
+          {
+            "time_sec": 140,
+            "time_str": "02:20",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 251,
+            "time_str": "04:11",
+            "side": "radiant",
+            "side_zh": "radiant",
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets"
+          },
+          {
+            "time_sec": 251,
+            "time_str": "04:11",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi"
+          },
+          {
+            "time_sec": 303,
+            "time_str": "05:03",
+            "side": "dire",
+            "side_zh": "dire",
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi"
+          }
+        ],
+        "map_interact_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Flame = ez mute",
+            "twin_gate": 1,
+            "watcher_lamp": 1,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 3,
+            "power_runes": 1
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets",
+            "twin_gate": 1,
+            "watcher_lamp": 1,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 3,
+            "water_runes": 2,
+            "bounty_runes": 0,
+            "power_runes": 0
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "personaname": "Make Your Choice",
+            "twin_gate": 2,
+            "watcher_lamp": 0,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 2,
+            "water_runes": 0,
+            "bounty_runes": 1,
+            "power_runes": 1
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica",
+            "twin_gate": 2,
+            "watcher_lamp": 4,
+            "outpost_capture": 0,
+            "lotus_used": 1,
+            "wisdom_runes": 1,
+            "water_runes": 0,
+            "bounty_runes": 2,
+            "power_runes": 2
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "巫妖",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "personaname": "Mr. Brightside",
+            "twin_gate": 2,
+            "watcher_lamp": 2,
+            "outpost_capture": 0,
+            "lotus_used": 0,
+            "wisdom_runes": 0,
+            "water_runes": 0,
+            "bounty_runes": 2,
+            "power_runes": 0
+          }
+        ]
+      }
+    },
+    "tp_rotation_by_side": {
+      "dire": {
+        "side": "dire",
+        "player_tp_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "炼金术士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
+            "personaname": "𐂃Tiny dela rosa",
+            "tp_bought": 0,
+            "tp_used": 3,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：37 分钟仅使用 3 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi",
+            "tp_bought": 7,
+            "tp_used": 9,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "全场使用 9 次 TP（主动购买 7 张，团战亮 TP 0 次），参战 7/7 波关键团。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "马格纳斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+            "personaname": "Tuwalya",
+            "tp_bought": 3,
+            "tp_used": 8,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "全场使用 8 次 TP（主动购买 3 张，团战亮 TP 1 次），参战 7/7 波关键团。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "X!",
+            "tp_bought": 2,
+            "tp_used": 8,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [
+              "09:06"
+            ],
+            "grade": "good",
+            "verdict": "全场使用 8 次 TP（主动购买 2 张，团战亮 TP 2 次），参战 7/7 波关键团，注意在 09:06 刚买 TP 后不久即阵亡。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "personaname": "Sansan",
+            "tp_bought": 3,
+            "tp_used": 5,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "bad",
+            "verdict": "⚠️ 支援频次偏低：37 分钟仅使用 5 次 TP（主动买 3 张，团战亮 TP 1 次），跑图大多靠双腿！"
+          }
+        ],
+        "rotation_highlights": [
+          {
+            "time_range": "07:59–08:41",
+            "responders": "远古冰魄(Sansan)、森海飞霞(X!)",
+            "trade_str": "打成 2 换 1",
+            "detail": "在 07:59–08:41 交战中，远古冰魄(Sansan)、森海飞霞(X!) 第一时间亮 TP 落地支援参战（该波 2 换 1）。"
+          },
+          {
+            "time_range": "11:19–12:09",
+            "responders": "马格纳斯(Tuwalya)、森海飞霞(X!)",
+            "trade_str": "打成 1 换 2",
+            "detail": "在 11:19–12:09 交战中，马格纳斯(Tuwalya)、森海飞霞(X!) 第一时间亮 TP 落地支援参战（该波 1 换 2）。"
+          }
+        ],
+        "absent_warnings": []
+      },
+      "radiant": {
+        "side": "radiant",
+        "player_tp_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Flame = ez mute",
+            "tp_bought": 0,
+            "tp_used": 11,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "支援极快：全场使用 11 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 50.0%。"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets",
+            "tp_bought": 2,
+            "tp_used": 6,
+            "tf_tp_cnt": 2,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [
+              "12:26"
+            ],
+            "grade": "good",
+            "verdict": "全场使用 6 次 TP（主动购买 2 张，团战亮 TP 2 次），参战 7/7 波关键团，注意在 12:26 刚买 TP 后不久即阵亡。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "personaname": "Make Your Choice",
+            "tp_bought": 1,
+            "tp_used": 6,
+            "tf_tp_cnt": 0,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "全场使用 6 次 TP（主动购买 1 张，团战亮 TP 0 次），参战 7/7 波关键团。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica",
+            "tp_bought": 0,
+            "tp_used": 11,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "warn",
+            "verdict": "全靠阵亡赠送的免费抚恤 TP 过日子（全场死 14 次、主动花钱买 TP 0 张，共使用 11 次，团战亮 TP 1 次），连续存活刷钱时注意检查背包是否断 TP！"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "巫妖",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "personaname": "Mr. Brightside",
+            "tp_bought": 2,
+            "tp_used": 7,
+            "tf_tp_cnt": 1,
+            "tf_joined_cnt": 7,
+            "tf_total_cnt": 7,
+            "tf_absent_cnt": 0,
+            "tp_feed_times": [],
+            "grade": "good",
+            "verdict": "全场使用 7 次 TP（主动购买 2 张，团战亮 TP 1 次），参战 7/7 波关键团。"
+          }
+        ],
+        "rotation_highlights": [
+          {
+            "time_range": "07:59–08:41",
+            "responders": "帕格纳(Replica)",
+            "trade_str": "打成 1 换 2",
+            "detail": "在 07:59–08:41 交战中，帕格纳(Replica) 第一时间亮 TP 落地支援参战（该波 1 换 2）。"
+          },
+          {
+            "time_range": "16:32–17:13",
+            "responders": "龙骑士(Paphets)",
+            "trade_str": "打成 2 换 2",
+            "detail": "在 16:32–17:13 交战中，龙骑士(Paphets) 第一时间亮 TP 落地支援参战（该波 2 换 2）。"
+          },
+          {
+            "time_range": "18:51–19:37",
+            "responders": "龙骑士(Paphets)、主宰(Flame = ez mute)",
+            "trade_str": "打成 0 换 5",
+            "detail": "在 18:51–19:37 交战中，龙骑士(Paphets)、主宰(Flame = ez mute) 第一时间亮 TP 落地支援参战（该波 0 换 5）。"
+          },
+          {
+            "time_range": "26:06–27:05",
+            "responders": "巫妖(Mr. Brightside)",
+            "trade_str": "打成 0 换 5",
+            "detail": "在 26:06–27:05 交战中，巫妖(Mr. Brightside) 第一时间亮 TP 落地支援参战（该波 0 换 5）。"
+          }
+        ],
+        "absent_warnings": []
+      }
+    }
   },
   "phases_data": [
     {
@@ -19514,7 +21504,59 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 1,
+        "player_slot": 4,
+        "side": "radiant",
+        "hero_id": 8,
+        "hero_short_zh": "主宰",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+        "personaname": "Flame = ez mute",
+        "stuns_sec": 0.0,
+        "ult_audits": [
+          {
+            "ability_key": "juggernaut_omni_slash",
+            "ability_zh": "无敌斩 (剑圣大)",
+            "casts": 3,
+            "hits": 15,
+            "avg_hits": 5.0,
+            "unit_label": "刀斩击",
+            "damage": 1765,
+            "tf_casts_count": 0,
+            "tf_casts_waves": [],
+            "tf_held_death_count": 6,
+            "tf_held_death_waves": [
+              "07:59–08:41",
+              "16:32–17:13",
+              "18:51–19:37",
+              "26:06–27:05",
+              "30:01–30:40",
+              "31:00–31:57"
+            ],
+            "victim_breakdown": [
+              "森海飞霞(1,765伤)"
+            ],
+            "grade": "warn",
+            "verdict_text": "大招中规中矩：全场释放 3 次，累计 15 刀斩击（场均每大 5.0 刀斩击，伤害 1,765）；但在 07:59–08:41, 16:32–17:13, 18:51–19:37 团战中未放出大招即阵亡！"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "无敌斩 (剑圣大): 场均5.0刀斩击",
+            "tone": "warn"
+          },
+          {
+            "text": "治疗守卫: 11根(奶队友833)",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招中规中矩：全场释放 3 次，累计 15 刀斩击（场均每大 5.0 刀斩击，伤害 1,765）；但在 07:59–08:41, 16:32–17:13, 18:51–19:37 团战中未放出大招即阵亡！",
+          "《治疗守卫 & 剑刃风暴》审计：全场插下 11 根治疗图腾（为队友治疗 833 点，另为自身恢复 15,412 点生命），转出 20 次剑刃风暴规避控制并打满 AOE。"
+        ]
+      }
     },
     {
       "player_slot": 0,
@@ -20123,7 +22165,57 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 0,
+        "side": "radiant",
+        "hero_id": 49,
+        "hero_short_zh": "龙骑士",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+        "personaname": "Paphets",
+        "stuns_sec": 39.3,
+        "ult_audits": [],
+        "skillshot_audits": [
+          {
+            "ability_zh": "神龙摆尾 (龙骑拍晕)",
+            "casts": 21,
+            "hits": 20,
+            "hit_pct": 95.2,
+            "damage": 1404,
+            "grade": "good",
+            "detail": "《神龙摆尾 (龙骑拍晕)》全场施放 21 次，命中敌方英雄 20 人次（有效命中比 95.2%，造成 1,404 伤害），手感火热！"
+          },
+          {
+            "ability_zh": "魔晶火球",
+            "casts": 14,
+            "hits": 56,
+            "hit_pct": 400.0,
+            "damage": 1766,
+            "grade": "good",
+            "detail": "《魔晶火球》全场施放 14 次，命中敌方英雄 56 人次（有效命中比 400.0%，造成 1,766 伤害），手感火热！"
+          }
+        ],
+        "headline_badges": [
+          {
+            "text": "神龙摆尾: 21放/20中(95.2%)",
+            "tone": "good"
+          },
+          {
+            "text": "魔晶火球: 14放/56中(400.0%)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 39.3秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "《神龙摆尾 (龙骑拍晕)》全场施放 21 次，命中敌方英雄 20 人次（有效命中比 95.2%，造成 1,404 伤害），手感火热！",
+          "《魔晶火球》全场施放 14 次，命中敌方英雄 56 人次（有效命中比 400.0%，造成 1,766 伤害），手感火热！",
+          "全场累计对敌方英雄造成 39.3 秒硬控眩晕（平均每分钟控制 1.07 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 2,
@@ -20612,7 +22704,76 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 2,
+        "side": "radiant",
+        "hero_id": 96,
+        "hero_short_zh": "半人马战行者",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+        "personaname": "Make Your Choice",
+        "stuns_sec": 33.5,
+        "ult_audits": [
+          {
+            "ability_key": "centaur_stampede",
+            "ability_zh": "奔袭冲撞 (人马大)",
+            "casts": 12,
+            "hits": 5,
+            "avg_hits": 0.42,
+            "unit_label": "人次",
+            "damage": 1015,
+            "tf_casts_count": 4,
+            "tf_casts_waves": [
+              "16:32–17:13(×1)",
+              "18:51–19:37(×1)",
+              "26:06–27:05(×1)",
+              "30:01–30:40(×1)"
+            ],
+            "tf_held_death_count": 1,
+            "tf_held_death_waves": [
+              "31:00–31:57"
+            ],
+            "victim_breakdown": [
+              "炼金术士(609伤)",
+              "远古冰魄(221伤)",
+              "莱恩(185伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "全场释放 12 次（平均每 3.0 分钟开大 1 次），其中 4 波关键团战开启大招掩护/冲阵。"
+          }
+        ],
+        "skillshot_audits": [
+          {
+            "ability_zh": "马蹄践踏 (人马踩)",
+            "casts": 51,
+            "hits": 18,
+            "hit_pct": 35.3,
+            "damage": 2604,
+            "grade": "warn",
+            "detail": "《马蹄践踏 (人马踩)》全场施放 51 次，命中敌方英雄 18 人次（有效命中比 35.3%，造成 2,604 伤害）。"
+          }
+        ],
+        "headline_badges": [
+          {
+            "text": "奔袭冲撞 (人马大): 12次",
+            "tone": "good"
+          },
+          {
+            "text": "马蹄践踏: 51放/18中(35.3%)",
+            "tone": "warn"
+          },
+          {
+            "text": "总硬控: 33.5秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "全场释放 12 次（平均每 3.0 分钟开大 1 次），其中 4 波关键团战开启大招掩护/冲阵。",
+          "《马蹄践踏 (人马踩)》全场施放 51 次，命中敌方英雄 18 人次（有效命中比 35.3%，造成 2,604 伤害）。",
+          "全场累计对敌方英雄造成 33.5 秒硬控眩晕（平均每分钟控制 0.92 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 1,
@@ -21183,7 +23344,53 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 1,
+        "side": "radiant",
+        "hero_id": 45,
+        "hero_short_zh": "帕格纳",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+        "personaname": "Replica",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [
+          {
+            "ability_zh": "幽冥守卫 (骨法插棒子电人)",
+            "casts": 8,
+            "hits": 28,
+            "hit_pct": 350.0,
+            "damage": 5127,
+            "grade": "good",
+            "detail": "《幽冥守卫》阵地威慑拉满：全场插下 8 根法力棒，累计电击敌方施法者 28 次，轰出 5,127 点反伤（重点电麻：森海飞霞(1,764血)、马格纳斯(1,489血)、莱恩(1,058血)）！"
+          },
+          {
+            "ability_zh": "幽冥爆轰 (爆塔/爆人)",
+            "casts": 76,
+            "hits": 25,
+            "hit_pct": 32.9,
+            "damage": 4713,
+            "grade": "warn",
+            "detail": "《幽冥爆轰 (爆塔/爆人)》全场施放 76 次，命中敌方英雄 25 人次（有效命中比 32.9%，造成 4,713 伤害）。"
+          }
+        ],
+        "headline_badges": [
+          {
+            "text": "幽冥棒: 8根电28次(5,127伤)",
+            "tone": "good"
+          },
+          {
+            "text": "幽冥爆轰: 76放/25中(32.9%)",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "《幽冥守卫》阵地威慑拉满：全场插下 8 根法力棒，累计电击敌方施法者 28 次，轰出 5,127 点反伤（重点电麻：森海飞霞(1,764血)、马格纳斯(1,489血)、莱恩(1,058血)）！",
+          "《幽冥爆轰 (爆塔/爆人)》全场施放 76 次，命中敌方英雄 25 人次（有效命中比 32.9%，造成 4,713 伤害）。",
+          "《生命汲取 & 衰老》机制审计：全场吸星大法开启 22 次，不仅打出高额法系输出，还给队友输血续命：半人马战行者(+825血)、巫妖(+225血)；全场释放《衰老》22 次救人/加深法伤。"
+        ]
+      }
     },
     {
       "player_slot": 3,
@@ -21839,7 +24046,65 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 3,
+        "side": "radiant",
+        "hero_id": 31,
+        "hero_short_zh": "巫妖",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+        "personaname": "Mr. Brightside",
+        "stuns_sec": 18.5,
+        "ult_audits": [
+          {
+            "ability_key": "lich_chain_frost",
+            "ability_zh": "连环霜冻 (巫妖冰球)",
+            "casts": 5,
+            "hits": 21,
+            "avg_hits": 4.2,
+            "unit_label": "次弹射",
+            "damage": 5497,
+            "tf_casts_count": 3,
+            "tf_casts_waves": [
+              "11:19–12:09(×1)",
+              "16:32–17:13(×1)",
+              "31:00–31:57(×1)"
+            ],
+            "tf_held_death_count": 4,
+            "tf_held_death_waves": [
+              "07:59–08:41",
+              "18:51–19:37",
+              "26:06–27:05",
+              "30:01–30:40"
+            ],
+            "victim_breakdown": [
+              "森海飞霞(2,680伤)",
+              "马格纳斯(1,526伤)",
+              "远古冰魄(568伤)",
+              "莱恩(546伤)",
+              "炼金术士(177伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 5 次，累计打出 21 次弹射（场均每大 4.2 次弹射，造成 5,497 点伤害），在 11:19–12:09(×1), 16:32–17:13(×1), 31:00–31:57(×1) 团战完美兑现；主要灌伤目标：森海飞霞(2,680伤)、马格纳斯(1,526伤)、远古冰魄(568伤)。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "连环霜冻 (巫妖冰球): 5放/21次弹射(均4.2)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 18.5秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 5 次，累计打出 21 次弹射（场均每大 4.2 次弹射，造成 5,497 点伤害），在 11:19–12:09(×1), 16:32–17:13(×1), 31:00–31:57(×1) 团战完美兑现；主要灌伤目标：森海飞霞(2,680伤)、马格纳斯(1,526伤)、远古冰魄(568伤)。",
+          "全场累计对敌方英雄造成 18.5 秒硬控眩晕（平均每分钟控制 0.51 秒）。"
+        ]
+      }
     }
   ],
   "dire_pos_1_to_5": [
@@ -22395,7 +24660,28 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 1,
+        "player_slot": 131,
+        "side": "dire",
+        "hero_id": 73,
+        "hero_short_zh": "炼金术士",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
+        "personaname": "𐂃Tiny dela rosa",
+        "stuns_sec": 15.4,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "总硬控: 15.4秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "全场累计对敌方英雄造成 15.4 秒硬控眩晕（平均每分钟控制 0.42 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 128,
@@ -23090,7 +25376,77 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 128,
+        "side": "dire",
+        "hero_id": 26,
+        "hero_short_zh": "莱恩",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+        "personaname": "palwa sa lubi",
+        "stuns_sec": 101.2,
+        "ult_audits": [
+          {
+            "ability_key": "lion_finger_of_death",
+            "ability_zh": "死亡一指 (莱恩大)",
+            "casts": 20,
+            "hits": 21,
+            "avg_hits": 1.05,
+            "unit_label": "人次",
+            "damage": 10080,
+            "tf_casts_count": 5,
+            "tf_casts_waves": [
+              "07:59–08:41(×1)",
+              "18:51–19:37(×1)",
+              "26:06–27:05(×2)",
+              "30:01–30:40(×1)",
+              "31:00–31:57(×1)"
+            ],
+            "tf_held_death_count": 0,
+            "tf_held_death_waves": [],
+            "victim_breakdown": [
+              "主宰(2,955伤)",
+              "龙骑士(2,550伤)",
+              "帕格纳(1,924伤)",
+              "巫妖(1,749伤)",
+              "半人马战行者(902伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 20 次，累计打出 21 人次（场均每大 1.05 人次，造成 10,080 点伤害），在 07:59–08:41(×1), 18:51–19:37(×1), 26:06–27:05(×2), 30:01–30:40(×1) 团战完美兑现；主要灌伤目标：主宰(2,955伤)、龙骑士(2,550伤)、帕格纳(1,924伤)。"
+          }
+        ],
+        "skillshot_audits": [
+          {
+            "ability_zh": "裂地尖刺 (莱恩穿刺)",
+            "casts": 60,
+            "hits": 39,
+            "hit_pct": 65.0,
+            "damage": 7311,
+            "grade": "warn",
+            "detail": "《裂地尖刺 (莱恩穿刺)》全场施放 60 次，命中敌方英雄 39 人次（有效命中比 65.0%，造成 7,311 伤害）。"
+          }
+        ],
+        "headline_badges": [
+          {
+            "text": "死亡一指 (莱恩大): 20放/21人次(均1.05)",
+            "tone": "good"
+          },
+          {
+            "text": "裂地尖刺: 60放/39中(65.0%)",
+            "tone": "warn"
+          },
+          {
+            "text": "总硬控: 101.2秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 20 次，累计打出 21 人次（场均每大 1.05 人次，造成 10,080 点伤害），在 07:59–08:41(×1), 18:51–19:37(×1), 26:06–27:05(×2), 30:01–30:40(×1) 团战完美兑现；主要灌伤目标：主宰(2,955伤)、龙骑士(2,550伤)、帕格纳(1,924伤)。",
+          "《裂地尖刺 (莱恩穿刺)》全场施放 60 次，命中敌方英雄 39 人次（有效命中比 65.0%，造成 7,311 伤害）。",
+          "全场累计对敌方英雄造成 101.2 秒硬控眩晕（平均每分钟控制 2.77 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 129,
@@ -23698,7 +26054,91 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 129,
+        "side": "dire",
+        "hero_id": 97,
+        "hero_short_zh": "马格纳斯",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+        "personaname": "Tuwalya",
+        "stuns_sec": 62.8,
+        "ult_audits": [
+          {
+            "ability_key": "magnataur_reverse_polarity",
+            "ability_zh": "两极反转 (猛犸大)",
+            "casts": 8,
+            "hits": 11,
+            "avg_hits": 1.38,
+            "unit_label": "人次",
+            "damage": 1382,
+            "tf_casts_count": 4,
+            "tf_casts_waves": [
+              "16:32–17:13(×1)",
+              "18:51–19:37(×1)",
+              "26:06–27:05(×1)",
+              "30:01–30:40(×1)"
+            ],
+            "tf_held_death_count": 1,
+            "tf_held_death_waves": [
+              "31:00–31:57"
+            ],
+            "victim_breakdown": [
+              "主宰(510伤)",
+              "龙骑士(413伤)",
+              "半人马战行者(233伤)",
+              "巫妖(226伤)"
+            ],
+            "grade": "bad",
+            "verdict_text": "⚠️ 大招严重低效/空大频发：全场放了 8 次《两极反转 (猛犸大)》，累计仅命中 11 人次（场均每次大招仅 1.38 人次！），且在 31:00–31:57 等 1 波关键团战中没按出大招就躺下读秒！"
+          }
+        ],
+        "skillshot_audits": [
+          {
+            "ability_zh": "巨角冲撞 (猛犸拱人)",
+            "casts": 32,
+            "hits": 26,
+            "hit_pct": 81.2,
+            "damage": 7389,
+            "grade": "good",
+            "detail": "《巨角冲撞 (猛犸拱人)》全场施放 32 次，命中敌方英雄 26 人次（有效命中比 81.2%，造成 7,389 伤害），手感火热！"
+          },
+          {
+            "ability_zh": "震荡波",
+            "casts": 62,
+            "hits": 51,
+            "hit_pct": 82.3,
+            "damage": 9108,
+            "grade": "good",
+            "detail": "《震荡波》全场施放 62 次，命中敌方英雄 51 人次（有效命中比 82.3%，造成 9,108 伤害），手感火热！"
+          }
+        ],
+        "headline_badges": [
+          {
+            "text": "🚨 两极反转 (猛犸大): 8大仅11人次(均1.38)",
+            "tone": "bad"
+          },
+          {
+            "text": "巨角冲撞: 32放/26中(81.2%)",
+            "tone": "good"
+          },
+          {
+            "text": "震荡波: 62放/51中(82.3%)",
+            "tone": "good"
+          },
+          {
+            "text": "授予力量: 20次(分均0.55)",
+            "tone": "bad"
+          }
+        ],
+        "special_insights": [
+          "⚠️ 大招严重低效/空大频发：全场放了 8 次《两极反转 (猛犸大)》，累计仅命中 11 人次（场均每次大招仅 1.38 人次！），且在 31:00–31:57 等 1 波关键团战中没按出大招就躺下读秒！",
+          "《巨角冲撞 (猛犸拱人)》全场施放 32 次，命中敌方英雄 26 人次（有效命中比 81.2%，造成 7,389 伤害），手感火热！",
+          "《震荡波》全场施放 62 次，命中敌方英雄 51 人次（有效命中比 82.3%，造成 9,108 伤害），手感火热！",
+          "《授予力量》Buff 覆盖审计：37 分钟比赛共施放 20 次（分均仅 0.55 次），帮助队友打出 炼金术士(溅射1刀/37伤)、马格纳斯(溅射1刀/48伤)。⚠️ 作为工具人猛犸，中后期给主C续 Buff 的频率偏低，刷钱与打团前务必保持主C身上常驻分裂！"
+        ]
+      }
     },
     {
       "player_slot": 132,
@@ -24262,7 +26702,57 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 132,
+        "side": "dire",
+        "hero_id": 123,
+        "hero_short_zh": "森海飞霞",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+        "personaname": "X!",
+        "stuns_sec": 71.7,
+        "ult_audits": [],
+        "skillshot_audits": [
+          {
+            "ability_zh": "一击必杀 (松鼠狙击大)",
+            "casts": 13,
+            "hits": 10,
+            "hit_pct": 76.9,
+            "damage": 4373,
+            "grade": "good",
+            "detail": "《一击必杀 (松鼠狙击大)》全场施放 13 次，命中敌方英雄 10 人次（有效命中比 76.9%，造成 4,373 伤害），手感火热！"
+          },
+          {
+            "ability_zh": "橡果栗鼠",
+            "casts": 46,
+            "hits": 31,
+            "hit_pct": 67.4,
+            "damage": 3538,
+            "grade": "good",
+            "detail": "《橡果栗鼠》全场施放 46 次，命中敌方英雄 31 人次（有效命中比 67.4%，造成 3,538 伤害），手感火热！"
+          }
+        ],
+        "headline_badges": [
+          {
+            "text": "一击必杀: 13放/10中(76.9%)",
+            "tone": "good"
+          },
+          {
+            "text": "橡果栗鼠: 46放/31中(67.4%)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 71.7秒",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "《一击必杀 (松鼠狙击大)》全场施放 13 次，命中敌方英雄 10 人次（有效命中比 76.9%，造成 4,373 伤害），手感火热！",
+          "《橡果栗鼠》全场施放 46 次，命中敌方英雄 31 人次（有效命中比 67.4%，造成 3,538 伤害），手感火热！",
+          "全场累计对敌方英雄造成 71.7 秒硬控眩晕（平均每分钟控制 1.96 秒）。"
+        ]
+      }
     },
     {
       "player_slot": 130,
@@ -24839,7 +27329,65 @@
             }
           ]
         }
-      ]
+      ],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 130,
+        "side": "dire",
+        "hero_id": 68,
+        "hero_short_zh": "远古冰魄",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+        "personaname": "Sansan",
+        "stuns_sec": 36.9,
+        "ult_audits": [
+          {
+            "ability_key": "ancient_apparition_ice_blast",
+            "ability_zh": "冰晶爆轰 (冰魂大)",
+            "casts": 17,
+            "hits": 125,
+            "avg_hits": 7.35,
+            "unit_label": "段命中",
+            "damage": 4659,
+            "tf_casts_count": 5,
+            "tf_casts_waves": [
+              "11:19–12:09(×1)",
+              "18:51–19:37(×1)",
+              "26:06–27:05(×1)",
+              "30:01–30:40(×1)",
+              "31:00–31:57(×1)"
+            ],
+            "tf_held_death_count": 2,
+            "tf_held_death_waves": [
+              "07:59–08:41",
+              "16:32–17:13"
+            ],
+            "victim_breakdown": [
+              "主宰(1,239伤)",
+              "巫妖(1,085伤)",
+              "龙骑士(1,051伤)",
+              "半人马战行者(898伤)",
+              "帕格纳(386伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 17 次，累计打出 125 段命中（场均每大 7.35 段命中，造成 4,659 点伤害），在 11:19–12:09(×1), 18:51–19:37(×1), 26:06–27:05(×1), 30:01–30:40(×1) 团战完美兑现；主要灌伤目标：主宰(1,239伤)、巫妖(1,085伤)、龙骑士(1,051伤)。"
+          }
+        ],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "冰晶爆轰 (冰魂大): 17放/125段命中(均7.35)",
+            "tone": "good"
+          },
+          {
+            "text": "总硬控: 36.9秒",
+            "tone": "warn"
+          }
+        ],
+        "special_insights": [
+          "大招质量极高！全场释放 17 次，累计打出 125 段命中（场均每大 7.35 段命中，造成 4,659 点伤害），在 11:19–12:09(×1), 18:51–19:37(×1), 26:06–27:05(×1), 30:01–30:40(×1) 团战完美兑现；主要灌伤目标：主宰(1,239伤)、巫妖(1,085伤)、龙骑士(1,051伤)。",
+          "全场累计对敌方英雄造成 36.9 秒硬控眩晕（平均每分钟控制 1.01 秒）。"
+        ]
+      }
     }
   ]
 }

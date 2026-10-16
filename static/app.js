@@ -36,6 +36,8 @@ const state = {
   mapMode: "wards_obs", // "wards_obs" | "wards_own" | "wards_all" | "heatmap" | "teamfights"
   selectedTeamfightIndex: null,
   focusMatrixSide: "own", // "own" | "opp"
+  microTab: "hero_ult", // "hero_ult" | "vision" | "stack_smoke" | "laning" | "tp_save" | "all"
+  microSide: "own", // "own" | "opp"
   activePhaseKey: "lane", // "lane" | "mid" | "late"
   activeTeamTab: "own", // "own" | "opp" | "both"
   llmStatus: null,
@@ -298,8 +300,13 @@ function bindEvents() {
   const toggleSquadBtn = document.getElementById("btn-toggle-squad-ledger");
   if (toggleSquadBtn) {
     toggleSquadBtn.addEventListener("click", () => {
-      const sec = document.getElementById("squad-ledger-section");
-      if (sec) sec.classList.toggle("collapsed");
+      const det = document.getElementById("squad-ledger-details");
+      if (det) {
+        det.open = !det.open;
+      } else {
+        const sec = document.getElementById("squad-ledger-section");
+        if (sec) sec.classList.toggle("collapsed");
+      }
     });
   }
 
@@ -384,6 +391,32 @@ function bindEvents() {
       );
       if (state.currentReport) {
         renderFocusFireMatrix(state.currentReport);
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-micro-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.microTab = btn.getAttribute("data-micro-tab") || "hero_ult";
+      document.querySelectorAll("[data-micro-tab]").forEach((b) => {
+        const active = b === btn;
+        b.classList.toggle("active", active);
+        b.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      if (state.currentReport) {
+        renderTacticalMicroscopeSection(state.currentReport);
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-micro-side]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.microSide = btn.getAttribute("data-micro-side") || "own";
+      document.querySelectorAll("[data-micro-side]").forEach((b) =>
+        b.classList.toggle("active", b === btn)
+      );
+      if (state.currentReport) {
+        renderTacticalMicroscopeSection(state.currentReport);
       }
     });
   });
@@ -704,6 +737,7 @@ function renderFullMatchReport(report) {
   renderMatchOverview(report);
   renderDraftAndComboSection(report);
   renderVerdictAndBlameSection(report);
+  renderTacticalMicroscopeSection(report);
   renderAdvChart(report);
   renderNetWorthChart(report);
   renderMinimap(report);
@@ -799,7 +833,7 @@ function renderMatchOverview(report) {
 }
 
 /**
- * 1.5 Render Draft & Synergy Combo Section (阵容选择评估 & 有什么配合可以打)
+ * 1.5 Render Draft & Synergy Combo Section (纯粹聚焦阵容选择评估 & 有什么配合可以打，不重复渲染对线和英雄技能表)
  */
 function renderDraftAndComboSection(report) {
   const container = document.getElementById("draft-combo-container");
@@ -908,6 +942,34 @@ function renderDraftAndComboSection(report) {
     })
     .join("");
 
+  const picksOnly = (report.deep_forensics?.picks_order || []).filter((pb) => pb.is_pick);
+  const picksHtml =
+    picksOnly.length > 0
+      ? `
+      <div class="combos-header-bar" style="margin-top: 14px;">
+        <h3>BP 选人先后手顺序还原 (1~10手点选博弈)</h3>
+        <span style="font-size: 11px; color: var(--muted);">看清谁是首轮盲选抗压位、谁是尾手第 9/10 手 Counter 位</span>
+      </div>
+      <div class="bp-order-strip">
+        ${picksOnly
+          .map((pb) => {
+            const isOwn = pb.side === side;
+            return `
+              <div class="bp-pick-chip ${isOwn ? "own" : "opp"}">
+                <span class="bp-seq-label">${escapeHtml(pb.stage_tag)} · ${escapeHtml(pb.side_zh)}</span>
+                <div class="bp-hero-line">
+                  ${pb.hero_img ? `<img src="${escapeHtml(pb.hero_img)}" alt="${escapeHtml(pb.hero_short_zh)}" width="28" height="16" loading="lazy" />` : ""}
+                  <strong>${pb.pos ? `${pb.pos}号位 ` : ""}${escapeHtml(pb.hero_short_zh)}</strong>
+                </div>
+                <span class="bp-player-sub">${escapeHtml(pb.personaname || "")}</span>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    `
+      : "";
+
   container.innerHTML = `
     <div class="draft-top-grid">
       <div class="draft-verdict-box">
@@ -949,58 +1011,592 @@ function renderDraftAndComboSection(report) {
       </div>
     </div>
 
+    ${picksHtml}
+
     <div class="combos-header-bar">
       <h3>有什么配合可以打 · 技能化学反应与本局实战对账 (${combos.length} 组核心套路)</h3>
       <span style="font-size: 11px; color: var(--muted);">对照本局录像按键次数，看看这套阵容的预设连招到底打出来了多少</span>
     </div>
     <div class="combos-grid">${combosHtml}</div>
-    ${renderDeepForensicsSubsections(report, side)}
   `;
 }
 
-function renderDeepForensicsSubsections(report, side) {
-  const df = report.deep_forensics;
-  if (!df) return "";
+/**
+ * 2.5 NEW MODULE: 🔬 录像级战术显微镜 (Tactical Microscope — 5 Deep Replay Tabs)
+ *  - Tab 1 (hero_ult): 英雄绝活与大招审判 (如猛犸两极反转大几个、哪波团憋大暴毙、授予力量覆盖率、潮汐毁灭、帕格纳棒子&吸血救人、剑圣棒子自奶vs团队奶、白虎神箭命中率)
+ *  - Tab 2 (vision): 辅助眼位进攻/防守与寿命 (进攻眼vs河道肉山眼vs防守保护眼占比、分阶段眼位倾向、平均寿命、秒排白给眼 <135s、同高台头铁连插、每颗假眼坐标明细)
+ *  - Tab 3 (stack_smoke): 辅助堆野 & 开雾找节奏 (辅助拉野vs大哥自拉野、精确到分钟的堆野时间点、每波诡计之雾激活人及破雾后 90s 团战战果)
+ *  - Tab 4 (laning): 对线拉野·走门·莲花·经验符 (拉野区驻留+封野真眼+反补、3/6/9m 疗伤莲花、7/14/21m 智慧神符时间轴、2/4m 河道水符、双生门传送、观察者点灯、三路10分钟对位验尸)
+ *  - Tab 5 (tp_save): TP 救人及时性与缺席抓包 (主动买TP vs 靠免费复活TP、团战亮TP反蹲次数、队友被围剿时0伤害0技能未亮TP边缘OB抓包)
+ */
+function renderTacticalMicroscopeSection(report) {
+  const bodyEl = document.getElementById("tactical-microscope-body");
+  if (!bodyEl) return;
 
-  const picksOnly = (df.picks_order || []).filter((pb) => pb.is_pick);
-  const picksHtml =
-    picksOnly.length > 0
-      ? `
-      <div class="combos-header-bar" style="margin-top: 14px;">
-        <h3>BP 选人先后手顺序还原 (1~10手点选博弈)</h3>
-        <span style="font-size: 11px; color: var(--muted);">看清谁是首轮盲选抗压位、谁是尾手第 9/10 手 Counter 位</span>
-      </div>
-      <div class="bp-order-strip">
-        ${picksOnly
-          .map((pb) => {
-            const isOwn = pb.side === side;
-            return `
-              <div class="bp-pick-chip ${isOwn ? "own" : "opp"}">
-                <span class="bp-seq-label">${escapeHtml(pb.stage_tag)} · ${escapeHtml(pb.side_zh)}</span>
-                <div class="bp-hero-line">
-                  ${pb.hero_img ? `<img src="${escapeHtml(pb.hero_img)}" alt="${escapeHtml(pb.hero_short_zh)}" width="28" height="16" loading="lazy" />` : ""}
-                  <strong>${pb.pos ? `${pb.pos}号位 ` : ""}${escapeHtml(pb.hero_short_zh)}</strong>
-                </div>
-                <span class="bp-player-sub">${escapeHtml(pb.personaname || "")}</span>
+  const df = report.deep_forensics || {};
+  const { side, sideZh, oppZh } = getOwnAndOppPlayers(report);
+  const oppSide = side === "radiant" ? "dire" : "radiant";
+  const targetSide = state.microSide === "opp" ? oppSide : side;
+  const targetSideZh = state.microSide === "opp" ? oppZh : sideZh;
+  const otherSide = targetSide === "radiant" ? "dire" : "radiant";
+  const otherSideZh = targetSide === "radiant" ? "夜魇" : "天辉";
+
+  const tab = state.microTab || "hero_ult";
+  const blocks = [];
+
+  if (tab === "hero_ult" || tab === "all") {
+    blocks.push(renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, otherSide, otherSideZh));
+  }
+  if (tab === "vision" || tab === "all") {
+    blocks.push(renderMicroSupportVisionPane(report, df, targetSide, targetSideZh));
+  }
+  if (tab === "stack_smoke" || tab === "all") {
+    blocks.push(renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh));
+  }
+  if (tab === "laning" || tab === "all") {
+    blocks.push(renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, otherSideZh));
+  }
+  if (tab === "tp_save" || tab === "all") {
+    blocks.push(renderMicroTpRotationPane(report, df, targetSide, targetSideZh));
+  }
+
+  bodyEl.innerHTML = blocks.join("");
+}
+
+function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, otherSide, otherSideZh) {
+  const execData = df.hero_execution_by_side?.[targetSide];
+  const oppExecData = df.hero_execution_by_side?.[otherSide];
+  if (!execData) {
+    return `<div class="empty-state compact">当前比赛暂无英雄绝活与大招显微镜数据</div>`;
+  }
+
+  const players = execData.players || [];
+  const cardsHtml = players
+    .map((p) => {
+      const badges = (p.headline_badges || [])
+        .map((b) => {
+          const isWarn = b.includes("⚠️") || b.includes("0.4/分") || b.includes("1.33");
+          const isGood = b.includes("14,807") || b.includes("3.1") || b.includes("A") || b.includes("S");
+          return `<span class="micro-exec-badge ${isWarn ? "warn" : isGood ? "good" : ""}">${escapeHtml(b)}</span>`;
+        })
+        .join("");
+
+      const sigSpellsHtml = (p.signature_spells || [])
+        .map((sp) => {
+          const tfCastsPills = (sp.teamfight_casts || [])
+            .map((tc) => `<span class="micro-tf-pill">✓ ${escapeHtml(tc.time_range)} 团战释放×${tc.casts}</span>`)
+            .join("");
+          const heldDeathPills = (sp.held_ult_deaths || [])
+            .map(
+              (hd) =>
+                `<span class="micro-tf-pill held-die">🚨 ${escapeHtml(hd.time_range)} 团战憋大阵亡 (仅打${fmtNum(
+                  hd.damage_dealt
+                )}伤)</span>`
+            )
+            .join("");
+          const targetsStr = (sp.targets_breakdown || [])
+            .slice(0, 4)
+            .map((t) => `${t.is_ally ? "友·" : "敌·"}${escapeHtml(t.hero_short_zh)}×${t.count}`)
+            .join(" / ");
+
+          return `
+            <div class="micro-ult-box">
+              <div class="micro-ult-top">
+                <span class="micro-ult-name">${sp.is_big_ult ? "💥 团战大招" : "⚡ 核心技能"} · ${escapeHtml(
+            sp.ability_zh
+          )}</span>
+                <span class="status-pill ${sp.grade === "S" || sp.grade === "A" ? "connected" : ""}">评级 ${escapeHtml(
+            sp.grade || "B"
+          )} · ${escapeHtml(sp.verdict || "")}</span>
               </div>
-            `;
-          })
-          .join("")}
+              <div class="micro-ult-stats">
+                <span>释放次数：<b>${sp.casts} 次</b></span>
+                ${
+                  sp.hero_hits > 0
+                    ? `<span>命中英雄：<b>${sp.hero_hits} 人次 (场均 ${sp.avg_heroes_per_cast} 人/次)</b></span>`
+                    : ""
+                }
+                ${sp.total_damage > 0 ? `<span>技能伤害：<b>${fmtNum(sp.total_damage)}</b></span>` : ""}
+                ${targetsStr ? `<span>主要目标：<b>${targetsStr}</b></span>` : ""}
+              </div>
+              ${
+                tfCastsPills || heldDeathPills
+                  ? `<div class="micro-tf-pills">${tfCastsPills}${heldDeathPills}</div>`
+                  : ""
+              }
+            </div>
+          `;
+        })
+        .join("");
+
+      const insightsHtml = (p.special_insights || [])
+        .map((ins) => `<li>${escapeHtml(ins)}</li>`)
+        .join("");
+
+      const hasHeldUltWarning = (p.signature_spells || []).some(
+        (sp) => (sp.held_ult_deaths || []).length > 0
+      );
+
+      return `
+        <article class="micro-hero-card ${hasHeldUltWarning ? "culprit-border" : ""}">
+          <div class="micro-hero-head">
+            <div class="micro-hero-id">
+              ${p.hero_img ? `<img src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(p.hero_short_zh)}" loading="lazy" />` : ""}
+              <div>
+                <strong>${p.pos}号位 · ${escapeHtml(p.hero_short_zh)} (${escapeHtml(p.personaname)})</strong>
+                <div class="micro-hero-sub">团战参战率 ${p.teamfight_participation_pct || 0}%${
+        p.stuns_sec > 0 ? ` · 硬控时长 ${p.stuns_sec} 秒` : ""
+      }</div>
+              </div>
+            </div>
+          </div>
+          ${badges ? `<div class="micro-badges-wrap">${badges}</div>` : ""}
+          ${sigSpellsHtml}
+          ${insightsHtml ? `<ul class="micro-insights-list">${insightsHtml}</ul>` : ""}
+        </article>
+      `;
+    })
+    .join("");
+
+  const rubickList = df.rubick_steal_ledger || [];
+  const rubickHtml =
+    rubickList.length > 0
+      ? `
+      <div class="micro-card">
+        <h4>🕵️ 谁在喂敌方拉比克偷技能 (内鬼嫌疑榜)</h4>
+        <div class="micro-badges-wrap">
+          ${rubickList
+            .map(
+              (r) =>
+                `<span class="micro-exec-badge warn">${escapeHtml(r.victim_hero)} (${escapeHtml(
+                  r.victim_player
+                )}) 被拉比克偷技能 <b>${r.stolen_count} 次</b></span>`
+            )
+            .join("")}
+        </div>
       </div>
     `
       : "";
 
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>🎯 1. 英雄绝活与大招释放质量审判 (${escapeHtml(targetSideZh)} 1~5 号位)</h3>
+          <p><strong>${escapeHtml(targetSideZh)}大招与关键技能兑现：</strong>${escapeHtml(execData.summary || "")}${
+    oppExecData?.summary
+      ? `<br/><span style="color:var(--muted);">对照${escapeHtml(otherSideZh)}表现：${escapeHtml(
+          oppExecData.summary
+        )}</span>`
+      : ""
+  }</p>
+        </div>
+      </div>
+      <div class="micro-hero-exec-grid">${cardsHtml}</div>
+      ${rubickHtml}
+    </div>
+  `;
+}
+
+function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
+  const vis = df.support_vision_by_side?.[targetSide];
+  if (!vis) {
+    return `<div class="empty-state compact">当前比赛暂无辅助眼位显微镜数据</div>`;
+  }
+
+  const ps = vis.posture_summary || {};
+  const aggPct = Number(ps.aggressive_pct || 0);
+  const midPct = Number(ps.river_roshan_pct || 0);
+  const defPct = Number(ps.defensive_pct || 0);
+
+  const supRowsHtml = (vis.support_breakdown || [])
+    .map(
+      (s) => `
+      <tr>
+        <td><b>${s.pos}号位 · ${escapeHtml(s.hero_short_zh)}</b> (${escapeHtml(s.personaname)})</td>
+        <td><b>${s.obs_placed} 颗</b> / ${s.sen_placed} 真眼</td>
+        <td>⚔️ 进攻 ${s.aggressive} / ⚖️ 河道 ${s.river_roshan} / 🛡️ 防守 ${s.defensive}</td>
+        <td><b>${s.avg_lifespan_sec}s</b> / 360s</td>
+        <td>被排 ${s.dewarded_count} 颗 / 反排敌方 <b>${s.obs_destroyed || 0} 颗</b></td>
+      </tr>
+    `
+    )
+    .join("");
+
+  const phaseRowsHtml = ["lane", "mid", "late"]
+    .map((pk) => {
+      const ph = vis.phase_posture?.[pk];
+      if (!ph) return "";
+      return `
+        <tr>
+          <td><b>${escapeHtml(ph.label)}</b></td>
+          <td>${ph.total} 颗</td>
+          <td>⚔️ 深入进攻眼 <b>${ph.aggressive} 颗</b></td>
+          <td>⚖️ 河道/肉山眼 <b>${ph.river_roshan} 颗</b></td>
+          <td>🛡️ 被动防守眼 <b>${ph.defensive} 颗</b></td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const instantHtml =
+    (vis.instant_dewards || []).length > 0
+      ? vis.instant_dewards
+          .map(
+            (w) =>
+              `<li><b>${escapeHtml(w.time_str)}</b> · ${escapeHtml(w.hero_short_zh)} 插在 <b>${escapeHtml(
+                w.zone_zh
+              )} (${w.x},${w.y})</b> 的${escapeHtml(w.posture_label)}仅活 <b>${
+                w.lifespan_sec
+              } 秒</b>即被敌方秒排！</li>`
+          )
+          .join("")
+      : `<li>✓ 本局未出现插下 2 分钟内被秒排的白给假眼</li>`;
+
+  const cliffHtml =
+    (vis.cliff_obsession || []).length > 0
+      ? vis.cliff_obsession
+          .map(
+            (c) =>
+              `<li>🚨 <b>${escapeHtml(c.zone_zh)} (${c.coord})</b> 全场头铁重复插了 <b>${
+                c.count
+              } 颗假眼</b>（时间点：${escapeHtml((c.times || []).join("、"))}），被排掉 ${
+                c.dewarded_count
+              } 颗！</li>`
+          )
+          .join("")
+      : `<li>✓ 本局未出现同一高台头铁连插 2 颗以上假眼的情况</li>`;
+
+  const obsTableRows = (vis.obs_records || [])
+    .map(
+      (w, idx) => `
+      <tr>
+        <td>#${idx + 1}</td>
+        <td><b>${escapeHtml(w.time_str)}</b> (${escapeHtml(w.phase_zh)})</td>
+        <td>${w.pos}号位 · ${escapeHtml(w.hero_short_zh)}</td>
+        <td><b>${escapeHtml(w.zone_zh)}</b> <span style="color:var(--muted);">(${w.x}, ${w.y})</span></td>
+        <td>${escapeHtml(w.posture_label)}</td>
+        <td><b style="color:${
+          w.is_instant_deward ? "var(--red-light)" : w.dewarded ? "var(--gold-light)" : "var(--green-light)"
+        }">${w.lifespan_sec} 秒</b> / 360 秒</td>
+        <td>${escapeHtml(w.fate_zh)}${w.dewarded_time_str ? ` (@${escapeHtml(w.dewarded_time_str)})` : ""}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>👁️ 2. 辅助眼位进攻/防守倾向与存活寿命审计 (${escapeHtml(targetSideZh)})</h3>
+          <p>${escapeHtml(vis.posture_verdict || "")}</p>
+        </div>
+      </div>
+
+      <div class="posture-bar-stack" title="假眼进攻/河道/防守姿态比例">
+        ${
+          aggPct > 0
+            ? `<div class="posture-seg agg" style="width:${Math.max(aggPct, 10)}%">⚔️ 进攻眼 ${aggPct}% (${ps.aggressive}颗)</div>`
+            : ""
+        }
+        ${
+          midPct > 0
+            ? `<div class="posture-seg mid" style="width:${Math.max(midPct, 10)}%">⚖️ 河道/肉山眼 ${midPct}% (${ps.river_roshan}颗)</div>`
+            : ""
+        }
+        ${
+          defPct > 0
+            ? `<div class="posture-seg def" style="width:${Math.max(defPct, 10)}%">🛡️ 防守保护眼 ${defPct}% (${ps.defensive}颗)</div>`
+            : ""
+        }
+      </div>
+
+      <div class="micro-kpi-row">
+        <div class="micro-kpi-cell">
+          <span>假眼总数 / 真眼总数</span>
+          <strong>${vis.obs_total} 颗假眼 / ${vis.sen_total} 颗真眼</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>假眼平均存活寿命 (满6分钟=360s)</span>
+          <strong>${vis.avg_lifespan_sec} 秒 / 360 秒</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>假眼被敌方排掉比例</span>
+          <strong>被排 ${vis.obs_dewarded_count} 颗 (${vis.obs_dewarded_pct}%)</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>秒排白给眼 (&lt;135s) / 同高台连插</span>
+          <strong>${(vis.instant_dewards || []).length} 颗秒排 / ${(vis.cliff_obsession || []).length} 处同高台</strong>
+        </div>
+      </div>
+
+      <div class="micro-grid-2col">
+        <div class="micro-card">
+          <h4>🧭 辅助个人视野成绩单 &amp; 前中后期眼位深浅变化</h4>
+          <div class="micro-table-wrap">
+            <table class="micro-data-table">
+              <thead>
+                <tr>
+                  <th>操刀人</th>
+                  <th>假眼/真眼</th>
+                  <th>进攻/河道/防守分布</th>
+                  <th>平均寿命</th>
+                  <th>被排/反排</th>
+                </tr>
+              </thead>
+              <tbody>${supRowsHtml}</tbody>
+            </table>
+          </div>
+          <div class="micro-table-wrap">
+            <table class="micro-data-table">
+              <thead>
+                <tr>
+                  <th>比赛阶段</th>
+                  <th>总假眼</th>
+                  <th>⚔️ 深入敌后进攻眼</th>
+                  <th>⚖️ 河道/肉山眼</th>
+                  <th>🛡️ 自家野区防守眼</th>
+                </tr>
+              </thead>
+              <tbody>${phaseRowsHtml}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="micro-card">
+          <h4>🚨 秒排白给眼 (&lt;135s) &amp; 同高台头铁连插抓包台</h4>
+          <div>
+            <strong style="font-size:12px; color:var(--gold-light);">⚡ 插下不到 2 分钟即被排掉的秒排眼：</strong>
+            <ul class="micro-insights-list" style="margin-top:5px;">${instantHtml}</ul>
+          </div>
+          <div style="margin-top:6px;">
+            <strong style="font-size:12px; color:var(--gold-light);">📍 同一高台/眼位重复插眼习惯审计：</strong>
+            <ul class="micro-insights-list" style="margin-top:5px;">${cliffHtml}</ul>
+          </div>
+        </div>
+      </div>
+
+      <details class="squad-ledger-details" style="margin-bottom:0;">
+        <summary class="squad-ledger-summary">
+          <div class="squad-ledger-summary-left">
+            <strong>📋 展开查看本局全部 ${vis.obs_total} 颗假眼精确坐标、区域分类与存活秒数流水表</strong>
+          </div>
+          <span class="squad-ledger-summary-arrow">展开明细表 ▾</span>
+        </summary>
+        <div class="micro-table-wrap" style="border:none;">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>插眼时间</th>
+                <th>操刀人</th>
+                <th>地图区域 &amp; 坐标</th>
+                <th>进攻/防守姿态</th>
+                <th>存活寿命</th>
+                <th>最终结局</th>
+              </tr>
+            </thead>
+            <tbody>${obsTableRows}</tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  `;
+}
+
+function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
+  const ss = df.stacking_and_smoke_by_side?.[targetSide];
+  if (!ss) {
+    return `<div class="empty-state compact">当前比赛暂无堆野与开雾找节奏数据</div>`;
+  }
+
+  const stackRowsHtml = (ss.stack_rows || [])
+    .map(
+      (r) => `
+      <tr>
+        <td><b>${r.pos}号位 · ${escapeHtml(r.hero_short_zh)}</b> (${escapeHtml(r.personaname)})</td>
+        <td>${r.is_support ? "辅助位屯野" : "核心位自拉野"}</td>
+        <td><b style="color:${r.camps_stacked > 0 ? "var(--gold-light)" : "var(--muted)"}">${
+        r.camps_stacked
+      } 组</b> (${r.creeps_stacked} 只野怪)</td>
+        <td>${escapeHtml(r.stack_minutes_str || "无")}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  const smokeRowsHtml = (ss.smoke_events || [])
+    .map(
+      (sm) => `
+      <tr>
+        <td><b>${escapeHtml(sm.time_str)}</b> (${escapeHtml(sm.phase_zh)})</td>
+        <td>${sm.activator_pos}号位 · ${escapeHtml(sm.activator_hero)} (${escapeHtml(sm.activator_player)})</td>
+        <td><b>${escapeHtml(sm.outcome_label)}</b></td>
+        <td><b>${sm.kills_in_window} 杀 / ${sm.deaths_in_window} 死</b></td>
+        <td>${escapeHtml(sm.detail)}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-grid-2col">
+        <div class="micro-card">
+          <h4>🌾 辅助堆野屯矿 vs 大哥自拉野审计 (${escapeHtml(targetSideZh)}合计堆野 ${ss.total_team_stacks} 组)</h4>
+          <p style="margin:0; font-size:12.5px; color:var(--text); line-height:1.55;">${escapeHtml(
+            ss.stack_verdict || ""
+          )}</p>
+          <div class="micro-kpi-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+            <div class="micro-kpi-cell">
+              <span>全队累计堆野</span>
+              <strong>${ss.total_team_stacks} 组 (${ss.total_creeps_stacked} 只野)</strong>
+            </div>
+            <div class="micro-kpi-cell">
+              <span>4/5号位辅助堆野</span>
+              <strong>${ss.support_stacks} 组</strong>
+            </div>
+            <div class="micro-kpi-cell">
+              <span>1~3号位大哥自拉野</span>
+              <strong>${ss.core_self_stacks} 组</strong>
+            </div>
+          </div>
+          <div class="micro-table-wrap">
+            <table class="micro-data-table">
+              <thead>
+                <tr>
+                  <th>选手</th>
+                  <th>角色定位</th>
+                  <th>堆野组数</th>
+                  <th>精确堆野分钟节点</th>
+                </tr>
+              </thead>
+              <tbody>${stackRowsHtml}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="micro-card">
+          <h4>💨 诡计之雾 (Smoke of Deceit) 开雾找节奏全记录 (${ss.smoke_total_uses} 波)</h4>
+          <p style="margin:0; font-size:12.5px; color:var(--text); line-height:1.55;">${escapeHtml(
+            ss.smoke_verdict || ""
+          )}</p>
+          <div class="micro-kpi-row">
+            <div class="micro-kpi-cell">
+              <span>买雾 / 开雾次数</span>
+              <strong>买 ${ss.smoke_total_bought} / 用 ${ss.smoke_total_uses}</strong>
+            </div>
+            <div class="micro-kpi-cell">
+              <span>🟢 破雾大捷</span>
+              <strong>${ss.smoke_success_count} 波</strong>
+            </div>
+            <div class="micro-kpi-cell">
+              <span>🔴 开雾撞墙</span>
+              <strong>${ss.smoke_backfire_count} 波</strong>
+            </div>
+            <div class="micro-kpi-cell">
+              <span>🟡 哑火空雾</span>
+              <strong>${ss.smoke_dry_count} 波</strong>
+            </div>
+          </div>
+          <div class="micro-table-wrap">
+            <table class="micro-data-table">
+              <thead>
+                <tr>
+                  <th>开雾时间</th>
+                  <th>捏雾发起人</th>
+                  <th>战果判定</th>
+                  <th>90秒内头数</th>
+                  <th>破雾90秒实战复盘</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${
+                  smokeRowsHtml ||
+                  `<tr><td colspan="5" style="color:var(--muted);">本局未检测到诡计之雾使用记录</td></tr>`
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, otherSideZh) {
+  const lm = df.laning_mechanics_by_side?.[targetSide];
+  if (!lm) {
+    return `<div class="empty-state compact">当前比赛暂无对线细节显微镜数据</div>`;
+  }
+
+  const pullRowsHtml = (lm.pull_rows || [])
+    .map(
+      (r) => `
+      <tr>
+        <td><b>${r.pos}号位 · ${escapeHtml(r.hero_short_zh)}</b> (${escapeHtml(r.personaname)})</td>
+        <td><b>${r.pull_zone_samples}</b> (占比 ${r.pull_presence_pct}%)</td>
+        <td><b>${r.early_sentries_placed} 颗</b> (${escapeHtml(
+        (r.early_sentry_times || []).join(" / ") || "未插"
+      )})</td>
+        <td>10m 反补 <b>${r.dn10} 刀</b> (全场 ${r.total_denies} 刀)</td>
+        <td>${r.camps_stacked} 组</td>
+        <td>${escapeHtml(r.assessment)}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  const lotusPills = (lm.lotus_rows || [])
+    .filter((r) => r.total_lotuses > 0)
+    .map(
+      (r) =>
+        `<span class="micro-exec-badge ${r.side === targetSide ? "good" : "warn"}">${escapeHtml(
+          r.side_zh
+        )}·${r.pos}号位 ${escapeHtml(r.hero_short_zh)}：<b>吃莲花 ×${r.total_lotuses}</b></span>`
+    )
+    .join("");
+
+  const wisdomPills = (lm.wisdom_events || [])
+    .map(
+      (w) =>
+        `<span class="micro-exec-badge ${w.is_own ? "good" : "warn"}"><b>${escapeHtml(
+          w.time_str
+        )}</b> · ${escapeHtml(w.side_zh)} ${w.pos}号位 ${escapeHtml(w.hero_short_zh)} (${escapeHtml(
+          w.personaname
+        )}) 摘取智慧符</span>`
+    )
+    .join("");
+
+  const gatePills = (lm.gate_rows || [])
+    .map(
+      (g) =>
+        `<span class="micro-exec-badge ${g.side === targetSide ? "good" : ""}">${escapeHtml(
+          g.side_zh
+        )}·${g.pos}号位 ${escapeHtml(g.hero_short_zh)}：<b>走门传送 ×${g.portal_warps}</b> (${escapeHtml(
+          (g.early_warp_times || []).join("、") || "中后期"
+        )})</span>`
+    )
+    .join("");
+
+  const waterPills = (lm.water_events || [])
+    .map(
+      (w) =>
+        `<span class="micro-exec-badge ${w.side === targetSide ? "good" : ""}">${escapeHtml(
+          w.time_str
+        )} · ${escapeHtml(w.side_zh)} ${escapeHtml(w.hero_short_zh)} 控水符</span>`
+    )
+    .join("");
+
+  // Relocated 3-lane 10m matchup cards so all laning analysis lives cleanly in Tab 4
   const lanes = df.lane_matchups || [];
   const lanesHtml =
     lanes.length > 0
       ? `
-      <div class="combos-header-bar" style="margin-top: 14px;">
-        <h3>三路对线 10 分钟对位验尸台 (上路 / 中路 / 下路正面对账)</h3>
-        <span style="font-size: 11px; color: var(--muted);">对比 10 分钟三路总经济、正反补与对线效率，直接判定哪条路打穿、哪条路养爹</span>
-      </div>
       <div class="lane-matchups-grid">
         ${lanes
-          .map((lm) => {
+          .map((lane) => {
             const renderHeroMini = (h) => `
               <div class="lm-hero-row">
                 <div class="lm-hero-id">
@@ -1010,23 +1606,23 @@ function renderDeepForensicsSubsections(report, side) {
                 <span class="lm-hero-stats">${h.lh10}/${h.dn10}刀 · ${fmtNum(h.gold10)}金 · 效率${h.lane_eff}%</span>
               </div>
             `;
-            const isOwnWin = lm.winner_side === side;
-            const isEven = lm.winner_side === "even";
+            const isOwnWin = lane.winner_side === targetSide;
+            const isEven = lane.winner_side === "even";
             const badgeCls = isEven ? "even" : isOwnWin ? "win" : "loss";
             return `
               <article class="lane-matchup-card">
                 <div class="lm-head">
-                  <strong>${escapeHtml(lm.title)}</strong>
-                  <span class="lm-verdict-pill ${badgeCls}">${escapeHtml(lm.verdict_zh)}</span>
+                  <strong>${escapeHtml(lane.title)}</strong>
+                  <span class="lm-verdict-pill ${badgeCls}">${escapeHtml(lane.verdict_zh)}</span>
                 </div>
                 <div class="lm-sides-box">
                   <div class="lm-side-col">
-                    <div class="lm-side-title dire">夜魇对线 (${fmtNum(lm.dire_gold10)}金 · ${escapeHtml(lm.dire_lh_dn)}刀)</div>
-                    ${(lm.dire_heroes || []).map(renderHeroMini).join("")}
+                    <div class="lm-side-title dire">夜魇对线 (${fmtNum(lane.dire_gold10)}金 · ${escapeHtml(lane.dire_lh_dn)}刀)</div>
+                    ${(lane.dire_heroes || []).map(renderHeroMini).join("")}
                   </div>
                   <div class="lm-side-col">
-                    <div class="lm-side-title rad">天辉对线 (${fmtNum(lm.radiant_gold10)}金 · ${escapeHtml(lm.radiant_lh_dn)}刀)</div>
-                    ${(lm.radiant_heroes || []).map(renderHeroMini).join("")}
+                    <div class="lm-side-title rad">天辉对线 (${fmtNum(lane.radiant_gold10)}金 · ${escapeHtml(lane.radiant_lh_dn)}刀)</div>
+                    ${(lane.radiant_heroes || []).map(renderHeroMini).join("")}
                   </div>
                 </div>
               </article>
@@ -1037,123 +1633,199 @@ function renderDeepForensicsSubsections(report, side) {
     `
       : "";
 
-  const rubickList = df.rubick_steal_ledger || [];
-  const spellTargets = (df.key_spell_targets || []).filter((st) => st.caster_side === side).slice(0, 5);
-  const couriers = df.courier_graveyard || [];
-  const pingsRank = (df.ping_pressure_rank || []).slice(0, 6);
-
-  const hasSpecial = rubickList.length > 0 || spellTargets.length > 0 || couriers.length > 0;
-  const specialHtml = hasSpecial
-    ? `
-      <div class="combos-header-bar" style="margin-top: 14px;">
-        <h3>录像细节刑侦台 · 关键技能交给了谁 / 谁在喂拉比克 / 信使墓志铭与 Ping 压力榜</h3>
-        <span style="font-size: 11px; color: var(--muted);">从底层 combatlog 提取指向性技能目标、被拉比克偷技能次数与掉鸡时间点</span>
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>🌱 4. 对线期拉野·封野·走门·莲花·智慧经验符全维审计 (${escapeHtml(targetSideZh)} vs ${escapeHtml(
+    otherSideZh
+  )})</h3>
+          <p>${escapeHtml(lm.pull_verdict || "")} ｜ ${escapeHtml(lm.lotus_verdict || "")} ｜ ${escapeHtml(
+    lm.wisdom_verdict || ""
+  )}</p>
+        </div>
       </div>
-      <div class="special-forensics-grid">
-        <div class="sf-card">
-          <h4>🎯 本方关键技能都交给了谁 (指向性目标核查)</h4>
-          <div class="sf-list">
-            ${
-              spellTargets.length > 0
-                ? spellTargets
-                    .map(
-                      (st) => `
-                      <div class="sf-item-row">
-                        <div class="sf-caster-line">
-                          ${st.caster_img ? `<img src="${escapeHtml(st.caster_img)}" alt="" width="24" height="14" loading="lazy" />` : ""}
-                          <strong>${escapeHtml(st.caster_hero)} · ${escapeHtml(st.ability_zh)}</strong>
-                          <span>(合计对英雄 ${st.total_casts} 次)</span>
-                        </div>
-                        <div class="sf-targets-pills">
-                          ${(st.targets || [])
-                            .map(
-                              (t) => `
-                              <span class="sf-target-pill ${t.is_ally ? "ally" : "enemy"}">
-                                ${t.is_ally ? "友·" : "敌·"}${escapeHtml(t.hero_short_zh)} <b>×${t.count}</b>
-                              </span>
-                            `
-                            )
-                            .join("")}
-                        </div>
-                      </div>
-                    `
-                    )
-                    .join("")
-                : `<div style="font-size: 11px; color: var(--dim);">暂无指向性技能目标日志</div>`
-            }
-          </div>
+
+      <div class="micro-kpi-row">
+        <div class="micro-kpi-cell">
+          <span>🌺 疗伤莲花争夺 (${escapeHtml(targetSideZh)}:${escapeHtml(otherSideZh)})</span>
+          <strong>${lm.lotus_own_total} 颗 : ${lm.lotus_opp_total} 颗</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>📚 7/14/21m 智慧神符 (${escapeHtml(targetSideZh)}:${escapeHtml(otherSideZh)})</span>
+          <strong>${lm.wisdom_own_count} 枚 : ${lm.wisdom_opp_count} 枚</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🚪 双生门传送绕后 (${escapeHtml(targetSideZh)}:${escapeHtml(otherSideZh)})</span>
+          <strong>${lm.gate_own_count} 次 : ${lm.gate_opp_count} 次</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>💧 2/4m 水符 &amp; 观察者点灯</span>
+          <strong>水符 ${lm.water_own_count}:${lm.water_opp_count} · 点灯 ${lm.lamp_own_count}:${lm.lamp_opp_count}</strong>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🪝 辅助对线期拉野/消兵区活跃度、前 10 分钟封野真眼与反补审计</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>辅助选手</th>
+                <th>拉野点坐标驻留权重</th>
+                <th>0-10m 封野/排野真眼</th>
+                <th>对线反补</th>
+                <th>顺手堆野</th>
+                <th>对线细节评语</th>
+              </tr>
+            </thead>
+            <tbody>${pullRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="micro-grid-2col">
+        <div class="micro-card">
+          <h4>🌺 疗伤莲花 (Lotus) &amp; 💧 2/4m 中路水符归属明细</h4>
+          <p style="margin:0; font-size:12px; color:var(--muted);">${escapeHtml(lm.lotus_verdict || "")}</p>
+          <div class="micro-badges-wrap">${lotusPills || `<span class="micro-exec-badge">未记录到吃莲花事件</span>`}</div>
+          ${
+            waterPills
+              ? `<div style="margin-top:6px;"><strong style="font-size:12px; color:var(--gold-light);">💧 2/4分钟河道水符：</strong><div class="micro-badges-wrap" style="margin-top:4px;">${waterPills}</div></div>`
+              : ""
+          }
         </div>
 
-        <div class="sf-card">
-          <h4>🕵️ ${rubickList.length > 0 ? "谁在喂敌方拉比克偷技能 (内鬼嫌疑榜)" : "全场狂点地图 Ping 压力榜"}</h4>
-          <div class="sf-list">
-            ${
-              rubickList.length > 0
-                ? rubickList
-                    .map(
-                      (r) => `
-                      <div class="sf-rubick-row">
-                        <div style="display:flex; align-items:center; gap:6px;">
-                          ${r.victim_img ? `<img src="${escapeHtml(r.victim_img)}" alt="" width="26" height="15" loading="lazy" />` : ""}
-                          <strong>${escapeHtml(r.victim_hero)} (${escapeHtml(r.victim_player)})</strong>
-                        </div>
-                        <span class="blame-badge">被拉比克偷技能 <b>${r.stolen_count} 次</b></span>
-                      </div>
-                    `
-                    )
-                    .join("")
-                : ""
-            }
-            ${
-              pingsRank.length > 0
-                ? `
-                <div style="margin-top: 6px; font-size: 11px; color: var(--muted);">
-                  <strong style="color: var(--gold-light); display:block; margin-bottom:4px;">📢 地图 Ping 信号狂点榜：</strong>
-                  <div class="sf-targets-pills">
-                    ${pingsRank
-                      .map(
-                        (pr) => `
-                        <span class="sf-target-pill">
-                          ${escapeHtml(pr.hero_short_zh)}(${escapeHtml(pr.personaname)}) <b>Ping ${pr.pings}次</b>
-                        </span>
-                      `
-                      )
-                      .join("")}
-                  </div>
-                </div>
-              `
-                : ""
-            }
-          </div>
-        </div>
-
-        <div class="sf-card">
-          <h4>🐔 信使阵亡墓志铭 (整局掉鸡 ${couriers.length} 只)</h4>
-          <div class="sf-list">
-            ${
-              couriers.length > 0
-                ? couriers
-                    .map(
-                      (c) => `
-                      <div class="sf-courier-row">
-                        <span class="window-time-badge">${escapeHtml(c.time_str)}</span>
-                        <span><b style="color:${c.lost_side === side ? "var(--red-light)" : "var(--green-light)"}">${escapeHtml(
-                        c.lost_side_zh
-                      )}信使阵亡</b> · 被 ${escapeHtml(c.killer_hero)} (${escapeHtml(c.killer_player)}) 击杀提款</span>
-                      </div>
-                    `
-                    )
-                    .join("")
-                : `<div style="font-size: 11px; color: var(--dim);">本局双方信使全员生还</div>`
-            }
+        <div class="micro-card">
+          <h4>📚 智慧神符 (经验符) 时间轴 &amp; 🚪 双生门传送 (Twin Gate)</h4>
+          <p style="margin:0; font-size:12px; color:var(--muted);">${escapeHtml(lm.wisdom_verdict || "")} ｜ ${escapeHtml(
+    lm.gate_verdict || ""
+  )}</p>
+          <div class="micro-badges-wrap">${wisdomPills || `<span class="micro-exec-badge">无智慧神符拾取记录</span>`}</div>
+          <div style="margin-top:6px;">
+            <strong style="font-size:12px; color:var(--gold-light);">🚪 双生门传送 (twin_gate_portal_warp) 玩家明细：</strong>
+            <div class="micro-badges-wrap" style="margin-top:4px;">${
+              gatePills || `<span class="micro-exec-badge">整局无人使用双生门传送</span>`
+            }</div>
           </div>
         </div>
       </div>
-    `
-    : "";
 
-  return `${picksHtml}${lanesHtml}${specialHtml}`;
+      ${lanesHtml}
+    </div>
+  `;
 }
+
+function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
+  const tp = df.tp_rotation_by_side?.[targetSide];
+  if (!tp) {
+    return `<div class="empty-state compact">当前比赛暂无 TP 救人与团战缺席抓包数据</div>`;
+  }
+
+  const pRowsHtml = (tp.player_tp_rows || [])
+    .map(
+      (r) => `
+      <tr>
+        <td><b>${r.pos}号位 · ${escapeHtml(r.hero_short_zh)}</b> (${escapeHtml(r.personaname)})</td>
+        <td><b>${r.tp_used} 次</b></td>
+        <td><b style="color:${r.tp_bought === 0 ? "var(--red-light)" : "var(--text)"}">${
+        r.tp_bought
+      } 张</b>${r.tp_bought === 0 ? " (全靠复活白嫖!)" : ""}</td>
+        <td>${r.early_tp_rotations_12m} 次</td>
+        <td><b style="color:${r.teamfight_tp_saves > 0 ? "var(--green-light)" : "var(--muted)"}">${
+        r.teamfight_tp_saves
+      } 次</b> (${escapeHtml((r.teamfight_tp_times || []).join("、") || "无")})</td>
+        <td><b style="color:${r.spectator_teamfights > 0 ? "var(--red-light)" : "var(--green-light)"}">${
+        r.spectator_teamfights
+      } 波</b>${
+        (r.spectator_times || []).length > 0 ? ` (${escapeHtml(r.spectator_times.join("、"))})` : ""
+      }</td>
+        <td>${escapeHtml(r.verdict)}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  const tfRowsHtml = (tp.teamfight_tp_events || [])
+    .map((ev) => {
+      const saviors = (ev.tp_saviors || [])
+        .map(
+          (s) =>
+            `<span class="micro-tf-pill">🟢 ${s.pos}号位·${escapeHtml(s.hero_short_zh)} 亮TP支援 (打${fmtNum(
+              s.damage
+            )}伤)</span>`
+        )
+        .join("");
+      const specs = (ev.spectators || [])
+        .map(
+          (sp) =>
+            `<span class="micro-tf-pill held-die">🔴 ${sp.pos}号位·${escapeHtml(sp.hero_short_zh)} (${escapeHtml(
+              sp.personaname
+            )}) 0伤害0技能未亮TP旁观</span>`
+        )
+        .join("");
+      return `
+        <tr>
+          <td><b>团战 #${ev.tf_index}</b> (${escapeHtml(ev.time_range)})</td>
+          <td>本方阵亡 <b>${ev.own_deaths}</b> 人 / 击杀敌方 <b>${ev.opp_kills}</b> 人</td>
+          <td><div class="micro-tf-pills">${saviors || `<span style="color:var(--muted);">无人交TP</span>`}</div></td>
+          <td><div class="micro-tf-pills">${
+            specs || `<span style="color:var(--green-light);">✓ 全员参战无OB</span>`
+          }</div></td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>🆘 5. TP 救人及时性、主动买 TP 习惯与团战边缘 OB 抓包 (${escapeHtml(targetSideZh)})</h3>
+          <p>${escapeHtml(tp.tp_verdict || "")}</p>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>📜 1~5 号位 TP 购买量、前 12 分钟支援 TP 与团战亮 TP 审计表</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄</th>
+                <th>整局使用 TP</th>
+                <th>主动花钱买 TP</th>
+                <th>前12m支援/回线TP</th>
+                <th>团战亮 TP 救人/进场</th>
+                <th>队友阵亡时0参与旁观</th>
+                <th>TP 支援习惯判词</th>
+              </tr>
+            </thead>
+            <tbody>${pRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🚨 历次团战谁亮了 TP 救人 vs 谁在队友挨揍阵亡时 0 伤害 0 技能未亮 TP 旁观</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>团战时间窗</th>
+                <th>双方伤亡交换</th>
+                <th>🟢 团战期间亮出 TP 支援的功臣</th>
+                <th>🔴 队友阵亡时全程 0 伤害 0 技能未亮 TP 旁观抓包</th>
+              </tr>
+            </thead>
+            <tbody>${tfRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 
 /**
  * 2. Render Grok 4.7 Verdict Banner + MVP Card + Culprit Card + 5-Stack Blame Ledger
@@ -2540,7 +3212,28 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
       </div>
 
       ${
-        assessmentText
+        (p.hero_execution_audit?.headline_badges || []).length > 0
+          ? `
+        <div class="micro-badges-wrap" style="margin-top: 10px;">
+          ${(p.hero_execution_audit.headline_badges || [])
+            .map(
+              (b) =>
+                `<span class="micro-exec-badge ${
+                  b.includes("⚠️") || b.includes("1.33") || b.includes("0.4/分")
+                    ? "warn"
+                    : b.includes("14,807") || b.includes("3.1")
+                    ? "good"
+                    : ""
+                }">🔬 ${escapeHtml(b)}</span>`
+            )
+            .join("")}
+        </div>
+      `
+          : ""
+      }
+
+      ${
+        assessmentText && !isMvp && !isTopCulprit
           ? `
         <div style="padding: 11px 14px; margin-top: 12px; background: #181a16; border-left: 3px solid var(--gold); font-size: 13px; color: #ddd6c5; line-height: 1.8;">
           ${escapeHtml(assessmentText)}
@@ -3201,6 +3894,13 @@ function openSharePosterDialog(report) {
     (a, b) => (b.rating_score || 0) - (a.rating_score || 0)
   )[0];
 
+  const df = report.deep_forensics || {};
+  const microExec = df.hero_execution_by_side?.[side]?.summary || "";
+  const microVis = df.support_vision_by_side?.[side]?.posture_verdict || "";
+  const microStack = df.stacking_and_smoke_by_side?.[side]?.stack_verdict || "";
+  const microSmoke = df.stacking_and_smoke_by_side?.[side]?.smoke_verdict || "";
+  const microTp = df.tp_rotation_by_side?.[side]?.tp_verdict || "";
+
   const lines = [
     `⚖️【刀塔五黑算账台 · 赛后处刑判决书】`,
     `📍 比赛编号：#${report.match_id} (${report.duration_str} · ${sideZh}${won ? "获胜" : "落败"} ${report.radiant_score}:${report.dire_score})`,
@@ -3212,8 +3912,23 @@ function openSharePosterDialog(report) {
     `📊 五黑全员算账明细 (按背锅排序)：`,
     ...sortedBlame.map(
       (p, i) =>
-        `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s | 锅 ${p.blame_share_pct}%`
+        `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s | 锅 ${p.blame_share_pct}%${
+          (p.hero_execution_audit?.headline_badges || [])[0]
+            ? ` | 🔬 ${p.hero_execution_audit.headline_badges[0]}`
+            : ""
+        }`
     ),
+    ...(microExec || microVis || microTp
+      ? [
+          `────────────────────`,
+          `🔬 录像级战术显微镜实锤：`,
+          ...(microExec ? [`• 【大招与绝活】${microExec}`] : []),
+          ...(microVis ? [`• 【辅助眼位】${microVis}`] : []),
+          ...(microStack ? [`• 【堆野屯矿】${microStack}`] : []),
+          ...(microSmoke ? [`• 【开雾节奏】${microSmoke}`] : []),
+          ...(microTp ? [`• 【TP支援】${microTp}`] : []),
+        ]
+      : []),
     `────────────────────`,
     `💡 下把铁律：${
       grok?.team_practice ||

@@ -1253,6 +1253,15 @@ def build_deep_replay_forensics(
                 "deaths_coords": deaths_coords,
             })
 
+    from tactical_microscope_engine import build_tactical_microscope
+    microscope = build_tactical_microscope(
+        match=match,
+        radiant_players=radiant_players,
+        dire_players=dire_players,
+        hero_const_by_id=hero_const_by_id,
+        npc_to_hid=npc_to_hid,
+    )
+
     return {
         "picks_order": picks_order,
         "lane_matchups": lane_matchups,
@@ -1262,6 +1271,7 @@ def build_deep_replay_forensics(
         "ping_pressure_rank": ping_pressure_rank,
         "focus_fire_matrix": focus_fire_matrix,
         "teamfight_forensics": tf_forensics,
+        **microscope,
     }
 
 

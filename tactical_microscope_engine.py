@@ -1,0 +1,1417 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Dota 2 录像级深度战术显微镜引擎 (tactical_microscope_engine.py)
+专为解决以下 6 大高阶复盘痛点而设计：
+1. 英雄本身的专属机制与关键大招/非指向性技能审判（如猛犸大招大到几个人、场均命中、团战憋大死、白虎箭命中率、拉比克偷大招战果、猛犸授予力量覆盖率、帕格纳棒子反伤与输血奶量等）
+2. 辅助眼位质量深度定性（进攻深入眼 vs 河道肉山博弈眼 vs 被动防守眼、分阶段眼位姿态诊断、假眼存活寿命、存活<90秒的秒排白给眼、同高台头铁连插）
+3. 辅助堆野 vs 大哥自力更生堆野审计（精确到第几分钟堆野、堆出几波几只野怪）
+4. 开雾找节奏（Smoke of Deceit）全链路还原（谁买的雾、几点几分开雾、开雾后90秒内是抓死人破局还是逛街空雾/撞墙送团）
+5. 对线期细节显微镜（0-10m 拉野区驻留与消兵反补、3/6/9m 疗伤莲花争夺、7/14/21m 智慧经验符归属时间轴、2/4m 河道圣水符、双生门传送走门游走、观察者视野灯塔点亮）
+6. TP 救人及时性与团战支援审计（团战窗口亮 TP 落地救人次数、队友被围剿时 0 伤害 0 技能挂机旁观缺席点名、复活买 TP 飞脸上连环死）
+"""
+
+from typing import Any, Dict, List, Optional, Tuple
+from dota_constants_zh import get_ability_zh
+
+
+RUNE_TYPES_ZH: Dict[str, str] = {
+    "0": "双倍伤害符",
+    "1": "极速神符",
+    "2": "幻象神符",
+    "3": "隐身神符",
+    "4": "恢复神符",
+    "5": "赏金神符",
+    "6": "奥术神符",
+    "7": "圣水神符(中路水符)",
+    "8": "智慧神符(经验符)",
+    "9": "护盾神符",
+}
+
+# 关键团控/爆发大招配置：用于重点审计「放了几次大、累计大到几个人、场均大几人、有没有憋大死」
+BIG_ULTIMATE_CATALOG: Dict[str, Dict[str, Any]] = {
+    "magnataur_reverse_polarity": {
+        "zh": "两极反转 (猛犸大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.0,
+        "warn_avg_hits": 1.4,
+        "unit_label": "人次",
+    },
+    "tidehunter_ravage": {
+        "zh": "毁灭 (潮汐大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.5,
+        "warn_avg_hits": 1.6,
+        "unit_label": "人次",
+    },
+    "faceless_void_chronosphere": {
+        "zh": "时间结界 (虚空大罩)",
+        "type": "zone_ult",
+        "good_avg_hits": 1.5,
+        "warn_avg_hits": 1.0,
+        "unit_label": "次结界",
+    },
+    "enigma_black_hole": {
+        "zh": "黑洞 (谜团大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.0,
+        "warn_avg_hits": 1.2,
+        "unit_label": "人次",
+    },
+    "earthshaker_echo_slam": {
+        "zh": "回音击 (牛头大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.2,
+        "warn_avg_hits": 1.4,
+        "unit_label": "人次",
+    },
+    "dark_seer_vacuum": {
+        "zh": "真空 (黑贤拉)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.0,
+        "warn_avg_hits": 1.3,
+        "unit_label": "人次",
+    },
+    "dark_seer_wall_of_replica": {
+        "zh": "复制之墙 (黑贤墙)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 1.8,
+        "warn_avg_hits": 1.1,
+        "unit_label": "人次",
+    },
+    "juggernaut_omni_slash": {
+        "zh": "无敌斩 (剑圣大)",
+        "type": "multi_slash_ult",
+        "good_avg_hits": 7.5,
+        "warn_avg_hits": 4.5,
+        "unit_label": "刀斩击",
+    },
+    "crystal_maiden_freezing_field": {
+        "zh": "极寒领域 (冰女大)",
+        "type": "multi_slash_ult",
+        "good_avg_hits": 5.0,
+        "warn_avg_hits": 2.5,
+        "unit_label": "段冰爆",
+    },
+    "obsidian_destroyer_sanity_eclipse": {
+        "zh": "神智之蚀 (黑鸟大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 1.8,
+        "warn_avg_hits": 1.1,
+        "unit_label": "人次",
+    },
+    "lion_finger_of_death": {
+        "zh": "死亡一指 (莱恩大)",
+        "type": "single_nuke_ult",
+        "good_avg_hits": 0.95,
+        "warn_avg_hits": 0.8,
+        "unit_label": "人次",
+    },
+    "lich_chain_frost": {
+        "zh": "连环霜冻 (巫妖冰球)",
+        "type": "multi_slash_ult",
+        "good_avg_hits": 3.5,
+        "warn_avg_hits": 2.0,
+        "unit_label": "次弹射",
+    },
+    "ancient_apparition_ice_blast": {
+        "zh": "冰晶爆轰 (冰魂大)",
+        "type": "multi_slash_ult",
+        "good_avg_hits": 3.0,
+        "warn_avg_hits": 1.5,
+        "unit_label": "段命中",
+    },
+    "centaur_stampede": {
+        "zh": "奔袭冲撞 (人马大)",
+        "type": "team_buff_ult",
+        "good_avg_hits": 0.5,
+        "warn_avg_hits": 0.2,
+        "unit_label": "人次",
+    },
+    "mirana_invis": {
+        "zh": "月光暗影 (白虎群体隐身大)",
+        "type": "team_buff_ult",
+        "good_avg_hits": 0.0,
+        "warn_avg_hits": 0.0,
+        "unit_label": "次全队隐身",
+    },
+    "furion_wrath_of_nature": {
+        "zh": "自然之怒 (先知大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.2,
+        "warn_avg_hits": 1.3,
+        "unit_label": "人次",
+    },
+    "pudge_dismember": {
+        "zh": "肢解 (屠夫咬)",
+        "type": "multi_slash_ult",
+        "good_avg_hits": 3.0,
+        "warn_avg_hits": 1.8,
+        "unit_label": "段吞噬",
+    },
+    "mars_arena_of_blood": {
+        "zh": "热血竞技场 (玛尔斯框大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 1.8,
+        "warn_avg_hits": 1.1,
+        "unit_label": "人次",
+    },
+    "disruptor_static_storm": {
+        "zh": "静态风暴 (萨尔框大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.0,
+        "warn_avg_hits": 1.2,
+        "unit_label": "人次",
+    },
+    "puck_dream_coil": {
+        "zh": "梦境缠绕 (帕克大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.0,
+        "warn_avg_hits": 1.2,
+        "unit_label": "人次",
+    },
+}
+
+# 核心非指向性/控制/绝活小技能目录：用于审计技能命中率（如白虎箭、屠夫钩、猛犸拱、人马踩、鱼人踩等）
+SKILLSHOT_CATALOG: Dict[str, Dict[str, Any]] = {
+    "mirana_arrow": {"zh": "月神之箭 (摸奖神箭)", "good_pct": 38.0, "warn_pct": 22.0},
+    "pudge_meat_hook": {"zh": "肉钩 (出钩命中)", "good_pct": 42.0, "warn_pct": 25.0},
+    "magnataur_skewer": {"zh": "巨角冲撞 (猛犸拱人)", "good_pct": 70.0, "warn_pct": 50.0},
+    "magnataur_shockwave": {"zh": "震荡波", "good_pct": 65.0, "warn_pct": 40.0},
+    "centaur_hoof_stomp": {"zh": "马蹄践踏 (人马踩)", "good_pct": 55.0, "warn_pct": 35.0},
+    "slardar_slithereen_crush": {"zh": "鱼人碎击 (大鱼踩)", "good_pct": 55.0, "warn_pct": 35.0},
+    "lion_impale": {"zh": "裂地尖刺 (莱恩穿刺)", "good_pct": 85.0, "warn_pct": 65.0},
+    "nyx_assassin_impale": {"zh": "穿刺 (小强戳)", "good_pct": 65.0, "warn_pct": 40.0},
+    "nyx_assassin_spiked_carapace": {"zh": "尖刺外壳 (开壳反晕)", "good_pct": 55.0, "warn_pct": 35.0},
+    "hoodwink_sharpshooter": {"zh": "一击必杀 (松鼠狙击大)", "good_pct": 70.0, "warn_pct": 45.0},
+    "hoodwink_acorn_shot": {"zh": "橡果栗鼠", "good_pct": 65.0, "warn_pct": 40.0},
+    "dragon_knight_dragon_tail": {"zh": "神龙摆尾 (龙骑拍晕)", "good_pct": 85.0, "warn_pct": 65.0},
+    "dragon_knight_fireball": {"zh": "魔晶火球", "good_pct": 80.0, "warn_pct": 50.0},
+    "pugna_nether_ward": {"zh": "幽冥守卫 (骨法插棒子电人)", "good_pct": 100.0, "warn_pct": 60.0},
+    "pugna_nether_blast": {"zh": "幽冥爆轰 (爆塔/爆人)", "good_pct": 35.0, "warn_pct": 20.0},
+    "furion_sprout": {"zh": "发芽 (先知框人)", "good_pct": 70.0, "warn_pct": 45.0},
+    "marci_grapple": {"zh": "过肩摔 (玛西背人)", "good_pct": 65.0, "warn_pct": 40.0},
+}
+
+
+def fmt_mmss(sec: Any) -> str:
+    s = int(sec or 0)
+    if s < 0:
+        return f"-{abs(s)//60:02d}:{abs(s)%60:02d}"
+    return f"{s//60:02d}:{s%60:02d}"
+
+
+def classify_ward_map_zone(x: float, y: float, planter_side: str) -> Dict[str, str]:
+    """
+    根据 Dota 2 真实小地图坐标 (x, y in 64..192) 与插眼方阵营 ('radiant' 或 'dire')：
+    1. 给出具体战术点位名称 (zone_zh)
+    2. 定性为：
+       - 'aggressive' (⚔️ 进攻深入眼：插在敌方半场野区/三角区/高地口)
+       - 'river_roshan' (⚖️ 河道/肉山争夺眼：插在河道中线/肉山坑/符点)
+       - 'defensive' (🛡️ 防守保护眼：插在己方半场野区/外塔后/高地)
+    """
+    diag_sum = x + y  # 256 为左下到右上河道中心线；<246 天辉半场，>266 夜魇半场
+    # 具体区域命名
+    if 246.0 <= diag_sum <= 266.0:
+        if x < 118 and y > 134:
+            zone_zh = "上路河道 / 肉山坑口"
+        elif x > 136 and y < 118:
+            zone_zh = "下路河道 / 魔晶区"
+        else:
+            zone_zh = "中路河道高坡 / 符点"
+        territory = "neutral"
+    elif diag_sum < 246.0:
+        territory = "radiant"
+        if x < 104 and y < 104:
+            zone_zh = "天辉基地高地 / 三塔内"
+        elif x < 108 and y >= 122:
+            zone_zh = "天辉上路三角区 / 二塔高台"
+        elif x >= 132 and y < 110:
+            zone_zh = "天辉下路主野区高台 / 一塔林区"
+        else:
+            zone_zh = "天辉中路野区腹地"
+    else:
+        territory = "dire"
+        if x > 148 and y > 148:
+            zone_zh = "夜魇基地高地 / 三塔内"
+        elif x < 124 and y >= 145:
+            zone_zh = "夜魇上路主野区高台 / 一塔林区"
+        elif x >= 142 and y < 126:
+            zone_zh = "夜魇下路三角区 / 二塔高台"
+        else:
+            zone_zh = "夜魇中路野区腹地"
+
+    if territory == "neutral":
+        posture = "river_roshan"
+        posture_zh = "⚖️ 河道/肉山博弈眼"
+    elif territory == planter_side:
+        posture = "defensive"
+        posture_zh = "🛡️ 被动防守保护眼"
+    else:
+        posture = "aggressive"
+        posture_zh = "⚔️ 深入敌后进攻眼"
+
+    return {
+        "zone_zh": zone_zh,
+        "territory": territory,
+        "posture": posture,
+        "posture_zh": posture_zh,
+    }
+
+
+def build_tactical_microscope(
+    match: Dict[str, Any],
+    radiant_players: List[Dict[str, Any]],
+    dire_players: List[Dict[str, Any]],
+    hero_const_by_id: Dict[int, Dict[str, Any]],
+    npc_to_hid: Dict[str, int],
+) -> Dict[str, Any]:
+    """
+    构建完整的赛后五大显微镜（支持按 radiant / dire 视角即时切换，同时把个人专属英雄审判挂载到每位 player 上）：
+    1. hero_execution_by_side: 英雄专属机制与大招/控制审判（猛犸RP场均人数、团战憋大死、技能命中率、Empower覆盖、骨法棒子反伤等）
+    2. support_vision_by_side: 辅助眼位质量诊断（进攻/河道/防守眼比例、分期姿态、假眼平均寿命、存活<90s秒排眼、同高台死磕）
+    3. stacking_and_smoke_by_side: 辅助堆野 vs 大哥自堆（精确到分钟）+ 开雾找节奏时间轴与破雾战果定性
+    4. laning_mechanics_by_side: 对线期拉野消兵、3/6/9m 疗伤莲花池对比、7/14/21m 智慧经验符归属时间轴、2/4m 圣水符、双生门传送、观察者灯塔
+    5. tp_rotation_by_side: TP 救人及时性、团战亮 TP 落地参战、队友阵亡时 0 参战挂机旁观抓包、买 TP 飞脸上连死
+    """
+    all_formatted = radiant_players + dire_players
+    fmt_by_slot = {int(p["player_slot"]): p for p in all_formatted}
+    fmt_by_hid = {int(p["hero_id"]): p for p in all_formatted}
+    raw_players_list = match.get("players") or []
+    raw_by_slot = {int(rp.get("player_slot", 0)): rp for rp in raw_players_list}
+    duration_sec = int(match.get("duration") or 2400)
+    duration_min = max(1.0, duration_sec / 60.0)
+    raw_tfs = match.get("teamfights") or []
+
+    # 预先构建团战索引：每个 slot 在每波团战的技能释放、伤害、死亡、TP使用
+    tf_records_by_slot: Dict[int, List[Dict[str, Any]]] = {int(p["player_slot"]): [] for p in all_formatted}
+    for tf_idx, tf in enumerate(raw_tfs):
+        tf_pl = tf.get("players") or []
+        if len(tf_pl) < 10:
+            continue
+        s_sec = int(tf.get("start") or 0)
+        e_sec = int(tf.get("end") or 0)
+        rad_deaths = sum(int(tf_pl[i].get("deaths") or 0) for i in range(5))
+        dire_deaths = sum(int(tf_pl[i].get("deaths") or 0) for i in range(5, 10))
+        if rad_deaths + dire_deaths < 2:
+            continue
+        for i in range(10):
+            rp_i = raw_players_list[i] if i < len(raw_players_list) else {}
+            pslot = int(rp_i.get("player_slot", i if i < 5 else i + 123))
+            tp_obj = tf_pl[i]
+            if pslot in tf_records_by_slot:
+                tf_records_by_slot[pslot].append({
+                    "tf_num": tf_idx + 1,
+                    "start_sec": s_sec,
+                    "end_sec": e_sec,
+                    "time_range": f"{fmt_mmss(s_sec)}–{fmt_mmss(e_sec)}",
+                    "deaths": int(tp_obj.get("deaths") or 0),
+                    "damage": int(tp_obj.get("damage") or 0),
+                    "healing": int(tp_obj.get("healing") or 0),
+                    "ability_uses": tp_obj.get("ability_uses") or {},
+                    "item_uses": tp_obj.get("item_uses") or {},
+                    "rad_deaths": rad_deaths,
+                    "dire_deaths": dire_deaths,
+                })
+
+    # =========================================================================
+    # 一、英雄本身与关键大招 / 核心技能深度审判 (Hero Execution & Ultimate Audit)
+    # =========================================================================
+    def analyze_player_hero_execution(fp: Dict[str, Any]) -> Dict[str, Any]:
+        pslot = int(fp["player_slot"])
+        rp = raw_by_slot.get(pslot, {})
+        hid = int(fp["hero_id"])
+        h_npc = hero_const_by_id.get(hid, {}).get("npc") or f"npc_dota_hero_{hid}"
+        h_prefix = h_npc.replace("npc_dota_hero_", "")
+        side_key = "radiant" if pslot < 128 else "dire"
+        allies = radiant_players if side_key == "radiant" else dire_players
+        enemies = dire_players if side_key == "radiant" else radiant_players
+
+        au: Dict[str, int] = {k: int(v or 0) for k, v in (rp.get("ability_uses") or {}).items()}
+        hh: Dict[str, int] = {k: int(v or 0) for k, v in (rp.get("hero_hits") or {}).items()}
+        dt: Dict[str, Dict[str, int]] = rp.get("damage_targets") or {}
+        di: Dict[str, int] = {k: int(v or 0) for k, v in (rp.get("damage_inflictor") or {}).items()}
+        heal_dict: Dict[str, int] = {k: int(v or 0) for k, v in (rp.get("healing") or {}).items()}
+        stuns_sec = round(float(rp.get("stuns") or 0.0), 1)
+        tf_list = tf_records_by_slot.get(pslot, [])
+
+        ult_audits: List[Dict[str, Any]] = []
+        skillshot_audits: List[Dict[str, Any]] = []
+        special_insights: List[str] = []
+        headline_badges: List[Dict[str, str]] = []
+
+        # 1) 检查该玩家是否拥有关键团控/爆发大招
+        for ab_key, cfg in BIG_ULTIMATE_CATALOG.items():
+            casts = au.get(ab_key, 0)
+            # 只有该英雄本尊或确实释放过的技能才进入审计
+            if casts <= 0 and not ab_key.startswith(h_prefix):
+                continue
+            hits = hh.get(ab_key, 0)
+            dmg = di.get(ab_key, 0)
+            avg_hits = round(hits / max(1, casts), 2) if casts > 0 else 0.0
+
+            # 统计团战中该大招的释放波数 vs 团战未放大就阵亡的波数
+            tf_casts_waves = []
+            tf_held_death_waves = []
+            for tfr in tf_list:
+                c_in_tf = int((tfr["ability_uses"] or {}).get(ab_key, 0))
+                if c_in_tf > 0:
+                    tf_casts_waves.append(f"{tfr['time_range']}(×{c_in_tf})")
+                elif tfr["deaths"] > 0 and tfr["start_sec"] >= 420:
+                    # 7分钟后有大招时期在团战阵亡但没放出大招
+                    tf_held_death_waves.append(tfr["time_range"])
+
+            # 拆解该大招打在哪些敌方英雄身上
+            target_dmg_map = dt.get(ab_key) or {}
+            victim_breakdown = []
+            for npc_k, d_val in sorted(target_dmg_map.items(), key=lambda x: int(x[1] or 0), reverse=True):
+                if int(d_val or 0) <= 0:
+                    continue
+                vhid = npc_to_hid.get(npc_k, 0)
+                vp = fmt_by_hid.get(vhid)
+                if vp and vp["side"] != fp["side"]:
+                    victim_breakdown.append(f"{vp['hero_short_zh']}({int(d_val):,}伤)")
+
+            if cfg["type"] == "team_buff_ult":
+                # 如白虎群体隐身大、人马奔袭大
+                freq_min = round(duration_min / max(1, casts), 1)
+                grade = "good" if casts >= max(4, int(duration_min / 3.8)) else "warn"
+                verdict_text = (
+                    f"全场释放 {casts} 次（平均每 {freq_min} 分钟开大 1 次），其中 {len(tf_casts_waves)} 波关键团战开启大招掩护/冲阵。"
+                )
+                badge_text = f"{cfg['zh']}: {casts}次"
+            else:
+                if casts == 0:
+                    grade = "bad"
+                    verdict_text = f"整局比赛 {cfg['zh']} 释放记录为 0！"
+                    badge_text = f"{cfg['zh']}: 0释放"
+                elif avg_hits >= cfg["good_avg_hits"]:
+                    grade = "good"
+                    verdict_text = (
+                        f"大招质量极高！全场释放 {casts} 次，累计打出 {hits} {cfg['unit_label']}（场均每大 {avg_hits} {cfg['unit_label']}，造成 {dmg:,} 点伤害）"
+                        + (f"，在 {', '.join(tf_casts_waves[:4])} 团战完美兑现" if tf_casts_waves else "")
+                        + (f"；主要灌伤目标：{'、'.join(victim_breakdown[:3])}" if victim_breakdown else "")
+                        + "。"
+                    )
+                    badge_text = f"{cfg['zh']}: {casts}放/{hits}{cfg['unit_label']}(均{avg_hits})"
+                elif avg_hits >= cfg["warn_avg_hits"]:
+                    grade = "warn"
+                    verdict_text = (
+                        f"大招中规中矩：全场释放 {casts} 次，累计 {hits} {cfg['unit_label']}（场均每大 {avg_hits} {cfg['unit_label']}，伤害 {dmg:,}）"
+                        + (f"；但在 {', '.join(tf_held_death_waves[:3])} 团战中未放出大招即阵亡！" if tf_held_death_waves else "。")
+                    )
+                    badge_text = f"{cfg['zh']}: 场均{avg_hits}{cfg['unit_label']}"
+                else:
+                    grade = "bad"
+                    verdict_text = (
+                        f"⚠️ 大招严重低效/空大频发：全场放了 {casts} 次《{cfg['zh']}》，累计仅命中 {hits} {cfg['unit_label']}（场均每次大招仅 {avg_hits} {cfg['unit_label']}！）"
+                        + (f"，且在 {', '.join(tf_held_death_waves[:3])} 等 {len(tf_held_death_waves)} 波关键团战中没按出大招就躺下读秒！" if tf_held_death_waves else "，多次出现单大或空大脱节！")
+                    )
+                    badge_text = f"🚨 {cfg['zh']}: {casts}大仅{hits}{cfg['unit_label']}(均{avg_hits})"
+
+            ult_audits.append({
+                "ability_key": ab_key,
+                "ability_zh": cfg["zh"],
+                "casts": casts,
+                "hits": hits,
+                "avg_hits": avg_hits,
+                "unit_label": cfg["unit_label"],
+                "damage": dmg,
+                "tf_casts_count": len(tf_casts_waves),
+                "tf_casts_waves": tf_casts_waves,
+                "tf_held_death_count": len(tf_held_death_waves),
+                "tf_held_death_waves": tf_held_death_waves,
+                "victim_breakdown": victim_breakdown,
+                "grade": grade,
+                "verdict_text": verdict_text,
+            })
+            headline_badges.append({"text": badge_text, "tone": grade})
+            special_insights.append(verdict_text)
+
+        # 2) 检查核心非指向性/控制小技能命中率 (如白虎箭、猛犸拱、屠夫钩、人马踩、莱恩刺、骨法棒子等)
+        for ab_key, scfg in SKILLSHOT_CATALOG.items():
+            casts = au.get(ab_key, 0)
+            if casts <= 0:
+                continue
+            hits = hh.get(ab_key, 0)
+            dmg = di.get(ab_key, 0)
+            hit_pct = round((hits / max(1, casts)) * 100.0, 1)
+
+            if ab_key == "pugna_nether_ward":
+                # 骨法棒子特殊计算：插了几根棒子 -> 电击敌方多少次 -> 分别电了谁多少血
+                target_dmg_map = dt.get(ab_key) or {}
+                zapped = []
+                for npc_k, d_val in sorted(target_dmg_map.items(), key=lambda x: int(x[1] or 0), reverse=True):
+                    vhid = npc_to_hid.get(npc_k, 0)
+                    vp = fmt_by_hid.get(vhid)
+                    if vp and vp["side"] != fp["side"] and int(d_val or 0) > 0:
+                        zapped.append(f"{vp['hero_short_zh']}({int(d_val):,}血)")
+                txt = (
+                    f"《幽冥守卫》阵地威慑拉满：全场插下 {casts} 根法力棒，累计电击敌方施法者 {hits} 次，轰出 {dmg:,} 点反伤"
+                    + (f"（重点电麻：{'、'.join(zapped[:3])}）！" if zapped else "！")
+                )
+                skillshot_audits.append({
+                    "ability_zh": scfg["zh"],
+                    "casts": casts,
+                    "hits": hits,
+                    "hit_pct": hit_pct,
+                    "damage": dmg,
+                    "grade": "good" if dmg >= 5000 else "warn",
+                    "detail": txt,
+                })
+                headline_badges.append({"text": f"幽冥棒: {casts}根电{hits}次({dmg:,}伤)", "tone": "good"})
+                special_insights.append(txt)
+            else:
+                grade = "good" if hit_pct >= scfg["good_pct"] else ("warn" if hit_pct >= scfg["warn_pct"] else "bad")
+                txt = (
+                    f"《{scfg['zh']}》全场施放 {casts} 次，命中敌方英雄 {hits} 人次（有效命中比 {hit_pct}%，造成 {dmg:,} 伤害）"
+                    + ("，手感火热！" if grade == "good" else ("，大量技能落空或仅用于清兵逃生。" if grade == "bad" else "。"))
+                )
+                skillshot_audits.append({
+                    "ability_zh": scfg["zh"],
+                    "casts": casts,
+                    "hits": hits,
+                    "hit_pct": hit_pct,
+                    "damage": dmg,
+                    "grade": grade,
+                    "detail": txt,
+                })
+                headline_badges.append({"text": f"{scfg['zh'].split(' ')[0]}: {casts}放/{hits}中({hit_pct}%)", "tone": grade})
+                special_insights.append(txt)
+
+        # 3) 专属英雄机制深度挖掘：
+        # 3a. 猛犸 Empower (授予力量) 给全队套了几次、主C靠溅射打了多少伤害
+        if hid == 97 or au.get("magnataur_empower", 0) > 0:
+            emp_casts = au.get("magnataur_empower", 0)
+            emp_per_min = round(emp_casts / duration_min, 2)
+            # 统计全队队友靠 magnataur_empower 溅射造成的伤害
+            ally_emp_details = []
+            total_emp_cleave_dmg = 0
+            for ally_p in allies:
+                arp = raw_by_slot.get(int(ally_p["player_slot"]), {})
+                a_hh = int((arp.get("hero_hits") or {}).get("magnataur_empower", 0))
+                a_dt = (arp.get("damage_targets") or {}).get("magnataur_empower") or {}
+                a_dmg = sum(int(v or 0) for v in a_dt.values())
+                if a_hh > 0 or a_dmg > 0:
+                    total_emp_cleave_dmg += a_dmg
+                    ally_emp_details.append(f"{ally_p['hero_short_zh']}(溅射{a_hh}刀/{a_dmg:,}伤)")
+            emp_tone = "good" if emp_casts >= int(duration_min * 0.75) else "bad"
+            emp_msg = (
+                f"《授予力量》Buff 覆盖审计：{duration_min:.0f} 分钟比赛共施放 {emp_casts} 次（分均仅 {emp_per_min} 次）"
+                + (f"，帮助队友打出 {'、'.join(ally_emp_details)}。" if ally_emp_details else "。")
+                + ("⚠️ 作为工具人猛犸，中后期给主C续 Buff 的频率偏低，刷钱与打团前务必保持主C身上常驻分裂！" if emp_tone == "bad" else "")
+            )
+            special_insights.append(emp_msg)
+            headline_badges.append({"text": f"授予力量: {emp_casts}次(分均{emp_per_min})", "tone": emp_tone})
+
+        # 3b. 帕格纳 (Pugna) 生命汲取给队友输血 & 衰老次数
+        if hid == 45:
+            ally_heals = []
+            for npc_k, h_val in sorted(heal_dict.items(), key=lambda x: int(x[1] or 0), reverse=True):
+                if "illusion" in npc_k or int(h_val or 0) <= 0:
+                    continue
+                thid = npc_to_hid.get(npc_k, 0)
+                tp_ally = fmt_by_hid.get(thid)
+                if tp_ally and tp_ally["side"] == fp["side"] and tp_ally["hero_id"] != 45:
+                    ally_heals.append(f"{tp_ally['hero_short_zh']}(+{int(h_val):,}血)")
+            dec_casts = au.get("pugna_decrepify", 0)
+            drain_casts = au.get("pugna_life_drain", 0)
+            pugna_msg = (
+                f"《生命汲取 & 衰老》机制审计：全场吸星大法开启 {drain_casts} 次，不仅打出高额法系输出，"
+                + (f"还给队友输血续命：{'、'.join(ally_heals[:3])}；" if ally_heals else "")
+                + f"全场释放《衰老》{dec_casts} 次救人/加深法伤。"
+            )
+            special_insights.append(pugna_msg)
+
+        # 3c. 主宰 (Juggernaut) 治疗守卫奶棒次数与治疗量
+        if hid == 8:
+            ward_casts = au.get("juggernaut_healing_ward", 0)
+            fury_casts = au.get("juggernaut_blade_fury", 0)
+            ally_heals = []
+            self_heal = 0
+            for npc_k, h_val in sorted(heal_dict.items(), key=lambda x: int(x[1] or 0), reverse=True):
+                if "illusion" in npc_k or int(h_val or 0) <= 0:
+                    continue
+                thid = npc_to_hid.get(npc_k, 0)
+                tp_ally = fmt_by_hid.get(thid)
+                if tp_ally and tp_ally["side"] == fp["side"]:
+                    if tp_ally["hero_id"] == 8:
+                        self_heal += int(h_val)
+                    else:
+                        ally_heals.append(f"{tp_ally['hero_short_zh']}(+{int(h_val):,}血)")
+            jugg_msg = (
+                f"《治疗守卫 & 剑刃风暴》审计：全场插下 {ward_casts} 根治疗图腾（为队友治疗 {fp.get('hero_healing',0):,} 点"
+                + (f"：{'、'.join(ally_heals[:3])}" if ally_heals else "")
+                + (f"，另为自身恢复 {self_heal:,} 点生命" if self_heal > 0 else "")
+                + f"），转出 {fury_casts} 次剑刃风暴规避控制并打满 AOE。"
+            )
+            special_insights.append(jugg_msg)
+            headline_badges.append({"text": f"治疗守卫: {ward_casts}根(奶队友{fp.get('hero_healing',0):,})", "tone": "good" if ward_casts >= 10 else "warn"})
+
+        # 3d. 拉比克 (Rubick) 偷到了什么技能、放了几次、砸中几人
+        if hid == 86:
+            steal_casts = au.get("rubick_spell_steal", 0)
+            stolen_used = []
+            for k_ab, cnt_ab in sorted(au.items(), key=lambda x: x[1], reverse=True):
+                if k_ab.startswith("rubick_") or k_ab in ("ability_capture", "ability_lamp_use", "twin_gate_portal_warp", "plus_high_five", "seasonal_dark_carnival_pie"):
+                    continue
+                h_ab = hh.get(k_ab, 0)
+                d_ab = di.get(k_ab, 0)
+                stolen_used.append(
+                    f"偷《{get_ability_zh(k_ab)}》放 {cnt_ab} 次"
+                    + (f"(中{h_ab}人/{d_ab:,}伤)" if (h_ab > 0 or d_ab > 0) else "")
+                )
+            rub_msg = (
+                f"《技能窃取》实战审计：全场大招偷取 {steal_casts} 次，"
+                + (f"成功用出的敌方核心技能包括：{'、'.join(stolen_used[:5])}！" if stolen_used else "但偷到后实际放出有效伤害的技能偏少。")
+            )
+            special_insights.append(rub_msg)
+            headline_badges.append({"text": f"偷技能: {steal_casts}次", "tone": "good" if steal_casts >= 18 else "warn"})
+
+        # 4) 硬控总时长勋章
+        if stuns_sec >= 15.0:
+            headline_badges.append({
+                "text": f"总硬控: {stuns_sec}秒",
+                "tone": "good" if stuns_sec >= 40.0 else "warn",
+            })
+            special_insights.append(f"全场累计对敌方英雄造成 {stuns_sec} 秒硬控眩晕（平均每分钟控制 {stuns_sec/duration_min:.2f} 秒）。")
+
+        # 兜底：如果该英雄没有在上面特殊目录里命中，自动提取其施放次数最多的前 3 个主动技能与命中人次
+        if not special_insights:
+            top_abs = [
+                (k, v) for k, v in sorted(au.items(), key=lambda x: x[1], reverse=True)
+                if k not in ("ability_capture", "ability_lamp_use", "twin_gate_portal_warp", "plus_high_five")
+            ][:3]
+            if top_abs:
+                parts = [f"《{get_ability_zh(k)}》释放 {v} 次(命中 {hh.get(k,0)} 人次 / {di.get(k,0):,} 伤害)" for k, v in top_abs]
+                special_insights.append("核心技能释放与转化：" + "；".join(parts) + "。")
+
+        res = {
+            "pos": fp["pos"],
+            "player_slot": pslot,
+            "side": side_key,
+            "hero_id": hid,
+            "hero_short_zh": fp["hero_short_zh"],
+            "hero_img": fp["hero_img"],
+            "personaname": fp["personaname"],
+            "stuns_sec": stuns_sec,
+            "ult_audits": ult_audits,
+            "skillshot_audits": skillshot_audits,
+            "headline_badges": headline_badges[:4],
+            "special_insights": special_insights[:4],
+        }
+        fp["hero_execution_audit"] = res
+        return res
+
+    all_hero_exec = [analyze_player_hero_execution(p) for p in all_formatted]
+
+    # =========================================================================
+    # 二、辅助眼位质量诊断：进攻眼 vs 防守眼 vs 河道眼、寿命、秒排眼、同高台死磕
+    # =========================================================================
+    def analyze_side_vision_quality(side_key: str) -> Dict[str, Any]:
+        own_players = radiant_players if side_key == "radiant" else dire_players
+        opp_players = dire_players if side_key == "radiant" else radiant_players
+        side_zh = "天辉" if side_key == "radiant" else "夜魇"
+
+        obs_records: List[Dict[str, Any]] = []
+        sen_records: List[Dict[str, Any]] = []
+        instant_dewards: List[Dict[str, Any]] = []
+        cliff_spots: List[Dict[str, Any]] = []
+
+        posture_counts = {"aggressive": 0, "river_roshan": 0, "defensive": 0}
+        phase_posture = {
+            "lane": {"label": "对线期 (0-10m)", "aggressive": 0, "river_roshan": 0, "defensive": 0},
+            "mid": {"label": "中期节奏 (10-25m)", "aggressive": 0, "river_roshan": 0, "defensive": 0},
+            "late": {"label": "后期决战 (25m+)", "aggressive": 0, "river_roshan": 0, "defensive": 0},
+        }
+
+        per_support_vision: List[Dict[str, Any]] = []
+
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            rp = raw_by_slot.get(int(fp["player_slot"]), {})
+            o_log = rp.get("obs_log") or []
+            o_left = rp.get("obs_left_log") or []
+            s_log = rp.get("sen_log") or []
+            s_left = rp.get("sen_left_log") or []
+
+            p_agg = 0
+            p_riv = 0
+            p_def = 0
+            p_lifespans = []
+            p_dewarded_cnt = 0
+
+            for o in o_log:
+                ox = float(o.get("x") or 128.0)
+                oy = float(o.get("y") or 128.0)
+                ot = int(o.get("time") or 0)
+                okey = o.get("key")
+                zinfo = classify_ward_map_zone(ox, oy, side_key)
+                post = zinfo["posture"]
+                posture_counts[post] += 1
+                if post == "aggressive":
+                    p_agg += 1
+                elif post == "river_roshan":
+                    p_riv += 1
+                else:
+                    p_def += 1
+
+                p_key = "lane" if ot < 600 else ("mid" if ot < 1500 else "late")
+                phase_posture[p_key][post] += 1
+
+                # 匹配消失事件计算寿命
+                matched_l = [
+                    ol for ol in o_left
+                    if ol.get("key") == okey and int(ol.get("time") or 0) >= ot
+                ]
+                if matched_l:
+                    ol = matched_l[0]
+                    lt = int(ol.get("time") or ot)
+                    lifespan = max(1, min(360, lt - ot))
+                    att_npc = str(ol.get("attackername") or "")
+                    att_hid = npc_to_hid.get(att_npc, 0)
+                    att_fp = fmt_by_hid.get(att_hid)
+                    was_dewarded = bool(att_fp and att_fp["side"] != fp["side"] and lifespan < 345)
+                    killer_zh = att_fp["hero_short_zh"] if was_dewarded else ("自然到期" if lifespan >= 345 else "被排/到期")
+                else:
+                    # 比赛结束时仍存活
+                    lifespan = max(1, min(360, duration_sec - ot))
+                    was_dewarded = False
+                    killer_zh = "终局仍存活"
+
+                p_lifespans.append(lifespan)
+                if was_dewarded:
+                    p_dewarded_cnt += 1
+                    if lifespan <= 135:
+                        instant_dewards.append({
+                            "time_str": fmt_mmss(ot),
+                            "planter_hero": fp["hero_short_zh"],
+                            "planter_player": fp["personaname"],
+                            "pos": fp["pos"],
+                            "zone_zh": zinfo["zone_zh"],
+                            "posture_zh": zinfo["posture_zh"],
+                            "coords": f"({ox:.0f},{oy:.0f})",
+                            "lifespan_sec": lifespan,
+                            "dewarded_by": killer_zh,
+                        })
+
+                obs_records.append({
+                    "time_sec": ot,
+                    "time_str": fmt_mmss(ot),
+                    "planter_hero": fp["hero_short_zh"],
+                    "planter_pos": fp["pos"],
+                    "x": ox,
+                    "y": oy,
+                    "zone_zh": zinfo["zone_zh"],
+                    "posture": post,
+                    "posture_zh": zinfo["posture_zh"],
+                    "lifespan_sec": lifespan,
+                    "was_dewarded": was_dewarded,
+                    "killer_zh": killer_zh,
+                })
+
+            for s in s_log:
+                sx = float(s.get("x") or 128.0)
+                sy = float(s.get("y") or 128.0)
+                st = int(s.get("time") or 0)
+                zinfo = classify_ward_map_zone(sx, sy, side_key)
+                sen_records.append({
+                    "time_sec": st,
+                    "time_str": fmt_mmss(st),
+                    "planter_hero": fp["hero_short_zh"],
+                    "planter_pos": fp["pos"],
+                    "x": sx,
+                    "y": sy,
+                    "zone_zh": zinfo["zone_zh"],
+                })
+
+            if len(o_log) > 0 or len(s_log) > 0 or int(fp["pos"]) in (4, 5):
+                avg_life = round(sum(p_lifespans) / len(p_lifespans), 0) if p_lifespans else 0
+                tot_o = max(1, len(o_log))
+                pos_num = int(fp["pos"])
+                # 评价做眼风格（区分 4/5 号位辅助与 1~3 号位大哥顺手补眼）
+                if len(o_log) == 0:
+                    style_note = "全场 0 假眼投放（仅插真眼反隐）。" if len(s_log) > 0 else "全场 0 真假眼投放。"
+                elif pos_num in (1, 2, 3) and len(o_log) <= 2:
+                    style_note = f"{pos_num}号位核心自备视野：顺手插下 {len(o_log)} 颗假眼 / {len(s_log)} 颗真眼（进攻 {p_agg} / 河道 {p_riv} / 防守保护 {p_def}），平均存活 {int(avg_life)}s。"
+                elif p_agg / tot_o >= 0.5:
+                    style_note = f"做眼风格偏【激进深插】（⚔️进攻眼 {p_agg} 颗 / ⚖️河道眼 {p_riv} 颗 / 🛡️防守眼 {p_def} 颗），平均寿命 {int(avg_life)}s。"
+                elif p_def / tot_o >= 0.55:
+                    style_note = f"做眼风格偏【保守缩家】（🛡️防守保护眼 {p_def} 颗 / ⚖️河道眼 {p_riv} 颗 / ⚔️进攻眼仅 {p_agg} 颗），平均寿命 {int(avg_life)}s。"
+                else:
+                    style_note = f"做眼攻守均衡（⚔️进攻眼 {p_agg} 颗 / ⚖️河道肉山眼 {p_riv} 颗 / 🛡️防守眼 {p_def} 颗），平均寿命 {int(avg_life)}s。"
+
+                per_support_vision.append({
+                    "pos": fp["pos"],
+                    "hero_short_zh": fp["hero_short_zh"],
+                    "hero_img": fp["hero_img"],
+                    "personaname": fp["personaname"],
+                    "obs_total": len(o_log),
+                    "sen_total": len(s_log),
+                    "obs_killed": int(rp.get("observer_kills") or 0),
+                    "sen_killed": int(rp.get("sentry_kills") or 0),
+                    "aggressive_cnt": p_agg,
+                    "river_cnt": p_riv,
+                    "defensive_cnt": p_def,
+                    "avg_lifespan_sec": int(avg_life),
+                    "dewarded_cnt": p_dewarded_cnt,
+                    "style_note": style_note,
+                })
+
+        # 聚类检测「同高台头铁连插」(半径 4.5 内插了 >= 3 颗守卫)
+        all_wards_combined = [
+            {"type": "假眼", **r} for r in obs_records
+        ] + [
+            {"type": "真眼", **r} for r in sen_records
+        ]
+        clusters: List[Dict[str, Any]] = []
+        for w in all_wards_combined:
+            placed = False
+            for c in clusters:
+                if abs(w["x"] - c["cx"]) <= 4.5 and abs(w["y"] - c["cy"]) <= 4.5:
+                    c["items"].append(w)
+                    placed = True
+                    break
+            if not placed:
+                clusters.append({"cx": w["x"], "cy": w["y"], "zone_zh": w["zone_zh"], "items": [w]})
+
+        for c in sorted(clusters, key=lambda x: len(x["items"]), reverse=True):
+            if len(c["items"]) >= 3:
+                obs_c = sum(1 for x in c["items"] if x["type"] == "假眼")
+                sen_c = sum(1 for x in c["items"] if x["type"] == "真眼")
+                planters = sorted({x["planter_hero"] for x in c["items"]})
+                times_s = "、".join(x["time_str"] for x in c["items"][:5])
+                cliff_spots.append({
+                    "zone_zh": c["zone_zh"],
+                    "coords": f"({c['cx']:.0f},{c['cy']:.0f})",
+                    "total_count": len(c["items"]),
+                    "obs_count": obs_c,
+                    "sen_count": sen_c,
+                    "planters": " / ".join(planters),
+                    "times_str": times_s,
+                    "comment": f"在【{c['zone_zh']} ({c['cx']:.0f},{c['cy']:.0f})】同一个眼位重复插了 {len(c['items'])} 颗眼（{obs_c}假/{sen_c}真，时间：{times_s}），属于典型的固定高台死磕！",
+                })
+
+        total_obs = max(1, len(obs_records))
+        agg_pct = round(posture_counts["aggressive"] / total_obs * 100, 1)
+        riv_pct = round(posture_counts["river_roshan"] / total_obs * 100, 1)
+        def_pct = round(posture_counts["defensive"] / total_obs * 100, 1)
+        avg_team_life = int(round(sum(r["lifespan_sec"] for r in obs_records) / total_obs, 0)) if obs_records else 0
+
+        # 生成本方眼位姿态毒舌诊断结论
+        mid_agg = phase_posture["mid"]["aggressive"]
+        mid_def = phase_posture["mid"]["defensive"]
+        late_agg = phase_posture["late"]["aggressive"]
+        late_def = phase_posture["late"]["defensive"]
+
+        if def_pct >= 52.0:
+            posture_verdict = (
+                f"⚠️ 眼位整体偏保守缩家：本方全场 {len(obs_records)} 颗假眼中，有 {posture_counts['defensive']} 颗（{def_pct}%）插在己方半场，"
+                f"河道/肉山争夺眼 {posture_counts['river_roshan']} 颗（{riv_pct}%），深入敌方野区的进攻眼仅有 {posture_counts['aggressive']} 颗（{agg_pct}%）。"
+                f"当队伍需要过河抓人或压制敌方主野区时，缺乏提前铺设的侵略视野。"
+            )
+        elif agg_pct >= 45.0:
+            posture_verdict = (
+                f"⚔️ 眼位极具进攻侵略性：本方 {len(obs_records)} 颗假眼中有 {posture_counts['aggressive']} 颗（{agg_pct}%）直接插进敌方半场野区/三角区，"
+                f"另有 {posture_counts['river_roshan']} 颗（{riv_pct}%）控制河道与肉山，防守眼仅 {posture_counts['defensive']} 颗（{def_pct}%）。"
+                + (f"但要注意其中有 {len(instant_dewards)} 颗假眼被敌方快速排掉，深入做眼最好配合开雾推进！" if instant_dewards else "视野压制非常到位！")
+            )
+        else:
+            posture_verdict = (
+                f"⚖️ 眼位攻守结构均衡：全场 {len(obs_records)} 颗假眼中，⚔️ 进攻深入眼 {posture_counts['aggressive']} 颗（{agg_pct}%）、"
+                f"⚖️ 河道/肉山眼 {posture_counts['river_roshan']} 颗（{riv_pct}%）、🛡️ 防守保护眼 {posture_counts['defensive']} 颗（{def_pct}%），"
+                f"假眼平均存活寿命 {avg_team_life} 秒（满分 360 秒）。"
+            )
+
+        return {
+            "side": side_key,
+            "side_zh": side_zh,
+            "total_obs": len(obs_records),
+            "total_sen": len(sen_records),
+            "avg_lifespan_sec": avg_team_life,
+            "posture_counts": posture_counts,
+            "posture_pcts": {
+                "aggressive": agg_pct,
+                "river_roshan": riv_pct,
+                "defensive": def_pct,
+            },
+            "phase_posture": phase_posture,
+            "posture_verdict": posture_verdict,
+            "per_support_vision": per_support_vision,
+            "instant_dewards": instant_dewards[:6],
+            "cliff_spots": cliff_spots[:4],
+        }
+
+    # =========================================================================
+    # 三、辅助堆野 vs 大哥自堆 & 开雾找节奏全链路还原 (Stacking & Smoke Rhythms)
+    # =========================================================================
+    def analyze_side_stacking_and_smokes(side_key: str) -> Dict[str, Any]:
+        own_players = radiant_players if side_key == "radiant" else dire_players
+        opp_players = dire_players if side_key == "radiant" else radiant_players
+
+        # 1) 堆野审计 (camps_stacked, creeps_stacked, camps_stacked_t)
+        stack_rows: List[Dict[str, Any]] = []
+        sup_stacks = 0
+        core_stacks = 0
+        total_stacks = 0
+        total_creeps = 0
+
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            rp = raw_by_slot.get(int(fp["player_slot"]), {})
+            c_stacked = int(rp.get("camps_stacked") or 0)
+            cr_stacked = int(rp.get("creeps_stacked") or 0)
+            st_t = rp.get("camps_stacked_t") or []
+            stack_mins: List[str] = []
+            for m_idx in range(1, len(st_t)):
+                diff = int(st_t[m_idx] or 0) - int(st_t[m_idx - 1] or 0)
+                if diff > 0:
+                    stack_mins.append(f"{m_idx}:00" + (f"(×{diff})" if diff > 1 else ""))
+
+            pos_i = int(fp["pos"])
+            if pos_i in (4, 5):
+                sup_stacks += c_stacked
+            else:
+                core_stacks += c_stacked
+            total_stacks += c_stacked
+            total_creeps += cr_stacked
+
+            stack_rows.append({
+                "pos": pos_i,
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "camps_stacked": c_stacked,
+                "creeps_stacked": cr_stacked,
+                "stack_mins": stack_mins,
+                "role_tag": "辅助本职" if pos_i in (4, 5) else "大哥自力更生",
+            })
+
+        opp_total_stacks = sum(
+            int(raw_by_slot.get(int(op["player_slot"]), {}).get("camps_stacked") or 0)
+            for op in opp_players
+        )
+
+        if sup_stacks == 0 and core_stacks > 0:
+            stack_verdict = (
+                f"🚨 辅助 0 堆野警告：本方全场共堆野 {total_stacks} 波（{total_creeps} 只野怪），"
+                f"竟然全部是 1~3 号位大哥自己动手堆的（{core_stacks} 波），4/5 号位双辅助堆野记录为 0！对比敌方全队堆野 {opp_total_stacks} 波。"
+            )
+        elif core_stacks > sup_stacks:
+            stack_verdict = (
+                f"⚠️ 大哥比辅助还会堆野：本方全队堆野 {total_stacks} 波（{total_creeps} 只怪），"
+                f"其中 1~3 号位核心自己顺手堆了 {core_stacks} 波，而 4/5 号位双辅助合计仅堆了 {sup_stacks} 波（敌方全队堆野 {opp_total_stacks} 波）。"
+                f"辅助路过三角区与主野区整点 53~55 秒拉野屯矿的肌肉记忆还不够强！"
+            )
+        elif sup_stacks >= 4:
+            stack_verdict = (
+                f"✓ 辅助屯野合格：本方全队累计堆野 {total_stacks} 波（{total_creeps} 只野怪，其中双辅助贡献 {sup_stacks} 波、核心自堆 {core_stacks} 波），"
+                f"对比敌方全队 {opp_total_stacks} 波，有效加速了本方核心中期经济起飞。"
+            )
+        else:
+            stack_verdict = (
+                f"全队累计堆野 {total_stacks} 波（{total_creeps} 只野怪，辅助 {sup_stacks} 波 / 核心 {core_stacks} 波；敌方 {opp_total_stacks} 波）。"
+                f"建议 4/5 号位在 6~18 分钟控符与插眼路过三角区时多帮主C屯远古与大野。"
+            )
+
+        # 2) 开雾找节奏审计 (smoke_of_deceit purchase_log + item_uses + 90s 战果关联)
+        raw_smoke_buys: List[Dict[str, Any]] = []
+        own_smoke_uses_total = 0
+        per_player_smokes: List[Dict[str, Any]] = []
+
+        # 收集全队击杀与阵亡时间戳用于关联开雾战果
+        team_kills_timeline: List[Dict[str, Any]] = []
+        team_deaths_timeline: List[Dict[str, Any]] = []
+        for fp in own_players:
+            rp = raw_by_slot.get(int(fp["player_slot"]), {})
+            s_used = int((rp.get("item_uses") or {}).get("smoke_of_deceit") or 0)
+            s_bought = sum(1 for x in (rp.get("purchase_log") or []) if x.get("key") == "smoke_of_deceit")
+            own_smoke_uses_total += s_used
+            if s_used > 0 or s_bought > 0 or int(fp["pos"]) in (3, 4, 5):
+                per_player_smokes.append({
+                    "pos": fp["pos"],
+                    "hero_short_zh": fp["hero_short_zh"],
+                    "personaname": fp["personaname"],
+                    "bought": s_bought,
+                    "used": s_used,
+                })
+            for pe in rp.get("purchase_log") or []:
+                if pe.get("key") == "smoke_of_deceit":
+                    raw_smoke_buys.append({
+                        "time_sec": int(pe.get("time") or 0),
+                        "hero_short_zh": fp["hero_short_zh"],
+                        "personaname": fp["personaname"],
+                        "pos": fp["pos"],
+                    })
+            for ke in rp.get("kills_log") or []:
+                vhid = npc_to_hid.get(str(ke.get("key") or ""), 0)
+                vfp = fmt_by_hid.get(vhid)
+                team_kills_timeline.append({
+                    "time_sec": int(ke.get("time") or 0),
+                    "killer": fp["hero_short_zh"],
+                    "victim": vfp["hero_short_zh"] if vfp else "敌方英雄",
+                })
+            for de in rp.get("deaths_log") or []:
+                team_deaths_timeline.append({
+                    "time_sec": int(de.get("time") or 0),
+                    "victim": fp["hero_short_zh"],
+                })
+
+        opp_smoke_uses_total = sum(
+            int((raw_by_slot.get(int(op["player_slot"]), {}).get("item_uses") or {}).get("smoke_of_deceit") or 0)
+            for op in opp_players
+        )
+
+        # 合并相近 30 秒内的买雾事件并追踪随后 105 秒战果
+        raw_smoke_buys.sort(key=lambda x: x["time_sec"])
+        smoke_events: List[Dict[str, Any]] = []
+        for sb in raw_smoke_buys:
+            t0 = sb["time_sec"]
+            if smoke_events and abs(t0 - smoke_events[-1]["time_sec"]) <= 35:
+                continue
+            window_end = t0 + 105
+            k_after = [k for k in team_kills_timeline if max(0, t0) <= k["time_sec"] <= window_end]
+            d_after = [d for d in team_deaths_timeline if max(0, t0) <= d["time_sec"] <= window_end]
+
+            if t0 < 0:
+                phase_tag = "出门一级团雾"
+            elif t0 < 600:
+                phase_tag = "对线期游走雾"
+            elif t0 < 1500:
+                phase_tag = "中期抓人/推进雾"
+            else:
+                phase_tag = "后期决胜/控盾雾"
+
+            if len(k_after) > len(d_after) and len(k_after) >= 1:
+                victims_str = "、".join(f"{ fmt_mmss(k['time_sec']) } 抓死{k['victim']}" for k in k_after[:3])
+                outcome = "success"
+                outcome_label = f"🟢 破雾奏效 ({len(k_after)}换{len(d_after)})"
+                detail = f"买雾/开雾后迅速打开节奏：{victims_str}。"
+            elif len(d_after) > len(k_after) and len(d_after) >= 1:
+                dead_str = "、".join(d["victim"] for d in d_after[:3])
+                outcome = "backfire"
+                outcome_label = f"🔴 开雾撞墙 ({len(k_after)}换{len(d_after)})"
+                detail = f"开雾切入后反遭敌方反打，导致我方 {dead_str} 阵亡。"
+            elif len(k_after) > 0 and len(k_after) == len(d_after):
+                outcome = "trade"
+                outcome_label = f"⚖️ 破雾互换 ({len(k_after)}换{len(d_after)})"
+                detail = f"开雾遭遇战双方打出 {len(k_after)} 换 {len(d_after)} 人头互换。"
+            else:
+                outcome = "dry"
+                outcome_label = "🟡 哑火空雾 (0击杀)"
+                detail = "买雾/屯雾后 100 秒内未产生任何击杀（蹲人落空或仅用于安全做视野）。"
+
+            smoke_events.append({
+                "time_sec": t0,
+                "time_str": fmt_mmss(t0),
+                "phase_tag": phase_tag,
+                "initiator_hero": sb["hero_short_zh"],
+                "initiator_player": sb["personaname"],
+                "initiator_pos": sb["pos"],
+                "outcome": outcome,
+                "outcome_label": outcome_label,
+                "detail": detail,
+            })
+
+        mid_smokes = sum(1 for e in smoke_events if 600 <= e["time_sec"] <= 1500)
+        succ_smokes = sum(1 for e in smoke_events if e["outcome"] == "success")
+
+        if own_smoke_uses_total <= 1:
+            smoke_verdict = (
+                f"🚨 全场几乎不开雾找节奏：本方 {duration_min:.0f} 分钟累计仅开雾 {own_smoke_uses_total} 次（敌方开雾 {opp_smoke_uses_total} 次）！"
+                f"10~25 分钟中期节奏期极度缺乏主动买雾抓单与控盾意识，全靠走明牌视野硬撞。"
+            )
+        elif mid_smokes == 0:
+            smoke_verdict = (
+                f"⚠️ 中期（10–25m）零开雾真空：本方全场共开雾 {own_smoke_uses_total} 次（敌方 {opp_smoke_uses_total} 次），"
+                f"但最关键的 10~25 分钟跳刀/大招节奏期竟然没有组织起有效的买雾抓人！"
+            )
+        else:
+            smoke_verdict = (
+                f"本方全场累计激活诡计之雾 {own_smoke_uses_total} 次（敌方 {opp_smoke_uses_total} 次），"
+                f"共捕获 {len(smoke_events)} 波买雾节奏，其中 {succ_smokes} 波在 100 秒内直接转化为击杀破局。"
+            )
+
+        return {
+            "side": side_key,
+            "total_stacks": total_stacks,
+            "total_creeps_stacked": total_creeps,
+            "support_stacks": sup_stacks,
+            "core_stacks": core_stacks,
+            "enemy_total_stacks": opp_total_stacks,
+            "stack_verdict": stack_verdict,
+            "stack_rows": stack_rows,
+            "own_smoke_uses": own_smoke_uses_total,
+            "enemy_smoke_uses": opp_smoke_uses_total,
+            "smoke_verdict": smoke_verdict,
+            "per_player_smokes": per_player_smokes,
+            "smoke_events": smoke_events[:8],
+        }
+
+    # =========================================================================
+    # 四、对线期细节显微镜：拉野、双生门走门、疗伤莲花、7/14m 智慧经验符、2/4m 圣水符
+    # =========================================================================
+    # 预先汇总全场所有 10 人的智慧神符 (key == '8') 与 圣水符 (key == '7') 时间轴
+    all_wisdom_runes: List[Dict[str, Any]] = []
+    all_water_runes: List[Dict[str, Any]] = []
+    for fp in all_formatted:
+        rp = raw_by_slot.get(int(fp["player_slot"]), {})
+        p_side = "radiant" if int(fp["player_slot"]) < 128 else "dire"
+        for rl in rp.get("runes_log") or []:
+            rkey = str(rl.get("key"))
+            rtime = int(rl.get("time") or 0)
+            entry = {
+                "time_sec": rtime,
+                "time_str": fmt_mmss(rtime),
+                "side": p_side,
+                "side_zh": fp["side"],
+                "pos": fp["pos"],
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+            }
+            if rkey == "8":
+                all_wisdom_runes.append(entry)
+            elif rkey == "7":
+                all_water_runes.append(entry)
+
+    all_wisdom_runes.sort(key=lambda x: x["time_sec"])
+    all_water_runes.sort(key=lambda x: x["time_sec"])
+
+    def analyze_side_laning_mechanics(side_key: str) -> Dict[str, Any]:
+        own_players = radiant_players if side_key == "radiant" else dire_players
+        opp_players = dire_players if side_key == "radiant" else radiant_players
+
+        # 1) 对线期拉野与消兵审计 (0–10m)
+        # 利用辅助在野区拉野坐标带的 lane_pos 驻留权重 + 前10分钟反补 dn10 + 前8分钟封野真眼
+        pulling_rows: List[Dict[str, Any]] = []
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            pos_i = int(fp["pos"])
+            if pos_i not in (4, 5):
+                continue
+            rp = raw_by_slot.get(int(fp["player_slot"]), {})
+            lpos = rp.get("lane_pos") or {}
+            pull_ticks = 0
+            lane_ticks = 0
+            for x_s, yd in lpos.items():
+                if not isinstance(yd, dict):
+                    continue
+                for y_s, w_cnt in yd.items():
+                    try:
+                        lx = float(x_s)
+                        ly = float(y_s)
+                        w = int(w_cnt or 0)
+                        lane_ticks += w
+                        # 天辉下路拉野带 (138..172, 74..108) 或 夜魇上路拉野带 (82..118, 148..182)
+                        if (138 <= lx <= 172 and 74 <= ly <= 108) or (82 <= lx <= 118 and 148 <= ly <= 182):
+                            pull_ticks += w
+                    except Exception:
+                        pass
+
+            pull_ratio_pct = round((pull_ticks / max(1, lane_ticks)) * 100, 1)
+            dn10 = int((fp.get("laning_10m") or {}).get("dn10") or 0)
+            lh10 = int((fp.get("laning_10m") or {}).get("lh10") or 0)
+            early_sen = sum(
+                1 for s in (rp.get("sen_log") or []) if int(s.get("time") or 9999) <= 540
+            )
+            if pull_ticks >= 18 or dn10 >= 4 or early_sen >= 2:
+                status_tag = "🟢 积极拉野/封野控线"
+                comment = (
+                    f"前10分钟在边路拉野/野店区域活动占比 {pull_ratio_pct}%（驻留权重 {pull_ticks}），"
+                    f"配合插下 {early_sen} 颗对线封野/反封真眼，贡献 {lh10} 正补 / {dn10} 反补。"
+                )
+            else:
+                status_tag = "🟡 占线偏多/拉野偏少"
+                comment = (
+                    f"前10分钟拉野区活动权重仅 {pull_ticks}（反补 {dn10} 刀，前9分钟真眼 {early_sen} 颗），"
+                    f"更多时间站在兵线上耗血或游走，拉野消兵频率偏低。"
+                )
+            pulling_rows.append({
+                "pos": pos_i,
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "pull_ticks": pull_ticks,
+                "pull_ratio_pct": pull_ratio_pct,
+                "dn10": dn10,
+                "lh10": lh10,
+                "early_sentries": early_sen,
+                "status_tag": status_tag,
+                "comment": comment,
+            })
+
+        # 2) 疗伤莲花 (Lotus: famango / great_famango / greater_famango) 争夺
+        own_lotus_total = 0
+        opp_lotus_total = 0
+        own_lotus_breakdown = []
+        opp_lotus_breakdown = []
+
+        for fp in own_players:
+            rp = raw_by_slot.get(int(fp["player_slot"]), {})
+            iu = rp.get("item_uses") or {}
+            cnt = int(iu.get("famango") or 0) + int(iu.get("great_famango") or 0) + int(iu.get("greater_famango") or 0)
+            own_lotus_total += cnt
+            if cnt > 0:
+                own_lotus_breakdown.append(f"{fp['hero_short_zh']}({cnt}朵)")
+
+        for op in opp_players:
+            rp = raw_by_slot.get(int(op["player_slot"]), {})
+            iu = rp.get("item_uses") or {}
+            cnt = int(iu.get("famango") or 0) + int(iu.get("great_famango") or 0) + int(iu.get("greater_famango") or 0)
+            opp_lotus_total += cnt
+            if cnt > 0:
+                opp_lotus_breakdown.append(f"{op['hero_short_zh']}({cnt}朵)")
+
+        if own_lotus_total < opp_lotus_total:
+            lotus_verdict = (
+                f"⚠️ 边路莲花池被压制：本方全队仅吃下 {own_lotus_total} 朵疗伤莲花（{'、'.join(own_lotus_breakdown) or '全员0莲花'}），"
+                f"而敌方抢下了 {opp_lotus_total} 朵莲花（{'、'.join(opp_lotus_breakdown)}）！03:00 / 06:00 / 09:00 整点莲花池争夺吃亏。"
+            )
+        elif own_lotus_total > opp_lotus_total:
+            lotus_verdict = (
+                f"✓ 边路莲花池掌控出色：本方累计控下 {own_lotus_total} 朵疗伤莲花（{'、'.join(own_lotus_breakdown)}），"
+                f"压制了敌方的 {opp_lotus_total} 朵（{'、'.join(opp_lotus_breakdown) or '0'}），线上换血续航占优。"
+            )
+        else:
+            lotus_verdict = (
+                f"双方疗伤莲花平分秋色：本方吃下 {own_lotus_total} 朵（{'、'.join(own_lotus_breakdown) or '0'}） vs 敌方 {opp_lotus_total} 朵。"
+            )
+
+        # 3) 双生门走门 (twin_gate_portal_warp) & 观察者灯塔 (ability_lamp_use) & 前哨 (ability_capture)
+        own_gate_total = 0
+        opp_gate_total = 0
+        own_lamp_total = 0
+        opp_lamp_total = 0
+        map_interact_rows = []
+
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            rp = raw_by_slot.get(int(fp["player_slot"]), {})
+            au = rp.get("ability_uses") or {}
+            iu = rp.get("item_uses") or {}
+            g_cnt = int(au.get("twin_gate_portal_warp") or 0)
+            l_cnt = int(au.get("ability_lamp_use") or 0)
+            c_cnt = int(au.get("ability_capture") or 0)
+            lot_cnt = int(iu.get("famango") or 0) + int(iu.get("great_famango") or 0) + int(iu.get("greater_famango") or 0)
+            r_list = rp.get("runes_log") or []
+            w_cnt = sum(1 for r in r_list if str(r.get("key")) == "8")
+            water_cnt = sum(1 for r in r_list if str(r.get("key")) == "7")
+            bounty_cnt = sum(1 for r in r_list if str(r.get("key")) == "5")
+            power_cnt = sum(1 for r in r_list if str(r.get("key")) not in ("5", "7", "8"))
+
+            own_gate_total += g_cnt
+            own_lamp_total += l_cnt
+
+            map_interact_rows.append({
+                "pos": fp["pos"],
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "twin_gate": g_cnt,
+                "watcher_lamp": l_cnt,
+                "outpost_capture": c_cnt,
+                "lotus_used": lot_cnt,
+                "wisdom_runes": w_cnt,
+                "water_runes": water_cnt,
+                "bounty_runes": bounty_cnt,
+                "power_runes": power_cnt,
+            })
+
+        for op in opp_players:
+            rp = raw_by_slot.get(int(op["player_slot"]), {})
+            au = rp.get("ability_uses") or {}
+            opp_gate_total += int(au.get("twin_gate_portal_warp") or 0)
+            opp_lamp_total += int(au.get("ability_lamp_use") or 0)
+
+        # 4) 智慧经验符 (7:00 / 14:00 / 21:00) 比分与评语
+        own_wisdom_cnt = sum(1 for w in all_wisdom_runes if w["side"] == side_key)
+        opp_wisdom_cnt = sum(1 for w in all_wisdom_runes if w["side"] != side_key)
+        if own_wisdom_cnt >= opp_wisdom_cnt and own_wisdom_cnt > 0:
+            wisdom_verdict = f"✓ 智慧经验符控制占优：本方抢下 {own_wisdom_cnt} 颗经验符 vs 敌方 {opp_wisdom_cnt} 颗，辅助等级与天赋节点没有落入下风。"
+        else:
+            wisdom_verdict = f"⚠️ 智慧经验符落后：本方仅吃到 {own_wisdom_cnt} 颗经验符 vs 敌方吃到 {opp_wisdom_cnt} 颗！07:00 与 14:00 必须提前 15 秒去劣势路祭坛蹲守经验符。"
+
+        return {
+            "side": side_key,
+            "pulling_rows": pulling_rows,
+            "own_lotus_total": own_lotus_total,
+            "opp_lotus_total": opp_lotus_total,
+            "lotus_verdict": lotus_verdict,
+            "own_gate_total": own_gate_total,
+            "opp_gate_total": opp_gate_total,
+            "own_lamp_total": own_lamp_total,
+            "opp_lamp_total": opp_lamp_total,
+            "own_wisdom_cnt": own_wisdom_cnt,
+            "opp_wisdom_cnt": opp_wisdom_cnt,
+            "wisdom_verdict": wisdom_verdict,
+            "wisdom_timeline": all_wisdom_runes,
+            "water_runes_timeline": all_water_runes,
+            "map_interact_rows": map_interact_rows,
+        }
+
+    # =========================================================================
+    # 五、TP 救人及时性与团战支援/缺席旁观审计 (TP Responsiveness & Rotation Audit)
+    # =========================================================================
+    def analyze_side_tp_and_rotations(side_key: str) -> Dict[str, Any]:
+        own_players = radiant_players if side_key == "radiant" else dire_players
+        is_rad = (side_key == "radiant")
+
+        player_tp_rows: List[Dict[str, Any]] = []
+        rotation_highlights: List[Dict[str, Any]] = []
+        absent_warnings: List[Dict[str, Any]] = []
+
+        # 逐波团战检查：谁亮了 TP 参战，谁在我方死人的团战里全程 0 伤害 0 技能 0 TP 旁观
+        for tf_idx, tf in enumerate(raw_tfs):
+            tf_pl = tf.get("players") or []
+            if len(tf_pl) < 10:
+                continue
+            s_sec = int(tf.get("start") or 0)
+            e_sec = int(tf.get("end") or 0)
+            own_indices = range(0, 5) if is_rad else range(5, 10)
+            opp_indices = range(5, 10) if is_rad else range(0, 5)
+
+            own_deaths_heroes = []
+            opp_deaths_cnt = sum(int(tf_pl[i].get("deaths") or 0) for i in opp_indices)
+            tp_responders = []
+            spectators = []
+
+            for i in own_indices:
+                rp_i = raw_players_list[i] if i < len(raw_players_list) else {}
+                pslot = int(rp_i.get("player_slot", i if i < 5 else i + 123))
+                fp = fmt_by_slot.get(pslot)
+                if not fp:
+                    continue
+                tp_obj = tf_pl[i]
+                d_cnt = int(tp_obj.get("deaths") or 0)
+                dmg_val = int(tp_obj.get("damage") or 0)
+                heal_val = int(tp_obj.get("healing") or 0)
+                ab_used = tp_obj.get("ability_uses") or {}
+                it_used = tp_obj.get("item_uses") or {}
+                tp_in_tf = int(it_used.get("tpscroll") or 0) + int(it_used.get("travel_boots") or 0) + int(it_used.get("travel_boots_2") or 0)
+
+                if d_cnt > 0:
+                    own_deaths_heroes.append(fp["hero_short_zh"])
+                if tp_in_tf > 0 and (dmg_val > 0 or len(ab_used) > 0):
+                    tp_responders.append(f"{fp['hero_short_zh']}({fp['personaname']})")
+                elif d_cnt == 0 and dmg_val == 0 and heal_val == 0 and len(ab_used) == 0 and tp_in_tf == 0:
+                    spectators.append(fp)
+
+            t_range = f"{fmt_mmss(s_sec)}–{fmt_mmss(e_sec)}"
+            if tp_responders and (len(own_deaths_heroes) + opp_deaths_cnt >= 2):
+                rotation_highlights.append({
+                    "time_range": t_range,
+                    "responders": "、".join(tp_responders),
+                    "trade_str": f"打成 {opp_deaths_cnt} 换 {len(own_deaths_heroes)}",
+                    "detail": f"在 {t_range} 交战中，{'、'.join(tp_responders)} 第一时间亮 TP 落地支援参战（该波 {opp_deaths_cnt} 换 {len(own_deaths_heroes)}）。",
+                })
+
+            # 如果本波我方死了至少 2 人（或 8分钟后我方核心阵亡），且有队友 0 伤害 0 技能 0 TP 旁观
+            if len(own_deaths_heroes) >= 2 and spectators and s_sec >= 360:
+                spec_names = "、".join(f"{sp['pos']}号位{sp['hero_short_zh']}" for sp in spectators)
+                absent_warnings.append({
+                    "time_range": t_range,
+                    "victims": "、".join(own_deaths_heroes),
+                    "spectators": spec_names,
+                    "detail": f"⚠️ {t_range} 我方【{'、'.join(own_deaths_heroes)}】遭围剿阵亡时，{spec_names} 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。",
+                })
+
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            pslot = int(fp["player_slot"])
+            rp = raw_by_slot.get(pslot, {})
+            iu = rp.get("item_uses") or {}
+            tp_used = int(iu.get("tpscroll") or 0) + int(iu.get("travel_boots") or 0) + int(iu.get("travel_boots_2") or 0)
+            tp_bought = int(rp.get("purchase_tpscroll") or sum(1 for x in (rp.get("purchase_log") or []) if x.get("key") == "tpscroll"))
+            tfs_for_p = tf_records_by_slot.get(pslot, [])
+
+            tf_tp_cnt = 0
+            tf_joined_cnt = 0
+            tf_absent_cnt = 0
+            for tfr in tfs_for_p:
+                own_d = tfr["rad_deaths"] if is_rad else tfr["dire_deaths"]
+                it_u = tfr["item_uses"] or {}
+                has_tp = (int(it_u.get("tpscroll") or 0) + int(it_u.get("travel_boots") or 0)) > 0
+                participated = (tfr["damage"] > 0 or tfr["healing"] > 0 or len(tfr["ability_uses"]) > 0 or tfr["deaths"] > 0)
+                if has_tp:
+                    tf_tp_cnt += 1
+                if participated:
+                    tf_joined_cnt += 1
+                elif own_d >= 1 and tfr["start_sec"] >= 360:
+                    tf_absent_cnt += 1
+
+            # 检测「买TP/用TP后40秒内暴毙（TP飞脸送）」
+            tp_buy_times = [int(x.get("time") or 0) for x in (rp.get("purchase_log") or []) if x.get("key") == "tpscroll"]
+            tp_feed_times = []
+            for de in rp.get("deaths_log") or []:
+                dt_s = int(de.get("time") or 0)
+                if any(0 <= (dt_s - bt) <= 45 for bt in tp_buy_times):
+                    tp_feed_times.append(fmt_mmss(dt_s))
+
+            pos_i = int(fp["pos"])
+            deaths_total = int(fp.get("deaths") or 0)
+            if tp_used >= 10 and tf_tp_cnt >= 2:
+                grade = "good"
+                verdict = f"支援极快：全场使用 {tp_used} 次 TP，其中 {tf_tp_cnt} 波团战直接亮 TP 落地救人/反打，参团率 {fp.get('kill_participation_pct')}%。"
+            elif tp_used <= max(4, int(duration_min / 6.5)):
+                grade = "bad"
+                verdict = (
+                    f"⚠️ 支援频次偏低：{duration_min:.0f} 分钟仅使用 {tp_used} 次 TP（主动买 {tp_bought} 张，团战亮 TP {tf_tp_cnt} 次），"
+                    + (f"在 {tf_absent_cnt} 波队友阵亡的团战中未能及时赶到！" if tf_absent_cnt > 0 else "跑图大多靠双腿！")
+                )
+            elif tp_bought == 0 and deaths_total >= 6:
+                grade = "warn"
+                verdict = (
+                    f"全靠阵亡赠送的免费抚恤 TP 过日子（全场死 {deaths_total} 次、主动花钱买 TP 0 张，共使用 {tp_used} 次，团战亮 TP {tf_tp_cnt} 次），"
+                    f"连续存活刷钱时注意检查背包是否断 TP！"
+                )
+            elif tf_absent_cnt >= 3:
+                grade = "warn"
+                verdict = f"全场使用 {tp_used} 次 TP（团战亮 TP {tf_tp_cnt} 次），但在 {tf_absent_cnt} 波队友阵亡的冲突中全程 0 参战（刷钱/带线未 TP）。"
+            else:
+                grade = "good" if tf_absent_cnt <= 1 else "warn"
+                verdict = (
+                    f"全场使用 {tp_used} 次 TP（主动购买 {tp_bought} 张，团战亮 TP {tf_tp_cnt} 次），参战 {tf_joined_cnt}/{len(tfs_for_p)} 波关键团"
+                    + (f"，注意在 {'、'.join(tp_feed_times[:2])} 刚买 TP 后不久即阵亡。" if tp_feed_times else "。")
+                )
+
+            player_tp_rows.append({
+                "pos": pos_i,
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "tp_bought": tp_bought,
+                "tp_used": tp_used,
+                "tf_tp_cnt": tf_tp_cnt,
+                "tf_joined_cnt": tf_joined_cnt,
+                "tf_total_cnt": len(tfs_for_p),
+                "tf_absent_cnt": tf_absent_cnt,
+                "tp_feed_times": tp_feed_times,
+                "grade": grade,
+                "verdict": verdict,
+            })
+
+        return {
+            "side": side_key,
+            "player_tp_rows": player_tp_rows,
+            "rotation_highlights": rotation_highlights[:5],
+            "absent_warnings": absent_warnings[:5],
+        }
+
+    return {
+        "hero_execution_by_side": {
+            "dire": [x for x in all_hero_exec if x["side"] == "dire"],
+            "radiant": [x for x in all_hero_exec if x["side"] == "radiant"],
+        },
+        "support_vision_by_side": {
+            "dire": analyze_side_vision_quality("dire"),
+            "radiant": analyze_side_vision_quality("radiant"),
+        },
+        "stacking_and_smoke_by_side": {
+            "dire": analyze_side_stacking_and_smokes("dire"),
+            "radiant": analyze_side_stacking_and_smokes("radiant"),
+        },
+        "laning_mechanics_by_side": {
+            "dire": analyze_side_laning_mechanics("dire"),
+            "radiant": analyze_side_laning_mechanics("radiant"),
+        },
+        "tp_rotation_by_side": {
+            "dire": analyze_side_tp_and_rotations("dire"),
+            "radiant": analyze_side_tp_and_rotations("radiant"),
+        },
+    }
