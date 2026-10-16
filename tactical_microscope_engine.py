@@ -822,11 +822,16 @@ def build_tactical_microscope(
                 f"假眼平均存活寿命 {avg_team_life} 秒（满分 360 秒）。"
             )
 
+        dewarded_total = sum(1 for r in obs_records if r.get("was_dewarded"))
+        dewarded_pct = round(dewarded_total / total_obs * 100, 1) if obs_records else 0.0
+
         return {
             "side": side_key,
             "side_zh": side_zh,
             "total_obs": len(obs_records),
             "total_sen": len(sen_records),
+            "dewarded_total": dewarded_total,
+            "dewarded_pct": dewarded_pct,
             "avg_lifespan_sec": avg_team_life,
             "posture_counts": posture_counts,
             "posture_pcts": {
@@ -839,6 +844,7 @@ def build_tactical_microscope(
             "per_support_vision": per_support_vision,
             "instant_dewards": instant_dewards[:6],
             "cliff_spots": cliff_spots[:4],
+            "obs_records": obs_records,
         }
 
     # =========================================================================
@@ -1256,8 +1262,9 @@ def build_tactical_microscope(
         player_tp_rows: List[Dict[str, Any]] = []
         rotation_highlights: List[Dict[str, Any]] = []
         absent_warnings: List[Dict[str, Any]] = []
+        teamfight_tp_events: List[Dict[str, Any]] = []
 
-        # 逐波团战检查：谁亮了 TP 参战，谁在我方死人的团战里全程 0 伤害 0 技能 0 TP 旁观
+        # 逐波团战检查：谁亮了 TP 参战，谁在我方死人的团战里全程 0 英雄伤害 0 阵亡 0 TP 旁观/刷野
         for tf_idx, tf in enumerate(raw_tfs):
             tf_pl = tf.get("players") or []
             if len(tf_pl) < 10:
@@ -1270,7 +1277,9 @@ def build_tactical_microscope(
             own_deaths_heroes = []
             opp_deaths_cnt = sum(int(tf_pl[i].get("deaths") or 0) for i in opp_indices)
             tp_responders = []
+            tp_saviors_objs = []
             spectators = []
+            spectators_objs = []
 
             for i in own_indices:
                 rp_i = raw_players_list[i] if i < len(raw_players_list) else {}
@@ -1281,19 +1290,39 @@ def build_tactical_microscope(
                 tp_obj = tf_pl[i]
                 d_cnt = int(tp_obj.get("deaths") or 0)
                 dmg_val = int(tp_obj.get("damage") or 0)
-                heal_val = int(tp_obj.get("healing") or 0)
                 ab_used = tp_obj.get("ability_uses") or {}
                 it_used = tp_obj.get("item_uses") or {}
                 tp_in_tf = int(it_used.get("tpscroll") or 0) + int(it_used.get("travel_boots") or 0) + int(it_used.get("travel_boots_2") or 0)
 
                 if d_cnt > 0:
                     own_deaths_heroes.append(fp["hero_short_zh"])
-                if tp_in_tf > 0 and (dmg_val > 0 or len(ab_used) > 0):
+                if tp_in_tf > 0 and (dmg_val > 0 or len(ab_used) > 0 or d_cnt > 0):
                     tp_responders.append(f"{fp['hero_short_zh']}({fp['personaname']})")
-                elif d_cnt == 0 and dmg_val == 0 and heal_val == 0 and len(ab_used) == 0 and tp_in_tf == 0:
+                    tp_saviors_objs.append({
+                        "pos": fp["pos"],
+                        "hero_short_zh": fp["hero_short_zh"],
+                        "personaname": fp["personaname"],
+                        "damage": dmg_val,
+                    })
+                elif d_cnt == 0 and dmg_val == 0 and tp_in_tf == 0:
                     spectators.append(fp)
+                    spectators_objs.append({
+                        "pos": fp["pos"],
+                        "hero_short_zh": fp["hero_short_zh"],
+                        "personaname": fp["personaname"],
+                    })
 
             t_range = f"{fmt_mmss(s_sec)}–{fmt_mmss(e_sec)}"
+            if len(own_deaths_heroes) + opp_deaths_cnt >= 2:
+                teamfight_tp_events.append({
+                    "tf_index": tf_idx + 1,
+                    "time_range": t_range,
+                    "own_deaths": len(own_deaths_heroes),
+                    "opp_kills": opp_deaths_cnt,
+                    "tp_saviors": tp_saviors_objs,
+                    "spectators": spectators_objs if len(own_deaths_heroes) >= 2 else [],
+                })
+
             if tp_responders and (len(own_deaths_heroes) + opp_deaths_cnt >= 2):
                 rotation_highlights.append({
                     "time_range": t_range,
@@ -1302,38 +1331,52 @@ def build_tactical_microscope(
                     "detail": f"在 {t_range} 交战中，{'、'.join(tp_responders)} 第一时间亮 TP 落地支援参战（该波 {opp_deaths_cnt} 换 {len(own_deaths_heroes)}）。",
                 })
 
-            # 如果本波我方死了至少 2 人（或 8分钟后我方核心阵亡），且有队友 0 伤害 0 技能 0 TP 旁观
+            # 如果本波我方死了至少 2 人，且有队友 0 英雄伤害 0 阵亡 0 TP 旁观/远处刷野
             if len(own_deaths_heroes) >= 2 and spectators and s_sec >= 360:
                 spec_names = "、".join(f"{sp['pos']}号位{sp['hero_short_zh']}" for sp in spectators)
                 absent_warnings.append({
                     "time_range": t_range,
                     "victims": "、".join(own_deaths_heroes),
                     "spectators": spec_names,
-                    "detail": f"⚠️ {t_range} 我方【{'、'.join(own_deaths_heroes)}】遭围剿阵亡时，{spec_names} 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。",
+                    "detail": f"⚠️ {t_range} 我方【{'、'.join(own_deaths_heroes)}】遭围剿阵亡时，{spec_names} 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。",
                 })
 
+        zero_buy_heroes = []
+        total_tf_tp_saves = 0
         for fp in sorted(own_players, key=lambda x: int(x["pos"])):
             pslot = int(fp["player_slot"])
             rp = raw_by_slot.get(pslot, {})
             iu = rp.get("item_uses") or {}
             tp_used = int(iu.get("tpscroll") or 0) + int(iu.get("travel_boots") or 0) + int(iu.get("travel_boots_2") or 0)
             tp_bought = int(rp.get("purchase_tpscroll") or sum(1 for x in (rp.get("purchase_log") or []) if x.get("key") == "tpscroll"))
+            early_tp_cnt = sum(
+                1 for x in (rp.get("purchase_log") or [])
+                if x.get("key") == "tpscroll" and int(x.get("time") or 9999) <= 720
+            )
             tfs_for_p = tf_records_by_slot.get(pslot, [])
 
             tf_tp_cnt = 0
+            tf_tp_times: List[str] = []
             tf_joined_cnt = 0
             tf_absent_cnt = 0
+            tf_absent_times: List[str] = []
             for tfr in tfs_for_p:
                 own_d = tfr["rad_deaths"] if is_rad else tfr["dire_deaths"]
                 it_u = tfr["item_uses"] or {}
-                has_tp = (int(it_u.get("tpscroll") or 0) + int(it_u.get("travel_boots") or 0)) > 0
-                participated = (tfr["damage"] > 0 or tfr["healing"] > 0 or len(tfr["ability_uses"]) > 0 or tfr["deaths"] > 0)
+                has_tp = (int(it_u.get("tpscroll") or 0) + int(it_u.get("travel_boots") or 0) + int(it_u.get("travel_boots_2") or 0)) > 0
+                participated = (tfr["damage"] > 0 or tfr["deaths"] > 0 or has_tp)
                 if has_tp:
                     tf_tp_cnt += 1
+                    tf_tp_times.append(fmt_mmss(tfr["start_sec"]))
                 if participated:
                     tf_joined_cnt += 1
-                elif own_d >= 1 and tfr["start_sec"] >= 360:
+                elif own_d >= 2 and tfr["start_sec"] >= 360:
                     tf_absent_cnt += 1
+                    tf_absent_times.append(fmt_mmss(tfr["start_sec"]))
+
+            total_tf_tp_saves += tf_tp_cnt
+            if tp_bought == 0:
+                zero_buy_heroes.append(f"{fp['pos']}号位{fp['hero_short_zh']}")
 
             # 检测「买TP/用TP后40秒内暴毙（TP飞脸送）」
             tp_buy_times = [int(x.get("time") or 0) for x in (rp.get("purchase_log") or []) if x.get("key") == "tpscroll"]
@@ -1347,7 +1390,7 @@ def build_tactical_microscope(
             deaths_total = int(fp.get("deaths") or 0)
             if tp_used >= 10 and tf_tp_cnt >= 2:
                 grade = "good"
-                verdict = f"支援极快：全场使用 {tp_used} 次 TP，其中 {tf_tp_cnt} 波团战直接亮 TP 落地救人/反打，参团率 {fp.get('kill_participation_pct')}%。"
+                verdict = f"支援极快：全场使用 {tp_used} 次 TP，其中 {tf_tp_cnt} 波团战（{'、'.join(tf_tp_times)}）直接亮 TP 落地救人/反打，参团率 {fp.get('kill_participation_pct')}%。"
             elif tp_used <= max(4, int(duration_min / 6.5)):
                 grade = "bad"
                 verdict = (
@@ -1360,13 +1403,14 @@ def build_tactical_microscope(
                     f"全靠阵亡赠送的免费抚恤 TP 过日子（全场死 {deaths_total} 次、主动花钱买 TP 0 张，共使用 {tp_used} 次，团战亮 TP {tf_tp_cnt} 次），"
                     f"连续存活刷钱时注意检查背包是否断 TP！"
                 )
-            elif tf_absent_cnt >= 3:
+            elif tf_absent_cnt >= 2:
                 grade = "warn"
-                verdict = f"全场使用 {tp_used} 次 TP（团战亮 TP {tf_tp_cnt} 次），但在 {tf_absent_cnt} 波队友阵亡的冲突中全程 0 参战（刷钱/带线未 TP）。"
+                verdict = f"全场使用 {tp_used} 次 TP（团战亮 TP {tf_tp_cnt} 次），但在 {tf_absent_cnt} 波队友多人阵亡的团战（{'、'.join(tf_absent_times)}）中对敌方 0 伤害未亮 TP。"
             else:
-                grade = "good" if tf_absent_cnt <= 1 else "warn"
+                grade = "good" if tf_absent_cnt == 0 else "warn"
                 verdict = (
                     f"全场使用 {tp_used} 次 TP（主动购买 {tp_bought} 张，团战亮 TP {tf_tp_cnt} 次），参战 {tf_joined_cnt}/{len(tfs_for_p)} 波关键团"
+                    + (f"（缺席 {'、'.join(tf_absent_times)}）" if tf_absent_times else "")
                     + (f"，注意在 {'、'.join(tp_feed_times[:2])} 刚买 TP 后不久即阵亡。" if tp_feed_times else "。")
                 )
 
@@ -1377,20 +1421,37 @@ def build_tactical_microscope(
                 "personaname": fp["personaname"],
                 "tp_bought": tp_bought,
                 "tp_used": tp_used,
+                "early_tp_cnt": early_tp_cnt,
                 "tf_tp_cnt": tf_tp_cnt,
+                "tf_tp_times": tf_tp_times,
                 "tf_joined_cnt": tf_joined_cnt,
                 "tf_total_cnt": len(tfs_for_p),
                 "tf_absent_cnt": tf_absent_cnt,
+                "tf_absent_times": tf_absent_times,
                 "tp_feed_times": tp_feed_times,
                 "grade": grade,
                 "verdict": verdict,
             })
 
+        tp_verdict_parts = [
+            f"本方全队在关键团战中共亮出 {total_tf_tp_saves} 人次 TP 落地支援（共触发 {len(rotation_highlights)} 波多英雄 TP 集结）。"
+        ]
+        if zero_buy_heroes:
+            tp_verdict_parts.append(
+                f"⚠️ 其中【{'、'.join(zero_buy_heroes)}】整局主动花钱买 TP 为 0 张，全靠阵亡复活赠送的免费 TP！"
+            )
+        if absent_warnings:
+            tp_verdict_parts.append(
+                f"🚨 抓包 {len(absent_warnings)} 波团战在队友成片阵亡时有人全程 0 英雄伤害且未亮 TP 支援！"
+            )
+
         return {
             "side": side_key,
+            "tp_verdict": " ".join(tp_verdict_parts),
             "player_tp_rows": player_tp_rows,
-            "rotation_highlights": rotation_highlights[:5],
-            "absent_warnings": absent_warnings[:5],
+            "rotation_highlights": rotation_highlights[:6],
+            "absent_warnings": absent_warnings[:6],
+            "teamfight_tp_events": teamfight_tp_events,
         }
 
     return {

@@ -15825,6 +15825,8 @@
         "side_zh": "夜魇",
         "total_obs": 22,
         "total_sen": 23,
+        "dewarded_total": 7,
+        "dewarded_pct": 31.8,
         "avg_lifespan_sec": 264,
         "posture_counts": {
           "aggressive": 9,
@@ -16005,6 +16007,316 @@
             "times_str": "00:20、09:15、09:14",
             "comment": "在【天辉上路三角区 / 二塔高台 (80,157)】同一个眼位重复插了 3 颗眼（2假/1真，时间：00:20、09:15、09:14），属于典型的固定高台死磕！"
           }
+        ],
+        "obs_records": [
+          {
+            "time_sec": -56,
+            "time_str": "-00:56",
+            "planter_hero": "帕克",
+            "planter_pos": 2,
+            "x": 131.1,
+            "y": 126.4,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 396,
+            "time_str": "06:36",
+            "planter_hero": "帕克",
+            "planter_pos": 2,
+            "x": 129.7,
+            "y": 109.8,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 20,
+            "time_str": "00:20",
+            "planter_hero": "司夜刺客",
+            "planter_pos": 4,
+            "x": 80.5,
+            "y": 156.7,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 131,
+            "was_dewarded": true,
+            "killer_zh": "编织者"
+          },
+          {
+            "time_sec": 150,
+            "time_str": "02:30",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 169.5,
+            "y": 89.9,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 64,
+            "was_dewarded": true,
+            "killer_zh": "天怒法师"
+          },
+          {
+            "time_sec": 337,
+            "time_str": "05:37",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 170.8,
+            "y": 98.5,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 555,
+            "time_str": "09:15",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 85.0,
+            "y": 157.1,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 95,
+            "was_dewarded": true,
+            "killer_zh": "编织者"
+          },
+          {
+            "time_sec": 845,
+            "time_str": "14:05",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 147.8,
+            "y": 118.5,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 993,
+            "time_str": "16:33",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 135.7,
+            "y": 155.7,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1002,
+            "time_str": "16:42",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 108.4,
+            "y": 162.1,
+            "zone_zh": "夜魇上路主野区高台 / 一塔林区",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1246,
+            "time_str": "20:46",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 148.4,
+            "y": 118.2,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 317,
+            "was_dewarded": true,
+            "killer_zh": "撼地者"
+          },
+          {
+            "time_sec": 1542,
+            "time_str": "25:42",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 114.2,
+            "y": 150.6,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1611,
+            "time_str": "26:51",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 134.4,
+            "y": 102.2,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1623,
+            "time_str": "27:03",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 125.6,
+            "y": 120.0,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 30,
+            "was_dewarded": true,
+            "killer_zh": "编织者"
+          },
+          {
+            "time_sec": 1665,
+            "time_str": "27:45",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 135.8,
+            "y": 155.7,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1766,
+            "time_str": "29:26",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 134.1,
+            "y": 90.2,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1996,
+            "time_str": "33:16",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 126.9,
+            "y": 65.3,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2154,
+            "time_str": "35:54",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 142.4,
+            "y": 107.5,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 290,
+            "was_dewarded": true,
+            "killer_zh": "天怒法师"
+          },
+          {
+            "time_sec": 2193,
+            "time_str": "36:33",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 129.2,
+            "y": 100.0,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2466,
+            "time_str": "41:06",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 148.2,
+            "y": 118.7,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 21,
+            "was_dewarded": true,
+            "killer_zh": "撼地者"
+          },
+          {
+            "time_sec": 2478,
+            "time_str": "41:18",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 135.9,
+            "y": 155.8,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 313,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          },
+          {
+            "time_sec": 2608,
+            "time_str": "43:28",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 115.5,
+            "y": 149.5,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 183,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          },
+          {
+            "time_sec": 2738,
+            "time_str": "45:38",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 5,
+            "x": 95.9,
+            "y": 86.0,
+            "zone_zh": "天辉基地高地 / 三塔内",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 53,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          }
         ]
       },
       "radiant": {
@@ -16012,6 +16324,8 @@
         "side_zh": "天辉",
         "total_obs": 20,
         "total_sen": 40,
+        "dewarded_total": 4,
+        "dewarded_pct": 20.0,
         "avg_lifespan_sec": 314,
         "posture_counts": {
           "aggressive": 6,
@@ -16148,6 +16462,288 @@
             "planters": "天怒法师 / 撼地者",
             "times_str": "10:46、14:15、33:20",
             "comment": "在【天辉上路三角区 / 二塔高台 (84,152)】同一个眼位重复插了 3 颗眼（0假/3真，时间：10:46、14:15、33:20），属于典型的固定高台死磕！"
+          }
+        ],
+        "obs_records": [
+          {
+            "time_sec": -51,
+            "time_str": "-00:51",
+            "planter_hero": "斧王",
+            "planter_pos": 2,
+            "x": 117.3,
+            "y": 126.5,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 157,
+            "was_dewarded": true,
+            "killer_zh": "帕克"
+          },
+          {
+            "time_sec": 319,
+            "time_str": "05:19",
+            "planter_hero": "斧王",
+            "planter_pos": 2,
+            "x": 119.9,
+            "y": 123.7,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 672,
+            "time_str": "11:12",
+            "planter_hero": "斧王",
+            "planter_pos": 2,
+            "x": 131.9,
+            "y": 126.1,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 37,
+            "was_dewarded": true,
+            "killer_zh": "环轨百戏王"
+          },
+          {
+            "time_sec": 944,
+            "time_str": "15:44",
+            "planter_hero": "斧王",
+            "planter_pos": 2,
+            "x": 128.4,
+            "y": 126.2,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 279,
+            "was_dewarded": true,
+            "killer_zh": "环轨百戏王"
+          },
+          {
+            "time_sec": 1314,
+            "time_str": "21:54",
+            "planter_hero": "撼地者",
+            "planter_pos": 4,
+            "x": 138.1,
+            "y": 92.1,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1525,
+            "time_str": "25:25",
+            "planter_hero": "撼地者",
+            "planter_pos": 4,
+            "x": 112.5,
+            "y": 129.4,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1723,
+            "time_str": "28:43",
+            "planter_hero": "撼地者",
+            "planter_pos": 4,
+            "x": 93.9,
+            "y": 120.0,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1749,
+            "time_str": "29:09",
+            "planter_hero": "撼地者",
+            "planter_pos": 4,
+            "x": 117.8,
+            "y": 94.5,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2143,
+            "time_str": "35:43",
+            "planter_hero": "撼地者",
+            "planter_pos": 4,
+            "x": 117.8,
+            "y": 94.2,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2407,
+            "time_str": "40:07",
+            "planter_hero": "撼地者",
+            "planter_pos": 4,
+            "x": 94.5,
+            "y": 120.1,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2498,
+            "time_str": "41:38",
+            "planter_hero": "撼地者",
+            "planter_pos": 4,
+            "x": 164.3,
+            "y": 134.1,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 56,
+            "was_dewarded": true,
+            "killer_zh": "环轨百戏王"
+          },
+          {
+            "time_sec": -7,
+            "time_str": "-00:07",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 176.0,
+            "y": 101.2,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 533,
+            "time_str": "08:53",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 137.1,
+            "y": 103.6,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 927,
+            "time_str": "15:27",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 126.0,
+            "y": 156.8,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1106,
+            "time_str": "18:26",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 118.2,
+            "y": 94.1,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1467,
+            "time_str": "24:27",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 130.2,
+            "y": 165.3,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1564,
+            "time_str": "26:04",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 141.7,
+            "y": 135.6,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1988,
+            "time_str": "33:08",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 115.5,
+            "y": 143.7,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2102,
+            "time_str": "35:02",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 121.8,
+            "y": 121.9,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2412,
+            "time_str": "40:12",
+            "planter_hero": "天怒法师",
+            "planter_pos": 5,
+            "x": 180.1,
+            "y": 112.2,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
           }
         ]
       }
@@ -17031,6 +17627,7 @@
     "tp_rotation_by_side": {
       "dire": {
         "side": "dire",
+        "tp_verdict": "本方全队在关键团战中共亮出 7 人次 TP 落地支援（共触发 6 波多英雄 TP 集结）。 🚨 抓包 4 波团战在队友成片阵亡时有人全程 0 英雄伤害且未亮 TP 支援！",
         "player_tp_rows": [
           {
             "pos": 1,
@@ -17039,13 +17636,21 @@
             "personaname": "Petarung Amoral",
             "tp_bought": 6,
             "tp_used": 9,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 2,
-            "tf_joined_cnt": 14,
+            "tf_tp_times": [
+              "14:51",
+              "33:36"
+            ],
+            "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
-            "tf_absent_cnt": 0,
+            "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "12:46"
+            ],
             "tp_feed_times": [],
-            "grade": "good",
-            "verdict": "全场使用 9 次 TP（主动购买 6 张，团战亮 TP 2 次），参战 14/14 波关键团。"
+            "grade": "warn",
+            "verdict": "全场使用 9 次 TP（主动购买 6 张，团战亮 TP 2 次），参战 13/14 波关键团（缺席 12:46）。"
           },
           {
             "pos": 2,
@@ -17054,15 +17659,22 @@
             "personaname": "loiverever౨ৎ",
             "tp_bought": 8,
             "tp_used": 17,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 1,
-            "tf_joined_cnt": 12,
+            "tf_tp_times": [
+              "43:55"
+            ],
+            "tf_joined_cnt": 10,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "23:41"
+            ],
             "tp_feed_times": [
               "41:02"
             ],
-            "grade": "good",
-            "verdict": "全场使用 17 次 TP（主动购买 8 张，团战亮 TP 1 次），参战 12/14 波关键团，注意在 41:02 刚买 TP 后不久即阵亡。"
+            "grade": "warn",
+            "verdict": "全场使用 17 次 TP（主动购买 8 张，团战亮 TP 1 次），参战 10/14 波关键团（缺席 23:41），注意在 41:02 刚买 TP 后不久即阵亡。"
           },
           {
             "pos": 3,
@@ -17071,13 +17683,21 @@
             "personaname": "Paphets",
             "tp_bought": 2,
             "tp_used": 5,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 1,
-            "tf_joined_cnt": 13,
+            "tf_tp_times": [
+              "23:41"
+            ],
+            "tf_joined_cnt": 12,
             "tf_total_cnt": 14,
-            "tf_absent_cnt": 1,
+            "tf_absent_cnt": 2,
+            "tf_absent_times": [
+              "14:51",
+              "33:36"
+            ],
             "tp_feed_times": [],
             "grade": "bad",
-            "verdict": "⚠️ 支援频次偏低：47 分钟仅使用 5 次 TP（主动买 2 张，团战亮 TP 1 次），在 1 波队友阵亡的团战中未能及时赶到！"
+            "verdict": "⚠️ 支援频次偏低：47 分钟仅使用 5 次 TP（主动买 2 张，团战亮 TP 1 次），在 2 波队友阵亡的团战中未能及时赶到！"
           },
           {
             "pos": 4,
@@ -17086,15 +17706,23 @@
             "personaname": "Nanana",
             "tp_bought": 2,
             "tp_used": 12,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 2,
+            "tf_tp_times": [
+              "23:41",
+              "31:17"
+            ],
             "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "33:36"
+            ],
             "tp_feed_times": [
               "14:01"
             ],
             "grade": "good",
-            "verdict": "支援极快：全场使用 12 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 74.5%。"
+            "verdict": "支援极快：全场使用 12 次 TP，其中 2 波团战（23:41、31:17）直接亮 TP 落地救人/反打，参团率 74.5%。"
           },
           {
             "pos": 5,
@@ -17103,15 +17731,20 @@
             "personaname": "Flame = ez mute",
             "tp_bought": 2,
             "tp_used": 11,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 1,
-            "tf_joined_cnt": 14,
+            "tf_tp_times": [
+              "30:06"
+            ],
+            "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [
               "31:32"
             ],
             "grade": "good",
-            "verdict": "全场使用 11 次 TP（主动购买 2 张，团战亮 TP 1 次），参战 14/14 波关键团，注意在 31:32 刚买 TP 后不久即阵亡。"
+            "verdict": "全场使用 11 次 TP（主动购买 2 张，团战亮 TP 1 次），参战 13/14 波关键团，注意在 31:32 刚买 TP 后不久即阵亡。"
           }
         ],
         "rotation_highlights": [
@@ -17144,25 +17777,235 @@
             "responders": "主宰(Petarung Amoral)",
             "trade_str": "打成 1 换 3",
             "detail": "在 33:36–34:26 交战中，主宰(Petarung Amoral) 第一时间亮 TP 落地支援参战（该波 1 换 3）。"
+          },
+          {
+            "time_range": "43:55–44:36",
+            "responders": "帕克(loiverever౨ৎ)",
+            "trade_str": "打成 3 换 0",
+            "detail": "在 43:55–44:36 交战中，帕克(loiverever౨ৎ) 第一时间亮 TP 落地支援参战（该波 3 换 0）。"
           }
         ],
         "absent_warnings": [
           {
+            "time_range": "12:46–13:33",
+            "victims": "环轨百戏王、帕克",
+            "spectators": "1号位主宰",
+            "detail": "⚠️ 12:46–13:33 我方【环轨百戏王、帕克】遭围剿阵亡时，1号位主宰 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
+            "time_range": "14:51–15:24",
+            "victims": "司夜刺客、帕克",
+            "spectators": "3号位潮汐猎人",
+            "detail": "⚠️ 14:51–15:24 我方【司夜刺客、帕克】遭围剿阵亡时，3号位潮汐猎人 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
             "time_range": "23:41–24:27",
             "victims": "主宰、司夜刺客、潮汐猎人、环轨百戏王",
             "spectators": "2号位帕克",
-            "detail": "⚠️ 23:41–24:27 我方【主宰、司夜刺客、潮汐猎人、环轨百戏王】遭围剿阵亡时，2号位帕克 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+            "detail": "⚠️ 23:41–24:27 我方【主宰、司夜刺客、潮汐猎人、环轨百戏王】遭围剿阵亡时，2号位帕克 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
           },
           {
             "time_range": "33:36–34:26",
             "victims": "主宰、环轨百戏王、帕克",
             "spectators": "4号位司夜刺客、3号位潮汐猎人",
-            "detail": "⚠️ 33:36–34:26 我方【主宰、环轨百戏王、帕克】遭围剿阵亡时，4号位司夜刺客、3号位潮汐猎人 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+            "detail": "⚠️ 33:36–34:26 我方【主宰、环轨百戏王、帕克】遭围剿阵亡时，4号位司夜刺客、3号位潮汐猎人 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ],
+        "teamfight_tp_events": [
+          {
+            "tf_index": 1,
+            "time_range": "12:46–13:33",
+            "own_deaths": 2,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": [
+              {
+                "pos": 1,
+                "hero_short_zh": "主宰",
+                "personaname": "Petarung Amoral"
+              }
+            ]
+          },
+          {
+            "tf_index": 2,
+            "time_range": "14:51–15:24",
+            "own_deaths": 2,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "主宰",
+                "personaname": "Petarung Amoral",
+                "damage": 0
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 3,
+                "hero_short_zh": "潮汐猎人",
+                "personaname": "Paphets"
+              }
+            ]
+          },
+          {
+            "tf_index": 3,
+            "time_range": "17:03–17:45",
+            "own_deaths": 3,
+            "opp_kills": 1,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 4,
+            "time_range": "18:50–19:35",
+            "own_deaths": 2,
+            "opp_kills": 1,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 5,
+            "time_range": "20:01–20:41",
+            "own_deaths": 0,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 6,
+            "time_range": "23:41–24:27",
+            "own_deaths": 4,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 4,
+                "hero_short_zh": "司夜刺客",
+                "personaname": "Nanana",
+                "damage": 1641
+              },
+              {
+                "pos": 3,
+                "hero_short_zh": "潮汐猎人",
+                "personaname": "Paphets",
+                "damage": 1311
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 2,
+                "hero_short_zh": "帕克",
+                "personaname": "loiverever౨ৎ"
+              }
+            ]
+          },
+          {
+            "tf_index": 7,
+            "time_range": "26:00–26:32",
+            "own_deaths": 0,
+            "opp_kills": 4,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 8,
+            "time_range": "30:06–30:47",
+            "own_deaths": 1,
+            "opp_kills": 3,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "环轨百戏王",
+                "personaname": "Flame = ez mute",
+                "damage": 378
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 9,
+            "time_range": "31:17–31:58",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 4,
+                "hero_short_zh": "司夜刺客",
+                "personaname": "Nanana",
+                "damage": 441
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 10,
+            "time_range": "33:36–34:26",
+            "own_deaths": 3,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "主宰",
+                "personaname": "Petarung Amoral",
+                "damage": 6600
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 4,
+                "hero_short_zh": "司夜刺客",
+                "personaname": "Nanana"
+              },
+              {
+                "pos": 3,
+                "hero_short_zh": "潮汐猎人",
+                "personaname": "Paphets"
+              }
+            ]
+          },
+          {
+            "tf_index": 11,
+            "time_range": "35:43–36:37",
+            "own_deaths": 0,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 12,
+            "time_range": "37:53–38:30",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 13,
+            "time_range": "43:55–44:36",
+            "own_deaths": 0,
+            "opp_kills": 3,
+            "tp_saviors": [
+              {
+                "pos": 2,
+                "hero_short_zh": "帕克",
+                "personaname": "loiverever౨ৎ",
+                "damage": 200
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 14,
+            "time_range": "44:53–45:35",
+            "own_deaths": 0,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
           }
         ]
       },
       "radiant": {
         "side": "radiant",
+        "tp_verdict": "本方全队在关键团战中共亮出 11 人次 TP 落地支援（共触发 8 波多英雄 TP 集结）。 ⚠️ 其中【4号位撼地者】整局主动花钱买 TP 为 0 张，全靠阵亡复活赠送的免费 TP！ 🚨 抓包 5 波团战在队友成片阵亡时有人全程 0 英雄伤害且未亮 TP 支援！",
         "player_tp_rows": [
           {
             "pos": 1,
@@ -17171,13 +18014,22 @@
             "personaname": "Me and 4 sinh viên",
             "tp_bought": 5,
             "tp_used": 10,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 2,
-            "tf_joined_cnt": 14,
+            "tf_tp_times": [
+              "14:51",
+              "18:50"
+            ],
+            "tf_joined_cnt": 12,
             "tf_total_cnt": 14,
-            "tf_absent_cnt": 0,
+            "tf_absent_cnt": 2,
+            "tf_absent_times": [
+              "20:01",
+              "31:17"
+            ],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 10 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 56.8%。"
+            "verdict": "支援极快：全场使用 10 次 TP，其中 2 波团战（14:51、18:50）直接亮 TP 落地救人/反打，参团率 56.8%。"
           },
           {
             "pos": 2,
@@ -17186,13 +18038,21 @@
             "personaname": "BOOM",
             "tp_bought": 1,
             "tp_used": 12,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 1,
-            "tf_joined_cnt": 13,
+            "tf_tp_times": [
+              "14:51"
+            ],
+            "tf_joined_cnt": 12,
             "tf_total_cnt": 14,
-            "tf_absent_cnt": 1,
+            "tf_absent_cnt": 2,
+            "tf_absent_times": [
+              "12:46",
+              "44:53"
+            ],
             "tp_feed_times": [],
-            "grade": "good",
-            "verdict": "全场使用 12 次 TP（主动购买 1 张，团战亮 TP 1 次），参战 13/14 波关键团。"
+            "grade": "warn",
+            "verdict": "全场使用 12 次 TP（团战亮 TP 1 次），但在 2 波队友多人阵亡的团战（12:46、44:53）中对敌方 0 伤害未亮 TP。"
           },
           {
             "pos": 3,
@@ -17201,13 +18061,23 @@
             "personaname": "Đỗ Ngọc Quý",
             "tp_bought": 1,
             "tp_used": 8,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 3,
-            "tf_joined_cnt": 13,
+            "tf_tp_times": [
+              "12:46",
+              "30:06",
+              "43:55"
+            ],
+            "tf_joined_cnt": 12,
             "tf_total_cnt": 14,
-            "tf_absent_cnt": 1,
+            "tf_absent_cnt": 2,
+            "tf_absent_times": [
+              "20:01",
+              "31:17"
+            ],
             "tp_feed_times": [],
-            "grade": "good",
-            "verdict": "全场使用 8 次 TP（主动购买 1 张，团战亮 TP 3 次），参战 13/14 波关键团。"
+            "grade": "warn",
+            "verdict": "全场使用 8 次 TP（团战亮 TP 3 次），但在 2 波队友多人阵亡的团战（20:01、31:17）中对敌方 0 伤害未亮 TP。"
           },
           {
             "pos": 4,
@@ -17216,13 +18086,20 @@
             "personaname": "Super Bóp",
             "tp_bought": 0,
             "tp_used": 7,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 1,
-            "tf_joined_cnt": 14,
+            "tf_tp_times": [
+              "30:06"
+            ],
+            "tf_joined_cnt": 12,
             "tf_total_cnt": 14,
-            "tf_absent_cnt": 0,
+            "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "35:43"
+            ],
             "tp_feed_times": [],
             "grade": "bad",
-            "verdict": "⚠️ 支援频次偏低：47 分钟仅使用 7 次 TP（主动买 0 张，团战亮 TP 1 次），跑图大多靠双腿！"
+            "verdict": "⚠️ 支援频次偏低：47 分钟仅使用 7 次 TP（主动买 0 张，团战亮 TP 1 次），在 1 波队友阵亡的团战中未能及时赶到！"
           },
           {
             "pos": 5,
@@ -17231,13 +18108,23 @@
             "personaname": "Roti Jala Mak Limah Biadab",
             "tp_bought": 2,
             "tp_used": 10,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 4,
+            "tf_tp_times": [
+              "12:46",
+              "17:03",
+              "20:01",
+              "31:17"
+            ],
             "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "44:53"
+            ],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 10 次 TP，其中 4 波团战直接亮 TP 落地救人/反打，参团率 70.3%。"
+            "verdict": "支援极快：全场使用 10 次 TP，其中 4 波团战（12:46、17:03、20:01、31:17）直接亮 TP 落地救人/反打，参团率 70.3%。"
           }
         ],
         "rotation_highlights": [
@@ -17270,20 +18157,271 @@
             "responders": "天怒法师(Roti Jala Mak Limah Biadab)",
             "trade_str": "打成 0 换 3",
             "detail": "在 20:01–20:41 交战中，天怒法师(Roti Jala Mak Limah Biadab) 第一时间亮 TP 落地支援参战（该波 0 换 3）。"
+          },
+          {
+            "time_range": "30:06–30:47",
+            "responders": "编织者(Đỗ Ngọc Quý)、撼地者(Super Bóp)",
+            "trade_str": "打成 1 换 3",
+            "detail": "在 30:06–30:47 交战中，编织者(Đỗ Ngọc Quý)、撼地者(Super Bóp) 第一时间亮 TP 落地支援参战（该波 1 换 3）。"
           }
         ],
         "absent_warnings": [
           {
+            "time_range": "12:46–13:33",
+            "victims": "天怒法师、编织者、撼地者",
+            "spectators": "2号位斧王",
+            "detail": "⚠️ 12:46–13:33 我方【天怒法师、编织者、撼地者】遭围剿阵亡时，2号位斧王 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
+            "time_range": "20:01–20:41",
+            "victims": "天怒法师、斧王、撼地者",
+            "spectators": "3号位编织者、1号位齐天大圣",
+            "detail": "⚠️ 20:01–20:41 我方【天怒法师、斧王、撼地者】遭围剿阵亡时，3号位编织者、1号位齐天大圣 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
             "time_range": "31:17–31:58",
             "victims": "斧王、撼地者",
-            "spectators": "3号位编织者",
-            "detail": "⚠️ 31:17–31:58 我方【斧王、撼地者】遭围剿阵亡时，3号位编织者 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+            "spectators": "3号位编织者、1号位齐天大圣",
+            "detail": "⚠️ 31:17–31:58 我方【斧王、撼地者】遭围剿阵亡时，3号位编织者、1号位齐天大圣 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
+            "time_range": "35:43–36:37",
+            "victims": "天怒法师、斧王、编织者",
+            "spectators": "4号位撼地者",
+            "detail": "⚠️ 35:43–36:37 我方【天怒法师、斧王、编织者】遭围剿阵亡时，4号位撼地者 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
           },
           {
             "time_range": "44:53–45:35",
             "victims": "编织者、齐天大圣、撼地者",
             "spectators": "5号位天怒法师、2号位斧王",
-            "detail": "⚠️ 44:53–45:35 我方【编织者、齐天大圣、撼地者】遭围剿阵亡时，5号位天怒法师、2号位斧王 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+            "detail": "⚠️ 44:53–45:35 我方【编织者、齐天大圣、撼地者】遭围剿阵亡时，5号位天怒法师、2号位斧王 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ],
+        "teamfight_tp_events": [
+          {
+            "tf_index": 1,
+            "time_range": "12:46–13:33",
+            "own_deaths": 3,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "天怒法师",
+                "personaname": "Roti Jala Mak Limah Biadab",
+                "damage": 468
+              },
+              {
+                "pos": 3,
+                "hero_short_zh": "编织者",
+                "personaname": "Đỗ Ngọc Quý",
+                "damage": 0
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 2,
+                "hero_short_zh": "斧王",
+                "personaname": "BOOM"
+              }
+            ]
+          },
+          {
+            "tf_index": 2,
+            "time_range": "14:51–15:24",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "齐天大圣",
+                "personaname": "Me and 4 sinh viên",
+                "damage": 1666
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 3,
+            "time_range": "17:03–17:45",
+            "own_deaths": 1,
+            "opp_kills": 3,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "天怒法师",
+                "personaname": "Roti Jala Mak Limah Biadab",
+                "damage": 414
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 4,
+            "time_range": "18:50–19:35",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "齐天大圣",
+                "personaname": "Me and 4 sinh viên",
+                "damage": 2281
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 5,
+            "time_range": "20:01–20:41",
+            "own_deaths": 3,
+            "opp_kills": 0,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "天怒法师",
+                "personaname": "Roti Jala Mak Limah Biadab",
+                "damage": 0
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 3,
+                "hero_short_zh": "编织者",
+                "personaname": "Đỗ Ngọc Quý"
+              },
+              {
+                "pos": 1,
+                "hero_short_zh": "齐天大圣",
+                "personaname": "Me and 4 sinh viên"
+              }
+            ]
+          },
+          {
+            "tf_index": 6,
+            "time_range": "23:41–24:27",
+            "own_deaths": 1,
+            "opp_kills": 4,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 7,
+            "time_range": "26:00–26:32",
+            "own_deaths": 4,
+            "opp_kills": 0,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 8,
+            "time_range": "30:06–30:47",
+            "own_deaths": 3,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 3,
+                "hero_short_zh": "编织者",
+                "personaname": "Đỗ Ngọc Quý",
+                "damage": 329
+              },
+              {
+                "pos": 4,
+                "hero_short_zh": "撼地者",
+                "personaname": "Super Bóp",
+                "damage": 332
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 9,
+            "time_range": "31:17–31:58",
+            "own_deaths": 2,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "天怒法师",
+                "personaname": "Roti Jala Mak Limah Biadab",
+                "damage": 203
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 3,
+                "hero_short_zh": "编织者",
+                "personaname": "Đỗ Ngọc Quý"
+              },
+              {
+                "pos": 1,
+                "hero_short_zh": "齐天大圣",
+                "personaname": "Me and 4 sinh viên"
+              }
+            ]
+          },
+          {
+            "tf_index": 10,
+            "time_range": "33:36–34:26",
+            "own_deaths": 1,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 11,
+            "time_range": "35:43–36:37",
+            "own_deaths": 3,
+            "opp_kills": 0,
+            "tp_saviors": [],
+            "spectators": [
+              {
+                "pos": 4,
+                "hero_short_zh": "撼地者",
+                "personaname": "Super Bóp"
+              }
+            ]
+          },
+          {
+            "tf_index": 12,
+            "time_range": "37:53–38:30",
+            "own_deaths": 2,
+            "opp_kills": 1,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 13,
+            "time_range": "43:55–44:36",
+            "own_deaths": 3,
+            "opp_kills": 0,
+            "tp_saviors": [
+              {
+                "pos": 3,
+                "hero_short_zh": "编织者",
+                "personaname": "Đỗ Ngọc Quý",
+                "damage": 339
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 14,
+            "time_range": "44:53–45:35",
+            "own_deaths": 3,
+            "opp_kills": 0,
+            "tp_saviors": [],
+            "spectators": [
+              {
+                "pos": 5,
+                "hero_short_zh": "天怒法师",
+                "personaname": "Roti Jala Mak Limah Biadab"
+              },
+              {
+                "pos": 2,
+                "hero_short_zh": "斧王",
+                "personaname": "BOOM"
+              }
+            ]
           }
         ]
       }

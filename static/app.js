@@ -1066,59 +1066,120 @@ function renderTacticalMicroscopeSection(report) {
 function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, otherSide, otherSideZh) {
   const execData = df.hero_execution_by_side?.[targetSide];
   const oppExecData = df.hero_execution_by_side?.[otherSide];
-  if (!execData) {
+  const players = Array.isArray(execData) ? execData : execData?.players || [];
+  const oppPlayers = Array.isArray(oppExecData) ? oppExecData : oppExecData?.players || [];
+  if (!players.length) {
     return `<div class="empty-state compact">当前比赛暂无英雄绝活与大招显微镜数据</div>`;
   }
 
-  const players = execData.players || [];
+  const buildSideSummary = (list) =>
+    list
+      .map((p) => {
+        const firstUlt = (p.ult_audits || [])[0];
+        if (firstUlt) {
+          return `${p.pos}号位${p.hero_short_zh}《${firstUlt.ability_zh}》释放 ${firstUlt.casts ?? 0} 次(命中 ${firstUlt.hits ?? 0} ${firstUlt.unit_label || "人次"} · 评级${firstUlt.grade || "B"})`;
+        }
+        const firstBadge = (p.headline_badges || [])[0];
+        const bText = typeof firstBadge === "string" ? firstBadge : firstBadge?.text || "";
+        return bText ? `${p.pos}号位${p.hero_short_zh}（${bText}）` : `${p.pos}号位${p.hero_short_zh}`;
+      })
+      .join("；");
+
+  const ownSummaryText = execData?.summary || buildSideSummary(players);
+  const oppSummaryText = oppExecData?.summary || buildSideSummary(oppPlayers);
+
   const cardsHtml = players
     .map((p) => {
       const badges = (p.headline_badges || [])
         .map((b) => {
-          const isWarn = b.includes("⚠️") || b.includes("0.4/分") || b.includes("1.33");
-          const isGood = b.includes("14,807") || b.includes("3.1") || b.includes("A") || b.includes("S");
-          return `<span class="micro-exec-badge ${isWarn ? "warn" : isGood ? "good" : ""}">${escapeHtml(b)}</span>`;
+          const txt = typeof b === "string" ? b : b?.text || "";
+          const tone = typeof b === "object" && b !== null ? b.tone : "";
+          const isWarn =
+            tone === "bad" ||
+            tone === "warn" ||
+            txt.includes("⚠️") ||
+            txt.includes("0.4/分") ||
+            txt.includes("1.33");
+          const isGood =
+            tone === "good" ||
+            txt.includes("14,807") ||
+            txt.includes("3.1") ||
+            txt.includes("评级S") ||
+            txt.includes("评级A");
+          return txt
+            ? `<span class="micro-exec-badge ${isWarn ? "warn" : isGood ? "good" : ""}">${escapeHtml(txt)}</span>`
+            : "";
         })
         .join("");
 
-      const sigSpellsHtml = (p.signature_spells || [])
+      const ultAudits = p.ult_audits || p.signature_spells || [];
+      const sigSpellsHtml = ultAudits
         .map((sp) => {
-          const tfCastsPills = (sp.teamfight_casts || [])
-            .map((tc) => `<span class="micro-tf-pill">✓ ${escapeHtml(tc.time_range)} 团战释放×${tc.casts}</span>`)
-            .join("");
-          const heldDeathPills = (sp.held_ult_deaths || [])
-            .map(
-              (hd) =>
-                `<span class="micro-tf-pill held-die">🚨 ${escapeHtml(hd.time_range)} 团战憋大阵亡 (仅打${fmtNum(
-                  hd.damage_dealt
-                )}伤)</span>`
-            )
-            .join("");
-          const targetsStr = (sp.targets_breakdown || [])
-            .slice(0, 4)
-            .map((t) => `${t.is_ally ? "友·" : "敌·"}${escapeHtml(t.hero_short_zh)}×${t.count}`)
-            .join(" / ");
+          const casts = sp.casts ?? 0;
+          const hits = sp.hits ?? sp.hero_hits ?? 0;
+          const avgHits = sp.avg_hits ?? sp.avg_heroes_per_cast ?? 0;
+          const unitLabel = sp.unit_label || "人次";
+          const totalDmg = sp.damage ?? sp.total_damage ?? 0;
+          const verdictText = sp.verdict_text || sp.verdict || "";
+          const grade = sp.grade || "B";
+
+          const tfWaves = sp.tf_casts_waves || [];
+          const tfCastsPills =
+            tfWaves.length > 0
+              ? tfWaves
+                  .map((w) => `<span class="micro-tf-pill">✓ ${escapeHtml(w)} 团战开大</span>`)
+                  .join("")
+              : (sp.teamfight_casts || [])
+                  .map((tc) => `<span class="micro-tf-pill">✓ ${escapeHtml(tc.time_range || "")} 团战释放×${tc.casts ?? 1}</span>`)
+                  .join("");
+
+          const heldWaves = sp.tf_held_death_waves || [];
+          const heldDeathPills =
+            heldWaves.length > 0
+              ? heldWaves
+                  .map((hw) => `<span class="micro-tf-pill held-die">🚨 ${escapeHtml(hw)} 团战憋大阵亡</span>`)
+                  .join("")
+              : (sp.held_ult_deaths || [])
+                  .map(
+                    (hd) =>
+                      `<span class="micro-tf-pill held-die">🚨 ${escapeHtml(hd.time_range || "")} 团战憋大阵亡 (仅打${fmtNum(
+                        hd.damage_dealt || 0
+                      )}伤)</span>`
+                  )
+                  .join("");
+
+          const targetsStr = Array.isArray(sp.victim_breakdown)
+            ? sp.victim_breakdown.slice(0, 4).join(" / ")
+            : (sp.targets_breakdown || [])
+                .slice(0, 4)
+                .map((t) => `${t.is_ally ? "友·" : "敌·"}${escapeHtml(t.hero_short_zh || "")}×${t.count ?? 0}`)
+                .join(" / ");
 
           return `
             <div class="micro-ult-box">
               <div class="micro-ult-top">
-                <span class="micro-ult-name">${sp.is_big_ult ? "💥 团战大招" : "⚡ 核心技能"} · ${escapeHtml(
-            sp.ability_zh
+                <span class="micro-ult-name">💥 大招审计 · ${escapeHtml(sp.ability_zh || "关键技能")}</span>
+                <span class="status-pill ${grade === "S" || grade === "A" ? "connected" : ""}">评级 ${escapeHtml(
+            grade
           )}</span>
-                <span class="status-pill ${sp.grade === "S" || sp.grade === "A" ? "connected" : ""}">评级 ${escapeHtml(
-            sp.grade || "B"
-          )} · ${escapeHtml(sp.verdict || "")}</span>
               </div>
               <div class="micro-ult-stats">
-                <span>释放次数：<b>${sp.casts} 次</b></span>
+                <span>释放次数：<b>${casts} 次</b></span>
                 ${
-                  sp.hero_hits > 0
-                    ? `<span>命中英雄：<b>${sp.hero_hits} 人次 (场均 ${sp.avg_heroes_per_cast} 人/次)</b></span>`
-                    : ""
+                  hits > 0
+                    ? `<span>命中统计：<b>${hits} ${escapeHtml(unitLabel)} (场均 ${avgHits} ${escapeHtml(unitLabel)}/次)</b></span>`
+                    : casts > 0
+                    ? `<span>团战开大：<b>${sp.tf_casts_count ?? tfWaves.length} 波团战</b></span>`
+                    : `<span>实战记录：<b>整局 0 释放</b></span>`
                 }
-                ${sp.total_damage > 0 ? `<span>技能伤害：<b>${fmtNum(sp.total_damage)}</b></span>` : ""}
-                ${targetsStr ? `<span>主要目标：<b>${targetsStr}</b></span>` : ""}
+                ${totalDmg > 0 ? `<span>大招伤害：<b>${fmtNum(totalDmg)}</b></span>` : ""}
+                ${targetsStr ? `<span>主要目标：<b>${escapeHtml(targetsStr)}</b></span>` : ""}
               </div>
+              ${
+                verdictText
+                  ? `<div style="font-size:12px; color:var(--text); line-height:1.5;">${escapeHtml(verdictText)}</div>`
+                  : ""
+              }
               ${
                 tfCastsPills || heldDeathPills
                   ? `<div class="micro-tf-pills">${tfCastsPills}${heldDeathPills}</div>`
@@ -1129,71 +1190,78 @@ function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, othe
         })
         .join("");
 
+      const skillshotHtml = (p.skillshot_audits || [])
+        .map(
+          (sk) => `
+          <div class="micro-ult-box" style="border-left: 2px solid var(--gold);">
+            <div class="micro-ult-top">
+              <span class="micro-ult-name">🎯 非指向核心技能 · ${escapeHtml(sk.ability_zh || "")}</span>
+              <span class="status-pill ${sk.grade === "S" || sk.grade === "A" ? "connected" : ""}">命中率 ${
+            sk.hit_pct ?? 0
+          }% (${sk.grade || "B"})</span>
+            </div>
+            <div class="micro-ult-stats">
+              <span>释放次数：<b>${sk.casts ?? 0} 次</b></span>
+              <span>命中英雄：<b>${sk.hits ?? 0} 人次</b></span>
+              ${(sk.damage ?? 0) > 0 ? `<span>技能伤害：<b>${fmtNum(sk.damage)}</b></span>` : ""}
+            </div>
+            ${
+              sk.detail
+                ? `<div style="font-size:12px; color:var(--muted);">${escapeHtml(sk.detail)}</div>`
+                : ""
+            }
+          </div>
+        `
+        )
+        .join("");
+
       const insightsHtml = (p.special_insights || [])
         .map((ins) => `<li>${escapeHtml(ins)}</li>`)
         .join("");
 
-      const hasHeldUltWarning = (p.signature_spells || []).some(
-        (sp) => (sp.held_ult_deaths || []).length > 0
+      const hasHeldUltWarning = ultAudits.some(
+        (sp) => (sp.tf_held_death_count ?? 0) > 0 || (sp.held_ult_deaths || []).length > 0
       );
 
       return `
         <article class="micro-hero-card ${hasHeldUltWarning ? "culprit-border" : ""}">
           <div class="micro-hero-head">
             <div class="micro-hero-id">
-              ${p.hero_img ? `<img src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(p.hero_short_zh)}" loading="lazy" />` : ""}
+              ${p.hero_img ? `<img src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(p.hero_short_zh || "")}" loading="lazy" />` : ""}
               <div>
-                <strong>${p.pos}号位 · ${escapeHtml(p.hero_short_zh)} (${escapeHtml(p.personaname)})</strong>
-                <div class="micro-hero-sub">团战参战率 ${p.teamfight_participation_pct || 0}%${
-        p.stuns_sec > 0 ? ` · 硬控时长 ${p.stuns_sec} 秒` : ""
-      }</div>
+                <strong>${p.pos ?? "?"}号位 · ${escapeHtml(p.hero_short_zh || "")} (${escapeHtml(p.personaname || "")})</strong>
+                <div class="micro-hero-sub">${
+                  (p.stuns_sec ?? 0) > 0
+                    ? `全场硬控眩晕 ${p.stuns_sec} 秒`
+                    : `关键技能与大招录像级审计`
+                }</div>
               </div>
             </div>
           </div>
           ${badges ? `<div class="micro-badges-wrap">${badges}</div>` : ""}
           ${sigSpellsHtml}
+          ${skillshotHtml}
           ${insightsHtml ? `<ul class="micro-insights-list">${insightsHtml}</ul>` : ""}
         </article>
       `;
     })
     .join("");
 
-  const rubickList = df.rubick_steal_ledger || [];
-  const rubickHtml =
-    rubickList.length > 0
-      ? `
-      <div class="micro-card">
-        <h4>🕵️ 谁在喂敌方拉比克偷技能 (内鬼嫌疑榜)</h4>
-        <div class="micro-badges-wrap">
-          ${rubickList
-            .map(
-              (r) =>
-                `<span class="micro-exec-badge warn">${escapeHtml(r.victim_hero)} (${escapeHtml(
-                  r.victim_player
-                )}) 被拉比克偷技能 <b>${r.stolen_count} 次</b></span>`
-            )
-            .join("")}
-        </div>
-      </div>
-    `
-      : "";
-
   return `
     <div class="micro-pane-block">
       <div class="micro-pane-banner">
         <div>
           <h3>🎯 1. 英雄绝活与大招释放质量审判 (${escapeHtml(targetSideZh)} 1~5 号位)</h3>
-          <p><strong>${escapeHtml(targetSideZh)}大招与关键技能兑现：</strong>${escapeHtml(execData.summary || "")}${
-    oppExecData?.summary
+          <p><strong>${escapeHtml(targetSideZh)}大招与关键技能兑现：</strong>${escapeHtml(ownSummaryText)}${
+    oppSummaryText
       ? `<br/><span style="color:var(--muted);">对照${escapeHtml(otherSideZh)}表现：${escapeHtml(
-          oppExecData.summary
+          oppSummaryText
         )}</span>`
       : ""
   }</p>
         </div>
       </div>
       <div class="micro-hero-exec-grid">${cardsHtml}</div>
-      ${rubickHtml}
     </div>
   `;
 }
@@ -1204,20 +1272,31 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
     return `<div class="empty-state compact">当前比赛暂无辅助眼位显微镜数据</div>`;
   }
 
-  const ps = vis.posture_summary || {};
-  const aggPct = Number(ps.aggressive_pct || 0);
-  const midPct = Number(ps.river_roshan_pct || 0);
-  const defPct = Number(ps.defensive_pct || 0);
+  const pc = vis.posture_counts || {};
+  const pp = vis.posture_pcts || {};
+  const aggCnt = Number(pc.aggressive ?? 0);
+  const midCnt = Number(pc.river_roshan ?? 0);
+  const defCnt = Number(pc.defensive ?? 0);
+  const aggPct = Number(pp.aggressive ?? 0);
+  const midPct = Number(pp.river_roshan ?? 0);
+  const defPct = Number(pp.defensive ?? 0);
 
-  const supRowsHtml = (vis.support_breakdown || [])
+  const totalObs = vis.total_obs ?? vis.obs_total ?? 0;
+  const totalSen = vis.total_sen ?? vis.sen_total ?? 0;
+  const avgLife = vis.avg_lifespan_sec ?? 0;
+  const dewardedTotal = vis.dewarded_total ?? vis.obs_dewarded_count ?? 0;
+  const dewardedPct = vis.dewarded_pct ?? vis.obs_dewarded_pct ?? 0;
+
+  const supList = vis.per_support_vision || vis.support_breakdown || [];
+  const supRowsHtml = supList
     .map(
       (s) => `
       <tr>
-        <td><b>${s.pos}号位 · ${escapeHtml(s.hero_short_zh)}</b> (${escapeHtml(s.personaname)})</td>
-        <td><b>${s.obs_placed} 颗</b> / ${s.sen_placed} 真眼</td>
-        <td>⚔️ 进攻 ${s.aggressive} / ⚖️ 河道 ${s.river_roshan} / 🛡️ 防守 ${s.defensive}</td>
-        <td><b>${s.avg_lifespan_sec}s</b> / 360s</td>
-        <td>被排 ${s.dewarded_count} 颗 / 反排敌方 <b>${s.obs_destroyed || 0} 颗</b></td>
+        <td><b>${s.pos ?? "?"}号位 · ${escapeHtml(s.hero_short_zh || "")}</b> (${escapeHtml(s.personaname || "")})</td>
+        <td><b>${s.obs_total ?? s.obs_placed ?? 0} 颗假眼</b> / ${s.sen_total ?? s.sen_placed ?? 0} 真眼</td>
+        <td>⚔️ 进攻 ${s.aggressive_cnt ?? s.aggressive ?? 0} / ⚖️ 河道 ${s.river_cnt ?? s.river_roshan ?? 0} / 🛡️ 防守 ${s.defensive_cnt ?? s.defensive ?? 0}</td>
+        <td><b>${s.avg_lifespan_sec ?? 0}s</b> / 360s</td>
+        <td>被排 ${s.dewarded_cnt ?? s.dewarded_count ?? 0} 颗 / 反排敌方 <b>${s.obs_killed ?? s.obs_destroyed ?? 0} 假 ${s.sen_killed ?? 0} 真</b></td>
       </tr>
     `
     )
@@ -1227,62 +1306,79 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
     .map((pk) => {
       const ph = vis.phase_posture?.[pk];
       if (!ph) return "";
+      const pAgg = ph.aggressive ?? 0;
+      const pMid = ph.river_roshan ?? 0;
+      const pDef = ph.defensive ?? 0;
+      const pTotal = ph.total ?? pAgg + pMid + pDef;
       return `
         <tr>
-          <td><b>${escapeHtml(ph.label)}</b></td>
-          <td>${ph.total} 颗</td>
-          <td>⚔️ 深入进攻眼 <b>${ph.aggressive} 颗</b></td>
-          <td>⚖️ 河道/肉山眼 <b>${ph.river_roshan} 颗</b></td>
-          <td>🛡️ 被动防守眼 <b>${ph.defensive} 颗</b></td>
+          <td><b>${escapeHtml(ph.label || pk)}</b></td>
+          <td><b>${pTotal} 颗</b></td>
+          <td>⚔️ 深入进攻眼 <b>${pAgg} 颗</b></td>
+          <td>⚖️ 河道/肉山眼 <b>${pMid} 颗</b></td>
+          <td>🛡️ 被动防守眼 <b>${pDef} 颗</b></td>
         </tr>
       `;
     })
     .join("");
 
+  const instantList = vis.instant_dewards || [];
   const instantHtml =
-    (vis.instant_dewards || []).length > 0
-      ? vis.instant_dewards
+    instantList.length > 0
+      ? instantList
           .map(
             (w) =>
-              `<li><b>${escapeHtml(w.time_str)}</b> · ${escapeHtml(w.hero_short_zh)} 插在 <b>${escapeHtml(
-                w.zone_zh
-              )} (${w.x},${w.y})</b> 的${escapeHtml(w.posture_label)}仅活 <b>${
-                w.lifespan_sec
-              } 秒</b>即被敌方秒排！</li>`
+              `<li><b>${escapeHtml(w.time_str || "")}</b> · ${escapeHtml(
+                w.planter_hero || w.hero_short_zh || ""
+              )} 插在 <b>${escapeHtml(w.zone_zh || "")} (${escapeHtml(
+                w.coords || `${w.x ?? ""},${w.y ?? ""}`
+              )})</b> 的【${escapeHtml(w.posture_zh || w.posture_label || "假眼")}】仅存活 <b>${
+                w.lifespan_sec ?? 0
+              } 秒</b>即被 ${escapeHtml(w.dewarded_by || "敌方")} 秒排！</li>`
           )
           .join("")
       : `<li>✓ 本局未出现插下 2 分钟内被秒排的白给假眼</li>`;
 
+  const cliffList = vis.cliff_spots || vis.cliff_obsession || [];
   const cliffHtml =
-    (vis.cliff_obsession || []).length > 0
-      ? vis.cliff_obsession
+    cliffList.length > 0
+      ? cliffList
           .map(
             (c) =>
-              `<li>🚨 <b>${escapeHtml(c.zone_zh)} (${c.coord})</b> 全场头铁重复插了 <b>${
-                c.count
-              } 颗假眼</b>（时间点：${escapeHtml((c.times || []).join("、"))}），被排掉 ${
-                c.dewarded_count
-              } 颗！</li>`
+              `<li>🚨 <b>${escapeHtml(c.zone_zh || "")} (${escapeHtml(
+                c.coords || c.coord || ""
+              )})</b> 全场重复插了 <b>${c.total_count ?? c.count ?? 0} 颗眼</b>（假眼 ${
+                c.obs_count ?? c.count ?? 0
+              } 颗 / 真眼 ${c.sen_count ?? 0} 颗 · 时间点：${escapeHtml(
+                c.times_str || (c.times || []).join("、")
+              )}）— ${escapeHtml(c.comment || "同一眼位反复博弈")}</li>`
           )
           .join("")
-      : `<li>✓ 本局未出现同一高台头铁连插 2 颗以上假眼的情况</li>`;
+      : `<li>✓ 本局未出现同一高台头铁连插 3 颗以上眼位的情况</li>`;
 
-  const obsTableRows = (vis.obs_records || [])
-    .map(
-      (w, idx) => `
+  const obsRecords = vis.obs_records || [];
+  const obsTableRows = obsRecords
+    .map((w, idx) => {
+      const life = w.lifespan_sec ?? 360;
+      const wasDew = Boolean(w.was_dewarded ?? w.dewarded);
+      const isInstant = wasDew && life <= 90;
+      const fateText = wasDew
+        ? `❌ 被 ${w.killer_zh || "敌方"} 排掉 (仅活 ${life}s)`
+        : `✓ 自然到点消失 (满 ${life}s)`;
+      return `
       <tr>
         <td>#${idx + 1}</td>
-        <td><b>${escapeHtml(w.time_str)}</b> (${escapeHtml(w.phase_zh)})</td>
-        <td>${w.pos}号位 · ${escapeHtml(w.hero_short_zh)}</td>
-        <td><b>${escapeHtml(w.zone_zh)}</b> <span style="color:var(--muted);">(${w.x}, ${w.y})</span></td>
-        <td>${escapeHtml(w.posture_label)}</td>
+        <td><b>${escapeHtml(w.time_str || "")}</b></td>
+        <td>${w.planter_pos ?? w.pos ?? "?"}号位 · ${escapeHtml(w.planter_hero || w.hero_short_zh || "")}</td>
+        <td><b>${escapeHtml(w.zone_zh || "")}</b> <span style="color:var(--muted);">(${w.x ?? "?"}, ${w.y ?? "?"})</span></td>
+        <td>${escapeHtml(w.posture_zh || w.posture_label || "")}</td>
         <td><b style="color:${
-          w.is_instant_deward ? "var(--red-light)" : w.dewarded ? "var(--gold-light)" : "var(--green-light)"
-        }">${w.lifespan_sec} 秒</b> / 360 秒</td>
-        <td>${escapeHtml(w.fate_zh)}${w.dewarded_time_str ? ` (@${escapeHtml(w.dewarded_time_str)})` : ""}</td>
+          isInstant ? "var(--red-light)" : wasDew ? "var(--gold-light)" : "var(--green-light)"
+        }">${life} 秒</b> / 360 秒</td>
+        <td>${escapeHtml(w.fate_zh || fateText)}</td>
       </tr>
-    `
-    )
+    `;
+    })
     .join("");
 
   return `
@@ -1297,17 +1393,17 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
       <div class="posture-bar-stack" title="假眼进攻/河道/防守姿态比例">
         ${
           aggPct > 0
-            ? `<div class="posture-seg agg" style="width:${Math.max(aggPct, 10)}%">⚔️ 进攻眼 ${aggPct}% (${ps.aggressive}颗)</div>`
+            ? `<div class="posture-seg agg" style="width:${Math.max(aggPct, 10)}%">⚔️ 进攻眼 ${aggPct}% (${aggCnt}颗)</div>`
             : ""
         }
         ${
           midPct > 0
-            ? `<div class="posture-seg mid" style="width:${Math.max(midPct, 10)}%">⚖️ 河道/肉山眼 ${midPct}% (${ps.river_roshan}颗)</div>`
+            ? `<div class="posture-seg mid" style="width:${Math.max(midPct, 10)}%">⚖️ 河道/肉山眼 ${midPct}% (${midCnt}颗)</div>`
             : ""
         }
         ${
           defPct > 0
-            ? `<div class="posture-seg def" style="width:${Math.max(defPct, 10)}%">🛡️ 防守保护眼 ${defPct}% (${ps.defensive}颗)</div>`
+            ? `<div class="posture-seg def" style="width:${Math.max(defPct, 10)}%">🛡️ 防守保护眼 ${defPct}% (${defCnt}颗)</div>`
             : ""
         }
       </div>
@@ -1315,19 +1411,19 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
       <div class="micro-kpi-row">
         <div class="micro-kpi-cell">
           <span>假眼总数 / 真眼总数</span>
-          <strong>${vis.obs_total} 颗假眼 / ${vis.sen_total} 颗真眼</strong>
+          <strong>${totalObs} 颗假眼 / ${totalSen} 颗真眼</strong>
         </div>
         <div class="micro-kpi-cell">
           <span>假眼平均存活寿命 (满6分钟=360s)</span>
-          <strong>${vis.avg_lifespan_sec} 秒 / 360 秒</strong>
+          <strong>${avgLife} 秒 / 360 秒</strong>
         </div>
         <div class="micro-kpi-cell">
           <span>假眼被敌方排掉比例</span>
-          <strong>被排 ${vis.obs_dewarded_count} 颗 (${vis.obs_dewarded_pct}%)</strong>
+          <strong>被排 ${dewardedTotal} 颗 (${dewardedPct}%)</strong>
         </div>
         <div class="micro-kpi-cell">
-          <span>秒排白给眼 (&lt;135s) / 同高台连插</span>
-          <strong>${(vis.instant_dewards || []).length} 颗秒排 / ${(vis.cliff_obsession || []).length} 处同高台</strong>
+          <span>秒排白给眼 (&le;90s) / 同高台死磕</span>
+          <strong>${instantList.length} 颗秒排 / ${cliffList.length} 处高台</strong>
         </div>
       </div>
 
@@ -1365,9 +1461,9 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
         </div>
 
         <div class="micro-card">
-          <h4>🚨 秒排白给眼 (&lt;135s) &amp; 同高台头铁连插抓包台</h4>
+          <h4>🚨 秒排白给眼 (&le;90s) &amp; 同高台头铁连插抓包台</h4>
           <div>
-            <strong style="font-size:12px; color:var(--gold-light);">⚡ 插下不到 2 分钟即被排掉的秒排眼：</strong>
+            <strong style="font-size:12px; color:var(--gold-light);">⚡ 插下不到 90 秒即被排掉的秒排眼：</strong>
             <ul class="micro-insights-list" style="margin-top:5px;">${instantHtml}</ul>
           </div>
           <div style="margin-top:6px;">
@@ -1377,10 +1473,13 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
         </div>
       </div>
 
+      ${
+        obsRecords.length > 0
+          ? `
       <details class="squad-ledger-details" style="margin-bottom:0;">
         <summary class="squad-ledger-summary">
           <div class="squad-ledger-summary-left">
-            <strong>📋 展开查看本局全部 ${vis.obs_total} 颗假眼精确坐标、区域分类与存活秒数流水表</strong>
+            <strong>📋 展开查看本局全部 ${totalObs} 颗假眼精确坐标、区域分类与存活秒数流水表</strong>
           </div>
           <span class="squad-ledger-summary-arrow">展开明细表 ▾</span>
         </summary>
@@ -1401,6 +1500,9 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
           </table>
         </div>
       </details>
+      `
+          : ""
+      }
     </div>
   `;
 }
@@ -1411,30 +1513,52 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
     return `<div class="empty-state compact">当前比赛暂无堆野与开雾找节奏数据</div>`;
   }
 
+  const totalStacks = ss.total_stacks ?? ss.total_team_stacks ?? 0;
+  const totalCreeps = ss.total_creeps_stacked ?? 0;
+  const supStacks = ss.support_stacks ?? 0;
+  const coreStacks = ss.core_stacks ?? ss.core_self_stacks ?? 0;
+
   const stackRowsHtml = (ss.stack_rows || [])
-    .map(
-      (r) => `
+    .map((r) => {
+      const minsStr = Array.isArray(r.stack_mins)
+        ? r.stack_mins.join("、")
+        : r.stack_minutes_str || "";
+      const roleLabel = r.role_tag || (r.pos >= 4 ? "辅助屯野" : "核心自拉");
+      return `
       <tr>
-        <td><b>${r.pos}号位 · ${escapeHtml(r.hero_short_zh)}</b> (${escapeHtml(r.personaname)})</td>
-        <td>${r.is_support ? "辅助位屯野" : "核心位自拉野"}</td>
-        <td><b style="color:${r.camps_stacked > 0 ? "var(--gold-light)" : "var(--muted)"}">${
-        r.camps_stacked
-      } 组</b> (${r.creeps_stacked} 只野怪)</td>
-        <td>${escapeHtml(r.stack_minutes_str || "无")}</td>
+        <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+        <td>${escapeHtml(roleLabel)}</td>
+        <td><b style="color:${(r.camps_stacked ?? 0) > 0 ? "var(--gold-light)" : "var(--muted)"}">${
+          r.camps_stacked ?? 0
+        } 组</b> (${r.creeps_stacked ?? 0} 只野怪)</td>
+        <td>${escapeHtml(minsStr || "无堆野记录")}</td>
       </tr>
-    `
-    )
+    `;
+    })
     .join("");
 
-  const smokeRowsHtml = (ss.smoke_events || [])
+  const smokeEvents = ss.smoke_events || [];
+  const smokeUses = ss.own_smoke_uses ?? ss.smoke_total_uses ?? smokeEvents.length;
+  const smokeBought =
+    ss.smoke_total_bought ??
+    (ss.per_player_smokes || []).reduce((acc, item) => acc + Number(item.bought || 0), 0);
+  const smokeSuccessCnt =
+    ss.smoke_success_count ?? smokeEvents.filter((e) => e.outcome === "success").length;
+  const smokeBackfireCnt =
+    ss.smoke_backfire_count ?? smokeEvents.filter((e) => e.outcome === "backfire").length;
+  const smokeDryCnt =
+    ss.smoke_dry_count ?? smokeEvents.filter((e) => e.outcome === "wasted").length;
+
+  const smokeRowsHtml = smokeEvents
     .map(
       (sm) => `
       <tr>
-        <td><b>${escapeHtml(sm.time_str)}</b> (${escapeHtml(sm.phase_zh)})</td>
-        <td>${sm.activator_pos}号位 · ${escapeHtml(sm.activator_hero)} (${escapeHtml(sm.activator_player)})</td>
-        <td><b>${escapeHtml(sm.outcome_label)}</b></td>
-        <td><b>${sm.kills_in_window} 杀 / ${sm.deaths_in_window} 死</b></td>
-        <td>${escapeHtml(sm.detail)}</td>
+        <td><b>${escapeHtml(sm.time_str || "")}</b> (${escapeHtml(sm.phase_tag || sm.phase_zh || "")})</td>
+        <td>${sm.initiator_pos ?? sm.activator_pos ?? "?"}号位 · ${escapeHtml(
+        sm.initiator_hero || sm.activator_hero || ""
+      )} (${escapeHtml(sm.initiator_player || sm.activator_player || "")})</td>
+        <td><b>${escapeHtml(sm.outcome_label || "")}</b></td>
+        <td>${escapeHtml(sm.detail || "")}</td>
       </tr>
     `
     )
@@ -1444,22 +1568,22 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
     <div class="micro-pane-block">
       <div class="micro-grid-2col">
         <div class="micro-card">
-          <h4>🌾 辅助堆野屯矿 vs 大哥自拉野审计 (${escapeHtml(targetSideZh)}合计堆野 ${ss.total_team_stacks} 组)</h4>
+          <h4>🌾 辅助堆野屯矿 vs 大哥自拉野审计 (${escapeHtml(targetSideZh)}合计堆野 ${totalStacks} 组)</h4>
           <p style="margin:0; font-size:12.5px; color:var(--text); line-height:1.55;">${escapeHtml(
             ss.stack_verdict || ""
           )}</p>
           <div class="micro-kpi-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
             <div class="micro-kpi-cell">
               <span>全队累计堆野</span>
-              <strong>${ss.total_team_stacks} 组 (${ss.total_creeps_stacked} 只野)</strong>
+              <strong>${totalStacks} 组 (${totalCreeps} 只野)</strong>
             </div>
             <div class="micro-kpi-cell">
               <span>4/5号位辅助堆野</span>
-              <strong>${ss.support_stacks} 组</strong>
+              <strong>${supStacks} 组</strong>
             </div>
             <div class="micro-kpi-cell">
               <span>1~3号位大哥自拉野</span>
-              <strong>${ss.core_self_stacks} 组</strong>
+              <strong>${coreStacks} 组</strong>
             </div>
           </div>
           <div class="micro-table-wrap">
@@ -1478,26 +1602,26 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
         </div>
 
         <div class="micro-card">
-          <h4>💨 诡计之雾 (Smoke of Deceit) 开雾找节奏全记录 (${ss.smoke_total_uses} 波)</h4>
+          <h4>💨 诡计之雾 (Smoke of Deceit) 开雾找节奏全记录 (${smokeUses} 波)</h4>
           <p style="margin:0; font-size:12.5px; color:var(--text); line-height:1.55;">${escapeHtml(
             ss.smoke_verdict || ""
           )}</p>
           <div class="micro-kpi-row">
             <div class="micro-kpi-cell">
               <span>买雾 / 开雾次数</span>
-              <strong>买 ${ss.smoke_total_bought} / 用 ${ss.smoke_total_uses}</strong>
+              <strong>买 ${smokeBought} / 用 ${smokeUses}</strong>
             </div>
             <div class="micro-kpi-cell">
               <span>🟢 破雾大捷</span>
-              <strong>${ss.smoke_success_count} 波</strong>
+              <strong>${smokeSuccessCnt} 波</strong>
             </div>
             <div class="micro-kpi-cell">
               <span>🔴 开雾撞墙</span>
-              <strong>${ss.smoke_backfire_count} 波</strong>
+              <strong>${smokeBackfireCnt} 波</strong>
             </div>
             <div class="micro-kpi-cell">
               <span>🟡 哑火空雾</span>
-              <strong>${ss.smoke_dry_count} 波</strong>
+              <strong>${smokeDryCnt} 波</strong>
             </div>
           </div>
           <div class="micro-table-wrap">
@@ -1507,14 +1631,13 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
                   <th>开雾时间</th>
                   <th>捏雾发起人</th>
                   <th>战果判定</th>
-                  <th>90秒内头数</th>
-                  <th>破雾90秒实战复盘</th>
+                  <th>破雾 90 秒内实战复盘</th>
                 </tr>
               </thead>
               <tbody>
                 ${
                   smokeRowsHtml ||
-                  `<tr><td colspan="5" style="color:var(--muted);">本局未检测到诡计之雾使用记录</td></tr>`
+                  `<tr><td colspan="4" style="color:var(--muted);">本局未检测到诡计之雾使用记录</td></tr>`
                 }
               </tbody>
             </table>
@@ -1531,63 +1654,75 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
     return `<div class="empty-state compact">当前比赛暂无对线细节显微镜数据</div>`;
   }
 
-  const pullRowsHtml = (lm.pull_rows || [])
+  const pullRows = lm.pulling_rows || lm.pull_rows || [];
+  const pullRowsHtml = pullRows
     .map(
       (r) => `
       <tr>
-        <td><b>${r.pos}号位 · ${escapeHtml(r.hero_short_zh)}</b> (${escapeHtml(r.personaname)})</td>
-        <td><b>${r.pull_zone_samples}</b> (占比 ${r.pull_presence_pct}%)</td>
-        <td><b>${r.early_sentries_placed} 颗</b> (${escapeHtml(
-        (r.early_sentry_times || []).join(" / ") || "未插"
-      )})</td>
-        <td>10m 反补 <b>${r.dn10} 刀</b> (全场 ${r.total_denies} 刀)</td>
-        <td>${r.camps_stacked} 组</td>
-        <td>${escapeHtml(r.assessment)}</td>
+        <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+        <td><b>${r.pull_ticks ?? r.pull_zone_samples ?? 0}</b> 次采样 (占比 ${r.pull_ratio_pct ?? r.pull_presence_pct ?? 0}%)</td>
+        <td><b>${r.early_sentries ?? r.early_sentries_placed ?? 0} 颗真眼</b></td>
+        <td>10m 正/反补 <b>${r.lh10 ?? 0}/${r.dn10 ?? 0} 刀</b></td>
+        <td><span class="status-pill ${
+          (r.status_tag || "").includes("积极") ? "connected" : ""
+        }">${escapeHtml(r.status_tag || "常规保线")}</span></td>
+        <td>${escapeHtml(r.comment || r.assessment || "")}</td>
       </tr>
     `
     )
     .join("");
 
-  const lotusPills = (lm.lotus_rows || [])
-    .filter((r) => r.total_lotuses > 0)
+  const mapRows = lm.map_interact_rows || [];
+  const lotusPills = mapRows
+    .filter((r) => (r.lotus_used ?? 0) > 0)
     .map(
       (r) =>
-        `<span class="micro-exec-badge ${r.side === targetSide ? "good" : "warn"}">${escapeHtml(
-          r.side_zh
-        )}·${r.pos}号位 ${escapeHtml(r.hero_short_zh)}：<b>吃莲花 ×${r.total_lotuses}</b></span>`
+        `<span class="micro-exec-badge good">${r.pos}号位 · ${escapeHtml(r.hero_short_zh || "")} (${escapeHtml(
+          r.personaname || ""
+        )})：<b>吃莲花 ×${r.lotus_used}</b></span>`
     )
     .join("");
 
-  const wisdomPills = (lm.wisdom_events || [])
+  const wisdomTimeline = lm.wisdom_timeline || lm.wisdom_events || [];
+  const wisdomPills = wisdomTimeline
     .map(
       (w) =>
-        `<span class="micro-exec-badge ${w.is_own ? "good" : "warn"}"><b>${escapeHtml(
-          w.time_str
-        )}</b> · ${escapeHtml(w.side_zh)} ${w.pos}号位 ${escapeHtml(w.hero_short_zh)} (${escapeHtml(
-          w.personaname
-        )}) 摘取智慧符</span>`
+        `<span class="micro-exec-badge ${w.side === targetSide ? "good" : "warn"}"><b>${escapeHtml(
+          w.time_str || ""
+        )}</b> · ${escapeHtml(w.side_zh || "")} ${w.pos ?? "?"}号位 ${escapeHtml(
+          w.hero_short_zh || ""
+        )} (${escapeHtml(w.personaname || "")}) 摘取智慧符</span>`
     )
     .join("");
 
-  const gatePills = (lm.gate_rows || [])
+  const gatePills = mapRows
+    .filter((g) => (g.twin_gate ?? 0) > 0 || (g.watcher_lamp ?? 0) > 0)
     .map(
       (g) =>
-        `<span class="micro-exec-badge ${g.side === targetSide ? "good" : ""}">${escapeHtml(
-          g.side_zh
-        )}·${g.pos}号位 ${escapeHtml(g.hero_short_zh)}：<b>走门传送 ×${g.portal_warps}</b> (${escapeHtml(
-          (g.early_warp_times || []).join("、") || "中后期"
-        )})</span>`
+        `<span class="micro-exec-badge ${g.twin_gate > 0 ? "good" : ""}">${g.pos}号位 · ${escapeHtml(
+          g.hero_short_zh || ""
+        )}：<b>走门 ×${g.twin_gate ?? 0}</b> / 点灯 ×${g.watcher_lamp ?? 0} / 抢哨 ×${g.outpost_capture ?? 0}</span>`
     )
     .join("");
 
-  const waterPills = (lm.water_events || [])
+  const waterTimeline = lm.water_runes_timeline || lm.water_events || [];
+  const waterPills = waterTimeline
     .map(
       (w) =>
         `<span class="micro-exec-badge ${w.side === targetSide ? "good" : ""}">${escapeHtml(
-          w.time_str
-        )} · ${escapeHtml(w.side_zh)} ${escapeHtml(w.hero_short_zh)} 控水符</span>`
+          w.time_str || ""
+        )} · ${escapeHtml(w.side_zh || "")} ${escapeHtml(w.hero_short_zh || "")} 控水符</span>`
     )
     .join("");
+
+  const ownLotus = lm.own_lotus_total ?? lm.lotus_own_total ?? 0;
+  const oppLotus = lm.opp_lotus_total ?? lm.lotus_opp_total ?? 0;
+  const ownWisdom = lm.own_wisdom_cnt ?? lm.wisdom_own_count ?? 0;
+  const oppWisdom = lm.opp_wisdom_cnt ?? lm.wisdom_opp_count ?? 0;
+  const ownGate = lm.own_gate_total ?? lm.gate_own_count ?? 0;
+  const oppGate = lm.opp_gate_total ?? lm.gate_opp_count ?? 0;
+  const ownLamp = lm.own_lamp_total ?? lm.lamp_own_count ?? 0;
+  const oppLamp = lm.opp_lamp_total ?? lm.lamp_opp_count ?? 0;
 
   // Relocated 3-lane 10m matchup cards so all laning analysis lives cleanly in Tab 4
   const lanes = df.lane_matchups || [];
@@ -1600,10 +1735,10 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
             const renderHeroMini = (h) => `
               <div class="lm-hero-row">
                 <div class="lm-hero-id">
-                  ${h.hero_img ? `<img src="${escapeHtml(h.hero_img)}" alt="${escapeHtml(h.hero_short_zh)}" width="28" height="16" loading="lazy" />` : ""}
-                  <span><b>${h.pos}号位·${escapeHtml(h.hero_short_zh)}</b> (${escapeHtml(h.personaname)})</span>
+                  ${h.hero_img ? `<img src="${escapeHtml(h.hero_img)}" alt="${escapeHtml(h.hero_short_zh || "")}" width="28" height="16" loading="lazy" />` : ""}
+                  <span><b>${h.pos}号位·${escapeHtml(h.hero_short_zh || "")}</b> (${escapeHtml(h.personaname || "")})</span>
                 </div>
-                <span class="lm-hero-stats">${h.lh10}/${h.dn10}刀 · ${fmtNum(h.gold10)}金 · 效率${h.lane_eff}%</span>
+                <span class="lm-hero-stats">${h.lh10 ?? 0}/${h.dn10 ?? 0}刀 · ${fmtNum(h.gold10 || 0)}金 · 效率${h.lane_eff ?? 0}%</span>
               </div>
             `;
             const isOwnWin = lane.winner_side === targetSide;
@@ -1612,16 +1747,16 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
             return `
               <article class="lane-matchup-card">
                 <div class="lm-head">
-                  <strong>${escapeHtml(lane.title)}</strong>
-                  <span class="lm-verdict-pill ${badgeCls}">${escapeHtml(lane.verdict_zh)}</span>
+                  <strong>${escapeHtml(lane.title || "")}</strong>
+                  <span class="lm-verdict-pill ${badgeCls}">${escapeHtml(lane.verdict_zh || "")}</span>
                 </div>
                 <div class="lm-sides-box">
                   <div class="lm-side-col">
-                    <div class="lm-side-title dire">夜魇对线 (${fmtNum(lane.dire_gold10)}金 · ${escapeHtml(lane.dire_lh_dn)}刀)</div>
+                    <div class="lm-side-title dire">夜魇对线 (${fmtNum(lane.dire_gold10 || 0)}金 · ${escapeHtml(lane.dire_lh_dn || "0/0")}刀)</div>
                     ${(lane.dire_heroes || []).map(renderHeroMini).join("")}
                   </div>
                   <div class="lm-side-col">
-                    <div class="lm-side-title rad">天辉对线 (${fmtNum(lane.radiant_gold10)}金 · ${escapeHtml(lane.radiant_lh_dn)}刀)</div>
+                    <div class="lm-side-title rad">天辉对线 (${fmtNum(lane.radiant_gold10 || 0)}金 · ${escapeHtml(lane.radiant_lh_dn || "0/0")}刀)</div>
                     ${(lane.radiant_heroes || []).map(renderHeroMini).join("")}
                   </div>
                 </div>
@@ -1640,28 +1775,26 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
           <h3>🌱 4. 对线期拉野·封野·走门·莲花·智慧经验符全维审计 (${escapeHtml(targetSideZh)} vs ${escapeHtml(
     otherSideZh
   )})</h3>
-          <p>${escapeHtml(lm.pull_verdict || "")} ｜ ${escapeHtml(lm.lotus_verdict || "")} ｜ ${escapeHtml(
-    lm.wisdom_verdict || ""
-  )}</p>
+          <p>${escapeHtml(lm.lotus_verdict || "")} ｜ ${escapeHtml(lm.wisdom_verdict || "")}</p>
         </div>
       </div>
 
       <div class="micro-kpi-row">
         <div class="micro-kpi-cell">
           <span>🌺 疗伤莲花争夺 (${escapeHtml(targetSideZh)}:${escapeHtml(otherSideZh)})</span>
-          <strong>${lm.lotus_own_total} 颗 : ${lm.lotus_opp_total} 颗</strong>
+          <strong>${ownLotus} 颗 : ${oppLotus} 颗</strong>
         </div>
         <div class="micro-kpi-cell">
           <span>📚 7/14/21m 智慧神符 (${escapeHtml(targetSideZh)}:${escapeHtml(otherSideZh)})</span>
-          <strong>${lm.wisdom_own_count} 枚 : ${lm.wisdom_opp_count} 枚</strong>
+          <strong>${ownWisdom} 枚 : ${oppWisdom} 枚</strong>
         </div>
         <div class="micro-kpi-cell">
           <span>🚪 双生门传送绕后 (${escapeHtml(targetSideZh)}:${escapeHtml(otherSideZh)})</span>
-          <strong>${lm.gate_own_count} 次 : ${lm.gate_opp_count} 次</strong>
+          <strong>${ownGate} 次 : ${oppGate} 次</strong>
         </div>
         <div class="micro-kpi-cell">
-          <span>💧 2/4m 水符 &amp; 观察者点灯</span>
-          <strong>水符 ${lm.water_own_count}:${lm.water_opp_count} · 点灯 ${lm.lamp_own_count}:${lm.lamp_opp_count}</strong>
+          <span>🏮 观察者点灯 (${escapeHtml(targetSideZh)}:${escapeHtml(otherSideZh)})</span>
+          <strong>点灯 ${ownLamp} 次 : ${oppLamp} 次</strong>
         </div>
       </div>
 
@@ -1674,8 +1807,8 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
                 <th>辅助选手</th>
                 <th>拉野点坐标驻留权重</th>
                 <th>0-10m 封野/排野真眼</th>
-                <th>对线反补</th>
-                <th>顺手堆野</th>
+                <th>10m 正/反补</th>
+                <th>对线评级</th>
                 <th>对线细节评语</th>
               </tr>
             </thead>
@@ -1688,7 +1821,7 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
         <div class="micro-card">
           <h4>🌺 疗伤莲花 (Lotus) &amp; 💧 2/4m 中路水符归属明细</h4>
           <p style="margin:0; font-size:12px; color:var(--muted);">${escapeHtml(lm.lotus_verdict || "")}</p>
-          <div class="micro-badges-wrap">${lotusPills || `<span class="micro-exec-badge">未记录到吃莲花事件</span>`}</div>
+          <div class="micro-badges-wrap">${lotusPills || `<span class="micro-exec-badge">本方未记录到吃莲花事件</span>`}</div>
           ${
             waterPills
               ? `<div style="margin-top:6px;"><strong style="font-size:12px; color:var(--gold-light);">💧 2/4分钟河道水符：</strong><div class="micro-badges-wrap" style="margin-top:4px;">${waterPills}</div></div>`
@@ -1698,12 +1831,10 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
 
         <div class="micro-card">
           <h4>📚 智慧神符 (经验符) 时间轴 &amp; 🚪 双生门传送 (Twin Gate)</h4>
-          <p style="margin:0; font-size:12px; color:var(--muted);">${escapeHtml(lm.wisdom_verdict || "")} ｜ ${escapeHtml(
-    lm.gate_verdict || ""
-  )}</p>
+          <p style="margin:0; font-size:12px; color:var(--muted);">${escapeHtml(lm.wisdom_verdict || "")}</p>
           <div class="micro-badges-wrap">${wisdomPills || `<span class="micro-exec-badge">无智慧神符拾取记录</span>`}</div>
           <div style="margin-top:6px;">
-            <strong style="font-size:12px; color:var(--gold-light);">🚪 双生门传送 (twin_gate_portal_warp) 玩家明细：</strong>
+            <strong style="font-size:12px; color:var(--gold-light);">🚪 双生门传送与观察者点灯明细：</strong>
             <div class="micro-badges-wrap" style="margin-top:4px;">${
               gatePills || `<span class="micro-exec-badge">整局无人使用双生门传送</span>`
             }</div>
@@ -1723,27 +1854,32 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
   }
 
   const pRowsHtml = (tp.player_tp_rows || [])
-    .map(
-      (r) => `
+    .map((r) => {
+      const tpUsed = r.tp_used ?? 0;
+      const tpBought = r.tp_bought ?? 0;
+      const earlyTp = r.early_tp_cnt ?? r.early_tp_rotations_12m ?? 0;
+      const tfTpCnt = r.tf_tp_cnt ?? r.teamfight_tp_saves ?? 0;
+      const tfTpTimes = r.tf_tp_times || r.teamfight_tp_times || [];
+      const tfAbsentCnt = r.tf_absent_cnt ?? r.spectator_teamfights ?? 0;
+      const tfAbsentTimes = r.tf_absent_times || r.spectator_times || [];
+      return `
       <tr>
-        <td><b>${r.pos}号位 · ${escapeHtml(r.hero_short_zh)}</b> (${escapeHtml(r.personaname)})</td>
-        <td><b>${r.tp_used} 次</b></td>
-        <td><b style="color:${r.tp_bought === 0 ? "var(--red-light)" : "var(--text)"}">${
-        r.tp_bought
-      } 张</b>${r.tp_bought === 0 ? " (全靠复活白嫖!)" : ""}</td>
-        <td>${r.early_tp_rotations_12m} 次</td>
-        <td><b style="color:${r.teamfight_tp_saves > 0 ? "var(--green-light)" : "var(--muted)"}">${
-        r.teamfight_tp_saves
-      } 次</b> (${escapeHtml((r.teamfight_tp_times || []).join("、") || "无")})</td>
-        <td><b style="color:${r.spectator_teamfights > 0 ? "var(--red-light)" : "var(--green-light)"}">${
-        r.spectator_teamfights
-      } 波</b>${
-        (r.spectator_times || []).length > 0 ? ` (${escapeHtml(r.spectator_times.join("、"))})` : ""
+        <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+        <td><b>${tpUsed} 次</b></td>
+        <td><b style="color:${tpBought === 0 ? "var(--red-light)" : "var(--text)"}">${tpBought} 张</b>${
+        tpBought === 0 ? " (全靠复活白嫖!)" : ""
       }</td>
-        <td>${escapeHtml(r.verdict)}</td>
+        <td><b>${earlyTp} 次</b></td>
+        <td><b style="color:${tfTpCnt > 0 ? "var(--green-light)" : "var(--muted)"}">${tfTpCnt} 次</b> (${escapeHtml(
+        tfTpTimes.join("、") || "无"
+      )})</td>
+        <td><b style="color:${tfAbsentCnt > 0 ? "var(--red-light)" : "var(--green-light)"}">${tfAbsentCnt} 波</b>${
+        tfAbsentTimes.length > 0 ? ` (${escapeHtml(tfAbsentTimes.join("、"))})` : ""
+      }</td>
+        <td>${escapeHtml(r.verdict || "")}</td>
       </tr>
-    `
-    )
+    `;
+    })
     .join("");
 
   const tfRowsHtml = (tp.teamfight_tp_events || [])
@@ -1751,23 +1887,23 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
       const saviors = (ev.tp_saviors || [])
         .map(
           (s) =>
-            `<span class="micro-tf-pill">🟢 ${s.pos}号位·${escapeHtml(s.hero_short_zh)} 亮TP支援 (打${fmtNum(
-              s.damage
-            )}伤)</span>`
+            `<span class="micro-tf-pill">🟢 ${s.pos ?? "?"}号位·${escapeHtml(
+              s.hero_short_zh || ""
+            )} 亮TP支援 (打${fmtNum(s.damage || 0)}伤)</span>`
         )
         .join("");
       const specs = (ev.spectators || [])
         .map(
           (sp) =>
-            `<span class="micro-tf-pill held-die">🔴 ${sp.pos}号位·${escapeHtml(sp.hero_short_zh)} (${escapeHtml(
-              sp.personaname
-            )}) 0伤害0技能未亮TP旁观</span>`
+            `<span class="micro-tf-pill held-die">🔴 ${sp.pos ?? "?"}号位·${escapeHtml(
+              sp.hero_short_zh || ""
+            )} (${escapeHtml(sp.personaname || "")}) 0伤害0技能未亮TP旁观</span>`
         )
         .join("");
       return `
         <tr>
-          <td><b>团战 #${ev.tf_index}</b> (${escapeHtml(ev.time_range)})</td>
-          <td>本方阵亡 <b>${ev.own_deaths}</b> 人 / 击杀敌方 <b>${ev.opp_kills}</b> 人</td>
+          <td><b>团战 #${ev.tf_index ?? "?"}</b> (${escapeHtml(ev.time_range || "")})</td>
+          <td>本方阵亡 <b>${ev.own_deaths ?? 0}</b> 人 / 击杀敌方 <b>${ev.opp_kills ?? 0}</b> 人</td>
           <td><div class="micro-tf-pills">${saviors || `<span style="color:var(--muted);">无人交TP</span>`}</div></td>
           <td><div class="micro-tf-pills">${
             specs || `<span style="color:var(--green-light);">✓ 全员参战无OB</span>`
@@ -3216,16 +3352,23 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
           ? `
         <div class="micro-badges-wrap" style="margin-top: 10px;">
           ${(p.hero_execution_audit.headline_badges || [])
-            .map(
-              (b) =>
-                `<span class="micro-exec-badge ${
-                  b.includes("⚠️") || b.includes("1.33") || b.includes("0.4/分")
-                    ? "warn"
-                    : b.includes("14,807") || b.includes("3.1")
-                    ? "good"
-                    : ""
-                }">🔬 ${escapeHtml(b)}</span>`
-            )
+            .map((b) => {
+              const txt = typeof b === "string" ? b : b?.text || "";
+              const tone = typeof b === "object" && b !== null ? b.tone : "";
+              const isWarn =
+                tone === "bad" ||
+                tone === "warn" ||
+                txt.includes("⚠️") ||
+                txt.includes("1.33") ||
+                txt.includes("0.4/分");
+              const isGood =
+                tone === "good" || txt.includes("14,807") || txt.includes("3.1");
+              return txt
+                ? `<span class="micro-exec-badge ${
+                    isWarn ? "warn" : isGood ? "good" : ""
+                  }">🔬 ${escapeHtml(txt)}</span>`
+                : "";
+            })
             .join("")}
         </div>
       `
@@ -3895,7 +4038,18 @@ function openSharePosterDialog(report) {
   )[0];
 
   const df = report.deep_forensics || {};
-  const microExec = df.hero_execution_by_side?.[side]?.summary || "";
+  const rawExec = df.hero_execution_by_side?.[side];
+  const microExec = Array.isArray(rawExec)
+    ? rawExec
+        .map((x) => {
+          const u = (x.ult_audits || [])[0];
+          return u
+            ? `${x.hero_short_zh}《${u.ability_zh}》释放${u.casts ?? 0}次(命中${u.hits ?? 0}${u.unit_label || "人次"})`
+            : "";
+        })
+        .filter(Boolean)
+        .join("；")
+    : rawExec?.summary || "";
   const microVis = df.support_vision_by_side?.[side]?.posture_verdict || "";
   const microStack = df.stacking_and_smoke_by_side?.[side]?.stack_verdict || "";
   const microSmoke = df.stacking_and_smoke_by_side?.[side]?.smoke_verdict || "";
@@ -3910,14 +4064,13 @@ function openSharePosterDialog(report) {
     `👑 本局真大腿：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 综合评分 ${mvpPlayer?.rating_score || 0}`,
     `────────────────────`,
     `📊 五黑全员算账明细 (按背锅排序)：`,
-    ...sortedBlame.map(
-      (p, i) =>
-        `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s | 锅 ${p.blame_share_pct}%${
-          (p.hero_execution_audit?.headline_badges || [])[0]
-            ? ` | 🔬 ${p.hero_execution_audit.headline_badges[0]}`
-            : ""
-        }`
-    ),
+    ...sortedBlame.map((p, i) => {
+      const b0 = (p.hero_execution_audit?.headline_badges || [])[0];
+      const b0Txt = typeof b0 === "string" ? b0 : b0?.text || "";
+      return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s | 锅 ${p.blame_share_pct}%${
+        b0Txt ? ` | 🔬 ${b0Txt}` : ""
+      }`;
+    }),
     ...(microExec || microVis || microTp
       ? [
           `────────────────────`,

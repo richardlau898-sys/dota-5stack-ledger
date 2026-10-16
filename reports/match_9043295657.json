@@ -17593,6 +17593,8 @@
         "side_zh": "夜魇",
         "total_obs": 30,
         "total_sen": 56,
+        "dewarded_total": 5,
+        "dewarded_pct": 16.7,
         "avg_lifespan_sec": 288,
         "posture_counts": {
           "aggressive": 12,
@@ -17762,6 +17764,428 @@
             "times_str": "14:09、21:56、04:48",
             "comment": "在【上路河道 / 肉山坑口 (96,155)】同一个眼位重复插了 3 颗眼（2假/1真，时间：14:09、21:56、04:48），属于典型的固定高台死磕！"
           }
+        ],
+        "obs_records": [
+          {
+            "time_sec": -42,
+            "time_str": "-00:42",
+            "planter_hero": "拉比克",
+            "planter_pos": 2,
+            "x": 123.5,
+            "y": 130.4,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 57,
+            "was_dewarded": true,
+            "killer_zh": "环轨百戏王"
+          },
+          {
+            "time_sec": 434,
+            "time_str": "07:14",
+            "planter_hero": "拉比克",
+            "planter_pos": 2,
+            "x": 111.9,
+            "y": 129.8,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 304,
+            "was_dewarded": true,
+            "killer_zh": "赏金猎人"
+          },
+          {
+            "time_sec": 305,
+            "time_str": "05:05",
+            "planter_hero": "狙击手",
+            "planter_pos": 4,
+            "x": 158.8,
+            "y": 98.2,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 831,
+            "time_str": "13:51",
+            "planter_hero": "狙击手",
+            "planter_pos": 4,
+            "x": 131.6,
+            "y": 109.9,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 21,
+            "was_dewarded": true,
+            "killer_zh": "赏金猎人"
+          },
+          {
+            "time_sec": 1271,
+            "time_str": "21:11",
+            "planter_hero": "狙击手",
+            "planter_pos": 4,
+            "x": 121.6,
+            "y": 137.7,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2125,
+            "time_str": "35:25",
+            "planter_hero": "狙击手",
+            "planter_pos": 4,
+            "x": 164.3,
+            "y": 134.1,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2164,
+            "time_str": "36:04",
+            "planter_hero": "狙击手",
+            "planter_pos": 4,
+            "x": 136.2,
+            "y": 155.7,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": -27,
+            "time_str": "-00:27",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 76.3,
+            "y": 153.6,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 678,
+            "time_str": "11:18",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 175.4,
+            "y": 70.3,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 849,
+            "time_str": "14:09",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 96.0,
+            "y": 154.8,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 969,
+            "time_str": "16:09",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 161.6,
+            "y": 83.5,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1118,
+            "time_str": "18:38",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 129.3,
+            "y": 126.1,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1316,
+            "time_str": "21:56",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 96.2,
+            "y": 154.8,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1390,
+            "time_str": "23:10",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 74.8,
+            "y": 135.0,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1520,
+            "time_str": "25:20",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 159.4,
+            "y": 98.0,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1714,
+            "time_str": "28:34",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 131.5,
+            "y": 126.2,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1747,
+            "time_str": "29:07",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 114.4,
+            "y": 139.2,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2173,
+            "time_str": "36:13",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 135.8,
+            "y": 106.7,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2365,
+            "time_str": "39:25",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 125.4,
+            "y": 139.0,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2423,
+            "time_str": "40:23",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 136.5,
+            "y": 184.8,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2584,
+            "time_str": "43:04",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 193.9,
+            "y": 130.5,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 28,
+            "was_dewarded": true,
+            "killer_zh": "赏金猎人"
+          },
+          {
+            "time_sec": 2739,
+            "time_str": "45:39",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 117.9,
+            "y": 94.3,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 93,
+            "was_dewarded": true,
+            "killer_zh": "环轨百戏王"
+          },
+          {
+            "time_sec": 2846,
+            "time_str": "47:26",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 136.3,
+            "y": 140.2,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2906,
+            "time_str": "48:26",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 135.6,
+            "y": 184.0,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 3033,
+            "time_str": "50:33",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 189.8,
+            "y": 140.9,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 3274,
+            "time_str": "54:34",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 136.1,
+            "y": 156.1,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 3536,
+            "time_str": "58:56",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 106.7,
+            "y": 75.3,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 328,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          },
+          {
+            "time_sec": 3764,
+            "time_str": "62:44",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 94.1,
+            "y": 119.8,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 100,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          },
+          {
+            "time_sec": 3786,
+            "time_str": "63:06",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 106.3,
+            "y": 101.9,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 78,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          },
+          {
+            "time_sec": 3803,
+            "time_str": "63:23",
+            "planter_hero": "水晶室女",
+            "planter_pos": 5,
+            "x": 91.9,
+            "y": 98.8,
+            "zone_zh": "天辉基地高地 / 三塔内",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 61,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          }
         ]
       },
       "radiant": {
@@ -17769,6 +18193,8 @@
         "side_zh": "天辉",
         "total_obs": 26,
         "total_sen": 53,
+        "dewarded_total": 9,
+        "dewarded_pct": 34.6,
         "avg_lifespan_sec": 239,
         "posture_counts": {
           "aggressive": 14,
@@ -17943,6 +18369,372 @@
             "planters": "环轨百戏王 / 赏金猎人",
             "times_str": "-00:16、38:12、40:27、48:28、48:57",
             "comment": "在【夜魇中路野区腹地 (134,171)】同一个眼位重复插了 5 颗眼（1假/4真，时间：-00:16、38:12、40:27、48:28、48:57），属于典型的固定高台死磕！"
+          }
+        ],
+        "obs_records": [
+          {
+            "time_sec": 15,
+            "time_str": "00:15",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 123.3,
+            "y": 134.8,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 140,
+            "time_str": "02:20",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 169.3,
+            "y": 91.3,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 154,
+            "was_dewarded": true,
+            "killer_zh": "狙击手"
+          },
+          {
+            "time_sec": 570,
+            "time_str": "09:30",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 171.5,
+            "y": 86.8,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 79,
+            "was_dewarded": true,
+            "killer_zh": "拉比克"
+          },
+          {
+            "time_sec": 762,
+            "time_str": "12:42",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 139.9,
+            "y": 133.3,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 7,
+            "was_dewarded": false,
+            "killer_zh": "被排/到期"
+          },
+          {
+            "time_sec": 967,
+            "time_str": "16:07",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 134.5,
+            "y": 103.1,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1147,
+            "time_str": "19:07",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 102.4,
+            "y": 133.2,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1252,
+            "time_str": "20:52",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 135.9,
+            "y": 155.7,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 13,
+            "was_dewarded": true,
+            "killer_zh": "水晶室女"
+          },
+          {
+            "time_sec": 1393,
+            "time_str": "23:13",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 163.8,
+            "y": 133.9,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 96,
+            "was_dewarded": true,
+            "killer_zh": "水晶室女"
+          },
+          {
+            "time_sec": 2149,
+            "time_str": "35:49",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 186.1,
+            "y": 111.2,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2282,
+            "time_str": "38:02",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 121.7,
+            "y": 158.0,
+            "zone_zh": "夜魇上路主野区高台 / 一塔林区",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 88,
+            "was_dewarded": true,
+            "killer_zh": "主宰"
+          },
+          {
+            "time_sec": 2348,
+            "time_str": "39:08",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 124.9,
+            "y": 146.2,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2611,
+            "time_str": "43:31",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 164.1,
+            "y": 134.1,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 124,
+            "was_dewarded": true,
+            "killer_zh": "狙击手"
+          },
+          {
+            "time_sec": 2929,
+            "time_str": "48:49",
+            "planter_hero": "环轨百戏王",
+            "planter_pos": 4,
+            "x": 135.9,
+            "y": 155.6,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": -16,
+            "time_str": "-00:16",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 133.5,
+            "y": 171.3,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 460,
+            "time_str": "07:40",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 125.2,
+            "y": 162.7,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 530,
+            "time_str": "08:50",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 119.2,
+            "y": 143.1,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 848,
+            "time_str": "14:08",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 131.5,
+            "y": 105.7,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 4,
+            "was_dewarded": true,
+            "killer_zh": "狙击手"
+          },
+          {
+            "time_sec": 1668,
+            "time_str": "27:48",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 118.0,
+            "y": 94.1,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1963,
+            "time_str": "32:43",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 137.8,
+            "y": 114.4,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 216,
+            "was_dewarded": true,
+            "killer_zh": "水晶室女"
+          },
+          {
+            "time_sec": 2200,
+            "time_str": "36:40",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 93.8,
+            "y": 119.6,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2442,
+            "time_str": "40:42",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 125.1,
+            "y": 162.5,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2627,
+            "time_str": "43:47",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 186.4,
+            "y": 145.1,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 18,
+            "was_dewarded": false,
+            "killer_zh": "被排/到期"
+          },
+          {
+            "time_sec": 2935,
+            "time_str": "48:55",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 125.0,
+            "y": 162.6,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2998,
+            "time_str": "49:58",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 154.8,
+            "y": 135.7,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 3536,
+            "time_str": "58:56",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 105.2,
+            "y": 74.4,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 328,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          },
+          {
+            "time_sec": 3743,
+            "time_str": "62:23",
+            "planter_hero": "赏金猎人",
+            "planter_pos": 5,
+            "x": 118.0,
+            "y": 93.8,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 36,
+            "was_dewarded": true,
+            "killer_zh": "水晶室女"
           }
         ]
       }
@@ -18916,6 +19708,7 @@
     "tp_rotation_by_side": {
       "dire": {
         "side": "dire",
+        "tp_verdict": "本方全队在关键团战中共亮出 18 人次 TP 落地支援（共触发 8 波多英雄 TP 集结）。 🚨 抓包 3 波团战在队友成片阵亡时有人全程 0 英雄伤害且未亮 TP 支援！",
         "player_tp_rows": [
           {
             "pos": 1,
@@ -18924,13 +19717,22 @@
             "personaname": "Ya Ah Waaaaa",
             "tp_bought": 14,
             "tp_used": 19,
+            "early_tp_cnt": 2,
             "tf_tp_cnt": 5,
+            "tf_tp_times": [
+              "14:06",
+              "23:25",
+              "34:45",
+              "57:16",
+              "59:38"
+            ],
             "tf_joined_cnt": 14,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 19 次 TP，其中 5 波团战直接亮 TP 落地救人/反打，参团率 70.8%。"
+            "verdict": "支援极快：全场使用 19 次 TP，其中 5 波团战（14:06、23:25、34:45、57:16、59:38）直接亮 TP 落地救人/反打，参团率 70.8%。"
           },
           {
             "pos": 2,
@@ -18939,13 +19741,21 @@
             "personaname": "MAD O.O",
             "tp_bought": 1,
             "tp_used": 10,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 2,
+            "tf_tp_times": [
+              "23:25",
+              "59:38"
+            ],
             "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "30:02"
+            ],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 10 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 89.6%。"
+            "verdict": "支援极快：全场使用 10 次 TP，其中 2 波团战（23:25、59:38）直接亮 TP 落地救人/反打，参团率 89.6%。"
           },
           {
             "pos": 3,
@@ -18954,13 +19764,22 @@
             "personaname": "NEver.RamPage",
             "tp_bought": 4,
             "tp_used": 11,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 3,
-            "tf_joined_cnt": 13,
+            "tf_tp_times": [
+              "20:23",
+              "43:40",
+              "57:16"
+            ],
+            "tf_joined_cnt": 12,
             "tf_total_cnt": 14,
-            "tf_absent_cnt": 0,
+            "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "55:55"
+            ],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 11 次 TP，其中 3 波团战直接亮 TP 落地救人/反打，参团率 50.0%。"
+            "verdict": "支援极快：全场使用 11 次 TP，其中 3 波团战（20:23、43:40、57:16）直接亮 TP 落地救人/反打，参团率 50.0%。"
           },
           {
             "pos": 4,
@@ -18969,13 +19788,21 @@
             "personaname": "I AM COMING",
             "tp_bought": 4,
             "tp_used": 11,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 4,
+            "tf_tp_times": [
+              "14:06",
+              "20:23",
+              "23:25",
+              "55:55"
+            ],
             "tf_joined_cnt": 14,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 11 次 TP，其中 4 波团战直接亮 TP 落地救人/反打，参团率 77.1%。"
+            "verdict": "支援极快：全场使用 11 次 TP，其中 4 波团战（14:06、20:23、23:25、55:55）直接亮 TP 落地救人/反打，参团率 77.1%。"
           },
           {
             "pos": 5,
@@ -18984,15 +19811,25 @@
             "personaname": "八级小狂风",
             "tp_bought": 6,
             "tp_used": 15,
+            "early_tp_cnt": 3,
             "tf_tp_cnt": 4,
+            "tf_tp_times": [
+              "14:06",
+              "20:23",
+              "23:25",
+              "55:55"
+            ],
             "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "33:11"
+            ],
             "tp_feed_times": [
               "23:41"
             ],
             "grade": "good",
-            "verdict": "支援极快：全场使用 15 次 TP，其中 4 波团战直接亮 TP 落地救人/反打，参团率 60.4%。"
+            "verdict": "支援极快：全场使用 15 次 TP，其中 4 波团战（14:06、20:23、23:25、55:55）直接亮 TP 落地救人/反打，参团率 60.4%。"
           }
         ],
         "rotation_highlights": [
@@ -19010,9 +19847,9 @@
           },
           {
             "time_range": "23:25–24:10",
-            "responders": "主宰(Ya Ah Waaaaa)、狙击手(I AM COMING)、拉比克(MAD O.O)",
+            "responders": "水晶室女(八级小狂风)、主宰(Ya Ah Waaaaa)、狙击手(I AM COMING)、拉比克(MAD O.O)",
             "trade_str": "打成 0 换 4",
-            "detail": "在 23:25–24:10 交战中，主宰(Ya Ah Waaaaa)、狙击手(I AM COMING)、拉比克(MAD O.O) 第一时间亮 TP 落地支援参战（该波 0 换 4）。"
+            "detail": "在 23:25–24:10 交战中，水晶室女(八级小狂风)、主宰(Ya Ah Waaaaa)、狙击手(I AM COMING)、拉比克(MAD O.O) 第一时间亮 TP 落地支援参战（该波 0 换 4）。"
           },
           {
             "time_range": "34:45–35:32",
@@ -19025,6 +19862,12 @@
             "responders": "哈斯卡(NEver.RamPage)",
             "trade_str": "打成 1 换 2",
             "detail": "在 43:40–44:19 交战中，哈斯卡(NEver.RamPage) 第一时间亮 TP 落地支援参战（该波 1 换 2）。"
+          },
+          {
+            "time_range": "55:55–56:37",
+            "responders": "水晶室女(八级小狂风)、狙击手(I AM COMING)",
+            "trade_str": "打成 1 换 2",
+            "detail": "在 55:55–56:37 交战中，水晶室女(八级小狂风)、狙击手(I AM COMING) 第一时间亮 TP 落地支援参战（该波 1 换 2）。"
           }
         ],
         "absent_warnings": [
@@ -19032,18 +19875,267 @@
             "time_range": "30:02–30:45",
             "victims": "水晶室女、主宰、狙击手",
             "spectators": "2号位拉比克",
-            "detail": "⚠️ 30:02–30:45 我方【水晶室女、主宰、狙击手】遭围剿阵亡时，2号位拉比克 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+            "detail": "⚠️ 30:02–30:45 我方【水晶室女、主宰、狙击手】遭围剿阵亡时，2号位拉比克 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
           },
           {
             "time_range": "33:11–33:42",
             "victims": "主宰、狙击手、拉比克",
             "spectators": "5号位水晶室女",
-            "detail": "⚠️ 33:11–33:42 我方【主宰、狙击手、拉比克】遭围剿阵亡时，5号位水晶室女 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+            "detail": "⚠️ 33:11–33:42 我方【主宰、狙击手、拉比克】遭围剿阵亡时，5号位水晶室女 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
+            "time_range": "55:55–56:37",
+            "victims": "主宰、拉比克",
+            "spectators": "3号位哈斯卡",
+            "detail": "⚠️ 55:55–56:37 我方【主宰、拉比克】遭围剿阵亡时，3号位哈斯卡 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ],
+        "teamfight_tp_events": [
+          {
+            "tf_index": 1,
+            "time_range": "14:06–15:08",
+            "own_deaths": 4,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "水晶室女",
+                "personaname": "八级小狂风",
+                "damage": 240
+              },
+              {
+                "pos": 1,
+                "hero_short_zh": "主宰",
+                "personaname": "Ya Ah Waaaaa",
+                "damage": 0
+              },
+              {
+                "pos": 4,
+                "hero_short_zh": "狙击手",
+                "personaname": "I AM COMING",
+                "damage": 1380
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 2,
+            "time_range": "20:23–21:11",
+            "own_deaths": 1,
+            "opp_kills": 3,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "水晶室女",
+                "personaname": "八级小狂风",
+                "damage": 1232
+              },
+              {
+                "pos": 3,
+                "hero_short_zh": "哈斯卡",
+                "personaname": "NEver.RamPage",
+                "damage": 3586
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 3,
+            "time_range": "23:25–24:10",
+            "own_deaths": 4,
+            "opp_kills": 0,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "水晶室女",
+                "personaname": "八级小狂风",
+                "damage": 0
+              },
+              {
+                "pos": 1,
+                "hero_short_zh": "主宰",
+                "personaname": "Ya Ah Waaaaa",
+                "damage": 685
+              },
+              {
+                "pos": 4,
+                "hero_short_zh": "狙击手",
+                "personaname": "I AM COMING",
+                "damage": 608
+              },
+              {
+                "pos": 2,
+                "hero_short_zh": "拉比克",
+                "personaname": "MAD O.O",
+                "damage": 448
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 4,
+            "time_range": "26:09–27:06",
+            "own_deaths": 1,
+            "opp_kills": 4,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 5,
+            "time_range": "30:02–30:45",
+            "own_deaths": 3,
+            "opp_kills": 0,
+            "tp_saviors": [],
+            "spectators": [
+              {
+                "pos": 2,
+                "hero_short_zh": "拉比克",
+                "personaname": "MAD O.O"
+              }
+            ]
+          },
+          {
+            "tf_index": 6,
+            "time_range": "33:11–33:42",
+            "own_deaths": 3,
+            "opp_kills": 1,
+            "tp_saviors": [],
+            "spectators": [
+              {
+                "pos": 5,
+                "hero_short_zh": "水晶室女",
+                "personaname": "八级小狂风"
+              }
+            ]
+          },
+          {
+            "tf_index": 7,
+            "time_range": "34:45–35:32",
+            "own_deaths": 0,
+            "opp_kills": 3,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "主宰",
+                "personaname": "Ya Ah Waaaaa",
+                "damage": 3450
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 8,
+            "time_range": "43:40–44:19",
+            "own_deaths": 2,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 3,
+                "hero_short_zh": "哈斯卡",
+                "personaname": "NEver.RamPage",
+                "damage": 5510
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 9,
+            "time_range": "44:33–45:09",
+            "own_deaths": 0,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 10,
+            "time_range": "53:35–54:23",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 11,
+            "time_range": "54:08–54:43",
+            "own_deaths": 1,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 12,
+            "time_range": "55:55–56:37",
+            "own_deaths": 2,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "水晶室女",
+                "personaname": "八级小狂风",
+                "damage": 2366
+              },
+              {
+                "pos": 4,
+                "hero_short_zh": "狙击手",
+                "personaname": "I AM COMING",
+                "damage": 1902
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 3,
+                "hero_short_zh": "哈斯卡",
+                "personaname": "NEver.RamPage"
+              }
+            ]
+          },
+          {
+            "tf_index": 13,
+            "time_range": "57:16–58:03",
+            "own_deaths": 0,
+            "opp_kills": 4,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "主宰",
+                "personaname": "Ya Ah Waaaaa",
+                "damage": 4845
+              },
+              {
+                "pos": 3,
+                "hero_short_zh": "哈斯卡",
+                "personaname": "NEver.RamPage",
+                "damage": 9250
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 14,
+            "time_range": "59:38–60:26",
+            "own_deaths": 2,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "主宰",
+                "personaname": "Ya Ah Waaaaa",
+                "damage": 3379
+              },
+              {
+                "pos": 2,
+                "hero_short_zh": "拉比克",
+                "personaname": "MAD O.O",
+                "damage": 1687
+              }
+            ],
+            "spectators": []
           }
         ]
       },
       "radiant": {
         "side": "radiant",
+        "tp_verdict": "本方全队在关键团战中共亮出 11 人次 TP 落地支援（共触发 8 波多英雄 TP 集结）。 🚨 抓包 3 波团战在队友成片阵亡时有人全程 0 英雄伤害且未亮 TP 支援！",
         "player_tp_rows": [
           {
             "pos": 1,
@@ -19052,15 +20144,27 @@
             "personaname": "Paphets",
             "tp_bought": 4,
             "tp_used": 11,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 6,
-            "tf_joined_cnt": 14,
+            "tf_tp_times": [
+              "14:06",
+              "23:25",
+              "44:33",
+              "53:35",
+              "54:08",
+              "59:38"
+            ],
+            "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
-            "tf_absent_cnt": 0,
+            "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "20:23"
+            ],
             "tp_feed_times": [
               "14:04"
             ],
             "grade": "good",
-            "verdict": "支援极快：全场使用 11 次 TP，其中 6 波团战直接亮 TP 落地救人/反打，参团率 85.4%。"
+            "verdict": "支援极快：全场使用 11 次 TP，其中 6 波团战（14:06、23:25、44:33、53:35、54:08、59:38）直接亮 TP 落地救人/反打，参团率 85.4%。"
           },
           {
             "pos": 2,
@@ -19069,10 +20173,17 @@
             "personaname": "Replica",
             "tp_bought": 2,
             "tp_used": 9,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 1,
+            "tf_tp_times": [
+              "14:06"
+            ],
             "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "44:33"
+            ],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：64 分钟仅使用 9 次 TP（主动买 2 张，团战亮 TP 1 次），在 1 波队友阵亡的团战中未能及时赶到！"
@@ -19084,13 +20195,19 @@
             "personaname": "Make Your Choice",
             "tp_bought": 6,
             "tp_used": 13,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 2,
+            "tf_tp_times": [
+              "14:06",
+              "57:16"
+            ],
             "tf_joined_cnt": 14,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 13 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 68.3%。"
+            "verdict": "支援极快：全场使用 13 次 TP，其中 2 波团战（14:06、57:16）直接亮 TP 落地救人/反打，参团率 68.3%。"
           },
           {
             "pos": 4,
@@ -19099,13 +20216,21 @@
             "personaname": "Flame = ez mute",
             "tp_bought": 6,
             "tp_used": 14,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 2,
+            "tf_tp_times": [
+              "20:23",
+              "57:16"
+            ],
             "tf_joined_cnt": 13,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "54:08"
+            ],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 14 次 TP，其中 2 波团战直接亮 TP 落地救人/反打，参团率 73.2%。"
+            "verdict": "支援极快：全场使用 14 次 TP，其中 2 波团战（20:23、57:16）直接亮 TP 落地救人/反打，参团率 73.2%。"
           },
           {
             "pos": 5,
@@ -19114,10 +20239,13 @@
             "personaname": "Mr. Brightside",
             "tp_bought": 2,
             "tp_used": 9,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 14,
             "tf_total_cnt": 14,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：64 分钟仅使用 9 次 TP（主动买 2 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -19153,20 +20281,238 @@
             "responders": "幽鬼(Paphets)",
             "trade_str": "打成 2 换 2",
             "detail": "在 53:35–54:23 交战中，幽鬼(Paphets) 第一时间亮 TP 落地支援参战（该波 2 换 2）。"
+          },
+          {
+            "time_range": "54:08–54:43",
+            "responders": "幽鬼(Paphets)",
+            "trade_str": "打成 1 换 3",
+            "detail": "在 54:08–54:43 交战中，幽鬼(Paphets) 第一时间亮 TP 落地支援参战（该波 1 换 3）。"
           }
         ],
         "absent_warnings": [
           {
+            "time_range": "20:23–21:11",
+            "victims": "赏金猎人、死亡先知、潮汐猎人",
+            "spectators": "1号位幽鬼",
+            "detail": "⚠️ 20:23–21:11 我方【赏金猎人、死亡先知、潮汐猎人】遭围剿阵亡时，1号位幽鬼 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          },
+          {
             "time_range": "44:33–45:09",
             "victims": "环轨百戏王、赏金猎人、潮汐猎人",
             "spectators": "2号位死亡先知",
-            "detail": "⚠️ 44:33–45:09 我方【环轨百戏王、赏金猎人、潮汐猎人】遭围剿阵亡时，2号位死亡先知 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+            "detail": "⚠️ 44:33–45:09 我方【环轨百戏王、赏金猎人、潮汐猎人】遭围剿阵亡时，2号位死亡先知 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
           },
           {
             "time_range": "54:08–54:43",
             "victims": "幽鬼、赏金猎人、死亡先知",
             "spectators": "4号位环轨百戏王",
-            "detail": "⚠️ 54:08–54:43 我方【幽鬼、赏金猎人、死亡先知】遭围剿阵亡时，4号位环轨百戏王 全程 0 伤害、0 技能、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+            "detail": "⚠️ 54:08–54:43 我方【幽鬼、赏金猎人、死亡先知】遭围剿阵亡时，4号位环轨百戏王 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ],
+        "teamfight_tp_events": [
+          {
+            "tf_index": 1,
+            "time_range": "14:06–15:08",
+            "own_deaths": 2,
+            "opp_kills": 4,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "幽鬼",
+                "personaname": "Paphets",
+                "damage": 875
+              },
+              {
+                "pos": 2,
+                "hero_short_zh": "死亡先知",
+                "personaname": "Replica",
+                "damage": 2072
+              },
+              {
+                "pos": 3,
+                "hero_short_zh": "潮汐猎人",
+                "personaname": "Make Your Choice",
+                "damage": 824
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 2,
+            "time_range": "20:23–21:11",
+            "own_deaths": 3,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 4,
+                "hero_short_zh": "环轨百戏王",
+                "personaname": "Flame = ez mute",
+                "damage": 583
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 1,
+                "hero_short_zh": "幽鬼",
+                "personaname": "Paphets"
+              }
+            ]
+          },
+          {
+            "tf_index": 3,
+            "time_range": "23:25–24:10",
+            "own_deaths": 0,
+            "opp_kills": 4,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "幽鬼",
+                "personaname": "Paphets",
+                "damage": 2918
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 4,
+            "time_range": "26:09–27:06",
+            "own_deaths": 4,
+            "opp_kills": 1,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 5,
+            "time_range": "30:02–30:45",
+            "own_deaths": 0,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 6,
+            "time_range": "33:11–33:42",
+            "own_deaths": 1,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 7,
+            "time_range": "34:45–35:32",
+            "own_deaths": 3,
+            "opp_kills": 0,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 8,
+            "time_range": "43:40–44:19",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 9,
+            "time_range": "44:33–45:09",
+            "own_deaths": 3,
+            "opp_kills": 0,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "幽鬼",
+                "personaname": "Paphets",
+                "damage": 1548
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 2,
+                "hero_short_zh": "死亡先知",
+                "personaname": "Replica"
+              }
+            ]
+          },
+          {
+            "tf_index": 10,
+            "time_range": "53:35–54:23",
+            "own_deaths": 2,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "幽鬼",
+                "personaname": "Paphets",
+                "damage": 10223
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 11,
+            "time_range": "54:08–54:43",
+            "own_deaths": 3,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "幽鬼",
+                "personaname": "Paphets",
+                "damage": 5681
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 4,
+                "hero_short_zh": "环轨百戏王",
+                "personaname": "Flame = ez mute"
+              }
+            ]
+          },
+          {
+            "tf_index": 12,
+            "time_range": "55:55–56:37",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 13,
+            "time_range": "57:16–58:03",
+            "own_deaths": 4,
+            "opp_kills": 0,
+            "tp_saviors": [
+              {
+                "pos": 4,
+                "hero_short_zh": "环轨百戏王",
+                "personaname": "Flame = ez mute",
+                "damage": 372
+              },
+              {
+                "pos": 3,
+                "hero_short_zh": "潮汐猎人",
+                "personaname": "Make Your Choice",
+                "damage": 429
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 14,
+            "time_range": "59:38–60:26",
+            "own_deaths": 2,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "幽鬼",
+                "personaname": "Paphets",
+                "damage": 9265
+              }
+            ],
+            "spectators": []
           }
         ]
       }

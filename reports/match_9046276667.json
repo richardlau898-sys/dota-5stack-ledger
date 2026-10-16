@@ -16648,6 +16648,8 @@
         "side_zh": "夜魇",
         "total_obs": 18,
         "total_sen": 30,
+        "dewarded_total": 5,
+        "dewarded_pct": 27.8,
         "avg_lifespan_sec": 275,
         "posture_counts": {
           "aggressive": 7,
@@ -16817,6 +16819,260 @@
             "times_str": "36:31、27:07、30:00",
             "comment": "在【夜魇中路野区腹地 (164,134)】同一个眼位重复插了 3 颗眼（1假/2真，时间：36:31、27:07、30:00），属于典型的固定高台死磕！"
           }
+        ],
+        "obs_records": [
+          {
+            "time_sec": -58,
+            "time_str": "-00:58",
+            "planter_hero": "龙骑士",
+            "planter_pos": 2,
+            "x": 123.8,
+            "y": 132.9,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 39,
+            "was_dewarded": true,
+            "killer_zh": "玛西"
+          },
+          {
+            "time_sec": 566,
+            "time_str": "09:26",
+            "planter_hero": "司夜刺客",
+            "planter_pos": 4,
+            "x": 117.7,
+            "y": 93.9,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 972,
+            "time_str": "16:12",
+            "planter_hero": "司夜刺客",
+            "planter_pos": 4,
+            "x": 96.1,
+            "y": 154.3,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1897,
+            "time_str": "31:37",
+            "planter_hero": "司夜刺客",
+            "planter_pos": 4,
+            "x": 157.6,
+            "y": 121.6,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 32,
+            "was_dewarded": true,
+            "killer_zh": "帕吉"
+          },
+          {
+            "time_sec": -40,
+            "time_str": "-00:40",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 79.9,
+            "y": 159.6,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 419,
+            "time_str": "06:59",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 85.0,
+            "y": 154.9,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 181,
+            "was_dewarded": true,
+            "killer_zh": "帕吉"
+          },
+          {
+            "time_sec": 621,
+            "time_str": "10:21",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 90.2,
+            "y": 167.1,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 44,
+            "was_dewarded": true,
+            "killer_zh": "森海飞霞"
+          },
+          {
+            "time_sec": 685,
+            "time_str": "11:25",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 119.8,
+            "y": 123.4,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 811,
+            "time_str": "13:31",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 151.6,
+            "y": 92.3,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 912,
+            "time_str": "15:12",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 159.2,
+            "y": 119.6,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1095,
+            "time_str": "18:15",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 173.4,
+            "y": 80.7,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1507,
+            "time_str": "25:07",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 118.2,
+            "y": 157.5,
+            "zone_zh": "夜魇上路主野区高台 / 一塔林区",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1581,
+            "time_str": "26:21",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 84.1,
+            "y": 152.1,
+            "zone_zh": "天辉上路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1694,
+            "time_str": "28:14",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 121.1,
+            "y": 137.4,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1963,
+            "time_str": "32:43",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 132.5,
+            "y": 115.0,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1982,
+            "time_str": "33:02",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 151.6,
+            "y": 91.8,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2191,
+            "time_str": "36:31",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 163.9,
+            "y": 134.1,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 118,
+            "was_dewarded": true,
+            "killer_zh": "森海飞霞"
+          },
+          {
+            "time_sec": 2263,
+            "time_str": "37:43",
+            "planter_hero": "拉比克",
+            "planter_pos": 5,
+            "x": 120.8,
+            "y": 138.0,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 224,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          }
         ]
       },
       "radiant": {
@@ -16824,6 +17080,8 @@
         "side_zh": "天辉",
         "total_obs": 19,
         "total_sen": 37,
+        "dewarded_total": 6,
+        "dewarded_pct": 31.6,
         "avg_lifespan_sec": 275,
         "posture_counts": {
           "aggressive": 7,
@@ -16960,6 +17218,274 @@
             "planters": "帕吉",
             "times_str": "33:12、23:15、33:11",
             "comment": "在【夜魇中路野区腹地 (136,156)】同一个眼位重复插了 3 颗眼（1假/2真，时间：33:12、23:15、33:11），属于典型的固定高台死磕！"
+          }
+        ],
+        "obs_records": [
+          {
+            "time_sec": -60,
+            "time_str": "-01:00",
+            "planter_hero": "玛西",
+            "planter_pos": 2,
+            "x": 135.4,
+            "y": 125.4,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 77,
+            "was_dewarded": true,
+            "killer_zh": "司夜刺客"
+          },
+          {
+            "time_sec": 340,
+            "time_str": "05:40",
+            "planter_hero": "玛西",
+            "planter_pos": 2,
+            "x": 125.8,
+            "y": 120.5,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 269,
+            "was_dewarded": true,
+            "killer_zh": "司夜刺客"
+          },
+          {
+            "time_sec": 476,
+            "time_str": "07:56",
+            "planter_hero": "帕吉",
+            "planter_pos": 4,
+            "x": 102.1,
+            "y": 161.6,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 717,
+            "time_str": "11:57",
+            "planter_hero": "帕吉",
+            "planter_pos": 4,
+            "x": 116.6,
+            "y": 127.0,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 24,
+            "was_dewarded": true,
+            "killer_zh": "拉比克"
+          },
+          {
+            "time_sec": 1089,
+            "time_str": "18:09",
+            "planter_hero": "帕吉",
+            "planter_pos": 4,
+            "x": 161.7,
+            "y": 94.9,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1607,
+            "time_str": "26:47",
+            "planter_hero": "帕吉",
+            "planter_pos": 4,
+            "x": 117.8,
+            "y": 94.4,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1992,
+            "time_str": "33:12",
+            "planter_hero": "帕吉",
+            "planter_pos": 4,
+            "x": 136.1,
+            "y": 156.0,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 148,
+            "was_dewarded": true,
+            "killer_zh": "拉比克"
+          },
+          {
+            "time_sec": 21,
+            "time_str": "00:21",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 178.0,
+            "y": 97.9,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 433,
+            "time_str": "07:13",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 163.0,
+            "y": 112.9,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 926,
+            "time_str": "15:26",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 145.3,
+            "y": 108.1,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1020,
+            "time_str": "17:00",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 94.0,
+            "y": 119.9,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1238,
+            "time_str": "20:38",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 109.6,
+            "y": 143.4,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 331,
+            "was_dewarded": true,
+            "killer_zh": "龙骑士"
+          },
+          {
+            "time_sec": 1373,
+            "time_str": "22:53",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 126.3,
+            "y": 164.1,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1479,
+            "time_str": "24:39",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 163.7,
+            "y": 124.3,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 337,
+            "was_dewarded": true,
+            "killer_zh": "拉比克"
+          },
+          {
+            "time_sec": 1575,
+            "time_str": "26:15",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 139.8,
+            "y": 115.4,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 1720,
+            "time_str": "28:40",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 156.0,
+            "y": 147.1,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 26,
+            "was_dewarded": false,
+            "killer_zh": "被排/到期"
+          },
+          {
+            "time_sec": 1874,
+            "time_str": "31:14",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 93.8,
+            "y": 120.0,
+            "zone_zh": "天辉中路野区腹地",
+            "posture": "defensive",
+            "posture_zh": "🛡️ 被动防守保护眼",
+            "lifespan_sec": 360,
+            "was_dewarded": false,
+            "killer_zh": "自然到期"
+          },
+          {
+            "time_sec": 2261,
+            "time_str": "37:41",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 149.8,
+            "y": 115.6,
+            "zone_zh": "下路河道 / 魔晶区",
+            "posture": "river_roshan",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 226,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
+          },
+          {
+            "time_sec": 2307,
+            "time_str": "38:27",
+            "planter_hero": "森海飞霞",
+            "planter_pos": 5,
+            "x": 163.6,
+            "y": 133.8,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture": "aggressive",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 180,
+            "was_dewarded": false,
+            "killer_zh": "终局仍存活"
           }
         ]
       }
@@ -17812,6 +18338,7 @@
     "tp_rotation_by_side": {
       "dire": {
         "side": "dire",
+        "tp_verdict": "本方全队在关键团战中共亮出 9 人次 TP 落地支援（共触发 6 波多英雄 TP 集结）。 🚨 抓包 1 波团战在队友成片阵亡时有人全程 0 英雄伤害且未亮 TP 支援！",
         "player_tp_rows": [
           {
             "pos": 1,
@@ -17820,10 +18347,13 @@
             "personaname": "Flame = ez mute",
             "tp_bought": 1,
             "tp_used": 7,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 8,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [
               "07:17"
             ],
@@ -17837,10 +18367,17 @@
             "personaname": "Paphets",
             "tp_bought": 2,
             "tp_used": 6,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 3,
-            "tf_joined_cnt": 8,
+            "tf_tp_times": [
+              "05:50",
+              "08:44",
+              "28:54"
+            ],
+            "tf_joined_cnt": 7,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [
               "18:54"
             ],
@@ -17854,13 +18391,20 @@
             "personaname": "Mr. Brightside",
             "tp_bought": 3,
             "tp_used": 8,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 1,
-            "tf_joined_cnt": 8,
+            "tf_tp_times": [
+              "06:50"
+            ],
+            "tf_joined_cnt": 7,
             "tf_total_cnt": 8,
-            "tf_absent_cnt": 0,
+            "tf_absent_cnt": 1,
+            "tf_absent_times": [
+              "08:44"
+            ],
             "tp_feed_times": [],
-            "grade": "good",
-            "verdict": "全场使用 8 次 TP（主动购买 3 张，团战亮 TP 1 次），参战 8/8 波关键团。"
+            "grade": "warn",
+            "verdict": "全场使用 8 次 TP（主动购买 3 张，团战亮 TP 1 次），参战 7/8 波关键团（缺席 08:44）。"
           },
           {
             "pos": 4,
@@ -17869,10 +18413,16 @@
             "personaname": "Replica",
             "tp_bought": 1,
             "tp_used": 5,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 2,
+            "tf_tp_times": [
+              "08:44",
+              "28:54"
+            ],
             "tf_joined_cnt": 8,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：41 分钟仅使用 5 次 TP（主动买 1 张，团战亮 TP 2 次），跑图大多靠双腿！"
@@ -17884,13 +18434,20 @@
             "personaname": "Make Your Choice",
             "tp_bought": 2,
             "tp_used": 12,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 3,
+            "tf_tp_times": [
+              "19:01",
+              "28:54",
+              "39:43"
+            ],
             "tf_joined_cnt": 8,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "good",
-            "verdict": "支援极快：全场使用 12 次 TP，其中 3 波团战直接亮 TP 落地救人/反打，参团率 54.5%。"
+            "verdict": "支援极快：全场使用 12 次 TP，其中 3 波团战（19:01、28:54、39:43）直接亮 TP 落地救人/反打，参团率 54.5%。"
           }
         ],
         "rotation_highlights": [
@@ -17923,12 +18480,158 @@
             "responders": "龙骑士(Paphets)、司夜刺客(Replica)、拉比克(Make Your Choice)",
             "trade_str": "打成 4 换 4",
             "detail": "在 28:54–30:17 交战中，龙骑士(Paphets)、司夜刺客(Replica)、拉比克(Make Your Choice) 第一时间亮 TP 落地支援参战（该波 4 换 4）。"
+          },
+          {
+            "time_range": "39:43–40:43",
+            "responders": "拉比克(Make Your Choice)",
+            "trade_str": "打成 2 换 4",
+            "detail": "在 39:43–40:43 交战中，拉比克(Make Your Choice) 第一时间亮 TP 落地支援参战（该波 2 换 4）。"
           }
         ],
-        "absent_warnings": []
+        "absent_warnings": [
+          {
+            "time_range": "08:44–09:43",
+            "victims": "龙骑士、拉比克、先知",
+            "spectators": "3号位黑暗贤者",
+            "detail": "⚠️ 08:44–09:43 我方【龙骑士、拉比克、先知】遭围剿阵亡时，3号位黑暗贤者 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。"
+          }
+        ],
+        "teamfight_tp_events": [
+          {
+            "tf_index": 1,
+            "time_range": "05:50–06:36",
+            "own_deaths": 2,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 2,
+                "hero_short_zh": "龙骑士",
+                "personaname": "Paphets",
+                "damage": 599
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 2,
+            "time_range": "06:50–07:32",
+            "own_deaths": 2,
+            "opp_kills": 1,
+            "tp_saviors": [
+              {
+                "pos": 3,
+                "hero_short_zh": "黑暗贤者",
+                "personaname": "Mr. Brightside",
+                "damage": 0
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 3,
+            "time_range": "08:44–09:43",
+            "own_deaths": 3,
+            "opp_kills": 4,
+            "tp_saviors": [
+              {
+                "pos": 2,
+                "hero_short_zh": "龙骑士",
+                "personaname": "Paphets",
+                "damage": 727
+              },
+              {
+                "pos": 4,
+                "hero_short_zh": "司夜刺客",
+                "personaname": "Replica",
+                "damage": 630
+              }
+            ],
+            "spectators": [
+              {
+                "pos": 3,
+                "hero_short_zh": "黑暗贤者",
+                "personaname": "Mr. Brightside"
+              }
+            ]
+          },
+          {
+            "tf_index": 4,
+            "time_range": "19:01–19:39",
+            "own_deaths": 1,
+            "opp_kills": 3,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "拉比克",
+                "personaname": "Make Your Choice",
+                "damage": 324
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 5,
+            "time_range": "23:18–24:02",
+            "own_deaths": 4,
+            "opp_kills": 0,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 6,
+            "time_range": "28:54–30:17",
+            "own_deaths": 4,
+            "opp_kills": 4,
+            "tp_saviors": [
+              {
+                "pos": 2,
+                "hero_short_zh": "龙骑士",
+                "personaname": "Paphets",
+                "damage": 3430
+              },
+              {
+                "pos": 4,
+                "hero_short_zh": "司夜刺客",
+                "personaname": "Replica",
+                "damage": 2872
+              },
+              {
+                "pos": 5,
+                "hero_short_zh": "拉比克",
+                "personaname": "Make Your Choice",
+                "damage": 2510
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 7,
+            "time_range": "33:51–34:53",
+            "own_deaths": 3,
+            "opp_kills": 2,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 8,
+            "time_range": "39:43–40:43",
+            "own_deaths": 4,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "拉比克",
+                "personaname": "Make Your Choice",
+                "damage": 277
+              }
+            ],
+            "spectators": []
+          }
+        ]
       },
       "radiant": {
         "side": "radiant",
+        "tp_verdict": "本方全队在关键团战中共亮出 8 人次 TP 落地支援（共触发 4 波多英雄 TP 集结）。",
         "player_tp_rows": [
           {
             "pos": 1,
@@ -17937,10 +18640,16 @@
             "personaname": "What the dog doing？",
             "tp_bought": 5,
             "tp_used": 5,
+            "early_tp_cnt": 1,
             "tf_tp_cnt": 2,
-            "tf_joined_cnt": 8,
+            "tf_tp_times": [
+              "08:44",
+              "23:18"
+            ],
+            "tf_joined_cnt": 7,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：41 分钟仅使用 5 次 TP（主动买 5 张，团战亮 TP 2 次），跑图大多靠双腿！"
@@ -17952,10 +18661,15 @@
             "personaname": "99",
             "tp_bought": 7,
             "tp_used": 10,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 1,
+            "tf_tp_times": [
+              "08:44"
+            ],
             "tf_joined_cnt": 8,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "good",
             "verdict": "全场使用 10 次 TP（主动购买 7 张，团战亮 TP 1 次），参战 8/8 波关键团。"
@@ -17967,10 +18681,15 @@
             "personaname": "东方树叶",
             "tp_bought": 3,
             "tp_used": 9,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 1,
+            "tf_tp_times": [
+              "08:44"
+            ],
             "tf_joined_cnt": 8,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "good",
             "verdict": "全场使用 9 次 TP（主动购买 3 张，团战亮 TP 1 次），参战 8/8 波关键团。"
@@ -17982,10 +18701,16 @@
             "personaname": "Mind's Desire",
             "tp_bought": 2,
             "tp_used": 7,
+            "early_tp_cnt": 2,
             "tf_tp_cnt": 2,
+            "tf_tp_times": [
+              "06:50",
+              "08:44"
+            ],
             "tf_joined_cnt": 8,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "good",
             "verdict": "全场使用 7 次 TP（主动购买 2 张，团战亮 TP 2 次），参战 8/8 波关键团。"
@@ -17997,10 +18722,16 @@
             "personaname": "莓啤汽",
             "tp_bought": 1,
             "tp_used": 4,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 2,
-            "tf_joined_cnt": 8,
+            "tf_tp_times": [
+              "08:44",
+              "28:54"
+            ],
+            "tf_joined_cnt": 7,
             "tf_total_cnt": 8,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：41 分钟仅使用 4 次 TP（主动买 1 张，团战亮 TP 2 次），跑图大多靠双腿！"
@@ -18032,7 +18763,125 @@
             "detail": "在 28:54–30:17 交战中，森海飞霞(莓啤汽) 第一时间亮 TP 落地支援参战（该波 4 换 4）。"
           }
         ],
-        "absent_warnings": []
+        "absent_warnings": [],
+        "teamfight_tp_events": [
+          {
+            "tf_index": 1,
+            "time_range": "05:50–06:36",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 2,
+            "time_range": "06:50–07:32",
+            "own_deaths": 1,
+            "opp_kills": 2,
+            "tp_saviors": [
+              {
+                "pos": 4,
+                "hero_short_zh": "帕吉",
+                "personaname": "Mind's Desire",
+                "damage": 0
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 3,
+            "time_range": "08:44–09:43",
+            "own_deaths": 4,
+            "opp_kills": 3,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "虚空假面",
+                "personaname": "What the dog doing？",
+                "damage": 654
+              },
+              {
+                "pos": 2,
+                "hero_short_zh": "玛西",
+                "personaname": "99",
+                "damage": 507
+              },
+              {
+                "pos": 4,
+                "hero_short_zh": "帕吉",
+                "personaname": "Mind's Desire",
+                "damage": 1451
+              },
+              {
+                "pos": 5,
+                "hero_short_zh": "森海飞霞",
+                "personaname": "莓啤汽",
+                "damage": 226
+              },
+              {
+                "pos": 3,
+                "hero_short_zh": "斯拉达",
+                "personaname": "东方树叶",
+                "damage": 208
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 4,
+            "time_range": "19:01–19:39",
+            "own_deaths": 3,
+            "opp_kills": 1,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 5,
+            "time_range": "23:18–24:02",
+            "own_deaths": 0,
+            "opp_kills": 4,
+            "tp_saviors": [
+              {
+                "pos": 1,
+                "hero_short_zh": "虚空假面",
+                "personaname": "What the dog doing？",
+                "damage": 0
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 6,
+            "time_range": "28:54–30:17",
+            "own_deaths": 4,
+            "opp_kills": 4,
+            "tp_saviors": [
+              {
+                "pos": 5,
+                "hero_short_zh": "森海飞霞",
+                "personaname": "莓啤汽",
+                "damage": 1532
+              }
+            ],
+            "spectators": []
+          },
+          {
+            "tf_index": 7,
+            "time_range": "33:51–34:53",
+            "own_deaths": 2,
+            "opp_kills": 3,
+            "tp_saviors": [],
+            "spectators": []
+          },
+          {
+            "tf_index": 8,
+            "time_range": "39:43–40:43",
+            "own_deaths": 2,
+            "opp_kills": 4,
+            "tp_saviors": [],
+            "spectators": []
+          }
+        ]
       }
     }
   },

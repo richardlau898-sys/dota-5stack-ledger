@@ -1086,6 +1086,8 @@
         "side_zh": "夜魇",
         "total_obs": 0,
         "total_sen": 0,
+        "dewarded_total": 0,
+        "dewarded_pct": 0.0,
         "avg_lifespan_sec": 0,
         "posture_counts": {
           "aggressive": 0,
@@ -1153,13 +1155,16 @@
           }
         ],
         "instant_dewards": [],
-        "cliff_spots": []
+        "cliff_spots": [],
+        "obs_records": []
       },
       "radiant": {
         "side": "radiant",
         "side_zh": "天辉",
         "total_obs": 0,
         "total_sen": 0,
+        "dewarded_total": 0,
+        "dewarded_pct": 0.0,
         "avg_lifespan_sec": 0,
         "posture_counts": {
           "aggressive": 0,
@@ -1227,7 +1232,8 @@
           }
         ],
         "instant_dewards": [],
-        "cliff_spots": []
+        "cliff_spots": [],
+        "obs_records": []
       }
     },
     "stacking_and_smoke_by_side": {
@@ -1643,6 +1649,7 @@
     "tp_rotation_by_side": {
       "dire": {
         "side": "dire",
+        "tp_verdict": "本方全队在关键团战中共亮出 0 人次 TP 落地支援（共触发 0 波多英雄 TP 集结）。 ⚠️ 其中【1号位狙击手、2号位昆卡、3号位帕吉、4号位司夜刺客、5号位工程师】整局主动花钱买 TP 为 0 张，全靠阵亡复活赠送的免费 TP！",
         "player_tp_rows": [
           {
             "pos": 1,
@@ -1651,10 +1658,13 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -1666,10 +1676,13 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -1681,10 +1694,13 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -1696,10 +1712,13 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -1711,20 +1730,25 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
           }
         ],
         "rotation_highlights": [],
-        "absent_warnings": []
+        "absent_warnings": [],
+        "teamfight_tp_events": []
       },
       "radiant": {
         "side": "radiant",
+        "tp_verdict": "本方全队在关键团战中共亮出 0 人次 TP 落地支援（共触发 0 波多英雄 TP 集结）。 ⚠️ 其中【1号位主宰、2号位幽鬼、3号位宙斯、4号位杰奇洛、5号位寒冬飞龙】整局主动花钱买 TP 为 0 张，全靠阵亡复活赠送的免费 TP！",
         "player_tp_rows": [
           {
             "pos": 1,
@@ -1733,10 +1757,13 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -1748,10 +1775,13 @@
             "personaname": "Tulok",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -1763,10 +1793,13 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -1778,10 +1811,13 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
@@ -1793,17 +1829,21 @@
             "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
+            "early_tp_cnt": 0,
             "tf_tp_cnt": 0,
+            "tf_tp_times": [],
             "tf_joined_cnt": 0,
             "tf_total_cnt": 0,
             "tf_absent_cnt": 0,
+            "tf_absent_times": [],
             "tp_feed_times": [],
             "grade": "bad",
             "verdict": "⚠️ 支援频次偏低：36 分钟仅使用 0 次 TP（主动买 0 张，团战亮 TP 0 次），跑图大多靠双腿！"
           }
         ],
         "rotation_highlights": [],
-        "absent_warnings": []
+        "absent_warnings": [],
+        "teamfight_tp_events": []
       }
     }
   },
