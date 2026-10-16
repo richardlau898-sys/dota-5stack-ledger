@@ -22038,6 +22038,7 @@
   "grok_coaching": null,
   "mvp": {
     "mvp_player": {
+      "player_slot": 128,
       "side": "夜魇",
       "pos": 1,
       "pos_label": "1号位 · 优势路核心",
@@ -22049,42 +22050,72 @@
       "friend_tag": "2人黑",
       "kda": "20/4/16",
       "rating_score": 9.4,
-      "rating_tier": "S+ 战神",
+      "rating_tier": "S+ 擎天战神",
       "mvp_score": 94.1,
       "blame_share_pct": 4.0,
+      "contrib_share_pct": 27.4,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "gpm": 735,
       "xpm": 1074,
       "hero_damage": 53761,
       "hero_damage_share_pct": 31.9,
       "tower_damage": 14541,
       "kill_participation_pct": 65.5,
-      "trash_talk": "@Petarung Amoral 这把 主宰 评分 9.4 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！"
+      "trash_talk": "@Petarung Amoral 这把 主宰 评分 9.4 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
+      "praise_talk": "@Petarung Amoral 这把 主宰 火力全开狂轰 53,761 伤害（包揽全队 32% 输出）+ 14,541 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
     },
     "runner_up_player": {
+      "player_slot": 131,
       "side": "夜魇",
-      "pos": 4,
-      "hero_name": "司夜刺客(小强/NA)",
-      "hero_short_zh": "司夜刺客",
-      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
-      "personaname": "Nanana",
-      "kda": "12/10/29",
+      "pos": 5,
+      "pos_label": "5号位 · 纯辅助",
+      "hero_name": "环轨百戏王(百戏大王/Ringmaster)",
+      "hero_short_zh": "环轨百戏王",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/ringmaster.png",
+      "personaname": "Flame = ez mute",
+      "friend_tag": "我 · Flame = ez mute",
+      "kda": "3/9/30",
+      "gpm": 364,
+      "xpm": 729,
+      "hero_damage": 20609,
+      "hero_damage_share_pct": 12.2,
+      "tower_damage": 282,
+      "kill_participation_pct": 60.0,
       "rating_score": 8.7,
-      "blame_share_pct": 27.9
+      "rating_tier": "S 凯旋真核",
+      "blame_share_pct": 16.0,
+      "contrib_share_pct": 23.4,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
+      "strengths": [
+        "保人拉野到位：对线期把同路核心 主宰 保出了 10分钟 61 刀 / 3,631 经济的顺畅开局。",
+        "全场核心技能施放统计：ringmaster_impalement 105次 / The Beasts 71次 / The Box 15次 / ringmaster_spotlight 14次（操作频率 250 APM）。",
+        "视野铺设尽职：全场插下 19 假眼 + 17 真眼（共 36 颗），并成功排掉敌方 3 颗假眼 / 6 颗真眼，顺手囤野 15 波。"
+      ],
+      "praise_talk": "@Flame = ez mute 最佳幕后功臣！环轨百戏王 全场点亮 19 假 17 真视野 + 参战率 60%，吃草挤奶把大哥伺候得明明白白！"
     },
     "svp_player": {
+      "player_slot": 4,
       "side": "天辉",
       "pos": 4,
+      "pos_label": "4号位 · 游走辅助",
       "hero_name": "撼地者(小牛/ES)",
       "hero_short_zh": "撼地者",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/earthshaker.png",
       "personaname": "Super Bóp",
       "kda": "5/11/18",
+      "gpm": 371,
+      "hero_damage": 20429,
+      "tower_damage": 0,
+      "kill_participation_pct": 62.2,
       "rating_score": 7.6,
-      "blame_share_pct": 14.1
+      "rating_tier": "B 随波逐流",
+      "blame_share_pct": 14.1,
+      "contrib_share_pct": 26.1
     },
     "culprit_player": {
+      "player_slot": 132,
       "side": "夜魇",
       "pos": 2,
       "pos_label": "2号位 · 中路核心",
@@ -22096,15 +22127,19 @@
       "friend_tag": null,
       "kda": "12/9/15",
       "rating_score": 6.5,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "B 躺赢福将",
       "blame_share_pct": 39.9,
+      "contrib_share_pct": 11.7,
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "dead_seconds": 439,
       "death_gold_lost": 2205,
       "main_crime": "头铁拒出 BKB：面对敌方 257 秒强控，全场阵亡 9 次直到终局都没出黑皇杖，团战容错率极低。",
       "trash_talk": "@loiverever౨ৎ 一局死 9 次，看了整整 7分19秒 黑白电视（其中被敌方【斧王】单人提款 4 次），光死就扣了 2205 块钱，对面大哥给你磕一个不过分吧？",
-      "verdict": "车队头号大锅认证（分锅占比 39.9%）：夜魇 2号位 帕克（loiverever౨ৎ，评分 6.5）——虽然比赛最终翻盘赢下，但中期险些葬送好局的头号战犯就是他：头铁拒出 BKB：面对敌方 257 秒强控，全场阵亡 9 次直到终局都没出黑皇杖，团战容错率极低。"
+      "praise_talk": "@loiverever౨ৎ 稳健上分拼图！帕克 交出 12/9/15（参战率 49% · 伤害 32,189），关键团战从不掉链子！",
+      "verdict": "凯旋庆功总结：夜魇头号首功 主宰（Petarung Amoral，贡献 27.4%）与二当家 环轨百戏王（Flame = ez mute，贡献 23.4%）携手带飞！ 本局惊险躺赢锦鲤：2号位 帕克（loiverever౨ৎ，贡献 11.7%）。"
     },
     "second_culprit_player": {
+      "player_slot": 129,
       "side": "夜魇",
       "pos": 4,
       "hero_name": "司夜刺客(小强/NA)",
@@ -22115,6 +22150,7 @@
       "kda": "12/10/29",
       "rating_score": 8.7,
       "blame_share_pct": 27.9,
+      "contrib_share_pct": 16.0,
       "main_crime": "视野严重断供：身为 4号位 47 分钟仅插了 1 假眼 / 5 真眼，导致全队中后期在野区毫无视野掩护。"
     },
     "focus_team_blame_ranking": [
@@ -22127,12 +22163,15 @@
         "personaname": "loiverever౨ৎ",
         "friend_tag": null,
         "blame_share_pct": 39.9,
+        "contrib_share_pct": 11.7,
+        "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
         "rating_score": 6.5,
-        "rating_tier": "C 头号战犯",
+        "rating_tier": "B 躺赢福将",
         "kda": "12/9/15",
         "dead_seconds": 439,
         "death_gold_lost": 2205,
-        "trash_talk": "@loiverever౨ৎ 一局死 9 次，看了整整 7分19秒 黑白电视（其中被敌方【斧王】单人提款 4 次），光死就扣了 2205 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@loiverever౨ৎ 一局死 9 次，看了整整 7分19秒 黑白电视（其中被敌方【斧王】单人提款 4 次），光死就扣了 2205 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@loiverever౨ৎ 稳健上分拼图！帕克 交出 12/9/15（参战率 49% · 伤害 32,189），关键团战从不掉链子！"
       },
       {
         "pos": 4,
@@ -22143,12 +22182,15 @@
         "personaname": "Nanana",
         "friend_tag": "2人黑",
         "blame_share_pct": 27.9,
+        "contrib_share_pct": 16.0,
+        "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
         "rating_score": 8.7,
-        "rating_tier": "S 核心支柱",
+        "rating_tier": "S 凯旋真核",
         "kda": "12/10/29",
         "dead_seconds": 410,
         "death_gold_lost": 1479,
-        "trash_talk": "@Nanana 一局死 10 次，看了整整 6分50秒 黑白电视（其中被敌方【天怒法师】单人提款 3 次），光死就扣了 1479 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@Nanana 一局死 10 次，看了整整 6分50秒 黑白电视（其中被敌方【天怒法师】单人提款 3 次），光死就扣了 1479 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@Nanana 虽然这把 司夜刺客 阵亡 10 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！"
       },
       {
         "pos": 5,
@@ -22159,12 +22201,15 @@
         "personaname": "Flame = ez mute",
         "friend_tag": "我 · Flame = ez mute",
         "blame_share_pct": 16.0,
+        "contrib_share_pct": 23.4,
+        "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
         "rating_score": 8.7,
-        "rating_tier": "S 核心支柱",
+        "rating_tier": "S 凯旋真核",
         "kda": "3/9/30",
         "dead_seconds": 389,
         "death_gold_lost": 1212,
-        "trash_talk": "@Flame = ez mute 一局死 9 次，看了整整 6分29秒 黑白电视（其中被敌方【齐天大圣】单人提款 5 次），光死就扣了 1212 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@Flame = ez mute 一局死 9 次，看了整整 6分29秒 黑白电视（其中被敌方【齐天大圣】单人提款 5 次），光死就扣了 1212 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@Flame = ez mute 最佳幕后功臣！环轨百戏王 全场点亮 19 假 17 真视野 + 参战率 60%，吃草挤奶把大哥伺候得明明白白！"
       },
       {
         "pos": 3,
@@ -22175,12 +22220,15 @@
         "personaname": "Paphets",
         "friend_tag": "车队好友 · Paphets",
         "blame_share_pct": 12.2,
+        "contrib_share_pct": 21.5,
+        "contrib_tier": "🛡️ 定海神针 · 中坚功臣",
         "rating_score": 8.4,
-        "rating_tier": "S 核心支柱",
+        "rating_tier": "S 凯旋真核",
         "kda": "8/6/26",
         "dead_seconds": 310,
         "death_gold_lost": 1293,
-        "trash_talk": "@Paphets 打野还能被野怪单杀 1 次，野区半人马才是你命中注定的克星是吧？"
+        "trash_talk": "@Paphets 打野还能被野怪单杀 1 次，野区半人马才是你命中注定的克星是吧？",
+        "praise_talk": "@Paphets 铁血三号位！潮汐猎人 参战率 62% 肉身扛下 43,574 伤害（全队 24%）外加 49.7 秒硬控，完美团战发动机！"
       },
       {
         "pos": 1,
@@ -22191,21 +22239,116 @@
         "personaname": "Petarung Amoral",
         "friend_tag": "2人黑",
         "blame_share_pct": 4.0,
+        "contrib_share_pct": 27.4,
+        "contrib_tier": "👑 头号首功 · 擎天真神",
         "rating_score": 9.4,
-        "rating_tier": "S+ 战神",
+        "rating_tier": "S+ 擎天战神",
         "kda": "20/4/16",
         "dead_seconds": 294,
         "death_gold_lost": 1840,
-        "trash_talk": "@Petarung Amoral 这把 主宰 评分 9.4 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！"
+        "trash_talk": "@Petarung Amoral 这把 主宰 评分 9.4 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
+        "praise_talk": "@Petarung Amoral 这把 主宰 火力全开狂轰 53,761 伤害（包揽全队 32% 输出）+ 14,541 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
+      }
+    ],
+    "focus_team_contrib_ranking": [
+      {
+        "pos": 1,
+        "hero_name": "主宰(剑圣/Jugg)",
+        "hero_short_zh": "主宰",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
+        "personaname": "Petarung Amoral",
+        "friend_tag": "2人黑",
+        "contrib_share_pct": 27.4,
+        "contrib_tier": "👑 头号首功 · 擎天真神",
+        "blame_share_pct": 4.0,
+        "rating_score": 9.4,
+        "rating_tier": "S+ 擎天战神",
+        "kda": "20/4/16",
+        "hero_damage": 53761,
+        "tower_damage": 14541,
+        "praise_talk": "@Petarung Amoral 这把 主宰 火力全开狂轰 53,761 伤害（包揽全队 32% 输出）+ 14,541 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
+      },
+      {
+        "pos": 5,
+        "hero_name": "环轨百戏王(百戏大王/Ringmaster)",
+        "hero_short_zh": "环轨百戏王",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/ringmaster.png",
+        "personaname": "Flame = ez mute",
+        "friend_tag": "我 · Flame = ez mute",
+        "contrib_share_pct": 23.4,
+        "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
+        "blame_share_pct": 16.0,
+        "rating_score": 8.7,
+        "rating_tier": "S 凯旋真核",
+        "kda": "3/9/30",
+        "hero_damage": 20609,
+        "tower_damage": 282,
+        "praise_talk": "@Flame = ez mute 最佳幕后功臣！环轨百戏王 全场点亮 19 假 17 真视野 + 参战率 60%，吃草挤奶把大哥伺候得明明白白！"
+      },
+      {
+        "pos": 3,
+        "hero_name": "潮汐猎人(潮汐/Tide)",
+        "hero_short_zh": "潮汐猎人",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/tidehunter.png",
+        "personaname": "Paphets",
+        "friend_tag": "车队好友 · Paphets",
+        "contrib_share_pct": 21.5,
+        "contrib_tier": "🛡️ 定海神针 · 中坚功臣",
+        "blame_share_pct": 12.2,
+        "rating_score": 8.4,
+        "rating_tier": "S 凯旋真核",
+        "kda": "8/6/26",
+        "hero_damage": 28931,
+        "tower_damage": 4052,
+        "praise_talk": "@Paphets 铁血三号位！潮汐猎人 参战率 62% 肉身扛下 43,574 伤害（全队 24%）外加 49.7 秒硬控，完美团战发动机！"
+      },
+      {
+        "pos": 4,
+        "hero_name": "司夜刺客(小强/NA)",
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+        "personaname": "Nanana",
+        "friend_tag": "2人黑",
+        "contrib_share_pct": 16.0,
+        "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
+        "blame_share_pct": 27.9,
+        "rating_score": 8.7,
+        "rating_tier": "S 凯旋真核",
+        "kda": "12/10/29",
+        "hero_damage": 33142,
+        "tower_damage": 386,
+        "praise_talk": "@Nanana 虽然这把 司夜刺客 阵亡 10 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！"
+      },
+      {
+        "pos": 2,
+        "hero_name": "帕克(Puck)",
+        "hero_short_zh": "帕克",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/puck.png",
+        "personaname": "loiverever౨ৎ",
+        "friend_tag": null,
+        "contrib_share_pct": 11.7,
+        "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
+        "blame_share_pct": 39.9,
+        "rating_score": 6.5,
+        "rating_tier": "B 躺赢福将",
+        "kda": "12/9/15",
+        "hero_damage": 32189,
+        "tower_damage": 3647,
+        "praise_talk": "@loiverever౨ৎ 稳健上分拼图！帕克 交出 12/9/15（参战率 49% · 伤害 32,189），关键团战从不掉链子！"
       }
     ],
     "rationale_list": [
-      "全场头号大腿 (9.4分 · S+ 战神)：夜魇 1号位 主宰（Petarung Amoral）交出 20/4/16（参战率 65.5%），本局个人背锅占比仅 4.0%。",
+      "全场头号首功 (9.4分 · 胜局贡献 27.4%)：夜魇 1号位 主宰（Petarung Amoral）交出 20/4/16（参战率 65.5%）。",
       "核心统治力数据：单人打出 53,761 英雄伤害（占全队 31.9%）+ 14,541 建筑伤害，总经济 31,243（GPM 735 / XPM 1074）。",
       "制胜关键：对线基本功扎实：前10分钟交出 61正/16反（10m经济 3,631，效率 73%），撑起了前中期基础节奏。",
-      "胜方二当家：4号位 司夜刺客（Nanana，评分 8.7）贡献 12/10/29（参战率 74.5%，伤害 33,142）。",
+      "胜方二当家（胜局贡献 23.4%）：5号位 环轨百戏王（Flame = ez mute，评分 8.7）贡献 3/9/30（参战率 60.0%，伤害 20,609）。",
       "败方孤胆院长 (SVP)：天辉 4号位 撼地者（Super Bóp，评分 7.6）交出 5/11/18（伤害 20,429），一神带四坑实在带不动。",
-      "车队头号大锅认证（分锅占比 39.9%）：夜魇 2号位 帕克（loiverever౨ৎ，评分 6.5）——虽然比赛最终翻盘赢下，但中期险些葬送好局的头号战犯就是他：头铁拒出 BKB：面对敌方 257 秒强控，全场阵亡 9 次直到终局都没出黑皇杖，团战容错率极低。"
+      "凯旋庆功总结：夜魇头号首功 主宰（Petarung Amoral，贡献 27.4%）与二当家 环轨百戏王（Flame = ez mute，贡献 23.4%）携手带飞！ 本局惊险躺赢锦鲤：2号位 帕克（loiverever౨ৎ，贡献 11.7%）。"
     ]
   },
   "match_narrative": {
@@ -22751,9 +22894,10 @@
         "survival": 62
       },
       "rating_score": 7.3,
-      "rating_tier": "B 隐身混子",
+      "rating_tier": "B 随波逐流",
       "mvp_score": 73.3,
       "raw_blame_points": 51.7,
+      "raw_contrib_points": 207.1,
       "strengths": [
         "对线基本功扎实：前10分钟交出 59正/15反（10m经济 4,348，效率 87%），10分钟净压对位 主宰 717 金，撑起了前中期基础节奏。",
         "刷钱效率拉满：GPM 677 / XPM 856（全场补刀 490），发育速度超越了全网 84% 的同英雄玩家。",
@@ -22768,7 +22912,11 @@
         "面对高控制阵容，1号位 齐天大圣 必须在第2或第3大件（23~26分钟前）准时做出 BKB，且第一波切入前提前开启，切忌省BKB被瞬秒。"
       ],
       "trash_talk": "@Me and 4 sinh viên 对面一身硬控你拖到 34:38 才出 BKB，整局就按了 2 次，买个黄棍放包里当传家宝辟邪是吧？",
+      "praise_talk": "@Me and 4 sinh viên 这把 齐天大圣 火力全开狂轰 40,556 伤害（包揽全队 28% 输出）+ 3,287 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
       "blame_share_pct": 11.2,
+      "contrib_share_pct": 34.1,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 4,
       "lane_id": 1,
       "benchmarks_list": [
@@ -23317,9 +23465,10 @@
         "survival": 15
       },
       "rating_score": 4.5,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 45.0,
       "raw_blame_points": 183.5,
+      "raw_contrib_points": 41.6,
       "strengths": [
         "切入发动机：14:03 摸出跳刀后全场高频切入 34 次，把控先手节奏。",
         "全场核心技能施放统计：Berserkers Call 51次 / Battle Hunger 42次 / Culling Blade 9次（操作频率 281 APM）。"
@@ -23338,7 +23487,11 @@
         "核心位阵亡 19 次严重拖垮发育节奏：当敌方 帕克 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@BOOM 一局死 19 次，看了整整 14分31秒 黑白电视（其中被敌方【帕克】单人提款 7 次），光死就扣了 4402 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@BOOM 虽然这把 斧王 阵亡 19 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
       "blame_share_pct": 39.6,
+      "contrib_share_pct": 6.9,
+      "contrib_rank": 5,
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "pings_count": 6,
       "lane_id": 2,
       "benchmarks_list": [
@@ -23945,9 +24098,10 @@
         "survival": 62
       },
       "rating_score": 4.8,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 47.7,
       "raw_blame_points": 100.3,
+      "raw_contrib_points": 55.9,
       "strengths": [
         "全场核心技能施放统计：weaver_shukuchi 210次 / The Swarm 18次 / Time Lapse 6次（操作频率 144 APM）。"
       ],
@@ -23960,7 +24114,11 @@
         "核心位阵亡 8 次严重拖垮发育节奏：当敌方 司夜刺客 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@Đỗ Ngọc Quý 一局死 8 次，看了整整 6分13秒 黑白电视（其中被敌方【司夜刺客】单人提款 4 次），光死就扣了 1910 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Đỗ Ngọc Quý 稳健上分拼图！编织者 交出 3/8/14（参战率 46% · 伤害 26,597），关键团战从不掉链子！",
       "blame_share_pct": 21.7,
+      "contrib_share_pct": 9.2,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 2,
       "lane_id": 3,
       "benchmarks_list": [
@@ -24524,9 +24682,10 @@
         "survival": 57
       },
       "rating_score": 7.6,
-      "rating_tier": "A 合格大腿",
+      "rating_tier": "B 随波逐流",
       "mvp_score": 76.0,
       "raw_blame_points": 65.5,
+      "raw_contrib_points": 158.5,
       "strengths": [
         "全场核心技能施放统计：Enchant Totem 76次 / earthshaker_fissure 47次 / Echo Slam 7次（操作频率 129 APM）。",
         "视野铺设尽职：全场插下 7 假眼 + 22 真眼（共 29 颗），并成功排掉敌方 2 颗假眼 / 3 颗真眼。",
@@ -24540,7 +24699,11 @@
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 主宰 无限提款。"
       ],
       "trash_talk": "@Super Bóp 一局死 11 次，看了整整 6分41秒 黑白电视（其中被敌方【主宰】单人提款 4 次），光死就扣了 1607 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Super Bóp 最佳幕后功臣！撼地者 全场点亮 7 假 22 真视野 + 参战率 62%，吃草挤奶把大哥伺候得明明白白！",
       "blame_share_pct": 14.1,
+      "contrib_share_pct": 26.1,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 55,
       "lane_id": 3,
       "benchmarks_list": [
@@ -25130,9 +25293,10 @@
         "survival": 54
       },
       "rating_score": 7.3,
-      "rating_tier": "B 隐身混子",
+      "rating_tier": "B 随波逐流",
       "mvp_score": 73.0,
       "raw_blame_points": 62.0,
+      "raw_contrib_points": 143.7,
       "strengths": [
         "保人拉野到位：对线期把同路核心 齐天大圣 保出了 10分钟 59 刀 / 4,348 经济的顺畅开局。",
         "全场核心技能施放统计：Concussive Shot 59次 / Arcane Bolt 43次 / Ancient Seal 33次 / Mystic Flare 14次（操作频率 129 APM）。",
@@ -25145,7 +25309,11 @@
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 主宰 无限提款。"
       ],
       "trash_talk": "@Roti Jala Mak Limah Biadab 一局死 12 次，看了整整 8分5秒 黑白电视（其中被敌方【主宰】单人提款 5 次），光死就扣了 1905 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Roti Jala Mak Limah Biadab 最佳幕后功臣！天怒法师 全场点亮 9 假 16 真视野 + 参战率 70%，吃草挤奶把大哥伺候得明明白白！",
       "blame_share_pct": 13.4,
+      "contrib_share_pct": 23.7,
+      "contrib_rank": 3,
+      "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
       "pings_count": 12,
       "lane_id": 1,
       "benchmarks_list": [
@@ -25802,9 +25970,10 @@
         "survival": 77
       },
       "rating_score": 9.4,
-      "rating_tier": "S+ 战神",
+      "rating_tier": "S+ 擎天战神",
       "mvp_score": 94.1,
       "raw_blame_points": 7.9,
+      "raw_contrib_points": 337.6,
       "strengths": [
         "对线基本功扎实：前10分钟交出 61正/16反（10m经济 3,631，效率 73%），撑起了前中期基础节奏。",
         "输出转化率极高：吃下全队 28.0% 经济（31,243金），狂轰 53,761 英雄伤害（占全队 31.9%，超越全网 92% 同英雄）。",
@@ -25820,7 +25989,11 @@
         "保持当前 主宰 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@Petarung Amoral 这把 主宰 评分 9.4 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
+      "praise_talk": "@Petarung Amoral 这把 主宰 火力全开狂轰 53,761 伤害（包揽全队 32% 输出）+ 14,541 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
       "blame_share_pct": 4.0,
+      "contrib_share_pct": 27.4,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 28,
       "lane_id": 3,
       "benchmarks_list": [
@@ -26465,9 +26638,10 @@
         "survival": 52
       },
       "rating_score": 6.5,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "B 躺赢福将",
       "mvp_score": 65.4,
       "raw_blame_points": 78.1,
+      "raw_contrib_points": 144.9,
       "strengths": [
         "切入发动机：25:13 摸出跳刀后全场高频切入 35 次，把控先手节奏。",
         "全场核心技能施放统计：Illusory Orb 140次 / Waning Rift 91次 / Phase Shift 85次 / Ethereal Jaunt 56次（操作频率 270 APM）。"
@@ -26481,7 +26655,11 @@
         "核心位阵亡 9 次严重拖垮发育节奏：当敌方 斧王 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@loiverever౨ৎ 一局死 9 次，看了整整 7分19秒 黑白电视（其中被敌方【斧王】单人提款 4 次），光死就扣了 2205 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@loiverever౨ৎ 稳健上分拼图！帕克 交出 12/9/15（参战率 49% · 伤害 32,189），关键团战从不掉链子！",
       "blame_share_pct": 39.9,
+      "contrib_share_pct": 11.7,
+      "contrib_rank": 5,
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "pings_count": 81,
       "lane_id": 2,
       "benchmarks_list": [
@@ -27088,9 +27266,10 @@
         "survival": 70
       },
       "rating_score": 8.4,
-      "rating_tier": "S 核心支柱",
+      "rating_tier": "S 凯旋真核",
       "mvp_score": 84.0,
       "raw_blame_points": 24.0,
+      "raw_contrib_points": 265.1,
       "strengths": [
         "对线基本功扎实：前10分钟交出 47正/0反（10m经济 3,008，效率 60%），撑起了前中期基础节奏。",
         "切入发动机：21:24 摸出跳刀后全场高频切入 26 次，把控先手节奏。",
@@ -27103,7 +27282,11 @@
         "保持当前 潮汐猎人 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@Paphets 打野还能被野怪单杀 1 次，野区半人马才是你命中注定的克星是吧？",
+      "praise_talk": "@Paphets 铁血三号位！潮汐猎人 参战率 62% 肉身扛下 43,574 伤害（全队 24%）外加 49.7 秒硬控，完美团战发动机！",
       "blame_share_pct": 12.2,
+      "contrib_share_pct": 21.5,
+      "contrib_rank": 3,
+      "contrib_tier": "🛡️ 定海神针 · 中坚功臣",
       "pings_count": 2,
       "lane_id": 1,
       "benchmarks_list": [
@@ -27803,9 +27986,10 @@
         "survival": 61
       },
       "rating_score": 8.7,
-      "rating_tier": "S 核心支柱",
+      "rating_tier": "S 凯旋真核",
       "mvp_score": 87.3,
       "raw_blame_points": 54.7,
+      "raw_contrib_points": 196.9,
       "strengths": [
         "全场核心技能施放统计：穿刺 61次 / 神智爆裂 55次 / 尖刺外壳(壳) 41次 / 复仇(大招隐身) 22次（操作频率 246 APM）。",
         "进攻节奏组织者：全场主动购买 3 颗诡计之雾带动抓人节奏。"
@@ -27819,7 +28003,11 @@
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 天怒法师 无限提款。"
       ],
       "trash_talk": "@Nanana 一局死 10 次，看了整整 6分50秒 黑白电视（其中被敌方【天怒法师】单人提款 3 次），光死就扣了 1479 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Nanana 虽然这把 司夜刺客 阵亡 10 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
       "blame_share_pct": 27.9,
+      "contrib_share_pct": 16.0,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 38,
       "lane_id": 3,
       "benchmarks_list": [
@@ -28478,9 +28666,10 @@
         "survival": 64
       },
       "rating_score": 8.7,
-      "rating_tier": "S 核心支柱",
+      "rating_tier": "S 凯旋真核",
       "mvp_score": 87.2,
       "raw_blame_points": 31.3,
+      "raw_contrib_points": 289.0,
       "strengths": [
         "保人拉野到位：对线期把同路核心 主宰 保出了 10分钟 61 刀 / 3,631 经济的顺畅开局。",
         "全场核心技能施放统计：ringmaster_impalement 105次 / The Beasts 71次 / The Box 15次 / ringmaster_spotlight 14次（操作频率 250 APM）。",
@@ -28493,7 +28682,11 @@
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 齐天大圣 无限提款。"
       ],
       "trash_talk": "@Flame = ez mute 一局死 9 次，看了整整 6分29秒 黑白电视（其中被敌方【齐天大圣】单人提款 5 次），光死就扣了 1212 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Flame = ez mute 最佳幕后功臣！环轨百戏王 全场点亮 19 假 17 真视野 + 参战率 60%，吃草挤奶把大哥伺候得明明白白！",
       "blame_share_pct": 16.0,
+      "contrib_share_pct": 23.4,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 40,
       "lane_id": 1,
       "benchmarks_list": [

@@ -1315,7 +1315,13 @@ def build_squad_history_ledger(
             won = (f_side == "radiant" and bool(rep.get("radiant_win"))) or (
                 f_side == "dire" and not bool(rep.get("radiant_win"))
             )
-            mvp_p = (rep.get("mvp") or {}).get("mvp_player") or own_list[0]
+            sorted_contrib = sorted(
+                own_list,
+                key=lambda x: (float(x.get("contrib_share_pct") or 0), float(x.get("mvp_score") or 0)),
+                reverse=True,
+            )
+            mvp_p = sorted_contrib[0] if sorted_contrib else ((rep.get("mvp") or {}).get("mvp_player") or own_list[0])
+            runner_up_p = sorted_contrib[1] if len(sorted_contrib) > 1 else mvp_p
             sorted_blame = sorted(own_list, key=lambda x: float(x.get("blame_share_pct") or 0), reverse=True)
             culprit_p = sorted_blame[0] if sorted_blame else own_list[0]
 
@@ -1331,6 +1337,11 @@ def build_squad_history_ledger(
                 "mvp_hero": mvp_p.get("hero_short_zh") or "",
                 "mvp_img": mvp_p.get("hero_img") or "",
                 "mvp_player": mvp_p.get("personaname") or "",
+                "mvp_contrib_pct": round(float(mvp_p.get("contrib_share_pct") or 25.0), 1),
+                "runner_up_hero": runner_up_p.get("hero_short_zh") or "",
+                "runner_up_img": runner_up_p.get("hero_img") or "",
+                "runner_up_player": runner_up_p.get("personaname") or "",
+                "runner_up_contrib_pct": round(float(runner_up_p.get("contrib_share_pct") or 22.0), 1),
                 "culprit_hero": culprit_p.get("hero_short_zh") or "",
                 "culprit_img": culprit_p.get("hero_img") or "",
                 "culprit_player": culprit_p.get("personaname") or "",
@@ -1340,6 +1351,8 @@ def build_squad_history_ledger(
             for p in own_list:
                 aid = p.get("account_id")
                 pname = p.get("personaname") or "匿名玩家"
+                if not aid and pname in ("匿名玩家", "Anonymous"):
+                    continue
                 key = str(aid) if aid else pname
                 st = member_stats.setdefault(
                     key,
@@ -1352,6 +1365,7 @@ def build_squad_history_ledger(
                         "games": 0,
                         "wins": 0,
                         "total_blame_pct": 0.0,
+                        "total_contrib_pct": 0.0,
                         "total_rating": 0.0,
                         "mvp_count": 0,
                         "culprit_count": 0,
@@ -1366,10 +1380,11 @@ def build_squad_history_ledger(
                 if won:
                     st["wins"] += 1
                 st["total_blame_pct"] += float(p.get("blame_share_pct") or 0)
+                st["total_contrib_pct"] += float(p.get("contrib_share_pct") or 20.0)
                 st["total_rating"] += float(p.get("rating_score") or 60)
                 if int(p.get("player_slot", -1)) == int(mvp_p.get("player_slot", -2)):
                     st["mvp_count"] += 1
-                if int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2)):
+                if (not won) and int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2)):
                     st["culprit_count"] += 1
                 st["total_kills"] += int(p.get("kills") or 0)
                 st["total_deaths"] += int(p.get("deaths") or 0)
@@ -1382,6 +1397,7 @@ def build_squad_history_ledger(
                     "pos": p.get("pos") or 1,
                     "kda": p.get("kda") or "",
                     "blame_pct": round(float(p.get("blame_share_pct") or 0), 1),
+                    "contrib_pct": round(float(p.get("contrib_share_pct") or 20.0), 1),
                     "won": won,
                 })
 
@@ -1389,22 +1405,23 @@ def build_squad_history_ledger(
     for st in member_stats.values():
         g = max(1, st["games"])
         avg_blame = round(st["total_blame_pct"] / g, 1)
+        avg_contrib = round(st["total_contrib_pct"] / g, 1)
         avg_rating = round(st["total_rating"] / g, 1)
         win_rate = round((st["wins"] / g) * 100, 1)
         avg_deaths = round(st["total_deaths"] / g, 1)
         avg_dead_sec = int(round(st["total_dead_sec"] / g))
 
-        if st["mvp_count"] >= 1 and avg_blame <= 16.0:
+        if st["mvp_count"] >= 1 and avg_contrib >= 22.0:
             role_tag = "👑 车队大腿 · 历史凯瑞王"
             tag_cls = "carry"
         elif st["culprit_count"] >= 1 or avg_blame >= 24.0:
-            role_tag = "🚨 车队头号惯犯 · 重点分锅对象"
+            role_tag = "🚨 败局常客 · 重点分锅对象"
             tag_cls = "culprit"
         elif avg_deaths >= 10.0:
             role_tag = "💀 泉水常客 · 场均十死俱乐部"
             tag_cls = "culprit"
         else:
-            role_tag = "⚖️ 车队中坚 · 功过相抵"
+            role_tag = "⚖️ 车队中坚 · 稳定贡献"
             tag_cls = "neutral"
 
         squad_members_rank.append({
@@ -1416,6 +1433,7 @@ def build_squad_history_ledger(
             "wins": st["wins"],
             "win_rate": win_rate,
             "avg_blame_pct": avg_blame,
+            "avg_contrib_pct": avg_contrib,
             "avg_rating": avg_rating,
             "mvp_count": st["mvp_count"],
             "culprit_count": st["culprit_count"],

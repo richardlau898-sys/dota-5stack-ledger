@@ -1969,9 +1969,98 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
 function renderVerdictAndBlameSection(report) {
   const { side, sideZh, own, all } = getOwnAndOppPlayers(report);
   const bySlot = new Map(all.map((p) => [Number(p.player_slot), p]));
+  const won =
+    (side === "radiant" && Boolean(report.radiant_win)) ||
+    (side === "dire" && !report.radiant_win);
 
   const grok = report.grok_coaching;
   const mvpData = report.mvp || {};
+
+  // Update Jump Chip, Section Heading, Card Labels, and Ledger Header dynamically based on WIN vs LOSS
+  const jumpChip = document.getElementById("jump-chip-verdict");
+  const secHeading = document.getElementById("verdict-heading");
+  const secCaption = document.getElementById("verdict-caption");
+  const mvpCardLabel = document.getElementById("mvp-card-label");
+  const secondCardEl = document.getElementById("culprit-card");
+  const secondCardLabel = document.getElementById("culprit-card-label");
+  const ledgerTitle = document.getElementById("blame-ledger-title");
+  const ledgerCaption = document.getElementById("blame-ledger-caption");
+  const shareBtn1 = document.getElementById("btn-open-share-poster");
+  const shareBtn2 = document.getElementById("btn-open-share-poster-2");
+
+  if (won) {
+    if (jumpChip) jumpChip.textContent = "② 🏆 凯旋庆功与100%贡献榜";
+    if (secHeading) {
+      secHeading.textContent = `② 🏆 ${sideZh}凯旋庆功封神榜 · 谁是头号首功 & 100% 胜局贡献排座次`;
+    }
+    if (secCaption) {
+      secCaption.textContent =
+        "赢球不背锅，全员论功行赏！结合英雄输出转化、推塔终结、团战控制与视野节奏核算五人 100% 胜局贡献度";
+    }
+    if (mvpCardLabel) mvpCardLabel.textContent = "👑 头号首功 · 本局擎天真大腿 (MVP)";
+    if (secondCardEl) {
+      secondCardEl.classList.remove("culprit-theme");
+      secondCardEl.classList.add("runnerup-theme");
+    }
+    if (secondCardLabel) secondCardLabel.textContent = "⚔️ 二号功臣 · 破阵二当家 & 定海神针";
+    if (ledgerTitle) ledgerTitle.textContent = `🎉 ${sideZh}五黑 100% 胜局贡献庆功榜 · 谁的军功章最大一目了然`;
+    if (ledgerCaption) {
+      ledgerCaption.textContent =
+        "按本局五人综合战功归一化为 100% 胜局贡献度，点击任意行右侧按钮可直接复制夸人/庆功贺电发群里";
+    }
+    if (shareBtn1) shareBtn1.textContent = "🏆 导出群聊庆功榜";
+    if (shareBtn2) shareBtn2.textContent = "🏆 导出群聊庆功榜";
+  } else {
+    if (jumpChip) jumpChip.textContent = "② ⚖️ 红黑榜与100%分锅";
+    if (secHeading) {
+      secHeading.textContent = `② ⚖️ ${sideZh}败局分锅定责总表 · 这把谁在尽力，谁在犯罪`;
+    }
+    if (secCaption) {
+      secCaption.textContent =
+        "输球不留情面，硬核数据定责！一屏看清全场真大腿、败方孤胆院长、头号战犯与 100% 责任切分";
+    }
+    if (mvpCardLabel) mvpCardLabel.textContent = "👑 全场头号功臣 · MVP / 败方孤胆院长";
+    if (secondCardEl) {
+      secondCardEl.classList.remove("runnerup-theme");
+      secondCardEl.classList.add("culprit-theme");
+    }
+    if (secondCardLabel) secondCardLabel.textContent = "🚨 本方头号大锅 · 一级战犯逮捕令";
+    if (ledgerTitle) ledgerTitle.textContent = `⚖️ ${sideZh}五人 100% 败局分锅账本 · 谁该在群里发致歉红包`;
+    if (ledgerCaption) {
+      ledgerCaption.textContent =
+        "点击任意行右侧按钮可直接复制该队友专属分锅算账金句发群里";
+    }
+    if (shareBtn1) shareBtn1.textContent = "📜 导出群聊处刑书";
+    if (shareBtn2) shareBtn2.textContent = "📜 导出群聊处刑书";
+  }
+
+  // Sort own team by Contribution Share (descending) and by Blame Share (descending)
+  const rawContribSum =
+    own.reduce((s, p) => s + Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)), 0) || 100;
+  const sortedByContrib = [...own]
+    .map((p) => ({
+      player: p,
+      contribShare: Number(
+        (
+          (Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)) / rawContribSum) *
+          100
+        ).toFixed(1)
+      ),
+    }))
+    .sort(
+      (a, b) =>
+        b.contribShare - a.contribShare ||
+        (b.player.rating_score || 0) - (a.player.rating_score || 0)
+    );
+
+  const rawBlameSum =
+    own.reduce((s, p) => s + Math.max(1, Number(p.blame_share_pct || 20)), 0) || 100;
+  const sortedByBlame = [...own]
+    .map((p) => ({
+      player: p,
+      blameShare: Number(((Math.max(1, Number(p.blame_share_pct || 20)) / rawBlameSum) * 100).toFixed(1)),
+    }))
+    .sort((a, b) => b.blameShare - a.blameShare);
 
   // 2.1 Grok Verdict Banner
   const authorEl = document.getElementById("grok-author-label");
@@ -1982,64 +2071,88 @@ function renderVerdictAndBlameSection(report) {
 
   if (grok && (!grok.side || grok.side === side)) {
     const modelTag = grok._meta?.model
-      ? `${String(grok._meta.provider || "XAI").toUpperCase()} / ${grok._meta.model} 赛后总账`
-      : "XAI / GROK-4.7 赛后总账";
+      ? `${String(grok._meta.provider || "XAI").toUpperCase()} / ${grok._meta.model} ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`
+      : `XAI / GROK-4.7 ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`;
     if (authorEl) authorEl.textContent = modelTag;
-    if (titleEl) titleEl.textContent = grok.title || "本局赛后复盘总账";
+    if (titleEl) titleEl.textContent = grok.title || (won ? "凯旋庆功与战术复盘" : "本局赛后复盘总账");
     if (summaryEl) summaryEl.textContent = grok.summary || "";
     if (verdictEl) verdictEl.textContent = grok.verdict || "";
     if (practiceEl) {
       practiceEl.innerHTML = grok.team_practice
-        ? `<strong>下把车队铁律：</strong>${escapeHtml(grok.team_practice)}`
+        ? `<strong>${won ? "乘胜追击 · 下把更稳铁律：" : "痛定思痛 · 下把车队铁律："}</strong>${escapeHtml(grok.team_practice)}`
         : "";
       practiceEl.hidden = !grok.team_practice;
     }
   } else {
     const stages = report.match_narrative?.stages || [];
-    if (authorEl) authorEl.textContent = "录像级算账引擎 · 自动判词 (可点右上角用 Grok 4.7 深度重算)";
+    if (authorEl) {
+      authorEl.textContent = won
+        ? "录像级庆功引擎 · 自动论功行赏 (可点右上角用 Grok 4.7 深度重算)"
+        : "录像级算账引擎 · 自动分锅判词 (可点右上角用 Grok 4.7 深度重算)";
+    }
     if (titleEl) {
-      titleEl.textContent = `${sideZh}赛后算账：终局比分 ${report.radiant_score} : ${report.dire_score} (${report.duration_str})`;
+      titleEl.textContent = won
+        ? `🎉 ${sideZh}凯旋大捷！终局比分 ${report.radiant_score} : ${report.dire_score} (${report.duration_str})`
+        : `⚖️ ${sideZh}败局算账：终局比分 ${report.radiant_score} : ${report.dire_score} (${report.duration_str})`;
     }
     if (summaryEl) {
-      summaryEl.textContent = stages.map((s) => `${s.stage}：${s.summary}`).join(" ");
+      summaryEl.textContent = stages.map((s) => `${s.stage || s.title}：${s.summary || s.content}`).join(" ");
     }
     if (verdictEl) {
-      verdictEl.textContent = (mvpData.rationale_list || []).join(" ");
+      if (won) {
+        const top1 = sortedByContrib[0]?.player;
+        const top2 = sortedByContrib[1]?.player;
+        const lucky5 = sortedByContrib[sortedByContrib.length - 1]?.player;
+        verdictEl.textContent = `🏆 本局 ${sideZh} 获胜论功行赏：头号首功 ${top1?.pos}号位 ${top1?.hero_short_zh}（${top1?.personaname}，胜局贡献 ${sortedByContrib[0]?.contribShare}% · 评分 ${top1?.rating_score}）与破阵二当家 ${top2?.pos}号位 ${top2?.hero_short_zh}（${top2?.personaname}，胜局贡献 ${sortedByContrib[1]?.contribShare}% · 评分 ${top2?.rating_score}）携手主宰比赛！本局惊险躺赢锦鲤：${lucky5?.pos}号位 ${lucky5?.hero_short_zh}（${lucky5?.personaname}，贡献 ${sortedByContrib[sortedByContrib.length - 1]?.contribShare}%）。`;
+      } else {
+        verdictEl.textContent = (mvpData.rationale_list || []).join(" ");
+      }
     }
     if (practiceEl) {
       practiceEl.innerHTML = `<strong>提示：</strong>点击右上角「用 Grok 4.7 重算判词」即可调用服务端已配置的 xAI Grok 4.7 生成针对『${escapeHtml(
         sideZh
-      )}』阵容的毒舌逐人判词。`;
+      )}』阵容的深度复盘。`;
       practiceEl.hidden = false;
     }
   }
 
-  // 2.2 MVP Card
+  // 2.2 Left Card: When WON -> #1 Top Contributor on our winning team; When LOST -> Match MVP / Our SVP
   const mvpBody = document.getElementById("mvp-card-body");
-  let mvpPlayer = mvpData.mvp_player || all[0];
+  let mvpPlayer = won ? sortedByContrib[0]?.player : mvpData.mvp_player || all[0];
   const grokMvp = grok?.mvp && (!grok.side || grok.side === side) ? grok.mvp : null;
-  if (grokMvp && bySlot.has(Number(grokMvp.slot))) {
+  if (!won && grokMvp && bySlot.has(Number(grokMvp.slot))) {
     mvpPlayer = bySlot.get(Number(grokMvp.slot));
   } else if (mvpPlayer && bySlot.has(Number(mvpPlayer.player_slot))) {
     mvpPlayer = bySlot.get(Number(mvpPlayer.player_slot));
   }
+  const mvpContribPct =
+    sortedByContrib.find((x) => Number(x.player.player_slot) === Number(mvpPlayer?.player_slot))
+      ?.contribShare ??
+    mvpPlayer?.contrib_share_pct ??
+    26.0;
 
   if (mvpBody && mvpPlayer) {
     const heroShort = mvpPlayer.hero_short_zh || mvpPlayer.hero_name;
+    const grokMvpPlayer = (grok?.players || []).find(
+      (gp) => Number(gp.slot) === Number(mvpPlayer.player_slot)
+    );
     const evidences = [];
-    if (grokMvp?.reason) evidences.push(grokMvp.reason);
-    if (grokMvp?.comparison) evidences.push(grokMvp.comparison);
-    if (Array.isArray(grokMvp?.evidence)) {
-      grokMvp.evidence.forEach((e) => evidences.push(e));
-    }
-    if (evidences.length === 0 && Array.isArray(mvpData.rationale_list)) {
-      mvpData.rationale_list.forEach((r) => evidences.push(r));
-    }
-    if (evidences.length === 0 && Array.isArray(mvpPlayer.strengths)) {
+    if (Array.isArray(mvpPlayer.strengths)) {
       mvpPlayer.strengths.slice(0, 3).forEach((r) => evidences.push(r));
     }
+    if (Array.isArray(grokMvpPlayer?.good)) {
+      grokMvpPlayer.good.slice(0, 2).forEach((g) => {
+        if (!evidences.includes(g)) evidences.push(g);
+      });
+    }
+    if (evidences.length === 0 && grokMvp?.reason) evidences.push(grokMvp.reason);
+    if (evidences.length === 0 && Array.isArray(mvpData.rationale_list)) {
+      mvpData.rationale_list.slice(0, 3).forEach((r) => evidences.push(r));
+    }
 
-    const mvpCopyText = `【本局大腿 MVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}。${evidences[0] || ""}`;
+    const mvpCopyText = won
+      ? `🏆【凯旋头号首功 MVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：独占全队 ${mvpContribPct}% 胜局贡献！KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}，推塔 ${fmtNum(mvpPlayer.tower_damage)}。${mvpPlayer.praise_talk || evidences[0] || ""}`
+      : `【本局大腿 MVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}。${evidences[0] || ""}`;
 
     mvpBody.innerHTML = `
       <div class="verdict-hero-row">
@@ -2052,15 +2165,23 @@ function renderVerdictAndBlameSection(report) {
           <div class="verdict-title-line">
             <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
             <span class="verdict-player-name">${escapeHtml(mvpPlayer.personaname)}${mvpPlayer.is_me ? " [我]" : ""}</span>
-            <span class="status-pill connected">${escapeHtml(mvpPlayer.side)} · ${escapeHtml(mvpPlayer.pos_label)}</span>
+            <span class="status-pill connected">${escapeHtml(mvpPlayer.pos_label)} · ${escapeHtml(
+      won ? mvpPlayer.contrib_tier || "👑 头号首功" : mvpPlayer.rating_tier || "全场真大腿"
+    )}</span>
           </div>
           <div class="verdict-sub-meta">
-            KDA ${escapeHtml(mvpPlayer.kda)} (${mvpPlayer.kill_participation_pct}% 参战) · GPM ${mvpPlayer.gpm} · 伤害 ${fmtNum(mvpPlayer.hero_damage)} · 拆塔 ${fmtNum(mvpPlayer.tower_damage)}
+            KDA ${escapeHtml(mvpPlayer.kda)} (${mvpPlayer.kill_participation_pct}% 参战) · GPM ${mvpPlayer.gpm} · 伤害 ${fmtNum(mvpPlayer.hero_damage)} (${mvpPlayer.hero_damage_share_pct || 0}%) · 拆塔 ${fmtNum(mvpPlayer.tower_damage)}
           </div>
         </div>
         <div class="verdict-score-box">
-          <div class="verdict-score-num">${Number(mvpPlayer.mvp_score || mvpPlayer.rating_score || 85).toFixed(1)}</div>
-          <div class="verdict-score-sub">MVP 战功分</div>
+          <div class="verdict-score-num">${
+            won
+              ? `${Number(mvpContribPct).toFixed(1)}%`
+              : Number(mvpPlayer.mvp_score || mvpPlayer.rating_score || 85).toFixed(1)
+          }</div>
+          <div class="verdict-score-sub">${
+            won ? `胜局贡献度 (评分 ${mvpPlayer.rating_score})` : "MVP 战功分"
+          }</div>
         </div>
       </div>
       <ul class="verdict-evidence-list">
@@ -2070,90 +2191,172 @@ function renderVerdictAndBlameSection(report) {
           .join("")}
       </ul>
       <div class="verdict-quote-bar">
-        <span>「这把要不是 ${escapeHtml(heroShort)} 死命顶着局势，早就提前十五分钟敲 GG 了。」</span>
-        <button type="button" class="button secondary" data-copy-quote="${escapeHtml(mvpCopyText)}">复制表彰词</button>
+        <span>${escapeHtml(
+          won
+            ? mvpPlayer.praise_talk ||
+                `「${heroShort} 这把真神降临包揽 ${mvpContribPct}% 胜局贡献，今晚车队全员排队敬茶！」`
+            : `「这把要不是 ${heroShort} 死命顶着局势，早就提前十五分钟敲 GG 了。」`
+        )}</span>
+        <button type="button" class="button secondary" data-copy-quote="${escapeHtml(mvpCopyText)}">${
+      won ? "复制首功贺电" : "复制表彰词"
+    }</button>
       </div>
     `;
   }
 
-  // 2.3 Top Culprit Card (Highest blame share on the audited side)
+  // 2.3 Right Card:
+  // - When WON: Show #2 Contributor ("⚔️ 二号功臣 · 破阵二当家") + fun shoutout to the 5th contributor ("🎉 躺赢锦鲤")!
+  // - When LOST: Show #1 Blame Culprit ("🚨 本方头号大锅 · 一级战犯逮捕令")!
   const culpritBody = document.getElementById("culprit-card-body");
-  const sortedByBlame = [...own].sort((a, b) => (b.blame_share_pct || 0) - (a.blame_share_pct || 0));
-  const culprit = sortedByBlame[0] || own[0];
-  const grokCulprit = (grok?.players || []).find((gp) => Number(gp.slot) === Number(culprit?.player_slot));
+  if (culpritBody) {
+    if (won) {
+      const runnerEntry = sortedByContrib[1] || sortedByContrib[0];
+      const runner = runnerEntry?.player || own[0];
+      const runnerShare = runnerEntry?.contribShare ?? runner?.contrib_share_pct ?? 22.0;
+      const luckyEntry = sortedByContrib[sortedByContrib.length - 1];
+      const luckyPlayer = luckyEntry?.player;
+      const grokRunner = (grok?.players || []).find(
+        (gp) => Number(gp.slot) === Number(runner?.player_slot)
+      );
 
-  if (culpritBody && culprit) {
-    const heroShort = culprit.hero_short_zh || culprit.hero_name;
-    const crimes = [];
-    if (grokCulprit?.assessment) crimes.push(grokCulprit.assessment);
-    if (Array.isArray(grokCulprit?.bad)) {
-      grokCulprit.bad.forEach((b) => crimes.push(b));
-    }
-    if (crimes.length === 0 && Array.isArray(culprit.weaknesses)) {
-      culprit.weaknesses.forEach((b) => crimes.push(b));
-    }
+      const heroShort = runner.hero_short_zh || runner.hero_name;
+      const highlights = [];
+      if (Array.isArray(runner.strengths)) {
+        runner.strengths.slice(0, 3).forEach((s) => highlights.push(s));
+      }
+      if (Array.isArray(grokRunner?.good)) {
+        grokRunner.good.slice(0, 2).forEach((g) => {
+          if (!highlights.includes(g)) highlights.push(g);
+        });
+      }
+      if (luckyPlayer && Number(luckyPlayer.player_slot) !== Number(runner.player_slot)) {
+        highlights.push(
+          `🎉 本局气氛组/躺赢锦鲤提名：${luckyPlayer.pos}号位 ${luckyPlayer.hero_short_zh} (${luckyPlayer.personaname}) — 贡献 ${luckyEntry.contribShare}%（KDA ${luckyPlayer.kda}），成功吸引敌方火力，赢球全员免锅！`
+        );
+      }
 
-    const culpritCopyText = `【头号战犯逮捕令】${culprit.personaname} (${heroShort} · ${culprit.pos_label}) 本局分锅占比 ${culprit.blame_share_pct}%！KDA ${culprit.kda}，泉水读秒 ${culprit.dead_seconds || 0} 秒。${
-      culprit.trash_talk || crimes[0] || ""
-    }`;
+      const runnerCopyText = `⚔️【凯旋二号功臣】${runner.personaname} (${heroShort} · ${runner.pos_label}) 本局胜局贡献 ${runnerShare}%（综合评分 ${runner.rating_score}）！KDA ${runner.kda}，参战率 ${runner.kill_participation_pct}%，英雄伤害 ${fmtNum(runner.hero_damage)}。${
+        runner.praise_talk || highlights[0] || ""
+      }`;
 
-    culpritBody.innerHTML = `
-      <div class="verdict-hero-row">
-        ${
-          culprit.hero_img
-            ? `<img class="verdict-portrait" src="${escapeHtml(culprit.hero_img)}" alt="${escapeHtml(heroShort)}" />`
-            : ""
-        }
-        <div class="verdict-identity">
-          <div class="verdict-title-line">
-            <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
-            <span class="verdict-player-name">${escapeHtml(culprit.personaname)}${culprit.is_me ? " [我]" : ""}</span>
-            <span class="status-pill">${escapeHtml(culprit.pos_label)} · ${escapeHtml(culprit.rating_tier || "头号大锅")}</span>
+      culpritBody.innerHTML = `
+        <div class="verdict-hero-row">
+          ${
+            runner.hero_img
+              ? `<img class="verdict-portrait" src="${escapeHtml(runner.hero_img)}" alt="${escapeHtml(heroShort)}" />`
+              : ""
+          }
+          <div class="verdict-identity">
+            <div class="verdict-title-line">
+              <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
+              <span class="verdict-player-name">${escapeHtml(runner.personaname)}${runner.is_me ? " [我]" : ""}</span>
+              <span class="status-pill connected">${escapeHtml(runner.pos_label)} · ${escapeHtml(
+        runner.contrib_tier || "⚔️ 破阵二当家"
+      )}</span>
+            </div>
+            <div class="verdict-sub-meta">
+              KDA ${escapeHtml(runner.kda)} · 参战率 ${runner.kill_participation_pct}% · 伤害 ${fmtNum(runner.hero_damage)} (${runner.hero_damage_share_pct || 0}%) · 控制 ${runner.stuns_sec || 0}秒
+            </div>
           </div>
-          <div class="verdict-sub-meta">
-            KDA ${escapeHtml(culprit.kda)} · 参战率 ${culprit.kill_participation_pct}% · 泉水读秒 ${culprit.dead_seconds || 0}秒 · 阵亡掉钱 ${fmtNum(culprit.death_gold_lost || 0)}
+          <div class="verdict-score-box">
+            <div class="verdict-score-num">${Number(runnerShare).toFixed(1)}%</div>
+            <div class="verdict-score-sub">胜局贡献度 (评分 ${runner.rating_score})</div>
           </div>
         </div>
-        <div class="verdict-score-box">
-          <div class="verdict-score-num">${Number(culprit.blame_share_pct || 0).toFixed(1)}%</div>
-          <div class="verdict-score-sub">全队分锅占比</div>
+        <ul class="verdict-evidence-list">
+          ${highlights
+            .slice(0, 4)
+            .map((item) => `<li>${escapeHtml(item)}</li>`)
+            .join("")}
+        </ul>
+        <div class="verdict-quote-bar">
+          <span>${escapeHtml(
+            runner.praise_talk || `「左膀右臂定海神针！这把赢下来必须记 ${heroShort} 半座军功章！」`
+          )}</span>
+          <button type="button" class="button secondary" data-copy-quote="${escapeHtml(runnerCopyText)}">复制庆功词</button>
         </div>
-      </div>
-      <ul class="verdict-evidence-list">
-        ${crimes
-          .slice(0, 4)
-          .map((item) => `<li>${escapeHtml(item)}</li>`)
-          .join("")}
-      </ul>
-      <div class="verdict-quote-bar">
-        <span>${escapeHtml(grokCulprit?.headline || culprit.trash_talk || "这把大锅请稳稳背好，群里发个红包不过分吧？")}</span>
-        <button type="button" class="button primary" data-copy-quote="${escapeHtml(culpritCopyText)}">复制处刑词</button>
-      </div>
-    `;
+      `;
+    } else {
+      const culpritEntry = sortedByBlame[0];
+      const culprit = culpritEntry?.player || own[0];
+      const culpritShare = culpritEntry?.blameShare ?? culprit?.blame_share_pct ?? 25.0;
+      const grokCulprit = (grok?.players || []).find(
+        (gp) => Number(gp.slot) === Number(culprit?.player_slot)
+      );
+      const heroShort = culprit.hero_short_zh || culprit.hero_name;
+      const crimes = [];
+      if (grokCulprit?.assessment) crimes.push(grokCulprit.assessment);
+      if (Array.isArray(grokCulprit?.bad)) {
+        grokCulprit.bad.forEach((b) => crimes.push(b));
+      }
+      if (crimes.length === 0 && Array.isArray(culprit.weaknesses)) {
+        culprit.weaknesses.forEach((b) => crimes.push(b));
+      }
+
+      const culpritCopyText = `【头号战犯逮捕令】${culprit.personaname} (${heroShort} · ${culprit.pos_label}) 本局分锅占比 ${culpritShare}%！KDA ${culprit.kda}，泉水读秒 ${culprit.dead_seconds || 0} 秒。${
+        culprit.trash_talk || crimes[0] || ""
+      }`;
+
+      culpritBody.innerHTML = `
+        <div class="verdict-hero-row">
+          ${
+            culprit.hero_img
+              ? `<img class="verdict-portrait" src="${escapeHtml(culprit.hero_img)}" alt="${escapeHtml(heroShort)}" />`
+              : ""
+          }
+          <div class="verdict-identity">
+            <div class="verdict-title-line">
+              <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
+              <span class="verdict-player-name">${escapeHtml(culprit.personaname)}${culprit.is_me ? " [我]" : ""}</span>
+              <span class="status-pill">${escapeHtml(culprit.pos_label)} · ${escapeHtml(culprit.rating_tier || "头号大锅")}</span>
+            </div>
+            <div class="verdict-sub-meta">
+              KDA ${escapeHtml(culprit.kda)} · 参战率 ${culprit.kill_participation_pct}% · 泉水读秒 ${culprit.dead_seconds || 0}秒 · 阵亡掉钱 ${fmtNum(culprit.death_gold_lost || 0)}
+            </div>
+          </div>
+          <div class="verdict-score-box">
+            <div class="verdict-score-num">${Number(culpritShare).toFixed(1)}%</div>
+            <div class="verdict-score-sub">全队分锅占比</div>
+          </div>
+        </div>
+        <ul class="verdict-evidence-list">
+          ${crimes
+            .slice(0, 4)
+            .map((item) => `<li>${escapeHtml(item)}</li>`)
+            .join("")}
+        </ul>
+        <div class="verdict-quote-bar">
+          <span>${escapeHtml(grokCulprit?.headline || culprit.trash_talk || "这把大锅请稳稳背好，群里发个红包不过分吧？")}</span>
+          <button type="button" class="button primary" data-copy-quote="${escapeHtml(culpritCopyText)}">复制处刑词</button>
+        </div>
+      `;
+    }
   }
 
-  // 2.4 5-Stack Blame Stacked Bar & Ranking Rows (Zero text clipping on narrow segments!)
+  // 2.4 5-Stack 100% Stacked Bar & Ranking Rows:
+  // - When WON: 100% Victory Contribution Ranking (sorted by contribShare descending)
+  // - When LOST: 100% Defeat Blame Ranking (sorted by blameShare descending)
   const stackedBar = document.getElementById("blame-stacked-bar");
   const rankingRows = document.getElementById("blame-ranking-rows");
 
   if (stackedBar && rankingRows) {
-    const rawTotal = sortedByBlame.reduce((s, p) => s + Math.max(1, Number(p.blame_share_pct || 0)), 0) || 100;
-    const normalized = sortedByBlame.map((p) => ({
-      player: p,
-      share: Number(((Math.max(1, Number(p.blame_share_pct || 0)) / rawTotal) * 100).toFixed(1)),
-    }));
+    stackedBar.classList.toggle("win-mode", won);
+    const listToDisplay = won
+      ? sortedByContrib.map((x) => ({ player: x.player, share: x.contribShare }))
+      : sortedByBlame.map((x) => ({ player: x.player, share: x.blameShare }));
 
-    stackedBar.innerHTML = normalized
+    stackedBar.innerHTML = listToDisplay
       .map(({ player: p, share }, idx) => {
         const heroShort = p.hero_short_zh || p.hero_name;
-        // CRITICAL FIX: Never render full text inside narrow segments (< 9%) so text never clips!
         let innerLabel = "";
         if (share >= 15) {
           innerLabel = `${escapeHtml(heroShort)} ${share}%`;
         } else if (share >= 9) {
           innerLabel = `${share}%`;
         }
-        const tooltip = `${p.pos_label} ${heroShort} (${p.personaname}): 背锅占比 ${share}%`;
+        const tooltip = won
+          ? `${p.pos_label} ${heroShort} (${p.personaname}): 胜局贡献度 ${share}%`
+          : `${p.pos_label} ${heroShort} (${p.personaname}): 败局分锅占比 ${share}%`;
         return `
           <div
             class="blame-seg rank-${idx}"
@@ -2164,51 +2367,102 @@ function renderVerdictAndBlameSection(report) {
       })
       .join("");
 
-    rankingRows.innerHTML = normalized
+    const rankMedals = ["🥇", "🥈", "🥉", "04", "05"];
+    rankingRows.innerHTML = listToDisplay
       .map(({ player: p, share }, idx) => {
         const heroShort = p.hero_short_zh || p.hero_name;
         const grokP = (grok?.players || []).find((gp) => Number(gp.slot) === Number(p.player_slot));
-        const oneLineCrime =
-          grokP?.headline ||
-          (p.weaknesses && p.weaknesses[0]) ||
-          p.trash_talk ||
-          "本局表现中规中矩";
-        const copyQuote = `【分锅账单 #${idx + 1}】${p.personaname} (${heroShort} · ${p.pos_label}) 背锅占比 ${share}%：KDA ${p.kda}，${oneLineCrime}`;
 
-        return `
-          <div class="blame-row rank-${idx}">
-            <div class="blame-rank-num">0${idx + 1}</div>
-            ${
-              p.hero_img
-                ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
-                : `<div class="blame-row-portrait"></div>`
-            }
-            <div class="blame-row-who">
-              <div class="blame-row-title">
-                <strong>${escapeHtml(heroShort)}</strong>
-                <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
+        if (won) {
+          const oneLinePraise =
+            (grokP?.good && grokP.good[0]) ||
+            (p.strengths && p.strengths[0]) ||
+            p.praise_talk ||
+            "稳健发挥助力团队拿下一城";
+          const tierTag =
+            idx === 0
+              ? "👑 头号首功"
+              : idx === 1
+              ? "⚔️ 破阵次功"
+              : idx === 4 && (p.deaths || 0) >= 8
+              ? "🎉 躺赢锦鲤"
+              : "🔥 凯旋功臣";
+          const copyQuote = `🏆【凯旋庆功榜 #${idx + 1} · ${tierTag}】${p.personaname} (${heroShort} · ${p.pos_label}) 胜局贡献 ${share}% (评分 ${p.rating_score})：KDA ${p.kda}，${oneLinePraise}`;
+          const extraStat =
+            p.pos >= 4
+              ? `视野 ${(p.obs_placed || 0) + (p.sen_placed || 0)}颗 · 控制 ${p.stuns_sec || 0}s`
+              : `伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct || 0}%) · 拆塔 ${fmtNum(p.tower_damage)}`;
+
+          return `
+            <div class="blame-row win-mode rank-${idx}">
+              <div class="blame-rank-num">${rankMedals[idx] || `0${idx + 1}`}</div>
+              ${
+                p.hero_img
+                  ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
+                  : `<div class="blame-row-portrait"></div>`
+              }
+              <div class="blame-row-who">
+                <div class="blame-row-title">
+                  <strong>${escapeHtml(heroShort)}</strong>
+                  <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
+                </div>
+                <div class="blame-row-sub">
+                  ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} (${p.kill_participation_pct}%参战) · ${extraStat}
+                </div>
               </div>
-              <div class="blame-row-sub">
-                ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} · 参战 ${p.kill_participation_pct}% · 读秒 ${p.dead_seconds || 0}s
+              <div class="blame-row-bar-wrap">
+                <div class="blame-row-bar-track">
+                  <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, share))}%"></div>
+                </div>
+                <div class="blame-row-quote" title="${escapeHtml(oneLinePraise)}">${escapeHtml(oneLinePraise)}</div>
               </div>
+              <span class="blame-badge">${tierTag} · 贡献 ${share.toFixed(1)}%</span>
+              <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制贺电</button>
             </div>
-            <div class="blame-row-bar-wrap">
-              <div class="blame-row-bar-track">
-                <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, share))}%"></div>
+          `;
+        } else {
+          const oneLineCrime =
+            grokP?.headline ||
+            (p.weaknesses && p.weaknesses[0]) ||
+            p.trash_talk ||
+            "本局表现中规中矩";
+          const copyQuote = `【分锅账单 #${idx + 1}】${p.personaname} (${heroShort} · ${p.pos_label}) 背锅占比 ${share}%：KDA ${p.kda}，${oneLineCrime}`;
+
+          return `
+            <div class="blame-row rank-${idx}">
+              <div class="blame-rank-num">0${idx + 1}</div>
+              ${
+                p.hero_img
+                  ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
+                  : `<div class="blame-row-portrait"></div>`
+              }
+              <div class="blame-row-who">
+                <div class="blame-row-title">
+                  <strong>${escapeHtml(heroShort)}</strong>
+                  <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
+                </div>
+                <div class="blame-row-sub">
+                  ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} · 参战 ${p.kill_participation_pct}% · 读秒 ${p.dead_seconds || 0}s
+                </div>
               </div>
-              <div class="blame-row-quote" title="${escapeHtml(oneLineCrime)}">${escapeHtml(oneLineCrime)}</div>
+              <div class="blame-row-bar-wrap">
+                <div class="blame-row-bar-track">
+                  <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, share))}%"></div>
+                </div>
+                <div class="blame-row-quote" title="${escapeHtml(oneLineCrime)}">${escapeHtml(oneLineCrime)}</div>
+              </div>
+              <span class="blame-badge">背锅 ${share.toFixed(1)}%</span>
+              <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制算账</button>
             </div>
-            <span class="blame-badge">背锅 ${share.toFixed(1)}%</span>
-            <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制算账</button>
-          </div>
-        `;
+          `;
+        }
       })
       .join("");
   }
 
   document.querySelectorAll(".verdict-and-blame-section [data-copy-quote]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      copyTextToClipboard(btn.getAttribute("data-copy-quote") || "", "处刑判词");
+      copyTextToClipboard(btn.getAttribute("data-copy-quote") || "", won ? "庆功贺电" : "处刑判词");
     });
   });
 }
@@ -3152,7 +3406,7 @@ function renderPlayersForensicsList(report) {
   const container = document.getElementById("players-forensics-container");
   if (!container) return;
 
-  const { side, own, opp } = getOwnAndOppPlayers(report);
+  const { side, own, opp, won: ownWon } = getOwnAndOppPlayers(report);
   const grok = report.grok_coaching;
   const grokPlayersMap = new Map();
   if (grok && (!grok.side || grok.side === side) && Array.isArray(grok.players)) {
@@ -3166,16 +3420,16 @@ function renderPlayersForensicsList(report) {
     listToRender = [...own, ...opp];
   }
 
-  const maxCulpritSlot = [...own].sort(
-    (a, b) => (b.blame_share_pct || 0) - (a.blame_share_pct || 0)
-  )[0]?.player_slot;
+  const maxCulpritSlot = !ownWon
+    ? [...own].sort((a, b) => (b.blame_share_pct || 0) - (a.blame_share_pct || 0))[0]?.player_slot
+    : null;
   const mvpSlot = report.mvp?.mvp_player?.player_slot;
 
   container.innerHTML = listToRender
     .map((p) =>
       renderSingleForensicCard(p, {
         grokPlayer: grokPlayersMap.get(Number(p.player_slot)),
-        isTopCulprit: Number(p.player_slot) === Number(maxCulpritSlot),
+        isTopCulprit: !p.won && Number(p.player_slot) === Number(maxCulpritSlot),
         isMvp: Number(p.player_slot) === Number(mvpSlot),
       })
     )
@@ -3183,7 +3437,8 @@ function renderPlayersForensicsList(report) {
 
   container.querySelectorAll("[data-copy-quote]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      copyTextToClipboard(btn.getAttribute("data-copy-quote") || "", "个人算账报告");
+      const label = btn.getAttribute("data-copy-label") || "个人复盘报告";
+      copyTextToClipboard(btn.getAttribute("data-copy-quote") || "", label);
     });
   });
 }
@@ -3191,6 +3446,9 @@ function renderPlayersForensicsList(report) {
 function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const heroShort = p.hero_short_zh || p.hero_name;
   const posNum = p.pos || 1;
+  const pWon = Boolean(p.won);
+  const contribPct = Number(p.contrib_share_pct ?? p.blame_share_pct ?? 20).toFixed(1);
+  const blamePct = Number(p.blame_share_pct || 0).toFixed(1);
 
   // Final 6-slot items + neutral item
   const slotsHtml = (p.final_items_rich || [])
@@ -3286,7 +3544,7 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const badList =
     grokPlayer?.bad && grokPlayer.bad.length > 0
       ? grokPlayer.bad
-      : p.weaknesses || ["本局无明显犯罪记录"];
+      : p.weaknesses || ["本局无明显失误记录"];
   const fixList =
     grokPlayer?.practice
       ? [grokPlayer.practice, ...(p.improvements || []).slice(0, 2)]
@@ -3295,9 +3553,13 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const headlineText = grokPlayer?.headline || "";
   const assessmentText = grokPlayer?.assessment || "";
 
-  const copyText = `【${p.pos_label}算账单】${p.personaname} (${heroShort})：KDA ${p.kda}，GPM ${p.gpm}，分锅占比 ${p.blame_share_pct}%。${
-    p.trash_talk || headlineText || badList[0] || ""
-  }`;
+  const footerQuote = pWon
+    ? p.praise_talk || headlineText || goodList[0] || p.trash_talk || ""
+    : p.trash_talk || headlineText || badList[0] || "";
+
+  const copyText = pWon
+    ? `【${p.pos_label}庆功表彰】${p.personaname} (${heroShort})：KDA ${p.kda}，GPM ${p.gpm}，胜局贡献 ${contribPct}%。${footerQuote}`
+    : `【${p.pos_label}算账单】${p.personaname} (${heroShort})：KDA ${p.kda}，GPM ${p.gpm}，分锅占比 ${blamePct}%。${footerQuote}`;
 
   const lh10 = p.laning_10m?.lh10 ?? "-";
   const dn10 = p.laning_10m?.dn10 ?? "-";
@@ -3318,7 +3580,7 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
               <span class="forensic-hero-zh">${escapeHtml(heroShort)}</span>
               <span class="forensic-player-id">${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
               <span class="status-pill">${escapeHtml(p.side)} · ${escapeHtml(p.pos_label)}</span>
-              ${isMvp ? `<span class="status-pill connected">全场 MVP</span>` : ""}
+              ${isMvp ? `<span class="status-pill connected">👑 全场 MVP</span>` : ""}
               ${(p.tags || [])
                 .slice(0, 4)
                 .map((t) => `<span class="status-pill">${escapeHtml(t)}</span>`)
@@ -3341,9 +3603,15 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
 
         <div class="forensic-badges-right">
           <span class="status-pill connected">综合评分 ${Number(p.rating_score || 60).toFixed(1)}</span>
-          <span class="blame-badge">背锅 ${Number(p.blame_share_pct || 0).toFixed(1)}% · ${escapeHtml(
-            p.rating_tier || "普通背锅"
-          )}</span>
+          ${
+            pWon
+              ? `<span class="blame-badge" style="color:#a8e5a7;border-color:#3a6a40;background:#152317;">🏆 胜局贡献 ${contribPct}% · ${escapeHtml(
+                  p.contrib_tier || p.rating_tier || "凯旋功臣"
+                )}</span>`
+              : `<span class="blame-badge">背锅 ${blamePct}% · ${escapeHtml(
+                  p.rating_tier || "普通背锅"
+                )}</span>`
+          }
         </div>
       </div>
 
@@ -3521,19 +3789,19 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
 
       <div class="forensic-prose-grid">
         <div class="prose-col good">
-          <h4>哪里干得漂亮 (高光与贡献)</h4>
+          <h4>${pWon ? "🏆 凯旋高光与胜局贡献" : "哪里干得漂亮 (高光与贡献)"}</h4>
           <ul>
             ${goodList.map((g) => `<li>${escapeHtml(g)}</li>`).join("")}
           </ul>
         </div>
         <div class="prose-col bad">
-          <h4>哪里在犯罪 (背锅铁证)</h4>
+          <h4>${pWon ? "🔍 胜局复盘小瑕疵 (美中不足)" : "哪里在犯罪 (背锅铁证)"}</h4>
           <ul>
             ${badList.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}
           </ul>
         </div>
         <div class="prose-col fix">
-          <h4>下把怎么改 (具体可执行动作)</h4>
+          <h4>${pWon ? "🚀 乘胜追击进阶建议" : "下把怎么改 (具体可执行动作)"}</h4>
           <ul>
             ${fixList.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}
           </ul>
@@ -3541,8 +3809,10 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
       </div>
 
       <div class="forensic-trash-footer">
-        <span><strong>专属算账金句：</strong>${escapeHtml(p.trash_talk || headlineText)}</span>
-        <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyText)}">复制这段喷他</button>
+        <span><strong>${pWon ? "🏆 专属庆功贺词：" : "专属算账金句："}</strong>${escapeHtml(footerQuote)}</span>
+        <button type="button" class="button secondary" data-copy-label="${pWon ? "个人庆功词" : "个人算账报告"}" data-copy-quote="${escapeHtml(copyText)}">${
+          pWon ? "复制庆功词" : "复制这段喷他"
+        }</button>
       </div>
     </article>
   `;
@@ -3737,8 +4007,21 @@ function renderSquadLedgerSection(squadLedger) {
           m.won ? "胜" : "负"
         }]</span>
         <span>#${m.match_id} (${escapeHtml(m.score)})</span>
-        <span>MVP:${escapeHtml(m.mvp_hero)}</span>
-        <span style="color:var(--red-light);">锅:${escapeHtml(m.culprit_hero)}(${m.culprit_blame_pct}%)</span>
+        ${
+          m.won
+            ? `<span style="color:var(--gold-light);">🏆首功:${escapeHtml(m.mvp_hero)}(${
+                m.mvp_contrib_pct ?? 25
+              }%)</span>${
+                m.runner_up_hero
+                  ? `<span style="color:var(--green-light);">⚔️二功:${escapeHtml(m.runner_up_hero)}(${
+                      m.runner_up_contrib_pct ?? 22
+                    }%)</span>`
+                  : ""
+              }`
+            : `<span>MVP:${escapeHtml(m.mvp_hero)}</span><span style="color:var(--red-light);">锅:${escapeHtml(
+                m.culprit_hero
+              )}(${m.culprit_blame_pct}%)</span>`
+        }
       </button>
     `
     )
@@ -3747,16 +4030,16 @@ function renderSquadLedgerSection(squadLedger) {
   container.innerHTML = `
     <div class="squad-summary-banner">
       <div class="squad-summary-text">
-        <strong>📂 五黑车队跨局惯犯总账：</strong>
-        历史头号背锅王 <b style="color:var(--red-light);">${escapeHtml(
-          topCulpritMember?.personaname || "—"
-        )}</b>（场均分锅 ${topCulpritMember?.avg_blame_pct || 0}% · 拿过 ${
-          topCulpritMember?.culprit_count || 0
-        } 次头号战犯） ｜ 历史头号真大腿 <b style="color:var(--green-light);">${escapeHtml(
+        <strong>📂 五黑车队跨局荣耀与算账总账：</strong>
+        历史头号真大腿 <b style="color:var(--green-light);">${escapeHtml(
           topCarryMember?.personaname || "—"
         )}</b>（场均评分 ${topCarryMember?.avg_rating || 0} · 拿过 ${
           topCarryMember?.mvp_count || 0
-        } 次全场 MVP）
+        } 次全场 MVP） ｜ 败局背锅王 <b style="color:var(--red-light);">${escapeHtml(
+          topCulpritMember?.personaname || "—"
+        )}</b>（败局头号战犯 ${
+          topCulpritMember?.culprit_count || 0
+        } 次 · 场均分锅 ${topCulpritMember?.avg_blame_pct || 0}%）
       </div>
       <div class="squad-summary-pills">
         <span class="squad-pill">近期组排开黑：${partySum.party_games || 0}局 (${partySum.party_win_rate || 0}%胜率)</span>
@@ -3767,8 +4050,8 @@ function renderSquadLedgerSection(squadLedger) {
     <div class="squad-grid-2col">
       <article class="squad-card">
         <div class="squad-card-head">
-          <h3>⚖️ 五黑车队成员跨局分锅与评分总榜</h3>
-          <span>按场均分锅占比排序 · 谁是长期惯犯一目了然</span>
+          <h3>⚖️ 五黑车队成员跨局贡献与分锅总榜</h3>
+          <span>胜局记首功 · 败局抓战犯 · 谁是大腿谁是惯犯一目了然</span>
         </div>
         <div class="squad-table-wrap">
           <table class="squad-rank-table">
@@ -3777,9 +4060,9 @@ function renderSquadLedgerSection(squadLedger) {
                 <th>队员昵称</th>
                 <th>历史定位</th>
                 <th>出勤/胜率</th>
-                <th>场均分锅</th>
+                <th>场均贡献/分锅</th>
                 <th>场均评分</th>
-                <th>MVP / 锅王</th>
+                <th>MVP / 败局锅王</th>
                 <th>场均KDA / 读秒</th>
                 <th>近期代表英雄</th>
               </tr>
@@ -3796,9 +4079,9 @@ function renderSquadLedgerSection(squadLedger) {
                         h.hero_img
                           ? `<img src="${escapeHtml(h.hero_img)}" width="26" height="15" alt="${escapeHtml(
                               h.hero_short_zh
-                            )}" title="#${h.match_id} ${escapeHtml(h.hero_short_zh)} (${h.kda} · 锅${
-                              h.blame_pct
-                            }%)" loading="lazy" />`
+                            )}" title="#${h.match_id} ${escapeHtml(h.hero_short_zh)} (${h.kda} · ${
+                              h.won ? `胜局贡献${h.contrib_pct ?? 20}%` : `败局锅${h.blame_pct}%`
+                            })" loading="lazy" />`
                           : ""
                     )
                     .join("");
@@ -3813,7 +4096,7 @@ function renderSquadLedgerSection(squadLedger) {
                       <td>${m.games}局 (${m.win_rate}%)</td>
                       <td style="color:${
                         m.avg_blame_pct >= 22 ? "var(--red-light)" : "var(--gold-light)"
-                      };font-weight:700;">${m.avg_blame_pct}%</td>
+                      };font-weight:700;">贡献${m.avg_contrib_pct ?? 20}% / 锅${m.avg_blame_pct}%</td>
                       <td>${m.avg_rating}</td>
                       <td>${m.mvp_count}次 / <b style="color:${
                         m.culprit_count > 0 ? "var(--red-light)" : "inherit"
@@ -4018,7 +4301,7 @@ function renderFocusFireMatrix(report) {
 }
 
 /**
- * 14. Shareable Verdict Poster & Chat Text Generator (群聊处刑判决书 & 长图导出)
+ * 14. Shareable Verdict Poster & Chat Text Generator (群聊处刑判决书 / 凯旋庆功表彰书 & 长图导出)
  */
 function openSharePosterDialog(report) {
   const dlg = document.getElementById("share-poster-dialog");
@@ -4032,10 +4315,14 @@ function openSharePosterDialog(report) {
   const sortedBlame = [...own].sort(
     (a, b) => (b.blame_share_pct || 0) - (a.blame_share_pct || 0)
   );
+  const sortedContrib = [...own].sort(
+    (a, b) =>
+      (b.contrib_share_pct ?? b.rating_score ?? 0) -
+      (a.contrib_share_pct ?? a.rating_score ?? 0)
+  );
   const topCulprit = sortedBlame[0];
-  const mvpPlayer = [...own].sort(
-    (a, b) => (b.rating_score || 0) - (a.rating_score || 0)
-  )[0];
+  const mvpPlayer = sortedContrib[0];
+  const runnerUpPlayer = sortedContrib[1] || sortedContrib[0];
 
   const df = report.deep_forensics || {};
   const rawExec = df.hero_execution_by_side?.[side];
@@ -4055,48 +4342,101 @@ function openSharePosterDialog(report) {
   const microSmoke = df.stacking_and_smoke_by_side?.[side]?.smoke_verdict || "";
   const microTp = df.tp_rotation_by_side?.[side]?.tp_verdict || "";
 
-  const lines = [
-    `⚖️【刀塔五黑算账台 · 赛后处刑判决书】`,
-    `📍 比赛编号：#${report.match_id} (${report.duration_str} · ${sideZh}${won ? "获胜" : "落败"} ${report.radiant_score}:${report.dire_score})`,
-    `📣 终局定性：${grok?.title || report.match_narrative?.headline || "正面团战与节奏复盘"}`,
-    `────────────────────`,
-    `🚨 头号背锅侠：${topCulprit?.personaname || ""} (${topCulprit?.hero_short_zh || ""}) — 分锅占比 ${topCulprit?.blame_share_pct || 0}%`,
-    `👑 本局真大腿：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 综合评分 ${mvpPlayer?.rating_score || 0}`,
-    `────────────────────`,
-    `📊 五黑全员算账明细 (按背锅排序)：`,
-    ...sortedBlame.map((p, i) => {
-      const b0 = (p.hero_execution_audit?.headline_badges || [])[0];
-      const b0Txt = typeof b0 === "string" ? b0 : b0?.text || "";
-      return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s | 锅 ${p.blame_share_pct}%${
-        b0Txt ? ` | 🔬 ${b0Txt}` : ""
-      }`;
-    }),
-    ...(microExec || microVis || microTp
-      ? [
-          `────────────────────`,
-          `🔬 录像级战术显微镜实锤：`,
-          ...(microExec ? [`• 【大招与绝活】${microExec}`] : []),
-          ...(microVis ? [`• 【辅助眼位】${microVis}`] : []),
-          ...(microStack ? [`• 【堆野屯矿】${microStack}`] : []),
-          ...(microSmoke ? [`• 【开雾节奏】${microSmoke}`] : []),
-          ...(microTp ? [`• 【TP支援】${microTp}`] : []),
-        ]
-      : []),
-    `────────────────────`,
-    `💡 下把铁律：${
-      grok?.team_practice ||
-      "盯紧 BKB 第一波强势期抱团推外塔，严禁带线过河道无视野暴毙！"
-    }`,
-  ];
+  const lines = won
+    ? [
+        `🏆【刀塔五黑庆功宴 · 赛后封神表彰书】`,
+        `📍 比赛编号：#${report.match_id} (${report.duration_str} · ${sideZh}凯旋获胜 ${report.radiant_score}:${report.dire_score})`,
+        `📣 凯旋定性：${grok?.title || report.match_narrative?.headline || "全员发力碾压获胜"}`,
+        `────────────────────`,
+        `👑 头号首功 (MVP)：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${Number(
+          mvpPlayer?.contrib_share_pct ?? 25
+        ).toFixed(1)}% · 综合评分 ${mvpPlayer?.rating_score || 0}`,
+        `⚔️ 破阵二当家：${runnerUpPlayer?.personaname || ""} (${runnerUpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${Number(
+          runnerUpPlayer?.contrib_share_pct ?? 22
+        ).toFixed(1)}% · 综合评分 ${runnerUpPlayer?.rating_score || 0}`,
+        `────────────────────`,
+        `📊 五黑全员胜局贡献榜 (100% 胜局贡献排位)：`,
+        ...sortedContrib.map((p, i) => {
+          const b0 = (p.hero_execution_audit?.headline_badges || [])[0];
+          const b0Txt = typeof b0 === "string" ? b0 : b0?.text || "";
+          const cPct = Number(p.contrib_share_pct ?? 20).toFixed(1);
+          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | 胜局贡献 ${cPct}% (${
+            p.contrib_tier || p.rating_tier || "功臣"
+          }) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}%${
+            b0Txt ? ` | 🔬 ${b0Txt}` : ""
+          }`;
+        }),
+        ...(microExec || microVis || microTp
+          ? [
+              `────────────────────`,
+              `🔬 录像级高光操作回放：`,
+              ...(microExec ? [`• 【大招与绝活】${microExec}`] : []),
+              ...(microVis ? [`• 【辅助眼位】${microVis}`] : []),
+              ...(microStack ? [`• 【堆野屯矿】${microStack}`] : []),
+              ...(microSmoke ? [`• 【开雾节奏】${microSmoke}`] : []),
+              ...(microTp ? [`• 【TP支援】${microTp}`] : []),
+            ]
+          : []),
+        `────────────────────`,
+        `🥂 乘胜追击备忘：${
+          grok?.team_practice ||
+          "保持当前中期抱团开雾压制与视野布控节奏，全员手感火热继续上分！"
+        }`,
+      ]
+    : [
+        `⚖️【刀塔五黑算账台 · 赛后处刑判决书】`,
+        `📍 比赛编号：#${report.match_id} (${report.duration_str} · ${sideZh}落败 ${report.radiant_score}:${report.dire_score})`,
+        `📣 终局定性：${grok?.title || report.match_narrative?.headline || "正面团战与节奏复盘"}`,
+        `────────────────────`,
+        `🚨 头号背锅侠：${topCulprit?.personaname || ""} (${topCulprit?.hero_short_zh || ""}) — 分锅占比 ${topCulprit?.blame_share_pct || 0}%`,
+        `👑 败方尽力王：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 综合评分 ${mvpPlayer?.rating_score || 0}`,
+        `────────────────────`,
+        `📊 五黑全员算账明细 (按背锅排序)：`,
+        ...sortedBlame.map((p, i) => {
+          const b0 = (p.hero_execution_audit?.headline_badges || [])[0];
+          const b0Txt = typeof b0 === "string" ? b0 : b0?.text || "";
+          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s | 锅 ${p.blame_share_pct}%${
+            b0Txt ? ` | 🔬 ${b0Txt}` : ""
+          }`;
+        }),
+        ...(microExec || microVis || microTp
+          ? [
+              `────────────────────`,
+              `🔬 录像级战术显微镜实锤：`,
+              ...(microExec ? [`• 【大招与绝活】${microExec}`] : []),
+              ...(microVis ? [`• 【辅助眼位】${microVis}`] : []),
+              ...(microStack ? [`• 【堆野屯矿】${microStack}`] : []),
+              ...(microSmoke ? [`• 【开雾节奏】${microSmoke}`] : []),
+              ...(microTp ? [`• 【TP支援】${microTp}`] : []),
+            ]
+          : []),
+        `────────────────────`,
+        `💡 下把铁律：${
+          grok?.team_practice ||
+          "盯紧 BKB 第一波强势期抱团推外塔，严禁带线过河道无视野暴毙！"
+        }`,
+      ];
 
   const textarea = document.getElementById("share-verdict-textarea");
   if (textarea) textarea.value = lines.join("\n");
 
-  drawVerdictPosterCanvas(report, { sideZh, won, sortedBlame, topCulprit, mvpPlayer, grok });
+  drawVerdictPosterCanvas(report, {
+    sideZh,
+    won,
+    sortedBlame,
+    sortedContrib,
+    topCulprit,
+    mvpPlayer,
+    runnerUpPlayer,
+    grok,
+  });
   dlg.showModal();
 }
 
-function drawVerdictPosterCanvas(report, { sideZh, won, sortedBlame, topCulprit, mvpPlayer, grok }) {
+function drawVerdictPosterCanvas(
+  report,
+  { sideZh, won, sortedBlame, sortedContrib, topCulprit, mvpPlayer, runnerUpPlayer, grok }
+) {
   const canvas = document.getElementById("share-poster-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
@@ -4106,7 +4446,7 @@ function drawVerdictPosterCanvas(report, { sideZh, won, sortedBlame, topCulprit,
   const H = canvas.height;
 
   const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, "#151713");
+  grad.addColorStop(0, won ? "#161d15" : "#151713");
   grad.addColorStop(1, "#0d0e0c");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
@@ -4117,16 +4457,24 @@ function drawVerdictPosterCanvas(report, { sideZh, won, sortedBlame, topCulprit,
 
   ctx.fillStyle = "#c6a468";
   ctx.font = "bold 16px sans-serif";
-  ctx.fillText("DOTA 2 五黑算账台 · 赛后处刑判决书", 42, 56);
+  ctx.fillText(
+    won ? "DOTA 2 五黑庆功宴 · 赛后封神表彰书" : "DOTA 2 五黑算账台 · 赛后处刑判决书",
+    42,
+    56
+  );
 
   ctx.fillStyle = won ? "#7cb87a" : "#e06c5a";
   ctx.font = "bold 26px sans-serif";
-  const headline = `[${sideZh}${won ? "获胜" : "落败"}] #${report.match_id} (${report.radiant_score} : ${report.dire_score} · ${report.duration_str})`;
+  const headline = `[${sideZh}${won ? "凯旋获胜" : "遗憾落败"}] #${report.match_id} (${report.radiant_score} : ${report.dire_score} · ${report.duration_str})`;
   ctx.fillText(headline, 42, 92);
 
   ctx.fillStyle = "#d9d4c7";
   ctx.font = "14px sans-serif";
-  const subTitle = (grok?.title || report.match_narrative?.headline || "录像级硬核责任划分报告").slice(0, 52);
+  const subTitle = (
+    grok?.title ||
+    report.match_narrative?.headline ||
+    (won ? "录像级胜局功勋与高光贡献榜" : "录像级硬核责任划分报告")
+  ).slice(0, 52);
   ctx.fillText(subTitle, 42, 120);
 
   ctx.strokeStyle = "#34372d";
@@ -4136,47 +4484,86 @@ function drawVerdictPosterCanvas(report, { sideZh, won, sortedBlame, topCulprit,
   ctx.lineTo(W - 42, 138);
   ctx.stroke();
 
-  ctx.fillStyle = "#261614";
-  ctx.fillRect(42, 152, 410, 74);
-  ctx.strokeStyle = "#b84a39";
-  ctx.strokeRect(42, 152, 410, 74);
+  if (won) {
+    ctx.fillStyle = "#162419";
+    ctx.fillRect(42, 152, 410, 74);
+    ctx.strokeStyle = "#569c5d";
+    ctx.strokeRect(42, 152, 410, 74);
 
-  ctx.fillStyle = "#e5897a";
-  ctx.font = "bold 13px sans-serif";
-  ctx.fillText("🚨 本局头号背锅侠 (TOP CULPRIT)", 56, 176);
-  ctx.fillStyle = "#f2efe9";
-  ctx.font = "bold 19px sans-serif";
-  ctx.fillText(
-    `${topCulprit?.personaname || ""} · ${topCulprit?.hero_short_zh || ""} (背锅 ${topCulprit?.blame_share_pct || 0}%)`,
-    56,
-    206
-  );
+    ctx.fillStyle = "#8fd196";
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText("👑 本局头号首功 (MATCH MVP)", 56, 176);
+    ctx.fillStyle = "#f2efe9";
+    ctx.font = "bold 19px sans-serif";
+    ctx.fillText(
+      `${mvpPlayer?.personaname || ""} · ${mvpPlayer?.hero_short_zh || ""} (贡献 ${Number(
+        mvpPlayer?.contrib_share_pct ?? 25
+      ).toFixed(1)}%)`,
+      56,
+      206
+    );
 
-  ctx.fillStyle = "#162218";
-  ctx.fillRect(468, 152, 410, 74);
-  ctx.strokeStyle = "#4d8a54";
-  ctx.strokeRect(468, 152, 410, 74);
+    ctx.fillStyle = "#221e14";
+    ctx.fillRect(468, 152, 410, 74);
+    ctx.strokeStyle = "#c79b3b";
+    ctx.strokeRect(468, 152, 410, 74);
 
-  ctx.fillStyle = "#8fd196";
-  ctx.font = "bold 13px sans-serif";
-  ctx.fillText("👑 本局真大腿 (MATCH MVP)", 482, 176);
-  ctx.fillStyle = "#f2efe9";
-  ctx.font = "bold 19px sans-serif";
-  ctx.fillText(
-    `${mvpPlayer?.personaname || ""} · ${mvpPlayer?.hero_short_zh || ""} (评分 ${mvpPlayer?.rating_score || 0})`,
-    482,
-    206
-  );
+    ctx.fillStyle = "#f0c76e";
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText("⚔️ 本局破阵二当家 (RUNNER-UP)", 482, 176);
+    ctx.fillStyle = "#f2efe9";
+    ctx.font = "bold 19px sans-serif";
+    ctx.fillText(
+      `${runnerUpPlayer?.personaname || ""} · ${runnerUpPlayer?.hero_short_zh || ""} (贡献 ${Number(
+        runnerUpPlayer?.contrib_share_pct ?? 22
+      ).toFixed(1)}%)`,
+      482,
+      206
+    );
+  } else {
+    ctx.fillStyle = "#261614";
+    ctx.fillRect(42, 152, 410, 74);
+    ctx.strokeStyle = "#b84a39";
+    ctx.strokeRect(42, 152, 410, 74);
+
+    ctx.fillStyle = "#e5897a";
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText("🚨 本局头号背锅侠 (TOP CULPRIT)", 56, 176);
+    ctx.fillStyle = "#f2efe9";
+    ctx.font = "bold 19px sans-serif";
+    ctx.fillText(
+      `${topCulprit?.personaname || ""} · ${topCulprit?.hero_short_zh || ""} (背锅 ${topCulprit?.blame_share_pct || 0}%)`,
+      56,
+      206
+    );
+
+    ctx.fillStyle = "#162218";
+    ctx.fillRect(468, 152, 410, 74);
+    ctx.strokeStyle = "#4d8a54";
+    ctx.strokeRect(468, 152, 410, 74);
+
+    ctx.fillStyle = "#8fd196";
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText("👑 败方尽力王 (MATCH MVP)", 482, 176);
+    ctx.fillStyle = "#f2efe9";
+    ctx.font = "bold 19px sans-serif";
+    ctx.fillText(
+      `${mvpPlayer?.personaname || ""} · ${mvpPlayer?.hero_short_zh || ""} (评分 ${mvpPlayer?.rating_score || 0})`,
+      482,
+      206
+    );
+  }
 
   let y = 252;
-  sortedBlame.forEach((p, idx) => {
-    const isCulprit = idx === 0;
-    ctx.fillStyle = isCulprit ? "#201715" : "#181a16";
+  const rowsList = won ? sortedContrib || sortedBlame : sortedBlame;
+  rowsList.forEach((p, idx) => {
+    const isFirst = idx === 0;
+    ctx.fillStyle = isFirst ? (won ? "#182419" : "#201715") : "#181a16";
     ctx.fillRect(42, y, W - 84, 58);
-    ctx.strokeStyle = isCulprit ? "#8c3b2e" : "#2e3028";
+    ctx.strokeStyle = isFirst ? (won ? "#4d8a54" : "#8c3b2e") : "#2e3028";
     ctx.strokeRect(42, y, W - 84, 58);
 
-    ctx.fillStyle = isCulprit ? "#e5897a" : "#c6a468";
+    ctx.fillStyle = isFirst ? (won ? "#8fd196" : "#e5897a") : "#c6a468";
     ctx.font = "bold 16px sans-serif";
     ctx.fillText(`#${idx + 1} [${p.pos_label}] ${p.hero_short_zh} · ${p.personaname}`, 56, y + 24);
 
@@ -4185,15 +4572,21 @@ function drawVerdictPosterCanvas(report, { sideZh, won, sortedBlame, topCulprit,
     ctx.fillText(
       `KDA ${p.kda} (${p.kill_participation_pct}%) ｜ GPM ${p.gpm} ｜ 英雄伤害 ${fmtNum(
         p.hero_damage
-      )} (${p.hero_damage_share_pct}%) ｜ 泉水读秒 ${p.dead_seconds || 0}秒`,
+      )} (${p.hero_damage_share_pct}%) ｜ 推塔 ${fmtNum(p.tower_damage)}`,
       56,
       y + 46
     );
 
-    ctx.fillStyle = isCulprit ? "#ff8a75" : "#dfbe82";
+    ctx.fillStyle = isFirst ? (won ? "#8fd196" : "#ff8a75") : "#dfbe82";
     ctx.font = "bold 16px sans-serif";
     ctx.textAlign = "right";
-    ctx.fillText(`分锅 ${p.blame_share_pct}% · 评分 ${p.rating_score}`, W - 58, y + 34);
+    ctx.fillText(
+      won
+        ? `胜局贡献 ${Number(p.contrib_share_pct ?? 20).toFixed(1)}% · 评分 ${p.rating_score}`
+        : `分锅 ${p.blame_share_pct}% · 评分 ${p.rating_score}`,
+      W - 58,
+      y + 34
+    );
     ctx.textAlign = "left";
 
     y += 68;
@@ -4203,8 +4596,10 @@ function drawVerdictPosterCanvas(report, { sideZh, won, sortedBlame, topCulprit,
   ctx.font = "12px sans-serif";
   const tip =
     grok?.team_practice ||
-    "前中期围绕核心第一件 BKB/跳刀出炉打主动开雾，拒绝无视野单带掉点。";
-  ctx.fillText(`下把改进铁律：${tip.slice(0, 62)}`, 42, H - 32);
+    (won
+      ? "继续保持核心强势期抱团开雾压制与进攻眼位铺设，乘胜追击！"
+      : "前中期围绕核心第一件 BKB/跳刀出炉打主动开雾，拒绝无视野单带掉点。");
+  ctx.fillText(`${won ? "乘胜追击备忘" : "下把改进铁律"}：${tip.slice(0, 62)}`, 42, H - 32);
 }
 
 /**

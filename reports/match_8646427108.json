@@ -2990,6 +2990,7 @@
   "grok_coaching": null,
   "mvp": {
     "mvp_player": {
+      "player_slot": 131,
       "side": "夜魇",
       "pos": 3,
       "pos_label": "3号位 · 劣势路核心",
@@ -3001,42 +3002,70 @@
       "friend_tag": null,
       "kda": "12/3/21",
       "rating_score": 8.3,
-      "rating_tier": "S 核心支柱",
+      "rating_tier": "S 凯旋真核",
       "mvp_score": 83.5,
       "blame_share_pct": 7.7,
+      "contrib_share_pct": 35.7,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "gpm": 1607,
       "xpm": 2809,
       "hero_damage": 65436,
       "hero_damage_share_pct": 34.9,
       "tower_damage": 2164,
       "kill_participation_pct": 75.0,
-      "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！"
+      "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
     },
     "runner_up_player": {
+      "player_slot": 130,
       "side": "夜魇",
       "pos": 1,
+      "pos_label": "1号位 · 优势路核心",
       "hero_name": "狙击手(火枪/Sniper)",
       "hero_short_zh": "狙击手",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
       "personaname": "匿名玩家",
+      "friend_tag": null,
       "kda": "8/5/17",
+      "gpm": 1497,
+      "xpm": 1835,
+      "hero_damage": 39967,
+      "hero_damage_share_pct": 21.3,
+      "tower_damage": 15219,
+      "kill_participation_pct": 56.8,
       "rating_score": 8.3,
-      "blame_share_pct": 8.1
+      "rating_tier": "S 凯旋真核",
+      "blame_share_pct": 8.1,
+      "contrib_share_pct": 32.4,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
+      "strengths": [
+        "推进终结能力极强：单人打出 15,219 建筑伤害（包揽全队 71% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。"
+      ],
+      "praise_talk": "@匿名玩家 推塔终结机器！狙击手 单人拆出 15,219 建筑伤害（占全队 71%），赢团推塔一气呵成！"
     },
     "svp_player": {
+      "player_slot": 4,
       "side": "天辉",
       "pos": 1,
+      "pos_label": "1号位 · 优势路核心",
       "hero_name": "主宰(剑圣/Jugg)",
       "hero_short_zh": "主宰",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
       "personaname": "匿名玩家",
       "kda": "12/4/10",
+      "gpm": 1398,
+      "hero_damage": 47673,
+      "tower_damage": 5165,
+      "kill_participation_pct": 71.0,
       "rating_score": 7.5,
-      "blame_share_pct": 9.0
+      "rating_tier": "B 随波逐流",
+      "blame_share_pct": 9.0,
+      "contrib_share_pct": 39.8
     },
     "culprit_player": {
+      "player_slot": 132,
       "side": "夜魇",
       "pos": 2,
       "pos_label": "2号位 · 中路核心",
@@ -3048,15 +3077,19 @@
       "friend_tag": null,
       "kda": "2/9/18",
       "rating_score": 4.3,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "B 躺赢福将",
       "blame_share_pct": 40.9,
+      "contrib_share_pct": 5.1,
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "dead_seconds": 0,
       "death_gold_lost": 0,
       "main_crime": "典型高占经低产出：拿了全队 14.5% 的总经济（30,488金），全场却只打出 18,562 伤害（仅占全队 9.9%），每1块钱经济只换来 0.61 点伤害。",
       "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-      "verdict": "车队头号大锅认证（分锅占比 40.9%）：夜魇 2号位 昆卡（匿名玩家，评分 4.3）——虽然比赛最终翻盘赢下，但中期险些葬送好局的头号战犯就是他：典型高占经低产出：拿了全队 14.5% 的总经济（30,488金），全场却只打出 18,562 伤害（仅占全队 9.9%），每1块钱经济只换来 0.61 点伤害。"
+      "praise_talk": "@匿名玩家 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！",
+      "verdict": "凯旋庆功总结：夜魇头号首功 帕吉（匿名玩家，贡献 35.7%）与二当家 狙击手（匿名玩家，贡献 32.4%）携手带飞！ 本局惊险躺赢锦鲤：2号位 昆卡（匿名玩家，贡献 5.1%）。"
     },
     "second_culprit_player": {
+      "player_slot": 128,
       "side": "夜魇",
       "pos": 4,
       "hero_name": "司夜刺客(小强/NA)",
@@ -3067,6 +3100,7 @@
       "kda": "7/7/10",
       "rating_score": 5.0,
       "blame_share_pct": 21.7,
+      "contrib_share_pct": 8.9,
       "main_crime": "整体发挥稳健：全场仅阵亡 7 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
     },
     "focus_team_blame_ranking": [
@@ -3079,12 +3113,15 @@
         "personaname": "匿名玩家",
         "friend_tag": null,
         "blame_share_pct": 40.9,
+        "contrib_share_pct": 5.1,
+        "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
         "rating_score": 4.3,
-        "rating_tier": "C 头号战犯",
+        "rating_tier": "B 躺赢福将",
         "kda": "2/9/18",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@匿名玩家 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！"
       },
       {
         "pos": 4,
@@ -3095,12 +3132,15 @@
         "personaname": "匿名玩家",
         "friend_tag": null,
         "blame_share_pct": 21.7,
+        "contrib_share_pct": 8.9,
+        "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
         "rating_score": 5.0,
-        "rating_tier": "C 头号战犯",
+        "rating_tier": "B 躺赢福将",
         "kda": "7/7/10",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@匿名玩家 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！"
+        "trash_talk": "@匿名玩家 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！",
+        "praise_talk": "@匿名玩家 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！"
       },
       {
         "pos": 5,
@@ -3111,12 +3151,15 @@
         "personaname": "匿名玩家",
         "friend_tag": null,
         "blame_share_pct": 21.6,
+        "contrib_share_pct": 17.9,
+        "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
         "rating_score": 6.1,
-        "rating_tier": "C 头号战犯",
+        "rating_tier": "B 躺赢福将",
         "kda": "15/8/14",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@匿名玩家 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@匿名玩家 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@匿名玩家 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！"
       },
       {
         "pos": 1,
@@ -3127,12 +3170,15 @@
         "personaname": "匿名玩家",
         "friend_tag": null,
         "blame_share_pct": 8.1,
+        "contrib_share_pct": 32.4,
+        "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
         "rating_score": 8.3,
-        "rating_tier": "S 核心支柱",
+        "rating_tier": "S 凯旋真核",
         "kda": "8/5/17",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@匿名玩家 这把 8/5/17 标准打卡下班，背锅占比 19 点，赢了跟着笑，输了怪队友！"
+        "trash_talk": "@匿名玩家 这把 8/5/17 标准打卡下班，背锅占比 19 点，赢了跟着笑，输了怪队友！",
+        "praise_talk": "@匿名玩家 推塔终结机器！狙击手 单人拆出 15,219 建筑伤害（占全队 71%），赢团推塔一气呵成！"
       },
       {
         "pos": 3,
@@ -3143,21 +3189,116 @@
         "personaname": "匿名玩家",
         "friend_tag": null,
         "blame_share_pct": 7.7,
+        "contrib_share_pct": 35.7,
+        "contrib_tier": "👑 头号首功 · 擎天真神",
         "rating_score": 8.3,
-        "rating_tier": "S 核心支柱",
+        "rating_tier": "S 凯旋真核",
         "kda": "12/3/21",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！"
+        "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
+        "praise_talk": "@匿名玩家 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
+      }
+    ],
+    "focus_team_contrib_ranking": [
+      {
+        "pos": 3,
+        "hero_name": "帕吉(屠夫/Pudge)",
+        "hero_short_zh": "帕吉",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "contrib_share_pct": 35.7,
+        "contrib_tier": "👑 头号首功 · 擎天真神",
+        "blame_share_pct": 7.7,
+        "rating_score": 8.3,
+        "rating_tier": "S 凯旋真核",
+        "kda": "12/3/21",
+        "hero_damage": 65436,
+        "tower_damage": 2164,
+        "praise_talk": "@匿名玩家 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
+      },
+      {
+        "pos": 1,
+        "hero_name": "狙击手(火枪/Sniper)",
+        "hero_short_zh": "狙击手",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "contrib_share_pct": 32.4,
+        "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
+        "blame_share_pct": 8.1,
+        "rating_score": 8.3,
+        "rating_tier": "S 凯旋真核",
+        "kda": "8/5/17",
+        "hero_damage": 39967,
+        "tower_damage": 15219,
+        "praise_talk": "@匿名玩家 推塔终结机器！狙击手 单人拆出 15,219 建筑伤害（占全队 71%），赢团推塔一气呵成！"
+      },
+      {
+        "pos": 5,
+        "hero_name": "工程师(炸弹人/Techies)",
+        "hero_short_zh": "工程师",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "contrib_share_pct": 17.9,
+        "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
+        "blame_share_pct": 21.6,
+        "rating_score": 6.1,
+        "rating_tier": "B 躺赢福将",
+        "kda": "15/8/14",
+        "hero_damage": 42442,
+        "tower_damage": 2490,
+        "praise_talk": "@匿名玩家 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！"
+      },
+      {
+        "pos": 4,
+        "hero_name": "司夜刺客(小强/NA)",
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "contrib_share_pct": 8.9,
+        "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
+        "blame_share_pct": 21.7,
+        "rating_score": 5.0,
+        "rating_tier": "B 躺赢福将",
+        "kda": "7/7/10",
+        "hero_damage": 21298,
+        "tower_damage": 348,
+        "praise_talk": "@匿名玩家 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！"
+      },
+      {
+        "pos": 2,
+        "hero_name": "昆卡(船长/Kunkka)",
+        "hero_short_zh": "昆卡",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "contrib_share_pct": 5.1,
+        "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
+        "blame_share_pct": 40.9,
+        "rating_score": 4.3,
+        "rating_tier": "B 躺赢福将",
+        "kda": "2/9/18",
+        "hero_damage": 18562,
+        "tower_damage": 1098,
+        "praise_talk": "@匿名玩家 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！"
       }
     ],
     "rationale_list": [
-      "全场头号大腿 (8.3分 · S 核心支柱)：夜魇 3号位 帕吉（匿名玩家）交出 12/3/21（参战率 75.0%），本局个人背锅占比仅 7.7%。",
+      "全场头号首功 (8.3分 · 胜局贡献 35.7%)：夜魇 3号位 帕吉（匿名玩家）交出 12/3/21（参战率 75.0%）。",
       "核心统治力数据：单人打出 65,436 英雄伤害（占全队 34.9%）+ 2,164 建筑伤害，总经济 58,282（GPM 1607 / XPM 2809）。",
       "制胜关键：极高生存容错：36 分钟高强度对抗仅阵亡 3 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。",
-      "胜方二当家：1号位 狙击手（匿名玩家，评分 8.3）贡献 8/5/17（参战率 56.8%，伤害 39,967）。",
+      "胜方二当家（胜局贡献 32.4%）：1号位 狙击手（匿名玩家，评分 8.3）贡献 8/5/17（参战率 56.8%，伤害 39,967）。",
       "败方孤胆院长 (SVP)：天辉 1号位 主宰（匿名玩家，评分 7.5）交出 12/4/10（伤害 47,673），一神带四坑实在带不动。",
-      "车队头号大锅认证（分锅占比 40.9%）：夜魇 2号位 昆卡（匿名玩家，评分 4.3）——虽然比赛最终翻盘赢下，但中期险些葬送好局的头号战犯就是他：典型高占经低产出：拿了全队 14.5% 的总经济（30,488金），全场却只打出 18,562 伤害（仅占全队 9.9%），每1块钱经济只换来 0.61 点伤害。"
+      "凯旋庆功总结：夜魇头号首功 帕吉（匿名玩家，贡献 35.7%）与二当家 狙击手（匿名玩家，贡献 32.4%）携手带飞！ 本局惊险躺赢锦鲤：2号位 昆卡（匿名玩家，贡献 5.1%）。"
     ]
   },
   "match_narrative": {
@@ -3385,9 +3526,10 @@
         "survival": 72
       },
       "rating_score": 7.5,
-      "rating_tier": "B 隐身混子",
+      "rating_tier": "B 随波逐流",
       "mvp_score": 74.5,
       "raw_blame_points": 27.5,
+      "raw_contrib_points": 216.3,
       "strengths": [
         "推进终结能力极强：单人打出 5,165 建筑伤害（包揽全队 50% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
         "极高生存容错：36 分钟高强度对抗仅阵亡 4 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
@@ -3399,7 +3541,11 @@
         "保持当前 主宰 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@匿名玩家 这把 12/4/10 标准打卡下班，背锅占比 28 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 推塔终结机器！主宰 单人拆出 5,165 建筑伤害（占全队 50%），赢团推塔一气呵成！",
       "blame_share_pct": 9.0,
+      "contrib_share_pct": 39.8,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -3681,9 +3827,10 @@
         "survival": 15
       },
       "rating_score": 5.4,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 53.8,
       "raw_blame_points": 86.7,
+      "raw_contrib_points": 72.3,
       "strengths": [
         "输出转化率极高：吃下全队 23.9% 经济（41,392金），狂轰 68,023 英雄伤害（占全队 30.4%，超越全网 85% 同英雄）。"
       ],
@@ -3694,7 +3841,11 @@
         "核心位阵亡 13 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@Tulok 一局死 13 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Tulok 这把 幽鬼 火力全开狂轰 68,023 伤害（包揽全队 30% 输出）+ 2,019 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
       "blame_share_pct": 28.2,
+      "contrib_share_pct": 13.3,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -3955,9 +4106,10 @@
         "survival": 43
       },
       "rating_score": 6.3,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 63.5,
       "raw_blame_points": 60.5,
+      "raw_contrib_points": 107.2,
       "strengths": [
         "基础数据合格：交出 7/10/19（参战率 83.9%，英雄伤害 51,597），完成了该位置基础任务。"
       ],
@@ -3968,7 +4120,11 @@
         "核心位阵亡 10 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@匿名玩家 一局死 10 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@匿名玩家 虽然这把 宙斯 阵亡 10 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
       "blame_share_pct": 19.7,
+      "contrib_share_pct": 19.7,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -4219,9 +4375,10 @@
         "survival": 64
       },
       "rating_score": 5.7,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 57.4,
       "raw_blame_points": 44.6,
+      "raw_contrib_points": 103.0,
       "strengths": [
         "基础数据合格：交出 2/7/18（参战率 64.5%，英雄伤害 32,303），完成了该位置基础任务。"
       ],
@@ -4232,7 +4389,11 @@
         "保持当前 杰奇洛 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@匿名玩家 这把 2/7/18 标准打卡下班，背锅占比 45 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 稳健上分拼图！杰奇洛 交出 2/7/18（参战率 64% · 伤害 32,303），关键团战从不掉链子！",
       "blame_share_pct": 14.5,
+      "contrib_share_pct": 18.9,
+      "contrib_rank": 3,
+      "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -4491,9 +4652,10 @@
         "survival": 42
       },
       "rating_score": 4.7,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 47.2,
       "raw_blame_points": 87.8,
+      "raw_contrib_points": 45.4,
       "strengths": [
         "基础数据合格：交出 2/12/15（参战率 54.8%，英雄伤害 23,819），完成了该位置基础任务。"
       ],
@@ -4504,7 +4666,11 @@
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 敌方切入 无限提款。"
       ],
       "trash_talk": "@匿名玩家 一局死 12 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@匿名玩家 虽然这把 寒冬飞龙 阵亡 12 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
       "blame_share_pct": 28.6,
+      "contrib_share_pct": 8.3,
+      "contrib_rank": 5,
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -4759,9 +4925,10 @@
         "survival": 65
       },
       "rating_score": 8.3,
-      "rating_tier": "S 核心支柱",
+      "rating_tier": "S 凯旋真核",
       "mvp_score": 82.7,
       "raw_blame_points": 19.3,
+      "raw_contrib_points": 237.0,
       "strengths": [
         "推进终结能力极强：单人打出 15,219 建筑伤害（包揽全队 71% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。"
       ],
@@ -4772,7 +4939,11 @@
         "保持当前 狙击手 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@匿名玩家 这把 8/5/17 标准打卡下班，背锅占比 19 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 推塔终结机器！狙击手 单人拆出 15,219 建筑伤害（占全队 71%），赢团推塔一气呵成！",
       "blame_share_pct": 8.1,
+      "contrib_share_pct": 32.4,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -5018,9 +5189,10 @@
         "survival": 38
       },
       "rating_score": 4.3,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "B 躺赢福将",
       "mvp_score": 42.6,
       "raw_blame_points": 97.9,
+      "raw_contrib_points": 37.3,
       "strengths": [
         "基础数据合格：交出 2/9/18（参战率 45.5%，英雄伤害 18,562），完成了该位置基础任务。"
       ],
@@ -5033,7 +5205,11 @@
         "核心位阵亡 9 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@匿名玩家 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！",
       "blame_share_pct": 40.9,
+      "contrib_share_pct": 5.1,
+      "contrib_rank": 5,
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -5289,9 +5465,10 @@
         "survival": 79
       },
       "rating_score": 8.3,
-      "rating_tier": "S 核心支柱",
+      "rating_tier": "S 凯旋真核",
       "mvp_score": 83.5,
       "raw_blame_points": 18.5,
+      "raw_contrib_points": 260.4,
       "strengths": [
         "极高生存容错：36 分钟高强度对抗仅阵亡 3 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
       ],
@@ -5302,7 +5479,11 @@
         "保持当前 帕吉 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！",
       "blame_share_pct": 7.7,
+      "contrib_share_pct": 35.7,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -5558,9 +5739,10 @@
         "survival": 64
       },
       "rating_score": 5.0,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "B 躺赢福将",
       "mvp_score": 50.0,
       "raw_blame_points": 52.0,
+      "raw_contrib_points": 64.9,
       "strengths": [
         "基础数据合格：交出 7/7/10（参战率 38.6%，英雄伤害 21,298），完成了该位置基础任务。"
       ],
@@ -5571,7 +5753,11 @@
         "保持当前 司夜刺客 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@匿名玩家 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！",
       "blame_share_pct": 21.7,
+      "contrib_share_pct": 8.9,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
@@ -5812,9 +5998,10 @@
         "survival": 60
       },
       "rating_score": 6.1,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "B 躺赢福将",
       "mvp_score": 61.2,
       "raw_blame_points": 51.8,
+      "raw_contrib_points": 131.1,
       "strengths": [
         "基础数据合格：交出 15/8/14（参战率 65.9%，英雄伤害 42,442），完成了该位置基础任务。"
       ],
@@ -5825,7 +6012,11 @@
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 敌方切入 无限提款。"
       ],
       "trash_talk": "@匿名玩家 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@匿名玩家 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！",
       "blame_share_pct": 21.6,
+      "contrib_share_pct": 17.9,
+      "contrib_rank": 3,
+      "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [

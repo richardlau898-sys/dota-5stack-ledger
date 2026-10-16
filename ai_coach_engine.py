@@ -184,16 +184,28 @@ def evaluate_player_deeply(
     mvp_score = round(clamp(base_score + bonus, 35.0, 99.0), 1)
     rating_score = round(clamp(mvp_score / 10.0, 4.0, 9.9), 1)
 
-    if rating_score >= 9.0:
-        rating_tier = "S+ 战神"
-    elif rating_score >= 8.3:
-        rating_tier = "S 核心支柱"
-    elif rating_score >= 7.6:
-        rating_tier = "A 合格大腿"
-    elif rating_score >= 6.8:
-        rating_tier = "B 隐身混子"
+    if won:
+        if rating_score >= 9.0:
+            rating_tier = "S+ 擎天战神"
+        elif rating_score >= 8.3:
+            rating_tier = "S 凯旋真核"
+        elif rating_score >= 7.6:
+            rating_tier = "A 功勋大腿"
+        elif rating_score >= 6.8:
+            rating_tier = "B+ 稳健功臣"
+        else:
+            rating_tier = "B 躺赢福将"
     else:
-        rating_tier = "C 头号战犯"
+        if rating_score >= 8.8:
+            rating_tier = "S 孤胆院长"
+        elif rating_score >= 8.0:
+            rating_tier = "A 尽力大腿"
+        elif rating_score >= 7.2:
+            rating_tier = "B 随波逐流"
+        elif rating_score >= 6.6:
+            rating_tier = "C 重点背锅"
+        else:
+            rating_tier = "D 头号战犯"
 
     # 3. 录像级数据取证 (去除模板化四字括号，完全用本局真实动作、按键、击杀关系说话)
     strengths: List[str] = []
@@ -603,6 +615,42 @@ def evaluate_player_deeply(
             f"保持当前 {hero_name} 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
         )
 
+    # 计算胜局贡献点数 (raw_contrib_points) 与凯旋庆功贺词 (praise_talk)
+    contrib_points = max(8.0, (mvp_score - 28.0) ** 1.35)
+    if hdmg_share >= 28.0:
+        contrib_points += 20.0
+    elif hdmg_share >= 22.0:
+        contrib_points += 11.0
+    if tdmg_share >= 40.0 and tdmg >= 3000:
+        contrib_points += 15.0
+    if kp >= 70.0:
+        contrib_points += 14.0
+    elif kp >= 60.0:
+        contrib_points += 7.0
+    if pos in (4, 5) and (obs + sen) >= 16:
+        contrib_points += 15.0
+    if stuns >= 35.0:
+        contrib_points += 12.0
+    if heal >= 4000:
+        contrib_points += 9.0
+    if stacked >= 4:
+        contrib_points += 8.0
+    if deaths >= 10:
+        contrib_points = max(6.0, contrib_points * 0.72)
+
+    if pos in (1, 2) and hdmg_share >= 26.0:
+        praise_talk = f"@{pname} 这把 {hero_name} 火力全开狂轰 {hdmg:,} 伤害（包揽全队 {hdmg_share:.0f}% 输出）+ {tdmg:,} 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
+    elif tdmg >= 5500 or (tdmg_share >= 45.0 and tdmg >= 3000):
+        praise_talk = f"@{pname} 推塔终结机器！{hero_name} 单人拆出 {tdmg:,} 建筑伤害（占全队 {tdmg_share:.0f}%），赢团推塔一气呵成！"
+    elif pos == 3 and (stuns >= 25.0 or dmg_taken_share >= 23.0):
+        praise_talk = f"@{pname} 铁血三号位！{hero_name} 参战率 {kp:.0f}% 肉身扛下 {dmg_taken:,} 伤害（全队 {dmg_taken_share:.0f}%）外加 {stuns:.1f} 秒硬控，完美团战发动机！"
+    elif pos in (4, 5) and (obs + sen) >= 12:
+        praise_talk = f"@{pname} 最佳幕后功臣！{hero_name} 全场点亮 {obs} 假 {sen} 真视野 + 参战率 {kp:.0f}%，吃草挤奶把大哥伺候得明明白白！"
+    elif deaths >= 10:
+        praise_talk = f"@{pname} 虽然这把 {hero_name} 阵亡 {deaths} 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！"
+    else:
+        praise_talk = f"@{pname} 稳健上分拼图！{hero_name} 交出 {kills}/{deaths}/{assists}（参战率 {kp:.0f}% · 伤害 {hdmg:,}），关键团战从不掉链子！"
+
     if trash_candidates:
         trash_candidates.sort(key=lambda x: x[0], reverse=True)
         trash_talk = trash_candidates[0][1]
@@ -617,15 +665,21 @@ def evaluate_player_deeply(
         "rating_tier": rating_tier,
         "mvp_score": mvp_score,
         "raw_blame_points": round(blame_points, 1),
+        "raw_contrib_points": round(contrib_points, 1),
         "strengths": strengths,
         "weaknesses": weaknesses,
         "improvements": improvements,
         "trash_talk": trash_talk,
+        "praise_talk": praise_talk,
     }
 
 
 def assign_team_blame_percentages(team_players: List[Dict[str, Any]]) -> None:
-    """将一方 5 人的 raw_blame_points 归一化为 100% 的【五人分锅占比 (blame_share_pct)】"""
+    """
+    同时计算一方 5 人的:
+    1) 100% 败局分锅占比 (blame_share_pct)
+    2) 100% 胜局贡献占比 (contrib_share_pct) 与功勋头衔 (contrib_tier)
+    """
     total_blame = sum(p.get("raw_blame_points", 10.0) for p in team_players) or 1.0
     for p in team_players:
         share = round(p.get("raw_blame_points", 10.0) / total_blame * 100.0, 1)
@@ -635,6 +689,30 @@ def assign_team_blame_percentages(team_players: List[Dict[str, Any]]) -> None:
         diff = round(100.0 - sum(p["blame_share_pct"] for p in team_players), 1)
         max_p = max(team_players, key=lambda x: x["blame_share_pct"])
         max_p["blame_share_pct"] = round(max_p["blame_share_pct"] + diff, 1)
+
+    total_contrib = sum(p.get("raw_contrib_points", 20.0) for p in team_players) or 1.0
+    for p in team_players:
+        c_share = round(p.get("raw_contrib_points", 20.0) / total_contrib * 100.0, 1)
+        p["contrib_share_pct"] = c_share
+
+    if team_players:
+        c_diff = round(100.0 - sum(p["contrib_share_pct"] for p in team_players), 1)
+        top_c = max(team_players, key=lambda x: x["contrib_share_pct"])
+        top_c["contrib_share_pct"] = round(top_c["contrib_share_pct"] + c_diff, 1)
+
+        sorted_by_c = sorted(team_players, key=lambda x: (x.get("contrib_share_pct", 0), x.get("mvp_score", 0)), reverse=True)
+        for rank_idx, cp in enumerate(sorted_by_c):
+            cp["contrib_rank"] = rank_idx + 1
+            if rank_idx == 0:
+                cp["contrib_tier"] = "👑 头号首功 · 擎天真神"
+            elif rank_idx == 1:
+                cp["contrib_tier"] = "⚔️ 破阵二当家 · 左膀右臂"
+            elif rank_idx == 2:
+                cp["contrib_tier"] = "👁️ 视野统帅 · 幕后功臣" if cp.get("pos") in (4, 5) else "🛡️ 定海神针 · 中坚功臣"
+            elif rank_idx == 3:
+                cp["contrib_tier"] = "🔥 黄金拼图 · 稳健节奏"
+            else:
+                cp["contrib_tier"] = "🎉 躺赢锦鲤 · 吸火福将" if (cp.get("deaths", 0) >= 8) else "🥂 凯旋功臣 · 团队拼图"
 
 
 def select_match_mvp_and_culprit(
@@ -648,7 +726,7 @@ def select_match_mvp_and_culprit(
     1. 全场 MVP (AI MVP)
     2. 胜方二当家 (Runner-up)
     3. 败方 SVP (Losing Team Best)
-    4. 车队头号大锅 / 一级战犯 (Chief Culprit)
+    4. 车队头号大锅 / 一级战犯 (仅在败局重点处刑；胜局展示头号首功 + 破阵二当家 + 100% 胜局贡献榜)
     """
     winning_team = radiant_players if radiant_win else dire_players
     losing_team = dire_players if radiant_win else radiant_players
@@ -663,9 +741,10 @@ def select_match_mvp_and_culprit(
     focus_side_zh = "天辉" if focus_team is radiant_players else "夜魇"
     focus_won = (radiant_win if focus_team is radiant_players else not radiant_win)
 
-    win_sorted = sorted(winning_team, key=lambda x: x.get("mvp_score", 0), reverse=True)
+    win_sorted = sorted(winning_team, key=lambda x: (x.get("contrib_share_pct", 0), x.get("mvp_score", 0)), reverse=True)
     lose_sorted = sorted(losing_team, key=lambda x: x.get("mvp_score", 0), reverse=True)
     focus_by_blame = sorted(focus_team, key=lambda x: x.get("blame_share_pct", 0), reverse=True)
+    focus_by_contrib = sorted(focus_team, key=lambda x: (x.get("contrib_share_pct", 0), x.get("mvp_score", 0)), reverse=True)
 
     mvp = win_sorted[0]
     runner_up = win_sorted[1] if len(win_sorted) > 1 else win_sorted[0]
@@ -674,24 +753,27 @@ def select_match_mvp_and_culprit(
     second_culprit = focus_by_blame[1] if len(focus_by_blame) > 1 else culprit
 
     mvp_reasons = [
-        f"全场头号大腿 ({mvp['rating_score']}分 · {mvp['rating_tier']})：{win_side_zh} {mvp['pos']}号位 {mvp['hero_short_zh']}（{mvp['personaname']}）交出 {mvp['kda']}（参战率 {mvp['kill_participation_pct']}%），本局个人背锅占比仅 {mvp['blame_share_pct']}%。",
+        f"全场头号首功 ({mvp['rating_score']}分 · 胜局贡献 {mvp.get('contrib_share_pct', 25)}%)：{win_side_zh} {mvp['pos']}号位 {mvp['hero_short_zh']}（{mvp['personaname']}）交出 {mvp['kda']}（参战率 {mvp['kill_participation_pct']}%）。",
         f"核心统治力数据：单人打出 {mvp['hero_damage']:,} 英雄伤害（占全队 {mvp['hero_damage_share_pct']}%）+ {mvp['tower_damage']:,} 建筑伤害，总经济 {mvp['net_worth']:,}（GPM {mvp['gpm']} / XPM {mvp['xpm']}）。",
         f"制胜关键：{mvp['strengths'][0]}",
-        f"胜方二当家：{runner_up['pos']}号位 {runner_up['hero_short_zh']}（{runner_up['personaname']}，评分 {runner_up['rating_score']}）贡献 {runner_up['kda']}（参战率 {runner_up['kill_participation_pct']}%，伤害 {runner_up['hero_damage']:,}）。",
+        f"胜方二当家（胜局贡献 {runner_up.get('contrib_share_pct', 22)}%）：{runner_up['pos']}号位 {runner_up['hero_short_zh']}（{runner_up['personaname']}，评分 {runner_up['rating_score']}）贡献 {runner_up['kda']}（参战率 {runner_up['kill_participation_pct']}%，伤害 {runner_up['hero_damage']:,}）。",
         f"败方孤胆院长 (SVP)：{lose_side_zh} {svp['pos']}号位 {svp['hero_short_zh']}（{svp['personaname']}，评分 {svp['rating_score']}）交出 {svp['kda']}（伤害 {svp['hero_damage']:,}），一神带四坑实在带不动。",
     ]
 
-    culprit_verdict = (
-        f"车队头号大锅认证（分锅占比 {culprit['blame_share_pct']}%）：{focus_side_zh} {culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，评分 {culprit['rating_score']}）——"
-        + (
-            f"虽然比赛最终翻盘赢下，但中期险些葬送好局的头号战犯就是他：{culprit['weaknesses'][0]}"
-            if focus_won
-            else f"本局失利首锅毫无疑问扣在他头上：{culprit['weaknesses'][0]}"
+    if focus_won:
+        culprit_verdict = (
+            f"凯旋庆功总结：{focus_side_zh}头号首功 {mvp['hero_short_zh']}（{mvp['personaname']}，贡献 {mvp.get('contrib_share_pct', 25)}%）与二当家 {runner_up['hero_short_zh']}（{runner_up['personaname']}，贡献 {runner_up.get('contrib_share_pct', 22)}%）携手带飞！"
+            f" 本局惊险躺赢锦鲤：{culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，贡献 {culprit.get('contrib_share_pct', 14)}%）。"
         )
-    )
+    else:
+        culprit_verdict = (
+            f"车队头号大锅认证（分锅占比 {culprit['blame_share_pct']}%）：{focus_side_zh} {culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，评分 {culprit['rating_score']}）——"
+            f"本局失利首锅毫无疑问扣在他头上：{culprit['weaknesses'][0]}"
+        )
 
     return {
         "mvp_player": {
+            "player_slot": mvp["player_slot"],
             "side": win_side_zh,
             "pos": mvp["pos"],
             "pos_label": mvp["pos_label"],
@@ -706,6 +788,8 @@ def select_match_mvp_and_culprit(
             "rating_tier": mvp["rating_tier"],
             "mvp_score": mvp["mvp_score"],
             "blame_share_pct": mvp["blame_share_pct"],
+            "contrib_share_pct": mvp.get("contrib_share_pct", 25.0),
+            "contrib_tier": mvp.get("contrib_tier", "👑 头号首功 · 擎天真神"),
             "gpm": mvp["gpm"],
             "xpm": mvp["xpm"],
             "hero_damage": mvp["hero_damage"],
@@ -713,32 +797,56 @@ def select_match_mvp_and_culprit(
             "tower_damage": mvp["tower_damage"],
             "kill_participation_pct": mvp["kill_participation_pct"],
             "trash_talk": mvp["trash_talk"],
+            "praise_talk": mvp.get("praise_talk", ""),
         },
         "runner_up_player": {
+            "player_slot": runner_up["player_slot"],
             "side": win_side_zh,
             "pos": runner_up["pos"],
+            "pos_label": runner_up["pos_label"],
             "hero_name": runner_up["hero_name"],
             "hero_short_zh": runner_up.get("hero_short_zh", runner_up["hero_name"]),
             "hero_img": runner_up.get("hero_img"),
             "hero_icon": runner_up.get("hero_icon"),
             "personaname": runner_up["personaname"],
+            "friend_tag": runner_up.get("friend_tag"),
             "kda": runner_up["kda"],
+            "gpm": runner_up["gpm"],
+            "xpm": runner_up["xpm"],
+            "hero_damage": runner_up["hero_damage"],
+            "hero_damage_share_pct": runner_up["hero_damage_share_pct"],
+            "tower_damage": runner_up["tower_damage"],
+            "kill_participation_pct": runner_up["kill_participation_pct"],
             "rating_score": runner_up["rating_score"],
+            "rating_tier": runner_up["rating_tier"],
             "blame_share_pct": runner_up["blame_share_pct"],
+            "contrib_share_pct": runner_up.get("contrib_share_pct", 22.0),
+            "contrib_tier": runner_up.get("contrib_tier", "⚔️ 破阵二当家 · 左膀右臂"),
+            "strengths": runner_up.get("strengths", []),
+            "praise_talk": runner_up.get("praise_talk", ""),
         },
         "svp_player": {
+            "player_slot": svp["player_slot"],
             "side": lose_side_zh,
             "pos": svp["pos"],
+            "pos_label": svp["pos_label"],
             "hero_name": svp["hero_name"],
             "hero_short_zh": svp.get("hero_short_zh", svp["hero_name"]),
             "hero_img": svp.get("hero_img"),
             "hero_icon": svp.get("hero_icon"),
             "personaname": svp["personaname"],
             "kda": svp["kda"],
+            "gpm": svp["gpm"],
+            "hero_damage": svp["hero_damage"],
+            "tower_damage": svp["tower_damage"],
+            "kill_participation_pct": svp["kill_participation_pct"],
             "rating_score": svp["rating_score"],
+            "rating_tier": svp["rating_tier"],
             "blame_share_pct": svp["blame_share_pct"],
+            "contrib_share_pct": svp.get("contrib_share_pct", 25.0),
         },
         "culprit_player": {
+            "player_slot": culprit["player_slot"],
             "side": focus_side_zh,
             "pos": culprit["pos"],
             "pos_label": culprit["pos_label"],
@@ -752,13 +860,17 @@ def select_match_mvp_and_culprit(
             "rating_score": culprit["rating_score"],
             "rating_tier": culprit["rating_tier"],
             "blame_share_pct": culprit["blame_share_pct"],
+            "contrib_share_pct": culprit.get("contrib_share_pct", 14.0),
+            "contrib_tier": culprit.get("contrib_tier", "🎉 躺赢锦鲤 · 吸火福将"),
             "dead_seconds": culprit.get("dead_seconds", 0),
             "death_gold_lost": culprit.get("death_gold_lost", 0),
             "main_crime": culprit["weaknesses"][0],
             "trash_talk": culprit["trash_talk"],
+            "praise_talk": culprit.get("praise_talk", ""),
             "verdict": culprit_verdict,
         },
         "second_culprit_player": {
+            "player_slot": second_culprit["player_slot"],
             "side": focus_side_zh,
             "pos": second_culprit["pos"],
             "hero_name": second_culprit["hero_name"],
@@ -769,6 +881,7 @@ def select_match_mvp_and_culprit(
             "kda": second_culprit["kda"],
             "rating_score": second_culprit["rating_score"],
             "blame_share_pct": second_culprit["blame_share_pct"],
+            "contrib_share_pct": second_culprit.get("contrib_share_pct", 16.0),
             "main_crime": second_culprit["weaknesses"][0],
         },
         "focus_team_blame_ranking": [
@@ -781,14 +894,38 @@ def select_match_mvp_and_culprit(
                 "personaname": fp["personaname"],
                 "friend_tag": fp.get("friend_tag"),
                 "blame_share_pct": fp["blame_share_pct"],
+                "contrib_share_pct": fp.get("contrib_share_pct", 20.0),
+                "contrib_tier": fp.get("contrib_tier", ""),
                 "rating_score": fp["rating_score"],
                 "rating_tier": fp["rating_tier"],
                 "kda": fp["kda"],
                 "dead_seconds": fp.get("dead_seconds", 0),
                 "death_gold_lost": fp.get("death_gold_lost", 0),
                 "trash_talk": fp["trash_talk"],
+                "praise_talk": fp.get("praise_talk", ""),
             }
             for fp in focus_by_blame
+        ],
+        "focus_team_contrib_ranking": [
+            {
+                "pos": fp["pos"],
+                "hero_name": fp["hero_name"],
+                "hero_short_zh": fp.get("hero_short_zh", fp["hero_name"]),
+                "hero_img": fp.get("hero_img"),
+                "hero_icon": fp.get("hero_icon"),
+                "personaname": fp["personaname"],
+                "friend_tag": fp.get("friend_tag"),
+                "contrib_share_pct": fp.get("contrib_share_pct", 20.0),
+                "contrib_tier": fp.get("contrib_tier", ""),
+                "blame_share_pct": fp["blame_share_pct"],
+                "rating_score": fp["rating_score"],
+                "rating_tier": fp["rating_tier"],
+                "kda": fp["kda"],
+                "hero_damage": fp["hero_damage"],
+                "tower_damage": fp["tower_damage"],
+                "praise_talk": fp.get("praise_talk", ""),
+            }
+            for fp in focus_by_contrib
         ],
         "rationale_list": mvp_reasons + [culprit_verdict],
     }

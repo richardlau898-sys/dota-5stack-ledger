@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=4.2" />
+  <link rel="stylesheet" href="/styles.css?v=4.3" />
 </head>
 <body>
   <header class="site-header">
@@ -172,7 +172,7 @@
       <nav class="postgame-jump-nav" aria-label="赛后复盘模块快速跳转">
         <span class="jump-nav-label">复盘目录 (已全面去重)：</span>
         <a href="#draft-combo-section" class="jump-chip">① 阵容BP与配合</a>
-        <a href="#verdict-and-blame-section" class="jump-chip">② 红黑榜与100%分锅</a>
+        <a href="#verdict-and-blame-section" id="jump-chip-verdict" class="jump-chip">② 胜局庆功 / 败局分锅</a>
         <a href="#tactical-microscope-section" class="jump-chip highlight">③ 🔬 战术显微镜 (大招/眼位/堆野开雾/对线/TP)</a>
         <a href="#charts-hub-section" class="jump-chip">④ 全局曲线与集火矩阵</a>
         <a href="#phase-review-section" class="jump-chip">⑤ 前中后期三阶段</a>
@@ -192,12 +192,12 @@
       <div id="draft-combo-container"></div>
     </section>
 
-    <!-- 模块二：MVP 真大腿 vs 头号战犯 + 五人分锅账本 -->
+    <!-- 模块二：赢球庆功论功行赏 (100%贡献榜) / 输球分锅算账 (100%定责表) -->
     <section id="verdict-and-blame-section" class="verdict-and-blame-section" aria-labelledby="verdict-heading">
       <div class="section-heading">
         <div>
-          <h2 id="verdict-heading">② 这把谁在干活，谁在犯罪 · 五人分锅定责总表</h2>
-          <p class="section-caption">一屏看清全场真大腿、头号战犯与 100% 责任切分（具体技能机制、眼位、拉野与 TP 细节已归入下方「战术显微镜」）</p>
+          <h2 id="verdict-heading">② 胜局凯旋庆功榜 / 败局五人分锅定责总表</h2>
+          <p id="verdict-caption" class="section-caption">赢球论功行赏看谁贡献最多，输球硬核取证看谁最该背锅（具体技能机制、眼位、拉野与 TP 细节已归入下方「战术显微镜」）</p>
         </div>
         <span id="parse-quality-badge" class="status-pill">录像解析核对中</span>
       </div>
@@ -213,28 +213,28 @@
         <div id="grok-team-practice-box" class="grok-practice-strip"></div>
       </article>
 
-      <!-- MVP 与 头号大锅 双栏 + 五人分锅比例账本 -->
+      <!-- 胜局：头号首功(MVP) + 破阵二当家 / 败局：全场真大腿 + 头号大锅 -->
       <div class="verdict-grid">
         <article id="mvp-card" class="verdict-card mvp-theme" aria-labelledby="mvp-card-title">
-          <div class="verdict-card-label">全场头号功臣 · MVP</div>
+          <div id="mvp-card-label" class="verdict-card-label">👑 全场头号功臣 · MVP</div>
           <h3 id="mvp-card-title" class="sr-only">全场 MVP</h3>
           <div id="mvp-card-body"></div>
         </article>
 
         <article id="culprit-card" class="verdict-card culprit-theme" aria-labelledby="culprit-card-title">
-          <div class="verdict-card-label">本方头号大锅 · 一级战犯</div>
-          <h3 id="culprit-card-title" class="sr-only">头号战犯</h3>
+          <div id="culprit-card-label" class="verdict-card-label">🚨 本方头号大锅 · 一级战犯</div>
+          <h3 id="culprit-card-title" class="sr-only">次席核心焦点</h3>
           <div id="culprit-card-body"></div>
         </article>
       </div>
 
-      <!-- 五人分锅比例条与清晰排行账本 -->
-      <article class="blame-ledger-panel" aria-labelledby="blame-ledger-title">
+      <!-- 胜局：100% 胜局贡献庆功榜 / 败局：100% 分锅责任账本 -->
+      <article id="blame-ledger-panel" class="blame-ledger-panel" aria-labelledby="blame-ledger-title">
         <div class="blame-ledger-header">
-          <h3 id="blame-ledger-title">本方五人分锅占比账本 (100% 责任切分)</h3>
-          <span class="section-caption">点击任意行右侧按钮可直接复制该队友专属算账金句发群里</span>
+          <h3 id="blame-ledger-title">本方五人 100% 贡献/分锅总账</h3>
+          <span id="blame-ledger-caption" class="section-caption">点击任意行右侧按钮可直接复制该队友专属贺电或算账金句发群里</span>
         </div>
-        <div id="blame-stacked-bar" class="blame-stacked-bar" role="img" aria-label="五人分锅比例堆叠条"></div>
+        <div id="blame-stacked-bar" class="blame-stacked-bar" role="img" aria-label="五人100%贡献或分锅比例堆叠条"></div>
         <div id="blame-ranking-rows" class="blame-ranking-rows"></div>
       </article>
     </section>
@@ -536,6 +536,6 @@
     <span>有据才喷，数据来自 OpenDota 录像解析与 xAI Grok 4.7</span>
   </footer>
 
-  <script src="/app.js?v=4.2" defer></script>
+  <script src="/app.js?v=4.3" defer></script>
 </body>
 </html>

@@ -22085,6 +22085,7 @@
   },
   "mvp": {
     "mvp_player": {
+      "player_slot": 1,
       "side": "天辉",
       "pos": 2,
       "pos_label": "2号位 · 中路核心",
@@ -22096,42 +22097,73 @@
       "friend_tag": "5人黑",
       "kda": "18/4/11",
       "rating_score": 9.9,
-      "rating_tier": "S+ 战神",
+      "rating_tier": "S+ 擎天战神",
       "mvp_score": 99.0,
       "blame_share_pct": 2.6,
+      "contrib_share_pct": 29.2,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "gpm": 707,
       "xpm": 1020,
       "hero_damage": 32013,
       "hero_damage_share_pct": 36.0,
       "tower_damage": 15878,
       "kill_participation_pct": 78.4,
-      "trash_talk": "@99 这把 玛西 评分 9.9 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！"
+      "trash_talk": "@99 这把 玛西 评分 9.9 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
+      "praise_talk": "@99 这把 玛西 火力全开狂轰 32,013 伤害（包揽全队 36% 输出）+ 15,878 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
     },
     "runner_up_player": {
+      "player_slot": 3,
       "side": "天辉",
       "pos": 5,
+      "pos_label": "5号位 · 纯辅助",
       "hero_name": "森海飞霞(松鼠/Hoodwink)",
       "hero_short_zh": "森海飞霞",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/hoodwink.png",
       "personaname": "莓啤汽",
+      "friend_tag": "5人黑",
       "kda": "5/5/18",
+      "gpm": 368,
+      "xpm": 605,
+      "hero_damage": 15315,
+      "hero_damage_share_pct": 17.2,
+      "tower_damage": 682,
+      "kill_participation_pct": 62.2,
       "rating_score": 9.2,
-      "blame_share_pct": 6.1
+      "rating_tier": "S+ 擎天战神",
+      "blame_share_pct": 6.1,
+      "contrib_share_pct": 24.7,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
+      "strengths": [
+        "保人拉野到位：对线期把同路核心 虚空假面 保出了 10分钟 56 刀 / 4,253 经济的顺畅开局。",
+        "全场核心技能施放统计：野地奇袭(捆树) 47次 / 橡果射击 44次 / 密林奔走 33次 / 一箭穿心(大招狙) 9次（操作频率 401 APM）。",
+        "视野铺设尽职：全场插下 12 假眼 + 22 真眼（共 34 颗），并成功排掉敌方 2 颗假眼 / 5 颗真眼，顺手囤野 6 波。",
+        "进攻节奏组织者：全场主动购买 4 颗诡计之雾带动抓人节奏。"
+      ],
+      "praise_talk": "@莓啤汽 最佳幕后功臣！森海飞霞 全场点亮 12 假 22 真视野 + 参战率 62%，吃草挤奶把大哥伺候得明明白白！"
     },
     "svp_player": {
+      "player_slot": 131,
       "side": "夜魇",
       "pos": 5,
+      "pos_label": "5号位 · 纯辅助",
       "hero_name": "拉比克(Rubick)",
       "hero_short_zh": "拉比克",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/rubick.png",
       "personaname": "Make Your Choice",
       "kda": "4/10/8",
+      "gpm": 261,
+      "hero_damage": 11236,
+      "tower_damage": 0,
+      "kill_participation_pct": 54.5,
       "rating_score": 7.2,
-      "blame_share_pct": 14.2
+      "rating_tier": "B 随波逐流",
+      "blame_share_pct": 14.2,
+      "contrib_share_pct": 22.2
     },
     "culprit_player": {
+      "player_slot": 128,
       "side": "夜魇",
       "pos": 2,
       "pos_label": "2号位 · 中路核心",
@@ -22143,15 +22175,19 @@
       "friend_tag": "车队好友 · Paphets",
       "kda": "2/8/10",
       "rating_score": 4.2,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "blame_share_pct": 30.2,
+      "contrib_share_pct": 9.1,
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "dead_seconds": 365,
       "death_gold_lost": 1870,
       "main_crime": "核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。",
       "trash_talk": "@Paphets 一局死 8 次，看了整整 6分5秒 黑白电视（其中被敌方【玛西】单人提款 5 次），光死就扣了 1870 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Paphets 稳健上分拼图！龙骑士 交出 2/8/10（参战率 54% · 伤害 19,202），关键团战从不掉链子！",
       "verdict": "车队头号大锅认证（分锅占比 30.2%）：夜魇 2号位 龙骑士（Paphets，评分 4.2）——本局失利首锅毫无疑问扣在他头上：核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。"
     },
     "second_culprit_player": {
+      "player_slot": 129,
       "side": "夜魇",
       "pos": 3,
       "hero_name": "黑暗贤者(黑贤/DS)",
@@ -22162,6 +22198,7 @@
       "kda": "4/8/10",
       "rating_score": 5.5,
       "blame_share_pct": 23.0,
+      "contrib_share_pct": 19.0,
       "main_crime": "头铁拒出 BKB：面对敌方 234 秒强控，全场阵亡 8 次直到终局都没出黑皇杖，团战容错率极低。"
     },
     "focus_team_blame_ranking": [
@@ -22174,12 +22211,15 @@
         "personaname": "Paphets",
         "friend_tag": "车队好友 · Paphets",
         "blame_share_pct": 30.2,
+        "contrib_share_pct": 9.1,
+        "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
         "rating_score": 4.2,
-        "rating_tier": "C 头号战犯",
+        "rating_tier": "D 头号战犯",
         "kda": "2/8/10",
         "dead_seconds": 365,
         "death_gold_lost": 1870,
-        "trash_talk": "@Paphets 一局死 8 次，看了整整 6分5秒 黑白电视（其中被敌方【玛西】单人提款 5 次），光死就扣了 1870 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@Paphets 一局死 8 次，看了整整 6分5秒 黑白电视（其中被敌方【玛西】单人提款 5 次），光死就扣了 1870 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@Paphets 稳健上分拼图！龙骑士 交出 2/8/10（参战率 54% · 伤害 19,202），关键团战从不掉链子！"
       },
       {
         "pos": 3,
@@ -22190,12 +22230,15 @@
         "personaname": "Mr. Brightside",
         "friend_tag": "车队好友 · Mr. Brightside",
         "blame_share_pct": 23.0,
+        "contrib_share_pct": 19.0,
+        "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
         "rating_score": 5.5,
-        "rating_tier": "C 头号战犯",
+        "rating_tier": "D 头号战犯",
         "kda": "4/8/10",
         "dead_seconds": 324,
         "death_gold_lost": 1805,
-        "trash_talk": "@Mr. Brightside 一局死 8 次，看了整整 5分24秒 黑白电视（其中被敌方【虚空假面】单人提款 5 次），光死就扣了 1805 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@Mr. Brightside 一局死 8 次，看了整整 5分24秒 黑白电视（其中被敌方【虚空假面】单人提款 5 次），光死就扣了 1805 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@Mr. Brightside 铁血三号位！黑暗贤者 参战率 64% 肉身扛下 31,495 伤害（全队 27%）外加 8.1 秒硬控，完美团战发动机！"
       },
       {
         "pos": 1,
@@ -22206,12 +22249,15 @@
         "personaname": "Flame = ez mute",
         "friend_tag": "我 · Flame = ez mute",
         "blame_share_pct": 18.9,
+        "contrib_share_pct": 29.1,
+        "contrib_tier": "👑 头号首功 · 擎天真神",
         "rating_score": 6.5,
-        "rating_tier": "C 头号战犯",
+        "rating_tier": "D 头号战犯",
         "kda": "9/9/8",
         "dead_seconds": 474,
         "death_gold_lost": 2925,
-        "trash_talk": "@Flame = ez mute 一局死 9 次，看了整整 7分54秒 黑白电视（其中被敌方【玛西】单人提款 6 次），光死就扣了 2925 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@Flame = ez mute 一局死 9 次，看了整整 7分54秒 黑白电视（其中被敌方【玛西】单人提款 6 次），光死就扣了 2925 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@Flame = ez mute 这把 先知 火力全开狂轰 30,060 伤害（包揽全队 28% 输出）+ 7,186 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
       },
       {
         "pos": 5,
@@ -22222,12 +22268,15 @@
         "personaname": "Make Your Choice",
         "friend_tag": "车队好友 · Make Your Choice",
         "blame_share_pct": 14.2,
+        "contrib_share_pct": 22.2,
+        "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
         "rating_score": 7.2,
-        "rating_tier": "B 隐身混子",
+        "rating_tier": "B 随波逐流",
         "kda": "4/10/8",
         "dead_seconds": 347,
         "death_gold_lost": 1094,
-        "trash_talk": "@Make Your Choice 一局死 10 次，看了整整 5分47秒 黑白电视（其中被敌方【玛西】单人提款 4 次），光死就扣了 1094 块钱，对面大哥给你磕一个不过分吧？"
+        "trash_talk": "@Make Your Choice 一局死 10 次，看了整整 5分47秒 黑白电视（其中被敌方【玛西】单人提款 4 次），光死就扣了 1094 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@Make Your Choice 最佳幕后功臣！拉比克 全场点亮 14 假 24 真视野 + 参战率 54%，吃草挤奶把大哥伺候得明明白白！"
       },
       {
         "pos": 4,
@@ -22238,19 +22287,114 @@
         "personaname": "Replica",
         "friend_tag": "车队好友 · Replica",
         "blame_share_pct": 13.7,
+        "contrib_share_pct": 20.6,
+        "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
         "rating_score": 6.2,
-        "rating_tier": "C 头号战犯",
+        "rating_tier": "D 头号战犯",
         "kda": "3/3/9",
         "dead_seconds": 100,
         "death_gold_lost": 327,
-        "trash_talk": "@Replica 这把 3/3/9 标准打卡下班，背锅占比 50 点，赢了跟着笑，输了怪队友！"
+        "trash_talk": "@Replica 这把 3/3/9 标准打卡下班，背锅占比 50 点，赢了跟着笑，输了怪队友！",
+        "praise_talk": "@Replica 稳健上分拼图！司夜刺客 交出 3/3/9（参战率 54% · 伤害 15,465），关键团战从不掉链子！"
+      }
+    ],
+    "focus_team_contrib_ranking": [
+      {
+        "pos": 1,
+        "hero_name": "先知(NP)",
+        "hero_short_zh": "先知",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/furion.png",
+        "personaname": "Flame = ez mute",
+        "friend_tag": "我 · Flame = ez mute",
+        "contrib_share_pct": 29.1,
+        "contrib_tier": "👑 头号首功 · 擎天真神",
+        "blame_share_pct": 18.9,
+        "rating_score": 6.5,
+        "rating_tier": "D 头号战犯",
+        "kda": "9/9/8",
+        "hero_damage": 30060,
+        "tower_damage": 7186,
+        "praise_talk": "@Flame = ez mute 这把 先知 火力全开狂轰 30,060 伤害（包揽全队 28% 输出）+ 7,186 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
+      },
+      {
+        "pos": 5,
+        "hero_name": "拉比克(Rubick)",
+        "hero_short_zh": "拉比克",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/rubick.png",
+        "personaname": "Make Your Choice",
+        "friend_tag": "车队好友 · Make Your Choice",
+        "contrib_share_pct": 22.2,
+        "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
+        "blame_share_pct": 14.2,
+        "rating_score": 7.2,
+        "rating_tier": "B 随波逐流",
+        "kda": "4/10/8",
+        "hero_damage": 11236,
+        "tower_damage": 0,
+        "praise_talk": "@Make Your Choice 最佳幕后功臣！拉比克 全场点亮 14 假 24 真视野 + 参战率 54%，吃草挤奶把大哥伺候得明明白白！"
+      },
+      {
+        "pos": 4,
+        "hero_name": "司夜刺客(小强/NA)",
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+        "personaname": "Replica",
+        "friend_tag": "车队好友 · Replica",
+        "contrib_share_pct": 20.6,
+        "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
+        "blame_share_pct": 13.7,
+        "rating_score": 6.2,
+        "rating_tier": "D 头号战犯",
+        "kda": "3/3/9",
+        "hero_damage": 15465,
+        "tower_damage": 79,
+        "praise_talk": "@Replica 稳健上分拼图！司夜刺客 交出 3/3/9（参战率 54% · 伤害 15,465），关键团战从不掉链子！"
+      },
+      {
+        "pos": 3,
+        "hero_name": "黑暗贤者(黑贤/DS)",
+        "hero_short_zh": "黑暗贤者",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dark_seer.png",
+        "personaname": "Mr. Brightside",
+        "friend_tag": "车队好友 · Mr. Brightside",
+        "contrib_share_pct": 19.0,
+        "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
+        "blame_share_pct": 23.0,
+        "rating_score": 5.5,
+        "rating_tier": "D 头号战犯",
+        "kda": "4/8/10",
+        "hero_damage": 30255,
+        "tower_damage": 14,
+        "praise_talk": "@Mr. Brightside 铁血三号位！黑暗贤者 参战率 64% 肉身扛下 31,495 伤害（全队 27%）外加 8.1 秒硬控，完美团战发动机！"
+      },
+      {
+        "pos": 2,
+        "hero_name": "龙骑士(龙骑/DK)",
+        "hero_short_zh": "龙骑士",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dragon_knight.png",
+        "personaname": "Paphets",
+        "friend_tag": "车队好友 · Paphets",
+        "contrib_share_pct": 9.1,
+        "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
+        "blame_share_pct": 30.2,
+        "rating_score": 4.2,
+        "rating_tier": "D 头号战犯",
+        "kda": "2/8/10",
+        "hero_damage": 19202,
+        "tower_damage": 978,
+        "praise_talk": "@Paphets 稳健上分拼图！龙骑士 交出 2/8/10（参战率 54% · 伤害 19,202），关键团战从不掉链子！"
       }
     ],
     "rationale_list": [
-      "全场头号大腿 (9.9分 · S+ 战神)：天辉 2号位 玛西（99）交出 18/4/11（参战率 78.4%），本局个人背锅占比仅 2.6%。",
+      "全场头号首功 (9.9分 · 胜局贡献 29.2%)：天辉 2号位 玛西（99）交出 18/4/11（参战率 78.4%）。",
       "核心统治力数据：单人打出 32,013 英雄伤害（占全队 36.0%）+ 15,878 建筑伤害，总经济 27,345（GPM 707 / XPM 1020）。",
       "制胜关键：刷钱效率拉满：GPM 707 / XPM 1020（全场补刀 305），发育速度超越了全网 96% 的同英雄玩家。",
-      "胜方二当家：5号位 森海飞霞（莓啤汽，评分 9.2）贡献 5/5/18（参战率 62.2%，伤害 15,315）。",
+      "胜方二当家（胜局贡献 24.7%）：5号位 森海飞霞（莓啤汽，评分 9.2）贡献 5/5/18（参战率 62.2%，伤害 15,315）。",
       "败方孤胆院长 (SVP)：夜魇 5号位 拉比克（Make Your Choice，评分 7.2）交出 4/10/8（伤害 11,236），一神带四坑实在带不动。",
       "车队头号大锅认证（分锅占比 30.2%）：夜魇 2号位 龙骑士（Paphets，评分 4.2）——本局失利首锅毫无疑问扣在他头上：核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。"
     ]
@@ -22746,9 +22890,10 @@
         "survival": 86
       },
       "rating_score": 9.2,
-      "rating_tier": "S+ 战神",
+      "rating_tier": "S+ 擎天战神",
       "mvp_score": 91.7,
       "raw_blame_points": 15.3,
+      "raw_contrib_points": 298.6,
       "strengths": [
         "对线基本功扎实：前10分钟交出 56正/21反（10m经济 4,253，效率 85%），撑起了前中期基础节奏。",
         "刷钱效率拉满：GPM 751 / XPM 931（全场补刀 483），发育速度超越了全网 90% 的同英雄玩家。",
@@ -22763,7 +22908,11 @@
         "保持当前 虚空假面 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@What the dog doing？ 这把 虚空假面 评分 9.2 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
+      "praise_talk": "@What the dog doing？ 推塔终结机器！虚空假面 单人拆出 14,313 建筑伤害（占全队 44%），赢团推塔一气呵成！",
       "blame_share_pct": 9.8,
+      "contrib_share_pct": 23.1,
+      "contrib_rank": 3,
+      "contrib_tier": "🛡️ 定海神针 · 中坚功臣",
       "pings_count": 5,
       "lane_id": 1,
       "benchmarks_list": [
@@ -23359,9 +23508,10 @@
         "survival": 75
       },
       "rating_score": 9.9,
-      "rating_tier": "S+ 战神",
+      "rating_tier": "S+ 擎天战神",
       "mvp_score": 99.0,
       "raw_blame_points": 4.0,
+      "raw_contrib_points": 376.6,
       "strengths": [
         "刷钱效率拉满：GPM 707 / XPM 1020（全场补刀 305），发育速度超越了全网 96% 的同英雄玩家。",
         "输出转化率极高：吃下全队 27.3% 经济（27,345金），狂轰 32,013 英雄伤害（占全队 36.0%，超越全网 78% 同英雄）。",
@@ -23377,7 +23527,11 @@
         "保持当前 玛西 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@99 这把 玛西 评分 9.9 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
+      "praise_talk": "@99 这把 玛西 火力全开狂轰 32,013 伤害（包揽全队 36% 输出）+ 15,878 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
       "blame_share_pct": 2.6,
+      "contrib_share_pct": 29.2,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 44,
       "lane_id": 2,
       "benchmarks_list": [
@@ -24048,9 +24202,10 @@
         "survival": 67
       },
       "rating_score": 5.9,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "B 躺赢福将",
       "mvp_score": 58.6,
       "raw_blame_points": 85.4,
+      "raw_contrib_points": 113.3,
       "strengths": [
         "切入发动机：13:33 摸出跳刀后全场高频切入 27 次，把控先手节奏。",
         "全场核心技能施放统计：鱼人碎击(踩) 58次 / 侵蚀雾霭(点灯) 27次 / 守卫冲刺(加速) 24次（操作频率 169 APM）。"
@@ -24065,7 +24220,11 @@
         "面对高控制阵容，3号位 斯拉达 必须在第2或第3大件（23~26分钟前）准时做出 BKB，且第一波切入前提前开启，切忌省BKB被瞬秒。"
       ],
       "trash_talk": "@东方树叶 对面一身硬控你拖到 31:51 才出 BKB，整局就按了 2 次，买个黄棍放包里当传家宝辟邪是吧？",
+      "praise_talk": "@东方树叶 铁血三号位！斯拉达 参战率 54% 肉身扛下 30,844 伤害（全队 20%）外加 35.5 秒硬控，完美团战发动机！",
       "blame_share_pct": 54.8,
+      "contrib_share_pct": 8.8,
+      "contrib_rank": 5,
+      "contrib_tier": "🥂 凯旋功臣 · 团队拼图",
       "pings_count": 1,
       "lane_id": 3,
       "benchmarks_list": [
@@ -24677,9 +24836,10 @@
         "survival": 72
       },
       "rating_score": 7.0,
-      "rating_tier": "B 隐身混子",
+      "rating_tier": "B+ 稳健功臣",
       "mvp_score": 70.3,
       "raw_blame_points": 41.7,
+      "raw_contrib_points": 183.9,
       "strengths": [
         "全场核心技能施放统计：腐烂 140次 / 肉钩 27次 / Flesh Heap 25次 / 肢解(咬) 12次（操作频率 172 APM）。",
         "视野铺设尽职：全场插下 5 假眼 + 15 真眼（共 20 颗），并成功排掉敌方 2 颗假眼 / 4 颗真眼。"
@@ -24691,7 +24851,11 @@
         "保持当前 帕吉 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@Mind's Desire 这把 2/6/16 标准打卡下班，背锅占比 42 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@Mind's Desire 最佳幕后功臣！帕吉 全场点亮 5 假 15 真视野 + 参战率 49%，吃草挤奶把大哥伺候得明明白白！",
       "blame_share_pct": 26.7,
+      "contrib_share_pct": 14.2,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 1,
       "lane_id": 3,
       "benchmarks_list": [
@@ -25344,9 +25508,10 @@
         "survival": 76
       },
       "rating_score": 9.2,
-      "rating_tier": "S+ 战神",
+      "rating_tier": "S+ 擎天战神",
       "mvp_score": 92.5,
       "raw_blame_points": 9.5,
+      "raw_contrib_points": 319.3,
       "strengths": [
         "保人拉野到位：对线期把同路核心 虚空假面 保出了 10分钟 56 刀 / 4,253 经济的顺畅开局。",
         "全场核心技能施放统计：野地奇袭(捆树) 47次 / 橡果射击 44次 / 密林奔走 33次 / 一箭穿心(大招狙) 9次（操作频率 401 APM）。",
@@ -25360,7 +25525,11 @@
         "保持当前 森海飞霞 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@莓啤汽 这把 森海飞霞 评分 9.2 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
+      "praise_talk": "@莓啤汽 最佳幕后功臣！森海飞霞 全场点亮 12 假 22 真视野 + 参战率 62%，吃草挤奶把大哥伺候得明明白白！",
       "blame_share_pct": 6.1,
+      "contrib_share_pct": 24.7,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 14,
       "lane_id": 1,
       "benchmarks_list": [
@@ -25964,9 +26133,10 @@
         "survival": 46
       },
       "rating_score": 6.5,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 65.3,
       "raw_blame_points": 69.2,
+      "raw_contrib_points": 181.4,
       "strengths": [
         "对线基本功扎实：前10分钟交出 54正/2反（10m经济 4,066，效率 82%），撑起了前中期基础节奏。",
         "输出转化率极高：吃下全队 30.5% 经济（23,044金），狂轰 30,060 英雄伤害（占全队 28.3%，超越全网 54% 同英雄）。",
@@ -25983,7 +26153,11 @@
         "核心位阵亡 9 次严重拖垮发育节奏：当敌方 玛西 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@Flame = ez mute 一局死 9 次，看了整整 7分54秒 黑白电视（其中被敌方【玛西】单人提款 6 次），光死就扣了 2925 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Flame = ez mute 这把 先知 火力全开狂轰 30,060 伤害（包揽全队 28% 输出）+ 7,186 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
       "blame_share_pct": 18.9,
+      "contrib_share_pct": 29.1,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 9,
       "lane_id": 3,
       "benchmarks_list": [
@@ -26600,9 +26774,10 @@
         "survival": 52
       },
       "rating_score": 4.2,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 42.3,
       "raw_blame_points": 110.7,
+      "raw_contrib_points": 56.3,
       "strengths": [
         "对线基本功扎实：前10分钟交出 55正/8反（10m经济 3,824，效率 77%），撑起了前中期基础节奏。",
         "全场核心技能施放统计：火焰气息(喷火) 81次 / 火球(魔晶) 26次 / 神龙摆尾(拍晕) 17次 / 古龙形态(变龙) 10次（操作频率 203 APM）。"
@@ -26618,7 +26793,11 @@
         "核心位阵亡 8 次严重拖垮发育节奏：当敌方 玛西 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@Paphets 一局死 8 次，看了整整 6分5秒 黑白电视（其中被敌方【玛西】单人提款 5 次），光死就扣了 1870 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Paphets 稳健上分拼图！龙骑士 交出 2/8/10（参战率 54% · 伤害 19,202），关键团战从不掉链子！",
       "blame_share_pct": 30.2,
+      "contrib_share_pct": 9.1,
+      "contrib_rank": 5,
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "pings_count": 4,
       "lane_id": 2,
       "benchmarks_list": [
@@ -27217,9 +27396,10 @@
         "survival": 58
       },
       "rating_score": 5.5,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 54.5,
       "raw_blame_points": 84.5,
+      "raw_contrib_points": 118.4,
       "strengths": [
         "对线基本功扎实：前10分钟交出 43正/0反（10m经济 2,576，效率 52%），撑起了前中期基础节奏。",
         "全场核心技能施放统计：离子外壳(套子) 96次 / 奔腾(加速) 95次 / 真空(拉) 8次 / 复制之墙(大招墙) 6次（操作频率 383 APM）。"
@@ -27233,7 +27413,11 @@
         "核心位阵亡 8 次严重拖垮发育节奏：当敌方 虚空假面 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
       "trash_talk": "@Mr. Brightside 一局死 8 次，看了整整 5分24秒 黑白电视（其中被敌方【虚空假面】单人提款 5 次），光死就扣了 1805 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Mr. Brightside 铁血三号位！黑暗贤者 参战率 64% 肉身扛下 31,495 伤害（全队 27%）外加 8.1 秒硬控，完美团战发动机！",
       "blame_share_pct": 23.0,
+      "contrib_share_pct": 19.0,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 10,
       "lane_id": 1,
       "benchmarks_list": [
@@ -27865,9 +28049,10 @@
         "survival": 83
       },
       "rating_score": 6.2,
-      "rating_tier": "C 头号战犯",
+      "rating_tier": "D 头号战犯",
       "mvp_score": 61.8,
       "raw_blame_points": 50.2,
+      "raw_contrib_points": 127.9,
       "strengths": [
         "全场核心技能施放统计：穿刺 68次 / 神智爆裂 31次 / 复仇(大招隐身) 18次 / 尖刺外壳(壳) 17次（操作频率 314 APM）。",
         "极高生存容错：41 分钟高强度对抗仅阵亡 3 次（读秒总计 1分40秒，仅占全场 4.0%），团战站位拉扯极佳。"
@@ -27879,7 +28064,11 @@
         "核心摸出跳刀或BKB的第一时间，4/5号位应立刻买雾发信号召集队友抓敌方落单打钱核。"
       ],
       "trash_talk": "@Replica 这把 3/3/9 标准打卡下班，背锅占比 50 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@Replica 稳健上分拼图！司夜刺客 交出 3/3/9（参战率 54% · 伤害 15,465），关键团战从不掉链子！",
       "blame_share_pct": 13.7,
+      "contrib_share_pct": 20.6,
+      "contrib_rank": 3,
+      "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
       "pings_count": 2,
       "lane_id": 1,
       "benchmarks_list": [
@@ -28552,9 +28741,10 @@
         "survival": 56
       },
       "rating_score": 7.2,
-      "rating_tier": "B 隐身混子",
+      "rating_tier": "B 随波逐流",
       "mvp_score": 71.8,
       "raw_blame_points": 52.2,
+      "raw_contrib_points": 137.8,
       "strengths": [
         "保人拉野到位：对线期把同路核心 先知 保出了 10分钟 54 刀 / 4,066 经济的顺畅开局。",
         "全场核心技能施放统计：弱化能流 44次 / 隔空取物(举) 23次 / 时间漫游(跳) 21次 / 技能窃取(偷) 18次（操作频率 257 APM）。",
@@ -28568,7 +28758,11 @@
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 玛西 无限提款。"
       ],
       "trash_talk": "@Make Your Choice 一局死 10 次，看了整整 5分47秒 黑白电视（其中被敌方【玛西】单人提款 4 次），光死就扣了 1094 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Make Your Choice 最佳幕后功臣！拉比克 全场点亮 14 假 24 真视野 + 参战率 54%，吃草挤奶把大哥伺候得明明白白！",
       "blame_share_pct": 14.2,
+      "contrib_share_pct": 22.2,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 10,
       "lane_id": 3,
       "benchmarks_list": [

@@ -931,6 +931,86 @@ select:hover {
   color: var(--green-light);
 }
 
+/* 胜局凯旋庆功模式 (win-mode & runnerup-theme)：金色/翡翠绿荣耀配色 */
+.verdict-card.runnerup-theme {
+  background: #1b241d;
+  border-color: #496b4c;
+  border-left: 3px solid var(--green-light);
+}
+
+.runnerup-theme .verdict-card-label {
+  color: var(--green-light);
+}
+
+.runnerup-theme .verdict-portrait {
+  border-color: #496b4c;
+}
+
+.runnerup-theme .verdict-score-num {
+  color: var(--green-light);
+}
+
+.runnerup-theme .verdict-quote-bar {
+  border-left-color: var(--green-light);
+}
+
+.blame-stacked-bar.win-mode .blame-seg.rank-0 { background: #8f6e26; }
+.blame-stacked-bar.win-mode .blame-seg.rank-1 { background: #3f6e46; }
+.blame-stacked-bar.win-mode .blame-seg.rank-2 { background: #345c58; }
+.blame-stacked-bar.win-mode .blame-seg.rank-3 { background: #3a5268; }
+.blame-stacked-bar.win-mode .blame-seg.rank-4 { background: #544963; }
+
+.blame-row.win-mode.rank-0 {
+  border-left: 3px solid var(--gold-light);
+  background: #232118;
+}
+
+.blame-row.win-mode.rank-1 {
+  border-left: 3px solid var(--green-light);
+  background: #1a221b;
+}
+
+.blame-row.win-mode.rank-4 {
+  border-left: 3px solid #7e7394;
+}
+
+.blame-row.win-mode.rank-0 .blame-row-bar-fill {
+  background: var(--gold-light);
+}
+
+.blame-row.win-mode.rank-1 .blame-row-bar-fill {
+  background: var(--green-light);
+}
+
+.blame-row.win-mode.rank-2 .blame-row-bar-fill,
+.blame-row.win-mode.rank-3 .blame-row-bar-fill {
+  background: #67a89a;
+}
+
+.blame-row.win-mode.rank-4 .blame-row-bar-fill {
+  background: #9c8cb8;
+}
+
+.blame-row.win-mode.rank-0 .blame-badge,
+.blame-badge.win-top {
+  background: #2d2716;
+  border-color: #8f7232;
+  color: var(--gold-light);
+}
+
+.blame-row.win-mode.rank-1 .blame-badge,
+.blame-badge.win-good {
+  background: #1b2a1f;
+  border-color: #4b7852;
+  color: var(--green-light);
+}
+
+.blame-row.win-mode.rank-4 .blame-badge {
+  background: #231f29;
+  border-color: #635775;
+  color: #cbbce0;
+}
+
 /* 模块二：四大战术图表中心 */
 .charts-hub-section {
   padding: 24px 0;
