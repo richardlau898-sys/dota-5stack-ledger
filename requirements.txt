@@ -1,0 +1,1 @@
+# Pure Python 3.12+ standard library implementation (zero external pip dependencies required)

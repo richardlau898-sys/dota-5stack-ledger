@@ -1,0 +1,71 @@
+{
+  "main_account_id": 86080912,
+  "main_name": "Flame = ez mute",
+  "players": {
+    "86080912": {
+      "name": "Flame = ez mute",
+      "usual_pos": "主力",
+      "note": "本人账号"
+    },
+    "85267950": {
+      "name": "Siesta",
+      "with_games": 2452,
+      "win_rate_pct": 51.3,
+      "note": "常驻开黑战友"
+    },
+    "43827844": {
+      "name": "Paphets",
+      "with_games": 1167,
+      "win_rate_pct": 51.6,
+      "note": "常驻开黑战友"
+    },
+    "114933560": {
+      "name": "Mr. Brightside",
+      "with_games": 849,
+      "win_rate_pct": 48.5,
+      "note": "常驻开黑战友"
+    },
+    "106255239": {
+      "name": "Merl",
+      "with_games": 537,
+      "win_rate_pct": 53.8,
+      "note": "常驻开黑战友"
+    },
+    "157118368": {
+      "name": "Replica",
+      "with_games": 216,
+      "win_rate_pct": 53.2,
+      "note": "常驻开黑战友"
+    },
+    "195089244": {
+      "name": "Make Your Choice",
+      "with_games": 191,
+      "win_rate_pct": 46.6,
+      "note": "常驻开黑战友"
+    },
+    "33287608": {
+      "name": "\"糕米团子\"",
+      "with_games": 160,
+      "win_rate_pct": 50.6,
+      "note": "常驻开黑战友"
+    },
+    "50008863": {
+      "name": "Life is HARD",
+      "with_games": 134,
+      "win_rate_pct": 44.8,
+      "note": "常驻开黑战友"
+    },
+    "109326665": {
+      "name": "Real Shiba",
+      "with_games": 125,
+      "win_rate_pct": 51.2,
+      "note": "常驻开黑战友"
+    },
+    "86542163": {
+      "name": "mr. brightside",
+      "with_games": 115,
+      "win_rate_pct": 53.0,
+      "note": "常驻开黑战友"
+    }
+  }
+}

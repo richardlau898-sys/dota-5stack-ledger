@@ -1,0 +1,4498 @@
+{
+  "match_id": 8646427108,
+  "mode_str": "⚡ 加速模式 (Turbo)",
+  "start_time_str": "2026-01-12 21:21",
+  "duration_str": "36:18",
+  "duration_min": 36.3,
+  "is_parsed": false,
+  "winner": "夜魇 (Dire)",
+  "radiant_win": false,
+  "radiant_score": 32,
+  "dire_score": 45,
+  "score": "天辉 32 : 45 夜魇",
+  "user_team_side": null,
+  "focus_side": "dire",
+  "user_won": null,
+  "radiant_gold_adv": [],
+  "radiant_xp_adv": [],
+  "objective_markers": [],
+  "vision_and_map_data": {
+    "wards": [],
+    "lane_heatmaps": []
+  },
+  "economy_timeline": {},
+  "key_teamfights": [],
+  "draft_analysis": {
+    "side": "dire",
+    "side_zh": "夜魇",
+    "lineup_str": "狙击手 + 昆卡 + 帕吉 + 司夜刺客 + 工程师",
+    "opp_lineup_str": "主宰 + 幽鬼 + 宙斯 + 杰奇洛 + 寒冬飞龙",
+    "grade": "A 级 · 扎实能打但极其考验执行",
+    "scores": {
+      "init": 76,
+      "burst": 79,
+      "tf": 80,
+      "push": 68,
+      "pick": 80,
+      "late": 78,
+      "tank": 68
+    },
+    "opp_scores": {
+      "init": 75,
+      "burst": 80,
+      "tf": 80,
+      "push": 74,
+      "pick": 81,
+      "late": 77,
+      "tank": 69
+    },
+    "verdict_summary": "夜魇这套『狙击手 + 昆卡 + 帕吉 + 司夜刺客 + 工程师』迎战天辉『主宰 + 幽鬼 + 宙斯 + 杰奇洛 + 寒冬飞龙』，在【推进拆塔 (68 vs 74)】与【先手抓人 (80 vs 81)】上具备明确体系支点；但面对敌方的团战反手与切后排威胁，极其考验前排第一波切入时机以及后排保命装（微光/推推/绿杖/BKB）的出装纪律。",
+    "strengths": [
+      "【中期抓人与爆发联动紧密 (80分)】控制与输出互补性好，只要双辅助跟紧三号位/二号位开雾节奏，很容易在中期打开突破口。"
+    ],
+    "weaknesses": [
+      "【持续磨高地能力偏弱 (68分)】缺乏远程无伤磨塔手段，如果中期打赢团不果断推外塔，拖到后期上高地会非常仰仗肉山盾强拆。",
+      "【中期跳刀/BKB真空期怕被强冲】12~22 分钟核心装未齐前，一旦分路带线过深或辅助独自做眼被抓，很容易连续掉外塔丢失半片野区。"
+    ],
+    "combos": [
+      {
+        "title": "【司夜刺客 + 工程师 + 昆卡】双辅助控符游走与中路联动",
+        "window": "04:00–15:00 · 6分钟动力符与夜晚第一波Gank",
+        "heroes": [
+          {
+            "short": "昆卡",
+            "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "pos": 2,
+            "personaname": "匿名玩家"
+          },
+          {
+            "short": "司夜刺客",
+            "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "pos": 4,
+            "personaname": "匿名玩家"
+          },
+          {
+            "short": "工程师",
+            "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "pos": 5,
+            "personaname": "匿名玩家"
+          }
+        ],
+        "how_to_play": "每逢 04:00 / 06:00 / 08:00 河道神符刷新前 20 秒，司夜刺客 必须提前靠向河道帮中单 昆卡 抢符；拿到加速/双倍/奥术或到 6 级后，立刻带着 工程师 开雾包抄敌方优势路大哥，打断敌方一号位无解肥节奏。",
+        "execution_audit": "本局实战验货：昆卡 参战率 45.5%，司夜刺客 与 工程师 整局合计买雾 0 根、插下假眼 0 颗。"
+      },
+      {
+        "title": "【帕吉 先手开团 + 狙击手/昆卡 后手切入】核心团战阵型拉扯",
+        "window": "18:00–终局 · 肉山团与高地攻坚战",
+        "heroes": [
+          {
+            "short": "帕吉",
+            "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "pos": 3,
+            "personaname": "匿名玩家"
+          },
+          {
+            "short": "狙击手",
+            "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "pos": 1,
+            "personaname": "匿名玩家"
+          },
+          {
+            "short": "昆卡",
+            "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "pos": 2,
+            "personaname": "匿名玩家"
+          }
+        ],
+        "how_to_play": "团战站位铁律：由三号位 帕吉 顶在视野最前方吃第一波先手并反手打控制，一号位 狙击手 与二号位 昆卡 切忌站在同一个圈里吃敌方满额 AOE；等敌方交出关键大招后，双核同时开启 BKB/切入技能直取敌方后排酱油与脆皮炮台。",
+        "execution_audit": "本局实战验货：帕吉 承受英雄伤害 0，双核 狙击手 与 昆卡 合计打出 58,529 英雄伤害与 16,317 建筑推塔伤害。"
+      }
+    ],
+    "heroes_brief": [
+      {
+        "pos": 1,
+        "pos_label": "1号位 · 优势路核心",
+        "hero_short_zh": "狙击手",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+        "personaname": "匿名玩家",
+        "is_me": false,
+        "roles": [
+          "一号位后期主核",
+          "装备成型收割",
+          "高地推进主力"
+        ],
+        "kda": "8/5/17"
+      },
+      {
+        "pos": 2,
+        "pos_label": "2号位 · 中路核心",
+        "hero_short_zh": "昆卡",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+        "personaname": "匿名玩家",
+        "is_me": false,
+        "roles": [
+          "二号位中单节奏核",
+          "前中期爆发游走",
+          "团战法系/混伤支点"
+        ],
+        "kda": "2/9/18"
+      },
+      {
+        "pos": 3,
+        "pos_label": "3号位 · 劣势路核心",
+        "hero_short_zh": "帕吉",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+        "personaname": "匿名玩家",
+        "is_me": false,
+        "roles": [
+          "三号位前排先手",
+          "团战吃伤害开团",
+          "团队光环与控制"
+        ],
+        "kda": "12/3/21"
+      },
+      {
+        "pos": 4,
+        "pos_label": "4号位 · 游走辅助",
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "personaname": "匿名玩家",
+        "is_me": false,
+        "roles": [
+          "四号位游走节奏",
+          "先手留人接控",
+          "中期团战拉扯"
+        ],
+        "kda": "7/7/10"
+      },
+      {
+        "pos": 5,
+        "pos_label": "5号位 · 纯辅助",
+        "hero_short_zh": "工程师",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+        "personaname": "匿名玩家",
+        "is_me": false,
+        "roles": [
+          "五号位保人视野",
+          "反手控制救人",
+          "线上消耗换血"
+        ],
+        "kda": "15/8/14"
+      }
+    ]
+  },
+  "draft_analysis_by_side": {
+    "radiant": {
+      "side": "radiant",
+      "side_zh": "天辉",
+      "lineup_str": "主宰 + 幽鬼 + 宙斯 + 杰奇洛 + 寒冬飞龙",
+      "opp_lineup_str": "狙击手 + 昆卡 + 帕吉 + 司夜刺客 + 工程师",
+      "grade": "A 级 · 扎实能打但极其考验执行",
+      "scores": {
+        "init": 75,
+        "burst": 80,
+        "tf": 80,
+        "push": 74,
+        "pick": 81,
+        "late": 77,
+        "tank": 69
+      },
+      "opp_scores": {
+        "init": 76,
+        "burst": 79,
+        "tf": 80,
+        "push": 68,
+        "pick": 80,
+        "late": 78,
+        "tank": 68
+      },
+      "verdict_summary": "天辉这套『主宰 + 幽鬼 + 宙斯 + 杰奇洛 + 寒冬飞龙』迎战夜魇『狙击手 + 昆卡 + 帕吉 + 司夜刺客 + 工程师』，在【推进拆塔 (74 vs 68)】与【先手抓人 (81 vs 80)】上具备明确体系支点；但面对敌方的团战反手与切后排威胁，极其考验前排第一波切入时机以及后排保命装（微光/推推/绿杖/BKB）的出装纪律。",
+      "strengths": [
+        "【中期抓人与爆发联动紧密 (81分)】控制与输出互补性好，只要双辅助跟紧三号位/二号位开雾节奏，很容易在中期打开突破口。"
+      ],
+      "weaknesses": [
+        "【中期跳刀/BKB真空期怕被强冲】12~22 分钟核心装未齐前，一旦分路带线过深或辅助独自做眼被抓，很容易连续掉外塔丢失半片野区。"
+      ],
+      "combos": [
+        {
+          "title": "【杰奇洛 + 寒冬飞龙 + 幽鬼】双辅助控符游走与中路联动",
+          "window": "04:00–15:00 · 6分钟动力符与夜晚第一波Gank",
+          "heroes": [
+            {
+              "short": "幽鬼",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+              "pos": 2,
+              "personaname": "Tulok"
+            },
+            {
+              "short": "杰奇洛",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+              "pos": 4,
+              "personaname": "匿名玩家"
+            },
+            {
+              "short": "寒冬飞龙",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+              "pos": 5,
+              "personaname": "匿名玩家"
+            }
+          ],
+          "how_to_play": "每逢 04:00 / 06:00 / 08:00 河道神符刷新前 20 秒，杰奇洛 必须提前靠向河道帮中单 幽鬼 抢符；拿到加速/双倍/奥术或到 6 级后，立刻带着 寒冬飞龙 开雾包抄敌方优势路大哥，打断敌方一号位无解肥节奏。",
+          "execution_audit": "本局实战验货：幽鬼 参战率 51.6%，杰奇洛 与 寒冬飞龙 整局合计买雾 0 根、插下假眼 0 颗。"
+        },
+        {
+          "title": "【宙斯 先手开团 + 主宰/幽鬼 后手切入】核心团战阵型拉扯",
+          "window": "18:00–终局 · 肉山团与高地攻坚战",
+          "heroes": [
+            {
+              "short": "宙斯",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+              "pos": 3,
+              "personaname": "匿名玩家"
+            },
+            {
+              "short": "主宰",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+              "pos": 1,
+              "personaname": "匿名玩家"
+            },
+            {
+              "short": "幽鬼",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+              "pos": 2,
+              "personaname": "Tulok"
+            }
+          ],
+          "how_to_play": "团战站位铁律：由三号位 宙斯 顶在视野最前方吃第一波先手并反手打控制，一号位 主宰 与二号位 幽鬼 切忌站在同一个圈里吃敌方满额 AOE；等敌方交出关键大招后，双核同时开启 BKB/切入技能直取敌方后排酱油与脆皮炮台。",
+          "execution_audit": "本局实战验货：宙斯 承受英雄伤害 0，双核 主宰 与 幽鬼 合计打出 115,696 英雄伤害与 7,184 建筑推塔伤害。"
+        }
+      ],
+      "heroes_brief": [
+        {
+          "pos": 1,
+          "pos_label": "1号位 · 优势路核心",
+          "hero_short_zh": "主宰",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "奶棒推进核",
+            "魔免剑刃风暴",
+            "无敌斩收割"
+          ],
+          "kda": "12/4/10"
+        },
+        {
+          "pos": 2,
+          "pos_label": "2号位 · 中路核心",
+          "hero_short_zh": "幽鬼",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+          "personaname": "Tulok",
+          "is_me": false,
+          "roles": [
+            "二号位中单节奏核",
+            "前中期爆发游走",
+            "团战法系/混伤支点"
+          ],
+          "kda": "8/13/8"
+        },
+        {
+          "pos": 3,
+          "pos_label": "3号位 · 劣势路核心",
+          "hero_short_zh": "宙斯",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "三号位前排先手",
+            "团战吃伤害开团",
+            "团队光环与控制"
+          ],
+          "kda": "7/10/19"
+        },
+        {
+          "pos": 4,
+          "pos_label": "4号位 · 游走辅助",
+          "hero_short_zh": "杰奇洛",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "四号位游走节奏",
+            "先手留人接控",
+            "中期团战拉扯"
+          ],
+          "kda": "2/7/18"
+        },
+        {
+          "pos": 5,
+          "pos_label": "5号位 · 纯辅助",
+          "hero_short_zh": "寒冬飞龙",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "五号位保人视野",
+            "反手控制救人",
+            "线上消耗换血"
+          ],
+          "kda": "2/12/15"
+        }
+      ]
+    },
+    "dire": {
+      "side": "dire",
+      "side_zh": "夜魇",
+      "lineup_str": "狙击手 + 昆卡 + 帕吉 + 司夜刺客 + 工程师",
+      "opp_lineup_str": "主宰 + 幽鬼 + 宙斯 + 杰奇洛 + 寒冬飞龙",
+      "grade": "A 级 · 扎实能打但极其考验执行",
+      "scores": {
+        "init": 76,
+        "burst": 79,
+        "tf": 80,
+        "push": 68,
+        "pick": 80,
+        "late": 78,
+        "tank": 68
+      },
+      "opp_scores": {
+        "init": 75,
+        "burst": 80,
+        "tf": 80,
+        "push": 74,
+        "pick": 81,
+        "late": 77,
+        "tank": 69
+      },
+      "verdict_summary": "夜魇这套『狙击手 + 昆卡 + 帕吉 + 司夜刺客 + 工程师』迎战天辉『主宰 + 幽鬼 + 宙斯 + 杰奇洛 + 寒冬飞龙』，在【推进拆塔 (68 vs 74)】与【先手抓人 (80 vs 81)】上具备明确体系支点；但面对敌方的团战反手与切后排威胁，极其考验前排第一波切入时机以及后排保命装（微光/推推/绿杖/BKB）的出装纪律。",
+      "strengths": [
+        "【中期抓人与爆发联动紧密 (80分)】控制与输出互补性好，只要双辅助跟紧三号位/二号位开雾节奏，很容易在中期打开突破口。"
+      ],
+      "weaknesses": [
+        "【持续磨高地能力偏弱 (68分)】缺乏远程无伤磨塔手段，如果中期打赢团不果断推外塔，拖到后期上高地会非常仰仗肉山盾强拆。",
+        "【中期跳刀/BKB真空期怕被强冲】12~22 分钟核心装未齐前，一旦分路带线过深或辅助独自做眼被抓，很容易连续掉外塔丢失半片野区。"
+      ],
+      "combos": [
+        {
+          "title": "【司夜刺客 + 工程师 + 昆卡】双辅助控符游走与中路联动",
+          "window": "04:00–15:00 · 6分钟动力符与夜晚第一波Gank",
+          "heroes": [
+            {
+              "short": "昆卡",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+              "pos": 2,
+              "personaname": "匿名玩家"
+            },
+            {
+              "short": "司夜刺客",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+              "pos": 4,
+              "personaname": "匿名玩家"
+            },
+            {
+              "short": "工程师",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+              "pos": 5,
+              "personaname": "匿名玩家"
+            }
+          ],
+          "how_to_play": "每逢 04:00 / 06:00 / 08:00 河道神符刷新前 20 秒，司夜刺客 必须提前靠向河道帮中单 昆卡 抢符；拿到加速/双倍/奥术或到 6 级后，立刻带着 工程师 开雾包抄敌方优势路大哥，打断敌方一号位无解肥节奏。",
+          "execution_audit": "本局实战验货：昆卡 参战率 45.5%，司夜刺客 与 工程师 整局合计买雾 0 根、插下假眼 0 颗。"
+        },
+        {
+          "title": "【帕吉 先手开团 + 狙击手/昆卡 后手切入】核心团战阵型拉扯",
+          "window": "18:00–终局 · 肉山团与高地攻坚战",
+          "heroes": [
+            {
+              "short": "帕吉",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+              "pos": 3,
+              "personaname": "匿名玩家"
+            },
+            {
+              "short": "狙击手",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+              "pos": 1,
+              "personaname": "匿名玩家"
+            },
+            {
+              "short": "昆卡",
+              "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+              "pos": 2,
+              "personaname": "匿名玩家"
+            }
+          ],
+          "how_to_play": "团战站位铁律：由三号位 帕吉 顶在视野最前方吃第一波先手并反手打控制，一号位 狙击手 与二号位 昆卡 切忌站在同一个圈里吃敌方满额 AOE；等敌方交出关键大招后，双核同时开启 BKB/切入技能直取敌方后排酱油与脆皮炮台。",
+          "execution_audit": "本局实战验货：帕吉 承受英雄伤害 0，双核 狙击手 与 昆卡 合计打出 58,529 英雄伤害与 16,317 建筑推塔伤害。"
+        }
+      ],
+      "heroes_brief": [
+        {
+          "pos": 1,
+          "pos_label": "1号位 · 优势路核心",
+          "hero_short_zh": "狙击手",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "一号位后期主核",
+            "装备成型收割",
+            "高地推进主力"
+          ],
+          "kda": "8/5/17"
+        },
+        {
+          "pos": 2,
+          "pos_label": "2号位 · 中路核心",
+          "hero_short_zh": "昆卡",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "二号位中单节奏核",
+            "前中期爆发游走",
+            "团战法系/混伤支点"
+          ],
+          "kda": "2/9/18"
+        },
+        {
+          "pos": 3,
+          "pos_label": "3号位 · 劣势路核心",
+          "hero_short_zh": "帕吉",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "三号位前排先手",
+            "团战吃伤害开团",
+            "团队光环与控制"
+          ],
+          "kda": "12/3/21"
+        },
+        {
+          "pos": 4,
+          "pos_label": "4号位 · 游走辅助",
+          "hero_short_zh": "司夜刺客",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "四号位游走节奏",
+            "先手留人接控",
+            "中期团战拉扯"
+          ],
+          "kda": "7/7/10"
+        },
+        {
+          "pos": 5,
+          "pos_label": "5号位 · 纯辅助",
+          "hero_short_zh": "工程师",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+          "personaname": "匿名玩家",
+          "is_me": false,
+          "roles": [
+            "五号位保人视野",
+            "反手控制救人",
+            "线上消耗换血"
+          ],
+          "kda": "15/8/14"
+        }
+      ]
+    }
+  },
+  "deep_forensics": {
+    "picks_order": [
+      {
+        "order": 1,
+        "pick_seq": 1,
+        "is_pick": true,
+        "side": "radiant",
+        "side_zh": "天辉",
+        "stage_tag": "第1手 · 首轮盲选",
+        "hero_id": 8,
+        "hero_short_zh": "主宰",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+        "pos": 1,
+        "personaname": "匿名玩家"
+      },
+      {
+        "order": 2,
+        "pick_seq": 2,
+        "is_pick": true,
+        "side": "dire",
+        "side_zh": "夜魇",
+        "stage_tag": "第2手 · 首轮盲选",
+        "hero_id": 14,
+        "hero_short_zh": "帕吉",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+        "pos": 3,
+        "personaname": "匿名玩家"
+      },
+      {
+        "order": 3,
+        "pick_seq": 3,
+        "is_pick": true,
+        "side": "dire",
+        "side_zh": "夜魇",
+        "stage_tag": "第3手 · 首轮盲选",
+        "hero_id": 88,
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "pos": 4,
+        "personaname": "匿名玩家"
+      },
+      {
+        "order": 4,
+        "pick_seq": 4,
+        "is_pick": true,
+        "side": "radiant",
+        "side_zh": "天辉",
+        "stage_tag": "第4手 · 首轮盲选",
+        "hero_id": 67,
+        "hero_short_zh": "幽鬼",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+        "pos": 2,
+        "personaname": "Tulok"
+      },
+      {
+        "order": 5,
+        "pick_seq": 5,
+        "is_pick": true,
+        "side": "dire",
+        "side_zh": "夜魇",
+        "stage_tag": "第5手 · 二轮核心",
+        "hero_id": 35,
+        "hero_short_zh": "狙击手",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+        "pos": 1,
+        "personaname": "匿名玩家"
+      },
+      {
+        "order": 6,
+        "pick_seq": 6,
+        "is_pick": true,
+        "side": "radiant",
+        "side_zh": "天辉",
+        "stage_tag": "第6手 · 二轮核心",
+        "hero_id": 64,
+        "hero_short_zh": "杰奇洛",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+        "pos": 4,
+        "personaname": "匿名玩家"
+      },
+      {
+        "order": 7,
+        "pick_seq": 7,
+        "is_pick": true,
+        "side": "dire",
+        "side_zh": "夜魇",
+        "stage_tag": "第7手 · 二轮核心",
+        "hero_id": 105,
+        "hero_short_zh": "工程师",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+        "pos": 5,
+        "personaname": "匿名玩家"
+      },
+      {
+        "order": 8,
+        "pick_seq": 8,
+        "is_pick": true,
+        "side": "radiant",
+        "side_zh": "天辉",
+        "stage_tag": "第8手 · 二轮核心",
+        "hero_id": 22,
+        "hero_short_zh": "宙斯",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+        "pos": 3,
+        "personaname": "匿名玩家"
+      },
+      {
+        "order": 9,
+        "pick_seq": 9,
+        "is_pick": true,
+        "side": "dire",
+        "side_zh": "夜魇",
+        "stage_tag": "第9手 · 尾手康特(Counter)",
+        "hero_id": 23,
+        "hero_short_zh": "昆卡",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+        "pos": 2,
+        "personaname": "匿名玩家"
+      },
+      {
+        "order": 10,
+        "pick_seq": 10,
+        "is_pick": true,
+        "side": "radiant",
+        "side_zh": "天辉",
+        "stage_tag": "第10手 · 尾手康特(Counter)",
+        "hero_id": 112,
+        "hero_short_zh": "寒冬飞龙",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+        "pos": 5,
+        "personaname": "匿名玩家"
+      }
+    ],
+    "lane_matchups": [],
+    "rubick_steal_ledger": [],
+    "key_spell_targets": [],
+    "courier_graveyard": [],
+    "ping_pressure_rank": []
+  },
+  "phases_data": [
+    {
+      "key": "lane",
+      "label": "前期对线",
+      "time_label": "00:00–05:00",
+      "start_sec": 0,
+      "end_sec": 300,
+      "team_summary": {
+        "income_diff_start": null,
+        "income_diff_end": null,
+        "income_diff_change": null,
+        "xp_diff_start": null,
+        "xp_diff_end": null,
+        "xp_diff_change": null,
+        "towers_taken": 0,
+        "towers_lost": 0,
+        "roshan_taken": 0,
+        "roshan_lost": 0
+      },
+      "events": [],
+      "players": [
+        {
+          "slot": 4,
+          "side": "radiant",
+          "pos": 1,
+          "personaname": "匿名玩家",
+          "hero_id": 8,
+          "hero_short_zh": "主宰",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "对线补刀严重不达标：作为 1 号位前10分钟仅有 0 刀（经济 +0），早期发育直接断档。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 3,
+          "side": "radiant",
+          "pos": 2,
+          "personaname": "Tulok",
+          "hero_id": 67,
+          "hero_short_zh": "幽鬼",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/spectre.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "对线补刀严重不达标：作为 2 号位前10分钟仅有 0 刀（经济 +0），早期发育直接断档。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 0,
+          "side": "radiant",
+          "pos": 3,
+          "personaname": "匿名玩家",
+          "hero_id": 22,
+          "hero_short_zh": "宙斯",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/zuus.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "劣势路混线艰难：10分钟仅 0 补刀（阶段 GPM 0），未能压制敌方优势路大哥。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 2,
+          "side": "radiant",
+          "pos": 4,
+          "personaname": "匿名玩家",
+          "hero_id": 64,
+          "hero_short_zh": "杰奇洛",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/jakiro.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "前10分钟推塔伤害为 0，对线期拿到优势后未能进一步磨掉敌方一塔血量。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 1,
+          "side": "radiant",
+          "pos": 5,
+          "personaname": "匿名玩家",
+          "hero_id": 112,
+          "hero_short_zh": "寒冬飞龙",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/winter_wyvern.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "对线期 0 真假眼记录：线上既没封敌方野店也没给中路补保护眼。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 130,
+          "side": "dire",
+          "pos": 1,
+          "personaname": "匿名玩家",
+          "hero_id": 35,
+          "hero_short_zh": "狙击手",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "对线补刀严重不达标：作为 1 号位前10分钟仅有 0 刀（经济 +0），早期发育直接断档。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 132,
+          "side": "dire",
+          "pos": 2,
+          "personaname": "匿名玩家",
+          "hero_id": 23,
+          "hero_short_zh": "昆卡",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "对线补刀严重不达标：作为 2 号位前10分钟仅有 0 刀（经济 +0），早期发育直接断档。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 131,
+          "side": "dire",
+          "pos": 3,
+          "personaname": "匿名玩家",
+          "hero_id": 14,
+          "hero_short_zh": "帕吉",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "劣势路混线艰难：10分钟仅 0 补刀（阶段 GPM 0），未能压制敌方优势路大哥。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 128,
+          "side": "dire",
+          "pos": 4,
+          "personaname": "匿名玩家",
+          "hero_id": 88,
+          "hero_short_zh": "司夜刺客",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "前10分钟推塔伤害为 0，对线期拿到优势后未能进一步磨掉敌方一塔血量。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        },
+        {
+          "slot": 129,
+          "side": "dire",
+          "pos": 5,
+          "personaname": "匿名玩家",
+          "hero_id": 105,
+          "hero_short_zh": "工程师",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "00:00–05:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
+          ],
+          "bad": [
+            "对线期 0 真假眼记录：线上既没封敌方野店也没给中路补保护眼。"
+          ],
+          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+        }
+      ],
+      "team_diagnostics": {
+        "radiant": {
+          "summary": "",
+          "turning_point": "",
+          "team_good": "1号位/核心（主宰）前10分钟补出 0 刀稳住了基本盘，全队打出 0:0 人头交换。",
+          "team_bad": "三路对线虽然稳住，但双辅助游走中路与抢 6 分钟河道神符的联动压制力还不够紧凑。",
+          "team_action": "【前期团队怎么进步 (00:00–10:00)】：① 03:00 边路莲花与 06:00/08:00 河道动力符必须由 4 号位提前 15 秒靠过去配合中单控下；② 优势路 5 号位前 5 分钟以拉野消兵、保 1 号位无解肥补刀为第一铁律，别盲目TP支援导致大哥线被冲；③ 一旦中单或三号位到 6 级有大招，立刻带帕格纳/辅助推掉敌方优势路一塔解放野区。"
+        },
+        "dire": {
+          "summary": "",
+          "turning_point": "",
+          "team_good": "1号位/核心（狙击手）前10分钟补出 0 刀稳住了基本盘，全队打出 0:0 人头交换。",
+          "team_bad": "三路对线虽然稳住，但双辅助游走中路与抢 6 分钟河道神符的联动压制力还不够紧凑。",
+          "team_action": "【前期团队怎么进步 (00:00–10:00)】：① 03:00 边路莲花与 06:00/08:00 河道动力符必须由 4 号位提前 15 秒靠过去配合中单控下；② 优势路 5 号位前 5 分钟以拉野消兵、保 1 号位无解肥补刀为第一铁律，别盲目TP支援导致大哥线被冲；③ 一旦中单或三号位到 6 级有大招，立刻带帕格纳/辅助推掉敌方优势路一塔解放野区。"
+        }
+      }
+    },
+    {
+      "key": "mid",
+      "label": "中期运营",
+      "time_label": "05:00–15:00",
+      "start_sec": 300,
+      "end_sec": 900,
+      "team_summary": {
+        "income_diff_start": null,
+        "income_diff_end": null,
+        "income_diff_change": null,
+        "xp_diff_start": null,
+        "xp_diff_end": null,
+        "xp_diff_change": null,
+        "towers_taken": 0,
+        "towers_lost": 0,
+        "roshan_taken": 0,
+        "roshan_lost": 0
+      },
+      "events": [],
+      "players": [
+        {
+          "slot": 4,
+          "side": "radiant",
+          "pos": 1,
+          "personaname": "匿名玩家",
+          "hero_id": 8,
+          "hero_short_zh": "主宰",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
+            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 3,
+          "side": "radiant",
+          "pos": 2,
+          "personaname": "Tulok",
+          "hero_id": 67,
+          "hero_short_zh": "幽鬼",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/spectre.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
+            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 0,
+          "side": "radiant",
+          "pos": 3,
+          "personaname": "匿名玩家",
+          "hero_id": 22,
+          "hero_short_zh": "宙斯",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/zuus.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 2,
+          "side": "radiant",
+          "pos": 4,
+          "personaname": "匿名玩家",
+          "hero_id": 64,
+          "hero_short_zh": "杰奇洛",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/jakiro.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 1,
+          "side": "radiant",
+          "pos": 5,
+          "personaname": "匿名玩家",
+          "hero_id": 112,
+          "hero_short_zh": "寒冬飞龙",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/winter_wyvern.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 130,
+          "side": "dire",
+          "pos": 1,
+          "personaname": "匿名玩家",
+          "hero_id": 35,
+          "hero_short_zh": "狙击手",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
+            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 132,
+          "side": "dire",
+          "pos": 2,
+          "personaname": "匿名玩家",
+          "hero_id": 23,
+          "hero_short_zh": "昆卡",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
+            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 131,
+          "side": "dire",
+          "pos": 3,
+          "personaname": "匿名玩家",
+          "hero_id": 14,
+          "hero_short_zh": "帕吉",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 128,
+          "side": "dire",
+          "pos": 4,
+          "personaname": "匿名玩家",
+          "hero_id": 88,
+          "hero_short_zh": "司夜刺客",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        },
+        {
+          "slot": 129,
+          "side": "dire",
+          "pos": 5,
+          "personaname": "匿名玩家",
+          "hero_id": 105,
+          "hero_short_zh": "工程师",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": null,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+          ],
+          "bad": [
+            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+          ],
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+        }
+      ],
+      "team_diagnostics": {
+        "radiant": {
+          "summary": "",
+          "turning_point": "",
+          "team_good": "主核 主宰 在 10~25 分钟保持 +0 高速发育，全队插下 0 假眼 / 0 真眼维持视野拉扯。",
+          "team_bad": "中期拿到击杀优势后推塔转化率偏低（阶段全队建筑伤害 0），没有在 20 分钟前早早控下一代肉山盾锁死胜局。",
+          "team_action": "【中期团队怎么进步 (10:00–25:00)】：① 明确中期带队核心：当 1 号位正在刷狂战/分身/BKB 关键成型点时，2/3/4/5 号位要么开雾去抓敌方落单刷钱核，要么蹲在己方刷钱大哥侧翼高坡反蹲，绝不无脑 4 打 5 强冲；② 3 号位跳刀出炉的第一时间必须立刻买雾打第一波信息差先手，打赢顺势拔掉敌方中一塔与优势路一塔；③ 20~24 分钟一旦抓死敌方双核或大招流辅助，全队立刻集合打掉第一代肉山，拒绝散开各刷各的野！"
+        },
+        "dire": {
+          "summary": "",
+          "turning_point": "",
+          "team_good": "主核 狙击手 在 10~25 分钟保持 +0 高速发育，全队插下 0 假眼 / 0 真眼维持视野拉扯。",
+          "team_bad": "中期拿到击杀优势后推塔转化率偏低（阶段全队建筑伤害 0），没有在 20 分钟前早早控下一代肉山盾锁死胜局。",
+          "team_action": "【中期团队怎么进步 (10:00–25:00)】：① 明确中期带队核心：当 1 号位正在刷狂战/分身/BKB 关键成型点时，2/3/4/5 号位要么开雾去抓敌方落单刷钱核，要么蹲在己方刷钱大哥侧翼高坡反蹲，绝不无脑 4 打 5 强冲；② 3 号位跳刀出炉的第一时间必须立刻买雾打第一波信息差先手，打赢顺势拔掉敌方中一塔与优势路一塔；③ 20~24 分钟一旦抓死敌方双核或大招流辅助，全队立刻集合打掉第一代肉山，拒绝散开各刷各的野！"
+        }
+      }
+    },
+    {
+      "key": "late",
+      "label": "后期决策",
+      "time_label": "15:00–36:18",
+      "start_sec": 900,
+      "end_sec": 2178,
+      "team_summary": {
+        "income_diff_start": null,
+        "income_diff_end": null,
+        "income_diff_change": null,
+        "xp_diff_start": null,
+        "xp_diff_end": null,
+        "xp_diff_change": null,
+        "towers_taken": 0,
+        "towers_lost": 0,
+        "roshan_taken": 0,
+        "roshan_lost": 0
+      },
+      "events": [],
+      "players": [
+        {
+          "slot": 4,
+          "side": "radiant",
+          "pos": 1,
+          "personaname": "匿名玩家",
+          "hero_id": 8,
+          "hero_short_zh": "主宰",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 48576,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 3,
+          "side": "radiant",
+          "pos": 2,
+          "personaname": "Tulok",
+          "hero_id": 67,
+          "hero_short_zh": "幽鬼",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/spectre.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 41392,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 0,
+          "side": "radiant",
+          "pos": 3,
+          "personaname": "匿名玩家",
+          "hero_id": 22,
+          "hero_short_zh": "宙斯",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/zuus.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 38295,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 2,
+          "side": "radiant",
+          "pos": 4,
+          "personaname": "匿名玩家",
+          "hero_id": 64,
+          "hero_short_zh": "杰奇洛",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/jakiro.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 21115,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 1,
+          "side": "radiant",
+          "pos": 5,
+          "personaname": "匿名玩家",
+          "hero_id": 112,
+          "hero_short_zh": "寒冬飞龙",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/winter_wyvern.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 23904,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 130,
+          "side": "dire",
+          "pos": 1,
+          "personaname": "匿名玩家",
+          "hero_id": 35,
+          "hero_short_zh": "狙击手",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 47476,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 132,
+          "side": "dire",
+          "pos": 2,
+          "personaname": "匿名玩家",
+          "hero_id": 23,
+          "hero_short_zh": "昆卡",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 30488,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 131,
+          "side": "dire",
+          "pos": 3,
+          "personaname": "匿名玩家",
+          "hero_id": 14,
+          "hero_short_zh": "帕吉",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 58282,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 128,
+          "side": "dire",
+          "pos": 4,
+          "personaname": "匿名玩家",
+          "hero_id": 88,
+          "hero_short_zh": "司夜刺客",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 37569,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        },
+        {
+          "slot": 129,
+          "side": "dire",
+          "pos": 5,
+          "personaname": "匿名玩家",
+          "hero_id": 105,
+          "hero_short_zh": "工程师",
+          "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
+          "gold_gain": null,
+          "gpm_phase": null,
+          "net_worth_start": null,
+          "net_worth_end": 36371,
+          "lh_gain": null,
+          "dn_gain": null,
+          "hero_damage_gain": null,
+          "tower_damage_gain": null,
+          "kills_count": 0,
+          "deaths_count": 0,
+          "kills_events": [],
+          "deaths_events": [],
+          "obs_placed": 0,
+          "sen_placed": 0,
+          "buybacks": 0,
+          "items_bought": [],
+          "assessment": "15:00–36:18 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
+          "good": [
+            "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
+          ],
+          "bad": [
+            "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
+          ],
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+        }
+      ],
+      "team_diagnostics": {
+        "radiant": {
+          "summary": "",
+          "turning_point": "",
+          "team_good": "25分钟后全队打出 0:0 的决战表现，合计轰出 0 点建筑伤害，抓住了关键团战与肉山窗口完成终结。",
+          "team_bad": "后期关键团战前后出现减员（主宰 阶段阵亡 0 次），上高地或压三塔时存在抗塔过深、技能交完不果断后撤被敌方买活反打的惊险失误！",
+          "team_action": "【后期团队怎么进步 (25:00–终局)】：① 25 分钟后全员严守『买活钱红线』，差 500 金以内买大件时优先留买活；② 上高地前必须确保带盾（或敌方至少减员 2 人且无买活），由带盾核+奶棒/爆轰磨塔，猛犸/莱恩蹲在后面专门断对面冲高地反扑；③ 破掉一路高地或逼出对面双买活后，全队立刻语音喊撤退转打肉山/控魔晶，绝不残血赖在敌方高地上送翻盘！"
+        },
+        "dire": {
+          "summary": "",
+          "turning_point": "",
+          "team_good": "25分钟后全队打出 0:0 的决战表现，合计轰出 0 点建筑伤害，抓住了关键团战与肉山窗口完成终结。",
+          "team_bad": "后期关键团战前后出现减员（狙击手 阶段阵亡 0 次），上高地或压三塔时存在抗塔过深、技能交完不果断后撤被敌方买活反打的惊险失误！",
+          "team_action": "【后期团队怎么进步 (25:00–终局)】：① 25 分钟后全员严守『买活钱红线』，差 500 金以内买大件时优先留买活；② 上高地前必须确保带盾（或敌方至少减员 2 人且无买活），由带盾核+奶棒/爆轰磨塔，猛犸/莱恩蹲在后面专门断对面冲高地反扑；③ 破掉一路高地或逼出对面双买活后，全队立刻语音喊撤退转打肉山/控魔晶，绝不残血赖在敌方高地上送翻盘！"
+        }
+      }
+    }
+  ],
+  "grok_coaching": null,
+  "mvp": {
+    "mvp_player": {
+      "side": "夜魇",
+      "pos": 3,
+      "pos_label": "3号位 · 劣势路核心",
+      "hero_name": "帕吉(屠夫/Pudge)",
+      "hero_short_zh": "帕吉",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "kda": "12/3/21",
+      "rating_score": 8.3,
+      "rating_tier": "S 核心支柱",
+      "mvp_score": 83.5,
+      "blame_share_pct": 7.7,
+      "gpm": 1607,
+      "xpm": 2809,
+      "hero_damage": 65436,
+      "hero_damage_share_pct": 34.9,
+      "tower_damage": 2164,
+      "kill_participation_pct": 75.0,
+      "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！"
+    },
+    "runner_up_player": {
+      "side": "夜魇",
+      "pos": 1,
+      "hero_name": "狙击手(火枪/Sniper)",
+      "hero_short_zh": "狙击手",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
+      "personaname": "匿名玩家",
+      "kda": "8/5/17",
+      "rating_score": 8.3,
+      "blame_share_pct": 8.1
+    },
+    "svp_player": {
+      "side": "天辉",
+      "pos": 1,
+      "hero_name": "主宰(剑圣/Jugg)",
+      "hero_short_zh": "主宰",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
+      "personaname": "匿名玩家",
+      "kda": "12/4/10",
+      "rating_score": 7.5,
+      "blame_share_pct": 9.0
+    },
+    "culprit_player": {
+      "side": "夜魇",
+      "pos": 2,
+      "pos_label": "2号位 · 中路核心",
+      "hero_name": "昆卡(船长/Kunkka)",
+      "hero_short_zh": "昆卡",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "kda": "2/9/18",
+      "rating_score": 4.3,
+      "rating_tier": "C 头号战犯",
+      "blame_share_pct": 40.9,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "main_crime": "典型高占经低产出：拿了全队 14.5% 的总经济（30,488金），全场却只打出 18,562 伤害（仅占全队 9.9%），每1块钱经济只换来 0.61 点伤害。",
+      "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "verdict": "车队头号大锅认证（分锅占比 40.9%）：夜魇 2号位 昆卡（匿名玩家，评分 4.3）——虽然比赛最终翻盘赢下，但中期险些葬送好局的头号战犯就是他：典型高占经低产出：拿了全队 14.5% 的总经济（30,488金），全场却只打出 18,562 伤害（仅占全队 9.9%），每1块钱经济只换来 0.61 点伤害。"
+    },
+    "second_culprit_player": {
+      "side": "夜魇",
+      "pos": 4,
+      "hero_name": "司夜刺客(小强/NA)",
+      "hero_short_zh": "司夜刺客",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+      "personaname": "匿名玩家",
+      "kda": "7/7/10",
+      "rating_score": 5.0,
+      "blame_share_pct": 21.7,
+      "main_crime": "整体发挥稳健：全场仅阵亡 7 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+    },
+    "focus_team_blame_ranking": [
+      {
+        "pos": 2,
+        "hero_name": "昆卡(船长/Kunkka)",
+        "hero_short_zh": "昆卡",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "blame_share_pct": 40.9,
+        "rating_score": 4.3,
+        "rating_tier": "C 头号战犯",
+        "kda": "2/9/18",
+        "dead_seconds": 0,
+        "death_gold_lost": 0,
+        "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？"
+      },
+      {
+        "pos": 4,
+        "hero_name": "司夜刺客(小强/NA)",
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "blame_share_pct": 21.7,
+        "rating_score": 5.0,
+        "rating_tier": "C 头号战犯",
+        "kda": "7/7/10",
+        "dead_seconds": 0,
+        "death_gold_lost": 0,
+        "trash_talk": "@匿名玩家 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！"
+      },
+      {
+        "pos": 5,
+        "hero_name": "工程师(炸弹人/Techies)",
+        "hero_short_zh": "工程师",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "blame_share_pct": 21.6,
+        "rating_score": 6.1,
+        "rating_tier": "C 头号战犯",
+        "kda": "15/8/14",
+        "dead_seconds": 0,
+        "death_gold_lost": 0,
+        "trash_talk": "@匿名玩家 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？"
+      },
+      {
+        "pos": 1,
+        "hero_name": "狙击手(火枪/Sniper)",
+        "hero_short_zh": "狙击手",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "blame_share_pct": 8.1,
+        "rating_score": 8.3,
+        "rating_tier": "S 核心支柱",
+        "kda": "8/5/17",
+        "dead_seconds": 0,
+        "death_gold_lost": 0,
+        "trash_talk": "@匿名玩家 这把 8/5/17 标准打卡下班，背锅占比 19 点，赢了跟着笑，输了怪队友！"
+      },
+      {
+        "pos": 3,
+        "hero_name": "帕吉(屠夫/Pudge)",
+        "hero_short_zh": "帕吉",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "blame_share_pct": 7.7,
+        "rating_score": 8.3,
+        "rating_tier": "S 核心支柱",
+        "kda": "12/3/21",
+        "dead_seconds": 0,
+        "death_gold_lost": 0,
+        "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！"
+      }
+    ],
+    "rationale_list": [
+      "全场头号大腿 (8.3分 · S 核心支柱)：夜魇 3号位 帕吉（匿名玩家）交出 12/3/21（参战率 75.0%），本局个人背锅占比仅 7.7%。",
+      "核心统治力数据：单人打出 65,436 英雄伤害（占全队 34.9%）+ 2,164 建筑伤害，总经济 58,282（GPM 1607 / XPM 2809）。",
+      "制胜关键：极高生存容错：36 分钟高强度对抗仅阵亡 3 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。",
+      "胜方二当家：1号位 狙击手（匿名玩家，评分 8.3）贡献 8/5/17（参战率 56.8%，伤害 39,967）。",
+      "败方孤胆院长 (SVP)：天辉 1号位 主宰（匿名玩家，评分 7.5）交出 12/4/10（伤害 47,673），一神带四坑实在带不动。",
+      "车队头号大锅认证（分锅占比 40.9%）：夜魇 2号位 昆卡（匿名玩家，评分 4.3）——虽然比赛最终翻盘赢下，但中期险些葬送好局的头号战犯就是他：典型高占经低产出：拿了全队 14.5% 的总经济（30,488金），全场却只打出 18,562 伤害（仅占全队 9.9%），每1块钱经济只换来 0.61 点伤害。"
+    ]
+  },
+  "match_narrative": {
+    "lane_matchups": [],
+    "roshan_events": [],
+    "couriers_lost": {
+      "radiant": 0,
+      "dire": 0
+    },
+    "stages": [
+      {
+        "title": "00:00 - 10:00 对线期三路对账",
+        "content": "双方完成前10分钟对线期博弈。"
+      },
+      {
+        "title": "10:00 - 25:00 中期节奏与装备真空取证",
+        "content": "20分钟时天辉经济领先 0 金，25分钟时天辉领先 0 金。全场天辉总计买雾 0 次，夜魇买雾 0 次。中期谁出现 15 分钟以上的装备真空期、谁拖到30分钟后才摸出 BKB，在下方 1~5 号位时间轴与按键取证中一目了然。"
+      },
+      {
+        "title": "25:00 - 终局 决胜团战与肉山高地博弈",
+        "content": "最终夜魇在 36.3 分钟推平遗迹终结比赛。"
+      },
+      {
+        "title": "全局五人硬实力与团队执行力对比",
+        "content": "主视角（夜魇）车队全局数据对比：① 控制时长：0.0秒 vs 敌方 0.0秒；② 视野与开雾：插眼 0颗（开雾 0次） vs 敌方插眼 0颗（开雾 0次）；③ 建筑伤害：21,319 vs 敌方 10,370；④ 全队泉水读秒总时长：0分00秒 vs 敌方 0分00秒。"
+      }
+    ]
+  },
+  "radiant_pos_1_to_5": [
+    {
+      "player_slot": 4,
+      "side": "radiant",
+      "pos": 1,
+      "pos_label": "1号位 · 优势路核心",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 8,
+      "hero_name": "主宰(剑圣/Jugg)",
+      "hero_short_zh": "主宰",
+      "hero_alias": "剑圣/Jugg",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "12/4/10",
+      "kills": 12,
+      "deaths": 4,
+      "assists": 10,
+      "kill_participation_pct": 71.0,
+      "net_worth": 48576,
+      "gpm": 1398,
+      "xpm": 2372,
+      "last_hits": 262,
+      "denies": 9,
+      "hero_damage": 47673,
+      "hero_damage_share_pct": 21.3,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 5165,
+      "hero_healing": 9798,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "狂战斧",
+        "否决挂坠",
+        "分身斧",
+        "大隐刀",
+        "冰眼",
+        "金箍棒(MKB)",
+        "[中立]Stygian Desolator",
+        "[A杖加持]",
+        "[魔晶加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "bfury",
+          "zh_name": "狂战斧",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/bfury.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "nullifier",
+          "zh_name": "否决挂坠",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/nullifier.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "manta",
+          "zh_name": "分身斧",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/manta.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "silver_edge",
+          "zh_name": "大隐刀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/silver_edge.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "skadi",
+          "zh_name": "冰眼",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/skadi.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "monkey_king_bar",
+          "zh_name": "金箍棒(MKB)",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/monkey_king_bar.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [
+        {
+          "slot": 0,
+          "key": "greater_famango",
+          "zh_name": "Greater Healing Lotus",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/greater_famango.png",
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "great_famango",
+          "zh_name": "Great Healing Lotus",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/great_famango.png",
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "travel_boots",
+          "zh_name": "飞鞋",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/travel_boots.png",
+          "use_count": 0
+        }
+      ],
+      "neutral_item_rich": {
+        "key": "desolator_2",
+        "zh_name": "Stygian Desolator",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/desolator_2.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": true,
+      "aghanims_shard": true,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 61% 同英雄",
+        "XPM同英雄分位": "超越 71% 同英雄",
+        "分均伤害分位": "超越 78% 同英雄",
+        "分均击杀分位": "超越 61% 同英雄",
+        "分均补刀分位": "超越 58% 同英雄",
+        "推塔分位": "超越 54% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.6142396427685438,
+        "xp_per_min": 0.7127263706276358,
+        "hero_damage_per_min": 0.7772264946663359,
+        "kills_per_min": 0.6065492433639296,
+        "last_hits_per_min": 0.5790126519474076,
+        "tower_damage": 0.5447779707268667
+      },
+      "tags": [
+        "高参战率 (71%)",
+        "推进核心 (塔伤5,165)"
+      ],
+      "radar": {
+        "farm": 71,
+        "damage": 71,
+        "tempo": 72,
+        "push": 66,
+        "utility": 50,
+        "survival": 72
+      },
+      "rating_score": 7.5,
+      "rating_tier": "B 隐身混子",
+      "mvp_score": 74.5,
+      "raw_blame_points": 27.5,
+      "strengths": [
+        "推进终结能力极强：单人打出 5,165 建筑伤害（包揽全队 50% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
+        "极高生存容错：36 分钟高强度对抗仅阵亡 4 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 4 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 主宰 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@匿名玩家 这把 12/4/10 标准打卡下班，背锅占比 28 点，赢了跟着笑，输了怪队友！",
+      "blame_share_pct": 9.0,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 61.4,
+          "raw": 1398.0,
+          "tier": "mid"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 71.3,
+          "raw": 2372.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 60.7,
+          "raw": 0.3,
+          "tier": "mid"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 57.9,
+          "raw": 7.2,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 77.7,
+          "raw": 1313.3,
+          "tier": "top"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 70.3,
+          "raw": 269.9,
+          "tier": "mid"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 54.5,
+          "raw": 5165.0,
+          "tier": "mid"
+        }
+      ],
+      "ability_targets_list": []
+    },
+    {
+      "player_slot": 3,
+      "side": "radiant",
+      "pos": 2,
+      "pos_label": "2号位 · 中路核心",
+      "account_id": 168580914,
+      "personaname": "Tulok",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "中军 (Crusader)[3星]",
+      "hero_id": 67,
+      "hero_name": "幽鬼(UG/Spectre)",
+      "hero_short_zh": "幽鬼",
+      "hero_alias": "UG/Spectre",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/spectre.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "8/13/8",
+      "kills": 8,
+      "deaths": 13,
+      "assists": 8,
+      "kill_participation_pct": 51.6,
+      "net_worth": 41392,
+      "gpm": 1165,
+      "xpm": 2122,
+      "last_hits": 194,
+      "denies": 6,
+      "hero_damage": 68023,
+      "hero_damage_share_pct": 30.4,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 2019,
+      "hero_healing": 125,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "龙心",
+        "分身斧",
+        "大散失(驱散之刃)",
+        "大晕锤",
+        "辉耀",
+        "假腿",
+        "[中立]Stygian Desolator",
+        "[魔晶加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "heart",
+          "zh_name": "龙心",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "manta",
+          "zh_name": "分身斧",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/manta.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "disperser",
+          "zh_name": "大散失(驱散之刃)",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/disperser.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "abyssal_blade",
+          "zh_name": "大晕锤",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/abyssal_blade.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "radiance",
+          "zh_name": "辉耀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/radiance.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "power_treads",
+          "zh_name": "假腿",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [
+        {
+          "slot": 0,
+          "key": "refresher",
+          "zh_name": "刷新球",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/refresher.png",
+          "use_count": 0
+        }
+      ],
+      "neutral_item_rich": {
+        "key": "desolator_2",
+        "zh_name": "Stygian Desolator",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/desolator_2.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": false,
+      "aghanims_shard": true,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 42% 同英雄",
+        "XPM同英雄分位": "超越 49% 同英雄",
+        "分均伤害分位": "超越 85% 同英雄",
+        "分均击杀分位": "超越 34% 同英雄",
+        "分均补刀分位": "超越 51% 同英雄",
+        "推塔分位": "超越 48% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.425,
+        "xp_per_min": 0.4920731707317073,
+        "hero_damage_per_min": 0.8542682926829268,
+        "kills_per_min": 0.3384146341463415,
+        "last_hits_per_min": 0.5109756097560976,
+        "tower_damage": 0.4841463414634146
+      },
+      "tags": [
+        "全队输出支柱 (30%)",
+        "核心高频阵亡 (13死)"
+      ],
+      "radar": {
+        "farm": 55,
+        "damage": 86,
+        "tempo": 53,
+        "push": 41,
+        "utility": 30,
+        "survival": 15
+      },
+      "rating_score": 5.4,
+      "rating_tier": "C 头号战犯",
+      "mvp_score": 53.8,
+      "raw_blame_points": 86.7,
+      "strengths": [
+        "输出转化率极高：吃下全队 23.9% 经济（41,392金），狂轰 68,023 英雄伤害（占全队 30.4%，超越全网 85% 同英雄）。"
+      ],
+      "weaknesses": [
+        "高频阵亡提款机：全场阵亡 **13 次**，黑白屏幕读秒长达 **0分00秒（占整局比赛 0.0% 时间）**！"
+      ],
+      "improvements": [
+        "核心位阵亡 13 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
+      ],
+      "trash_talk": "@Tulok 一局死 13 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "blame_share_pct": 28.2,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 42.5,
+          "raw": 1165.0,
+          "tier": "mid"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 49.2,
+          "raw": 2122.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 33.8,
+          "raw": 0.2,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 51.1,
+          "raw": 5.3,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 85.4,
+          "raw": 1873.9,
+          "tier": "top"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 89.8,
+          "raw": 3.4,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 48.4,
+          "raw": 2019.0,
+          "tier": "mid"
+        }
+      ],
+      "ability_targets_list": []
+    },
+    {
+      "player_slot": 0,
+      "side": "radiant",
+      "pos": 3,
+      "pos_label": "3号位 · 劣势路核心",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 22,
+      "hero_name": "宙斯(Zeus)",
+      "hero_short_zh": "宙斯",
+      "hero_alias": "Zeus",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/zuus.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "7/10/19",
+      "kills": 7,
+      "deaths": 10,
+      "assists": 19,
+      "kill_participation_pct": 83.9,
+      "net_worth": 38295,
+      "gpm": 1304,
+      "xpm": 2108,
+      "last_hits": 194,
+      "denies": 3,
+      "hero_damage": 51597,
+      "hero_damage_share_pct": 23.1,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 2542,
+      "hero_healing": 0,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "刷新球",
+        "大吹风",
+        "飞鞋",
+        "魔瓶",
+        "绝刃(大灵匣)",
+        "蝴蝶",
+        "[中立]Disgraced Regalia",
+        "[A杖加持]",
+        "[魔晶加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "refresher",
+          "zh_name": "刷新球",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/refresher.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "wind_waker",
+          "zh_name": "大吹风",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wind_waker.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "travel_boots",
+          "zh_name": "飞鞋",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/travel_boots.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "bottle",
+          "zh_name": "魔瓶",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/bottle.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "angels_demise",
+          "zh_name": "绝刃(大灵匣)",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/angels_demise.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "butterfly",
+          "zh_name": "蝴蝶",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/butterfly.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [
+        {
+          "slot": 0,
+          "key": "greater_famango",
+          "zh_name": "Greater Healing Lotus",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/greater_famango.png",
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "great_famango",
+          "zh_name": "Great Healing Lotus",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/great_famango.png",
+          "use_count": 0
+        }
+      ],
+      "neutral_item_rich": {
+        "key": "divine_regalia_broken",
+        "zh_name": "Disgraced Regalia",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/divine_regalia_broken.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": true,
+      "aghanims_shard": true,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 80% 同英雄",
+        "XPM同英雄分位": "超越 74% 同英雄",
+        "分均伤害分位": "超越 70% 同英雄",
+        "分均击杀分位": "超越 42% 同英雄",
+        "分均补刀分位": "超越 78% 同英雄",
+        "推塔分位": "超越 93% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.800628391888032,
+        "xp_per_min": 0.7435018566123964,
+        "hero_damage_per_min": 0.7003713224792917,
+        "kills_per_min": 0.41616680948300483,
+        "last_hits_per_min": 0.7786346758069123,
+        "tower_damage": 0.9303056269637247
+      },
+      "tags": [
+        "高参战率 (84%)",
+        "阵亡偏多 (10死)"
+      ],
+      "radar": {
+        "farm": 81,
+        "damage": 68,
+        "tempo": 94,
+        "push": 69,
+        "utility": 30,
+        "survival": 43
+      },
+      "rating_score": 6.3,
+      "rating_tier": "C 头号战犯",
+      "mvp_score": 63.5,
+      "raw_blame_points": 60.5,
+      "strengths": [
+        "基础数据合格：交出 7/10/19（参战率 83.9%，英雄伤害 51,597），完成了该位置基础任务。"
+      ],
+      "weaknesses": [
+        "高频阵亡提款机：全场阵亡 **10 次**，黑白屏幕读秒长达 **0分00秒（占整局比赛 0.0% 时间）**！"
+      ],
+      "improvements": [
+        "核心位阵亡 10 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
+      ],
+      "trash_talk": "@匿名玩家 一局死 10 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "blame_share_pct": 19.7,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 80.1,
+          "raw": 1304.0,
+          "tier": "top"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 74.4,
+          "raw": 2108.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 41.6,
+          "raw": 0.2,
+          "tier": "mid"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 77.9,
+          "raw": 5.3,
+          "tier": "top"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 70.0,
+          "raw": 1421.4,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 87.1,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 93.0,
+          "raw": 2542.0,
+          "tier": "top"
+        }
+      ],
+      "ability_targets_list": []
+    },
+    {
+      "player_slot": 2,
+      "side": "radiant",
+      "pos": 4,
+      "pos_label": "4号位 · 游走辅助",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 64,
+      "hero_name": "杰奇洛(双头龙/THD)",
+      "hero_short_zh": "杰奇洛",
+      "hero_alias": "双头龙/THD",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/jakiro.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "2/7/18",
+      "kills": 2,
+      "deaths": 7,
+      "assists": 18,
+      "kill_participation_pct": 64.5,
+      "net_worth": 21115,
+      "gpm": 733,
+      "xpm": 2150,
+      "last_hits": 69,
+      "denies": 0,
+      "hero_damage": 32303,
+      "hero_damage_share_pct": 14.5,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 644,
+      "hero_healing": 125,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "大推推",
+        "微光披风",
+        "Veil of Discord",
+        "秘法鞋",
+        "Observer and Sentry Wards",
+        "以太之镜",
+        "[中立]Fallen Sky",
+        "[A杖加持]",
+        "[魔晶加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "hurricane_pike",
+          "zh_name": "大推推",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/hurricane_pike.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "glimmer_cape",
+          "zh_name": "微光披风",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/glimmer_cape.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "veil_of_discord",
+          "zh_name": "Veil of Discord",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/veil_of_discord.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "arcane_boots",
+          "zh_name": "秘法鞋",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/arcane_boots.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "ward_dispenser",
+          "zh_name": "Observer and Sentry Wards",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ward_dispenser.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "aether_lens",
+          "zh_name": "以太之镜",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aether_lens.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [
+        {
+          "slot": 0,
+          "key": "platemail",
+          "zh_name": "Platemail",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/platemail.png",
+          "use_count": 0
+        }
+      ],
+      "neutral_item_rich": {
+        "key": "fallen_sky",
+        "zh_name": "Fallen Sky",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/fallen_sky.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": true,
+      "aghanims_shard": true,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 25% 同英雄",
+        "XPM同英雄分位": "超越 81% 同英雄",
+        "分均伤害分位": "超越 65% 同英雄",
+        "分均击杀分位": "超越 16% 同英雄",
+        "分均补刀分位": "超越 36% 同英雄",
+        "推塔分位": "超越 34% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.2535211267605634,
+        "xp_per_min": 0.8087757313109426,
+        "hero_damage_per_min": 0.6484290357529794,
+        "kills_per_min": 0.1581798483206934,
+        "last_hits_per_min": 0.3591549295774648,
+        "tower_damage": 0.34073672806067173
+      },
+      "tags": [],
+      "radar": {
+        "farm": 46,
+        "damage": 55,
+        "tempo": 75,
+        "push": 50,
+        "utility": 35,
+        "survival": 64
+      },
+      "rating_score": 5.7,
+      "rating_tier": "C 头号战犯",
+      "mvp_score": 57.4,
+      "raw_blame_points": 44.6,
+      "strengths": [
+        "基础数据合格：交出 2/7/18（参战率 64.5%，英雄伤害 32,303），完成了该位置基础任务。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 7 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 杰奇洛 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@匿名玩家 这把 2/7/18 标准打卡下班，背锅占比 45 点，赢了跟着笑，输了怪队友！",
+      "blame_share_pct": 14.5,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 25.4,
+          "raw": 733.0,
+          "tier": "low"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 80.9,
+          "raw": 2150.0,
+          "tier": "top"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 15.8,
+          "raw": 0.1,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 35.9,
+          "raw": 1.9,
+          "tier": "low"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 64.8,
+          "raw": 889.9,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 72.1,
+          "raw": 3.4,
+          "tier": "mid"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 34.1,
+          "raw": 644.0,
+          "tier": "low"
+        }
+      ],
+      "ability_targets_list": []
+    },
+    {
+      "player_slot": 1,
+      "side": "radiant",
+      "pos": 5,
+      "pos_label": "5号位 · 纯辅助",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 112,
+      "hero_name": "寒冬飞龙(冰龙/WW)",
+      "hero_short_zh": "寒冬飞龙",
+      "hero_alias": "冰龙/WW",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/winter_wyvern.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "2/12/15",
+      "kills": 2,
+      "deaths": 12,
+      "assists": 15,
+      "kill_participation_pct": 54.8,
+      "net_worth": 23904,
+      "gpm": 647,
+      "xpm": 1433,
+      "last_hits": 33,
+      "denies": 2,
+      "hero_damage": 23819,
+      "hero_damage_share_pct": 10.7,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 0,
+      "hero_healing": 5329,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "希瓦",
+        "大骨灰",
+        "跳刀",
+        "秘法鞋",
+        "盘子(永恒之盘)",
+        "以太之镜",
+        "[中立]Fallen Sky",
+        "[魔晶加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "shivas_guard",
+          "zh_name": "希瓦",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/shivas_guard.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "spirit_vessel",
+          "zh_name": "大骨灰",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/spirit_vessel.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "blink",
+          "zh_name": "跳刀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "arcane_boots",
+          "zh_name": "秘法鞋",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/arcane_boots.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "aeon_disk",
+          "zh_name": "盘子(永恒之盘)",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aeon_disk.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "aether_lens",
+          "zh_name": "以太之镜",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aether_lens.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [
+        {
+          "slot": 0,
+          "key": "roshans_banner",
+          "zh_name": "Roshan's Banner",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/roshans_banner.png",
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "point_booster",
+          "zh_name": "Point Booster",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/point_booster.png",
+          "use_count": 0
+        }
+      ],
+      "neutral_item_rich": {
+        "key": "fallen_sky",
+        "zh_name": "Fallen Sky",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/fallen_sky.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": false,
+      "aghanims_shard": true,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 25% 同英雄",
+        "XPM同英雄分位": "超越 30% 同英雄",
+        "分均伤害分位": "超越 43% 同英雄",
+        "分均击杀分位": "超越 18% 同英雄",
+        "分均补刀分位": "超越 22% 同英雄",
+        "推塔分位": "超越 26% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.24934036939313983,
+        "xp_per_min": 0.3007915567282322,
+        "hero_damage_per_min": 0.4340369393139842,
+        "kills_per_min": 0.17678100263852242,
+        "last_hits_per_min": 0.21767810026385223,
+        "tower_damage": 0.2612137203166227
+      },
+      "tags": [
+        "阵亡偏多 (12死)"
+      ],
+      "radar": {
+        "farm": 46,
+        "damage": 38,
+        "tempo": 56,
+        "push": 46,
+        "utility": 45,
+        "survival": 42
+      },
+      "rating_score": 4.7,
+      "rating_tier": "C 头号战犯",
+      "mvp_score": 47.2,
+      "raw_blame_points": 87.8,
+      "strengths": [
+        "基础数据合格：交出 2/12/15（参战率 54.8%，英雄伤害 23,819），完成了该位置基础任务。"
+      ],
+      "weaknesses": [
+        "高频阵亡提款机：全场阵亡 **12 次**，黑白屏幕读秒长达 **0分00秒（占整局比赛 0.0% 时间）**！"
+      ],
+      "improvements": [
+        "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 敌方切入 无限提款。"
+      ],
+      "trash_talk": "@匿名玩家 一局死 12 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "blame_share_pct": 28.6,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 24.9,
+          "raw": 647.0,
+          "tier": "low"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 30.1,
+          "raw": 1433.0,
+          "tier": "low"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 17.7,
+          "raw": 0.1,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 21.8,
+          "raw": 0.9,
+          "tier": "low"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 43.4,
+          "raw": 656.2,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 53.6,
+          "raw": 146.8,
+          "tier": "mid"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 26.1,
+          "raw": 0.0,
+          "tier": "low"
+        }
+      ],
+      "ability_targets_list": []
+    }
+  ],
+  "dire_pos_1_to_5": [
+    {
+      "player_slot": 130,
+      "side": "dire",
+      "pos": 1,
+      "pos_label": "1号位 · 优势路核心",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 35,
+      "hero_name": "狙击手(火枪/Sniper)",
+      "hero_short_zh": "狙击手",
+      "hero_alias": "火枪/Sniper",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "8/5/17",
+      "kills": 8,
+      "deaths": 5,
+      "assists": 17,
+      "kill_participation_pct": 56.8,
+      "net_worth": 47476,
+      "gpm": 1497,
+      "xpm": 1835,
+      "last_hits": 255,
+      "denies": 3,
+      "hero_damage": 39967,
+      "hero_damage_share_pct": 21.3,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 15219,
+      "hero_healing": 0,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "大隐刀",
+        "大炮",
+        "大推推",
+        "撒旦",
+        "金箍棒(MKB)",
+        "大电锤",
+        "[中立]Giant's Maul",
+        "[A杖加持]",
+        "[魔晶加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "silver_edge",
+          "zh_name": "大隐刀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/silver_edge.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "greater_crit",
+          "zh_name": "大炮",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/greater_crit.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "hurricane_pike",
+          "zh_name": "大推推",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/hurricane_pike.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "satanic",
+          "zh_name": "撒旦",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/satanic.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "monkey_king_bar",
+          "zh_name": "金箍棒(MKB)",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/monkey_king_bar.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "mjollnir",
+          "zh_name": "大电锤",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/mjollnir.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [
+        {
+          "slot": 0,
+          "key": "moon_shard",
+          "zh_name": "银月之晶",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/moon_shard.png",
+          "use_count": 0
+        }
+      ],
+      "neutral_item_rich": {
+        "key": "giant_maul",
+        "zh_name": "Giant's Maul",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/giant_maul.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": true,
+      "aghanims_shard": true,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 78% 同英雄",
+        "XPM同英雄分位": "超越 49% 同英雄",
+        "分均伤害分位": "超越 47% 同英雄",
+        "分均击杀分位": "超越 32% 同英雄",
+        "分均补刀分位": "超越 83% 同英雄",
+        "推塔分位": "超越 97% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.7802971071149335,
+        "xp_per_min": 0.48846755277560594,
+        "hero_damage_per_min": 0.4702892885066458,
+        "kills_per_min": 0.32212666145426117,
+        "last_hits_per_min": 0.8254495699765442,
+        "tower_damage": 0.9706802189210321
+      },
+      "tags": [
+        "推进核心 (塔伤15,219)"
+      ],
+      "radar": {
+        "farm": 89,
+        "damage": 53,
+        "tempo": 58,
+        "push": 99,
+        "utility": 30,
+        "survival": 65
+      },
+      "rating_score": 8.3,
+      "rating_tier": "S 核心支柱",
+      "mvp_score": 82.7,
+      "raw_blame_points": 19.3,
+      "strengths": [
+        "推进终结能力极强：单人打出 15,219 建筑伤害（包揽全队 71% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 5 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 狙击手 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@匿名玩家 这把 8/5/17 标准打卡下班，背锅占比 19 点，赢了跟着笑，输了怪队友！",
+      "blame_share_pct": 8.1,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 78.0,
+          "raw": 1497.0,
+          "tier": "top"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 48.8,
+          "raw": 1835.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 32.2,
+          "raw": 0.2,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 82.5,
+          "raw": 7.0,
+          "tier": "top"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 47.0,
+          "raw": 1101.0,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 94.3,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 97.1,
+          "raw": 15219.0,
+          "tier": "top"
+        }
+      ],
+      "ability_targets_list": []
+    },
+    {
+      "player_slot": 132,
+      "side": "dire",
+      "pos": 2,
+      "pos_label": "2号位 · 中路核心",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 23,
+      "hero_name": "昆卡(船长/Kunkka)",
+      "hero_short_zh": "昆卡",
+      "hero_alias": "船长/Kunkka",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "2/9/18",
+      "kills": 2,
+      "deaths": 9,
+      "assists": 18,
+      "kill_participation_pct": 45.5,
+      "net_worth": 30488,
+      "gpm": 880,
+      "xpm": 1835,
+      "last_hits": 99,
+      "denies": 0,
+      "hero_damage": 18562,
+      "hero_damage_share_pct": 9.9,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 1098,
+      "hero_healing": 0,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "相位鞋",
+        "笛子",
+        "莲花",
+        "玲珑心",
+        "刃甲",
+        "缚灵索(大电锤缠绕)",
+        "[中立]Spider Legs",
+        "[A杖加持]",
+        "[魔晶加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "phase_boots",
+          "zh_name": "相位鞋",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/phase_boots.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "pipe",
+          "zh_name": "笛子",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/pipe.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "lotus_orb",
+          "zh_name": "莲花",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/lotus_orb.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "octarine_core",
+          "zh_name": "玲珑心",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/octarine_core.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "blade_mail",
+          "zh_name": "刃甲",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blade_mail.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "gungir",
+          "zh_name": "缚灵索(大电锤缠绕)",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/gungir.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [],
+      "neutral_item_rich": {
+        "key": "spider_legs",
+        "zh_name": "Spider Legs",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/spider_legs.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": true,
+      "aghanims_shard": true,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 24% 同英雄",
+        "XPM同英雄分位": "超越 49% 同英雄",
+        "分均伤害分位": "超越 19% 同英雄",
+        "分均击杀分位": "超越 15% 同英雄",
+        "分均补刀分位": "超越 16% 同英雄",
+        "推塔分位": "超越 54% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.2447089947089947,
+        "xp_per_min": 0.4947089947089947,
+        "hero_damage_per_min": 0.19444444444444445,
+        "kills_per_min": 0.14682539682539683,
+        "last_hits_per_min": 0.15873015873015872,
+        "tower_damage": 0.5370370370370371
+      },
+      "tags": [
+        "输出占比偏低 (10%)",
+        "核心高频阵亡 (9死)"
+      ],
+      "radar": {
+        "farm": 32,
+        "damage": 23,
+        "tempo": 58,
+        "push": 37,
+        "utility": 30,
+        "survival": 38
+      },
+      "rating_score": 4.3,
+      "rating_tier": "C 头号战犯",
+      "mvp_score": 42.6,
+      "raw_blame_points": 97.9,
+      "strengths": [
+        "基础数据合格：交出 2/9/18（参战率 45.5%，英雄伤害 18,562），完成了该位置基础任务。"
+      ],
+      "weaknesses": [
+        "典型高占经低产出：拿了全队 14.5% 的总经济（30,488金），全场却只打出 18,562 伤害（仅占全队 9.9%），每1块钱经济只换来 0.61 点伤害。",
+        "高频阵亡提款机：全场阵亡 **9 次**，黑白屏幕读秒长达 **0分00秒（占整局比赛 0.0% 时间）**！"
+      ],
+      "improvements": [
+        "昆卡 做出核心装的第一波强势期必须主动跟雾找节奏，别等队友正面4打5溃败了再去边缘OB蹭两下伤害。",
+        "核心位阵亡 9 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
+      ],
+      "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "blame_share_pct": 40.9,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 24.5,
+          "raw": 880.0,
+          "tier": "low"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 49.5,
+          "raw": 1835.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 14.7,
+          "raw": 0.1,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 15.9,
+          "raw": 2.7,
+          "tier": "low"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 19.4,
+          "raw": 511.3,
+          "tier": "low"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 92.2,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 53.7,
+          "raw": 1098.0,
+          "tier": "mid"
+        }
+      ],
+      "ability_targets_list": []
+    },
+    {
+      "player_slot": 131,
+      "side": "dire",
+      "pos": 3,
+      "pos_label": "3号位 · 劣势路核心",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 14,
+      "hero_name": "帕吉(屠夫/Pudge)",
+      "hero_short_zh": "帕吉",
+      "hero_alias": "屠夫/Pudge",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "12/3/21",
+      "kills": 12,
+      "deaths": 3,
+      "assists": 21,
+      "kill_participation_pct": 75.0,
+      "net_worth": 58282,
+      "gpm": 1607,
+      "xpm": 2809,
+      "last_hits": 235,
+      "denies": 12,
+      "hero_damage": 65436,
+      "hero_damage_share_pct": 34.9,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 2164,
+      "hero_healing": 0,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "莲花",
+        "希瓦",
+        "力量跳刀",
+        "龙心",
+        "龙心",
+        "永世法衣",
+        "[中立]Fallen Sky",
+        "[A杖加持]",
+        "[魔晶加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "lotus_orb",
+          "zh_name": "莲花",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/lotus_orb.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "shivas_guard",
+          "zh_name": "希瓦",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/shivas_guard.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "overwhelming_blink",
+          "zh_name": "力量跳刀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/overwhelming_blink.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "heart",
+          "zh_name": "龙心",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "heart",
+          "zh_name": "龙心",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "eternal_shroud",
+          "zh_name": "永世法衣",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/eternal_shroud.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [
+        {
+          "slot": 0,
+          "key": "travel_boots_2",
+          "zh_name": "大飞鞋",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/travel_boots_2.png",
+          "use_count": 0
+        }
+      ],
+      "neutral_item_rich": {
+        "key": "fallen_sky",
+        "zh_name": "Fallen Sky",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/fallen_sky.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": true,
+      "aghanims_shard": true,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 98% 同英雄",
+        "XPM同英雄分位": "超越 96% 同英雄",
+        "分均伤害分位": "超越 97% 同英雄",
+        "分均击杀分位": "超越 74% 同英雄",
+        "分均补刀分位": "超越 99% 同英雄",
+        "推塔分位": "超越 87% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.9827125790583274,
+        "xp_per_min": 0.9596626844694308,
+        "hero_damage_per_min": 0.971890372452565,
+        "kills_per_min": 0.7368938861560085,
+        "last_hits_per_min": 0.9908643710470836,
+        "tower_damage": 0.8726633872101195
+      },
+      "tags": [
+        "全队输出支柱 (35%)",
+        "高参战率 (75%)",
+        "极少阵亡 (3死)",
+        "GPM同英雄前2%"
+      ],
+      "radar": {
+        "farm": 94,
+        "damage": 98,
+        "tempo": 85,
+        "push": 63,
+        "utility": 30,
+        "survival": 79
+      },
+      "rating_score": 8.3,
+      "rating_tier": "S 核心支柱",
+      "mvp_score": 83.5,
+      "raw_blame_points": 18.5,
+      "strengths": [
+        "极高生存容错：36 分钟高强度对抗仅阵亡 3 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 3 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 帕吉 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
+      "blame_share_pct": 7.7,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 98.3,
+          "raw": 1607.0,
+          "tier": "top"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 96.0,
+          "raw": 2809.0,
+          "tier": "top"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 73.7,
+          "raw": 0.3,
+          "tier": "mid"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 99.1,
+          "raw": 6.5,
+          "tier": "top"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 97.2,
+          "raw": 1802.6,
+          "tier": "top"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 86.9,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 87.3,
+          "raw": 2164.0,
+          "tier": "top"
+        }
+      ],
+      "ability_targets_list": []
+    },
+    {
+      "player_slot": 128,
+      "side": "dire",
+      "pos": 4,
+      "pos_label": "4号位 · 游走辅助",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 88,
+      "hero_name": "司夜刺客(小强/NA)",
+      "hero_short_zh": "司夜刺客",
+      "hero_alias": "小强/NA",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "7/7/10",
+      "kills": 7,
+      "deaths": 7,
+      "assists": 10,
+      "kill_participation_pct": 38.6,
+      "net_worth": 37569,
+      "gpm": 1048,
+      "xpm": 1835,
+      "last_hits": 128,
+      "denies": 1,
+      "hero_damage": 21298,
+      "hero_damage_share_pct": 11.3,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 348,
+      "hero_healing": 0,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "大鞋(卫士胫甲)",
+        "五级红杖",
+        "虚灵刀",
+        "大吹风",
+        "绝刃(大灵匣)",
+        "[中立]Fallen Sky",
+        "[A杖加持]"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "guardian_greaves",
+          "zh_name": "大鞋(卫士胫甲)",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/guardian_greaves.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "dagon_5",
+          "zh_name": "五级红杖",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/dagon_5.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "ethereal_blade",
+          "zh_name": "虚灵刀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ethereal_blade.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "wind_waker",
+          "zh_name": "大吹风",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wind_waker.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "angels_demise",
+          "zh_name": "绝刃(大灵匣)",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/angels_demise.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [],
+      "neutral_item_rich": {
+        "key": "fallen_sky",
+        "zh_name": "Fallen Sky",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/fallen_sky.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": true,
+      "aghanims_shard": false,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 75% 同英雄",
+        "XPM同英雄分位": "超越 50% 同英雄",
+        "分均伤害分位": "超越 17% 同英雄",
+        "分均击杀分位": "超越 37% 同英雄",
+        "分均补刀分位": "超越 95% 同英雄",
+        "推塔分位": "超越 61% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.7499072356215213,
+        "xp_per_min": 0.4975881261595547,
+        "hero_damage_per_min": 0.17476808905380334,
+        "kills_per_min": 0.3743970315398887,
+        "last_hits_per_min": 0.9506493506493506,
+        "tower_damage": 0.6074211502782931
+      },
+      "tags": [],
+      "radar": {
+        "farm": 79,
+        "damage": 23,
+        "tempo": 41,
+        "push": 66,
+        "utility": 35,
+        "survival": 64
+      },
+      "rating_score": 5.0,
+      "rating_tier": "C 头号战犯",
+      "mvp_score": 50.0,
+      "raw_blame_points": 52.0,
+      "strengths": [
+        "基础数据合格：交出 7/7/10（参战率 38.6%，英雄伤害 21,298），完成了该位置基础任务。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 7 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 司夜刺客 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@匿名玩家 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！",
+      "blame_share_pct": 21.7,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 75.0,
+          "raw": 1048.0,
+          "tier": "top"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 49.8,
+          "raw": 1835.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 37.4,
+          "raw": 0.2,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 95.1,
+          "raw": 3.5,
+          "tier": "top"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 17.5,
+          "raw": 586.7,
+          "tier": "low"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 82.4,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 60.7,
+          "raw": 348.0,
+          "tier": "mid"
+        }
+      ],
+      "ability_targets_list": []
+    },
+    {
+      "player_slot": 129,
+      "side": "dire",
+      "pos": 5,
+      "pos_label": "5号位 · 纯辅助",
+      "account_id": null,
+      "personaname": "匿名玩家",
+      "friend_tag": null,
+      "is_me": false,
+      "rank": "未知段位",
+      "hero_id": 105,
+      "hero_name": "工程师(炸弹人/Techies)",
+      "hero_short_zh": "工程师",
+      "hero_alias": "炸弹人/Techies",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
+      "raw_lane": null,
+      "lane_role": "按经济推断",
+      "lane_efficiency_pct": 0,
+      "kda": "15/8/14",
+      "kills": 15,
+      "deaths": 8,
+      "assists": 14,
+      "kill_participation_pct": 65.9,
+      "net_worth": 36371,
+      "gpm": 1120,
+      "xpm": 1660,
+      "last_hits": 82,
+      "denies": 1,
+      "hero_damage": 42442,
+      "hero_damage_share_pct": 22.6,
+      "damage_taken": 0,
+      "hero_damage_taken": 0,
+      "tower_damage": 2490,
+      "hero_healing": 0,
+      "stuns_sec": 0.0,
+      "obs_placed": null,
+      "sen_placed": null,
+      "obs_destroyed": 0,
+      "sen_destroyed": 0,
+      "camps_stacked": null,
+      "smokes_bought": 0,
+      "dusts_bought": 0,
+      "apm": 0,
+      "pings": 0,
+      "dead_seconds": 0,
+      "death_gold_lost": 0,
+      "buybacks": 0,
+      "networth_t": [],
+      "lh_t": [],
+      "killed_by_breakdown": {
+        "heroes": [],
+        "neutral_deaths": 0,
+        "tower_deaths": 0,
+        "fountain_deaths": 0
+      },
+      "kills_breakdown": {
+        "heroes": [],
+        "obs_destroyed": 0,
+        "sen_destroyed": 0
+      },
+      "laning_10m": {
+        "lh10": null,
+        "dn10": null,
+        "gold10": null,
+        "xp10": null
+      },
+      "final_items": [
+        "虚灵刀",
+        "羊刀",
+        "刷新球",
+        "跳刀",
+        "大飞鞋",
+        "玲珑心",
+        "[中立]Spider Legs"
+      ],
+      "final_items_rich": [
+        {
+          "slot": 0,
+          "key": "ethereal_blade",
+          "zh_name": "虚灵刀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ethereal_blade.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 1,
+          "key": "sheepstick",
+          "zh_name": "羊刀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/sheepstick.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 2,
+          "key": "refresher",
+          "zh_name": "刷新球",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/refresher.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 3,
+          "key": "blink",
+          "zh_name": "跳刀",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 4,
+          "key": "travel_boots_2",
+          "zh_name": "大飞鞋",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/travel_boots_2.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        },
+        {
+          "slot": 5,
+          "key": "octarine_core",
+          "zh_name": "玲珑心",
+          "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/octarine_core.png",
+          "purchase_time_sec": null,
+          "purchase_time_str": null,
+          "use_count": 0
+        }
+      ],
+      "backpack_items_rich": [],
+      "neutral_item_rich": {
+        "key": "spider_legs",
+        "zh_name": "Spider Legs",
+        "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/spider_legs.png",
+        "use_count": 0
+      },
+      "aghanims_scepter": false,
+      "aghanims_shard": false,
+      "key_item_timings": [],
+      "key_item_timings_rich": [],
+      "active_item_uses": {},
+      "ability_uses_rich": [],
+      "benchmarks": {
+        "GPM同英雄分位": "超越 73% 同英雄",
+        "XPM同英雄分位": "超越 47% 同英雄",
+        "分均伤害分位": "超越 56% 同英雄",
+        "分均击杀分位": "超越 82% 同英雄",
+        "分均补刀分位": "超越 44% 同英雄",
+        "推塔分位": "超越 87% 同英雄"
+      },
+      "raw_benchmarks": {
+        "gold_per_min": 0.7307839388145315,
+        "xp_per_min": 0.47418738049713194,
+        "hero_damage_per_min": 0.55717017208413,
+        "kills_per_min": 0.8198852772466539,
+        "last_hits_per_min": 0.4363288718929254,
+        "tower_damage": 0.8684512428298279
+      },
+      "tags": [],
+      "radar": {
+        "farm": 78,
+        "damage": 59,
+        "tempo": 67,
+        "push": 82,
+        "utility": 35,
+        "survival": 60
+      },
+      "rating_score": 6.1,
+      "rating_tier": "C 头号战犯",
+      "mvp_score": 61.2,
+      "raw_blame_points": 51.8,
+      "strengths": [
+        "基础数据合格：交出 15/8/14（参战率 65.9%，英雄伤害 42,442），完成了该位置基础任务。"
+      ],
+      "weaknesses": [
+        "高频阵亡提款机：全场阵亡 **8 次**，黑白屏幕读秒长达 **0分00秒（占整局比赛 0.0% 时间）**！"
+      ],
+      "improvements": [
+        "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 敌方切入 无限提款。"
+      ],
+      "trash_talk": "@匿名玩家 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "blame_share_pct": 21.6,
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 73.1,
+          "raw": 1120.0,
+          "tier": "mid"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 47.4,
+          "raw": 1660.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 82.0,
+          "raw": 0.4,
+          "tier": "top"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 43.6,
+          "raw": 2.3,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 55.7,
+          "raw": 1169.2,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 80.8,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 86.8,
+          "raw": 2490.0,
+          "tier": "top"
+        }
+      ],
+      "ability_targets_list": []
+    }
+  ]
+}

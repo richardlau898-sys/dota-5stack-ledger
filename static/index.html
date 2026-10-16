@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
+  <link rel="stylesheet" href="/styles.css?v=3.5" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <span class="brand-mark" aria-hidden="true">刀</span>
+        <div>
+          <h1 class="brand-title">战后算账 &amp; 赛前锦囊</h1>
+          <p class="brand-subtitle">DOTA 2 5-STACK FORENSICS &amp; LIVE DRAFT PLANNER</p>
+        </div>
+      </div>
+
+      <!-- 顶部双工作台切换：赛后算账复盘 vs 赛前五黑BP锦囊 -->
+      <nav class="workspace-nav" aria-label="核心功能切换">
+        <button type="button" id="nav-mode-postgame" class="ws-nav-btn active" data-ws-mode="postgame">
+          📊 赛后算账复盘
+        </button>
+        <button type="button" id="nav-mode-pregame" class="ws-nav-btn" data-ws-mode="pregame">
+          ⚔️ 赛前五黑BP锦囊 (选完人怎么打)
+        </button>
+      </nav>
+
+      <search class="header-search" id="header-search-box" aria-label="查询比赛或玩家">
+        <form id="quick-search-form" class="search-form">
+          <label for="search-input" class="sr-only">输入比赛编号 Match ID、好友 ID 或 Steam 链接</label>
+          <input
+            id="search-input"
+            type="search"
+            placeholder="输入比赛编号 (如 9046364324) 或 Steam 链接 / 好友 ID..."
+            autocomplete="off"
+          />
+          <button type="submit" id="btn-analyze-search" class="button primary">拉出来算账</button>
+          <button type="button" id="btn-Refresh-match" class="button secondary" title="强制从 OpenDota 重新拉取并重算">重新读取</button>
+        </form>
+      </search>
+
+      <div class="header-right">
+        <div id="llm-status-pill" class="model-status connected">已接入 XAI / grok-4.7</div>
+        <button type="button" id="btn-open-share-poster" class="button primary" title="一键生成群聊文字判决书与高清PNG战报卡片">📜 群聊处刑战报</button>
+        <button type="button" id="btn-open-settings" class="button secondary">车队与模型设置</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- =========================================================================
+         工作台 B：赛前五黑 BP 锦囊 · 选人完毕 10 秒作战室 (/pregame)
+         ========================================================================= -->
+    <div id="pregame-workspace" class="pregame-workspace" hidden>
+      <section class="pregame-header-banner">
+        <div>
+          <div class="match-meta">PRE-GAME 5-STACK LIVE TACTICAL ROOM · 选完英雄10秒内发进语音群</div>
+          <h2 class="match-headline">五黑赛前作战室 · 选完人这把怎么配合、前中后期干什么</h2>
+          <p class="section-caption">点选你们五黑刚刚选好的 1~5 号位英雄（可选填入对面英雄），立即生成核心 Combo 口令、三路对线重点、前中后期节奏与每人推荐出装</p>
+        </div>
+        <div class="pregame-top-actions">
+          <button type="button" id="btn-pregame-preset-last" class="button secondary" title="一键填入最近一把五黑的1-5号位阵容">套用最近五黑阵容</button>
+          <button type="button" id="btn-pregame-preset-best" class="button secondary" title="一键填入车队高胜率绝活体系">套用车队绝活体系</button>
+          <button type="button" id="btn-pregame-clear" class="button secondary">清空重选</button>
+          <button type="button" id="btn-pregame-copy-brief" class="button secondary">📋 复制赛前作战简报</button>
+          <button type="button" id="btn-pregame-grok" class="button primary">🧠 呼叫 Grok 4.7 深度推演本局战术</button>
+        </div>
+      </section>
+
+      <!-- 选人操作台：左侧本方1-5号位 + 敌方1-5号位，右侧126英雄即时搜索点选 -->
+      <section class="pregame-draft-board">
+        <div class="pregame-slots-panel">
+          <div class="pregame-side-box own">
+            <div class="pregame-side-head">
+              <h3>🟢 本方五黑 1~5 号位阵容（点击槽位切换正在选人的位置）</h3>
+              <span>已自动绑定车队常驻成员</span>
+            </div>
+            <div id="pregame-own-slots" class="pregame-slots-grid"></div>
+          </div>
+
+          <div class="pregame-side-box enemy">
+            <div class="pregame-side-head">
+              <h3>🔴 敌方 1~5 号位阵容（可选填，填入后自动计算克制与团战集火优先级）</h3>
+              <span>点击槽位后从右侧点选敌方英雄</span>
+            </div>
+            <div id="pregame-enemy-slots" class="pregame-slots-grid"></div>
+          </div>
+        </div>
+
+        <div class="pregame-picker-panel">
+          <div class="pregame-picker-head">
+            <div id="pregame-active-slot-indicator" class="status-pill connected">当前正在选择：本方 1号位</div>
+            <input
+              id="pregame-hero-search"
+              type="search"
+              placeholder="搜索英雄中文名 / 别名 / 英文 (如 剑圣 / 猛犸 / 莱恩 / jugg)..."
+              autocomplete="off"
+            />
+          </div>
+          <div id="pregame-hero-grid" class="pregame-hero-grid" role="listbox" aria-label="Dota 2 英雄列表"></div>
+        </div>
+      </section>
+
+      <!-- 赛前作战方案实时输出区 -->
+      <section id="pregame-plan-output" class="pregame-plan-output"></section>
+    </div>
+
+    <!-- =========================================================================
+         工作台 A：赛后录像级复盘与车队分锅账本 (默认主工作台)
+         ========================================================================= -->
+    <div id="postgame-workspace">
+    <!-- 最近比赛横条 -->
+    <section class="matches-section" aria-labelledby="recent-heading">
+      <div class="section-heading compact">
+        <div class="heading-left">
+          <h2 id="recent-heading">最近战绩账本</h2>
+          <span id="current-player-badge" class="status-pill connected">主视角加载中...</span>
+        </div>
+        <div class="recent-actions">
+          <button type="button" id="btn-toggle-squad-ledger" class="text-button">展开/收起五黑车队多局惯犯总账 ↓</button>
+          <button type="button" id="btn-load-latest" class="text-button">直接看最近一把 →</button>
+        </div>
+      </div>
+      <div id="recent-matches-strip" class="recent-list" role="list" aria-label="最近比赛列表">
+        <div class="empty-state compact">正在读取最近比赛记录...</div>
+      </div>
+    </section>
+
+    <!-- 新增模块：五黑车队多局惯犯档案 & 历史总账本 -->
+    <section id="squad-ledger-section" class="squad-ledger-section" aria-labelledby="squad-ledger-heading">
+      <div class="section-heading compact">
+        <div>
+          <h2 id="squad-ledger-heading">五黑车队多局惯犯档案 · 跨比赛累计分锅总账与绝活红黑榜</h2>
+          <p class="section-caption">自动汇总已审理的多局五黑比赛与近期战绩：谁是长期真大腿、谁是固定头号战犯、哪些英雄选出来就赢、哪些应该永久关进小黑屋</p>
+        </div>
+        <span id="squad-ledger-badge" class="status-pill connected">多局档案汇总中</span>
+      </div>
+      <div id="squad-ledger-container"></div>
+    </section>
+
+    <!-- 比赛总览横幅 -->
+    <section id="match-overview-section" class="match-overview" aria-labelledby="match-Overview-title">
+      <div class="overview-top-row">
+        <div>
+          <div id="match-meta-line" class="match-meta">加载中...</div>
+          <h2 id="match-overview-title" class="match-headline">正在读取比赛数据...</h2>
+        </div>
+        <div class="overview-actions">
+          <label class="team-perspective-field">
+            <span>算哪边的账</span>
+            <select id="perspective-select">
+              <option value="auto">按我的车队阵营</option>
+              <option value="dire">夜魇 (Dire)</option>
+              <option value="radiant">天辉 (Radiant)</option>
+            </select>
+          </label>
+          <button type="button" id="btn-request-parse" class="button secondary" hidden>请求录像解析</button>
+          <button type="button" id="btn-open-share-poster-2" class="button secondary">📜 导出群聊战报</button>
+          <button type="button" id="btn-trigger-grok" class="button primary">用 Grok 4.7 重算判词</button>
+        </div>
+      </div>
+
+      <div id="match-kpi-strip" class="match-stats"></div>
+    </section>
+
+    <!-- 新增前置模块：阵容选择与核心配合算账 (选得如何 & 有什么配合可以打) -->
+    <section id="draft-combo-section" class="draft-combo-section" aria-labelledby="draft-combo-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="draft-combo-heading">阵容选择与配合诊断 · 选得如何 &amp; 有什么配合可以打</h2>
+          <p class="section-caption">评估双方 1~5 号位阵容六维成色、先天优劣势与克制关系，拆解本方必打的核心技能 Combo 以及本局实战兑现度</p>
+        </div>
+        <span id="draft-grade-badge" class="status-pill connected">阵容评级核算中</span>
+      </div>
+      <div id="draft-combo-container"></div>
+    </section>
+
+    <!-- 模块一：MVP 真大腿 vs 头号战犯 + 五人分锅账本 (修复一切文字裁切与换行问题) -->
+    <section class="verdict-and-blame-section" aria-labelledby="verdict-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="verdict-heading">这把谁在干活，谁在犯罪</h2>
+          <p class="section-caption">综合对线期、经济伤害转化率、推进拆塔、主动装备按键次数与阵亡读秒时长量化核算</p>
+        </div>
+        <span id="parse-quality-badge" class="status-pill">录像解析核对中</span>
+      </div>
+
+      <!-- Grok 4.7 总判词横幅 -->
+      <article id="grok-verdict-banner" class="grok-banner">
+        <div class="grok-banner-head">
+          <span class="grok-tag" id="grok-author-label">XAI / GROK-4.7 赛后总账</span>
+          <span id="grok-title-text" class="grok-banner-title">正在装载赛后判词...</span>
+        </div>
+        <p id="grok-summary-text" class="grok-summary-p"></p>
+        <div id="grok-verdict-text" class="grok-verdict-box"></div>
+        <div id="grok-team-practice-box" class="grok-practice-strip"></div>
+      </article>
+
+      <!-- MVP 与 头号大锅 双栏 + 五人分锅比例账本 -->
+      <div class="verdict-grid">
+        <article id="mvp-card" class="verdict-card mvp-theme" aria-labelledby="mvp-card-title">
+          <div class="verdict-card-label">全场头号功臣 · MVP</div>
+          <h3 id="mvp-card-title" class="sr-only">全场 MVP</h3>
+          <div id="mvp-card-body"></div>
+        </article>
+
+        <article id="culprit-card" class="verdict-card culprit-theme" aria-labelledby="culprit-card-title">
+          <div class="verdict-card-label">本方头号大锅 · 一级战犯</div>
+          <h3 id="culprit-card-title" class="sr-only">头号战犯</h3>
+          <div id="culprit-card-body"></div>
+        </article>
+      </div>
+
+      <!-- 五人分锅比例条与清晰排行账本 (绝不裁切窄条文字) -->
+      <article class="blame-ledger-panel" aria-labelledby="blame-ledger-title">
+        <div class="blame-ledger-header">
+          <h3 id="blame-ledger-title">本方五人分锅占比账本 (100% 责任切分)</h3>
+          <span class="section-caption">点击任意行右侧按钮可直接复制该队友专属算账金句发群里</span>
+        </div>
+        <div id="blame-stacked-bar" class="blame-stacked-bar" role="img" aria-label="五人分锅比例堆叠条"></div>
+        <div id="blame-ranking-rows" class="blame-ranking-rows"></div>
+      </article>
+    </section>
+
+    <!-- 模块二：四大可视化战术图表中心 + 5v5 集火流向矩阵 -->
+    <section class="charts-hub-section" aria-labelledby="charts-hub-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="charts-hub-heading">全局战术图表与地图取证</h2>
+          <p class="section-caption">团队经济/经验走势、十人分钟级净资产曲线、2D 眼位/对线热力/团战阵亡坐标小地图、十人三维横评与 5v5 集火伤害矩阵</p>
+        </div>
+      </div>
+
+      <div class="charts-grid-2x2">
+        <!-- 图表 1: 团队累计经济差 & 经验差曲线 + 肉山/兵营/团战标记 -->
+        <article class="chart-box" aria-labelledby="chart-adv-title">
+          <div class="chart-box-header">
+            <div>
+              <h3 id="chart-adv-title">团队累计收入差 &amp; 经验差走势</h3>
+              <p class="chart-sub">实线面积：团队累计经济差 | 虚线：团队累计经验差 | 竖线：肉山/高地/关键团</p>
+            </div>
+            <div class="chart-legend-inline">
+              <span class="legend-dot rad">天辉优势</span>
+              <span class="legend-dot dire">夜魇优势</span>
+              <span class="legend-dot xp">经验差</span>
+            </div>
+          </div>
+          <div id="adv-chart-container" class="svg-chart-wrap"></div>
+          <div id="economy-checkpoints-strip" class="checkpoints-strip"></div>
+        </article>
+
+        <!-- 图表 2: 十人分钟级净资产曲线 (networth_t) -->
+        <article class="chart-box" aria-labelledby="chart-nw-title">
+          <div class="chart-box-header">
+            <div>
+              <h3 id="chart-nw-title">十人分钟级净资产走势 (Net Worth)</h3>
+              <p class="chart-sub">对比双方 1~5 号位每一分钟的真实装备与存款净值曲线，谁在刷钱谁在断档一目了然</p>
+            </div>
+            <div class="chart-filter-group" role="group" aria-label="净资产曲线筛选">
+              <button type="button" class="filter-chip active" data-nw-filter="cores">双方 1-3 号位核心</button>
+              <button type="button" class="filter-chip" data-nw-filter="own">本方五人</button>
+              <button type="button" class="filter-chip" data-nw-filter="all">全场十人</button>
+            </div>
+          </div>
+          <div id="nw-chart-container" class="svg-chart-wrap"></div>
+          <div id="nw-chart-legend" class="nw-legend-grid"></div>
+        </article>
+
+        <!-- 图表 3: 2D Dota 2 战术小地图 (真假眼位坐标 + 对线期走位热力图 + 团战阵亡坐标点) -->
+        <article class="chart-box" aria-labelledby="chart-map-title">
+          <div class="chart-box-header">
+            <div>
+              <h3 id="chart-map-title">2D 战术小地图 · 视野坐标 / 对线热力 / 团战墓碑</h3>
+              <p class="chart-sub">支持按需切换高台假眼、本方真假眼、前10分钟走位热力及各波团战阵亡墓碑</p>
+            </div>
+            <div class="chart-filter-group" role="group" aria-label="小地图图层筛选">
+              <button type="button" class="filter-chip active" data-map-mode="wards_obs">仅假眼视野</button>
+              <button type="button" class="filter-chip" data-map-mode="wards_own">本方真假眼</button>
+              <button type="button" class="filter-chip" data-map-mode="wards_all">全部守卫</button>
+              <button type="button" class="filter-chip" data-map-mode="heatmap">对线热力</button>
+              <button type="button" class="filter-chip" data-map-mode="teamfights">团战墓碑</button>
+            </div>
+          </div>
+          <div class="minimap-layout">
+            <div id="minimap-svg-container" class="minimap-svg-wrap"></div>
+            <div id="minimap-stats-side" class="minimap-side-ledger"></div>
+          </div>
+        </article>
+
+        <!-- 图表 4: 十人英雄伤害 / 承受伤害 / 建筑拆塔横评图 -->
+        <article class="chart-box" aria-labelledby="chart-dmg-title">
+          <div class="chart-box-header">
+            <div>
+              <h3 id="chart-dmg-title">十人输出 · 承伤 · 拆塔三维横评图</h3>
+              <p class="chart-sub">直观对比全场十人的英雄伤害、承受伤害与建筑伤害，抓出“只刷钱不打人”和“打赢团不推塔”</p>
+            </div>
+            <div class="chart-legend-inline">
+              <span class="legend-dot dmg">英雄伤害</span>
+              <span class="legend-dot tank">承受伤害</span>
+              <span class="legend-dot tower">建筑伤害</span>
+            </div>
+          </div>
+          <div id="damage-matrix-container" class="damage-matrix-wrap"></div>
+        </article>
+      </div>
+
+      <!-- 新增图表 5: 5v5 集火流向与互相伤害矩阵 (谁在切C位 / 谁在给肉盾刮痧) -->
+      <article id="focus-fire-matrix-box" class="chart-box focus-fire-box" aria-labelledby="focus-fire-title">
+        <div class="chart-box-header">
+          <div>
+            <h3 id="focus-fire-title">5v5 集火流向与伤害分配矩阵 · 谁在切敌方后排，谁在给肉盾刮痧？</h3>
+            <p class="chart-sub">基于录像伤害目标表 (`damage`) 精确还原每位英雄打在敌方 1~5 号位身上的真实伤害与集火占比</p>
+          </div>
+          <div class="chart-filter-group" role="group" aria-label="切换集火矩阵方向">
+            <button type="button" class="filter-chip active" data-focus-side="own">本方打敌方 (集火审计)</button>
+            <button type="button" class="filter-chip" data-focus-side="opp">敌方打本方 (挨打审计)</button>
+          </div>
+        </div>
+        <div id="focus-fire-matrix-container"></div>
+      </article>
+    </section>
+
+    <!-- 模块三：按时间阶段把账算清楚 (前期对线 0-10m / 中期运营 10-25m / 后期决策 25m+) -->
+    <section class="phase-review-section" aria-labelledby="phase-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="phase-heading">按时间分段，把每一期的账算清楚（含个人得失与团队三期进化指南）</h2>
+          <p class="section-caption">切分前期对线 (00:00–10:00)、中期运营 (10:00–25:00)、后期决策 (25:00–终局)，逐一评价 1~5 号位每个人每阶段哪里做得好、哪里做得不好，以及团队每个阶段该怎么配合进步</p>
+        </div>
+      </div>
+
+      <!-- 团队三阶段综合进步指南 (前期能做什么 / 中期能做什么 / 后期能做什么) -->
+      <div id="team-three-stage-roadmap" class="team-roadmap-grid"></div>
+
+      <div id="phase-tabs-bar" class="phase-tabs" role="tablist" aria-label="比赛阶段切换"></div>
+      <div id="phase-active-panel" class="phase-panel-box"></div>
+    </section>
+
+    <!-- 模块四：该回看的几波关键团战与转折窗口 -->
+    <section class="windows-section" aria-labelledby="windows-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="windows-heading">该回看的几波关键交战与经济拐点</h2>
+          <p class="section-caption">结合录像团战日志与 Grok 复盘定位最关键的胜负手窗口，展开可查看十人技能与道具释放明细，或点击「在地图定位墓碑」还原团战阵亡坐标</p>
+        </div>
+      </div>
+      <div id="key-windows-grid" class="windows-grid"></div>
+    </section>
+
+    <!-- 模块五：1~5 号位逐一拉出来处刑 (本方五人 + 对方五人全解：含六神装图标、按键次数、技能图标、六维雷达图、提款关系) -->
+    <section class="players-forensics-section" aria-labelledby="players-forensics-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="players-forensics-heading">1~5 号位逐一拉出来算账</h2>
+          <p class="section-caption">包含官方装备图标与出装时间点、主动道具按键次数审计、核心技能释放次数、六维能力雷达图、天敌提款记录与改进动作</p>
+        </div>
+        <div class="team-tab-group" role="tablist" aria-label="切换查看阵营">
+          <button type="button" class="team-tab active" data-team-tab="own" role="tab" aria-selected="true">本方五人详单</button>
+          <button type="button" class="team-tab" data-team-tab="opp" role="tab" aria-selected="false">对方五人对照</button>
+          <button type="button" class="team-tab" data-team-tab="both" role="tab" aria-selected="false">十人同屏全览</button>
+        </div>
+      </div>
+
+      <div id="players-forensics-container" class="players-forensics-list"></div>
+    </section>
+    </div>
+  </main>
+
+  <!-- 车队花名册与大模型 API 配置弹窗 (<dialog closedby="any"> 符合现代 Web 规范) -->
+  <dialog id="settings-dialog" class="settings-dialog" closedby="any" aria-labelledby="dialog-title">
+    <div class="dialog-inner">
+      <div class="dialog-header">
+        <h2 id="dialog-title">车队花名册 &amp; 模型接口配置</h2>
+        <button type="button" id="btn-close-dialog" class="text-button" aria-label="关闭设置窗口">关闭 ✕</button>
+      </div>
+
+      <div class="dialog-body">
+        <section class="dialog-block" aria-labelledby="roster-config-title">
+          <h3 id="roster-config-title">主视角账号与常驻五黑队友</h3>
+          <form id="roster-form" class="dialog-form">
+            <div class="form-row-2">
+              <label class="field">
+                <span>你的 Steam 链接 / 好友 ID</span>
+                <input id="input-main-id" type="text" placeholder="如 86080912" />
+              </label>
+              <label class="field">
+                <span>你的昵称备注</span>
+                <input id="input-main-name" type="text" placeholder="如 Flame = ez mute" />
+              </label>
+            </div>
+            <div class="form-row-3">
+              <label class="field">
+                <span>新增/修改队友 ID</span>
+                <input id="input-friend-id" type="text" placeholder="好友 Steam32 ID" />
+              </label>
+              <label class="field">
+                <span>队友称呼</span>
+                <input id="input-friend-name" type="text" placeholder="如 Siesta / Paphets" />
+              </label>
+              <label class="field">
+                <span>常打位置备注</span>
+                <input id="input-friend-pos" type="text" placeholder="如 常驻3/4号位" />
+              </label>
+            </div>
+            <div class="dialog-form-actions">
+              <button type="submit" class="button primary">保存花名册并刷新</button>
+            </div>
+          </form>
+          <div id="roster-tags-list" class="roster-pills-wrap"></div>
+        </section>
+
+        <section class="dialog-block" aria-labelledby="llm-config-title">
+          <h3 id="llm-config-title">外部大模型接口设置 (已默认接入服务端 xAI Grok)</h3>
+          <p class="dialog-hint">服务端 `.env.local` 已内置你的 xAI (`grok-4.7`) 密钥，无需手动填写即可直接调用。如需临时切换其他模型可在下方覆盖：</p>
+          <div class="form-row-2">
+            <label class="field">
+              <span>服务提供商</span>
+              <select id="select-llm-provider">
+                <option value="xai">xAI Grok (默认已配置 grok-4.7)</option>
+                <option value="gemini">Google Gemini (gemini-3.8-flash)</option>
+                <option value="openai">OpenAI 兼容接口</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>模型名称</span>
+              <input id="input-llm-model" type="text" value="grok-4.7" />
+            </label>
+          </div>
+          <div class="form-row-2">
+            <label class="field">
+              <span>自定义 API Key (留空则自动使用服务端 .env.local 密钥)</span>
+              <input id="input-llm-key" type="password" placeholder="留空即可直接使用内置 xAI Grok 密钥" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>Base URL (可选)</span>
+              <input id="input-llm-base" type="url" placeholder="https://api.x.ai/v1" />
+            </label>
+          </div>
+          <div class="dialog-form-actions">
+            <button type="button" id="btn-save-llm-local" class="button secondary">保存覆盖设置</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 群聊处刑判决书 & 高清 PNG 战报卡片导出弹窗 -->
+  <dialog id="share-poster-dialog" class="settings-dialog share-poster-dialog" closedby="any" aria-labelledby="poster-dialog-title">
+    <div class="dialog-inner">
+      <div class="dialog-header">
+        <h2 id="poster-dialog-title">📜 群聊处刑判决书 &amp; 高清战报卡片导出</h2>
+        <button type="button" id="btn-close-poster-dialog" class="text-button" aria-label="关闭战报窗口">关闭 ✕</button>
+      </div>
+      <div class="dialog-body">
+        <div class="poster-actions-row">
+          <button type="button" id="btn-copy-verdict-text" class="button primary">📋 一键复制群聊文字判决书 (直接发微信/QQ/Discord)</button>
+          <button type="button" id="btn-download-poster-png" class="button secondary">🖼️ 下载高清 PNG 处刑战报长图</button>
+        </div>
+        <div class="poster-split-grid">
+          <div class="poster-text-box">
+            <label class="field">
+              <span>群聊文字版判决书（可自由编辑或一键复制）</span>
+              <textarea id="share-verdict-textarea" rows="16" readonly></textarea>
+            </label>
+          </div>
+          <div class="poster-canvas-box">
+            <div class="poster-canvas-caption">高清 PNG 战报预览（右键另存或点击上方按钮下载）</div>
+            <canvas id="share-poster-canvas" width="920" height="620"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast-banner" class="toast-banner" role="status" aria-live="polite" hidden></div>
+
+  <footer class="site-footer">
+    <span>战后算账 · Dota 2 录像级战术复盘与车队分锅工作台</span>
+    <span>·</span>
+    <span>有据才喷，数据来自 OpenDota 录像解析与 xAI Grok 4.7</span>
+  </footer>
+
+  <script src="/app.js?v=3.5" defer></script>
+</body>
+</html>
