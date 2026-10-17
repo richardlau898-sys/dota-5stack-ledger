@@ -5179,7 +5179,13 @@ async function triggerGrokReview({ force = true } = {}) {
         base_url: llmCfg.baseUrl,
       }),
     });
-    const data = await res.json();
+    const rawText = await res.text();
+    let data = null;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      throw new Error(`服务端响应超时或异常 (${res.status})，请稍后重试`);
+    }
     if (!data.ok) throw new Error(data.error || "大模型调用失败");
     if (data.report) {
       state.currentReport = data.report;
@@ -5456,7 +5462,7 @@ function renderDraftAndComboSection(report) {
           <div class="draft-grade-pill" title="${escapeHtml(fullGradeStr)}">${escapeHtml(shortGrade)}</div>
           <div class="draft-verdict-text">
             <div style="font-weight: 700; color: var(--gold); margin-bottom: 3px;">${escapeHtml(fullGradeStr)}</div>
-            ${escapeHtml(draft.verdict_summary || "")}
+            ${injectHeroLogosIntoHtml(escapeHtml(draft.verdict_summary || ""), report)}
           </div>
         </div>
 
@@ -5478,13 +5484,13 @@ function renderDraftAndComboSection(report) {
         <div class="draft-sw-group good">
           <h4>✓ 阵容选得好的地方 (天然赢面与强势期)</h4>
           <ul>
-            ${(draft.strengths || []).map((s) => `<li>${escapeHtml(s)}</li>`).join("")}
+            ${(draft.strengths || []).map((s) => `<li>${injectHeroLogosIntoHtml(escapeHtml(s), report)}</li>`).join("")}
           </ul>
         </div>
         <div class="draft-sw-group bad">
           <h4>✕ 阵容隐患与短板 (容错率与被克制点)</h4>
           <ul>
-            ${(draft.weaknesses || []).map((w) => `<li>${escapeHtml(w)}</li>`).join("")}
+            ${(draft.weaknesses || []).map((w) => `<li>${injectHeroLogosIntoHtml(escapeHtml(w), report)}</li>`).join("")}
           </ul>
         </div>
       </div>
@@ -7746,31 +7752,48 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   const heroShort = p.hero_short_zh || p.hero_name || "";
   const oppHero = mirrorRow?.opp_hero || "同位宿敌";
   const score100 = getHeroScore100(p);
+  const pt = p.phase_telemetry || {};
   const lh10 = p.laning_10m?.lh10 ?? laneP?.lh_gain ?? 0;
   const dn10 = p.laning_10m?.dn10 ?? laneP?.dn_gain ?? 0;
   const gold10 = p.laning_10m?.gold10 ?? laneP?.gold_gain ?? 0;
   const g10Diff = Number(mirrorRow?.gold10_diff ?? 0);
+  const midGold = midP?.gold_gain ?? pt.mid_gold_gain ?? 0;
+  const midDmg = midP?.hero_damage_gain ?? pt.mid_hdmg_gain ?? 0;
+  const hasTimelineTelemetry = Boolean(report.is_parsed) && (gold10 > 0 || midGold > 0);
 
   // 1) Early Game (0-10m)
-  const laneK = laneP?.kills_count ?? 0;
-  const laneD = laneP?.deaths_count ?? 0;
+  const laneK = laneP?.kills_count ?? pt.lane_kills ?? 0;
+  const laneD = laneP?.deaths_count ?? pt.lane_deaths ?? 0;
+  const laneDmg = laneP?.hero_damage_gain ?? pt.lane_hdmg_gain ?? 0;
   const earlyDiffText =
     g10Diff >= 250
       ? `压制对位 ${oppHero} +${fmtNum(g10Diff)} 金`
       : g10Diff <= -250
       ? `对位落后 ${oppHero} ${fmtNum(g10Diff)} 金`
       : `与对位 ${oppHero} 经济持平`;
-  const earlySegment = `<b>【前期 0–10m】</b>操刀 ${p.pos}号位 ${heroShort} 交出 <b>${lh10}/${dn10} 补刀、10m 经济 ${fmtNum(
-    gold10
-  )}（对线效率 ${p.lane_efficiency_pct || 0}% · ${earlyDiffText}）</b>，前10分钟战绩 <b>${laneK}杀/${laneD}死</b>${
-    (tpRow?.early_tp_cnt ?? 0) > 0 ? `，并亮出 <b>${tpRow.early_tp_cnt} 次前12m支援/回线TP</b>` : ""
-  }。`;
+  let earlySegment = "";
+  if (hasTimelineTelemetry) {
+    earlySegment = `<b>【前期 0–10m】</b>操刀 ${p.pos}号位 ${heroShort} 交出 <b>${lh10}/${dn10} 补刀、10m 经济 ${fmtNum(
+      gold10
+    )}（对线效率 ${p.lane_efficiency_pct || 0}% · ${earlyDiffText}）</b>，前10分钟战绩 <b>${laneK}杀/${laneD}死</b>${
+      p.is_afk_farmer && laneDmg > 0
+        ? `（前10m仅打 <b>${fmtNum(laneDmg)} 英雄伤害</b>，0游走纯占线发育）`
+        : (tpRow?.early_tp_cnt ?? 0) > 0
+        ? `，并亮出 <b>${tpRow.early_tp_cnt} 次前12m支援/回线TP</b>`
+        : ""
+    }。`;
+  } else {
+    earlySegment = `<b>【前期与发育总览】</b>操刀 ${p.pos}号位 ${heroShort} 全场交出 <b>${p.last_hits || 0}/${
+      p.denies || 0
+    } 补刀、GPM ${p.gpm || 0} / XPM ${p.xpm || 0}（净资产 ${fmtNum(p.net_worth || 0)}）</b>。`;
+  }
 
   // 2) Mid Game (10-25m)
-  const midK = midP?.kills_count ?? 0;
-  const midD = midP?.deaths_count ?? 0;
-  const midGold = midP?.gold_gain ?? 0;
-  const midDmg = midP?.hero_damage_gain ?? 0;
+  const midK = midP?.kills_count ?? pt.mid_kills ?? 0;
+  const midD = midP?.deaths_count ?? pt.mid_deaths ?? 0;
+  const midGoldShare = pt.mid_gold_share_pct ?? 0;
+  const midDmgShare = pt.mid_hdmg_share_pct ?? 0;
+  const tfAfkCnt = Math.max(Number(pt.tf_zero_dmg_afk_count || 0), Number(tpRow?.tf_absent_cnt || 0));
   const midItems = (midP?.items_bought || [])
     .slice(0, 3)
     .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
@@ -7780,35 +7803,52 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     return m >= 9 && m <= 26;
   });
 
-  let midSegment = `<b>【中期 10–25m】</b>阶段战绩 <b>${midK}杀/${midD}死</b>，进账 <b>+${fmtNum(
-    midGold
-  )} 金</b>、倾泻 <b>${fmtNum(midDmg)} 英雄伤害</b>${
-    midItems ? `，做出核心装 <b>${midItems}</b>` : ""
-  }`;
-  if (roleType === "struggle" || roleType === "culprit1" || roleType === "culprit2") {
-    if (midSoloList.length > 0) {
-      midSegment += `；但中期多次脱离大部队在危险线/黑图落单被抓（<b>${midSoloList
-        .map((e) => `${e.time_str}在${e.zone_zh}被${e.killer_zh || "敌方"}提款`)
-        .join("、")}</b>）`;
-    } else if (midD >= 3) {
-      midSegment += `；但中期连续阵亡 <b>${midD} 次</b>导致刷钱与参战节奏断档`;
-    }
-    if ((tpRow?.tf_absent_cnt ?? 0) > 0) {
-      midSegment += `，且有 <b>${tpRow.tf_absent_cnt} 波队友阵亡团战 0伤害未亮TP旁观</b>`;
-    }
-    midSegment += "。";
-  } else {
-    if (midSoloList.length === 0) {
-      midSegment += `，中期走位稳健 <b>0 次落单掉点</b>，紧跟团队节奏将经济优势持续滚大。`;
+  let midSegment = "";
+  if (hasTimelineTelemetry) {
+    midSegment = `<b>【中期 10–25m】</b>阶段战绩 <b>${midK}杀/${midD}死</b>，进账 <b>+${fmtNum(
+      midGold
+    )} 金${midGoldShare > 0 ? `（占全队中期经济 ${midGoldShare}%）` : ""}</b>、打出 <b>${fmtNum(
+      midDmg
+    )} 英雄伤害${midDmgShare > 0 ? `（占全队中期伤害 ${midDmgShare}%）` : ""}</b>${
+      midItems ? `，做出核心装 <b>${midItems}</b>` : ""
+    }`;
+    if (p.is_afk_farmer) {
+      midSegment += `；但<b>全程闷头刷野拒绝参战</b>——中期吃下全队最高档资源却仅打出 <b>${fmtNum(
+        midDmg
+      )} 伤害（全队垫底 ${midDmgShare}%）</b>${
+        tfAfkCnt > 0 ? `，且在 <b>${tfAfkCnt} 波全队浴血团战中 0 伤害卖队友独刷</b>` : ""
+      }！`;
+    } else if (roleType === "struggle" || roleType === "culprit1" || roleType === "culprit2") {
+      if (midSoloList.length > 0) {
+        midSegment += `；但中期多次脱离大部队在危险线/黑图落单被抓（<b>${midSoloList
+          .map((e) => `${e.time_str}在${e.zone_zh}被${e.killer_zh || "敌方"}提款`)
+          .join("、")}</b>）`;
+      } else if (midD >= 3) {
+        midSegment += `；但中期连续阵亡 <b>${midD} 次</b>导致刷钱与参战节奏断档`;
+      }
+      if ((tpRow?.tf_absent_cnt ?? 0) > 0) {
+        midSegment += `，且有 <b>${tpRow.tf_absent_cnt} 波队友阵亡团战 0伤害未亮TP旁观</b>`;
+      }
+      midSegment += "。";
     } else {
-      midSegment += `，虽偶有被抓但正面团战输出与控制拉满。`;
+      if (midSoloList.length === 0) {
+        midSegment += `，中期走位稳健 <b>0 次落单掉点</b>，紧跟团队节奏将经济优势持续滚大。`;
+      } else {
+        midSegment += `，虽偶有被抓但正面团战输出与控制拉满。`;
+      }
     }
+  } else {
+    midSegment = `<b>【中期参战与推进】</b>全场参战率 <b>${p.kill_participation_pct || 0}%（KDA ${
+      p.kda
+    }）</b>，倾泻 <b>${fmtNum(p.hero_damage || 0)} 英雄伤害（全队 ${
+      p.hero_damage_share_pct || 0
+    }%）</b> 与 <b>${fmtNum(p.tower_damage || 0)} 建筑推塔伤害</b>。`;
   }
 
   // 3) Late Game (25m+) & Verdict Conclusion
-  const lateK = lateP?.kills_count ?? 0;
-  const lateD = lateP?.deaths_count ?? 0;
-  const lateDmg = lateP?.hero_damage_gain ?? 0;
+  const lateK = lateP?.kills_count ?? pt.late_kills ?? 0;
+  const lateD = lateP?.deaths_count ?? pt.late_deaths ?? 0;
+  const lateDmg = lateP?.hero_damage_gain ?? pt.late_hdmg_gain ?? 0;
   const lateItems = (lateP?.items_bought || [])
     .slice(0, 2)
     .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
@@ -7820,9 +7860,12 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
 
   let lateConclusion = "";
   if (roleType === "mvp") {
-    lateConclusion = `<b>【后期 25m+ & 为什么他是 MVP】</b>决胜期再砍 <b>${lateK}杀/${lateD}死、+${fmtNum(
-      lateDmg
-    )} 伤害</b>${lateItems ? `（成型 ${lateItems}）` : ""}，${ultSummary}。全场交出 <b>${
+    const lateIntro = hasTimelineTelemetry
+      ? `决胜期再砍 <b>${lateK}杀/${lateD}死、+${fmtNum(lateDmg)} 伤害</b>${
+          lateItems ? `（成型 ${lateItems}）` : ""
+        }，${ultSummary}。`
+      : "";
+    lateConclusion = `<b>【后期 25m+ & 为什么他是 MVP】</b>${lateIntro}全场交出 <b>${
       p.kda
     }（${p.kill_participation_pct}% 参战率）、${fmtNum(p.hero_damage)} 英雄伤害（全队 ${
       p.hero_damage_share_pct || 0
@@ -7834,13 +7877,25 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
             p.stuns_sec || 0
           } 秒硬控</b>`
         : `倾泻 <b>${fmtNum(p.hero_damage)} 伤害</b> 与 <b>${fmtNum(p.tower_damage || 0)} 推塔</b>`;
-    lateConclusion = `<b>【后期 25m+ & 为什么他是二号功臣】</b>后期团战打出 <b>${lateK}杀/${lateD}死、+${fmtNum(
-      lateDmg
-    )} 伤害</b>，${ultSummary}，全场${supExtra}，参战率高达 <b>${
+    const lateIntro = hasTimelineTelemetry
+      ? `后期团战打出 <b>${lateK}杀/${lateD}死、+${fmtNum(lateDmg)} 伤害</b>，${ultSummary}，`
+      : "";
+    lateConclusion = `<b>【后期 25m+ & 为什么他是二号功臣】</b>${lateIntro}全场${supExtra}，参战率高达 <b>${
       p.kill_participation_pct
     }%</b>。从前期保线/游走到中后期团战先手反手无缝衔接，拿到 <b>${score100}/100 分（胜局贡献 ${sharePct}%）</b>，是仅次于 MVP 的定海神针！`;
   } else if (roleType === "struggle") {
     const struggleReasons = [];
+    if (p.is_afk_farmer) {
+      struggleReasons.push(
+        `身为 ${p.pos}号位核心全场参战率仅 <b>${p.kill_participation_pct}%（全队垫底，仅 ${p.assists || 0} 个助攻）</b>，前期 0–10m 仅打 <b>${fmtNum(
+          laneDmg
+        )} 伤害</b>，中期 10–25m 狂刷 <b>+${fmtNum(midGold)} 金（占全队 ${midGoldShare}%）</b>却只打 <b>${fmtNum(
+          midDmg
+        )} 伤害（仅占全队 ${midDmgShare}%）</b>${
+          tfAfkCnt > 0 ? `，且在 <b>${tfAfkCnt} 波关键团战 0 伤害卖队友独刷野区</b>` : ""
+        }，纯粹靠四名队友4打5顶住前30分钟局势后才在大后期出来收割混伤害`
+      );
+    }
     if (soloEvents.length > 0) {
       struggleReasons.push(
         `9分钟后脱离团队落单被抓 <b>${soloEvents.length} 次</b>（送出 ${fmtNum(
@@ -7865,9 +7920,14 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     if (struggleReasons.length === 0) {
       struggleReasons.push(`全场阵亡 <b>${p.deaths || 0} 次</b>、参战率仅 <b>${p.kill_participation_pct}%</b>`);
     }
-    lateConclusion = `<b>【后期 25m+ & 为什么这把 ${heroShort} 表现不行】</b>后期阶段 <b>${lateK}杀/${lateD}死</b>。纵观全局，${heroShort} 之所以仅得 <b>${score100}/100 分</b>，核心症结在于：${struggleReasons.join(
+    const closingAdvice = p.is_afk_farmer
+      ? "好在另外四名队友正面对局够硬4打5撑到后期，下把切忌只顾自己闷头打钱卖队友！"
+      : "好在队友正面对局够硬带飞全场，下把务必戒掉无视野危险线单带！";
+    lateConclusion = `<b>【后期 25m+ & 为什么这把 ${heroShort} 表现不行】</b>${
+      hasTimelineTelemetry ? `后期阶段 <b>${lateK}杀/${lateD}死</b>。` : ""
+    }纵观全局，${heroShort} 之所以仅得 <b>${score100}/100 分</b>，核心症结在于：${struggleReasons.join(
       "；"
-    )}。好在队友正面对局够硬带飞全场，下把务必戒掉无视野危险线单带！`;
+    )}。${closingAdvice}`;
   } else if (roleType === "svp") {
     lateConclusion = `<b>【后期 25m+ & 为什么他是败方孤胆院长】</b>逆风局后期依然死命打出 <b>${lateK}杀/${lateD}死、+${fmtNum(
       lateDmg
@@ -8001,7 +8061,7 @@ function renderVerdictAndBlameSection(report) {
     .sort((a, b) => b.blameShare - a.blameShare);
 
   // Pick the 3rd card player in a WIN: among the remaining 3 players (excluding #1 MVP and #2 Runner-Up),
-  // pick the player with the highest struggle index (solo pickoffs, fountain dead time, low rating, core with 0 tower dmg)
+  // pick the player with the highest struggle index (AFK farming core, solo pickoffs, fountain dead time, low rating, core with 0 tower dmg)
   const top1 = sortedByContrib[0]?.player;
   const top2 = sortedByContrib[1]?.player;
   const msSide = df.map_space_by_side?.[side] || {};
@@ -8018,8 +8078,9 @@ function renderVerdictAndBlameSection(report) {
     const deaths = Number(p.deaths || 0);
     const ratingPenalty = Math.max(0, 8.6 - Number(p.rating_score || 7.5)) * 10;
     const coreZeroTdPenalty = (p.pos || 5) <= 3 && Number(p.tower_damage || 0) < 500 ? 48 : 0;
+    const afkFarmerPenalty = p.is_afk_farmer ? 140 : 0;
     const blameShare = Number(p.blame_share_pct || 15);
-    return soloCnt * 28 + deadSec * 0.25 + deaths * 8.5 + ratingPenalty + coreZeroTdPenalty + blameShare;
+    return afkFarmerPenalty + soloCnt * 28 + deadSec * 0.25 + deaths * 8.5 + ratingPenalty + coreZeroTdPenalty + blameShare;
   };
   const remainingCandidates = sortedByContrib
     .slice(2)

@@ -12770,6 +12770,17 @@
         },
         {
           "side": "dire",
+          "personaname": "Paphets",
+          "hero_short_zh": "龙骑士",
+          "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dragon_knight.png",
+          "damage": 0,
+          "deaths": 0,
+          "gold_delta": 90,
+          "abilities": [],
+          "items": []
+        },
+        {
+          "side": "dire",
           "personaname": "Mr. Brightside",
           "hero_short_zh": "黑暗贤者",
           "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dark_seer.png",
@@ -13654,31 +13665,33 @@
     "side_zh": "夜魇",
     "lineup_str": "先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克",
     "opp_lineup_str": "虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞",
-    "grade": "A 级 · 扎实能打但极其考验执行",
+    "grade": "B 级 · 偏科走钢丝 · 容错率偏低且极其考验执行",
     "scores": {
-      "init": 81,
-      "burst": 73,
-      "tf": 82,
-      "push": 77,
-      "pick": 81,
-      "late": 82,
-      "tank": 80
+      "init": 85,
+      "burst": 80,
+      "tf": 80,
+      "push": 82,
+      "pick": 89,
+      "late": 73,
+      "tank": 76
     },
     "opp_scores": {
-      "init": 81,
-      "burst": 81,
-      "tf": 80,
-      "push": 68,
-      "pick": 85,
-      "late": 79,
-      "tank": 74
+      "init": 90,
+      "burst": 86,
+      "tf": 86,
+      "push": 69,
+      "pick": 91,
+      "late": 84,
+      "tank": 80
     },
-    "verdict_summary": "夜魇这套『先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克』迎战天辉『虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞』，在【推进拆塔 (77 vs 68)】与【先手抓人 (81 vs 85)】上具备明确体系支点；但面对敌方的团战反手与切后排威胁，极其考验前排第一波切入时机以及后排保命装（微光/推推/绿杖/BKB）的出装纪律。",
+    "verdict_summary": "夜魇这套『先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克』迎战天辉『虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞』属于典型的偏科走钢丝阵容：仅在【推进拆塔 (82 vs 69)】上有局部支点，但在【后期上限 (73 vs 84)】与【瞬间爆发 (80 vs 86)】上处于明显劣势；正面5v5团战（80 vs 86）容错率极低，完全仰仗带线牵制、抓落单与后排保命装的极限执行。",
     "strengths": [
-      "【中期抓人与爆发联动紧密 (81分)】控制与输出互补性好，只要双辅助跟紧三号位/二号位开雾节奏，很容易在中期打开突破口。"
+      "【推进牵制与拆塔速度占优 (82 vs 69)】阵容具备较强的兵线牵制与建筑消耗能力，一旦赢下局部碰撞或抓死人，拆外塔效率高于天辉。",
+      "【先手开团与点控留人稳定 (85 vs 90)】具备可靠的瞬发点控/团控先手，中期开雾找节奏的主动权较清晰。"
     ],
     "weaknesses": [
-      "【中期跳刀/BKB真空期怕被强冲】12~22 分钟核心装未齐前，一旦分路带线过深或辅助独自做眼被抓，很容易连续掉外塔丢失半片野区。"
+      "【一号位非传统正面硬刚大核】1号位『先知』偏机动牵制与支援，大后期正面5v5硬刚能力弱于敌方主C，必须靠前中期节奏滚起雪球。",
+      "【中期关键保命装（BKB/推推/微光）真空期怕被强冲】12~22分钟核心装未成型前，分路带线过深容易被敌方开雾突破。"
     ],
     "combos": [
       {
@@ -13743,9 +13756,9 @@
         "personaname": "Flame = ez mute",
         "is_me": true,
         "roles": [
-          "一号位后期主核",
-          "装备成型收割",
-          "高地推进主力"
+          "全图传送支援收割与带球牵制",
+          "发芽框人克制无推推近战",
+          "正面5v5硬刚与抗冲脸能力偏弱的机动核"
         ],
         "kda": "9/9/8"
       },
@@ -13771,9 +13784,9 @@
         "personaname": "Mr. Brightside",
         "is_me": false,
         "roles": [
-          "三号位前排先手",
-          "团战吃伤害开团",
-          "团队光环与控制"
+          "真空+复制之墙团战完美聚怪",
+          "离子外壳推线消耗近战",
+          "奔腾极限加速切入/救人"
         ],
         "kda": "4/8/10"
       },
@@ -13785,9 +13798,9 @@
         "personaname": "Replica",
         "is_me": false,
         "roles": [
-          "四号位游走节奏",
-          "先手留人接控",
-          "中期团战拉扯"
+          "复仇隐身超高爆发猎杀脆皮远程核",
+          "尖刺外壳完美反弹敌方AOE先手",
+          "穿刺+心灵焦灼控制消蓝"
         ],
         "kda": "3/3/9"
       },
@@ -13813,32 +13826,33 @@
       "side_zh": "天辉",
       "lineup_str": "虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞",
       "opp_lineup_str": "先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克",
-      "grade": "A 级 · 扎实能打但极其考验执行",
+      "grade": "S 级 · 体系完备且先天克制对手",
       "scores": {
-        "init": 81,
-        "burst": 81,
-        "tf": 80,
-        "push": 68,
-        "pick": 85,
-        "late": 79,
-        "tank": 74
-      },
-      "opp_scores": {
-        "init": 81,
-        "burst": 73,
-        "tf": 82,
-        "push": 77,
-        "pick": 81,
-        "late": 82,
+        "init": 90,
+        "burst": 86,
+        "tf": 86,
+        "push": 69,
+        "pick": 91,
+        "late": 84,
         "tank": 80
       },
-      "verdict_summary": "天辉这套『虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞』迎战夜魇『先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克』，在【推进拆塔 (68 vs 77)】与【先手抓人 (85 vs 81)】上具备明确体系支点；但面对敌方的团战反手与切后排威胁，极其考验前排第一波切入时机以及后排保命装（微光/推推/绿杖/BKB）的出装纪律。",
+      "opp_scores": {
+        "init": 85,
+        "burst": 80,
+        "tf": 80,
+        "push": 82,
+        "pick": 89,
+        "late": 73,
+        "tank": 76
+      },
+      "verdict_summary": "天辉这套『虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞』迎战夜魇『先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克』，阵容结构均衡扎实：在【后期上限 (84 vs 73)】与【瞬间爆发 (86 vs 80)】上占优，前排、控制与输出衔接自然，正面5v5团战容错率高，只要稳扎稳打控盾推塔即可拿下比赛。",
       "strengths": [
-        "【中期抓人与爆发联动紧密 (85分)】控制与输出互补性好，只要双辅助跟紧三号位/二号位开雾节奏，很容易在中期打开突破口。"
+        "【先手开团与点控留人稳定 (90 vs 85)】具备可靠的瞬发点控/团控先手，中期开雾找节奏的主动权较清晰。",
+        "【瞬间爆发秒人线高 (86分)】控制接高额爆发可在敌方开出BKB或救人技能前完成定点秒杀。",
+        "【五人阵地团战上限高 (86 vs 80)】拥有高价值团控大招与AOE反手，肉山团与高地攻坚战容错率高。"
       ],
       "weaknesses": [
-        "【持续磨高地能力偏弱 (68分)】缺乏远程无伤磨塔手段，如果中期打赢团不果断推外塔，拖到后期上高地会非常仰仗肉山盾强拆。",
-        "【中期跳刀/BKB真空期怕被强冲】12~22 分钟核心装未齐前，一旦分路带线过深或辅助独自做眼被抓，很容易连续掉外塔丢失半片野区。"
+        "【中期关键保命装（BKB/推推/微光）真空期怕被强冲】12~22分钟核心装未成型前，分路带线过深容易被敌方开雾突破。"
       ],
       "combos": [
         {
@@ -13903,9 +13917,9 @@
           "personaname": "What the dog doing？",
           "is_me": false,
           "roles": [
-            "一号位后期主核",
-            "装备成型收割",
-            "高地推进主力"
+            "时间结界无视BKB毁天灭地大招",
+            "时间漫游回血规避爆发",
+            "时间锁定被动晕眩后期真神"
           ],
           "kda": "7/2/10"
         },
@@ -13931,9 +13945,9 @@
           "personaname": "东方树叶",
           "is_me": false,
           "roles": [
-            "三号位前排先手",
-            "团战吃伤害开团",
-            "团队光环与控制"
+            "跳刀鱼人碎击瞬发群晕",
+            "侵蚀雾霭巨额减甲+真视克制隐身与肉核",
+            "深海重击被动连晕"
           ],
           "kda": "5/6/15"
         },
@@ -13945,9 +13959,9 @@
           "personaname": "Mind's Desire",
           "is_me": false,
           "roles": [
-            "四号位游走节奏",
-            "先手留人接控",
-            "中期团战拉扯"
+            "肉钩超远破阵先手/救人",
+            "肢解无视BKB点控",
+            "腐肉堆积高血量肉盾"
           ],
           "kda": "2/6/16"
         },
@@ -13959,9 +13973,9 @@
           "personaname": "莓啤汽",
           "is_me": false,
           "roles": [
-            "五号位保人视野",
-            "反手控制救人",
-            "线上消耗换血"
+            "野地奇袭捆树群控",
+            "神枪在手超远破被动百分比狙杀",
+            "松鼠步高机动游走逃生"
           ],
           "kda": "5/5/18"
         }
@@ -13972,31 +13986,33 @@
       "side_zh": "夜魇",
       "lineup_str": "先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克",
       "opp_lineup_str": "虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞",
-      "grade": "A 级 · 扎实能打但极其考验执行",
+      "grade": "B 级 · 偏科走钢丝 · 容错率偏低且极其考验执行",
       "scores": {
-        "init": 81,
-        "burst": 73,
-        "tf": 82,
-        "push": 77,
-        "pick": 81,
-        "late": 82,
-        "tank": 80
+        "init": 85,
+        "burst": 80,
+        "tf": 80,
+        "push": 82,
+        "pick": 89,
+        "late": 73,
+        "tank": 76
       },
       "opp_scores": {
-        "init": 81,
-        "burst": 81,
-        "tf": 80,
-        "push": 68,
-        "pick": 85,
-        "late": 79,
-        "tank": 74
+        "init": 90,
+        "burst": 86,
+        "tf": 86,
+        "push": 69,
+        "pick": 91,
+        "late": 84,
+        "tank": 80
       },
-      "verdict_summary": "夜魇这套『先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克』迎战天辉『虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞』，在【推进拆塔 (77 vs 68)】与【先手抓人 (81 vs 85)】上具备明确体系支点；但面对敌方的团战反手与切后排威胁，极其考验前排第一波切入时机以及后排保命装（微光/推推/绿杖/BKB）的出装纪律。",
+      "verdict_summary": "夜魇这套『先知 + 龙骑士 + 黑暗贤者 + 司夜刺客 + 拉比克』迎战天辉『虚空假面 + 玛西 + 斯拉达 + 帕吉 + 森海飞霞』属于典型的偏科走钢丝阵容：仅在【推进拆塔 (82 vs 69)】上有局部支点，但在【后期上限 (73 vs 84)】与【瞬间爆发 (80 vs 86)】上处于明显劣势；正面5v5团战（80 vs 86）容错率极低，完全仰仗带线牵制、抓落单与后排保命装的极限执行。",
       "strengths": [
-        "【中期抓人与爆发联动紧密 (81分)】控制与输出互补性好，只要双辅助跟紧三号位/二号位开雾节奏，很容易在中期打开突破口。"
+        "【推进牵制与拆塔速度占优 (82 vs 69)】阵容具备较强的兵线牵制与建筑消耗能力，一旦赢下局部碰撞或抓死人，拆外塔效率高于天辉。",
+        "【先手开团与点控留人稳定 (85 vs 90)】具备可靠的瞬发点控/团控先手，中期开雾找节奏的主动权较清晰。"
       ],
       "weaknesses": [
-        "【中期跳刀/BKB真空期怕被强冲】12~22 分钟核心装未齐前，一旦分路带线过深或辅助独自做眼被抓，很容易连续掉外塔丢失半片野区。"
+        "【一号位非传统正面硬刚大核】1号位『先知』偏机动牵制与支援，大后期正面5v5硬刚能力弱于敌方主C，必须靠前中期节奏滚起雪球。",
+        "【中期关键保命装（BKB/推推/微光）真空期怕被强冲】12~22分钟核心装未成型前，分路带线过深容易被敌方开雾突破。"
       ],
       "combos": [
         {
@@ -14061,9 +14077,9 @@
           "personaname": "Flame = ez mute",
           "is_me": true,
           "roles": [
-            "一号位后期主核",
-            "装备成型收割",
-            "高地推进主力"
+            "全图传送支援收割与带球牵制",
+            "发芽框人克制无推推近战",
+            "正面5v5硬刚与抗冲脸能力偏弱的机动核"
           ],
           "kda": "9/9/8"
         },
@@ -14089,9 +14105,9 @@
           "personaname": "Mr. Brightside",
           "is_me": false,
           "roles": [
-            "三号位前排先手",
-            "团战吃伤害开团",
-            "团队光环与控制"
+            "真空+复制之墙团战完美聚怪",
+            "离子外壳推线消耗近战",
+            "奔腾极限加速切入/救人"
           ],
           "kda": "4/8/10"
         },
@@ -14103,9 +14119,9 @@
           "personaname": "Replica",
           "is_me": false,
           "roles": [
-            "四号位游走节奏",
-            "先手留人接控",
-            "中期团战拉扯"
+            "复仇隐身超高爆发猎杀脆皮远程核",
+            "尖刺外壳完美反弹敌方AOE先手",
+            "穿刺+心灵焦灼控制消蓝"
           ],
           "kda": "3/3/9"
         },
@@ -20310,7 +20326,7 @@
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
             "opp_player": "What the dog doing？",
             "opp_kda": "7/2/10",
-            "opp_rating": 9.2,
+            "opp_rating": 6.1,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 1,
             "gold10_own": 4066,
@@ -20334,31 +20350,31 @@
             "stuns_opp": 25.9,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 60.2,
-            "opp_bm_avg": 74.8,
+            "own_bm_avg": 59.1,
+            "opp_bm_avg": 73.5,
             "own_bm_top": [
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 75.0,
+                "pct": 73.5,
                 "raw": 10.1
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 62.7,
+                "pct": 61.8,
                 "raw": 7186.0
               },
               {
                 "key": "kills_per_min",
                 "label_zh": "击杀效率",
-                "pct": 57.4,
+                "pct": 57.1,
                 "raw": 0.2
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 56.8,
+                "pct": 54.9,
                 "raw": 730.0
               }
             ],
@@ -20366,30 +20382,30 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 97.8,
+                "pct": 96.9,
                 "raw": 11.7
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 93.0,
+                "pct": 91.1,
                 "raw": 14313.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 90.2,
+                "pct": 88.7,
                 "raw": 751.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 67.2,
+                "pct": 65.0,
                 "raw": 931.0
               }
             ],
-            "own_share_pct": 45.6,
-            "opp_share_pct": 54.4,
+            "own_share_pct": 46.4,
+            "opp_share_pct": 53.6,
             "verdict_tag": "⚠️ 对位小劣 (被压)",
             "grade": "warn",
             "summary_txt": "10m对线经济 4,066 vs 4,253（-187）｜终局经济 23,044 vs 30,500（-7,456）｜英雄输出 30,060 vs 21,351｜正面对位互杀 0 : 1。"
@@ -20429,31 +20445,31 @@
             "stuns_opp": 79.6,
             "wards_own": "1眼/排1",
             "wards_opp": "2眼/排1",
-            "own_bm_avg": 26.8,
-            "opp_bm_avg": 89.8,
+            "own_bm_avg": 26.6,
+            "opp_bm_avg": 90.5,
             "own_bm_top": [
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 69.0,
+                "pct": 69.8,
                 "raw": 7.3
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 25.2,
+                "pct": 25.1,
                 "raw": 454.0
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 23.3,
+                "pct": 23.5,
                 "raw": 978.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 19.3,
+                "pct": 17.7,
                 "raw": 463.3
               }
             ],
@@ -20461,25 +20477,25 @@
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 98.8,
+                "pct": 99.3,
                 "raw": 15878.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 97.6,
+                "pct": 97.9,
                 "raw": 7.4
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 96.0,
+                "pct": 96.8,
                 "raw": 707.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 93.0,
+                "pct": 93.9,
                 "raw": 1020.0
               }
             ],
@@ -20500,7 +20516,7 @@
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
             "opp_player": "东方树叶",
             "opp_kda": "5/6/15",
-            "opp_rating": 5.9,
+            "opp_rating": 5.8,
             "h2h_own_kills": 1,
             "h2h_opp_kills": 0,
             "gold10_own": 2576,
@@ -20524,31 +20540,31 @@
             "stuns_opp": 35.5,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 42.2,
-            "opp_bm_avg": 43.1,
+            "own_bm_avg": 43.8,
+            "opp_bm_avg": 42.0,
             "own_bm_top": [
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 64.0,
+                "pct": 67.0,
                 "raw": 7.2
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 60.8,
+                "pct": 59.2,
                 "raw": 729.9
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 57.1,
+                "pct": 56.4,
                 "raw": 713.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 30.5,
+                "pct": 33.1,
                 "raw": 458.0
               }
             ],
@@ -20556,19 +20572,19 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 65.0,
+                "pct": 64.4,
                 "raw": 5.1
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 57.7,
+                "pct": 56.7,
                 "raw": 1425.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 51.1,
+                "pct": 48.9,
                 "raw": 453.0
               },
               {
@@ -20619,31 +20635,31 @@
             "stuns_opp": 47.9,
             "wards_own": "9眼/排2",
             "wards_opp": "20眼/排2",
-            "own_bm_avg": 31.5,
-            "opp_bm_avg": 39.3,
+            "own_bm_avg": 31.4,
+            "opp_bm_avg": 39.5,
             "own_bm_top": [
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 67.9,
+                "pct": 68.7,
                 "raw": 2.2
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 41.1,
+                "pct": 38.8,
                 "raw": 567.0
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 37.7,
+                "pct": 36.8,
                 "raw": 79.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 18.5,
+                "pct": 18.4,
                 "raw": 294.0
               }
             ],
@@ -20651,25 +20667,25 @@
               {
                 "key": "hero_healing_per_min",
                 "label_zh": "团队治疗",
-                "pct": 97.2,
+                "pct": 96.9,
                 "raw": 23.1
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 55.0,
+                "pct": 55.2,
                 "raw": 490.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 41.2,
+                "pct": 41.5,
                 "raw": 2.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 35.3,
+                "pct": 35.4,
                 "raw": 526.0
               }
             ],
@@ -20714,31 +20730,31 @@
             "stuns_opp": 45.0,
             "wards_own": "38眼/排3",
             "wards_opp": "34眼/排2",
-            "own_bm_avg": 16.4,
-            "opp_bm_avg": 53.4,
+            "own_bm_avg": 16.8,
+            "opp_bm_avg": 54.4,
             "own_bm_top": [
               {
                 "key": "kills_per_min",
                 "label_zh": "击杀效率",
-                "pct": 36.2,
+                "pct": 36.4,
                 "raw": 0.1
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 19.7,
+                "pct": 20.9,
                 "raw": 0.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 17.3,
+                "pct": 18.1,
                 "raw": 1.5
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 12.4,
+                "pct": 12.2,
                 "raw": 382.0
               }
             ],
@@ -20746,25 +20762,25 @@
               {
                 "key": "hero_healing_per_min",
                 "label_zh": "团队治疗",
-                "pct": 71.2,
+                "pct": 71.6,
                 "raw": 7.6
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 60.4,
+                "pct": 62.7,
                 "raw": 682.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 58.8,
+                "pct": 59.1,
                 "raw": 605.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 54.4,
+                "pct": 55.3,
                 "raw": 368.0
               }
             ],
@@ -20788,7 +20804,7 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
             "own_player": "What the dog doing？",
             "own_kda": "7/2/10",
-            "own_rating": 9.2,
+            "own_rating": 6.1,
             "opp_hero": "先知",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
             "opp_player": "Flame = ez mute",
@@ -20817,31 +20833,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 74.8,
-            "opp_bm_avg": 60.2,
+            "own_bm_avg": 73.5,
+            "opp_bm_avg": 59.1,
             "own_bm_top": [
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 97.8,
+                "pct": 96.9,
                 "raw": 11.7
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 93.0,
+                "pct": 91.1,
                 "raw": 14313.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 90.2,
+                "pct": 88.7,
                 "raw": 751.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 67.2,
+                "pct": 65.0,
                 "raw": 931.0
               }
             ],
@@ -20849,30 +20865,30 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 75.0,
+                "pct": 73.5,
                 "raw": 10.1
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 62.7,
+                "pct": 61.8,
                 "raw": 7186.0
               },
               {
                 "key": "kills_per_min",
                 "label_zh": "击杀效率",
-                "pct": 57.4,
+                "pct": 57.1,
                 "raw": 0.2
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 56.8,
+                "pct": 54.9,
                 "raw": 730.0
               }
             ],
-            "own_share_pct": 54.4,
-            "opp_share_pct": 45.6,
+            "own_share_pct": 53.6,
+            "opp_share_pct": 46.4,
             "verdict_tag": "⚔️ 对位压制 (小优)",
             "grade": "good",
             "summary_txt": "10m对线经济 4,253 vs 4,066（+187）｜终局经济 30,500 vs 23,044（+7,456）｜英雄输出 21,351 vs 30,060｜正面对位互杀 1 : 0。"
@@ -20912,31 +20928,31 @@
             "stuns_opp": 35.6,
             "wards_own": "2眼/排1",
             "wards_opp": "1眼/排1",
-            "own_bm_avg": 89.8,
-            "opp_bm_avg": 26.8,
+            "own_bm_avg": 90.5,
+            "opp_bm_avg": 26.6,
             "own_bm_top": [
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 98.8,
+                "pct": 99.3,
                 "raw": 15878.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 97.6,
+                "pct": 97.9,
                 "raw": 7.4
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 96.0,
+                "pct": 96.8,
                 "raw": 707.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 93.0,
+                "pct": 93.9,
                 "raw": 1020.0
               }
             ],
@@ -20944,25 +20960,25 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 69.0,
+                "pct": 69.8,
                 "raw": 7.3
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 25.2,
+                "pct": 25.1,
                 "raw": 454.0
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 23.3,
+                "pct": 23.5,
                 "raw": 978.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 19.3,
+                "pct": 17.7,
                 "raw": 463.3
               }
             ],
@@ -20978,7 +20994,7 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
             "own_player": "东方树叶",
             "own_kda": "5/6/15",
-            "own_rating": 5.9,
+            "own_rating": 5.8,
             "opp_hero": "黑暗贤者",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
             "opp_player": "Mr. Brightside",
@@ -21007,25 +21023,25 @@
             "stuns_opp": 8.1,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 43.1,
-            "opp_bm_avg": 42.2,
+            "own_bm_avg": 42.0,
+            "opp_bm_avg": 43.8,
             "own_bm_top": [
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 65.0,
+                "pct": 64.4,
                 "raw": 5.1
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 57.7,
+                "pct": 56.7,
                 "raw": 1425.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 51.1,
+                "pct": 48.9,
                 "raw": 453.0
               },
               {
@@ -21039,25 +21055,25 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 64.0,
+                "pct": 67.0,
                 "raw": 7.2
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 60.8,
+                "pct": 59.2,
                 "raw": 729.9
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 57.1,
+                "pct": 56.4,
                 "raw": 713.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 30.5,
+                "pct": 33.1,
                 "raw": 458.0
               }
             ],
@@ -21102,31 +21118,31 @@
             "stuns_opp": 73.1,
             "wards_own": "20眼/排2",
             "wards_opp": "9眼/排2",
-            "own_bm_avg": 39.3,
-            "opp_bm_avg": 31.5,
+            "own_bm_avg": 39.5,
+            "opp_bm_avg": 31.4,
             "own_bm_top": [
               {
                 "key": "hero_healing_per_min",
                 "label_zh": "团队治疗",
-                "pct": 97.2,
+                "pct": 96.9,
                 "raw": 23.1
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 55.0,
+                "pct": 55.2,
                 "raw": 490.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 41.2,
+                "pct": 41.5,
                 "raw": 2.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 35.3,
+                "pct": 35.4,
                 "raw": 526.0
               }
             ],
@@ -21134,25 +21150,25 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 67.9,
+                "pct": 68.7,
                 "raw": 2.2
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 41.1,
+                "pct": 38.8,
                 "raw": 567.0
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 37.7,
+                "pct": 36.8,
                 "raw": 79.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 18.5,
+                "pct": 18.4,
                 "raw": 294.0
               }
             ],
@@ -21197,31 +21213,31 @@
             "stuns_opp": 52.3,
             "wards_own": "34眼/排2",
             "wards_opp": "38眼/排3",
-            "own_bm_avg": 53.4,
-            "opp_bm_avg": 16.4,
+            "own_bm_avg": 54.4,
+            "opp_bm_avg": 16.8,
             "own_bm_top": [
               {
                 "key": "hero_healing_per_min",
                 "label_zh": "团队治疗",
-                "pct": 71.2,
+                "pct": 71.6,
                 "raw": 7.6
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 60.4,
+                "pct": 62.7,
                 "raw": 682.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 58.8,
+                "pct": 59.1,
                 "raw": 605.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 54.4,
+                "pct": 55.3,
                 "raw": 368.0
               }
             ],
@@ -21229,25 +21245,25 @@
               {
                 "key": "kills_per_min",
                 "label_zh": "击杀效率",
-                "pct": 36.2,
+                "pct": 36.4,
                 "raw": 0.1
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 19.7,
+                "pct": 20.9,
                 "raw": 0.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 17.3,
+                "pct": 18.1,
                 "raw": 1.5
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 12.4,
+                "pct": 12.2,
                 "raw": 382.0
               }
             ],
@@ -41875,8 +41891,8 @@
       "rating_score": 9.9,
       "rating_tier": "S+ 擎天战神",
       "mvp_score": 99.0,
-      "blame_share_pct": 2.6,
-      "contrib_share_pct": 29.2,
+      "blame_share_pct": 2.1,
+      "contrib_share_pct": 36.4,
       "contrib_tier": "👑 头号首功 · 擎天真神",
       "gpm": 707,
       "xpm": 1020,
@@ -41907,8 +41923,8 @@
       "kill_participation_pct": 62.2,
       "rating_score": 9.2,
       "rating_tier": "S+ 擎天战神",
-      "blame_share_pct": 6.1,
-      "contrib_share_pct": 24.7,
+      "blame_share_pct": 4.9,
+      "contrib_share_pct": 31.0,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "strengths": [
         "保人拉野到位：对线期把同路核心 虚空假面 保出了 10分钟 56 刀 / 4,253 经济的顺畅开局。",
@@ -41936,7 +41952,7 @@
       "rating_score": 7.2,
       "rating_tier": "B 随波逐流",
       "blame_share_pct": 14.2,
-      "contrib_share_pct": 22.2
+      "contrib_share_pct": 22.3
     },
     "culprit_player": {
       "player_slot": 128,
@@ -41953,7 +41969,7 @@
       "rating_score": 4.2,
       "rating_tier": "D 头号战犯",
       "blame_share_pct": 30.2,
-      "contrib_share_pct": 9.1,
+      "contrib_share_pct": 8.9,
       "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "dead_seconds": 365,
       "death_gold_lost": 1870,
@@ -41974,7 +41990,7 @@
       "kda": "4/8/10",
       "rating_score": 5.5,
       "blame_share_pct": 23.0,
-      "contrib_share_pct": 19.0,
+      "contrib_share_pct": 19.2,
       "main_crime": "头铁拒出 BKB：面对敌方 234 秒强控，全场阵亡 8 次直到终局都没出黑皇杖，团战容错率极低。"
     },
     "focus_team_blame_ranking": [
@@ -41987,7 +42003,7 @@
         "personaname": "Paphets",
         "friend_tag": "车队好友 · Paphets",
         "blame_share_pct": 30.2,
-        "contrib_share_pct": 9.1,
+        "contrib_share_pct": 8.9,
         "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
         "rating_score": 4.2,
         "rating_tier": "D 头号战犯",
@@ -42006,7 +42022,7 @@
         "personaname": "Mr. Brightside",
         "friend_tag": "车队好友 · Mr. Brightside",
         "blame_share_pct": 23.0,
-        "contrib_share_pct": 19.0,
+        "contrib_share_pct": 19.2,
         "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
         "rating_score": 5.5,
         "rating_tier": "D 头号战犯",
@@ -42024,8 +42040,8 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/furion.png",
         "personaname": "Flame = ez mute",
         "friend_tag": "我 · Flame = ez mute",
-        "blame_share_pct": 18.9,
-        "contrib_share_pct": 29.1,
+        "blame_share_pct": 19.0,
+        "contrib_share_pct": 28.9,
         "contrib_tier": "👑 头号首功 · 擎天真神",
         "rating_score": 6.5,
         "rating_tier": "D 头号战犯",
@@ -42044,7 +42060,7 @@
         "personaname": "Make Your Choice",
         "friend_tag": "车队好友 · Make Your Choice",
         "blame_share_pct": 14.2,
-        "contrib_share_pct": 22.2,
+        "contrib_share_pct": 22.3,
         "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
         "rating_score": 7.2,
         "rating_tier": "B 随波逐流",
@@ -42062,8 +42078,8 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
         "personaname": "Replica",
         "friend_tag": "车队好友 · Replica",
-        "blame_share_pct": 13.7,
-        "contrib_share_pct": 20.6,
+        "blame_share_pct": 13.6,
+        "contrib_share_pct": 20.7,
         "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
         "rating_score": 6.2,
         "rating_tier": "D 头号战犯",
@@ -42083,9 +42099,9 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/furion.png",
         "personaname": "Flame = ez mute",
         "friend_tag": "我 · Flame = ez mute",
-        "contrib_share_pct": 29.1,
+        "contrib_share_pct": 28.9,
         "contrib_tier": "👑 头号首功 · 擎天真神",
-        "blame_share_pct": 18.9,
+        "blame_share_pct": 19.0,
         "rating_score": 6.5,
         "rating_tier": "D 头号战犯",
         "kda": "9/9/8",
@@ -42101,7 +42117,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/rubick.png",
         "personaname": "Make Your Choice",
         "friend_tag": "车队好友 · Make Your Choice",
-        "contrib_share_pct": 22.2,
+        "contrib_share_pct": 22.3,
         "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
         "blame_share_pct": 14.2,
         "rating_score": 7.2,
@@ -42119,9 +42135,9 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
         "personaname": "Replica",
         "friend_tag": "车队好友 · Replica",
-        "contrib_share_pct": 20.6,
+        "contrib_share_pct": 20.7,
         "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
-        "blame_share_pct": 13.7,
+        "blame_share_pct": 13.6,
         "rating_score": 6.2,
         "rating_tier": "D 头号战犯",
         "kda": "3/3/9",
@@ -42137,7 +42153,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dark_seer.png",
         "personaname": "Mr. Brightside",
         "friend_tag": "车队好友 · Mr. Brightside",
-        "contrib_share_pct": 19.0,
+        "contrib_share_pct": 19.2,
         "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
         "blame_share_pct": 23.0,
         "rating_score": 5.5,
@@ -42155,7 +42171,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dragon_knight.png",
         "personaname": "Paphets",
         "friend_tag": "车队好友 · Paphets",
-        "contrib_share_pct": 9.1,
+        "contrib_share_pct": 8.9,
         "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
         "blame_share_pct": 30.2,
         "rating_score": 4.2,
@@ -42167,10 +42183,10 @@
       }
     ],
     "rationale_list": [
-      "全场头号首功 (9.9分 · 胜局贡献 29.2%)：天辉 2号位 玛西（99）交出 18/4/11（参战率 78.4%）。",
+      "全场头号首功 (9.9分 · 胜局贡献 36.4%)：天辉 2号位 玛西（99）交出 18/4/11（参战率 78.4%）。",
       "核心统治力数据：单人打出 32,013 英雄伤害（占全队 36.0%）+ 15,878 建筑伤害，总经济 27,345（GPM 707 / XPM 1020）。",
-      "制胜关键：刷钱效率拉满：GPM 707 / XPM 1020（全场补刀 305），发育速度超越了全网 96% 的同英雄玩家。",
-      "胜方二当家（胜局贡献 24.7%）：5号位 森海飞霞（莓啤汽，评分 9.2）贡献 5/5/18（参战率 62.2%，伤害 15,315）。",
+      "制胜关键：刷钱效率拉满：GPM 707 / XPM 1020（全场补刀 305），发育速度超越了全网 97% 的同英雄玩家。",
+      "胜方二当家（胜局贡献 31.0%）：5号位 森海飞霞（莓啤汽，评分 9.2）贡献 5/5/18（参战率 62.2%，伤害 15,315）。",
       "败方孤胆院长 (SVP)：夜魇 5号位 拉比克（Make Your Choice，评分 7.2）交出 4/10/8（伤害 11,236），一神带四坑实在带不动。",
       "车队头号大锅认证（分锅占比 30.2%）：夜魇 2号位 龙骑士（Paphets，评分 4.2）——本局失利首锅毫无疑问扣在他头上：核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。"
     ]
@@ -42631,107 +42647,128 @@
         }
       ],
       "benchmarks": {
-        "GPM同英雄分位": "超越 90% 同英雄",
-        "XPM同英雄分位": "超越 67% 同英雄",
-        "分均伤害分位": "超越 54% 同英雄",
+        "GPM同英雄分位": "超越 89% 同英雄",
+        "XPM同英雄分位": "超越 65% 同英雄",
+        "分均伤害分位": "超越 53% 同英雄",
         "分均击杀分位": "超越 47% 同英雄",
-        "分均补刀分位": "超越 98% 同英雄",
-        "推塔分位": "超越 93% 同英雄"
+        "分均补刀分位": "超越 97% 同英雄",
+        "推塔分位": "超越 91% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.9023991275899673,
-        "xp_per_min": 0.6723009814612868,
-        "hero_damage_per_min": 0.5370774263904035,
-        "kills_per_min": 0.46619411123227916,
-        "last_hits_per_min": 0.9776444929116684,
-        "tower_damage": 0.9296619411123228
+        "gold_per_min": 0.8869220607661823,
+        "xp_per_min": 0.6504623513870542,
+        "hero_damage_per_min": 0.5254953764861294,
+        "kills_per_min": 0.4702774108322325,
+        "last_hits_per_min": 0.9693527080581241,
+        "tower_damage": 0.9109643328929987
       },
       "tags": [
         "极少阵亡 (2死)",
         "推进核心 (塔伤14,313)",
-        "GPM同英雄前10%"
+        "GPM同英雄前12%"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 3959,
+        "lane_hdmg_gain": 1602,
+        "lane_hdmg_share_pct": 10.9,
+        "lane_kills": 2,
+        "lane_deaths": 0,
+        "mid_gold_gain": 8789,
+        "mid_hdmg_gain": 1997,
+        "mid_gold_share_pct": 24.0,
+        "mid_hdmg_share_pct": 7.1,
+        "mid_kills": 0,
+        "mid_deaths": 1,
+        "late_gold_gain": 17630,
+        "late_hdmg_gain": 17690,
+        "late_kills": 4,
+        "late_deaths": 1,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 1,
+        "tf_zero_dmg_gold_farmed": 730
+      },
+      "is_afk_farmer": true,
       "radar": {
         "farm": 99,
-        "damage": 60,
-        "tempo": 48,
+        "damage": 59,
+        "tempo": 26,
         "push": 99,
         "utility": 47,
-        "survival": 86
+        "survival": 50
       },
-      "rating_score": 9.2,
-      "rating_tier": "S+ 擎天战神",
-      "mvp_score": 91.7,
-      "raw_blame_points": 15.3,
-      "raw_contrib_points": 298.6,
+      "rating_score": 6.1,
+      "rating_tier": "C 毒瘤独刷",
+      "mvp_score": 61.0,
+      "raw_blame_points": 53.5,
+      "raw_contrib_points": 39.3,
       "strengths": [
         "对线基本功扎实：前10分钟交出 56正/21反（10m经济 4,253，效率 85%），撑起了前中期基础节奏。",
-        "刷钱效率拉满：GPM 751 / XPM 931（全场补刀 483），发育速度超越了全网 90% 的同英雄玩家。",
+        "刷钱效率拉满：GPM 751 / XPM 931（全场补刀 483），发育速度超越了全网 89% 的同英雄玩家。",
         "推进终结能力极强：单人打出 14,313 建筑伤害（包揽全队 44% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
-        "全场核心技能施放统计：时间漫游(跳) 147次 / 时间膨胀(锁CD) 15次 / 时间结界(大招罩子) 6次（操作频率 177 APM）。",
-        "极高生存容错：41 分钟高强度对抗仅阵亡 2 次（读秒总计 1分48秒，仅占全场 4.3%），团战站位拉扯极佳。"
+        "全场核心技能施放统计：时间漫游(跳) 147次 / 时间膨胀(锁CD) 15次 / 时间结界(大招罩子) 6次（操作频率 177 APM）。"
       ],
       "weaknesses": [
+        "前中期毒瘤独刷不参战：全场参战率仅 **45.9%（全队倒数第一，7/2/10 全场仅 10 个助攻）**！前10分钟仅打出 **1,602 英雄伤害**，10–25m 中期狂刷 **+8,789 金（占全队中期经济 24.0%）** 却只打出 **1,997 伤害（仅占全队中期伤害 7.1%，连双辅助都不如）**，且有 **1 波关键团战 0 伤害卖队友独刷（趁队友4打5挨揍在野区收割 +730 金）**，全靠四个队友前中期 4 打 5 血战撑住局势才混到后期出山收割面板！",
         "假腿焊死细节缺失：整场 41 分钟比赛里，假腿属性总共只切换了 0 次，刷野放技能从不切智力省蓝、挨打也不切力量撑血。"
       ],
       "improvements": [
-        "保持当前 虚空假面 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+        "身为 1号位切忌前中期把四个队友当肉盾吸血独刷：10~25分钟做出第一件节奏装后必须带队接团或TP反打，而不是全程0参战闷头刷野。"
       ],
-      "trash_talk": "@What the dog doing？ 这把 虚空假面 评分 9.2 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
-      "praise_talk": "@What the dog doing？ 推塔终结机器！虚空假面 单人拆出 14,313 建筑伤害（占全队 44%），赢团推塔一气呵成！",
-      "blame_share_pct": 9.8,
-      "contrib_share_pct": 23.1,
-      "contrib_rank": 3,
-      "contrib_tier": "🛡️ 定海神针 · 中坚功臣",
+      "trash_talk": "@What the dog doing？ 玩个1号位虚空假面前25分钟打钱不参战（参战率45.9%全队垫底、全场仅10个助攻），队友正面4打5流血你钻野区收租，最后出山K几个头真当自己是MVP了？",
+      "praise_talk": "@What the dog doing？ 这把 虚空假面 前中期闷头独刷 25 分钟（参战率仅 45.9% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！",
+      "blame_share_pct": 27.5,
+      "contrib_share_pct": 3.8,
+      "contrib_rank": 5,
+      "contrib_tier": "🥂 凯旋功臣 · 团队拼图",
       "pings_count": 5,
       "lane_id": 1,
       "benchmarks_list": [
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 90.2,
+          "pct": 88.7,
           "raw": 751.0,
           "tier": "top"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 67.2,
+          "pct": 65.0,
           "raw": 931.0,
           "tier": "mid"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 46.6,
+          "pct": 47.0,
           "raw": 0.2,
           "tier": "mid"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 97.8,
+          "pct": 96.9,
           "raw": 11.7,
           "tier": "top"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 53.7,
+          "pct": 52.5,
           "raw": 515.1,
           "tier": "mid"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 95.8,
+          "pct": 95.7,
           "raw": 0.0,
           "tier": "top"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 93.0,
+          "pct": 91.1,
           "raw": 14313.0,
           "tier": "top"
         }
@@ -43252,20 +43289,20 @@
         }
       ],
       "benchmarks": {
-        "GPM同英雄分位": "超越 96% 同英雄",
-        "XPM同英雄分位": "超越 93% 同英雄",
-        "分均伤害分位": "超越 78% 同英雄",
-        "分均击杀分位": "超越 83% 同英雄",
+        "GPM同英雄分位": "超越 97% 同英雄",
+        "XPM同英雄分位": "超越 94% 同英雄",
+        "分均伤害分位": "超越 79% 同英雄",
+        "分均击杀分位": "超越 85% 同英雄",
         "分均补刀分位": "超越 98% 同英雄",
         "推塔分位": "超越 99% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.9601307189542484,
-        "xp_per_min": 0.9300653594771242,
-        "hero_damage_per_min": 0.7810457516339869,
-        "kills_per_min": 0.8287581699346406,
-        "last_hits_per_min": 0.9758169934640523,
-        "tower_damage": 0.9875816993464053
+        "gold_per_min": 0.9680964197093229,
+        "xp_per_min": 0.9386742289968096,
+        "hero_damage_per_min": 0.7866004962779156,
+        "kills_per_min": 0.847217298830202,
+        "last_hits_per_min": 0.978730946472882,
+        "tower_damage": 0.9925558312655087
       },
       "tags": [
         "全队输出支柱 (36%)",
@@ -43273,6 +43310,27 @@
         "推进核心 (塔伤15,878)",
         "GPM同英雄前4%"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 4060,
+        "lane_hdmg_gain": 5643,
+        "lane_hdmg_share_pct": 38.3,
+        "lane_kills": 3,
+        "lane_deaths": 2,
+        "mid_gold_gain": 10361,
+        "mid_hdmg_gain": 12506,
+        "mid_gold_share_pct": 28.3,
+        "mid_hdmg_share_pct": 44.5,
+        "mid_kills": 8,
+        "mid_deaths": 1,
+        "late_gold_gain": 14705,
+        "late_hdmg_gain": 13724,
+        "late_kills": 7,
+        "late_deaths": 1,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0
+      },
+      "is_afk_farmer": false,
       "radar": {
         "farm": 99,
         "damage": 88,
@@ -43287,8 +43345,8 @@
       "raw_blame_points": 4.0,
       "raw_contrib_points": 376.6,
       "strengths": [
-        "刷钱效率拉满：GPM 707 / XPM 1020（全场补刀 305），发育速度超越了全网 96% 的同英雄玩家。",
-        "输出转化率极高：吃下全队 27.3% 经济（27,345金），狂轰 32,013 英雄伤害（占全队 36.0%，超越全网 78% 同英雄）。",
+        "刷钱效率拉满：GPM 707 / XPM 1020（全场补刀 305），发育速度超越了全网 97% 的同英雄玩家。",
+        "输出转化率极高：吃下全队 27.3% 经济（27,345金），狂轰 32,013 英雄伤害（占全队 36.0%，超越全网 79% 同英雄）。",
         "推进终结能力极强：单人打出 15,878 建筑伤害（包揽全队 48% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
         "BKB 节点与使用果断：18:46 准时做出黑皇杖，全场有效开启 6 次顶住敌方第一波控制链。",
         "全场核心技能施放统计：回身踢(跳) 57次 / 过肩摔 47次 / 怒拳破(大招) 16次 / 护卫 10次（操作频率 113 APM）。",
@@ -43302,8 +43360,8 @@
       ],
       "trash_talk": "@99 这把 玛西 评分 9.9 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
       "praise_talk": "@99 这把 玛西 火力全开狂轰 32,013 伤害（包揽全队 36% 输出）+ 15,878 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
-      "blame_share_pct": 2.6,
-      "contrib_share_pct": 29.2,
+      "blame_share_pct": 2.1,
+      "contrib_share_pct": 36.4,
       "contrib_rank": 1,
       "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 44,
@@ -43312,49 +43370,49 @@
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 96.0,
+          "pct": 96.8,
           "raw": 707.0,
           "tier": "top"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 93.0,
+          "pct": 93.9,
           "raw": 1020.0,
           "tier": "top"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 82.9,
+          "pct": 84.7,
           "raw": 0.4,
           "tier": "top"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 97.6,
+          "pct": 97.9,
           "raw": 7.4,
           "tier": "top"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 78.1,
+          "pct": 78.7,
           "raw": 772.3,
           "tier": "top"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 82.0,
+          "pct": 82.3,
           "raw": 12.3,
           "tier": "top"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 98.8,
+          "pct": 99.3,
           "raw": 15878.0,
           "tier": "top"
         }
@@ -43959,35 +44017,56 @@
         }
       ],
       "benchmarks": {
-        "GPM同英雄分位": "超越 51% 同英雄",
-        "XPM同英雄分位": "超越 35% 同英雄",
-        "分均伤害分位": "超越 13% 同英雄",
+        "GPM同英雄分位": "超越 49% 同英雄",
+        "XPM同英雄分位": "超越 33% 同英雄",
+        "分均伤害分位": "超越 12% 同英雄",
         "分均击杀分位": "超越 37% 同英雄",
-        "分均补刀分位": "超越 65% 同英雄",
-        "推塔分位": "超越 58% 同英雄"
+        "分均补刀分位": "超越 64% 同英雄",
+        "推塔分位": "超越 57% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.5111402359108781,
-        "xp_per_min": 0.3519003931847969,
-        "hero_damage_per_min": 0.12975098296199214,
-        "kills_per_min": 0.36500655307994756,
-        "last_hits_per_min": 0.6500655307994757,
-        "tower_damage": 0.5766710353866317
+        "gold_per_min": 0.4894885472230938,
+        "xp_per_min": 0.33103231879510514,
+        "hero_damage_per_min": 0.12111703796673988,
+        "kills_per_min": 0.36523376215877,
+        "last_hits_per_min": 0.6438657044242234,
+        "tower_damage": 0.566990900533417
       },
       "tags": [],
+      "phase_telemetry": {
+        "lane_gold_gain": 2551,
+        "lane_hdmg_gain": 668,
+        "lane_hdmg_share_pct": 4.5,
+        "lane_kills": 0,
+        "lane_deaths": 2,
+        "mid_gold_gain": 7116,
+        "mid_hdmg_gain": 4533,
+        "mid_gold_share_pct": 19.5,
+        "mid_hdmg_share_pct": 16.1,
+        "mid_kills": 3,
+        "mid_deaths": 1,
+        "late_gold_gain": 8903,
+        "late_hdmg_gain": 3499,
+        "late_kills": 2,
+        "late_deaths": 3,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0
+      },
+      "is_afk_farmer": false,
       "radar": {
-        "farm": 61,
+        "farm": 59,
         "damage": 19,
         "tempo": 56,
         "push": 40,
         "utility": 53,
         "survival": 67
       },
-      "rating_score": 5.9,
+      "rating_score": 5.8,
       "rating_tier": "B 躺赢福将",
-      "mvp_score": 58.6,
-      "raw_blame_points": 85.4,
-      "raw_contrib_points": 113.3,
+      "mvp_score": 58.3,
+      "raw_blame_points": 85.7,
+      "raw_contrib_points": 112.0,
       "strengths": [
         "切入发动机：13:33 摸出跳刀后全场高频切入 27 次，把控先手节奏。",
         "全场核心技能施放统计：鱼人碎击(踩) 58次 / 侵蚀雾霭(大招点灯) 27次 / 守卫冲刺(加速) 24次（操作频率 169 APM）。"
@@ -44003,24 +44082,24 @@
       ],
       "trash_talk": "@东方树叶 对面一身硬控你拖到 31:51 才出 BKB，整局就按了 2 次，买个黄棍放包里当传家宝辟邪是吧？",
       "praise_talk": "@东方树叶 铁血三号位！斯拉达 参战率 54% 肉身扛下 30,844 伤害（全队 20%）外加 35.5 秒硬控，完美团战发动机！",
-      "blame_share_pct": 54.8,
-      "contrib_share_pct": 8.8,
-      "contrib_rank": 5,
-      "contrib_tier": "🥂 凯旋功臣 · 团队拼图",
+      "blame_share_pct": 44.1,
+      "contrib_share_pct": 10.9,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 1,
       "lane_id": 3,
       "benchmarks_list": [
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 51.1,
+          "pct": 48.9,
           "raw": 453.0,
           "tier": "mid"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 35.2,
+          "pct": 33.1,
           "raw": 566.0,
           "tier": "low"
         },
@@ -44034,28 +44113,28 @@
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 65.0,
+          "pct": 64.4,
           "raw": 5.1,
           "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 13.0,
+          "pct": 12.1,
           "raw": 213.2,
           "tier": "low"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 95.2,
+          "pct": 95.0,
           "raw": 0.0,
           "tier": "top"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 57.7,
+          "pct": 56.7,
           "raw": 1425.0,
           "tier": "mid"
         }
@@ -44595,7 +44674,7 @@
         }
       ],
       "benchmarks": {
-        "GPM同英雄分位": "超越 29% 同英雄",
+        "GPM同英雄分位": "超越 30% 同英雄",
         "XPM同英雄分位": "超越 35% 同英雄",
         "分均伤害分位": "超越 10% 同英雄",
         "分均击杀分位": "超越 7% 同英雄",
@@ -44603,19 +44682,40 @@
         "推塔分位": "超越 55% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.2915980230642504,
-        "xp_per_min": 0.35270330986970194,
-        "hero_damage_per_min": 0.09944585891867605,
-        "kills_per_min": 0.07308671559083421,
-        "last_hits_per_min": 0.4121611502171634,
-        "tower_damage": 0.5502471169686985
+        "gold_per_min": 0.3012057626057,
+        "xp_per_min": 0.35405574694644537,
+        "hero_damage_per_min": 0.09763545255245851,
+        "kills_per_min": 0.07469464453492014,
+        "last_hits_per_min": 0.414970247416223,
+        "tower_damage": 0.5521453178828688
       },
       "tags": [
         "视野高产 (5假/15真)"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 2089,
+        "lane_hdmg_gain": 2373,
+        "lane_hdmg_share_pct": 16.1,
+        "lane_kills": 2,
+        "lane_deaths": 1,
+        "mid_gold_gain": 4968,
+        "mid_hdmg_gain": 3301,
+        "mid_gold_share_pct": 13.6,
+        "mid_hdmg_share_pct": 11.7,
+        "mid_kills": 0,
+        "mid_deaths": 3,
+        "late_gold_gain": 6443,
+        "late_hdmg_gain": 5503,
+        "late_kills": 0,
+        "late_deaths": 2,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0
+      },
+      "is_afk_farmer": false,
       "radar": {
-        "farm": 49,
-        "damage": 21,
+        "farm": 50,
+        "damage": 20,
         "tempo": 61,
         "push": 63,
         "utility": 89,
@@ -44623,9 +44723,9 @@
       },
       "rating_score": 7.0,
       "rating_tier": "B+ 稳健功臣",
-      "mvp_score": 70.3,
-      "raw_blame_points": 41.7,
-      "raw_contrib_points": 183.9,
+      "mvp_score": 70.4,
+      "raw_blame_points": 41.6,
+      "raw_contrib_points": 184.4,
       "strengths": [
         "全场核心技能施放统计：腐烂 140次 / 肉钩 27次 / 腐肉堆积(护盾) 25次 / 肢解(大招咬) 12次（操作频率 172 APM）。",
         "视野铺设尽职：全场插下 5 假眼 + 15 真眼（共 20 颗），并成功排掉敌方 2 颗假眼 / 4 颗真眼。"
@@ -44638,59 +44738,59 @@
       ],
       "trash_talk": "@Mind's Desire 这把 2/6/16 标准打卡下班，背锅占比 42 点，赢了跟着笑，输了怪队友！",
       "praise_talk": "@Mind's Desire 最佳幕后功臣！帕吉 全场点亮 5 假 15 真视野 + 参战率 49%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 26.7,
-      "contrib_share_pct": 14.2,
-      "contrib_rank": 4,
-      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
+      "blame_share_pct": 21.4,
+      "contrib_share_pct": 17.9,
+      "contrib_rank": 3,
+      "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
       "pings_count": 1,
       "lane_id": 3,
       "benchmarks_list": [
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 29.2,
+          "pct": 30.1,
           "raw": 333.0,
           "tier": "low"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 35.3,
+          "pct": 35.4,
           "raw": 526.0,
           "tier": "low"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 7.3,
+          "pct": 7.5,
           "raw": 0.0,
           "tier": "low"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 41.2,
+          "pct": 41.5,
           "raw": 2.0,
           "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 9.9,
+          "pct": 9.8,
           "raw": 275.4,
           "tier": "low"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 97.2,
+          "pct": 96.9,
           "raw": 23.1,
           "tier": "top"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 55.0,
+          "pct": 55.2,
           "raw": 490.0,
           "tier": "mid"
         }
@@ -45264,30 +45364,51 @@
         }
       ],
       "benchmarks": {
-        "GPM同英雄分位": "超越 54% 同英雄",
+        "GPM同英雄分位": "超越 55% 同英雄",
         "XPM同英雄分位": "超越 59% 同英雄",
         "分均伤害分位": "超越 31% 同英雄",
-        "分均击杀分位": "超越 46% 同英雄",
+        "分均击杀分位": "超越 49% 同英雄",
         "分均补刀分位": "超越 52% 同英雄",
-        "推塔分位": "超越 60% 同英雄"
+        "推塔分位": "超越 63% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.5442300691663633,
-        "xp_per_min": 0.5879140880961048,
-        "hero_damage_per_min": 0.3119767018565708,
-        "kills_per_min": 0.464506734619585,
-        "last_hits_per_min": 0.5154714233709501,
-        "tower_damage": 0.6035675282125955
+        "gold_per_min": 0.5530662616290108,
+        "xp_per_min": 0.5910385418644389,
+        "hero_damage_per_min": 0.31080311372697933,
+        "kills_per_min": 0.4936396430605658,
+        "last_hits_per_min": 0.5162331498006455,
+        "tower_damage": 0.62749193089045
       },
       "tags": [
         "视野高产 (12假/22真)",
         "囤野 6 波"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 1676,
+        "lane_hdmg_gain": 4459,
+        "lane_hdmg_share_pct": 30.2,
+        "lane_kills": 0,
+        "lane_deaths": 2,
+        "mid_gold_gain": 5332,
+        "mid_hdmg_gain": 5796,
+        "mid_gold_share_pct": 14.6,
+        "mid_hdmg_share_pct": 20.6,
+        "mid_kills": 4,
+        "mid_deaths": 1,
+        "late_gold_gain": 8035,
+        "late_hdmg_gain": 4995,
+        "late_kills": 1,
+        "late_deaths": 2,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0
+      },
+      "is_afk_farmer": false,
       "radar": {
-        "farm": 65,
+        "farm": 66,
         "damage": 38,
         "tempo": 93,
-        "push": 66,
+        "push": 68,
         "utility": 96,
         "survival": 76
       },
@@ -45310,8 +45431,8 @@
       ],
       "trash_talk": "@莓啤汽 这把 森海飞霞 评分 9.2 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！",
       "praise_talk": "@莓啤汽 最佳幕后功臣！森海飞霞 全场点亮 12 假 22 真视野 + 参战率 62%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 6.1,
-      "contrib_share_pct": 24.7,
+      "blame_share_pct": 4.9,
+      "contrib_share_pct": 31.0,
       "contrib_rank": 2,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 14,
@@ -45320,49 +45441,49 @@
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 54.4,
+          "pct": 55.3,
           "raw": 368.0,
           "tier": "mid"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 58.8,
+          "pct": 59.1,
           "raw": 605.0,
           "tier": "mid"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 46.5,
+          "pct": 49.4,
           "raw": 0.1,
           "tier": "mid"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 51.5,
+          "pct": 51.6,
           "raw": 2.0,
           "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 31.2,
+          "pct": 31.1,
           "raw": 369.5,
           "tier": "low"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 71.2,
+          "pct": 71.6,
           "raw": 7.6,
           "tier": "mid"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 60.4,
+          "pct": 62.7,
           "raw": 682.0,
           "tier": "mid"
         }
@@ -45888,39 +46009,60 @@
         }
       ],
       "benchmarks": {
-        "GPM同英雄分位": "超越 55% 同英雄",
-        "XPM同英雄分位": "超越 57% 同英雄",
+        "GPM同英雄分位": "超越 54% 同英雄",
+        "XPM同英雄分位": "超越 55% 同英雄",
         "分均伤害分位": "超越 54% 同英雄",
         "分均击杀分位": "超越 57% 同英雄",
-        "分均补刀分位": "超越 75% 同英雄",
-        "推塔分位": "超越 63% 同英雄"
+        "分均补刀分位": "超越 73% 同英雄",
+        "推塔分位": "超越 62% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.5514138817480719,
-        "xp_per_min": 0.5681233933161953,
-        "hero_damage_per_min": 0.5449871465295629,
-        "kills_per_min": 0.5736932305055699,
-        "last_hits_per_min": 0.7502142245072836,
-        "tower_damage": 0.6272493573264781
+        "gold_per_min": 0.5392657427668368,
+        "xp_per_min": 0.5494772672015561,
+        "hero_damage_per_min": 0.5351325066861172,
+        "kills_per_min": 0.5713591052759542,
+        "last_hits_per_min": 0.7345003646973013,
+        "tower_damage": 0.6182834913688305
       },
       "tags": [
         "高参战率 (77%)",
         "核心高频阵亡 (9死)",
         "推进核心 (塔伤7,186)"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 4066,
+        "lane_hdmg_gain": 6223,
+        "lane_hdmg_share_pct": 34.7,
+        "lane_kills": 3,
+        "lane_deaths": 2,
+        "mid_gold_gain": 10429,
+        "mid_hdmg_gain": 10716,
+        "mid_gold_share_pct": 33.9,
+        "mid_hdmg_share_pct": 35.1,
+        "mid_kills": 4,
+        "mid_deaths": 3,
+        "late_gold_gain": 10881,
+        "late_hdmg_gain": 13121,
+        "late_kills": 2,
+        "late_deaths": 4,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0
+      },
+      "is_afk_farmer": false,
       "radar": {
-        "farm": 60,
-        "damage": 65,
+        "farm": 59,
+        "damage": 64,
         "tempo": 77,
-        "push": 78,
+        "push": 77,
         "utility": 39,
         "survival": 46
       },
       "rating_score": 6.5,
       "rating_tier": "D 头号战犯",
-      "mvp_score": 65.3,
-      "raw_blame_points": 69.2,
-      "raw_contrib_points": 181.4,
+      "mvp_score": 64.7,
+      "raw_blame_points": 69.8,
+      "raw_contrib_points": 178.5,
       "strengths": [
         "对线基本功扎实：前10分钟交出 54正/2反（10m经济 4,066，效率 82%），撑起了前中期基础节奏。",
         "输出转化率极高：吃下全队 30.5% 经济（23,044金），狂轰 30,060 英雄伤害（占全队 28.3%，超越全网 54% 同英雄）。",
@@ -45938,8 +46080,8 @@
       ],
       "trash_talk": "@Flame = ez mute 一局死 9 次，看了整整 7分54秒 黑白电视（其中被敌方【玛西】单人提款 6 次），光死就扣了 2925 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Flame = ez mute 这把 先知 火力全开狂轰 30,060 伤害（包揽全队 28% 输出）+ 7,186 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
-      "blame_share_pct": 18.9,
-      "contrib_share_pct": 29.1,
+      "blame_share_pct": 19.0,
+      "contrib_share_pct": 28.9,
       "contrib_rank": 1,
       "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 9,
@@ -45948,49 +46090,49 @@
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 55.1,
+          "pct": 53.9,
           "raw": 613.0,
           "tier": "mid"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 56.8,
+          "pct": 54.9,
           "raw": 730.0,
           "tier": "mid"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 57.4,
+          "pct": 57.1,
           "raw": 0.2,
           "tier": "mid"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 75.0,
+          "pct": 73.5,
           "raw": 10.1,
-          "tier": "top"
+          "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 54.5,
+          "pct": 53.5,
           "raw": 725.2,
           "tier": "mid"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 81.0,
+          "pct": 80.5,
           "raw": 0.0,
           "tier": "top"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 62.7,
+          "pct": 61.8,
           "raw": 7186.0,
           "tier": "mid"
         }
@@ -46540,26 +46682,47 @@
       ],
       "benchmarks": {
         "GPM同英雄分位": "超越 25% 同英雄",
-        "XPM同英雄分位": "超越 17% 同英雄",
-        "分均伤害分位": "超越 19% 同英雄",
+        "XPM同英雄分位": "超越 16% 同英雄",
+        "分均伤害分位": "超越 18% 同英雄",
         "分均击杀分位": "超越 7% 同英雄",
-        "分均补刀分位": "超越 69% 同英雄",
-        "推塔分位": "超越 23% 同英雄"
+        "分均补刀分位": "超越 70% 同英雄",
+        "推塔分位": "超越 24% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.25200918484500573,
-        "xp_per_min": 0.17336394948335246,
-        "hero_damage_per_min": 0.1928817451205511,
-        "kills_per_min": 0.07003444316877153,
-        "last_hits_per_min": 0.6897244546498278,
-        "tower_damage": 0.2330654420206659
+        "gold_per_min": 0.2509658246656761,
+        "xp_per_min": 0.16196136701337296,
+        "hero_damage_per_min": 0.1774145616641902,
+        "kills_per_min": 0.07280832095096583,
+        "last_hits_per_min": 0.6976225854383358,
+        "tower_damage": 0.23521545319465081
       },
       "tags": [
         "囤野 4 波"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 3824,
+        "lane_hdmg_gain": 3476,
+        "lane_hdmg_share_pct": 19.4,
+        "lane_kills": 0,
+        "lane_deaths": 2,
+        "mid_gold_gain": 5902,
+        "mid_hdmg_gain": 3597,
+        "mid_gold_share_pct": 19.2,
+        "mid_hdmg_share_pct": 11.8,
+        "mid_kills": 1,
+        "mid_deaths": 3,
+        "late_gold_gain": 9084,
+        "late_hdmg_gain": 12129,
+        "late_kills": 1,
+        "late_deaths": 3,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 1,
+        "tf_zero_dmg_gold_farmed": 90
+      },
+      "is_afk_farmer": false,
       "radar": {
         "farm": 36,
-        "damage": 32,
+        "damage": 31,
         "tempo": 56,
         "push": 19,
         "utility": 68,
@@ -46567,9 +46730,9 @@
       },
       "rating_score": 4.2,
       "rating_tier": "D 头号战犯",
-      "mvp_score": 42.3,
-      "raw_blame_points": 110.7,
-      "raw_contrib_points": 56.3,
+      "mvp_score": 42.0,
+      "raw_blame_points": 111.0,
+      "raw_contrib_points": 55.3,
       "strengths": [
         "对线基本功扎实：前10分钟交出 55正/8反（10m经济 3,824，效率 77%），撑起了前中期基础节奏。",
         "全场核心技能施放统计：火焰气息(喷火) 81次 / 火球(魔晶) 26次 / 神龙摆尾(拍晕) 17次 / 古龙形态(变龙) 10次（操作频率 203 APM）。"
@@ -46587,7 +46750,7 @@
       "trash_talk": "@Paphets 一局死 8 次，看了整整 6分5秒 黑白电视（其中被敌方【玛西】单人提款 5 次），光死就扣了 1870 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Paphets 稳健上分拼图！龙骑士 交出 2/8/10（参战率 54% · 伤害 19,202），关键团战从不掉链子！",
       "blame_share_pct": 30.2,
-      "contrib_share_pct": 9.1,
+      "contrib_share_pct": 8.9,
       "contrib_rank": 5,
       "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "pings_count": 4,
@@ -46596,49 +46759,49 @@
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 25.2,
+          "pct": 25.1,
           "raw": 454.0,
           "tier": "low"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 17.3,
+          "pct": 16.2,
           "raw": 529.0,
           "tier": "low"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 7.0,
+          "pct": 7.3,
           "raw": 0.0,
           "tier": "low"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 69.0,
+          "pct": 69.8,
           "raw": 7.3,
           "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 19.3,
+          "pct": 17.7,
           "raw": 463.3,
           "tier": "low"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 95.8,
+          "pct": 95.6,
           "raw": 0.0,
           "tier": "top"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 23.3,
+          "pct": 23.5,
           "raw": 978.0,
           "tier": "low"
         }
@@ -47161,27 +47324,48 @@
         }
       ],
       "benchmarks": {
-        "GPM同英雄分位": "超越 30% 同英雄",
-        "XPM同英雄分位": "超越 57% 同英雄",
-        "分均伤害分位": "超越 61% 同英雄",
-        "分均击杀分位": "超越 30% 同英雄",
-        "分均补刀分位": "超越 64% 同英雄",
-        "推塔分位": "超越 11% 同英雄"
+        "GPM同英雄分位": "超越 33% 同英雄",
+        "XPM同英雄分位": "超越 56% 同英雄",
+        "分均伤害分位": "超越 59% 同英雄",
+        "分均击杀分位": "超越 32% 同英雄",
+        "分均补刀分位": "超越 67% 同英雄",
+        "推塔分位": "超越 15% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.3049907578558225,
-        "xp_per_min": 0.5711645101663586,
-        "hero_damage_per_min": 0.6081330868761553,
-        "kills_per_min": 0.2957486136783734,
-        "last_hits_per_min": 0.6395563770794824,
-        "tower_damage": 0.11367837338262476
+        "gold_per_min": 0.3314917127071823,
+        "xp_per_min": 0.5644567219152854,
+        "hero_damage_per_min": 0.5916206261510129,
+        "kills_per_min": 0.3236648250460405,
+        "last_hits_per_min": 0.6703499079189686,
+        "tower_damage": 0.14825046040515655
       },
       "tags": [
         "囤野 5 波"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 2576,
+        "lane_hdmg_gain": 2062,
+        "lane_hdmg_share_pct": 11.5,
+        "lane_kills": 1,
+        "lane_deaths": 2,
+        "mid_gold_gain": 7760,
+        "mid_hdmg_gain": 7451,
+        "mid_gold_share_pct": 25.2,
+        "mid_hdmg_share_pct": 24.4,
+        "mid_kills": 1,
+        "mid_deaths": 1,
+        "late_gold_gain": 8642,
+        "late_hdmg_gain": 20742,
+        "late_kills": 2,
+        "late_deaths": 4,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 1,
+        "tf_zero_dmg_gold_farmed": 186
+      },
+      "is_afk_farmer": false,
       "radar": {
-        "farm": 46,
-        "damage": 69,
+        "farm": 48,
+        "damage": 68,
         "tempo": 65,
         "push": 10,
         "utility": 50,
@@ -47189,9 +47373,9 @@
       },
       "rating_score": 5.5,
       "rating_tier": "D 头号战犯",
-      "mvp_score": 54.5,
-      "raw_blame_points": 84.5,
-      "raw_contrib_points": 118.4,
+      "mvp_score": 54.6,
+      "raw_blame_points": 84.4,
+      "raw_contrib_points": 118.9,
       "strengths": [
         "对线基本功扎实：前10分钟交出 43正/0反（10m经济 2,576，效率 52%），撑起了前中期基础节奏。",
         "全场核心技能施放统计：离子外壳(套子) 96次 / 奔腾(加速) 95次 / 真空(拉) 8次 / 复制之墙(大招墙) 6次（操作频率 383 APM）。"
@@ -47207,7 +47391,7 @@
       "trash_talk": "@Mr. Brightside 一局死 8 次，看了整整 5分24秒 黑白电视（其中被敌方【虚空假面】单人提款 5 次），光死就扣了 1805 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Mr. Brightside 铁血三号位！黑暗贤者 参战率 64% 肉身扛下 31,495 伤害（全队 27%）外加 8.1 秒硬控，完美团战发动机！",
       "blame_share_pct": 23.0,
-      "contrib_share_pct": 19.0,
+      "contrib_share_pct": 19.2,
       "contrib_rank": 4,
       "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 10,
@@ -47216,49 +47400,49 @@
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 30.5,
+          "pct": 33.1,
           "raw": 458.0,
           "tier": "low"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 57.1,
+          "pct": 56.4,
           "raw": 713.0,
           "tier": "mid"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 29.6,
+          "pct": 32.4,
           "raw": 0.1,
           "tier": "low"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 64.0,
+          "pct": 67.0,
           "raw": 7.2,
           "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 60.8,
+          "pct": 59.2,
           "raw": 729.9,
           "tier": "mid"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 69.9,
+          "pct": 65.4,
           "raw": 0.0,
           "tier": "mid"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 11.4,
+          "pct": 14.8,
           "raw": 14.0,
           "tier": "low"
         }
@@ -47812,37 +47996,58 @@
         }
       ],
       "benchmarks": {
-        "GPM同英雄分位": "超越 19% 同英雄",
-        "XPM同英雄分位": "超越 41% 同英雄",
-        "分均伤害分位": "超越 12% 同英雄",
-        "分均击杀分位": "超越 12% 同英雄",
-        "分均补刀分位": "超越 68% 同英雄",
-        "推塔分位": "超越 38% 同英雄"
+        "GPM同英雄分位": "超越 18% 同英雄",
+        "XPM同英雄分位": "超越 39% 同英雄",
+        "分均伤害分位": "超越 13% 同英雄",
+        "分均击杀分位": "超越 13% 同英雄",
+        "分均补刀分位": "超越 69% 同英雄",
+        "推塔分位": "超越 37% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.18512720156555773,
-        "xp_per_min": 0.410958904109589,
-        "hero_damage_per_min": 0.12446183953033269,
-        "kills_per_min": 0.1162426614481409,
-        "last_hits_per_min": 0.6794520547945205,
-        "tower_damage": 0.37690802348336594
+        "gold_per_min": 0.18351987649556156,
+        "xp_per_min": 0.38807410266306447,
+        "hero_damage_per_min": 0.130451563103049,
+        "kills_per_min": 0.12659204940177538,
+        "last_hits_per_min": 0.6868004631416441,
+        "tower_damage": 0.36819760710150523
       },
       "tags": [
         "极少阵亡 (3死)"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 2109,
+        "lane_hdmg_gain": 2614,
+        "lane_hdmg_share_pct": 14.6,
+        "lane_kills": 1,
+        "lane_deaths": 0,
+        "mid_gold_gain": 3482,
+        "mid_hdmg_gain": 5955,
+        "mid_gold_share_pct": 11.3,
+        "mid_hdmg_share_pct": 19.5,
+        "mid_kills": 1,
+        "mid_deaths": 3,
+        "late_gold_gain": 6554,
+        "late_hdmg_gain": 6602,
+        "late_kills": 1,
+        "late_deaths": 0,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0
+      },
+      "is_afk_farmer": false,
       "radar": {
         "farm": 42,
-        "damage": 24,
+        "damage": 25,
         "tempo": 56,
-        "push": 53,
+        "push": 52,
         "utility": 73,
         "survival": 83
       },
       "rating_score": 6.2,
       "rating_tier": "D 头号战犯",
-      "mvp_score": 61.8,
-      "raw_blame_points": 50.2,
-      "raw_contrib_points": 127.9,
+      "mvp_score": 61.9,
+      "raw_blame_points": 50.1,
+      "raw_contrib_points": 128.4,
       "strengths": [
         "全场核心技能施放统计：穿刺(戳) 68次 / 神智爆裂 31次 / 复仇(大招隐身) 18次 / 尖刺外壳(壳) 17次（操作频率 314 APM）。",
         "极高生存容错：41 分钟高强度对抗仅阵亡 3 次（读秒总计 1分40秒，仅占全场 4.0%），团战站位拉扯极佳。"
@@ -47855,8 +48060,8 @@
       ],
       "trash_talk": "@Replica 这把 3/3/9 标准打卡下班，背锅占比 50 点，赢了跟着笑，输了怪队友！",
       "praise_talk": "@Replica 稳健上分拼图！司夜刺客 交出 3/3/9（参战率 54% · 伤害 15,465），关键团战从不掉链子！",
-      "blame_share_pct": 13.7,
-      "contrib_share_pct": 20.6,
+      "blame_share_pct": 13.6,
+      "contrib_share_pct": 20.7,
       "contrib_rank": 3,
       "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
       "pings_count": 2,
@@ -47865,49 +48070,49 @@
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 18.5,
+          "pct": 18.4,
           "raw": 294.0,
           "tier": "low"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 41.1,
+          "pct": 38.8,
           "raw": 567.0,
-          "tier": "mid"
+          "tier": "low"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 11.6,
+          "pct": 12.7,
           "raw": 0.1,
           "tier": "low"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 67.9,
+          "pct": 68.7,
           "raw": 2.2,
           "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 12.4,
+          "pct": 13.0,
           "raw": 373.1,
           "tier": "low"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 74.3,
+          "pct": 72.9,
           "raw": 0.0,
           "tier": "mid"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 37.7,
+          "pct": 36.8,
           "raw": 79.0,
           "tier": "low"
         }
@@ -48016,7 +48221,7 @@
       "personaname": "Make Your Choice",
       "friend_tag": "车队好友 · Make Your Choice",
       "is_me": false,
-      "rank": "万古流芳[3星]",
+      "rank": "中军[4星]",
       "hero_id": 86,
       "hero_name": "拉比克(大魔导师)",
       "hero_short_zh": "拉比克",
@@ -48501,34 +48706,55 @@
         "XPM同英雄分位": "超越 12% 同英雄",
         "分均伤害分位": "超越 6% 同英雄",
         "分均击杀分位": "超越 36% 同英雄",
-        "分均补刀分位": "超越 17% 同英雄",
-        "推塔分位": "超越 20% 同英雄"
+        "分均补刀分位": "超越 18% 同英雄",
+        "推塔分位": "超越 21% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.07227853680035258,
-        "xp_per_min": 0.123622741295725,
-        "hero_damage_per_min": 0.055310709563684446,
-        "kills_per_min": 0.3622741295724989,
-        "last_hits_per_min": 0.17276333186425738,
-        "tower_damage": 0.19700308505949757
+        "gold_per_min": 0.07431119240882589,
+        "xp_per_min": 0.12175603063907625,
+        "hero_damage_per_min": 0.05979192866125529,
+        "kills_per_min": 0.36378186806905227,
+        "last_hits_per_min": 0.18143363438893334,
+        "tower_damage": 0.2093289127700926
       },
       "tags": [
         "阵亡偏多 (10死)",
         "视野高产 (14假/24真)"
       ],
+      "phase_telemetry": {
+        "lane_gold_gain": 2080,
+        "lane_hdmg_gain": 3580,
+        "lane_hdmg_share_pct": 19.9,
+        "lane_kills": 2,
+        "lane_deaths": 2,
+        "mid_gold_gain": 3197,
+        "mid_hdmg_gain": 2818,
+        "mid_gold_share_pct": 10.4,
+        "mid_hdmg_share_pct": 9.2,
+        "mid_kills": 0,
+        "mid_deaths": 5,
+        "late_gold_gain": 5514,
+        "late_hdmg_gain": 4838,
+        "late_kills": 2,
+        "late_deaths": 3,
+        "tf_total_count": 6,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0
+      },
+      "is_afk_farmer": false,
       "radar": {
         "farm": 35,
-        "damage": 15,
+        "damage": 16,
         "tempo": 76,
-        "push": 42,
+        "push": 43,
         "utility": 98,
         "survival": 56
       },
       "rating_score": 7.2,
       "rating_tier": "B 随波逐流",
-      "mvp_score": 71.8,
-      "raw_blame_points": 52.2,
-      "raw_contrib_points": 137.8,
+      "mvp_score": 71.9,
+      "raw_blame_points": 52.1,
+      "raw_contrib_points": 138.2,
       "strengths": [
         "保人拉野到位：对线期把同路核心 先知 保出了 10分钟 54 刀 / 4,066 经济的顺畅开局。",
         "全场核心技能施放统计：弱化能流 44次 / 隔空取物(举) 23次 / 时间漫游(跳) 21次 / 技能窃取(偷) 18次（操作频率 257 APM）。",
@@ -48544,7 +48770,7 @@
       "trash_talk": "@Make Your Choice 一局死 10 次，看了整整 5分47秒 黑白电视（其中被敌方【玛西】单人提款 4 次），光死就扣了 1094 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Make Your Choice 最佳幕后功臣！拉比克 全场点亮 14 假 24 真视野 + 参战率 54%，吃草挤奶把大哥伺候得明明白白！",
       "blame_share_pct": 14.2,
-      "contrib_share_pct": 22.2,
+      "contrib_share_pct": 22.3,
       "contrib_rank": 2,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 10,
@@ -48553,49 +48779,49 @@
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 7.2,
+          "pct": 7.4,
           "raw": 261.0,
           "tier": "low"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 12.4,
+          "pct": 12.2,
           "raw": 382.0,
           "tier": "low"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 36.2,
+          "pct": 36.4,
           "raw": 0.1,
           "tier": "low"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 17.3,
+          "pct": 18.1,
           "raw": 1.5,
           "tier": "low"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 5.5,
+          "pct": 6.0,
           "raw": 271.1,
           "tier": "low"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 46.3,
+          "pct": 47.7,
           "raw": 0.0,
           "tier": "mid"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 19.7,
+          "pct": 20.9,
           "raw": 0.0,
           "tier": "low"
         }

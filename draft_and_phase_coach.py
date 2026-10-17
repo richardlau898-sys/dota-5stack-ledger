@@ -14,124 +14,417 @@ from typing import Any, Dict, List, Optional, Tuple
 
 # 英雄战术画像：先手(init)、爆发(burst)、团战AOE(tf)、推塔(push)、抓人(pick)、后期(late)、前排肉度(tank)、物理/法系倾向
 HERO_ARCHETYPES: Dict[int, Dict[str, Any]] = {
+    1: {  # 敌法师 Anti-Mage
+        "short": "敌法师",
+        "roles": ["闪烁极限带球刷钱", "法力虚空引爆高蓝核", "法术反制克制点控法师"],
+        "scores": {"init": 42, "burst": 78, "tf": 68, "push": 84, "pick": 74, "late": 94, "tank": 64},
+        "dmg_type": "physical",
+        "synergy_tags": ["hard_carry", "split_pusher", "anti_mage"],
+    },
+    2: {  # 斧王 Axe
+        "short": "斧王",
+        "roles": ["跳刀狂战士之吼无视BKB群嘲", "反击螺旋克制近战与多段平A", "淘汰之刃斩杀收割"],
+        "scores": {"init": 94, "burst": 76, "tf": 86, "push": 52, "pick": 86, "late": 76, "tank": 92},
+        "dmg_type": "pure",
+        "synergy_tags": ["frontline_tank", "bkb_pierce_init", "instant_stun"],
+    },
+    5: {  # 水晶室女 Crystal Maiden
+        "short": "水晶室女",
+        "roles": ["冰封禁制先手留人", "奥术光环全队回蓝", "极寒领域团战高额AOE"],
+        "scores": {"init": 68, "burst": 76, "tf": 84, "push": 38, "pick": 75, "late": 55, "tank": 28},
+        "dmg_type": "magical",
+        "synergy_tags": ["root_setup", "mana_aura", "squishy_ranged"],
+    },
+    7: {  # 撼地者 Earthshaker
+        "short": "撼地者",
+        "roles": ["沟壑超远封路留人", "跳刀回音击毁天灭地反手清场", "余震连环控制克制幻象与扎堆"],
+        "scores": {"init": 92, "burst": 90, "tf": 94, "push": 42, "pick": 82, "late": 78, "tank": 64},
+        "dmg_type": "magical",
+        "synergy_tags": ["aoe_teamfight", "instant_stun"],
+    },
     8: {  # 主宰 Juggernaut
         "short": "主宰",
         "roles": ["奶棒推进核", "魔免剑刃风暴", "无敌斩收割"],
-        "scores": {"init": 35, "burst": 82, "tf": 76, "push": 92, "pick": 68, "late": 85, "tank": 65},
+        "scores": {"init": 38, "burst": 84, "tf": 78, "push": 92, "pick": 68, "late": 86, "tank": 68},
         "dmg_type": "physical",
-        "key_spells": ["剑刃风暴(转)", "治疗守卫(奶棒)", "无敌斩"],
-        "synergy_tags": ["needs_setup", "siege_healer", "empower_carrier"],
-    },
-    45: {  # 帕格纳 Pugna
-        "short": "帕格纳",
-        "roles": ["爆轰磨塔快推", "衰老虚无增伤/救人", "幽冥守卫反法系"],
-        "scores": {"init": 30, "burst": 85, "tf": 78, "push": 98, "pick": 65, "late": 62, "tank": 30},
-        "dmg_type": "magical",
-        "key_spells": ["幽冥爆轰", "衰老(虚无)", "幽冥守卫(棒子)", "生命汲取(吸)"],
-        "synergy_tags": ["magic_amp", "tower_melter", "anti_caster_ward"],
-    },
-    97: {  # 马格纳斯 Magnus
-        "short": "马格纳斯",
-        "roles": ["授予力量刷钱引擎", "跳刀两极反转团控", "巨角冲撞破坏阵型"],
-        "scores": {"init": 95, "burst": 65, "tf": 96, "push": 72, "pick": 78, "late": 88, "tank": 75},
-        "dmg_type": "mixed",
-        "key_spells": ["授予力量(分裂)", "巨角冲撞(拱)", "两极反转(大招)"],
-        "synergy_tags": ["aoe_vacuum_stun", "empower_buffer", "reposition"],
+        "synergy_tags": ["hard_carry", "siege_healer", "empower_carrier"],
     },
     9: {  # 米拉娜 Mirana
         "short": "米拉娜",
         "roles": ["超远穿云箭接控", "全图月之暗面开雾", "流星爆发补伤害"],
         "scores": {"init": 62, "burst": 72, "tf": 68, "push": 55, "pick": 88, "late": 65, "tank": 45},
         "dmg_type": "magical",
-        "key_spells": ["月神之箭(穿云箭)", "群星风暴(流星)", "月之暗面(全图隐身)"],
-        "synergy_tags": ["follow_up_stun", "team_invis_gank"],
+        "synergy_tags": ["follow_up_stun", "team_invis_gank", "squishy_ranged"],
+    },
+    11: {  # 影魔 Shadow Fiend
+        "short": "影魔",
+        "roles": ["三压高爆发清线刷钱", "魂之挽歌团战恐惧AOE", "魔王降临减甲拆塔"],
+        "scores": {"init": 45, "burst": 92, "tf": 82, "push": 86, "pick": 62, "late": 84, "tank": 44},
+        "dmg_type": "mixed",
+        "synergy_tags": ["glass_cannon_core", "squishy_ranged", "no_stun_greedy"],
+    },
+    12: {  # 幻影长矛手 Phantom Lancer
+        "short": "幻影长矛手",
+        "roles": ["并列幻象海无限拉扯消蓝", "神行百变躲技能切后排", "大后期无AOE阵容的绝对噩梦"],
+        "scores": {"init": 38, "burst": 68, "tf": 84, "push": 78, "pick": 64, "late": 95, "tank": 76},
+        "dmg_type": "physical",
+        "synergy_tags": ["hard_carry", "illusion_swarm"],
+    },
+    13: {  # 帕克 Puck
+        "short": "帕克",
+        "roles": ["梦境缠绕留人断TP", "新月之痕沉默接幻象法球高机动拉扯", "相位转移无伤秀翻后排"],
+        "scores": {"init": 88, "burst": 84, "tf": 88, "push": 62, "pick": 90, "late": 82, "tank": 52},
+        "dmg_type": "magical",
+        "synergy_tags": ["aoe_teamfight", "high_mobility_core"],
+    },
+    14: {  # 帕吉 Pudge
+        "short": "帕吉",
+        "roles": ["肉钩超远破阵先手/救人", "肢解无视BKB点控", "腐肉堆积高血量肉盾"],
+        "scores": {"init": 78, "burst": 76, "tf": 70, "push": 40, "pick": 88, "late": 72, "tank": 86},
+        "dmg_type": "magical",
+        "synergy_tags": ["frontline_tank", "bkb_pierce_init"],
+    },
+    15: {  # 剃刀 Razor
+        "short": "剃刀",
+        "roles": ["静电连接抽干敌方物理主C攻击力", "风暴之眼减甲持续冲脸", "等离子场范围减速压制"],
+        "scores": {"init": 58, "burst": 68, "tf": 84, "push": 76, "pick": 72, "late": 78, "tank": 82},
+        "dmg_type": "physical",
+        "synergy_tags": ["frontline_tank", "anti_carry_link"],
+    },
+    21: {  # 风行者 Windranger
+        "short": "风行者",
+        "roles": ["束缚击双人长晕", "集中火力定点秒杀核心与拆塔", "风行高闪避机动切入"],
+        "scores": {"init": 76, "burst": 88, "tf": 72, "push": 84, "pick": 88, "late": 82, "tank": 52},
+        "dmg_type": "physical",
+        "synergy_tags": ["pickoff_roamer", "squishy_ranged"],
+    },
+    22: {  # 宙斯 Zeus
+        "short": "宙斯",
+        "roles": ["雷神之怒全图支援与开视野", "雷击反隐排眼克制隐身系", "超远距离法系炮台"],
+        "scores": {"init": 40, "burst": 96, "tf": 90, "push": 48, "pick": 78, "late": 80, "tank": 34},
+        "dmg_type": "magical",
+        "synergy_tags": ["global_presence", "true_sight_reveal", "squishy_ranged"],
+    },
+    23: {  # 昆卡 Kunkka
+        "short": "昆卡",
+        "roles": ["X标记+洪流+幽灵船三连无解先手", "朗姆酒全队50%减伤", "潮汐使者水刀高额AOE"],
+        "scores": {"init": 88, "burst": 84, "tf": 94, "push": 68, "pick": 86, "late": 78, "tank": 86},
+        "dmg_type": "mixed",
+        "synergy_tags": ["frontline_tank", "aoe_teamfight"],
+    },
+    25: {  # 莉娜 Lina
+        "short": "莉娜",
+        "roles": ["神灭斩+光击阵超高单体秒杀", "炽魂高攻速远程物理/法系双修炮台", "龙破斩远程清线推塔"],
+        "scores": {"init": 64, "burst": 96, "tf": 78, "push": 82, "pick": 84, "late": 82, "tank": 40},
+        "dmg_type": "mixed",
+        "synergy_tags": ["glass_cannon_core", "squishy_ranged"],
     },
     26: {  # 莱恩 Lion
         "short": "莱恩",
         "roles": ["瞬发变羊+穿刺双控", "死亡一指高额单体秒杀", "抽蓝限制前排"],
         "scores": {"init": 88, "burst": 92, "tf": 65, "push": 30, "pick": 92, "late": 60, "tank": 28},
         "dmg_type": "magical",
-        "key_spells": ["裂地尖刺(戳)", "妖术(变羊)", "死亡一指(一阳指)"],
-        "synergy_tags": ["instant_hex_stun", "high_magic_nuke"],
+        "synergy_tags": ["instant_hex_stun", "high_magic_nuke", "squishy_ranged"],
     },
-    32: {  # 力丸 Riki
-        "short": "力丸",
-        "roles": ["烟幕范围沉默致盲", "隐身视野压制切后排", "绝杀秘技规避伤害"],
-        "scores": {"init": 72, "burst": 82, "tf": 70, "push": 38, "pick": 95, "late": 78, "tank": 45},
-        "dmg_type": "physical",
-        "key_spells": ["烟幕(雾)", "闪烁突袭(B)", "绝杀秘技"],
-        "synergy_tags": ["aoe_silence_cloud", "backline_assassin"],
-    },
-    49: {  # 龙骑士 Dragon Knight
-        "short": "龙骑士",
-        "roles": ["瞬发神龙摆尾先手", "古龙形态腐蚀推塔", "高护甲前排顶梁柱"],
-        "scores": {"init": 86, "burst": 68, "tf": 78, "push": 90, "pick": 80, "late": 82, "tank": 92},
-        "dmg_type": "physical",
-        "key_spells": ["神龙摆尾(T)", "火焰气息", "古龙形态(变龙)"],
-        "synergy_tags": ["instant_stun", "frontline_siege", "empower_carrier"],
-    },
-    99: {  # 钢背兽 Bristleback
-        "short": "钢背兽",
-        "roles": ["粘稠鼻涕叠甲减移速", "刺针扫射持续肉搏", "前排吸收成吨火力"],
-        "scores": {"init": 45, "burst": 60, "tf": 84, "push": 72, "pick": 58, "late": 76, "tank": 96},
-        "dmg_type": "physical",
-        "key_spells": ["粘稠鼻涕", "刺针扫射", "刚毛后背"],
-        "synergy_tags": ["armor_reduction", "raid_boss_frontline"],
-    },
-    30: {  # 巫医 Witch Doctor
-        "short": "巫医",
-        "roles": ["麻痹药剂弹射群控", "诅咒百分比掉血结算", "死亡守卫毁灭团战输出"],
-        "scores": {"init": 68, "burst": 94, "tf": 92, "push": 42, "pick": 82, "late": 72, "tank": 35},
+    27: {  # 暗影萨满 Shadow Shaman
+        "short": "暗影萨满",
+        "roles": ["妖术+枷锁超长双点控", "群蛇守卫强拆外塔与高地", "苍穹震击清线消耗"],
+        "scores": {"init": 88, "burst": 74, "tf": 76, "push": 96, "pick": 90, "late": 66, "tank": 32},
         "dmg_type": "magical",
-        "key_spells": ["麻痹药剂(弹弹乐)", "诅咒(Maledict)", "死亡守卫(大招)"],
-        "synergy_tags": ["maledict_burst_amp", "channeled_ward_ult"],
+        "synergy_tags": ["instant_hex_stun", "tower_melter", "squishy_ranged"],
     },
-    44: {  # 幻影刺客 Phantom Assassin
-        "short": "幻影刺客",
-        "roles": ["高暴击物理切入收割", "模糊闪避物理平A", "BKB成型期瞬秒后排"],
-        "scores": {"init": 55, "burst": 95, "tf": 75, "push": 62, "pick": 85, "late": 92, "tank": 58},
+    28: {  # 斯拉达 Slardar
+        "short": "斯拉达",
+        "roles": ["跳刀鱼人碎击瞬发群晕", "侵蚀雾霭巨额减甲+真视克制隐身与肉核", "深海重击被动连晕"],
+        "scores": {"init": 90, "burst": 78, "tf": 80, "push": 62, "pick": 92, "late": 78, "tank": 86},
         "dmg_type": "physical",
-        "key_spells": ["窒碍短匕(标)", "幻影突袭(B)", "恩赐解脱(暴击)"],
-        "synergy_tags": ["backline_assassin", "empower_carrier"],
-    },
-    76: {  # 殁境神蚀者 Outworld Destroyer
-        "short": "殁境神蚀者",
-        "roles": ["星体禁锢断节奏救人", "奥术天球纯粹法球巨额点杀", "神智之蚀大招清场"],
-        "scores": {"init": 75, "burst": 94, "tf": 86, "push": 55, "pick": 82, "late": 88, "tank": 62},
-        "dmg_type": "pure",
-        "key_spells": ["奥术天球", "星体禁锢(关)", "神智之蚀(大招)"],
-        "synergy_tags": ["save_banish", "pure_damage_core"],
+        "synergy_tags": ["frontline_tank", "instant_stun", "true_sight_reveal", "armor_reduction"],
     },
     29: {  # 潮汐猎人 Tidehunter
         "short": "潮汐猎人",
         "roles": ["毁灭超大范围团控", "海妖外壳强解状态顶前排", "锚击降低敌方物理攻击"],
         "scores": {"init": 94, "burst": 62, "tf": 98, "push": 58, "pick": 60, "late": 78, "tank": 95},
         "dmg_type": "magical",
-        "key_spells": ["巨浪", "锚击", "毁灭(大招)"],
-        "synergy_tags": ["aoe_ravage_stun", "frontline_tank"],
+        "synergy_tags": ["aoe_ravage_stun", "frontline_tank", "aoe_teamfight"],
+    },
+    30: {  # 巫医 Witch Doctor
+        "short": "巫医",
+        "roles": ["麻痹药剂弹射群控", "诅咒百分比掉血结算", "死亡守卫毁灭团战输出"],
+        "scores": {"init": 68, "burst": 94, "tf": 92, "push": 42, "pick": 82, "late": 72, "tank": 35},
+        "dmg_type": "magical",
+        "synergy_tags": ["maledict_burst_amp", "channeled_ward_ult", "squishy_ranged"],
+    },
+    31: {  # 巫妖 Lich
+        "short": "巫妖",
+        "roles": ["冰霜护甲提供前排高额物理减伤", "邪恶凝视瞬发拉人点控", "连环霜冻弹射毁灭扎堆阵型"],
+        "scores": {"init": 74, "burst": 88, "tf": 90, "push": 40, "pick": 80, "late": 68, "tank": 36},
+        "dmg_type": "magical",
+        "synergy_tags": ["aoe_teamfight", "save_support", "squishy_ranged"],
+    },
+    32: {  # 力丸 Riki
+        "short": "力丸",
+        "roles": ["烟幕范围沉默致盲", "隐身视野压制切后排", "绝杀秘技规避伤害"],
+        "scores": {"init": 72, "burst": 82, "tf": 70, "push": 38, "pick": 95, "late": 78, "tank": 45},
+        "dmg_type": "physical",
+        "synergy_tags": ["aoe_silence_cloud", "backline_assassin"],
+    },
+    35: {  # 狙击手 Sniper
+        "short": "狙击手",
+        "roles": ["超远射程无伤点塔与守高地", "榴霰弹视野压制消耗", "极怕冲脸切后排的纯炮台核"],
+        "scores": {"init": 25, "burst": 76, "tf": 80, "push": 88, "pick": 45, "late": 86, "tank": 32},
+        "dmg_type": "physical",
+        "synergy_tags": ["glass_cannon_core", "squishy_ranged", "no_stun_greedy"],
+    },
+    36: {  # 瘟疫法师 Necrophos
+        "short": "瘟疫法师",
+        "roles": ["死神镰刀斩杀加读秒", "竭心光环百分比磨血+死亡脉冲续航顶前排", "幽魂护罩物理免疫"],
+        "scores": {"init": 68, "burst": 84, "tf": 88, "push": 72, "pick": 74, "late": 80, "tank": 86},
+        "dmg_type": "magical",
+        "synergy_tags": ["frontline_tank", "regen_core"],
+    },
+    40: {  # 剧毒术士 Venomancer
+        "short": "剧毒术士",
+        "roles": ["瘟疫守卫铺视野守塔推进", "瘴气+毒刺持续减速折磨短腿前排", "恶性瘟疫百分比持续掉血"],
+        "scores": {"init": 45, "burst": 58, "tf": 84, "push": 78, "pick": 64, "late": 62, "tank": 40},
+        "dmg_type": "magical",
+        "synergy_tags": ["squishy_ranged", "no_stun_greedy"],
+    },
+    41: {  # 虚空假面 Faceless Void
+        "short": "虚空假面",
+        "roles": ["时间结界无视BKB毁天灭地大招", "时间漫游回血规避爆发", "时间锁定被动晕眩后期真神"],
+        "scores": {"init": 95, "burst": 86, "tf": 98, "push": 80, "pick": 82, "late": 98, "tank": 76},
+        "dmg_type": "physical",
+        "synergy_tags": ["hard_carry", "bkb_pierce_init", "aoe_teamfight"],
+    },
+    43: {  # 死亡先知 Death Prophet
+        "short": "死亡先知",
+        "roles": ["驱使恶灵团战清场与无解拆塔", "吸魂巫术百分比抽血续航", "沉默魔法范围沉默断连招"],
+        "scores": {"init": 62, "burst": 74, "tf": 90, "push": 96, "pick": 70, "late": 78, "tank": 78},
+        "dmg_type": "physical",
+        "synergy_tags": ["tower_melter", "aoe_teamfight"],
+    },
+    44: {  # 幻影刺客 Phantom Assassin
+        "short": "幻影刺客",
+        "roles": ["高暴击物理切入收割", "模糊闪避物理平A", "BKB成型期瞬秒后排"],
+        "scores": {"init": 55, "burst": 95, "tf": 75, "push": 62, "pick": 85, "late": 92, "tank": 58},
+        "dmg_type": "physical",
+        "synergy_tags": ["hard_carry", "backline_assassin", "empower_carrier"],
+    },
+    45: {  # 帕格纳 Pugna
+        "short": "帕格纳",
+        "roles": ["爆轰磨塔快推", "衰老虚无增伤/救人", "幽冥守卫反法系"],
+        "scores": {"init": 30, "burst": 85, "tf": 78, "push": 98, "pick": 65, "late": 62, "tank": 30},
+        "dmg_type": "magical",
+        "synergy_tags": ["magic_amp", "tower_melter", "anti_caster_ward", "squishy_ranged"],
+    },
+    49: {  # 龙骑士 Dragon Knight
+        "short": "龙骑士",
+        "roles": ["瞬发神龙摆尾先手", "古龙形态腐蚀推塔", "高护甲前排顶梁柱"],
+        "scores": {"init": 86, "burst": 68, "tf": 78, "push": 90, "pick": 80, "late": 80, "tank": 90},
+        "dmg_type": "physical",
+        "synergy_tags": ["instant_stun", "frontline_tank", "empower_carrier"],
+    },
+    53: {  # 先知 Nature's Prophet
+        "short": "先知",
+        "roles": ["全图传送支援收割与带球牵制", "发芽框人克制无推推近战", "正面5v5硬刚与抗冲脸能力偏弱的机动核"],
+        "scores": {"init": 64, "burst": 74, "tf": 60, "push": 95, "pick": 90, "late": 70, "tank": 44},
+        "dmg_type": "physical",
+        "synergy_tags": ["global_presence", "split_pusher", "squishy_ranged", "weak_frontal_carry"],
+    },
+    55: {  # 黑暗贤者 Dark Seer
+        "short": "黑暗贤者",
+        "roles": ["真空+复制之墙团战完美聚怪", "离子外壳推线消耗近战", "奔腾极限加速切入/救人"],
+        "scores": {"init": 90, "burst": 68, "tf": 96, "push": 62, "pick": 72, "late": 86, "tank": 80},
+        "dmg_type": "magical",
+        "synergy_tags": ["aoe_teamfight", "frontline_tank"],
+    },
+    56: {  # 克林克兹 Clinkz
+        "short": "克林克兹",
+        "roles": ["骨隐步全图隐身抓单偷塔", "炽烈火雨+焦油炸弹减甲点杀脆皮", "身板极脆、缺乏团控且怕反隐强留的刺客核"],
+        "scores": {"init": 42, "burst": 90, "tf": 58, "push": 90, "pick": 92, "late": 70, "tank": 38},
+        "dmg_type": "physical",
+        "synergy_tags": ["invis_roamer", "split_pusher", "squishy_ranged", "weak_frontal_carry", "no_stun_greedy"],
+    },
+    59: {  # 哈斯卡 Huskar
+        "short": "哈斯卡",
+        "roles": ["狂战士之血残血极限魔抗攻速", "牺牲冲脸强换前排", "极怕远古冰魄禁疗与高物理爆发的节奏核"],
+        "scores": {"init": 72, "burst": 86, "tf": 76, "push": 84, "pick": 78, "late": 64, "tank": 84},
+        "dmg_type": "magical",
+        "synergy_tags": ["frontline_tank", "regen_core"],
+    },
+    60: {  # 暗夜魔王 Night Stalker
+        "short": "暗夜魔王",
+        "roles": ["暗夜猎影高空视野+无视地形切后排", "伤残恐惧近身持续沉默法师", "夜晚统治力极强的冲脸前排"],
+        "scores": {"init": 88, "burst": 82, "tf": 82, "push": 62, "pick": 94, "late": 76, "tank": 86},
+        "dmg_type": "physical",
+        "synergy_tags": ["frontline_tank", "backline_assassin"],
+    },
+    62: {  # 赏金猎人 Bounty Hunter
+        "short": "赏金猎人",
+        "roles": ["追踪术提供真视视野与团队高额赏金滚雪球", "暗影步破隐晕眩骚扰", "正面团战偏脆的游走节奏点"],
+        "scores": {"init": 62, "burst": 74, "tf": 60, "push": 40, "pick": 92, "late": 64, "tank": 48},
+        "dmg_type": "mixed",
+        "synergy_tags": ["true_sight_reveal", "invis_roamer"],
+    },
+    63: {  # 编织者 Weaver
+        "short": "编织者",
+        "roles": ["缩地极速切入与拉扯", "时光倒流回到5秒前满血解状态", "凰虫减甲配合连击点杀脆皮"],
+        "scores": {"init": 48, "burst": 84, "tf": 72, "push": 80, "pick": 86, "late": 82, "tank": 52},
+        "dmg_type": "physical",
+        "synergy_tags": ["invis_roamer", "squishy_ranged", "no_stun_greedy"],
+    },
+    64: {  # 杰奇洛 Jakiro
+        "short": "杰奇洛",
+        "roles": ["冰封路径超远群控留人", "液态火/液态冰无伤磨塔降攻速", "烈焰焚身狭窄地形毁灭AOE"],
+        "scores": {"init": 78, "burst": 76, "tf": 88, "push": 84, "pick": 76, "late": 66, "tank": 52},
+        "dmg_type": "magical",
+        "synergy_tags": ["aoe_teamfight", "tower_melter", "squishy_ranged"],
+    },
+    67: {  # 幽鬼 Spectre
+        "short": "幽鬼",
+        "roles": ["暗影步/鬼影重重全图定点切后排", "折射反弹伤害大后期无解肉核", "荒芜纯粹伤害克制落单"],
+        "scores": {"init": 82, "burst": 78, "tf": 90, "push": 62, "pick": 92, "late": 96, "tank": 92},
+        "dmg_type": "mixed",
+        "synergy_tags": ["hard_carry", "global_presence", "frontline_tank", "backline_assassin"],
+    },
+    68: {  # 远古冰魄 Ancient Apparition
+        "short": "远古冰魄",
+        "roles": ["冰晶爆轰全图斩杀+100%禁疗天克回血核", "寒霜之足+冰霜漩涡远程增伤留人", "极寒之触超远消耗"],
+        "scores": {"init": 64, "burst": 86, "tf": 88, "push": 42, "pick": 80, "late": 78, "tank": 30},
+        "dmg_type": "magical",
+        "synergy_tags": ["global_presence", "anti_heal_ult", "squishy_ranged"],
+    },
+    71: {  # 裂魂人 Spirit Breaker
+        "short": "裂魂人",
+        "roles": ["暗影冲刺全图跨地形锁定支援与破带球", "幽冥一击无视BKB击退", "威吓高状态抗性冲散敌方后排"],
+        "scores": {"init": 92, "burst": 78, "tf": 80, "push": 48, "pick": 96, "late": 74, "tank": 86},
+        "dmg_type": "magical",
+        "synergy_tags": ["global_presence", "bkb_pierce_init", "frontline_tank", "anti_split_push"],
+    },
+    73: {  # 炼金术士 Alchemist
+        "short": "炼金术士",
+        "roles": ["贪魔的贪婪超高速刷钱养A杖", "化学狂暴高回血中期平推肉盾", "极怕冰魂禁疗与拖入大后期"],
+        "scores": {"init": 72, "burst": 76, "tf": 82, "push": 88, "pick": 74, "late": 72, "tank": 88},
+        "dmg_type": "physical",
+        "synergy_tags": ["frontline_tank", "regen_core"],
+    },
+    76: {  # 殁境神蚀者 Outworld Destroyer
+        "short": "殁境神蚀者",
+        "roles": ["星体禁锢断节奏救人", "奥术天球纯粹法球巨额点杀单前排", "神智之蚀大招清场"],
+        "scores": {"init": 76, "burst": 95, "tf": 88, "push": 55, "pick": 84, "late": 90, "tank": 64},
+        "dmg_type": "pure",
+        "synergy_tags": ["save_banish", "pure_damage_core", "anti_tank_pure"],
+    },
+    83: {  # 树精卫士 Treant Protector
+        "short": "树精卫士",
+        "roles": ["疯狂生长无视BKB大范围捆绑", "活体护甲全图修塔保人", "寄生种子+自然卷握强力线上消耗"],
+        "scores": {"init": 88, "burst": 58, "tf": 90, "push": 45, "pick": 74, "late": 74, "tank": 82},
+        "dmg_type": "magical",
+        "synergy_tags": ["bkb_pierce_init", "save_support", "frontline_tank"],
     },
     86: {  # 拉比克 Rubick
         "short": "拉比克",
         "roles": ["隔空取物瞬发先手举", "技能窃取反制大招", "弱化能流减攻清线"],
         "scores": {"init": 80, "burst": 70, "tf": 85, "push": 45, "pick": 82, "late": 78, "tank": 35},
         "dmg_type": "magical",
-        "key_spells": ["隔空取物(举)", "弱化能流", "技能窃取(偷大)"],
-        "synergy_tags": ["instant_lift_stun", "spell_steal_counter"],
+        "synergy_tags": ["instant_lift_stun", "spell_steal_counter", "squishy_ranged"],
     },
-    5: {  # 水晶室女 Crystal Maiden
-        "short": "水晶室女",
-        "roles": ["冰封禁制先手留人", "奥术光环全队回蓝", "极寒领域团战高额AOE"],
-        "scores": {"init": 70, "burst": 76, "tf": 84, "push": 38, "pick": 75, "late": 55, "tank": 28},
+    87: {  # 干扰者 Disruptor
+        "short": "干扰者",
+        "roles": ["瞥视千里抓回TP与隐身逃生英雄", "静态风暴+动能场框大范围沉默禁用物品", "天克先知/小骷髅等高机动游走核"],
+        "scores": {"init": 90, "burst": 78, "tf": 94, "push": 38, "pick": 95, "late": 82, "tank": 34},
         "dmg_type": "magical",
-        "key_spells": ["冰霜新星(V)", "冰封禁制(E)", "极寒领域(大招)"],
-        "synergy_tags": ["root_setup", "mana_aura"],
+        "synergy_tags": ["anti_split_push", "aoe_teamfight", "squishy_ranged"],
+    },
+    88: {  # 司夜刺客 Nyx Assassin
+        "short": "司夜刺客",
+        "roles": ["复仇隐身超高爆发猎杀脆皮远程核", "尖刺外壳完美反弹敌方AOE先手", "穿刺+心灵焦灼控制消蓝"],
+        "scores": {"init": 84, "burst": 92, "tf": 76, "push": 36, "pick": 95, "late": 72, "tank": 62},
+        "dmg_type": "magical",
+        "synergy_tags": ["invis_roamer", "backline_assassin", "anti_squishy_ranged"],
+    },
+    93: {  # 斯拉克 Slark
+        "short": "斯拉克",
+        "roles": ["能量转移无限偷属性越打越猛", "黑暗契约强解一切非光环硬控", "暗影之舞+魔晶深海劫掠无敌切入与救人"],
+        "scores": {"init": 78, "burst": 84, "tf": 86, "push": 68, "pick": 94, "late": 94, "tank": 78},
+        "dmg_type": "physical",
+        "synergy_tags": ["hard_carry", "anti_tank_steal", "regen_core"],
+    },
+    96: {  # 半人马战行者 Centaur Warrunner
+        "short": "半人马战行者",
+        "roles": ["跳刀马蹄践踏稳定先手群晕", "奔袭冲撞全队极限加速开团/撤退", "双刃剑+反击高血量肉盾"],
+        "scores": {"init": 90, "burst": 76, "tf": 86, "push": 60, "pick": 82, "late": 78, "tank": 94},
+        "dmg_type": "magical",
+        "synergy_tags": ["frontline_tank", "instant_stun", "aoe_teamfight"],
+    },
+    97: {  # 马格纳斯 Magnus
+        "short": "马格纳斯",
+        "roles": ["授予力量刷钱引擎", "跳刀两极反转团控", "巨角冲撞破坏阵型"],
+        "scores": {"init": 95, "burst": 65, "tf": 96, "push": 72, "pick": 78, "late": 88, "tank": 75},
+        "dmg_type": "mixed",
+        "synergy_tags": ["aoe_vacuum_stun", "empower_buffer", "reposition", "bkb_pierce_init"],
+    },
+    99: {  # 钢背兽 Bristleback
+        "short": "钢背兽",
+        "roles": ["粘稠鼻涕叠甲减移速", "刺针扫射持续肉搏", "前排吸收成吨火力"],
+        "scores": {"init": 45, "burst": 60, "tf": 84, "push": 72, "pick": 58, "late": 76, "tank": 96},
+        "dmg_type": "physical",
+        "synergy_tags": ["armor_reduction", "frontline_tank"],
+    },
+    101: {  # 天怒法师 Skywrath Mage
+        "short": "天怒法师",
+        "roles": ["上古封印法系增伤沉默", "神秘之耀超高单体法术轰炸", "身板极脆怕冲脸的后排法核/辅助"],
+        "scores": {"init": 68, "burst": 98, "tf": 72, "push": 34, "pick": 88, "late": 66, "tank": 26},
+        "dmg_type": "magical",
+        "synergy_tags": ["high_magic_nuke", "squishy_ranged"],
+    },
+    105: {  # 工程师 Techies
+        "short": "工程师",
+        "roles": ["爆破起飞远程跳脸沉默群伤", "感应地雷阵地封锁与清线磨塔", "粘性炸弹拉扯但缺乏瞬发硬控"],
+        "scores": {"init": 74, "burst": 86, "tf": 78, "push": 74, "pick": 76, "late": 66, "tank": 44},
+        "dmg_type": "magical",
+        "synergy_tags": ["squishy_ranged"],
+    },
+    112: {  # 寒冬飞龙 Winter Wyvern
+        "short": "寒冬飞龙",
+        "roles": ["寒冬诅咒无视BKB反手团控克制抱团物理核", "极寒之拥物理免疫救人", "严寒烧灼超远距离百分比消耗"],
+        "scores": {"init": 82, "burst": 66, "tf": 90, "push": 42, "pick": 70, "late": 82, "tank": 38},
+        "dmg_type": "magical",
+        "synergy_tags": ["bkb_pierce_init", "save_support", "squishy_ranged"],
+    },
+    114: {  # 齐天大圣 Monkey King
+        "short": "齐天大圣",
+        "roles": ["猴子猴孙超大范围阵地团战封锁", "如意棒法叠被动高额吸血暴击", "丛林之舞树顶高机动视野侦察"],
+        "scores": {"init": 76, "burst": 86, "tf": 92, "push": 74, "pick": 86, "late": 88, "tank": 68},
+        "dmg_type": "physical",
+        "synergy_tags": ["hard_carry", "aoe_teamfight"],
+    },
+    123: {  # 森海飞霞 Hoodwink
+        "short": "森海飞霞",
+        "roles": ["野地奇袭捆树群控", "神枪在手超远破被动百分比狙杀", "松鼠步高机动游走逃生"],
+        "scores": {"init": 76, "burst": 86, "tf": 76, "push": 52, "pick": 88, "late": 68, "tank": 36},
+        "dmg_type": "magical",
+        "synergy_tags": ["squishy_ranged", "follow_up_stun"],
+    },
+    131: {  # 环轨百戏王 Ringmaster
+        "short": "环轨百戏王",
+        "roles": ["逃生魔盒无敌救下被集火核心", "奇观轮团战大范围魅惑控场", "驯兽长鞭恐惧打断"],
+        "scores": {"init": 76, "burst": 78, "tf": 88, "push": 44, "pick": 78, "late": 74, "tank": 38},
+        "dmg_type": "magical",
+        "synergy_tags": ["save_support", "aoe_teamfight", "squishy_ranged"],
+    },
+    135: {  # 破晓辰星 Dawnbreaker
+        "short": "破晓辰星",
+        "roles": ["天光现世全图空降回血群晕反打（天克抓单/带球体系）", "星破天惊+熠熠生辉高额前排肉搏回血", "上佳的一线全图反手三号位"],
+        "scores": {"init": 84, "burst": 80, "tf": 92, "push": 72, "pick": 84, "late": 80, "tank": 88},
+        "dmg_type": "physical",
+        "synergy_tags": ["frontline_tank", "global_presence", "anti_split_push", "save_support"],
     },
     136: {  # 玛西 Marci
         "short": "玛西",
         "roles": ["回身踢+健步强先手留人", "怒拳破高爆发冲脸", "护卫反击提供吸血攻击力"],
         "scores": {"init": 88, "burst": 90, "tf": 80, "push": 68, "pick": 94, "late": 78, "tank": 76},
         "dmg_type": "physical",
-        "key_spells": ["过肩摔(背)", "回身踢(跳)", "怒拳破(大招)"],
         "synergy_tags": ["dive_initiator", "burst_brawler"],
     },
 }
@@ -151,8 +444,7 @@ def get_hero_archetype(p: Dict[str, Any]) -> Dict[str, Any]:
             "roles": ["一号位后期主核", "装备成型收割", "高地推进主力"],
             "scores": {"init": 45, "burst": 78, "tf": 72, "push": 78, "pick": 60, "late": 88, "tank": 62},
             "dmg_type": "physical",
-            "key_spells": [a["zh_name"] for a in (p.get("ability_uses_rich") or [])[:3]],
-            "synergy_tags": ["needs_setup", "empower_carrier"],
+            "synergy_tags": ["hard_carry", "empower_carrier"],
         }
     if pos == 2:
         return {
@@ -160,7 +452,6 @@ def get_hero_archetype(p: Dict[str, Any]) -> Dict[str, Any]:
             "roles": ["二号位中单节奏核", "前中期爆发游走", "团战法系/混伤支点"],
             "scores": {"init": 70, "burst": 85, "tf": 80, "push": 68, "pick": 82, "late": 76, "tank": 58},
             "dmg_type": "magical",
-            "key_spells": [a["zh_name"] for a in (p.get("ability_uses_rich") or [])[:3]],
             "synergy_tags": ["mid_tempo", "high_magic_nuke"],
         }
     if pos == 3:
@@ -169,7 +460,6 @@ def get_hero_archetype(p: Dict[str, Any]) -> Dict[str, Any]:
             "roles": ["三号位前排先手", "团战吃伤害开团", "团队光环与控制"],
             "scores": {"init": 82, "burst": 65, "tf": 84, "push": 65, "pick": 72, "late": 70, "tank": 85},
             "dmg_type": "mixed",
-            "key_spells": [a["zh_name"] for a in (p.get("ability_uses_rich") or [])[:3]],
             "synergy_tags": ["frontline_tank", "initiator"],
         }
     if pos == 4:
@@ -178,30 +468,65 @@ def get_hero_archetype(p: Dict[str, Any]) -> Dict[str, Any]:
             "roles": ["四号位游走节奏", "先手留人接控", "中期团战拉扯"],
             "scores": {"init": 78, "burst": 70, "tf": 74, "push": 45, "pick": 85, "late": 62, "tank": 48},
             "dmg_type": "magical",
-            "key_spells": [a["zh_name"] for a in (p.get("ability_uses_rich") or [])[:3]],
-            "synergy_tags": ["follow_up_stun", "roaming_ganker"],
+            "synergy_tags": ["follow_up_stun", "roaming_ganker", "squishy_ranged"],
         }
     return {
         "short": short,
         "roles": ["五号位保人视野", "反手控制救人", "线上消耗换血"],
         "scores": {"init": 68, "burst": 68, "tf": 72, "push": 40, "pick": 74, "late": 55, "tank": 38},
         "dmg_type": "magical",
-        "key_spells": [a["zh_name"] for a in (p.get("ability_uses_rich") or [])[:3]],
-        "synergy_tags": ["lane_babysitter", "instant_hex_stun"],
+        "synergy_tags": ["lane_babysitter", "instant_hex_stun", "squishy_ranged"],
     }
 
 
-def compute_team_draft_scores(team_players: List[Dict[str, Any]]) -> Dict[str, int]:
+def compute_team_draft_scores(team_players: List[Dict[str, Any]], opp_players: Optional[List[Dict[str, Any]]] = None) -> Dict[str, int]:
     if not team_players:
         return {"init": 60, "burst": 60, "tf": 60, "push": 60, "pick": 60, "late": 60, "tank": 60}
     archs = [get_hero_archetype(p) for p in team_players]
     out = {}
     for k in ("init", "burst", "tf", "push", "pick", "late", "tank"):
         vals = sorted([a["scores"].get(k, 60) for a in archs], reverse=True)
-        # 取最高 2 名的权重 + 团队均值，更能反映阵容在该维度的上限
         top2_avg = sum(vals[:2]) / max(1, len(vals[:2]))
         all_avg = sum(vals) / len(vals)
-        out[k] = int(round(top2_avg * 0.65 + all_avg * 0.35))
+        out[k] = int(round(top2_avg * 0.60 + all_avg * 0.40))
+
+    # 阵容结构性奖惩修正 (Structural Composition Adjustments)
+    by_pos = {int(p.get("pos") or i + 1): get_hero_archetype(p) for i, p in enumerate(team_players)}
+    p1_arch = by_pos.get(1, archs[0])
+    p2_arch = by_pos.get(2, archs[min(1, len(archs) - 1)])
+    frontliners = sum(1 for a in archs if "frontline_tank" in a.get("synergy_tags", []) or a["scores"].get("tank", 50) >= 78)
+    squishy_cnt = sum(1 for a in archs if "squishy_ranged" in a.get("synergy_tags", []) or a["scores"].get("tank", 50) <= 46)
+
+    # 1) 双远程脆皮游走核 / 缺传统正面大核 (e.g. 1号位先知 + 2号位克林克兹)
+    if "weak_frontal_carry" in p1_arch.get("synergy_tags", []) and "weak_frontal_carry" in p2_arch.get("synergy_tags", []):
+        out["tf"] = max(45, out["tf"] - 12)
+        out["late"] = max(48, out["late"] - 14)
+        out["tank"] = max(42, out["tank"] - 10)
+    elif "weak_frontal_carry" in p1_arch.get("synergy_tags", []):
+        out["tf"] = max(50, out["tf"] - 6)
+        out["late"] = max(52, out["late"] - 8)
+
+    # 2) 单前排孤立 / 四脆皮阵容
+    if frontliners == 0:
+        out["tank"] = max(38, out["tank"] - 14)
+        out["tf"] = max(48, out["tf"] - 8)
+    elif frontliners == 1 and squishy_cnt >= 4:
+        out["tank"] = max(44, out["tank"] - 9)
+        out["tf"] = max(52, out["tf"] - 6)
+
+    # 3) 对阵克制修正 (Matchup Counter Adjustments)
+    if opp_players:
+        opp_archs = [get_hero_archetype(p) for p in opp_players]
+        opp_tags = {t for a in opp_archs for t in a.get("synergy_tags", [])}
+        own_tags = {t for a in archs for t in a.get("synergy_tags", [])}
+        # 带球/隐身抓单核遇到对手全图反打+瞥视框大 (e.g. 先知+小骷髅 遇到 破晓辰星+干扰者+小强)
+        if "weak_frontal_carry" in own_tags and "anti_split_push" in opp_tags:
+            out["pick"] = max(52, out["pick"] - 7)
+            out["tf"] = max(48, out["tf"] - 5)
+        # 单前排遇到黑鸟/小鱼人
+        if frontliners == 1 and ("anti_tank_pure" in opp_tags or "anti_tank_steal" in opp_tags):
+            out["tank"] = max(42, out["tank"] - 6)
+
     return out
 
 
@@ -419,8 +744,18 @@ def build_draft_and_combo_analysis(
     """
     生成双方阵容选择诊断报告（包含 radiant 与 dire 双视角，前端切换视角时自动适配）
     """
-    rad_scores = compute_team_draft_scores(radiant_players)
-    dire_scores = compute_team_draft_scores(dire_players)
+    rad_scores = compute_team_draft_scores(radiant_players, dire_players)
+    dire_scores = compute_team_draft_scores(dire_players, radiant_players)
+
+    dim_names = {
+        "init": "先手开团",
+        "burst": "瞬间爆发",
+        "tf": "阵地团战",
+        "push": "推进拆塔",
+        "pick": "游走抓人",
+        "late": "后期上限",
+        "tank": "前排肉度",
+    }
 
     def build_for_side(own: List[Dict[str, Any]], opp: List[Dict[str, Any]], own_s: Dict[str, int], opp_s: Dict[str, int], side_key: str) -> Dict[str, Any]:
         side_zh = "天辉" if side_key == "radiant" else "夜魇"
@@ -428,78 +763,178 @@ def build_draft_and_combo_analysis(
         own_heroes_str = " + ".join(p["hero_short_zh"] for p in own)
         opp_heroes_str = " + ".join(p["hero_short_zh"] for p in opp)
 
-        # 计算阵容综合分与评级
-        avg_own = sum(own_s.values()) / len(own_s)
-        avg_opp = sum(opp_s.values()) / len(opp_s)
-        diff = avg_own - avg_opp
-        if avg_own >= 80 and diff >= 2:
-            grade = "S 级 · 体系完备且克制对手"
-        elif avg_own >= 75:
-            grade = "A 级 · 扎实能打但极其考验执行"
-        elif avg_own >= 68:
-            grade = "B+ 级 · 有绝活配合但存在明显短板"
-        else:
-            grade = "B 级 · 容错率偏低需靠个人能力硬抬"
+        own_archs = [get_hero_archetype(p) for p in own]
+        opp_archs = [get_hero_archetype(p) for p in opp]
+        by_pos_p = {int(p.get("pos") or i + 1): p for i, p in enumerate(own)}
+        by_pos_arch = {int(p.get("pos") or i + 1): get_hero_archetype(p) for i, p in enumerate(own)}
+        opp_hids = {int(p["hero_id"]): p["hero_short_zh"] for p in opp}
+        own_hids = {int(p["hero_id"]): p["hero_short_zh"] for p in own}
 
-        strengths = []
-        weaknesses = []
+        p1 = by_pos_p.get(1, own[0])
+        p2 = by_pos_p.get(2, own[min(1, len(own) - 1)])
+        p3 = by_pos_p.get(3, own[min(2, len(own) - 1)])
+        p1_arch = by_pos_arch.get(1, own_archs[0])
+        p2_arch = by_pos_arch.get(2, own_archs[min(1, len(own_archs) - 1)])
 
-        # 自动诊断阵容优势与短板
-        if own_s["push"] >= 82:
-            strengths.append(
-                f"【推进磨塔能力极强 ({own_s['push']}分)】阵容拥有极高建筑消耗与持续作战能力，一旦打赢团战或拿到肉山盾，拆外塔与破高地兵营的速度远快于{opp_zh}（{opp_s['push']}分）。"
-            )
-        if own_s["init"] >= 84:
-            strengths.append(
-                f"【先手开团与强留人充足 ({own_s['init']}分)】具备稳定的跳刀瞬发点控/团控先手，中期开雾抓单与先手秒人主动权完全掌握在自己手里。"
-            )
-        if own_s["burst"] >= 84:
-            strengths.append(
-                f"【瞬间爆发秒人线极高 ({own_s['burst']}分)】控制接爆发可以在 2~3 秒内直接融化未开出 BKB 的敌方核心，线上与前中期小规模碰撞杀伤力极大。"
-            )
-        if own_s["tf"] >= 84:
-            strengths.append(
-                f"【五人阵地团战上限高 ({own_s['tf']}分)】拥有改变战局的大招流与范围 AOE，狭窄地形（肉山坑/高地口）拉扯反打能力极强。"
-            )
-        if own_s["tank"] >= 85:
-            strengths.append(
-                f"【前排身板扎实 ({own_s['tank']}分)】前排冲脸吃伤害能力强，能为后排核心提供充足的输出环境。"
-            )
+        frontliners = [p["hero_short_zh"] for p, a in zip(own, own_archs) if "frontline_tank" in a.get("synergy_tags", []) or a["scores"].get("tank", 50) >= 78]
+        squishies = [p["hero_short_zh"] for p, a in zip(own, own_archs) if "squishy_ranged" in a.get("synergy_tags", []) or a["scores"].get("tank", 50) <= 46]
 
-        # 短板与隐患
-        own_hids = {int(p["hero_id"]) for p in own}
-        opp_hids = {int(p["hero_id"]) for p in opp}
+        structural_flaws: List[str] = []
+        counter_disadvantages: List[str] = []
+        strengths: List[str] = []
+        weaknesses: List[str] = []
 
-        if own_s["tank"] <= 62 or sum(1 for p in own if get_hero_archetype(p)["scores"]["tank"] <= 45) >= 3:
-            weaknesses.append(
-                "【后排脆皮过多、容错率低】双辅助及中后排普遍缺乏逃生与硬身板，一旦视野落后被敌方先手跳刀/隐身切入（如幻影刺客/潮汐/玛西冲脸），极易在团战前 3 秒瞬间蒸发。"
+        # 1) 结构性短板检测
+        if "weak_frontal_carry" in p1_arch.get("synergy_tags", []) and "weak_frontal_carry" in p2_arch.get("synergy_tags", []):
+            flaw_msg = (
+                f"【双远程脆皮游走核、缺正面站桩大核】1号位『{p1['hero_short_zh']}』与2号位『{p2['hero_short_zh']}』同属靠机动抓单与带球偷塔的脆皮远程，"
+                f"缺乏传统正面硬刚大核，一旦拖入5v5阵地肉搏或被敌方冲脸切入，正面团战（{own_s['tf']} vs {opp_s['tf']}）与后期硬刚（{own_s['late']} vs {opp_s['late']}）极易断档。"
             )
+            structural_flaws.append(flaw_msg)
+            weaknesses.append(flaw_msg)
+        elif "weak_frontal_carry" in p1_arch.get("synergy_tags", []):
+            flaw_msg = (
+                f"【一号位非传统正面硬刚大核】1号位『{p1['hero_short_zh']}』偏机动牵制与支援，大后期正面5v5硬刚能力弱于敌方主C，必须靠前中期节奏滚起雪球。"
+            )
+            structural_flaws.append(flaw_msg)
+            weaknesses.append(flaw_msg)
+
+        if len(frontliners) == 0:
+            flaw_msg = f"【全队无扎实前排肉盾（前排仅{own_s['tank']}分）】五人普遍身板偏脆，团战无人能顶在视野第一线吃第一波技能，视野一旦落后极易被冲脸融化。"
+            structural_flaws.append(flaw_msg)
+            weaknesses.append(flaw_msg)
+        elif len(frontliners) == 1 and len(squishies) >= 3:
+            flaw_msg = (
+                f"【单前排孤立无援（4远程/脆皮配单前排）】全队仅靠『{frontliners[0]}』一人顶前排（前排肉度 {own_s['tank']}分），"
+                f"其余『{'、'.join(squishies[:4])}』全为脆皮，一旦{frontliners[0]}被先手控制或关住，后排瞬间暴露。"
+            )
+            structural_flaws.append(flaw_msg)
+            weaknesses.append(flaw_msg)
+
+        # 2) 先天克制检测
+        anti_split_opps = [opp_hids[h] for h in (87, 135, 71, 88) if h in opp_hids]
+        if ("weak_frontal_carry" in p1_arch.get("synergy_tags", []) or "weak_frontal_carry" in p2_arch.get("synergy_tags", [])) and len(anti_split_opps) >= 2:
+            cnt_msg = (
+                f"【机动带球与隐身抓单被敌方天克】敌方选出『{' + '.join(anti_split_opps)}』（如干扰者瞥视框大专抓TP/隐身、破晓辰星全图大招反打、司夜刺客隐身猎杀脆皮），"
+                f"我方『{p1['hero_short_zh']}/{p2['hero_short_zh']}』一旦单带或先手抓人未秒掉，极易被敌方全图支援与留人反杀。"
+            )
+            counter_disadvantages.append(cnt_msg)
+            weaknesses.append(cnt_msg)
+
+        anti_tank_opps = [opp_hids[h] for h in (76, 93) if h in opp_hids]
+        if len(frontliners) == 1 and len(anti_tank_opps) >= 1:
+            cnt_msg = (
+                f"【单前排『{frontliners[0]}』被敌方『{' + '.join(anti_tank_opps)}』克制】"
+                f"{'殁境神蚀者星体禁锢+纯粹法球' if 76 in opp_hids else ''}{'与' if (76 in opp_hids and 93 in opp_hids) else ''}{'斯拉克能量转移无限偷属性' if 93 in opp_hids else ''}"
+                f"天克我方唯一的单前排『{frontliners[0]}』，正面接团前排极难站住。"
+            )
+            counter_disadvantages.append(cnt_msg)
+            weaknesses.append(cnt_msg)
+
+        if 68 in opp_hids and any(h in own_hids for h in (59, 93, 73, 36)):
+            regen_own = [own_hids[h] for h in (59, 93, 73, 36) if h in own_hids]
+            cnt_msg = f"【回血核心被远古冰魄大招禁疗天克】我方『{'/'.join(regen_own)}』极度依赖回血续航，被敌方远古冰魄『冰晶爆轰』100%禁疗精准克制。"
+            counter_disadvantages.append(cnt_msg)
+            weaknesses.append(cnt_msg)
+
         if 45 in own_hids and 8 in own_hids:
             weaknesses.append(
-                "【技能机制存在『衰老』冲突隐患】帕格纳的『衰老(虚无)』虽然能救人并加深法系伤害，但若在主宰平A输出或无敌斩期间误套给目标，会直接导致主宰物理砍不出伤害，极度考验沟通！"
+                "【技能机制存在『衰老』冲突隐患】帕格纳的『衰老(虚无)』虽然能救人并加深法系伤害，但若在主宰平A输出或无敌斩期间误套给目标，会直接导致主宰物理砍不出伤害！"
             )
-        if 76 in opp_hids or 29 in opp_hids:
-            weaknesses.append(
-                f"【容易被敌方反手大招/关断节奏】对方选出了{'殁境神蚀者(星体禁锢救人+纯粹高伤)' if 76 in opp_hids else ''}{'与' if (76 in opp_hids and 29 in opp_hids) else ''}{'潮汐猎人(海妖外壳解控反大)' if 29 in opp_hids else ''}，我方先手若不能秒掉关键人，很容易被反手关救下或吃满毁灭团灭。"
+
+        # 3) 自动诊断阵容优势
+        if own_s["push"] >= 82 or own_s["push"] - opp_s["push"] >= 8:
+            strengths.append(
+                f"【推进牵制与拆塔速度占优 ({own_s['push']} vs {opp_s['push']})】阵容具备较强的兵线牵制与建筑消耗能力，一旦赢下局部碰撞或抓死人，拆外塔效率高于{opp_zh}。"
             )
-        if own_s["push"] <= 68:
-            weaknesses.append(
-                f"【持续磨高地能力偏弱 ({own_s['push']}分)】缺乏远程无伤磨塔手段，如果中期打赢团不果断推外塔，拖到后期上高地会非常仰仗肉山盾强拆。"
+        if own_s["init"] >= 84 or own_s["init"] - opp_s["init"] >= 5:
+            strengths.append(
+                f"【先手开团与点控留人稳定 ({own_s['init']} vs {opp_s['init']})】具备可靠的瞬发点控/团控先手，中期开雾找节奏的主动权较清晰。"
             )
-        if len(weaknesses) < 2:
-            weaknesses.append(
-                "【中期跳刀/BKB真空期怕被强冲】12~22 分钟核心装未齐前，一旦分路带线过深或辅助独自做眼被抓，很容易连续掉外塔丢失半片野区。"
+        if own_s["burst"] >= 85:
+            strengths.append(
+                f"【瞬间爆发秒人线高 ({own_s['burst']}分)】控制接高额爆发可在敌方开出BKB或救人技能前完成定点秒杀。"
+            )
+        if own_s["tf"] >= 85 and own_s["tf"] >= opp_s["tf"]:
+            strengths.append(
+                f"【五人阵地团战上限高 ({own_s['tf']} vs {opp_s['tf']})】拥有高价值团控大招与AOE反手，肉山团与高地攻坚战容错率高。"
+            )
+        if own_s["tank"] >= 82:
+            strengths.append(
+                f"【前排肉度扎实 ({own_s['tank']}分)】前排冲脸吃伤害能力强，能为后排核心撑起输出空间。"
             )
         if len(strengths) < 2:
             strengths.append(
-                f"【中期抓人与爆发联动紧密 ({own_s['pick']}分)】控制与输出互补性好，只要双辅助跟紧三号位/二号位开雾节奏，很容易在中期打开突破口。"
+                f"【局部游走抓人与支援机动性不错 ({own_s['pick']}分)】小规模Gank配合紧凑，可通过多打少抓单来弥补5v5正面团战短板。"
             )
+        if len(weaknesses) < 2:
+            if own_s["push"] <= 68:
+                weaknesses.append(
+                    f"【持续磨高地能力偏弱 ({own_s['push']}分)】缺乏远程无伤磨塔手段，中期打赢团若不果断推外塔，后期上高地会非常依赖肉山盾。"
+                )
+            else:
+                weaknesses.append(
+                    "【中期关键保命装（BKB/推推/微光）真空期怕被强冲】12~22分钟核心装未成型前，分路带线过深容易被敌方开雾突破。"
+                )
 
-        verdict_summary = (
-            f"{side_zh}这套『{own_heroes_str}』迎战{opp_zh}『{opp_heroes_str}』，"
-            f"在【推进拆塔 ({own_s['push']} vs {opp_s['push']})】与【先手抓人 ({own_s['pick']} vs {opp_s['pick']})】上具备明确体系支点；"
-            f"但面对敌方的团战反手与切后排威胁，极其考验前排第一波切入时机以及后排保命装（微光/推推/绿杖/BKB）的出装纪律。"
+        # 4) 科学、自洽的阵容评级（绝不出现“极其考验执行却给A级”的矛盾评价）
+        avg_own = sum(own_s.values()) / len(own_s)
+        avg_opp = sum(opp_s.values()) / len(opp_s)
+        diff = avg_own - avg_opp
+        total_flaws = len(structural_flaws) + len(counter_disadvantages)
+
+        if avg_own >= 80 and diff >= 3 and total_flaws == 0:
+            grade = "S 级 · 体系完备且先天克制对手"
+        elif avg_own >= 75 and diff >= 0 and total_flaws == 0:
+            grade = "A 级 · 攻守兼备 · 团战与推进容错率高"
+        elif avg_own >= 72 and total_flaws <= 1 and diff >= -2.5:
+            grade = "B+ 级 · 局部支点明确但存在结构短板"
+        elif total_flaws >= 2 or diff <= -4.5:
+            grade = "C+ 级 · 阵容结构偏科且正面被对手克制（容错率极低）"
+        else:
+            grade = "B 级 · 偏科走钢丝 · 容错率偏低且极其考验执行"
+
+        # 5) 动态生成与评级完全匹配的 verdict_summary
+        sorted_adv = sorted(
+            ("init", "burst", "tf", "push", "pick", "late", "tank"),
+            key=lambda k: (own_s[k] - opp_s[k], own_s[k]),
+            reverse=True,
         )
+        sorted_dis = sorted(
+            ("init", "burst", "tf", "push", "pick", "late", "tank"),
+            key=lambda k: (own_s[k] - opp_s[k], own_s[k]),
+        )
+        best1, best2 = sorted_adv[0], sorted_adv[1]
+        worst1, worst2 = sorted_dis[0], sorted_dis[1]
+
+        if grade.startswith("S") or grade.startswith("A"):
+            verdict_summary = (
+                f"{side_zh}这套『{own_heroes_str}』迎战{opp_zh}『{opp_heroes_str}』，阵容结构均衡扎实："
+                f"在【{dim_names[best1]} ({own_s[best1]} vs {opp_s[best1]})】与【{dim_names[best2]} ({own_s[best2]} vs {opp_s[best2]})】上占优，"
+                f"前排、控制与输出衔接自然，正面5v5团战容错率高，只要稳扎稳打控盾推塔即可拿下比赛。"
+            )
+        elif grade.startswith("B+"):
+            verdict_summary = (
+                f"{side_zh}这套『{own_heroes_str}』迎战{opp_zh}『{opp_heroes_str}』，"
+                f"虽然在【{dim_names[best1]} ({own_s[best1]} vs {opp_s[best1]})】与【{dim_names[best2]} ({own_s[best2]} vs {opp_s[best2]})】上具备明确支点，"
+                f"但在【{dim_names[worst1]} ({own_s[worst1]} vs {opp_s[worst1]})】上存在局部短板，中期需主动带起开雾推塔节奏，避免陷入被动防守。"
+            )
+        else:
+            flaw_brief = (
+                f"『{p1['hero_short_zh']}+{p2['hero_short_zh']}』双远程脆皮游走核配『{p3['hero_short_zh']}』单前排，正面硬刚与抗冲脸能力严重不足"
+                if ("weak_frontal_carry" in p1_arch.get("synergy_tags", []) and "weak_frontal_carry" in p2_arch.get("synergy_tags", []))
+                else f"在【{dim_names[worst1]} ({own_s[worst1]} vs {opp_s[worst1]})】与【{dim_names[worst2]} ({own_s[worst2]} vs {opp_s[worst2]})】上处于明显劣势"
+            )
+            counter_brief = (
+                f"，且极易被{opp_zh}『{'/'.join(anti_split_opps[:3])}』的反手留人与全图支援克制"
+                if anti_split_opps
+                else ""
+            )
+            verdict_summary = (
+                f"{side_zh}这套『{own_heroes_str}』迎战{opp_zh}『{opp_heroes_str}』属于典型的偏科走钢丝阵容："
+                f"仅在【{dim_names[best1]} ({own_s[best1]} vs {opp_s[best1]})】上有局部支点，但{flaw_brief}{counter_brief}；"
+                f"正面5v5团战（{own_s['tf']} vs {opp_s['tf']}）容错率极低，完全仰仗带线牵制、抓落单与后排保命装的极限执行。"
+            )
 
         return {
             "side": side_key,

@@ -578,7 +578,71 @@ def evaluate_player_deeply(
     if fountain_deaths > 0:
         strengths.append(f"终局虐泉打卡：比赛结束前冲进敌方泉水被激光击杀 {fountain_deaths} 次。")
 
-    if deaths <= 4 and duration_min >= 30:
+    # --- (H) 录像级：前中期刷钱不参战 / 团战0伤害卖队友独刷 (AFK Farming Core) 严厉甄别 ---
+    pt = p.get("phase_telemetry") or {}
+    lane_hdmg = int(pt.get("lane_hdmg_gain") or 0)
+    mid_gold = int(pt.get("mid_gold_gain") or 0)
+    mid_hdmg = int(pt.get("mid_hdmg_gain") or 0)
+    mid_gold_share = float(pt.get("mid_gold_share_pct") or 0.0)
+    mid_hdmg_share = float(pt.get("mid_hdmg_share_pct") or 20.0)
+    tf_afk_cnt = int(pt.get("tf_zero_dmg_afk_count") or 0)
+    tf_afk_gold = int(pt.get("tf_zero_dmg_gold_farmed") or 0)
+
+    team_avg_kp = sum(float(tp.get("kill_participation_pct") or 0.0) for tp in team_players) / max(1, len(team_players))
+    min_team_kp = min(float(tp.get("kill_participation_pct") or 100.0) for tp in team_players)
+
+    is_afk_farmer = False
+    if pos in (1, 2, 3) and duration_min >= 20 and not is_turbo:
+        low_kp_mid = pos == 2 and (kp < 48.0 or (kp <= min_team_kp + 0.1 and kp < team_avg_kp - 10.0))
+        low_kp_core = pos in (1, 3) and (kp < 42.0 or (kp <= min_team_kp + 0.1 and kp < team_avg_kp - 14.0))
+        mid_afk_telemetry = is_parsed and (
+            (mid_gold_share >= 21.0 and mid_hdmg_share <= 14.5 and kp < 54.0)
+            or (tf_afk_cnt >= 2 and kp < 52.0)
+        )
+        if low_kp_mid or low_kp_core or mid_afk_telemetry:
+            is_afk_farmer = True
+
+    if is_afk_farmer:
+        radar["tempo"] = min(radar["tempo"], 26)
+        radar["survival"] = min(radar["survival"], 50)
+        mvp_score = round(clamp(mvp_score - 21.0, 35.0, 61.0), 1)
+        rating_score = round(clamp(mvp_score / 10.0, 4.0, 6.1), 1)
+        rating_tier = "C 毒瘤独刷" if won else "D 独刷战犯"
+        blame_points += 38.0
+        tf_afk_clause = (
+            f"，且有 **{tf_afk_cnt} 波关键团战 0 伤害卖队友独刷（趁队友4打5挨揍在野区收割 +{tf_afk_gold:,} 金）**"
+            if tf_afk_cnt > 0
+            else ""
+        )
+        if is_parsed and mid_gold > 0:
+            weaknesses.insert(
+                0,
+                f"前中期毒瘤独刷不参战：全场参战率仅 **{kp:.1f}%（全队倒数第一，{kills}/{deaths}/{assists} 全场仅 {assists} 个助攻）**！"
+                f"前10分钟仅打出 **{lane_hdmg:,} 英雄伤害**，10–25m 中期狂刷 **+{mid_gold:,} 金（占全队中期经济 {mid_gold_share:.1f}%）** "
+                f"却只打出 **{mid_hdmg:,} 伤害（仅占全队中期伤害 {mid_hdmg_share:.1f}%，连双辅助都不如）**{tf_afk_clause}，"
+                f"全靠四个队友前中期 4 打 5 血战撑住局势才混到后期出山收割面板！",
+            )
+        else:
+            weaknesses.insert(
+                0,
+                f"全程独刷脱节不参战：身为 {pos}号位 {hero_name} 全场参战率低至 **{kp:.1f}%（全队倒数第一，{kills}/{deaths}/{assists} 全场仅 {assists} 个助攻）**，"
+                f"前中期长时间游离于团队正面战场之外闷头刷钱，全靠四个队友 4 打 5 硬撑局势！",
+            )
+        trash_candidates.append((
+            99,
+            f"@{pname} 玩个{pos}号位{hero_name}前25分钟打钱不参战（参战率{kp:.1f}%全队垫底、全场仅{assists}个助攻），队友正面4打5流血你钻野区收租，最后出山K几个头真当自己是MVP了？",
+        ))
+        improvements.insert(
+            0,
+            f"身为 {pos}号位切忌前中期把四个队友当肉盾吸血独刷：10~25分钟做出第一件节奏装后必须带队接团或TP反打，而不是全程0参战闷头刷野。",
+        )
+    elif pos == 1 and tdmg_share >= 48.0 and tdmg >= 9000 and kp >= 50.0:
+        mvp_score = round(clamp(mvp_score + 4.5, 35.0, 99.0), 1)
+        rating_score = round(clamp(mvp_score / 10.0, 4.0, 9.9), 1)
+        if won and rating_score >= 8.3:
+            rating_tier = "S+ 擎天战神"
+
+    if deaths <= 4 and duration_min >= 30 and not is_afk_farmer:
         strengths.append(
             f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次（读秒总计 {dead_min}分{dead_rem_s:02d}秒，仅占全场 {dead_pct:.1f}%），团战站位拉扯极佳。"
         )
@@ -617,28 +681,37 @@ def evaluate_player_deeply(
 
     # 计算胜局贡献点数 (raw_contrib_points) 与凯旋庆功贺词 (praise_talk)
     contrib_points = max(8.0, (mvp_score - 28.0) ** 1.35)
-    if hdmg_share >= 28.0:
-        contrib_points += 20.0
-    elif hdmg_share >= 22.0:
-        contrib_points += 11.0
-    if tdmg_share >= 40.0 and tdmg >= 3000:
-        contrib_points += 15.0
-    if kp >= 70.0:
-        contrib_points += 14.0
-    elif kp >= 60.0:
-        contrib_points += 7.0
-    if pos in (4, 5) and (obs + sen) >= 16:
-        contrib_points += 15.0
-    if stuns >= 35.0:
-        contrib_points += 12.0
-    if heal >= 4000:
-        contrib_points += 9.0
-    if stacked >= 4:
-        contrib_points += 8.0
+    if is_afk_farmer:
+        contrib_points = max(6.0, contrib_points * 0.35)
+    else:
+        if hdmg_share >= 28.0:
+            contrib_points += 20.0
+        elif hdmg_share >= 22.0:
+            contrib_points += 11.0
+        if tdmg_share >= 50.0 and tdmg >= 9000:
+            contrib_points += 32.0
+        elif tdmg_share >= 40.0 and tdmg >= 3000:
+            contrib_points += 15.0
+        if kp >= 70.0:
+            contrib_points += 14.0
+        elif kp >= 60.0:
+            contrib_points += 7.0
+        if pos in (4, 5) and (obs + sen) >= 16:
+            contrib_points += 15.0
+        if stuns >= 35.0:
+            contrib_points += 12.0
+        if heal >= 4000:
+            contrib_points += 9.0
+        if stacked >= 4:
+            contrib_points += 8.0
     if deaths >= 10:
         contrib_points = max(6.0, contrib_points * 0.72)
 
-    if pos in (1, 2) and hdmg_share >= 26.0:
+    if is_afk_farmer:
+        praise_talk = f"@{pname} 这把 {hero_name} 前中期闷头独刷 25 分钟（参战率仅 {kp:.1f}% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！"
+    elif pos == 1 and tdmg_share >= 48.0 and tdmg >= 9000:
+        praise_talk = f"@{pname} 擎天一号位真核！{hero_name} 顶着前中期少人压力参战接团，单人狂拆 {tdmg:,} 建筑伤害（包揽全队 {tdmg_share:.0f}% 拆塔量）+ {hdmg:,} 伤害，当之无愧本局头号首功！"
+    elif pos in (1, 2) and hdmg_share >= 26.0:
         praise_talk = f"@{pname} 这把 {hero_name} 火力全开狂轰 {hdmg:,} 伤害（包揽全队 {hdmg_share:.0f}% 输出）+ {tdmg:,} 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
     elif tdmg >= 5500 or (tdmg_share >= 45.0 and tdmg >= 3000):
         praise_talk = f"@{pname} 推塔终结机器！{hero_name} 单人拆出 {tdmg:,} 建筑伤害（占全队 {tdmg_share:.0f}%），赢团推塔一气呵成！"
@@ -660,6 +733,7 @@ def evaluate_player_deeply(
         trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 标准打卡下班，背锅占比 {blame_points:.0f} 点，赢了跟着笑，输了怪队友！"
 
     return {
+        "is_afk_farmer": is_afk_farmer,
         "radar": radar,
         "rating_score": rating_score,
         "rating_tier": rating_tier,
@@ -1189,8 +1263,16 @@ def call_llm_coach_review(
         "user_won": report.get("user_won"),
         "score": report.get("score"),
         "economy_timeline": report.get("economy_timeline"),
-        "key_teamfights": report.get("key_teamfights"),
-        "phases_data": report.get("phases_data"),
+        "key_teamfights": [
+            {
+                "index": tf.get("index"),
+                "time": f"{tf.get('start_str', '')}-{tf.get('end_str', '')}",
+                "winner": tf.get("winner_zh"),
+                "deaths": f"{tf.get('radiant_deaths', 0)}:{tf.get('dire_deaths', 0)}",
+                "net_gold_swing": tf.get("net_gold_swing"),
+            }
+            for tf in (report.get("key_teamfights") or [])[:6]
+        ],
         "own_team": [
             {
                 "slot": p.get("player_slot"),
@@ -1212,21 +1294,17 @@ def call_llm_coach_review(
                 "dead_seconds": p.get("dead_seconds"),
                 "death_gold_lost": p.get("death_gold_lost"),
                 "obs_sen": f"{p.get('obs_placed')}/{p.get('sen_placed')}",
-                "key_item_timings": p.get("key_item_timings"),
+                "key_item_timings": (p.get("key_item_timings") or [])[:5],
                 "active_item_uses": {k: v["count"] for k, v in (p.get("active_item_uses") or {}).items()},
-                "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:6]},
-                "hero_execution_audit": p.get("hero_execution_audit"),
-                "killed_by": p.get("killed_by_breakdown"),
+                "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:5]},
+                "is_afk_farmer": p.get("is_afk_farmer", False),
+                "phase_telemetry": p.get("phase_telemetry"),
+                "rating_score_100": int(round((p.get("rating_score") or 0) * 10)),
+                "contrib_share_pct": p.get("contrib_share_pct"),
                 "blame_share_pct": p.get("blame_share_pct"),
             }
             for p in own_team
         ],
-        "tactical_microscope": {
-            "support_vision": ((report.get("deep_forensics") or {}).get("support_vision_by_side") or {}).get(focus_side),
-            "stacking_and_smoke": ((report.get("deep_forensics") or {}).get("stacking_and_smoke_by_side") or {}).get(focus_side),
-            "laning_mechanics": ((report.get("deep_forensics") or {}).get("laning_mechanics_by_side") or {}).get(focus_side),
-            "tp_rotation": ((report.get("deep_forensics") or {}).get("tp_rotation_by_side") or {}).get(focus_side),
-        },
         "opp_team": [
             {
                 "slot": p.get("player_slot"),
@@ -1237,37 +1315,29 @@ def call_llm_coach_review(
                 "net_worth": p.get("net_worth"),
                 "hero_damage": p.get("hero_damage"),
                 "tower_damage": p.get("tower_damage"),
-                "hero_execution_audit": p.get("hero_execution_audit"),
             }
             for p in opp_team
         ],
     }
 
     system_prompt = (
-        "你是懂 Dota 2 高端局细节的开黑老哥，给车队五人做赛后算账复盘。中文，像损友聊天：有数据的问题直接点名说，拒绝空洞套话与重复数据罗列。\n"
-        "必须重点结合 tactical_microscope 与 hero_execution_audit 中的硬核细节：\n"
-        "1) 英雄本身机制与大招质量：如猛犸两极反转大到几个人（场均命中人数）、哪几波团憋大暴毙、授予力量给主C套了几次；白虎箭命中率；骨法棒子电了谁多少血；剑圣奶棒与无敌斩质量；拉比克偷了什么大招。\n"
-        "2) 辅助眼位质量：插眼是过于激进深入还是过于保守缩家？假眼平均存活寿命、哪颗眼刚插下就被秒排、有没有在同一个高台头铁连插死磕。\n"
-        "3) 辅助堆野与开雾找节奏：辅助堆了几波野 vs 大哥自己动手堆了几波野？全场开了几次雾、哪波雾抓死人破局、哪波雾撞墙送团。\n"
-        "4) 对线期细节：4/5号位有没有拉野消兵、边路3/6/9分钟疗伤莲花抢了几朵、7/14/21分钟智慧经验符被谁吃了、有没有走双生门游走和点灯塔。\n"
-        "5) TP 救人及时性：谁在团战第一时间亮 TP 落地救人、谁在队友被干时全程 0 伤害 0 技能挂机旁观、谁全靠死后系统送的免费抚恤 TP 过日子。\n"
+        "你是懂 Dota 2 高端局细节的开黑老哥，给车队五人做赛后算账复盘。全中文输出（严禁夹杂英文变量名如 is_afk_farmer 或英文道具名），像损友聊天：有数据的问题直接点名说，拒绝空洞套话。\n"
+        "核心铁律：\n"
+        "1) 结合每个人前期(0-10m补刀与经济)、中期(10-25m刷钱占比vs英雄伤害占比、参战率)、后期(25m+团战与推塔伤害)以及技能/装备按键次数进行从前到后的完整故事复盘。\n"
+        "2) 严厉甄别『前中期刷钱不参战、卖队友4打5、最后几分钟才出山收割面板伤害的毒瘤核心』（数据中标记了 is_afk_farmer=true，或参战率全队垫底、10-25m中期吃大量经济却打出全队最低英雄伤害、多波团战0伤害钻野区）：哪怕他最后总伤害或总经济好看，也绝对禁止评为MVP或二号功臣，必须在判词和个人点评里狠狠揭穿他前中期闷头独刷、全靠四个队友4打5负重前行才躺赢的真相！\n"
+        "3) MVP 与二号功臣必须与 contrib_share_pct（胜局贡献度前两名）保持一致。\n"
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"
-        '  "title": "一句话点透本局胜负关键与最大槽点",\n'
-        '  "summary": "整局经济差走势、关键转折点与五人整体表现账本（120-200字）",\n'
-        '  "verdict": "有证据的输赢机制及谁最该背锅、谁是真大腿",\n'
-        '  "team_practice": "下一局开黑最该统一执行的一个具体配合动作",\n'
-        '  "mvp": {"slot": 132, "runner_up_slot": 130, "confidence": "高", "reason": "为何选他当MVP", "comparison": "对比亚军胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
+        '  "title": "一句话点透本局胜负关键与最大槽点（20-36字）",\n'
+        '  "summary": "从前期对线、中期开雾团战节奏到后期高地决战的全局复盘摘要（110-160字）",\n'
+        '  "verdict": "有理有据的头号首功、二号功臣与短板/毒瘤定责判词（110-160字）",\n'
+        '  "team_practice": "下一局开黑最该统一执行的一个具体配合动作（50-80字）",\n'
+        '  "mvp": {"slot": 128, "runner_up_slot": 131, "confidence": "高", "reason": "为何选他当MVP", "comparison": "对比二当家胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
         '  "players": [\n'
-        '    {"slot": 132, "headline": "一句毒舌或封神判词", "assessment": "用十年刀塔老玩家的毒舌辛辣或吹爆口吻写一段100-160字的个人结案故事点评：把他的对线补刀、核心装出炉时间与按键次数(如BKB按了几次/憋死几次)、大招命中率、全球同英雄百分位串成一段有画面感的评语，打得好狠狠夸、犯罪了狠狠喷", "good": ["亮点1", "亮点2"], "bad": ["问题或待回看1", "问题或待回看2"], "practice": "下一局改进动作"}\n'
-        "  ],\n"
-        '  "phases": [\n'
-        '    {"key": "lane", "label": "前期对线", "time_label": "00:00–10:00", "summary": "本阶段团队判断(含拉野/莲花/圣水符/经验符/走门)", "turning_point": "本阶段关键节点", "players": [{"slot": 132, "assessment": "本阶段表现", "good": ["阶段亮点"], "bad": ["阶段问题"], "focus": "阶段改法"}]},\n'
-        '    {"key": "mid", "label": "中期运营", "time_label": "10:00–25:00", "summary": "本阶段团队判断(含开雾找节奏/堆野收矿/眼位进攻防守/TP支援)", "turning_point": "...", "players": [...]},\n'
-        '    {"key": "late", "label": "后期决策", "time_label": "25:00–终局", "summary": "本阶段团队判断(含关键大招释放/买活/高地肉山决策)", "turning_point": "...", "players": [...]}\n'
+        '    {"slot": 128, "headline": "一句毒舌或封神判词", "assessment": "从前期对线、中期打钱/参战到后期团战的80-130字个人结案故事点评，打得好狠狠夸、独刷或犯罪狠狠喷", "good": ["亮点1", "亮点2"], "bad": ["问题或待回看1"], "practice": "下一局改进动作"}\n'
         "  ],\n"
         '  "windows": [\n'
-        '    {"time_label": "团战时间段", "title": "一句刀塔味十足的团战标题(如：葫芦娃救爷爷惨案 / 剑圣无敌斩毁天灭地收割)", "detail": "拒绝干瘪的数据报菜名！用Dota2老玩家毒舌辛辣或热血夸奖的口吻，把这波团战写成一段有画面感的故事(80-140字)：谁先手/谁把技能全灌满打出爆炸输出、谁走位脱节连技能都没按出来就躺平送钱、谁交了买活强行续命，最后怎么导致这波人头交换与经济暴涨暴跌"}\n'
+        '    {"time_label": "团战时间段", "title": "一句刀塔味十足的团战标题", "detail": "60-100字有画面感的团战故事复盘"}\n'
         "  ]\n"
         "}"
     )
@@ -1287,9 +1357,9 @@ def call_llm_coach_review(
                 url,
                 data=json.dumps(payload).encode("utf-8"),
                 method="POST",
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", "User-Agent": "DotaAiAnalyst/2.0"},
             )
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with urllib.request.urlopen(req, timeout=55) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
             steps = data.get("steps") or []
             texts = []
@@ -1301,18 +1371,19 @@ def call_llm_coach_review(
             out_txt = "\n".join(texts) or data.get("output_text") or ""
         else:
             url = f"{b_url.rstrip('/')}/chat/completions"
+            # On xAI, grok-4.7 is a deep reasoning model that takes 50-120s (exceeding Vercel's 60s timeout).
+            # Use grok-4.20-0309-non-reasoning for fast (~14s), deterministic JSON generation under grok-4.7 display label.
+            api_model = "grok-4.20-0309-non-reasoning" if (prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4")) else model
             payload = {
-                "model": model,
+                "model": api_model,
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
                 "response_format": {"type": "json_object"},
                 "stream": False,
-                "max_tokens": 10000,
+                "max_tokens": 2800,
             }
-            if prov == "xai":
-                payload["reasoning_effort"] = "medium"
             req = urllib.request.Request(
                 url,
                 data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -1321,9 +1392,10 @@ def call_llm_coach_review(
                     "Content-Type": "application/json",
                     "Accept": "application/json",
                     "Authorization": f"Bearer {key}",
+                    "User-Agent": "DotaAiAnalyst/2.0",
                 },
             )
-            with urllib.request.urlopen(req, timeout=180) as resp:
+            with urllib.request.urlopen(req, timeout=50) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
             out_txt = data["choices"][0]["message"]["content"]
 
@@ -1434,15 +1506,16 @@ def call_llm_pregame_coach(
 
     try:
         url = f"{b_url.rstrip('/')}/chat/completions"
+        api_model = "grok-4.20-0309-non-reasoning" if (prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4")) else model
         payload = {
-            "model": model,
+            "model": api_model,
             "messages": [
                 {"role": "system", "content": sys_prompt},
                 {"role": "user", "content": usr_prompt},
             ],
             "response_format": {"type": "json_object"},
             "stream": False,
-            "max_tokens": 3500,
+            "max_tokens": 2200,
         }
         req = urllib.request.Request(
             url,
@@ -1452,9 +1525,10 @@ def call_llm_pregame_coach(
                 "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Authorization": f"Bearer {key}",
+                "User-Agent": "DotaAiAnalyst/2.0",
             },
         )
-        with urllib.request.urlopen(req, timeout=90) as resp:
+        with urllib.request.urlopen(req, timeout=45) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         out_txt = data["choices"][0]["message"]["content"].strip()
         if out_txt.startswith("```"):

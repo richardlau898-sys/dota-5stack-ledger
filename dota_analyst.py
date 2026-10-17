@@ -1206,21 +1206,6 @@ def analyze_match_data(
     radiant_report = format_team_players(radiant_sorted, "radiant")
     dire_report = format_team_players(dire_sorted, "dire")
 
-    is_turbo = (match.get("game_mode") == 23)
-    for rp in radiant_report:
-        eval_res = evaluate_player_deeply(
-            rp, radiant_report, dire_report, radiant_win, duration_min, is_parsed, is_turbo
-        )
-        rp.update(eval_res)
-    for dp in dire_report:
-        eval_res = evaluate_player_deeply(
-            dp, dire_report, radiant_report, not radiant_win, duration_min, is_parsed, is_turbo
-        )
-        dp.update(eval_res)
-
-    assign_team_blame_percentages(radiant_report)
-    assign_team_blame_percentages(dire_report)
-
     # 经济走势与转折点分析
     gold_adv = match.get("radiant_gold_adv") or []
     xp_adv = match.get("radiant_xp_adv") or []
@@ -1287,7 +1272,7 @@ def analyze_match_data(
                         for ik, cnt in (tp.get("item_uses") or {}).items()
                         if get_item_zh(ik)
                     ]
-                    if dmg_v > 0 or d_v > 0 or ab_used:
+                    if dmg_v > 0 or d_v > 0 or ab_used or abs(g_v) > 0:
                         participants_detail.append({
                             "side": "radiant" if idx_p < 5 else "dire",
                             "personaname": raw_p.get("personaname") or "匿名",
@@ -1348,13 +1333,6 @@ def analyze_match_data(
                 "label": f"{'天辉' if attacker_side == 'radiant' else '夜魇'}攻破{btype_zh}",
             })
 
-    mvp_and_culprit = select_match_mvp_and_culprit(
-        radiant_report, dire_report, radiant_win, user_team_side
-    )
-    match_narrative = build_four_stage_narrative(
-        match, radiant_report, dire_report, economy_timeline, key_teamfights, user_team_side
-    )
-
     phases_data = build_three_phases_breakdown(
         match=match,
         all_formatted_players=radiant_report + dire_report,
@@ -1363,6 +1341,88 @@ def analyze_match_data(
         npc_to_id=npc_to_id,
         item_by_key=item_by_key,
         focus_side=focus_side_resolved,
+    )
+
+    # 将前/中/后期经济、伤害占比与关键团战缺席独刷取证挂载到每位玩家身上，供 evaluate_player_deeply 精准识别「刷钱不参战毒瘤」
+    lane_ph = next((ph for ph in phases_data if ph.get("key") == "lane"), {})
+    mid_ph = next((ph for ph in phases_data if ph.get("key") == "mid"), {})
+    late_ph = next((ph for ph in phases_data if ph.get("key") == "late"), {})
+    lane_by_slot = {pp["slot"]: pp for pp in (lane_ph.get("players") or [])}
+    mid_by_slot = {pp["slot"]: pp for pp in (mid_ph.get("players") or [])}
+    late_by_slot = {pp["slot"]: pp for pp in (late_ph.get("players") or [])}
+
+    for side_key, team_list in (("radiant", radiant_report), ("dire", dire_report)):
+        team_mid_gold = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("gold_gain") or 0) for tp in team_list) or 1
+        team_mid_hdmg = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
+        team_lane_hdmg = sum(max(0, lane_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
+
+        for tp in team_list:
+            slot = tp["player_slot"]
+            lp = lane_by_slot.get(slot, {})
+            mp = mid_by_slot.get(slot, {})
+            ltp = late_by_slot.get(slot, {})
+            h_short = tp.get("hero_short_zh")
+
+            tf_afk_cnt = 0
+            tf_afk_gold = 0
+            for tf in key_teamfights:
+                own_deaths = tf.get("rad_deaths", 0) if side_key == "radiant" else tf.get("dire_deaths", 0)
+                own_parts = [pt for pt in (tf.get("participants") or []) if pt.get("side") == side_key]
+                own_active_cnt = sum(1 for pt in own_parts if (pt.get("damage") or 0) > 0 or (pt.get("deaths") or 0) > 0)
+                if own_deaths >= 1 or own_active_cnt >= 3:
+                    my_pt = next((pt for pt in own_parts if pt.get("hero_short_zh") == h_short), None)
+                    my_dmg = (my_pt.get("damage") or 0) if my_pt else 0
+                    my_deaths = (my_pt.get("deaths") or 0) if my_pt else 0
+                    my_gold = (my_pt.get("gold_delta") or 0) if my_pt else 0
+                    if my_dmg == 0 and my_deaths == 0:
+                        tf_afk_cnt += 1
+                        if my_gold > 0:
+                            tf_afk_gold += my_gold
+
+            m_gold = max(0, mp.get("gold_gain") or 0)
+            m_hdmg = max(0, mp.get("hero_damage_gain") or 0)
+            l_hdmg = max(0, lp.get("hero_damage_gain") or 0)
+            tp["phase_telemetry"] = {
+                "lane_gold_gain": lp.get("gold_gain") or 0,
+                "lane_hdmg_gain": l_hdmg,
+                "lane_hdmg_share_pct": round(l_hdmg / team_lane_hdmg * 100.0, 1) if is_parsed else 20.0,
+                "lane_kills": lp.get("kills_count") or 0,
+                "lane_deaths": lp.get("deaths_count") or 0,
+                "mid_gold_gain": m_gold,
+                "mid_hdmg_gain": m_hdmg,
+                "mid_gold_share_pct": round(m_gold / team_mid_gold * 100.0, 1) if is_parsed else 20.0,
+                "mid_hdmg_share_pct": round(m_hdmg / team_mid_hdmg * 100.0, 1) if is_parsed else 20.0,
+                "mid_kills": mp.get("kills_count") or 0,
+                "mid_deaths": mp.get("deaths_count") or 0,
+                "late_gold_gain": ltp.get("gold_gain") or 0,
+                "late_hdmg_gain": ltp.get("hero_damage_gain") or 0,
+                "late_kills": ltp.get("kills_count") or 0,
+                "late_deaths": ltp.get("deaths_count") or 0,
+                "tf_total_count": len(key_teamfights),
+                "tf_zero_dmg_afk_count": tf_afk_cnt,
+                "tf_zero_dmg_gold_farmed": tf_afk_gold,
+            }
+
+    is_turbo = (match.get("game_mode") == 23)
+    for rp in radiant_report:
+        eval_res = evaluate_player_deeply(
+            rp, radiant_report, dire_report, radiant_win, duration_min, is_parsed, is_turbo
+        )
+        rp.update(eval_res)
+    for dp in dire_report:
+        eval_res = evaluate_player_deeply(
+            dp, dire_report, radiant_report, not radiant_win, duration_min, is_parsed, is_turbo
+        )
+        dp.update(eval_res)
+
+    assign_team_blame_percentages(radiant_report)
+    assign_team_blame_percentages(dire_report)
+
+    mvp_and_culprit = select_match_mvp_and_culprit(
+        radiant_report, dire_report, radiant_win, user_team_side
+    )
+    match_narrative = build_four_stage_narrative(
+        match, radiant_report, dire_report, economy_timeline, key_teamfights, user_team_side
     )
 
     grok_coaching = load_cached_grok_coaching(match_id, focus_side_resolved)

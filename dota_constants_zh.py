@@ -1016,6 +1016,17 @@ LEGACY_ENGLISH_TO_ZH_MAP = {
     "Kraken Shell": "海妖外壳",
     "The Swarm": "蝗虫群",
     "Time Lapse": "时光倒流(大招)",
+    "is_afk_farmer=true": "被系统判定为前中期毒瘤独刷",
+    "is_afk_farmer=True": "被系统判定为前中期毒瘤独刷",
+    "is_afk_farmer为真": "被系统判定为前中期毒瘤独刷",
+    "is_afk_farmer": "毒瘤独刷标记",
+    "tf_zero_dmg_afk_count": "团战0伤害独刷次数",
+    "contrib_share_pct": "胜局贡献度",
+    "blame_share_pct": "背锅占比",
+    "rating_score_100": "百分制评分",
+    "contrib ": "胜局贡献度 ",
+    "contrib": "胜局贡献度",
+    "rating只有": "评分只有",
 }
 
 

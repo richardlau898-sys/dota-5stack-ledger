@@ -258,14 +258,16 @@ def get_or_build_match_report(
     if not raw_match:
         try:
             raw_match = api_get(f"/matches/{match_id}")
-            # If the match just ended and OpenDota hasn't parsed the .dem replay yet, auto-request parse!
+            # If the match just ended and OpenDota hasn't parsed the .dem replay yet, auto-request parse and poll!
             if raw_match and not raw_match.get("version"):
                 try:
                     api_post(f"/request/{match_id}")
-                    time.sleep(3.0)
-                    retry_raw = api_get(f"/matches/{match_id}")
-                    if retry_raw and retry_raw.get("version"):
-                        raw_match = retry_raw
+                    for _ in range(4):
+                        time.sleep(2.5)
+                        retry_raw = api_get(f"/matches/{match_id}")
+                        if retry_raw and retry_raw.get("version"):
+                            raw_match = retry_raw
+                            break
                 except Exception:
                     pass
             # Only cache raw_match on disk if it is parsed (version is not None)
