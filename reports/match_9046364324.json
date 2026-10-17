@@ -21306,7 +21306,7 @@
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/obsidian_destroyer.png",
             "opp_player": "ҨƸəյʉυﮎ.ᴒյԐːБmɿԐ",
             "opp_kda": "10/7/7",
-            "opp_rating": 4.0,
+            "opp_rating": 5.3,
             "h2h_own_kills": 2,
             "h2h_opp_kills": 1,
             "gold10_own": 2854,
@@ -21384,8 +21384,8 @@
                 "raw": 1828.0
               }
             ],
-            "own_share_pct": 61.0,
-            "opp_share_pct": 39.0,
+            "own_share_pct": 60.5,
+            "opp_share_pct": 39.5,
             "verdict_tag": "👑 对位完爆 (大优)",
             "grade": "good",
             "summary_txt": "10m对线经济 2,854 vs 3,902（-1,048）｜终局经济 21,882 vs 20,278（+1,604）｜英雄输出 48,250 vs 25,932｜正面对位互杀 2 : 1。"
@@ -21784,7 +21784,7 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/obsidian_destroyer.png",
             "own_player": "ҨƸəյʉυﮎ.ᴒյԐːБmɿԐ",
             "own_kda": "10/7/7",
-            "own_rating": 4.0,
+            "own_rating": 5.3,
             "opp_hero": "帕格纳",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
             "opp_player": "Replica",
@@ -21867,8 +21867,8 @@
                 "raw": 0.3
               }
             ],
-            "own_share_pct": 39.0,
-            "opp_share_pct": 61.0,
+            "own_share_pct": 39.5,
+            "opp_share_pct": 60.5,
             "verdict_tag": "🚨 对位被打穿 (被爆金币)",
             "grade": "bad",
             "summary_txt": "10m对线经济 3,902 vs 2,854（+1,048）｜终局经济 20,278 vs 21,882（-1,604）｜英雄输出 25,932 vs 48,250｜正面对位互杀 1 : 2。"
@@ -43524,8 +43524,8 @@
       "kill_participation_pct": 76.3,
       "rating_score": 8.7,
       "rating_tier": "A 尽力大腿",
-      "blame_share_pct": 10.3,
-      "contrib_share_pct": 30.2
+      "blame_share_pct": 11.3,
+      "contrib_share_pct": 26.7
     },
     "culprit_player": {
       "player_slot": 131,
@@ -44304,10 +44304,10 @@
       ],
       "trash_talk": "@Like it or not 玩个1号位幻影刺客前25分钟打钱不参战（参战率44.7%全队垫底、全场仅10个助攻），队友正面4打5流血你钻野区收租，最后出山K几个头真当自己是MVP了？",
       "praise_talk": "@Like it or not 这把 幻影刺客 前中期闷头独刷 25 分钟（参战率仅 44.7% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！",
-      "blame_share_pct": 35.7,
-      "contrib_share_pct": 0.8,
-      "contrib_rank": 4,
-      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
+      "blame_share_pct": 39.5,
+      "contrib_share_pct": 0.7,
+      "contrib_rank": 5,
+      "contrib_tier": "🥂 凯旋功臣 · 团队拼图",
       "pings_count": 3,
       "lane_id": 1,
       "benchmarks_list": [
@@ -44960,41 +44960,40 @@
         "tf_zero_dmg_afk_count": 0,
         "tf_zero_dmg_gold_farmed": 0
       },
-      "is_afk_farmer": true,
+      "is_afk_farmer": false,
       "radar": {
         "farm": 61,
         "damage": 46,
-        "tempo": 26,
+        "tempo": 47,
         "push": 35,
         "utility": 79,
-        "survival": 50
+        "survival": 59
       },
-      "rating_score": 4.0,
-      "rating_tier": "D 独刷战犯",
-      "mvp_score": 35.0,
-      "raw_blame_points": 128.1,
-      "raw_contrib_points": 6.0,
+      "rating_score": 5.3,
+      "rating_tier": "D 头号战犯",
+      "mvp_score": 52.9,
+      "raw_blame_points": 90.1,
+      "raw_contrib_points": 99.7,
       "strengths": [
         "对线基本功扎实：前10分钟交出 61正/12反（10m经济 3,902，效率 78%），10分钟净压对位 帕格纳 1048 金，撑起了前中期基础节奏。",
         "救人装高频救场：大推推 全场精准开启 12 次，多次在关键团战帮队友死里逃生。",
         "全场核心技能施放统计：申斥(魔晶护盾) 36次 / 星体禁锢(关) 28次 / 神智之蚀(大招) 8次（操作频率 335 APM）。"
       ],
       "weaknesses": [
-        "前中期毒瘤独刷不参战：全场参战率仅 **44.7%（全队倒数第一，10/7/7 全场仅 7 个助攻）**！前10分钟仅打出 **1,701 英雄伤害**，10–25m 中期狂刷 **+8,414 金（占全队中期经济 23.6%）** 却只打出 **7,207 伤害（仅占全队中期伤害 20.6%，连双辅助都不如）**，全靠四个队友前中期 4 打 5 血战撑住局势才混到后期出山收割面板！",
         "头铁拒出 BKB：面对敌方 264 秒强控，全场阵亡 7 次直到终局都没出黑皇杖，团战容错率极低。",
         "假腿焊死细节缺失：整场 43 分钟比赛里，假腿属性总共只切换了 2 次，刷野放技能从不切智力省蓝、挨打也不切力量撑血。",
         "主动救人装严重漏按：20:29 做出 推推棒，拿在手里 22 分钟总共只按了 0 次，团战队友被集火时反应慢半拍。",
         "越塔犯罪记录：本局有 **1 次直接死于敌方防御塔攻击**，冲塔上头未能计算防御塔仇恨与伤害。"
       ],
       "improvements": [
-        "身为 2号位切忌前中期把四个队友当肉盾吸血独刷：10~25分钟做出第一件节奏装后必须带队接团或TP反打，而不是全程0参战闷头刷野。"
+        "保持当前 殁境神蚀者 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
-      "trash_talk": "@ҨƸəյʉυﮎ.ᴒյԐːБmɿԐ 玩个2号位殁境神蚀者前25分钟打钱不参战（参战率44.7%全队垫底、全场仅7个助攻），队友正面4打5流血你钻野区收租，最后出山K几个头真当自己是MVP了？",
-      "praise_talk": "@ҨƸəյʉυﮎ.ᴒյԐːБmɿԐ 这把 殁境神蚀者 前中期闷头独刷 25 分钟（参战率仅 44.7% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！",
-      "blame_share_pct": 31.2,
-      "contrib_share_pct": 0.8,
-      "contrib_rank": 5,
-      "contrib_tier": "🥂 凯旋功臣 · 团队拼图",
+      "trash_talk": "@ҨƸəյʉυﮎ.ᴒյԐːБmɿԐ 死了7次硬是不出BKB，BKB这件装备在你的商店里是被G胖下架了吗？",
+      "praise_talk": "@ҨƸəյʉυﮎ.ᴒյԐːБmɿԐ 稳健上分拼图！殁境神蚀者 交出 10/7/7（参战率 45% · 伤害 25,932），关键团战从不掉链子！",
+      "blame_share_pct": 24.1,
+      "contrib_share_pct": 12.4,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 8,
       "lane_id": 2,
       "benchmarks_list": [
@@ -45692,8 +45691,8 @@
       ],
       "trash_talk": "@baymax 一局死 9 次，看了整整 5分56秒 黑白电视（其中被敌方【帕格纳】单人提款 3 次），光死就扣了 2223 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@baymax 铁血三号位！潮汐猎人 参战率 82% 肉身扛下 41,358 伤害（全队 27%）外加 59.0 秒硬控，完美团战发动机！",
-      "blame_share_pct": 16.4,
-      "contrib_share_pct": 28.9,
+      "blame_share_pct": 18.1,
+      "contrib_share_pct": 25.5,
       "contrib_rank": 3,
       "contrib_tier": "🛡️ 定海神针 · 中坚功臣",
       "pings_count": 6,
@@ -46414,8 +46413,8 @@
       ],
       "trash_talk": "@Wendy 一局死 11 次，看了整整 7分0秒 黑白电视（其中被敌方【帕格纳】单人提款 3 次），光死就扣了 1850 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Wendy 最佳幕后功臣！水晶室女 全场点亮 10 假 19 真视野 + 参战率 76%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 10.3,
-      "contrib_share_pct": 30.2,
+      "blame_share_pct": 11.3,
+      "contrib_share_pct": 26.7,
       "contrib_rank": 2,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 77,
@@ -47137,8 +47136,8 @@
       ],
       "trash_talk": "@Sa Po Tar A ko Lay 这把 3/7/26 标准打卡下班，背锅占比 26 点，赢了跟着笑，输了怪队友！",
       "praise_talk": "@Sa Po Tar A ko Lay 最佳幕后功臣！拉比克 全场点亮 7 假 17 真视野 + 参战率 76%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 6.4,
-      "contrib_share_pct": 39.3,
+      "blame_share_pct": 7.0,
+      "contrib_share_pct": 34.7,
       "contrib_rank": 1,
       "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 15,

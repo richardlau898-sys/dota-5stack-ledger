@@ -593,14 +593,20 @@ def evaluate_player_deeply(
 
     is_afk_farmer = False
     if pos in (1, 2, 3) and duration_min >= 20 and not is_turbo:
-        low_kp_mid = pos == 2 and (kp < 48.0 or (kp <= min_team_kp + 0.1 and kp < team_avg_kp - 10.0))
-        low_kp_core = pos in (1, 3) and (kp < 42.0 or (kp <= min_team_kp + 0.1 and kp < team_avg_kp - 14.0))
-        mid_afk_telemetry = is_parsed and (
-            (mid_gold_share >= 21.0 and mid_hdmg_share <= 14.5 and kp < 54.0)
-            or (tf_afk_cnt >= 2 and kp < 52.0)
-        )
-        if low_kp_mid or low_kp_core or mid_afk_telemetry:
-            is_afk_farmer = True
+        if is_parsed and mid_gold > 0:
+            # Must have both low overall KP and severe mid-game gold-vs-damage disparity
+            if (
+                kp < 48.5
+                and mid_gold_share >= 22.5
+                and mid_hdmg_share <= 14.5
+                and (kp <= min_team_kp + 2.0 or tf_afk_cnt >= 2)
+            ):
+                is_afk_farmer = True
+        else:
+            low_kp_mid = pos == 2 and (kp < 46.0 and kp <= min_team_kp + 0.1 and kp < team_avg_kp - 10.0)
+            low_kp_core = pos in (1, 3) and (kp < 40.0 and kp <= min_team_kp + 0.1 and kp < team_avg_kp - 14.0)
+            if low_kp_mid or low_kp_core:
+                is_afk_farmer = True
 
     if is_afk_farmer:
         radar["tempo"] = min(radar["tempo"], 26)
@@ -1320,12 +1326,22 @@ def call_llm_coach_review(
         ],
     }
 
+    afk_heroes = [p.get("hero_short_zh") for p in own_team if p.get("is_afk_farmer")]
+    sorted_own_by_contrib = sorted(own_team, key=lambda x: float(x.get("contrib_share_pct") or 0), reverse=True)
+    top1_hero = sorted_own_by_contrib[0].get("hero_short_zh") if sorted_own_by_contrib else ""
+    top2_hero = sorted_own_by_contrib[1].get("hero_short_zh") if len(sorted_own_by_contrib) > 1 else ""
+    afk_rule_str = (
+        f"2) 本局本方存在『前中期刷钱不参战、卖队友4打5、最后几分钟才出山收割面板伤害的毒瘤核心』：{'、'.join(afk_heroes)}（数据中 is_afk_farmer=true，参战率全队垫底、10-25m中期吃大量经济却打出极低英雄伤害、多波团战0伤害钻野区）。哪怕他最后总伤害或总经济好看，也绝对禁止评为MVP或二号功臣，必须在判词和个人点评里狠狠揭穿他前中期闷头独刷、全靠四个队友4打5负重前行才躺赢的真相！\n"
+        if afk_heroes
+        else "2) 本局本方无人闷头独刷，请严格依据真实阵亡次数、中期落单被抓或推塔/参战短板点评本局暴露的问题，切勿凭空捏造独刷罪名。\n"
+    )
+
     system_prompt = (
         "你是懂 Dota 2 高端局细节的开黑老哥，给车队五人做赛后算账复盘。全中文输出（严禁夹杂英文变量名如 is_afk_farmer 或英文道具名），像损友聊天：有数据的问题直接点名说，拒绝空洞套话。\n"
         "核心铁律：\n"
         "1) 结合每个人前期(0-10m补刀与经济)、中期(10-25m刷钱占比vs英雄伤害占比、参战率)、后期(25m+团战与推塔伤害)以及技能/装备按键次数进行从前到后的完整故事复盘。\n"
-        "2) 严厉甄别『前中期刷钱不参战、卖队友4打5、最后几分钟才出山收割面板伤害的毒瘤核心』（数据中标记了 is_afk_farmer=true，或参战率全队垫底、10-25m中期吃大量经济却打出全队最低英雄伤害、多波团战0伤害钻野区）：哪怕他最后总伤害或总经济好看，也绝对禁止评为MVP或二号功臣，必须在判词和个人点评里狠狠揭穿他前中期闷头独刷、全靠四个队友4打5负重前行才躺赢的真相！\n"
-        "3) MVP 与二号功臣必须与 contrib_share_pct（胜局贡献度前两名）保持一致。\n"
+        + afk_rule_str +
+        f"3) 头号首功 MVP 必须定为『{top1_hero}』，二号功臣必须定为『{top2_hero}』（与胜局贡献度前两名严格一致）。\n"
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"
         '  "title": "一句话点透本局胜负关键与最大槽点（20-36字）",\n'

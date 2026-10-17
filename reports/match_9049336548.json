@@ -19098,7 +19098,7 @@
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/antimage.png",
             "opp_player": "superbye",
             "opp_kda": "10/5/5",
-            "opp_rating": 4.0,
+            "opp_rating": 5.3,
             "h2h_own_kills": 2,
             "h2h_opp_kills": 0,
             "gold10_own": 2691,
@@ -19176,9 +19176,9 @@
                 "raw": 0.2
               }
             ],
-            "own_share_pct": 56.9,
-            "opp_share_pct": 43.1,
-            "verdict_tag": "👑 对位完爆 (大优)",
+            "own_share_pct": 56.4,
+            "opp_share_pct": 43.6,
+            "verdict_tag": "⚔️ 对位压制 (小优)",
             "grade": "good",
             "summary_txt": "10m对线经济 2,691 vs 2,677（+14）｜终局经济 25,564 vs 24,620（+944）｜英雄输出 20,291 vs 24,827｜正面对位互杀 2 : 0。"
           },
@@ -19576,7 +19576,7 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/antimage.png",
             "own_player": "superbye",
             "own_kda": "10/5/5",
-            "own_rating": 4.0,
+            "own_rating": 5.3,
             "opp_hero": "虚空假面",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
             "opp_player": "Flame = ez mute",
@@ -19659,10 +19659,10 @@
                 "raw": 0.2
               }
             ],
-            "own_share_pct": 43.1,
-            "opp_share_pct": 56.9,
-            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
-            "grade": "bad",
+            "own_share_pct": 43.6,
+            "opp_share_pct": 56.4,
+            "verdict_tag": "⚠️ 对位小劣 (被压)",
+            "grade": "warn",
             "summary_txt": "10m对线经济 2,677 vs 2,691（-14）｜终局经济 24,620 vs 25,564（-944）｜英雄输出 24,827 vs 20,291｜正面对位互杀 0 : 2。"
           },
           {
@@ -40801,8 +40801,8 @@
       "kill_participation_pct": 94.4,
       "rating_score": 8.2,
       "rating_tier": "A 尽力大腿",
-      "blame_share_pct": 9.5,
-      "contrib_share_pct": 41.7
+      "blame_share_pct": 10.8,
+      "contrib_share_pct": 36.8
     },
     "culprit_player": {
       "player_slot": 132,
@@ -41575,33 +41575,33 @@
         "tf_zero_dmg_afk_count": 1,
         "tf_zero_dmg_gold_farmed": 294
       },
-      "is_afk_farmer": true,
+      "is_afk_farmer": false,
       "radar": {
         "farm": 48,
         "damage": 59,
-        "tempo": 26,
+        "tempo": 44,
         "push": 33,
         "utility": 47,
-        "survival": 50
+        "survival": 69
       },
-      "rating_score": 4.0,
-      "rating_tier": "D 独刷战犯",
-      "mvp_score": 35.0,
-      "raw_blame_points": 87.1,
-      "raw_contrib_points": 6.0,
+      "rating_score": 5.3,
+      "rating_tier": "D 头号战犯",
+      "mvp_score": 52.9,
+      "raw_blame_points": 49.1,
+      "raw_contrib_points": 87.7,
       "strengths": [
         "全场核心技能施放统计：敌法专属技能 110次 / 敌法专属技能 33次 / 敌法专属技能 9次（操作频率 266 APM）。"
       ],
       "weaknesses": [
-        "前中期毒瘤独刷不参战：全场参战率仅 **41.7%（全队倒数第一，10/5/5 全场仅 5 个助攻）**！前10分钟仅打出 **1,692 英雄伤害**，10–25m 中期狂刷 **+9,048 金（占全队中期经济 29.5%）** 却只打出 **5,001 伤害（仅占全队中期伤害 18.7%，连双辅助都不如）**，且有 **1 波关键团战 0 伤害卖队友独刷（趁队友4打5挨揍在野区收割 +294 金）**，全靠四个队友前中期 4 打 5 血战撑住局势才混到后期出山收割面板！"
+        "整体发挥稳健：全场仅阵亡 5 次（读秒 4分49秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
       ],
       "improvements": [
-        "身为 1号位切忌前中期把四个队友当肉盾吸血独刷：10~25分钟做出第一件节奏装后必须带队接团或TP反打，而不是全程0参战闷头刷野。"
+        "保持当前 敌法师 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
-      "trash_talk": "@superbye 玩个1号位敌法师前25分钟打钱不参战（参战率41.7%全队垫底、全场仅5个助攻），队友正面4打5流血你钻野区收租，最后出山K几个头真当自己是MVP了？",
-      "praise_talk": "@superbye 这把 敌法师 前中期闷头独刷 25 分钟（参战率仅 41.7% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！",
-      "blame_share_pct": 27.4,
-      "contrib_share_pct": 1.0,
+      "trash_talk": "@superbye 这把 10/5/5 标准打卡下班，背锅占比 49 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@superbye 稳健上分拼图！敌法师 交出 10/5/5（参战率 42% · 伤害 24,827），关键团战从不掉链子！",
+      "blame_share_pct": 17.6,
+      "contrib_share_pct": 12.5,
       "contrib_rank": 5,
       "contrib_tier": "🥂 凯旋功臣 · 团队拼图",
       "pings_count": 19,
@@ -42201,8 +42201,8 @@
       ],
       "trash_talk": "@mpieces 对面一身硬控你拖到 36:09 才出 BKB，整局就按了 3 次，买个黄棍放包里当传家宝辟邪是吧？",
       "praise_talk": "@mpieces 稳健上分拼图！莉娜 交出 9/7/14（参战率 64% · 伤害 24,888），关键团战从不掉链子！",
-      "blame_share_pct": 21.0,
-      "contrib_share_pct": 15.6,
+      "blame_share_pct": 23.8,
+      "contrib_share_pct": 13.8,
       "contrib_rank": 3,
       "contrib_tier": "🛡️ 定海神针 · 中坚功臣",
       "pings_count": 3,
@@ -42879,8 +42879,8 @@
       ],
       "trash_talk": "@staycalmี่ 一局死 10 次，看了整整 7分13秒 黑白电视（其中被敌方【司夜刺客】单人提款 3 次），光死就扣了 2525 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@staycalmี่ 铁血三号位！斧王 参战率 56% 肉身扛下 42,456 伤害（全队 28%）外加 64.4 秒硬控，完美团战发动机！",
-      "blame_share_pct": 26.3,
-      "contrib_share_pct": 14.4,
+      "blame_share_pct": 29.9,
+      "contrib_share_pct": 12.8,
       "contrib_rank": 4,
       "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 1,
@@ -43516,8 +43516,8 @@
       ],
       "trash_talk": "@程曦 这把 9/6/25 标准打卡下班，背锅占比 30 点，赢了跟着笑，输了怪队友！",
       "praise_talk": "@程曦 最佳幕后功臣！裂魂人 全场点亮 6 假 11 真视野 + 参战率 94%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 9.5,
-      "contrib_share_pct": 41.7,
+      "blame_share_pct": 10.8,
+      "contrib_share_pct": 36.8,
       "contrib_rank": 1,
       "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 0,
@@ -44145,8 +44145,8 @@
       ],
       "trash_talk": "@冬瓜不是瓜 一局死 9 次，看了整整 6分7秒 黑白电视（其中被敌方【影魔】单人提款 4 次），光死就扣了 1345 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@冬瓜不是瓜 最佳幕后功臣！干扰者 全场点亮 4 假 13 真视野 + 参战率 64%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 15.8,
-      "contrib_share_pct": 27.3,
+      "blame_share_pct": 17.9,
+      "contrib_share_pct": 24.1,
       "contrib_rank": 2,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 1,
