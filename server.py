@@ -72,6 +72,18 @@ def resolve_player_input(raw_input: str) -> int:
     return normalize_account_id(s)
 
 
+TMP_REPORTS_DIR = Path("/tmp/dota_reports")
+
+
+def is_match_already_analyzed(match_id: Any) -> bool:
+    if not match_id:
+        return False
+    return (
+        (REPORTS_DIR / f"match_{match_id}.json").exists()
+        or (TMP_REPORTS_DIR / f"match_{match_id}.json").exists()
+    )
+
+
 def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
     hero_map, _ = get_hero_constants_map()
     raw_list = api_get(f"/players/{account_id}/recentMatches")
@@ -110,19 +122,18 @@ def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
             "party_size": psize,
             "party_label": f"{psize}人黑" if psize > 1 else "单排",
             "is_parsed": bool(m.get("version")),
+            "is_analyzed": is_match_already_analyzed(mid),
             "mode_str": get_mode_and_lobby(m.get("game_mode", 0), m.get("lobby_type", 0)),
         })
     return out
-
-
-TMP_REPORTS_DIR = Path("/tmp/dota_reports")
 
 
 def get_or_build_match_report(
     match_id: int,
     focus_account_id: Optional[int] = None,
     force_refresh: bool = False,
-) -> Dict[str, Any]:
+    allow_build: bool = True,
+) -> Optional[Dict[str, Any]]:
     json_cache = REPORTS_DIR / f"match_{match_id}.json"
     md_cache = REPORTS_DIR / f"match_{match_id}.md"
     raw_cache = REPORTS_DIR / f"raw_{match_id}.json"
@@ -130,6 +141,22 @@ def get_or_build_match_report(
     tmp_json_cache = TMP_REPORTS_DIR / f"match_{match_id}.json"
     tmp_md_cache = TMP_REPORTS_DIR / f"match_{match_id}.md"
     tmp_raw_cache = TMP_REPORTS_DIR / f"raw_{match_id}.json"
+
+    if not force_refresh:
+        for jc in (json_cache, tmp_json_cache):
+            if jc.exists():
+                try:
+                    cached_rep = json.loads(jc.read_text(encoding="utf-8"))
+                    if (
+                        isinstance(cached_rep, dict)
+                        and cached_rep.get("deep_forensics", {}).get("unpressed_saves_by_side") is not None
+                    ):
+                        return cached_rep
+                except Exception:
+                    pass
+
+    if not allow_build and not json_cache.exists() and not tmp_json_cache.exists():
+        return None
 
     roster = load_roster()
     aid = focus_account_id or roster.get("main_account_id")
@@ -235,10 +262,21 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 losses = len(recent) - wins
                 win_rate = round((wins / len(recent)) * 100, 1) if recent else 0.0
                 latest_report = None
-                if recent:
+                analyzed_in_recent = [m for m in recent if m.get("is_analyzed")]
+                if analyzed_in_recent:
                     latest_report = get_or_build_match_report(
-                        recent[0]["match_id"], focus_account_id=main_id
+                        analyzed_in_recent[0]["match_id"],
+                        focus_account_id=main_id,
+                        allow_build=False,
                     )
+                elif recent:
+                    # Fallback to latest match_*.json in REPORTS_DIR without auto-analyzing unanalyzed matches
+                    existing_files = sorted(REPORTS_DIR.glob("match_*.json"), reverse=True)
+                    if existing_files:
+                        try:
+                            latest_report = json.loads(existing_files[0].read_text(encoding="utf-8"))
+                        except Exception:
+                            latest_report = None
                 profile_obj = {
                     "profile": {
                         "account_id": main_id,
@@ -272,7 +310,14 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 wins = sum(1 for m in recent if m.get("won"))
                 losses = len(recent) - wins
                 win_rate = round((wins / len(recent)) * 100, 1) if recent else 0.0
-                latest_report = get_or_build_match_report(recent[0]["match_id"], focus_account_id=aid) if recent else None
+                analyzed_in_recent = [m for m in recent if m.get("is_analyzed")]
+                latest_report = (
+                    get_or_build_match_report(
+                        analyzed_in_recent[0]["match_id"], focus_account_id=aid, allow_build=False
+                    )
+                    if analyzed_in_recent
+                    else None
+                )
                 profile_obj = {
                     "profile": {
                         "account_id": aid,
@@ -300,16 +345,30 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     mid_str = (qs.get("match_id") or [""])[0].strip()
                 mid = int(mid_str)
                 force = (qs.get("refresh") or ["0"])[0] == "1"
+                analyze_now = (qs.get("analyze") or ["0"])[0] == "1"
                 aid_str = (qs.get("account_id") or [""])[0].strip()
                 aid = resolve_player_input(aid_str) if aid_str else None
-                report = get_or_build_match_report(mid, focus_account_id=aid, force_refresh=force)
+                report = get_or_build_match_report(
+                    mid,
+                    focus_account_id=aid,
+                    force_refresh=force,
+                    allow_build=(force or analyze_now),
+                )
                 roster = load_roster()
                 squad_ledger = build_squad_history_ledger(REPORTS_DIR, roster, [])
+                if report is None:
+                    self._send_json({
+                        "ok": True,
+                        "not_analyzed": True,
+                        "match_id": mid,
+                        "squad_ledger": squad_ledger,
+                    })
+                    return
                 self._send_json({"ok": True, "report": report, "squad_ledger": squad_ledger})
                 return
 
-            # 静态文件服务 (支持 / 与 /pregame)
-            if path in ("/", "", "/pregame", "/pregame.html"):
+            # 静态文件服务 (支持 /, /pregame, 以及公开分享链接 /match/<id>)
+            if path in ("/", "", "/pregame", "/pregame.html") or path.startswith("/match/"):
                 file_path = STATIC_DIR / "index.html"
             else:
                 rel = path.lstrip("/")

@@ -31,12 +31,16 @@ const state = {
   isGeneratingPregameGrok: false,
   currentMatchId: null,
   currentReport: null,
+  pendingMatchId: null,
+  pendingMatchMeta: null,
+  scrubberMinute: 15,
+  scrubSyncMapMinute: null,
   perspective: "auto", // "auto" | "dire" | "radiant"
   nwFilter: "cores",   // "cores" | "own" | "all"
   mapMode: "wards_obs", // "wards_obs" | "wards_own" | "wards_all" | "heatmap" | "teamfights"
   selectedTeamfightIndex: null,
   focusMatrixSide: "own", // "own" | "opp"
-  microTab: "hero_ult", // "hero_ult" | "vision" | "stack_smoke" | "laning" | "tp_save" | "all"
+  microTab: "hero_ult", // "hero_ult" | "unpressed_saves" | "map_space" | "damage_received" | "vision" | "stack_smoke" | "laning" | "tp_save" | "econ_pings" | "all"
   microSide: "own", // "own" | "opp"
   activePhaseKey: "lane", // "lane" | "mid" | "late"
   activeTeamTab: "own", // "own" | "opp" | "both"
@@ -109,6 +113,48 @@ async function copyTextToClipboard(text, label = "算账金句") {
   }
 }
 
+function getPublicShareUrl(matchId = state.currentMatchId) {
+  const mid = matchId || state.currentMatchId || state.pendingMatchId || "";
+  const origin =
+    window.location?.origin && window.location.origin !== "null"
+      ? window.location.origin
+      : "https://dota-ai-analyst.vercel.app";
+  if (!mid) return origin;
+  const side = state.currentReport ? getAuditedSide(state.currentReport) : state.perspective;
+  const sideParam = side === "dire" || side === "radiant" ? `&side=${encodeURIComponent(side)}` : "";
+  return `${origin}/?match=${encodeURIComponent(mid)}${sideParam}`;
+}
+
+async function copyMatchShareLink() {
+  if (!state.currentMatchId || !state.currentReport) {
+    showToast("请先完成本局 AI 分析后再复制公开分享链接");
+    return;
+  }
+  const shareUrl = getPublicShareUrl(state.currentMatchId);
+  const { sideZh } = getOwnAndOppPlayers(state.currentReport);
+  const shareTitle = state.currentReport.grok_coaching?.title || `比赛 #${state.currentMatchId}`;
+  await copyTextToClipboard(
+    shareUrl,
+    `比赛 #${state.currentMatchId} (${sideZh}视角 · ${shareTitle}) 公开复盘分享链接`
+  );
+}
+
+function syncMatchUrlInAddressBar(matchId) {
+  if (!matchId || state.workspaceMode === "pregame") return;
+  try {
+    if (window.history?.replaceState) {
+      const side = state.currentReport ? getAuditedSide(state.currentReport) : state.perspective;
+      const sideQuery = side === "dire" || side === "radiant" ? `&side=${encodeURIComponent(side)}` : "";
+      const nextUrl = `/?match=${encodeURIComponent(matchId)}${sideQuery}`;
+      if (window.location.search !== `?match=${encodeURIComponent(matchId)}${sideQuery}`) {
+        window.history.replaceState({}, "", nextUrl);
+      }
+    }
+  } catch {
+    // ignore history errors in sandboxed environments
+  }
+}
+
 /**
  * Determine which side ("dire" or "radiant") we are auditing as "本方 (own)".
  */
@@ -142,10 +188,34 @@ function getOwnAndOppPlayers(report) {
 }
 
 /**
+ * Extract requested match_id from URL (?match=12345 or /match/12345)
+ */
+function getUrlRequestedMatchAndSide() {
+  const params = new URLSearchParams(window.location.search || "");
+  const qMatch = params.get("match") || params.get("match_id");
+  const qSide = params.get("side");
+  let matchId = qMatch && /^\d{8,12}$/.test(qMatch.trim()) ? Number(qMatch.trim()) : null;
+  if (!matchId) {
+    const mPath = (window.location.pathname || "").match(/\/match\/(\d{8,12})/);
+    if (mPath && mPath[1]) {
+      matchId = Number(mPath[1]);
+    }
+  }
+  const side = qSide === "dire" || qSide === "radiant" ? qSide : null;
+  return { matchId, side };
+}
+
+/**
  * Initialize app on load
  */
 async function initApp() {
   bindEvents();
+  const { matchId: urlMatchId, side: urlSide } = getUrlRequestedMatchAndSide();
+  if (urlSide) {
+    state.perspective = urlSide;
+    const perspSelect = document.getElementById("perspective-select");
+    if (perspSelect) perspSelect.value = urlSide;
+  }
   if (
     window.location.pathname.includes("/pregame") ||
     new URLSearchParams(window.location.search).get("mode") === "pregame"
@@ -171,11 +241,15 @@ async function initApp() {
     initPregameWorkspace();
 
     const firstReport = data.latest_match_report || data.latest_report;
-    if (firstReport) {
+    if (urlMatchId && (!firstReport || Number(firstReport.match_id) !== Number(urlMatchId))) {
+      await loadMatchReport(urlMatchId);
+    } else if (firstReport) {
       state.currentMatchId = firstReport.match_id;
       state.currentReport = firstReport;
+      toggleOnDemandGate(false);
       renderFullMatchReport(state.currentReport);
       highlightSelectedMatchCard(state.currentMatchId);
+      syncMatchUrlInAddressBar(state.currentMatchId);
     } else if ((data.recent_matches || []).length > 0) {
       await loadMatchReport(data.recent_matches[0].match_id);
     }
@@ -314,8 +388,9 @@ function bindEvents() {
   if (latestBtn) {
     latestBtn.addEventListener("click", async () => {
       const list = state.profileData?.recent_matches || [];
-      if (list.length > 0) {
-        await loadMatchReport(list[0].match_id);
+      const latestAnalyzed = list.find((m) => m.is_analyzed) || list[0];
+      if (latestAnalyzed) {
+        await loadMatchReport(latestAnalyzed.match_id);
       }
     });
   }
@@ -326,6 +401,7 @@ function bindEvents() {
       state.perspective = perspSelect.value;
       if (state.currentReport) {
         renderFullMatchReport(state.currentReport);
+        syncMatchUrlInAddressBar(state.currentMatchId);
       }
     });
   }
@@ -435,6 +511,93 @@ function bindEvents() {
     });
   });
 
+  // Share Link buttons (Header, Hero Overview, and Share Modal)
+  ["btn-copy-share-link", "btn-hero-share-link", "btn-modal-share-link"].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener("click", () => {
+        copyMatchShareLink();
+      });
+    }
+  });
+
+  // On-Demand AI Analysis Gate Confirmation Button
+  const confirmAnalyzeBtn = document.getElementById("btn-confirm-analyze-match");
+  if (confirmAnalyzeBtn) {
+    confirmAnalyzeBtn.addEventListener("click", async () => {
+      const targetMid = state.pendingMatchId || state.currentMatchId;
+      if (!targetMid) return;
+      confirmAnalyzeBtn.disabled = true;
+      confirmAnalyzeBtn.textContent = "🤖 AI 正在拉取录像并执行九维显微镜分析 (约3~8秒)...";
+      try {
+        await loadMatchReport(targetMid, { analyzeNow: true });
+      } finally {
+        confirmAnalyzeBtn.disabled = false;
+        confirmAnalyzeBtn.textContent = "⚡ 立即让 AI 深度分析本局并生成公开分享链接";
+      }
+    });
+  }
+
+  // Minute-by-Minute Timeline Scrubber bindings
+  const scrubRange = document.getElementById("minute-scrubber-range");
+  if (scrubRange) {
+    scrubRange.addEventListener("input", () => {
+      state.scrubberMinute = Number(scrubRange.value || 0);
+      if (state.currentReport) {
+        renderMinuteScrubberSnapshot(state.currentReport, state.scrubberMinute);
+        if (state.scrubSyncMapMinute !== null) {
+          state.scrubSyncMapMinute = state.scrubberMinute;
+          renderMinimap(state.currentReport);
+        }
+      }
+    });
+  }
+  const scrubPrev = document.getElementById("btn-scrub-prev");
+  if (scrubPrev) {
+    scrubPrev.addEventListener("click", () => {
+      if (!state.currentReport) return;
+      const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+      const nextM = Math.max(0, (state.scrubberMinute || 0) - 1);
+      if (snaps.length > 0) {
+        setScrubberMinute(nextM);
+      }
+    });
+  }
+  const scrubNext = document.getElementById("btn-scrub-next");
+  if (scrubNext) {
+    scrubNext.addEventListener("click", () => {
+      if (!state.currentReport) return;
+      const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+      const maxM = Math.max(0, snaps.length - 1);
+      const nextM = Math.min(maxM, (state.scrubberMinute || 0) + 1);
+      if (snaps.length > 0) {
+        setScrubberMinute(nextM);
+      }
+    });
+  }
+  const scrubSyncMapBtn = document.getElementById("btn-scrub-sync-map");
+  if (scrubSyncMapBtn) {
+    scrubSyncMapBtn.addEventListener("click", () => {
+      if (!state.currentReport) return;
+      if (state.scrubSyncMapMinute === state.scrubberMinute) {
+        state.scrubSyncMapMinute = null;
+        scrubSyncMapBtn.classList.remove("active");
+        scrubSyncMapBtn.textContent = "🗺️ 同步定位小地图眼位";
+        showToast("已恢复小地图显示全场所有眼位");
+      } else {
+        state.scrubSyncMapMinute = state.scrubberMinute;
+        state.mapMode = "wards_all";
+        document.querySelectorAll("[data-map-mode]").forEach((b) =>
+          b.classList.toggle("active", b.getAttribute("data-map-mode") === "wards_all")
+        );
+        scrubSyncMapBtn.classList.add("active");
+        scrubSyncMapBtn.textContent = `🗺️ 已锁定 ${String(state.scrubberMinute).padStart(2, "0")}:00 场上存活眼位 (再点取消)`;
+        showToast(`下方 2D 小地图已同步过滤为 ${String(state.scrubberMinute).padStart(2, "0")}:00 时刻场上存活的真假眼`);
+      }
+      renderMinimap(state.currentReport);
+    });
+  }
+
   // Share Poster Dialog bindings
   const posterDialog = document.getElementById("share-poster-dialog");
   const openPosterBtn1 = document.getElementById("btn-open-share-poster");
@@ -463,7 +626,7 @@ function bindEvents() {
     copyVerdictBtn.addEventListener("click", () => {
       const ta = document.getElementById("share-verdict-textarea");
       if (ta && ta.value) {
-        copyTextToClipboard(ta.value, "群聊处刑判决书");
+        copyTextToClipboard(ta.value, "群聊处刑判决书 (含公开分享链接)");
       }
     });
   }
@@ -572,16 +735,20 @@ function renderRecentMatchesStrip(matches) {
     return;
   }
 
+  const activeMid = state.pendingMatchId || state.currentMatchId;
   strip.innerHTML = matches
     .slice(0, 12)
     .map((m) => {
-      const selected = Number(m.match_id) === Number(state.currentMatchId);
+      const selected = Number(m.match_id) === Number(activeMid);
       const isWin = m.won !== undefined ? Boolean(m.won) : m.result === "胜利";
       const resultText = isWin ? "胜利" : "落败";
       const heroShort = m.hero_short_zh || m.hero_name || "未知英雄";
       const partyLabel = m.party_label || (m.party_size >= 2 ? `${m.party_size}人黑` : "单排");
       const durText = m.duration_str || m.duration || "";
-      const parsedLabel = m.is_parsed ? "录像已解" : "基础数据";
+      const isAnalyzed = Boolean(m.is_analyzed);
+      const aiBadgeHtml = isAnalyzed
+        ? `<span class="analyzed-badge ready" title="已生成AI复盘报告，点击直接秒开并可复制分享链接">✅ 已复盘·可分享</span>`
+        : `<span class="analyzed-badge pending" title="尚未执行AI分析，点击后可按需启动AI复盘">⚡ 待AI分析</span>`;
       return `
         <button
           type="button"
@@ -605,7 +772,7 @@ function renderRecentMatchesStrip(matches) {
           </div>
           <div class="recent-id">
             <span>#${escapeHtml(m.match_id)}</span>
-            <span>${escapeHtml(parsedLabel)}</span>
+            ${aiBadgeHtml}
           </div>
         </button>
       `;
@@ -625,6 +792,43 @@ function highlightSelectedMatchCard(matchId) {
     const mid = Number(btn.getAttribute("data-match-card"));
     btn.classList.toggle("selected", mid === Number(matchId));
   });
+}
+
+function toggleOnDemandGate(showGate, matchId = null) {
+  const gateEl = document.getElementById("on-demand-analysis-gate");
+  const contentEl = document.getElementById("analyzed-report-content");
+  if (!gateEl || !contentEl) return;
+
+  if (!showGate) {
+    gateEl.hidden = true;
+    contentEl.hidden = false;
+    state.pendingMatchId = null;
+    return;
+  }
+
+  state.pendingMatchId = Number(matchId);
+  gateEl.hidden = false;
+  contentEl.hidden = true;
+
+  const recentList = state.profileData?.recent_matches || [];
+  const meta = recentList.find((m) => Number(m.match_id) === Number(matchId)) || null;
+  state.pendingMatchMeta = meta;
+
+  const titleEl = document.getElementById("gate-title");
+  const summaryEl = document.getElementById("gate-summary");
+  if (titleEl) {
+    if (meta) {
+      const heroShort = meta.hero_short_zh || meta.hero_name || "未知英雄";
+      const isWin = meta.won !== undefined ? Boolean(meta.won) : meta.result === "胜利";
+      titleEl.textContent = `比赛 #${matchId}（${heroShort} · ${isWin ? "胜利" : "落败"} · KDA ${meta.kda} · ${meta.duration_str || ""}）尚未执行 AI 复盘`;
+    } else {
+      titleEl.textContent = `比赛 #${matchId} 尚未生成 AI 深度复盘报告`;
+    }
+  }
+  if (summaryEl) {
+    summaryEl.textContent =
+      "已开启「按需 AI 分析」模式（不自动分析每一局比赛）。当你确认需要复盘这局时，点击下方按钮即可拉取该局录像底层日志、运行九维战术显微镜，并生成可公开分享给群友的复盘链接。";
+  }
 }
 
 async function handleSmartQuery(raw) {
@@ -648,8 +852,10 @@ async function handleSmartQuery(raw) {
     if (data.latest_match_report) {
       state.currentMatchId = data.latest_match_report.match_id;
       state.currentReport = data.latest_match_report;
+      toggleOnDemandGate(false);
       renderFullMatchReport(state.currentReport);
       highlightSelectedMatchCard(state.currentMatchId);
+      syncMatchUrlInAddressBar(state.currentMatchId);
     }
     showToast(`已切换主视角至 #${state.accountId}`);
   } catch (err) {
@@ -657,25 +863,50 @@ async function handleSmartQuery(raw) {
   }
 }
 
-async function loadMatchReport(matchId, { forceRefresh = false } = {}) {
-  showToast(`正在拉取比赛 #${matchId} 录像账本...`, 2000);
+async function loadMatchReport(matchId, { forceRefresh = false, analyzeNow = false } = {}) {
+  if (analyzeNow || forceRefresh) {
+    showToast(`🤖 AI 正在深度拆解比赛 #${matchId} 录像日志并生成分享链接...`, 4000);
+  }
   try {
+    const flags = `${forceRefresh ? "&refresh=1" : ""}${analyzeNow ? "&analyze=1" : ""}`;
     const url = `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
       state.accountId
-    )}${forceRefresh ? "&refresh=1" : ""}`;
+    )}${flags}`;
     const res = await fetch(url);
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || "读取比赛失败");
 
+    if (data.not_analyzed) {
+      highlightSelectedMatchCard(matchId);
+      toggleOnDemandGate(true, matchId);
+      showToast(`比赛 #${matchId} 尚未分析，点击页面中央按钮即可启动 AI 深度复盘`, 3000);
+      return;
+    }
+
+    toggleOnDemandGate(false);
     state.currentMatchId = data.report.match_id;
     state.currentReport = data.report;
     state.selectedTeamfightIndex = null;
+    state.scrubSyncMapMinute = null;
+
+    // Mark match as analyzed in recent_matches strip so its badge turns green immediately
+    const recentList = state.profileData?.recent_matches || [];
+    const foundRecent = recentList.find((m) => Number(m.match_id) === Number(state.currentMatchId));
+    if (foundRecent && !foundRecent.is_analyzed) {
+      foundRecent.is_analyzed = true;
+      renderRecentMatchesStrip(recentList);
+    }
+
     if (data.squad_ledger) {
       state.squadLedger = data.squad_ledger;
       renderSquadLedgerSection(state.squadLedger);
     }
     highlightSelectedMatchCard(state.currentMatchId);
     renderFullMatchReport(state.currentReport);
+    syncMatchUrlInAddressBar(state.currentMatchId);
+    if (analyzeNow) {
+      showToast(`✅ 比赛 #${state.currentMatchId} AI 深度复盘已完成！点击右上角「分享本局链接」即可发群`);
+    }
   } catch (err) {
     console.error(err);
     showToast(`拉取比赛 #${matchId} 失败: ${err.message}`);
@@ -738,6 +969,7 @@ function renderFullMatchReport(report) {
   renderDraftAndComboSection(report);
   renderVerdictAndBlameSection(report);
   renderTacticalMicroscopeSection(report);
+  renderMinuteScrubber(report);
   renderAdvChart(report);
   renderNetWorthChart(report);
   renderMinimap(report);
@@ -1022,12 +1254,16 @@ function renderDraftAndComboSection(report) {
 }
 
 /**
- * 2.5 NEW MODULE: 🔬 录像级战术显微镜 (Tactical Microscope — 5 Deep Replay Tabs)
- *  - Tab 1 (hero_ult): 英雄绝活与大招审判 (如猛犸两极反转大几个、哪波团憋大暴毙、授予力量覆盖率、潮汐毁灭、帕格纳棒子&吸血救人、剑圣棒子自奶vs团队奶、白虎神箭命中率)
- *  - Tab 2 (vision): 辅助眼位进攻/防守与寿命 (进攻眼vs河道肉山眼vs防守保护眼占比、分阶段眼位倾向、平均寿命、秒排白给眼 <135s、同高台头铁连插、每颗假眼坐标明细)
- *  - Tab 3 (stack_smoke): 辅助堆野 & 开雾找节奏 (辅助拉野vs大哥自拉野、精确到分钟的堆野时间点、每波诡计之雾激活人及破雾后 90s 团战战果)
- *  - Tab 4 (laning): 对线拉野·走门·莲花·经验符 (拉野区驻留+封野真眼+反补、3/6/9m 疗伤莲花、7/14/21m 智慧神符时间轴、2/4m 河道水符、双生门传送、观察者点灯、三路10分钟对位验尸)
- *  - Tab 5 (tp_save): TP 救人及时性与缺席抓包 (主动买TP vs 靠免费复活TP、团战亮TP反蹲次数、队友被围剿时0伤害0技能未亮TP边缘OB抓包)
+ * 2.5 NEW MODULE: 🔬 录像级九维战术显微镜 (Tactical Microscope — 9 Deep Replay Tabs)
+ *  - Tab 1 (hero_ult): 英雄绝活与大招审判
+ *  - Tab 2 (unpressed_saves): 💀 憋死 BKB / 救命装与团战 0 技能秒躺尸检
+ *  - Tab 3 (map_space): 🗺️ 地图空间理解与「大哥带无聊危险线 / 落单乱逛被抓死」空间取证
+ *  - Tab 4 (damage_received): 🛡️ 承伤来源拆解与针对性防装审计
+ *  - Tab 5 (vision): 👁️ 辅助眼位进攻/防守与寿命
+ *  - Tab 6 (stack_smoke): 🌾 辅助堆野 & 开雾找节奏
+ *  - Tab 7 (laning): 🌱 对线拉野·走门·莲花·经验符
+ *  - Tab 8 (tp_save): 🆘 TP 救人及时性与缺席抓包
+ *  - Tab 9 (econ_pings): 💰 经济来源结构拆解 & 局内信号/暂停互动
  */
 function renderTacticalMicroscopeSection(report) {
   const bodyEl = document.getElementById("tactical-microscope-body");
@@ -1047,6 +1283,15 @@ function renderTacticalMicroscopeSection(report) {
   if (tab === "hero_ult" || tab === "all") {
     blocks.push(renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, otherSide, otherSideZh));
   }
+  if (tab === "unpressed_saves" || tab === "all") {
+    blocks.push(renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh));
+  }
+  if (tab === "map_space" || tab === "all") {
+    blocks.push(renderMicroMapSpacePane(report, df, targetSide, targetSideZh));
+  }
+  if (tab === "damage_received" || tab === "all") {
+    blocks.push(renderMicroDamageReceivedPane(report, df, targetSide, targetSideZh));
+  }
   if (tab === "vision" || tab === "all") {
     blocks.push(renderMicroSupportVisionPane(report, df, targetSide, targetSideZh));
   }
@@ -1058,6 +1303,9 @@ function renderTacticalMicroscopeSection(report) {
   }
   if (tab === "tp_save" || tab === "all") {
     blocks.push(renderMicroTpRotationPane(report, df, targetSide, targetSideZh));
+  }
+  if (tab === "econ_pings" || tab === "all") {
+    blocks.push(renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh));
   }
 
   bodyEl.innerHTML = blocks.join("");
@@ -1917,7 +2165,7 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
     <div class="micro-pane-block">
       <div class="micro-pane-banner">
         <div>
-          <h3>🆘 5. TP 救人及时性、主动买 TP 习惯与团战边缘 OB 抓包 (${escapeHtml(targetSideZh)})</h3>
+          <h3>🆘 8. TP 救人及时性、主动买 TP 习惯与团战边缘 OB 抓包 (${escapeHtml(targetSideZh)})</h3>
           <p>${escapeHtml(tp.tp_verdict || "")}</p>
         </div>
       </div>
@@ -1955,6 +2203,357 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
               </tr>
             </thead>
             <tbody>${tfRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Tab 2: 💀 憋死 BKB / 救命装与团战 0 技能秒躺法医尸检
+ */
+function renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh) {
+  const us = df.unpressed_saves_by_side?.[targetSide];
+  if (!us) {
+    return `<div class="empty-state compact">当前比赛暂无憋死 BKB / 救命装与团战 0 技能秒躺数据</div>`;
+  }
+
+  const critTotal = Number(us.critical_total ?? 0);
+  const zeroSpellTotal = Number(us.zero_spell_total ?? 0);
+  const incidents = us.incidents || [];
+  const pRows = us.player_rows || [];
+
+  const pRowsHtml = pRows
+    .map((r) => {
+      const coreCnt = Number(r.unpressed_core_cnt ?? 0);
+      const wandCnt = Number(r.unpressed_wand_cnt ?? 0);
+      const zeroCnt = Number(r.zero_spell_cnt ?? 0);
+      return `
+        <tr>
+          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+          <td><b>${r.tf_deaths ?? 0} 次</b></td>
+          <td><b style="color:${coreCnt > 0 ? "var(--red-light)" : "var(--green-light)"}">${coreCnt} 次</b>${
+        wandCnt > 0 ? ` <span style="color:var(--gold-light);">(+魔棒/刃甲未按 ${wandCnt} 次)</span>` : ""
+      }</td>
+          <td><b style="color:${zeroCnt > 0 ? "var(--red-light)" : "var(--green-light)"}">${zeroCnt} 次</b></td>
+          <td style="font-size:11.5px;color:var(--muted);">${escapeHtml(r.owned_saves_str || "未合成主动保命装")}</td>
+          <td>${escapeHtml(r.verdict || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const incHtml =
+    incidents.length > 0
+      ? incidents
+          .map(
+            (inc) => `
+        <li>
+          <span class="micro-tf-pill ${inc.severity === "critical" ? "held-die" : ""}">
+            ${inc.severity === "critical" ? "🚨 一级憋死犯罪" : "⚠️ 保命细节疏漏"} · ${escapeHtml(
+              inc.time_range || ""
+            )}
+          </span>
+          <b>${inc.pos ?? "?"}号位 · ${escapeHtml(inc.hero_short_zh || "")} (${escapeHtml(
+              inc.personaname || ""
+            )})</b>：${escapeHtml(inc.detail || "")}
+        </li>
+      `
+          )
+          .join("")
+      : `<li>✓ 全队本局所有团战阵亡前均已按出已拥有的核心保命装与技能，未检测到憋死 BKB/推推/微光/分身斧记录！</li>`;
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>💀 2. 憋死 BKB / 救命装与团战 0 技能秒躺尸检 (${escapeHtml(targetSideZh)})</h3>
+          <p>${escapeHtml(us.side_verdict || "")}</p>
+        </div>
+      </div>
+
+      <div class="micro-kpi-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+        <div class="micro-kpi-cell">
+          <span>💀 憋死核心保命装 (BKB/推推/微光/分身/绿杖等)</span>
+          <strong style="color:${critTotal > 0 ? "var(--red-light)" : "var(--green-light)"}">${critTotal} 人次</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🔇 中后期团战 0 技能释放直接秒躺</span>
+          <strong style="color:${zeroSpellTotal > 0 ? "var(--red-light)" : "var(--green-light)"}">${zeroSpellTotal} 人次</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>📋 抓包具体团战憋死/秒躺事故数</span>
+          <strong>${incidents.length} 起典型尸检</strong>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>⚰️ 1~5 号位已合成主动救命装按键次数 &amp; 团战憋死尸检总表</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄</th>
+                <th>团战阵亡次数</th>
+                <th>憋死核心保命装</th>
+                <th>团战0技能秒躺</th>
+                <th>本局合成保命装及全场按键次数</th>
+                <th>团战反应与保命习惯判词</th>
+              </tr>
+            </thead>
+            <tbody>${pRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🚨 历次团战憋死救命装 / 0 技能暴毙逐波抓包笔录</h4>
+        <ul class="micro-insights-list">${incHtml}</ul>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Tab 3: 🗺️ 地图空间理解与「大哥带无聊危险线 / 落单乱逛被抓死」空间取证
+ */
+function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
+  const ms = df.map_space_by_side?.[targetSide];
+  if (!ms) {
+    return `<div class="empty-state compact">当前比赛暂无地图空间理解与落单被抓数据</div>`;
+  }
+
+  const totalSolo = Number(ms.total_solo_pickoffs ?? 0);
+  const events = ms.solo_pickoff_events || [];
+  const pRows = ms.player_space_rows || [];
+
+  const pRowsHtml = pRows
+    .map((r) => {
+      const soloCnt = Number(r.solo_pickoff_cnt ?? 0);
+      const isBad = r.grade === "bad" || soloCnt >= 2;
+      const isGood = r.grade === "good";
+      return `
+        <tr>
+          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+          <td><span class="micro-exec-badge ${isBad ? "warn" : isGood ? "good" : ""}">${escapeHtml(
+        r.space_style_badge || "常规驻守"
+      )}</span></td>
+          <td>兵线 <b>${r.lane_kills ?? 0}</b> (${r.lane_farm_pct ?? 0}%) / 野区 <b>${r.neutral_kills ?? 0}</b> (${r.jungle_farm_pct ?? 0}%)</td>
+          <td><b style="color:${(r.tower_damage ?? 0) >= 3500 ? "var(--gold-light)" : "var(--text)"}">${fmtNum(
+        r.tower_damage || 0
+      )}</b></td>
+          <td><b style="color:${soloCnt >= 2 ? "var(--red-light)" : soloCnt === 0 ? "var(--green-light)" : "var(--gold-light)"}">${soloCnt} 次</b> (送 ${fmtNum(
+        r.solo_gold_fed || 0
+      )} 金)</td>
+          <td>${escapeHtml(r.verdict || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const evRowsHtml = events
+    .map(
+      (ev) => `
+      <tr>
+        <td><b>${escapeHtml(ev.time_str || "")}</b></td>
+        <td><b>${ev.pos ?? "?"}号位 · ${escapeHtml(ev.hero_short_zh || "")}</b> (${escapeHtml(ev.personaname || "")})</td>
+        <td><b>${escapeHtml(ev.zone_zh || "")}</b> (被 ${escapeHtml(ev.killer_zh || "敌方")} 抓死)</td>
+        <td>${escapeHtml(ev.vision_tag || "")}</td>
+        <td>读秒 <b>${ev.time_dead ?? 0}s</b> · 送 <b>${fmtNum(ev.gold_fed || 0)} 金</b></td>
+        <td><b style="color:${
+          (ev.consequence || "").includes("无战略收益") ? "var(--gold-light)" : "var(--red-light)"
+        }">${escapeHtml(ev.consequence || "")}</b></td>
+      </tr>
+    `
+    )
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>🗺️ 3. 地图空间理解与「大哥带无聊危险线 / 落单乱逛被抓死」空间取证 (${escapeHtml(targetSideZh)})</h3>
+          <p>${escapeHtml(ms.side_verdict || "")}</p>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🧭 1~5 号位地图空间画像 · 收线 vs 缩野比例、推塔牵制与中后期落单被抓统计</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄</th>
+                <th>地图空间理解画像</th>
+                <th>收线补刀 vs 刷野占比</th>
+                <th>建筑推塔转化</th>
+                <th>9m后落单被抓</th>
+                <th>空间利用与带线纪律判词</th>
+              </tr>
+            </thead>
+            <tbody>${pRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🚨 9 分钟后脱离团队「无聊带危险线 / 黑图盲区乱逛被抓死」全记录 (共 ${totalSolo} 次)</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>被抓时间</th>
+                <th>落单当事人</th>
+                <th>暴毙地点 &amp; 凶手</th>
+                <th>当时场上假眼视野</th>
+                <th>读秒与经济出血</th>
+                <th>70秒内连锁后果 / 战略收益审计</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${
+                evRowsHtml ||
+                `<tr><td colspan="6" style="color:var(--green-light);">✓ 本局 9 分钟后未发生脱离团队无聊带线或盲区落单被抓事故！</td></tr>`
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Tab 4: 🛡️ 承伤来源拆解与防装合规审计
+ */
+function renderMicroDamageReceivedPane(report, df, targetSide, targetSideZh) {
+  const dr = df.damage_received_by_side?.[targetSide];
+  if (!dr) {
+    return `<div class="empty-state compact">当前比赛暂无承伤来源拆解与防装审计数据</div>`;
+  }
+
+  const rows = dr.rows || [];
+  const rowsHtml = rows
+    .map((r) => {
+      const killersStr = (r.top_killers || [])
+        .map(
+          (k) =>
+            `<span class="micro-tf-pill">${escapeHtml(k.zh_name || "")} <b>${fmtNum(
+              k.damage || 0
+            )}</b> (${k.share_pct ?? 0}%)</span>`
+        )
+        .join("");
+      const defItemsStr =
+        (r.def_items_owned || []).length > 0
+          ? r.def_items_owned.map((it) => `<span class="micro-exec-badge good">${escapeHtml(it)}</span>`).join("")
+          : `<span class="micro-exec-badge warn">未出针对防装</span>`;
+
+      return `
+        <tr>
+          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+          <td><b>${fmtNum(r.total_dmg_taken || 0)}</b></td>
+          <td>🔮 技能/法系 <b>${r.spell_pct ?? 0}%</b> (${fmtNum(r.spell_dmg || 0)})<br/>🗡️ 物理平A <b>${
+        r.auto_pct ?? 0
+      }%</b> (${fmtNum(r.auto_dmg || 0)})</td>
+          <td><div class="micro-tf-pills">${killersStr || "平A为主"}</div></td>
+          <td><div class="micro-badges-wrap">${defItemsStr}</div></td>
+          <td>${escapeHtml(r.verdict || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>🛡️ 4. 承伤来源拆解（物理平A vs 技能爆发）与防装合规审计 (${escapeHtml(targetSideZh)})</h3>
+          <p>${escapeHtml(dr.side_verdict || "")}</p>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🛡️ 1~5 号位挨揍伤害构成、头号致死技能凶手与防装（BKB/微光/笛子/绿杖/护甲）合规表</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄</th>
+                <th>总承受英雄伤害</th>
+                <th>技能爆发 vs 物理平A占比</th>
+                <th>揍他最狠的 Top 4 敌方技能/物品</th>
+                <th>已出针对性防装</th>
+                <th>防装选择合规判词</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Tab 9: 💰 经济来源结构拆解 & 局内信号/暂停/公屏互动档案
+ */
+function renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh) {
+  const ep = df.economy_and_pings_by_side?.[targetSide];
+  if (!ep) {
+    return `<div class="empty-state compact">当前比赛暂无经济来源结构与信号互动数据</div>`;
+  }
+
+  const rows = ep.econ_rows || [];
+  const rowsHtml = rows
+    .map(
+      (r) => `
+      <tr>
+        <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+        <td><span class="micro-exec-badge">${escapeHtml(r.econ_tag || "均衡发育")}</span></td>
+        <td>🌾 <b>${fmtNum(r.lane_gold || 0)}</b> (${r.lane_pct ?? 0}%)</td>
+        <td>🌲 <b>${fmtNum(r.jungle_gold || 0)}</b> (${r.jungle_pct ?? 0}%)</td>
+        <td>⚔️ <b>${fmtNum(r.kill_gold || 0)}</b> (${r.kill_pct ?? 0}%)</td>
+        <td>🏰 <b>${fmtNum(r.obj_gold || 0)}</b> (${r.obj_pct ?? 0}%)</td>
+        <td><b style="color:${
+          (r.death_loss || 0) + (r.buyback_loss || 0) >= 2200 ? "var(--red-light)" : "var(--muted)"
+        }">-${fmtNum((r.death_loss || 0) + (r.buyback_loss || 0))} 金</b> (死-${fmtNum(
+        r.death_loss || 0
+      )} / 买活-${fmtNum(r.buyback_loss || 0)})</td>
+        <td>📡 点信号 <b>${r.pings ?? 0}</b> 次 / 轮盘 <b>${r.chatwheel_cnt ?? 0}</b> 条</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>💰 9. 经济来源结构拆解（兵线/野区/人头/塔盾/阵亡买活损耗）与局内信号互动 (${escapeHtml(
+            targetSideZh
+          )})</h3>
+          <p>${escapeHtml(ep.side_verdict || "")}</p>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>💳 1~5 号位进账渠道占比（谁在刷野吸血、谁在打钱推塔、谁阵亡买活扣钱最多）&amp; 局内地图信号频次</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄</th>
+                <th>财政风格画像</th>
+                <th>🌾 兵线进账</th>
+                <th>🌲 野区进账</th>
+                <th>⚔️ 人头/助攻进账</th>
+                <th>🏰 建筑/肉山/赏金</th>
+                <th>💸 阵亡+买活扣钱损耗</th>
+                <th>📡 地图信号 &amp; 轮盘</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
           </table>
         </div>
       </div>
@@ -2468,6 +3067,221 @@ function renderVerdictAndBlameSection(report) {
 }
 
 /**
+ * 2.8 Interactive Minute-by-Minute Timeline Scrubber (00:00 -> End)
+ */
+function setScrubberMinute(minuteIdx) {
+  if (!state.currentReport) return;
+  const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+  if (!snaps.length) return;
+  const clamped = Math.max(0, Math.min(snaps.length - 1, Number(minuteIdx || 0)));
+  state.scrubberMinute = clamped;
+  const rangeEl = document.getElementById("minute-scrubber-range");
+  if (rangeEl) rangeEl.value = String(clamped);
+  renderMinuteScrubberSnapshot(state.currentReport, clamped);
+  if (state.scrubSyncMapMinute !== null) {
+    state.scrubSyncMapMinute = clamped;
+    const syncBtn = document.getElementById("btn-scrub-sync-map");
+    if (syncBtn) {
+      syncBtn.textContent = `🗺️ 已锁定 ${String(clamped).padStart(2, "0")}:00 场上存活眼位 (再点取消)`;
+    }
+    renderMinimap(state.currentReport);
+  }
+}
+
+function renderMinuteScrubber(report) {
+  const box = document.getElementById("minute-scrubber-box");
+  const rangeEl = document.getElementById("minute-scrubber-range");
+  const maxLabelEl = document.getElementById("scrubber-max-label");
+  const jumpsEl = document.getElementById("scrubber-quick-jumps");
+  const contentEl = document.getElementById("minute-scrubber-content");
+  if (!box || !contentEl) return;
+
+  const snaps = report.deep_forensics?.minute_snapshots || [];
+  if (!snaps.length) {
+    contentEl.innerHTML = `<div class="empty-state compact">当前比赛暂未生成逐分钟时间轴快照</div>`;
+    return;
+  }
+
+  const maxMin = snaps.length - 1;
+  if (state.scrubberMinute > maxMin || state.scrubberMinute < 0) {
+    state.scrubberMinute = Math.min(15, maxMin);
+  }
+  if (rangeEl) {
+    rangeEl.min = "0";
+    rangeEl.max = String(maxMin);
+    rangeEl.value = String(state.scrubberMinute);
+  }
+  if (maxLabelEl) {
+    maxLabelEl.textContent = snaps[maxMin]?.time_str || `${maxMin}:00`;
+  }
+
+  // Build quick-jump pills for key moments (10m Laning End, 20m Mid, Roshan/Highground markers, Final)
+  if (jumpsEl) {
+    const jumpTargets = [
+      { m: Math.min(10, maxMin), label: "10:00 对线期交卷" },
+      { m: Math.min(20, maxMin), label: "20:00 中期抱团点" },
+    ];
+    (report.objective_markers || []).slice(0, 5).forEach((mk) => {
+      const mVal = Math.min(maxMin, Math.max(1, Math.round(Number(mk.time_sec || 0) / 60)));
+      jumpTargets.push({
+        m: mVal,
+        label: `${String(mVal).padStart(2, "0")}:00 ${mk.label || "关键节点"}`,
+      });
+    });
+    jumpTargets.push({ m: maxMin, label: `${snaps[maxMin]?.time_str || ""} 终局定格` });
+
+    const seenMins = new Set();
+    const uniqueJumps = jumpTargets.filter((jt) => {
+      const key = `${jt.m}_${jt.label}`;
+      if (seenMins.has(key)) return false;
+      seenMins.add(key);
+      return true;
+    });
+
+    jumpsEl.innerHTML =
+      `<span style="font-size:11px;color:var(--muted);margin-right:4px;">⚡ 一键跳至关键帧：</span>` +
+      uniqueJumps
+        .map(
+          (jt) =>
+            `<button type="button" class="cp-pill scrub-jump-pill" data-scrub-jump="${jt.m}" style="cursor:pointer;">${escapeHtml(
+              jt.label
+            )}</button>`
+        )
+        .join("");
+
+    jumpsEl.querySelectorAll("[data-scrub-jump]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const mTarget = Number(btn.getAttribute("data-scrub-jump") || 0);
+        setScrubberMinute(mTarget);
+      });
+    });
+  }
+
+  renderMinuteScrubberSnapshot(report, state.scrubberMinute);
+}
+
+function renderMinuteScrubberSnapshot(report, minuteIdx) {
+  const contentEl = document.getElementById("minute-scrubber-content");
+  const badgeEl = document.getElementById("scrubber-time-badge");
+  if (!contentEl) return;
+
+  const snaps = report.deep_forensics?.minute_snapshots || [];
+  if (!snaps.length) return;
+  const idx = Math.max(0, Math.min(snaps.length - 1, Number(minuteIdx || 0)));
+  const snap = snaps[idx];
+  if (!snap) return;
+
+  if (badgeEl) {
+    badgeEl.textContent = `⏱️ 第 ${snap.time_str || `${idx}:00`} 分钟`;
+  }
+
+  const { side } = getOwnAndOppPlayers(report);
+  const players = snap.players || [];
+  const maxNw = Math.max(1000, ...players.map((p) => Number(p.networth || 0)));
+
+  const radGoldAdv = Number(snap.radiant_gold_adv || 0);
+  const radXpAdv = Number(snap.radiant_xp_adv || 0);
+  const goldLeadTeam = radGoldAdv > 0 ? "天辉" : radGoldAdv < 0 ? "夜魇" : "双方均势";
+  const xpLeadTeam = radXpAdv > 0 ? "天辉" : radXpAdv < 0 ? "夜魇" : "双方均势";
+
+  // Count active wards on map at this exact minute
+  const allWards = report.vision_and_map_data?.wards || [];
+  const secNow = idx * 60;
+  const activeObsAtMin = allWards.filter(
+    (w) =>
+      w.type === "obs" &&
+      Number(w.time_sec ?? 0) <= secNow &&
+      secNow <= Number(w.left_sec ?? Number(w.time_sec ?? 0) + 360)
+  );
+  const radObsNow = activeObsAtMin.filter((w) => w.side === "radiant" || w.side === "天辉").length;
+  const direObsNow = activeObsAtMin.filter((w) => w.side === "dire" || w.side === "夜魇").length;
+
+  const barsHtml = players
+    .map((p, rankIdx) => {
+      const pct = Math.max(4, Math.round((Number(p.networth || 0) / maxNw) * 100));
+      const isOwn = p.side === side;
+      const sideLabel = p.side === "radiant" ? "天辉" : "夜魇";
+      const itemsHtml = (p.items || [])
+        .map(
+          (it) =>
+            `<img class="scrub-item-icon" src="${escapeHtml(it.img || "")}" alt="${escapeHtml(
+              it.zh || it.key || ""
+            )}" title="${escapeHtml(it.zh || it.key || "")}" width="24" height="18" loading="lazy" />`
+        )
+        .join("");
+      return `
+        <div class="scrub-player-row ${isOwn ? "own-row" : "opp-row"}">
+          <span class="scrub-rank">#${rankIdx + 1}</span>
+          <div class="scrub-hero-cell">
+            ${
+              p.hero_img
+                ? `<img src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(
+                    p.hero_short_zh || ""
+                  )}" width="30" height="17" loading="lazy" />`
+                : ""
+            }
+            <div>
+              <strong>[${sideLabel}${p.pos ?? "?"}] ${escapeHtml(p.hero_short_zh || "")}</strong>
+              <span class="scrub-pname">${escapeHtml(p.personaname || "")}</span>
+            </div>
+          </div>
+          <div class="scrub-bar-cell">
+            <div class="scrub-bar-track">
+              <div class="scrub-bar-fill ${p.side === "radiant" ? "rad" : "dire"}" style="width:${pct}%"></div>
+            </div>
+            <div class="scrub-items-strip">${itemsHtml || `<span class="scrub-no-item">散件过渡期</span>`}</div>
+          </div>
+          <div class="scrub-stat-cell">
+            <strong>${fmtNum(p.networth || 0)} 金</strong>
+            <span>补刀 ${p.lh ?? 0}/${p.dn ?? 0}</span>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const eventsList = snap.events || [];
+  const eventsHtml =
+    eventsList.length > 0
+      ? eventsList.map((ev) => `<li>${escapeHtml(ev)}</li>`).join("")
+      : `<li>本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 双方平稳对线/刷钱发育，无英雄击杀或建筑摧毁</li>`;
+
+  contentEl.innerHTML = `
+    <div class="scrub-left-col">
+      <div class="scrub-col-title">
+        <strong>🏆 ${escapeHtml(snap.time_str || "")} 时刻 · 十人实时净资产 (Net Worth) &amp; 当时已出核心装排位</strong>
+        <span>正补/反补同步定格</span>
+      </div>
+      <div class="scrub-players-list">${barsHtml}</div>
+    </div>
+    <div class="scrub-right-col">
+      <div class="scrub-kpi-card">
+        <span>💰 ${escapeHtml(snap.time_str || "")} 团队经济差</span>
+        <strong style="color:${
+          radGoldAdv === 0
+            ? "var(--text)"
+            : (radGoldAdv > 0 && side === "radiant") || (radGoldAdv < 0 && side === "dire")
+            ? "var(--green-light)"
+            : "var(--red-light)"
+        }">${goldLeadTeam} ${radGoldAdv === 0 ? "0" : `+${fmtNum(Math.abs(radGoldAdv))}`} 金</strong>
+      </div>
+      <div class="scrub-kpi-card">
+        <span>📚 ${escapeHtml(snap.time_str || "")} 团队经验差</span>
+        <strong>${xpLeadTeam} ${radXpAdv === 0 ? "0" : `+${fmtNum(Math.abs(radXpAdv))}`} XP</strong>
+      </div>
+      <div class="scrub-kpi-card">
+        <span>👁️ 当时地图存活假眼数</span>
+        <strong>天辉 ${radObsNow} 颗 / 夜魇 ${direObsNow} 颗</strong>
+      </div>
+      <div class="scrub-events-box">
+        <h4>⚔️ 本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 关键交火与推塔战报</h4>
+        <ul class="micro-insights-list">${eventsHtml}</ul>
+      </div>
+    </div>
+  `;
+}
+
+/**
  * 3. Chart 1: Team Cumulative Gold & XP Advantage SVG Curve + Objective Markers
  */
 function renderAdvChart(report) {
@@ -2794,6 +3608,15 @@ function renderMinimap(report) {
     } else if (state.mapMode === "wards_own") {
       filteredWards = allWards.filter((w) => w.side === side || w.side === sideZh);
     }
+    if (state.scrubSyncMapMinute !== null) {
+      const targetSec = Number(state.scrubSyncMapMinute) * 60;
+      filteredWards = filteredWards.filter((w) => {
+        const tIn = Number(w.time_sec ?? 0);
+        const maxLife = w.type === "obs" ? 360 : 420;
+        const tOut = Number(w.left_sec ?? tIn + maxLife);
+        return tIn <= targetSec && targetSec <= tOut;
+      });
+    }
 
     // Group wards placed on the exact same cliff cell (rounded to 2.5 grid) so they never overlap into a blob
     const cellGroups = new Map();
@@ -2888,6 +3711,10 @@ function renderMinimap(report) {
                 )}) 阵亡墓碑`
               : `当前显示全场 ${tfForensics.length} 波关键团战阵亡坐标（红✕本方阵亡 / 绿✕敌方阵亡）`
           }
+        </div>`
+      : state.scrubSyncMapMinute !== null
+      ? `<div style="font-size: 11px; color: var(--gold-light); background: #232017; border: 1px solid #594f36; padding: 4px 8px;">
+          ⏱️ 已与上方时间轴联动：当前仅显示第 <b>${String(state.scrubSyncMapMinute).padStart(2, "0")}:00</b> 时刻场上仍在生效的真假眼
         </div>`
       : "";
 
@@ -4337,15 +5164,19 @@ function openSharePosterDialog(report) {
         .filter(Boolean)
         .join("；")
     : rawExec?.summary || "";
+  const microSaves = df.unpressed_saves_by_side?.[side]?.side_verdict || "";
+  const microSpace = df.map_space_by_side?.[side]?.side_verdict || "";
   const microVis = df.support_vision_by_side?.[side]?.posture_verdict || "";
   const microStack = df.stacking_and_smoke_by_side?.[side]?.stack_verdict || "";
   const microSmoke = df.stacking_and_smoke_by_side?.[side]?.smoke_verdict || "";
   const microTp = df.tp_rotation_by_side?.[side]?.tp_verdict || "";
+  const shareUrl = getPublicShareUrl(report.match_id);
 
   const lines = won
     ? [
         `🏆【刀塔五黑庆功宴 · 赛后封神表彰书】`,
         `📍 比赛编号：#${report.match_id} (${report.duration_str} · ${sideZh}凯旋获胜 ${report.radiant_score}:${report.dire_score})`,
+        `🔗 公开复盘分享链接：${shareUrl}`,
         `📣 凯旋定性：${grok?.title || report.match_narrative?.headline || "全员发力碾压获胜"}`,
         `────────────────────`,
         `👑 头号首功 (MVP)：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${Number(
@@ -4366,11 +5197,13 @@ function openSharePosterDialog(report) {
             b0Txt ? ` | 🔬 ${b0Txt}` : ""
           }`;
         }),
-        ...(microExec || microVis || microTp
+        ...(microExec || microSaves || microSpace || microVis || microTp
           ? [
               `────────────────────`,
               `🔬 录像级高光操作回放：`,
               ...(microExec ? [`• 【大招与绝活】${microExec}`] : []),
+              ...(microSaves ? [`• 【保命装与反应】${microSaves}`] : []),
+              ...(microSpace ? [`• 【地图空间牵制】${microSpace}`] : []),
               ...(microVis ? [`• 【辅助眼位】${microVis}`] : []),
               ...(microStack ? [`• 【堆野屯矿】${microStack}`] : []),
               ...(microSmoke ? [`• 【开雾节奏】${microSmoke}`] : []),
@@ -4386,6 +5219,7 @@ function openSharePosterDialog(report) {
     : [
         `⚖️【刀塔五黑算账台 · 赛后处刑判决书】`,
         `📍 比赛编号：#${report.match_id} (${report.duration_str} · ${sideZh}落败 ${report.radiant_score}:${report.dire_score})`,
+        `🔗 公开复盘分享链接：${shareUrl}`,
         `📣 终局定性：${grok?.title || report.match_narrative?.headline || "正面团战与节奏复盘"}`,
         `────────────────────`,
         `🚨 头号背锅侠：${topCulprit?.personaname || ""} (${topCulprit?.hero_short_zh || ""}) — 分锅占比 ${topCulprit?.blame_share_pct || 0}%`,
@@ -4399,11 +5233,13 @@ function openSharePosterDialog(report) {
             b0Txt ? ` | 🔬 ${b0Txt}` : ""
           }`;
         }),
-        ...(microExec || microVis || microTp
+        ...(microExec || microSaves || microSpace || microVis || microTp
           ? [
               `────────────────────`,
               `🔬 录像级战术显微镜实锤：`,
               ...(microExec ? [`• 【大招与绝活】${microExec}`] : []),
+              ...(microSaves ? [`• 【憋死BKB/救命装】${microSaves}`] : []),
+              ...(microSpace ? [`• 【地图空间与落单带线】${microSpace}`] : []),
               ...(microVis ? [`• 【辅助眼位】${microVis}`] : []),
               ...(microStack ? [`• 【堆野屯矿】${microStack}`] : []),
               ...(microSmoke ? [`• 【开雾节奏】${microSmoke}`] : []),

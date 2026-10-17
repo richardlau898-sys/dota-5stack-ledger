@@ -12,7 +12,7 @@ Dota 2 录像级深度战术显微镜引擎 (tactical_microscope_engine.py)
 """
 
 from typing import Any, Dict, List, Optional, Tuple
-from dota_constants_zh import get_ability_zh
+from dota_constants_zh import get_ability_zh, ITEMS_ZH
 
 
 RUNE_TYPES_ZH: Dict[str, str] = {
@@ -1454,6 +1454,776 @@ def build_tactical_microscope(
             "teamfight_tp_events": teamfight_tp_events,
         }
 
+    # =========================================================================
+    # 六、憋死 BKB / 救命装 / 团战 0 技能暴毙尸检 (Died With Cooldown Ready)
+    # =========================================================================
+    SAVE_ACTIVE_ITEMS: Dict[str, Tuple[str, str]] = {
+        "black_king_bar": ("BKB黑皇杖", "critical"),
+        "satanic": ("撒旦之邪力", "critical"),
+        "manta": ("分身斧", "critical"),
+        "aeon_disk": ("永恒之盘", "critical"),
+        "hurricane_pike": ("飓风长戟(大推推)", "critical"),
+        "force_staff": ("推推棒", "critical"),
+        "glimmer_cape": ("微光披风", "critical"),
+        "ghost": ("幽魂权杖(绿杖)", "critical"),
+        "ethereal_blade": ("虚灵之刃", "critical"),
+        "cyclone": ("吹风杖", "critical"),
+        "wind_waker": ("风之杖(大吹风)", "critical"),
+        "lotus_orb": ("清莲宝珠", "critical"),
+        "cheese": ("奶酪", "critical"),
+        "blade_mail": ("刃甲", "warn"),
+        "shivas_guard": ("希瓦的守护", "warn"),
+        "pipe": ("洞察烟斗(笛子)", "warn"),
+        "crimson_guard": ("赤红甲", "warn"),
+        "magic_wand": ("大魔棒", "warn"),
+    }
+
+    def analyze_side_unpressed_saves(side_key: str) -> Dict[str, Any]:
+        own_players = radiant_players if side_key == "radiant" else dire_players
+        incidents: List[Dict[str, Any]] = []
+        player_rows: List[Dict[str, Any]] = []
+        critical_total = 0
+        zero_spell_total = 0
+
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            pslot = int(fp["player_slot"])
+            rp = raw_by_slot.get(pslot, {})
+            plog = rp.get("purchase_log") or []
+            owned_save_times: Dict[str, int] = {}
+            for entry in plog:
+                ik = str(entry.get("key") or "")
+                t_buy = int(entry.get("time") or 0)
+                if ik in SAVE_ACTIVE_ITEMS and ik not in owned_save_times:
+                    owned_save_times[ik] = t_buy
+
+            tfs_for_p = tf_records_by_slot.get(pslot, [])
+            tf_deaths = 0
+            unpressed_core_cnt = 0
+            unpressed_wand_cnt = 0
+            zero_spell_cnt = 0
+            p_incidents: List[str] = []
+
+            for tfr in tfs_for_p:
+                if int(tfr.get("deaths") or 0) <= 0:
+                    continue
+                tf_deaths += 1
+                s_sec = int(tfr.get("start_sec") or 0)
+                e_sec = int(tfr.get("end_sec") or 0)
+                t_range = f"{fmt_mmss(s_sec)}–{fmt_mmss(e_sec)}"
+                it_u = tfr.get("item_uses") or {}
+                ab_u = tfr.get("ability_uses") or {}
+                dmg_val = int(tfr.get("damage") or 0)
+
+                unpressed_crit_zh: List[str] = []
+                unpressed_warn_zh: List[str] = []
+                for ik, buy_t in owned_save_times.items():
+                    if buy_t + 15 <= s_sec and int(it_u.get(ik) or 0) == 0:
+                        zh_label, sev = SAVE_ACTIVE_ITEMS[ik]
+                        if sev == "critical":
+                            unpressed_crit_zh.append(zh_label)
+                        else:
+                            unpressed_warn_zh.append(zh_label)
+
+                is_zero_spell = (s_sec >= 480 and len(ab_u) == 0)
+                if is_zero_spell:
+                    zero_spell_cnt += 1
+                    zero_spell_total += 1
+
+                if unpressed_crit_zh:
+                    unpressed_core_cnt += 1
+                    critical_total += 1
+                elif unpressed_warn_zh:
+                    unpressed_wand_cnt += 1
+
+                if unpressed_crit_zh or is_zero_spell or unpressed_warn_zh:
+                    severity = "critical" if (unpressed_crit_zh or is_zero_spell) else "warn"
+                    parts = []
+                    if unpressed_crit_zh:
+                        parts.append(f"身怀【{' / '.join(unpressed_crit_zh)}】却 0 次按下直接阵亡")
+                    elif unpressed_warn_zh:
+                        parts.append(f"背包有【{' / '.join(unpressed_warn_zh)}】未按出即阵亡")
+                    if is_zero_spell:
+                        parts.append(f"整波团战 0 技能释放（仅打出 {dmg_val} 点伤害）秒躺")
+                    desc = "，且".join(parts)
+                    p_incidents.append(f"{fmt_mmss(s_sec)} {desc}")
+                    incidents.append({
+                        "time_range": t_range,
+                        "start_sec": s_sec,
+                        "pos": int(fp["pos"]),
+                        "hero_short_zh": fp["hero_short_zh"],
+                        "hero_img": fp["hero_img"],
+                        "personaname": fp["personaname"],
+                        "unpressed_items": unpressed_crit_zh + unpressed_warn_zh,
+                        "zero_abilities": is_zero_spell,
+                        "tf_damage": dmg_val,
+                        "severity": severity,
+                        "detail": f"[{t_range}] {fp['pos']}号位 {fp['hero_short_zh']}({fp['personaname']})：{desc}。",
+                    })
+
+            # 统计整局主动保命装总按键次数
+            iu_all = rp.get("item_uses") or {}
+            owned_summary = []
+            for ik, buy_t in owned_save_times.items():
+                zh_label, _ = SAVE_ACTIVE_ITEMS[ik]
+                owned_summary.append(f"{zh_label}({fmt_mmss(buy_t)}出·按{int(iu_all.get(ik) or 0)}次)")
+
+            if unpressed_core_cnt == 0 and zero_spell_cnt == 0 and unpressed_wand_cnt == 0:
+                grade = "good"
+                verdict = (
+                    f"✓ 团战反应拉满：本局 {tf_deaths} 次团战阵亡中，所有已合成保命装与核心技能均在死前完整交出，0 次憋死！"
+                    if tf_deaths > 0
+                    else "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+                )
+            elif unpressed_core_cnt > 0 or zero_spell_cnt > 0:
+                grade = "bad"
+                verdict = (
+                    f"🚨 抓包 {unpressed_core_cnt} 次憋死核心保命装、{zero_spell_cnt} 次团战 0 技能秒躺："
+                    + "；".join(p_incidents[:3])
+                )
+                # 同步挂一条徽章到玩家卡片
+                audit_obj = fp.get("hero_execution_audit")
+                if isinstance(audit_obj, dict):
+                    badges = audit_obj.setdefault("headline_badges", [])
+                    if unpressed_core_cnt > 0:
+                        badges.append({"text": f"💀 憋死救命装 ×{unpressed_core_cnt}次", "tone": "bad"})
+                    elif zero_spell_cnt > 0:
+                        badges.append({"text": f"💀 团战0技能秒躺 ×{zero_spell_cnt}次", "tone": "bad"})
+            else:
+                grade = "warn"
+                verdict = f"⚠️ 核心保命装均有按出，但有 {unpressed_wand_cnt} 波团战阵亡前未按出大魔棒/刃甲（{'；'.join(p_incidents[:2])}）。"
+
+            player_rows.append({
+                "pos": int(fp["pos"]),
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "tf_deaths": tf_deaths,
+                "unpressed_core_cnt": unpressed_core_cnt,
+                "unpressed_wand_cnt": unpressed_wand_cnt,
+                "zero_spell_cnt": zero_spell_cnt,
+                "owned_saves_str": " ｜ ".join(owned_summary) if owned_summary else "未合成主动保命装",
+                "grade": grade,
+                "verdict": verdict,
+            })
+
+        incidents.sort(key=lambda x: (0 if x["severity"] == "critical" else 1, x["start_sec"]))
+        if critical_total == 0 and zero_spell_total == 0:
+            side_verdict = "✓ 全队团战技能与救命装释放及格：未出现身怀 BKB/推推/微光/分身斧却在团战暴毙未按出的重大犯罪。"
+        else:
+            side_verdict = (
+                f"🚨 团战尸检抓包：全队共发生 {critical_total} 人次【身怀 BKB/分身/推推/绿杖等救命装却 0 次按下暴毙】、"
+                f"{zero_spell_total} 人次【中后期团战 0 技能释放直接秒躺】！"
+            )
+
+        return {
+            "side": side_key,
+            "side_verdict": side_verdict,
+            "critical_total": critical_total,
+            "zero_spell_total": zero_spell_total,
+            "incidents": incidents[:10],
+            "player_rows": player_rows,
+        }
+
+    # =========================================================================
+    # 七、地图空间理解与「大哥带无聊危险线 / 落单乱逛被抓死」空间取证 (Map Space & Solo Pickoffs)
+    # =========================================================================
+    raw_objectives = match.get("objectives") or []
+
+    def analyze_side_map_space_and_pickoffs(side_key: str) -> Dict[str, Any]:
+        own_players = radiant_players if side_key == "radiant" else dire_players
+        is_rad = (side_key == "radiant")
+
+        # 收集我方整局假眼存活区间与坐标，用于判断死的时候是不是黑图盲区
+        own_obs_wards: List[Dict[str, Any]] = []
+        for fp in own_players:
+            rp = raw_by_slot.get(int(fp["player_slot"]), {})
+            obs_l = rp.get("obs_log") or []
+            left_l = rp.get("obs_left_log") or []
+            for idx_w, w in enumerate(obs_l):
+                t_in = int(w.get("time") or 0)
+                t_out = int(left_l[idx_w].get("time") or (t_in + 360)) if idx_w < len(left_l) else (t_in + 360)
+                own_obs_wards.append({
+                    "x": float(w.get("x") or 128),
+                    "y": float(w.get("y") or 128),
+                    "t_in": t_in,
+                    "t_out": t_out,
+                })
+
+        solo_pickoff_events: List[Dict[str, Any]] = []
+        player_space_rows: List[Dict[str, Any]] = []
+        total_solo_pickoffs = 0
+        total_pointless_deaths = 0
+
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            pslot = int(fp["player_slot"])
+            pos_i = int(fp["pos"])
+            rp = raw_by_slot.get(pslot, {})
+            dlog = rp.get("deaths_log") or []
+            lane_kills = int(rp.get("lane_kills") or 0)
+            neutral_kills = int(rp.get("neutral_kills") or 0)
+            total_creeps = max(1, lane_kills + neutral_kills)
+            lane_farm_pct = round(lane_kills * 100.0 / total_creeps, 1)
+            jungle_farm_pct = round(neutral_kills * 100.0 / total_creeps, 1)
+            tower_dmg = int(fp.get("tower_damage") or 0)
+            kp_pct = float(fp.get("kill_participation_pct") or 0.0)
+
+            p_solo_cnt = 0
+            p_solo_gold_fed = 0
+            p_deep_death_cnt = 0
+            p_pickoff_details: List[str] = []
+
+            for d_entry in dlog:
+                t_sec = int(d_entry.get("time") or 0)
+                if t_sec < 540:  # 9分钟前算对线期阵亡
+                    continue
+                gold_fed = int(d_entry.get("gold_fed") or 0) + int(d_entry.get("gold_lost") or 0)
+                dead_s = int(d_entry.get("time_dead") or 0)
+                killer_npc = str(d_entry.get("key") or "")
+                killer_hid = npc_to_hid.get(killer_npc, 0)
+                killer_fp = fmt_by_hid.get(killer_hid)
+                killer_zh = killer_fp["hero_short_zh"] if killer_fp else get_ability_zh(killer_npc)
+
+                # 检查是否在大规模团战内
+                matched_tf = None
+                for tf in raw_tfs:
+                    if int(tf.get("start") or 0) - 12 <= t_sec <= int(tf.get("end") or 0) + 12:
+                        matched_tf = tf
+                        break
+
+                is_solo_pickoff = False
+                death_zone_zh = "野区/兵线交界处"
+                is_deep_enemy_half = False
+                dx_val, dy_val = None, None
+
+                if matched_tf is None:
+                    is_solo_pickoff = True
+                else:
+                    tf_pl = matched_tf.get("players") or []
+                    own_range = range(0, 5) if is_rad else range(5, 10)
+                    opp_range = range(5, 10) if is_rad else range(0, 5)
+                    own_d = sum(int(tf_pl[j].get("deaths") or 0) for j in own_range) if len(tf_pl) >= 10 else 1
+                    opp_d = sum(int(tf_pl[j].get("deaths") or 0) for j in opp_range) if len(tf_pl) >= 10 else 0
+                    zero_dmg_allies = sum(
+                        1 for j in own_range
+                        if len(tf_pl) >= 10 and int(tf_pl[j].get("damage") or 0) == 0 and int(tf_pl[j].get("deaths") or 0) == 0
+                    )
+                    # 提取该玩家在团战中的死亡坐标
+                    p_idx_in_raw = next((idx for idx, item in enumerate(raw_players_list) if int(item.get("player_slot", -1)) == pslot), None)
+                    if p_idx_in_raw is not None and p_idx_in_raw < len(tf_pl):
+                        dpos = tf_pl[p_idx_in_raw].get("deaths_pos") or {}
+                        for kx, vy in dpos.items():
+                            if isinstance(vy, dict):
+                                for ky in vy.keys():
+                                    dx_val, dy_val = float(kx), float(ky)
+                                    break
+                            if dx_val is not None:
+                                break
+                    if dx_val is not None and dy_val is not None:
+                        zinfo = classify_ward_map_zone(dx_val, dy_val, side_key)
+                        death_zone_zh = zinfo["zone_zh"]
+                        if zinfo["posture"] == "aggressive":
+                            is_deep_enemy_half = True
+                            p_deep_death_cnt += 1
+
+                    # 如果这波只有他 1 个人死、对面 0 死，且至少 3 个队友 0 伤害（队友根本不在身边，自己落单带线/逛街被抓）
+                    if own_d == 1 and opp_d == 0 and zero_dmg_allies >= 3:
+                        is_solo_pickoff = True
+
+                if is_solo_pickoff:
+                    p_solo_cnt += 1
+                    total_solo_pickoffs += 1
+                    p_solo_gold_fed += gold_fed
+
+                    # 检查当时场上我方存活假眼数量与视野保护
+                    active_wards = [
+                        w for w in own_obs_wards
+                        if w["t_in"] <= t_sec <= w["t_out"]
+                    ]
+                    has_nearby_ward = False
+                    if dx_val is not None and dy_val is not None:
+                        has_nearby_ward = any(
+                            ((w["x"] - dx_val) ** 2 + (w["y"] - dy_val) ** 2) ** 0.5 <= 28.0
+                            for w in active_wards
+                        )
+                    vision_tag = (
+                        "🌑 黑图无眼盲区孤立深带"
+                        if (not has_nearby_ward and len(active_wards) <= 2)
+                        else f"👁️ 场上虽有 {len(active_wards)} 颗眼仍未警觉蹲伏"
+                    )
+
+                    # 检查死后 70 秒内是否连累团队丢塔/丢肉山
+                    consequence_list = []
+                    for obj in raw_objectives:
+                        ot = int(obj.get("time") or 0)
+                        if t_sec <= ot <= t_sec + 70:
+                            otype = str(obj.get("type") or "")
+                            okey = str(obj.get("key") or "")
+                            if otype == "CHAT_MESSAGE_ROSHAN_KILL":
+                                oteam = int(obj.get("team") or 0)
+                                if (is_rad and oteam == 3) or ((not is_rad) and oteam == 2):
+                                    consequence_list.append(f"{fmt_mmss(ot)} 敌方趁机控下肉山盾")
+                            elif otype == "building_kill":
+                                if (is_rad and "goodguys" in okey) or ((not is_rad) and "badguys" in okey):
+                                    b_zh = "高地塔/兵营" if ("3" in okey or "rax" in okey) else "外塔"
+                                    consequence_list.append(f"{fmt_mmss(ot)} 连累本方丢掉{b_zh}")
+
+                    if not consequence_list:
+                        total_pointless_deaths += 1
+
+                    conseq_str = (
+                        f" → 💥 连锁掉点：{'、'.join(consequence_list[:2])}！"
+                        if consequence_list
+                        else " → 🚫 零战略收益的无聊带线/乱逛白给！"
+                    )
+                    detail_txt = (
+                        f"[{fmt_mmss(t_sec)}] {pos_i}号位 {fp['hero_short_zh']} 在【{death_zone_zh}】落单被 {killer_zh} 等人抓死"
+                        f"（{vision_tag} · 读秒 {dead_s}s · 送出 {gold_fed} 金）{conseq_str}"
+                    )
+                    p_pickoff_details.append(f"{fmt_mmss(t_sec)}({death_zone_zh})")
+                    solo_pickoff_events.append({
+                        "time_str": fmt_mmss(t_sec),
+                        "time_sec": t_sec,
+                        "pos": pos_i,
+                        "hero_short_zh": fp["hero_short_zh"],
+                        "hero_img": fp["hero_img"],
+                        "personaname": fp["personaname"],
+                        "zone_zh": death_zone_zh,
+                        "killer_zh": killer_zh,
+                        "vision_tag": vision_tag,
+                        "gold_fed": gold_fed,
+                        "time_dead": dead_s,
+                        "consequence": "、".join(consequence_list[:2]) if consequence_list else "无战略收益白给",
+                        "detail": detail_txt,
+                    })
+
+            # 判定该选手的「地图空间理解画像」
+            is_core = pos_i in (1, 2, 3)
+            if is_core and p_solo_cnt >= 2 and tower_dmg < 2500:
+                style_badge = "🚨 危险呆刷 · 无聊带线提款机"
+                grade = "bad"
+                verdict = (
+                    f"🚨 空间感亮红灯：线上补刀 {lane_kills} / 野区 {neutral_kills}（推塔仅 {tower_dmg}），"
+                    f"中后期发生 {p_solo_cnt} 次无掩护落单被抓（{'、'.join(p_pickoff_details[:3])}，累计白给 {p_solo_gold_fed} 金），带了最危险的线却没换成塔伤！"
+                )
+                audit_obj = fp.get("hero_execution_audit")
+                if isinstance(audit_obj, dict):
+                    audit_obj.setdefault("headline_badges", []).append(
+                        {"text": f"🗺️ 落单带线被抓 ×{p_solo_cnt}次", "tone": "bad"}
+                    )
+            elif is_core and jungle_farm_pct >= 58.0 and tower_dmg < 1800 and kp_pct < 55.0:
+                style_badge = "🧛 缩壳野区吸血鬼"
+                grade = "warn"
+                verdict = (
+                    f"⚠️ 地图空间利用偏消极：野区补刀占 {jungle_farm_pct}%（{neutral_kills}野 vs {lane_kills}线），"
+                    f"长期缩在自家野区刷安全钱，既少顶危险线牵制（推塔 {tower_dmg}），参战率也仅有 {kp_pct}%。"
+                )
+            elif is_core and tower_dmg >= 4000 and p_solo_cnt <= 1:
+                style_badge = "👑 顶级带线牵制大师"
+                grade = "good"
+                verdict = (
+                    f"✓ 教科书级空间牵制：收线补刀 {lane_kills}（占 {lane_farm_pct}%）+ 建筑推塔高达 {tower_dmg}，"
+                    f"全局中后期仅 {p_solo_cnt} 次落单被抓，真正做到了『带线逼塔牵制、看着小地图极限全身而退』！"
+                )
+                audit_obj = fp.get("hero_execution_audit")
+                if isinstance(audit_obj, dict):
+                    audit_obj.setdefault("headline_badges", []).append(
+                        {"text": f"🗺️ 顶级带线牵制(塔伤{tower_dmg})", "tone": "good"}
+                    )
+            elif p_solo_cnt >= 3:
+                style_badge = "🚨 迷雾乱逛提款机"
+                grade = "bad"
+                verdict = (
+                    f"🚨 中后期高达 {p_solo_cnt} 次脱离大部队独自在迷雾/危险线乱逛被抓（{'、'.join(p_pickoff_details[:3])}），"
+                    f"累计送出 {p_solo_gold_fed} 金，极大断送了本方控图节奏！"
+                )
+                audit_obj = fp.get("hero_execution_audit")
+                if isinstance(audit_obj, dict):
+                    audit_obj.setdefault("headline_badges", []).append(
+                        {"text": f"🗺️ 迷雾落单被抓 ×{p_solo_cnt}次", "tone": "bad"}
+                    )
+            elif kp_pct >= 62.0 and p_solo_cnt <= 1:
+                style_badge = "⚔️ 侵略控图发动机"
+                grade = "good"
+                verdict = (
+                    f"✓ 空间嗅觉敏锐：参团率 {kp_pct}%，中后期仅 {p_solo_cnt} 次落单掉点，"
+                    f"兵线/野区分配合理（收线 {lane_kills} / 刷野 {neutral_kills}），始终在有视野或队友掩护区活动。"
+                )
+            else:
+                style_badge = "🛡️ 稳健抱团驻守" if p_solo_cnt <= 1 else "⚠️ 偶有盲区深带掉点"
+                grade = "good" if p_solo_cnt <= 1 else "warn"
+                verdict = (
+                    f"收线补刀 {lane_kills}（{lane_farm_pct}%）/ 刷野 {neutral_kills}（{jungle_farm_pct}%），推塔伤害 {tower_dmg}；"
+                    f"中后期发生 {p_solo_cnt} 次落单被抓"
+                    + (f"（{'、'.join(p_pickoff_details[:2])}，喂钱 {p_solo_gold_fed} 金）。" if p_solo_cnt > 0 else "，位置感保持稳健。")
+                )
+
+            player_space_rows.append({
+                "pos": pos_i,
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "lane_kills": lane_kills,
+                "neutral_kills": neutral_kills,
+                "lane_farm_pct": lane_farm_pct,
+                "jungle_farm_pct": jungle_farm_pct,
+                "tower_damage": tower_dmg,
+                "solo_pickoff_cnt": p_solo_cnt,
+                "solo_gold_fed": p_solo_gold_fed,
+                "deep_death_cnt": p_deep_death_cnt,
+                "space_style_badge": style_badge,
+                "grade": grade,
+                "verdict": verdict,
+            })
+
+        solo_pickoff_events.sort(key=lambda x: x["time_sec"])
+        if total_solo_pickoffs <= 3:
+            side_verdict = (
+                f"✓ 团队地图空间纪律严明：9 分钟后全队仅发生 {total_solo_pickoffs} 次落单被抓，"
+                f"大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。"
+            )
+        else:
+            side_verdict = (
+                f"🚨 地图空间警报：9 分钟后全队共发生 {total_solo_pickoffs} 次【脱离团队落单带无聊线 / 盲区乱逛被抓死】！"
+                f"切忌在无假眼保护、无队友蹲后的情况下一个人过河道深带收线。"
+            )
+
+        return {
+            "side": side_key,
+            "side_verdict": side_verdict,
+            "total_solo_pickoffs": total_solo_pickoffs,
+            "solo_pickoff_events": solo_pickoff_events[:10],
+            "player_space_rows": player_space_rows,
+        }
+
+    # =========================================================================
+    # 八、承伤来源拆解与针对性防装审计 (Damage Inflictor Received & Defense Audit)
+    # =========================================================================
+    def analyze_side_damage_received(side_key: str) -> Dict[str, Any]:
+        own_players = radiant_players if side_key == "radiant" else dire_players
+        rows: List[Dict[str, Any]] = []
+        team_auto_dmg = 0
+        team_spell_dmg = 0
+
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            pslot = int(fp["player_slot"])
+            rp = raw_by_slot.get(pslot, {})
+            dir_map = rp.get("damage_inflictor_received") or {}
+            auto_dmg = int(dir_map.get("null") or 0)
+            spell_entries: List[Tuple[str, int]] = []
+            for k, v in dir_map.items():
+                if k == "null":
+                    continue
+                iv = int(v or 0)
+                if iv > 0:
+                    spell_entries.append((str(k), iv))
+            spell_entries.sort(key=lambda x: x[1], reverse=True)
+            spell_dmg = sum(v for _, v in spell_entries)
+            total_dmg = max(1, auto_dmg + spell_dmg)
+            auto_pct = round(auto_dmg * 100.0 / total_dmg, 1)
+            spell_pct = round(spell_dmg * 100.0 / total_dmg, 1)
+
+            team_auto_dmg += auto_dmg
+            team_spell_dmg += spell_dmg
+
+            top_killers_zh: List[Dict[str, Any]] = []
+            for k, v in spell_entries[:4]:
+                zh_name = ITEMS_ZH.get(k) or get_ability_zh(k) or k
+                top_killers_zh.append({
+                    "key": k,
+                    "zh_name": zh_name,
+                    "damage": v,
+                    "share_pct": round(v * 100.0 / total_dmg, 1),
+                })
+
+            final_keys = {str(it.get("key") or "") for it in (fp.get("final_items_rich") or [])}
+            magic_def_owned = [
+                ITEMS_ZH.get(k, k)
+                for k in ("black_king_bar", "pipe", "glimmer_cape", "eternal_shroud", "mage_slayer", "sphere", "aeon_disk")
+                if k in final_keys
+            ]
+            phys_def_owned = [
+                ITEMS_ZH.get(k, k)
+                for k in ("ghost", "crimson_guard", "shivas_guard", "assault", "butterfly", "solar_crest", "lotus_orb", "blade_mail", "hurricane_pike", "force_staff")
+                if k in final_keys
+            ]
+
+            deaths_cnt = int(fp.get("deaths") or 0)
+            top1_str = (
+                f"{top_killers_zh[0]['zh_name']}({top_killers_zh[0]['damage']:,}伤)"
+                if top_killers_zh
+                else "平A普攻"
+            )
+            if spell_pct >= 62.0 and deaths_cnt >= 5 and not magic_def_owned:
+                grade = "bad"
+                verdict = (
+                    f"🚨 防装严重缺失：全场高达 {spell_pct}% 承伤来自技能/法系爆发（头号凶手：{top1_str}），"
+                    f"阵亡 {deaths_cnt} 次却到终局都没出 BKB / 微光 / 笛子 / 法师克星！"
+                )
+            elif auto_pct >= 52.0 and deaths_cnt >= 5 and not phys_def_owned:
+                grade = "warn"
+                verdict = (
+                    f"⚠️ 物理防护不足：全场 {auto_pct}% 承伤（{auto_dmg:,}点）来自敌方物理平A右击，"
+                    f"阵亡 {deaths_cnt} 次但缺乏绿杖 / 强袭 / 希瓦 / 推推等针对性防物理拉扯装。"
+                )
+            else:
+                grade = "good"
+                def_all = magic_def_owned + phys_def_owned
+                def_txt = f"已配防装【{'、'.join(def_all[:3])}】" if def_all else "站位保持较好"
+                verdict = (
+                    f"✓ 承伤结构：{spell_pct}% 技能伤害（{spell_dmg:,}） vs {auto_pct}% 物理平A（{auto_dmg:,}），"
+                    f"最大威胁源为 {top1_str}，{def_txt}。"
+                )
+
+            rows.append({
+                "pos": int(fp["pos"]),
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "total_dmg_taken": auto_dmg + spell_dmg,
+                "auto_dmg": auto_dmg,
+                "spell_dmg": spell_dmg,
+                "auto_pct": auto_pct,
+                "spell_pct": spell_pct,
+                "top_killers": top_killers_zh,
+                "def_items_owned": (magic_def_owned + phys_def_owned)[:4],
+                "grade": grade,
+                "verdict": verdict,
+            })
+
+        tot_team = max(1, team_auto_dmg + team_spell_dmg)
+        t_spell_pct = round(team_spell_dmg * 100.0 / tot_team, 1)
+        t_auto_pct = round(team_auto_dmg * 100.0 / tot_team, 1)
+        side_verdict = (
+            f"全队合计承受英雄伤害 {tot_team:,} 点：其中技能/物品伤害占 {t_spell_pct}%（{team_spell_dmg:,}），"
+            f"物理平A普攻占 {t_auto_pct}%（{team_auto_dmg:,}）。"
+        )
+        return {
+            "side": side_key,
+            "side_verdict": side_verdict,
+            "team_spell_pct": t_spell_pct,
+            "team_auto_pct": t_auto_pct,
+            "rows": rows,
+        }
+
+    # =========================================================================
+    # 九、经济来源结构拆解 & 局内信号/暂停/公屏互动档案 (Gold Reasons & Pings/Pauses/Chat)
+    # =========================================================================
+    raw_pauses = match.get("pauses") or []
+    raw_chat = match.get("chat") or []
+    comeback_val = int(match.get("comeback") or 0)
+    stomp_val = int(match.get("stomp") or 0)
+
+    def analyze_side_economy_and_pings(side_key: str) -> Dict[str, Any]:
+        own_players = radiant_players if side_key == "radiant" else dire_players
+        econ_rows: List[Dict[str, Any]] = []
+        max_ping_player = ("", 0)
+
+        for fp in sorted(own_players, key=lambda x: int(x["pos"])):
+            pslot = int(fp["player_slot"])
+            rp = raw_by_slot.get(pslot, {})
+            gr = rp.get("gold_reasons") or {}
+            lane_g = max(0, int(gr.get("12") or 0))
+            jungle_g = max(0, int(gr.get("13") or 0))
+            kill_g = max(0, int(gr.get("11") or 0))
+            obj_g = max(0, int(gr.get("6") or 0)) + max(0, int(gr.get("14") or 0))
+            bounty_ward_g = max(0, int(gr.get("16") or 0)) + max(0, int(gr.get("20") or 0)) + max(0, int(gr.get("15") or 0))
+            death_loss = abs(int(gr.get("0") or 0))
+            buyback_loss = abs(min(0, int(gr.get("1") or 0)))
+
+            pos_earned = max(1, lane_g + jungle_g + kill_g + obj_g + bounty_ward_g)
+            lane_pct = round(lane_g * 100.0 / pos_earned, 1)
+            jungle_pct = round(jungle_g * 100.0 / pos_earned, 1)
+            kill_pct = round(kill_g * 100.0 / pos_earned, 1)
+            obj_pct = round((obj_g + bounty_ward_g) * 100.0 / pos_earned, 1)
+
+            pings_cnt = int(rp.get("pings") or 0)
+            if pings_cnt > max_ping_player[1]:
+                max_ping_player = (f"{fp['hero_short_zh']}({fp['personaname']})", pings_cnt)
+
+            chatwheel_cnt = sum(
+                1 for c in raw_chat
+                if int(c.get("player_slot", -1)) == pslot
+            )
+
+            dmg_share = float(fp.get("hero_damage_share_pct") or 0.0)
+            if kill_pct >= 32.0:
+                econ_tag = "⚔️ 以战养战提款王"
+            elif jungle_pct >= 38.0 and dmg_share < 18.0:
+                econ_tag = "🧛 野区只进不出吸尘器"
+            elif lane_pct >= 45.0:
+                econ_tag = "🌾 扎实兵线收割机"
+            elif death_loss + buyback_loss >= 2400:
+                econ_tag = "💸 阵亡/买活散财童子"
+            else:
+                econ_tag = "⚖️ 均衡发育节奏手"
+
+            econ_rows.append({
+                "pos": int(fp["pos"]),
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "lane_gold": lane_g,
+                "jungle_gold": jungle_g,
+                "kill_gold": kill_g,
+                "obj_gold": obj_g + bounty_ward_g,
+                "death_loss": death_loss,
+                "buyback_loss": buyback_loss,
+                "lane_pct": lane_pct,
+                "jungle_pct": jungle_pct,
+                "kill_pct": kill_pct,
+                "obj_pct": obj_pct,
+                "pings": pings_cnt,
+                "chatwheel_cnt": chatwheel_cnt,
+                "econ_tag": econ_tag,
+            })
+
+        total_pause_sec = sum(int(p.get("duration") or 0) for p in raw_pauses)
+        pause_str = (
+            f"全场共触发 {len(raw_pauses)} 次暂停（累计停表 {total_pause_sec} 秒）"
+            if raw_pauses
+            else "全场 0 暂停顺畅打完"
+        )
+        ping_king_str = (
+            f"📡 信号狂点王：{max_ping_player[0]}（狂点 {max_ping_player[1]} 次地图信号）"
+            if max_ping_player[1] > 0
+            else "全员静默开黑"
+        )
+        swing_str = (
+            f"📈 极限翻盘指数 {comeback_val:,} 金 / 碾压指数 {stomp_val:,} 金"
+            if (comeback_val or stomp_val)
+            else ""
+        )
+
+        return {
+            "side": side_key,
+            "side_verdict": " ｜ ".join(x for x in [ping_king_str, pause_str, swing_str] if x),
+            "pause_count": len(raw_pauses),
+            "pause_total_sec": total_pause_sec,
+            "comeback": comeback_val,
+            "stomp": stomp_val,
+            "econ_rows": econ_rows,
+        }
+
+    # =========================================================================
+    # 十、0:00 ~ 终局逐分钟时空回放器快照 (Minute-by-Minute Interactive Scrubber)
+    # =========================================================================
+    def build_minute_snapshots() -> List[Dict[str, Any]]:
+        r_gold_adv = match.get("radiant_gold_adv") or []
+        r_xp_adv = match.get("radiant_xp_adv") or []
+        max_idx = len(r_gold_adv)
+        if max_idx == 0:
+            for rp in raw_players_list:
+                t_arr = rp.get("times") or []
+                if len(t_arr) > max_idx:
+                    max_idx = len(t_arr)
+        if max_idx == 0:
+            return []
+
+        # 预先整理每位玩家的核心成装购买时间表 (cost >= 1400 或在 ITEMS_ZH 中且非消耗品)
+        SKIP_CONSUMABLES = {
+            "tpscroll", "ward_observer", "ward_sentry", "smoke_of_deceit", "dust",
+            "clarity", "faerie_fire", "enchanted_mango", "tango", "flask", "blood_grenade",
+            "branches", "magic_stick", "sobi_mask", "ring_of_protection", "quelling_blade",
+        }
+        player_core_purchases: Dict[int, List[Dict[str, Any]]] = {}
+        for fp in all_formatted:
+            pslot = int(fp["player_slot"])
+            rp = raw_by_slot.get(pslot, {})
+            plog = rp.get("purchase_log") or []
+            seen_items = set()
+            core_list = []
+            for entry in plog:
+                ik = str(entry.get("key") or "")
+                if not ik or ik in SKIP_CONSUMABLES or ik.startswith("recipe_"):
+                    continue
+                if ik not in ITEMS_ZH:
+                    continue
+                if ik in seen_items:
+                    continue
+                seen_items.add(ik)
+                core_list.append({
+                    "key": ik,
+                    "zh": ITEMS_ZH.get(ik, ik),
+                    "time": int(entry.get("time") or 0),
+                    "img": f"https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/{ik}.png",
+                })
+            player_core_purchases[pslot] = core_list
+
+        snapshots: List[Dict[str, Any]] = []
+        for m in range(max_idx):
+            sec_cutoff = m * 60
+            sec_prev = (m - 1) * 60
+            g_adv = int(r_gold_adv[m]) if m < len(r_gold_adv) else 0
+            x_adv = int(r_xp_adv[m]) if m < len(r_xp_adv) else 0
+
+            p_snap_list = []
+            events_in_min: List[str] = []
+
+            for fp in all_formatted:
+                pslot = int(fp["player_slot"])
+                rp = raw_by_slot.get(pslot, {})
+                nw_arr = rp.get("networth_t") or rp.get("gold_t") or []
+                lh_arr = rp.get("lh_t") or []
+                dn_arr = rp.get("dn_t") or []
+                xp_arr = rp.get("xp_t") or []
+
+                nw_val = int(nw_arr[m]) if m < len(nw_arr) else int(fp.get("net_worth") or 0)
+                lh_val = int(lh_arr[m]) if m < len(lh_arr) else int(fp.get("last_hits") or 0)
+                dn_val = int(dn_arr[m]) if m < len(dn_arr) else int(fp.get("denies") or 0)
+                xp_val = int(xp_arr[m]) if m < len(xp_arr) else 0
+
+                items_now = [
+                    {"key": it["key"], "zh": it["zh"], "img": it["img"]}
+                    for it in player_core_purchases.get(pslot, [])
+                    if it["time"] <= sec_cutoff
+                ][-6:]
+
+                p_snap_list.append({
+                    "slot": pslot,
+                    "side": "radiant" if pslot < 128 else "dire",
+                    "pos": int(fp["pos"]),
+                    "hero_short_zh": fp["hero_short_zh"],
+                    "hero_img": fp["hero_img"],
+                    "personaname": fp["personaname"],
+                    "networth": nw_val,
+                    "lh": lh_val,
+                    "dn": dn_val,
+                    "xp": xp_val,
+                    "items": items_now,
+                })
+
+                # 收集这一分钟内该玩家的击杀事件
+                if m > 0:
+                    for k_ev in rp.get("kills_log") or []:
+                        kt = int(k_ev.get("time") or 0)
+                        if sec_prev < kt <= sec_cutoff:
+                            v_hid = npc_to_hid.get(str(k_ev.get("key") or ""), 0)
+                            v_fp = fmt_by_hid.get(v_hid)
+                            v_zh = v_fp["hero_short_zh"] if v_fp else "敌方英雄"
+                            events_in_min.append(f"⚔️ {fmt_mmss(kt)} {fp['hero_short_zh']} 击杀 {v_zh}")
+
+            if m > 0:
+                for obj in raw_objectives:
+                    ot = int(obj.get("time") or 0)
+                    if sec_prev < ot <= sec_cutoff:
+                        otype = str(obj.get("type") or "")
+                        if otype == "CHAT_MESSAGE_ROSHAN_KILL":
+                            events_in_min.append(f"🐉 {fmt_mmss(ot)} 肉山被击杀")
+                        elif otype == "building_kill":
+                            events_in_min.append(f"🏰 {fmt_mmss(ot)} 建筑被摧毁")
+
+            p_snap_list.sort(key=lambda x: x["networth"], reverse=True)
+            snapshots.append({
+                "minute": m,
+                "time_str": f"{m:02d}:00",
+                "radiant_gold_adv": g_adv,
+                "radiant_xp_adv": x_adv,
+                "players": p_snap_list,
+                "events": events_in_min[:6],
+            })
+
+        return snapshots
+
     return {
         "hero_execution_by_side": {
             "dire": [x for x in all_hero_exec if x["side"] == "dire"],
@@ -1475,4 +2245,21 @@ def build_tactical_microscope(
             "dire": analyze_side_tp_and_rotations("dire"),
             "radiant": analyze_side_tp_and_rotations("radiant"),
         },
+        "unpressed_saves_by_side": {
+            "dire": analyze_side_unpressed_saves("dire"),
+            "radiant": analyze_side_unpressed_saves("radiant"),
+        },
+        "map_space_by_side": {
+            "dire": analyze_side_map_space_and_pickoffs("dire"),
+            "radiant": analyze_side_map_space_and_pickoffs("radiant"),
+        },
+        "damage_received_by_side": {
+            "dire": analyze_side_damage_received("dire"),
+            "radiant": analyze_side_damage_received("radiant"),
+        },
+        "economy_and_pings_by_side": {
+            "dire": analyze_side_economy_and_pings("dire"),
+            "radiant": analyze_side_economy_and_pings("radiant"),
+        },
+        "minute_snapshots": build_minute_snapshots(),
     }

@@ -894,7 +894,12 @@
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
-          "headline_badges": [],
+          "headline_badges": [
+            {
+              "text": "🗺️ 顶级带线牵制(塔伤15219)",
+              "tone": "good"
+            }
+          ],
           "special_insights": []
         },
         {
@@ -1015,6 +1020,10 @@
             {
               "text": "治疗守卫: 0根(奶队友9,798)",
               "tone": "warn"
+            },
+            {
+              "text": "🗺️ 顶级带线牵制(塔伤5165)",
+              "tone": "good"
             }
           ],
           "special_insights": [
@@ -1845,7 +1854,744 @@
         "absent_warnings": [],
         "teamfight_tp_events": []
       }
-    }
+    },
+    "unpressed_saves_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "✓ 全队团战技能与救命装释放及格：未出现身怀 BKB/推推/微光/分身斧却在团战暴毙未按出的重大犯罪。",
+        "critical_total": 0,
+        "zero_spell_total": 0,
+        "incidents": [],
+        "player_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "✓ 全队团战技能与救命装释放及格：未出现身怀 BKB/推推/微光/分身斧却在团战暴毙未按出的重大犯罪。",
+        "critical_total": 0,
+        "zero_spell_total": 0,
+        "incidents": [],
+        "player_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "tf_deaths": 0,
+            "unpressed_core_cnt": 0,
+            "unpressed_wand_cnt": 0,
+            "zero_spell_cnt": 0,
+            "owned_saves_str": "未合成主动保命装",
+            "grade": "good",
+            "verdict": "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+          }
+        ]
+      }
+    },
+    "map_space_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "✓ 团队地图空间纪律严明：9 分钟后全队仅发生 0 次落单被抓，大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。",
+        "total_solo_pickoffs": 0,
+        "solo_pickoff_events": [],
+        "player_space_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 15219,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "👑 顶级带线牵制大师",
+            "grade": "good",
+            "verdict": "✓ 教科书级空间牵制：收线补刀 0（占 0.0%）+ 建筑推塔高达 15219，全局中后期仅 0 次落单被抓，真正做到了『带线逼塔牵制、看着小地图极限全身而退』！"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 1098,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "🛡️ 稳健抱团驻守",
+            "grade": "good",
+            "verdict": "收线补刀 0（0.0%）/ 刷野 0（0.0%），推塔伤害 1098；中后期发生 0 次落单被抓，位置感保持稳健。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 2164,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "⚔️ 侵略控图发动机",
+            "grade": "good",
+            "verdict": "✓ 空间嗅觉敏锐：参团率 75.0%，中后期仅 0 次落单掉点，兵线/野区分配合理（收线 0 / 刷野 0），始终在有视野或队友掩护区活动。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 348,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "🛡️ 稳健抱团驻守",
+            "grade": "good",
+            "verdict": "收线补刀 0（0.0%）/ 刷野 0（0.0%），推塔伤害 348；中后期发生 0 次落单被抓，位置感保持稳健。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 2490,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "⚔️ 侵略控图发动机",
+            "grade": "good",
+            "verdict": "✓ 空间嗅觉敏锐：参团率 65.9%，中后期仅 0 次落单掉点，兵线/野区分配合理（收线 0 / 刷野 0），始终在有视野或队友掩护区活动。"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "✓ 团队地图空间纪律严明：9 分钟后全队仅发生 0 次落单被抓，大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。",
+        "total_solo_pickoffs": 0,
+        "solo_pickoff_events": [],
+        "player_space_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 5165,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "👑 顶级带线牵制大师",
+            "grade": "good",
+            "verdict": "✓ 教科书级空间牵制：收线补刀 0（占 0.0%）+ 建筑推塔高达 5165，全局中后期仅 0 次落单被抓，真正做到了『带线逼塔牵制、看着小地图极限全身而退』！"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 2019,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "🛡️ 稳健抱团驻守",
+            "grade": "good",
+            "verdict": "收线补刀 0（0.0%）/ 刷野 0（0.0%），推塔伤害 2019；中后期发生 0 次落单被抓，位置感保持稳健。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 2542,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "⚔️ 侵略控图发动机",
+            "grade": "good",
+            "verdict": "✓ 空间嗅觉敏锐：参团率 83.9%，中后期仅 0 次落单掉点，兵线/野区分配合理（收线 0 / 刷野 0），始终在有视野或队友掩护区活动。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 644,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "⚔️ 侵略控图发动机",
+            "grade": "good",
+            "verdict": "✓ 空间嗅觉敏锐：参团率 64.5%，中后期仅 0 次落单掉点，兵线/野区分配合理（收线 0 / 刷野 0），始终在有视野或队友掩护区活动。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "lane_kills": 0,
+            "neutral_kills": 0,
+            "lane_farm_pct": 0.0,
+            "jungle_farm_pct": 0.0,
+            "tower_damage": 0,
+            "solo_pickoff_cnt": 0,
+            "solo_gold_fed": 0,
+            "deep_death_cnt": 0,
+            "space_style_badge": "🛡️ 稳健抱团驻守",
+            "grade": "good",
+            "verdict": "收线补刀 0（0.0%）/ 刷野 0（0.0%），推塔伤害 0；中后期发生 0 次落单被抓，位置感保持稳健。"
+          }
+        ]
+      }
+    },
+    "damage_received_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "全队合计承受英雄伤害 1 点：其中技能/物品伤害占 0.0%（0），物理平A普攻占 0.0%（0）。",
+        "team_spell_pct": 0.0,
+        "team_auto_pct": 0.0,
+        "rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [
+              "大推推"
+            ],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【大推推】。"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [
+              "笛子",
+              "莲花",
+              "刃甲"
+            ],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【笛子、莲花、刃甲】。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [
+              "永世法衣",
+              "希瓦",
+              "莲花"
+            ],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【永世法衣、希瓦、莲花】。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，站位保持较好。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，站位保持较好。"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "全队合计承受英雄伤害 1 点：其中技能/物品伤害占 0.0%（0），物理平A普攻占 0.0%（0）。",
+        "team_spell_pct": 0.0,
+        "team_auto_pct": 0.0,
+        "rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，站位保持较好。"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，站位保持较好。"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [
+              "蝴蝶"
+            ],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【蝴蝶】。"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [
+              "微光披风",
+              "大推推"
+            ],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【微光披风、大推推】。"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "total_dmg_taken": 0,
+            "auto_dmg": 0,
+            "spell_dmg": 0,
+            "auto_pct": 0.0,
+            "spell_pct": 0.0,
+            "top_killers": [],
+            "def_items_owned": [
+              "盘子(永恒之盘)",
+              "希瓦"
+            ],
+            "grade": "good",
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【盘子(永恒之盘)、希瓦】。"
+          }
+        ]
+      }
+    },
+    "economy_and_pings_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "全员静默开黑 ｜ 全场 0 暂停顺畅打完",
+        "pause_count": 0,
+        "pause_total_sec": 0,
+        "comeback": 0,
+        "stomp": 0,
+        "econ_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "全员静默开黑 ｜ 全场 0 暂停顺畅打完",
+        "pause_count": 0,
+        "pause_total_sec": 0,
+        "comeback": 0,
+        "stomp": 0,
+        "econ_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "lane_gold": 0,
+            "jungle_gold": 0,
+            "kill_gold": 0,
+            "obj_gold": 0,
+            "death_loss": 0,
+            "buyback_loss": 0,
+            "lane_pct": 0.0,
+            "jungle_pct": 0.0,
+            "kill_pct": 0.0,
+            "obj_pct": 0.0,
+            "pings": 0,
+            "chatwheel_cnt": 0,
+            "econ_tag": "⚖️ 均衡发育节奏手"
+          }
+        ]
+      }
+    },
+    "minute_snapshots": []
   },
   "phases_data": [
     {
@@ -3636,6 +4382,10 @@
           {
             "text": "治疗守卫: 0根(奶队友9,798)",
             "tone": "warn"
+          },
+          {
+            "text": "🗺️ 顶级带线牵制(塔伤5165)",
+            "tone": "good"
           }
         ],
         "special_insights": [
@@ -5009,7 +5759,12 @@
         "stuns_sec": 0.0,
         "ult_audits": [],
         "skillshot_audits": [],
-        "headline_badges": [],
+        "headline_badges": [
+          {
+            "text": "🗺️ 顶级带线牵制(塔伤15219)",
+            "tone": "good"
+          }
+        ],
         "special_insights": []
       }
     },

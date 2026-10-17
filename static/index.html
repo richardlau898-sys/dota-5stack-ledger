@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=4.3" />
+  <link rel="stylesheet" href="/styles.css?v=4.4" />
 </head>
 <body>
   <header class="site-header">
@@ -36,14 +36,15 @@
             placeholder="输入比赛编号 (如 9046364324) 或 Steam 链接 / 好友 ID..."
             autocomplete="off"
           />
-          <button type="submit" id="btn-analyze-search" class="button primary">拉出来算账</button>
-          <button type="button" id="btn-Refresh-match" class="button secondary" title="强制从 OpenDota 重新拉取并重算">重新读取</button>
+          <button type="submit" id="btn-analyze-search" class="button primary">查询战绩</button>
+          <button type="button" id="btn-Refresh-match" class="button secondary" title="强制从 OpenDota 重新拉取并重算">重新分析</button>
         </form>
       </search>
 
       <div class="header-right">
         <div id="llm-status-pill" class="model-status connected">已接入 XAI / grok-4.7</div>
-        <button type="button" id="btn-open-share-poster" class="button primary" title="一键生成群聊文字判决书与高清PNG战报卡片">📜 群聊处刑战报</button>
+        <button type="button" id="btn-copy-share-link" class="button secondary" title="复制当前已分析比赛的公开分享链接，发给群友直接点开查看完整复盘">🔗 分享本局链接</button>
+        <button type="button" id="btn-open-share-poster" class="button primary" title="一键生成群聊文字判决书与高清PNG战报卡片">📜 导出群聊战报</button>
         <button type="button" id="btn-open-settings" class="button secondary">车队与模型设置</button>
       </div>
     </div>
@@ -115,12 +116,12 @@
     <section class="matches-section" aria-labelledby="recent-heading">
       <div class="section-heading compact">
         <div class="heading-left">
-          <h2 id="recent-heading">最近战绩账本</h2>
+          <h2 id="recent-heading">最近战绩账本（带「✅ 已复盘」可直接调阅与公开分享，未分析比赛点击后按需启动 AI 分析）</h2>
           <span id="current-player-badge" class="status-pill connected">主视角加载中...</span>
         </div>
         <div class="recent-actions">
           <button type="button" id="btn-toggle-squad-ledger" class="text-button">展开/收起五黑车队多局惯犯总账 ↓</button>
-          <button type="button" id="btn-load-latest" class="text-button">直接看最近一把 →</button>
+          <button type="button" id="btn-load-latest" class="text-button">调阅最新已复盘比赛 →</button>
         </div>
       </div>
       <div id="recent-matches-strip" class="recent-list" role="list" aria-label="最近比赛列表">
@@ -144,6 +145,21 @@
       </section>
     </details>
 
+    <!-- 按需 AI 分析门控面板：当用户点击一局尚未分析的比赛时呈现，只有用户点击按钮才执行 AI 复盘分析 -->
+    <section id="on-demand-analysis-gate" class="on-demand-gate" hidden aria-labelledby="gate-title">
+      <div class="gate-inner">
+        <div class="gate-badge">🤖 按需 AI 录像级复盘 · 不浪费算力，点哪局算哪局</div>
+        <h2 id="gate-title" class="gate-headline">比赛 #-- 尚未生成 AI 深度复盘报告</h2>
+        <p id="gate-summary" class="gate-desc">点击下方按钮后，系统将拉取该局 OpenDota 录像数据并启动九大战术显微镜分析，生成永久可公开分享的复盘链接。</p>
+        <div class="gate-actions">
+          <button type="button" id="btn-confirm-analyze-match" class="button primary gate-primary-btn">
+            ⚡ 立即让 AI 深度分析本局并生成公开分享链接
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div id="analyzed-report-content">
     <!-- 比赛总览横幅 + 6大无重叠复盘模块快速跳转栏 -->
     <section id="match-overview-section" class="match-overview" aria-labelledby="match-overview-title">
       <div class="overview-top-row">
@@ -153,7 +169,7 @@
         </div>
         <div class="overview-actions">
           <label class="team-perspective-field">
-            <span>算哪边的账</span>
+            <span>看哪边视角</span>
             <select id="perspective-select">
               <option value="auto">按我的车队阵营</option>
               <option value="dire">夜魇 (Dire)</option>
@@ -161,8 +177,9 @@
             </select>
           </label>
           <button type="button" id="btn-request-parse" class="button secondary" hidden>请求录像解析</button>
+          <button type="button" id="btn-hero-share-link" class="button secondary" title="复制本局公开分享链接发到微信/Discord群">🔗 复制本局分享链接</button>
           <button type="button" id="btn-open-share-poster-2" class="button secondary">📜 导出群聊战报</button>
-          <button type="button" id="btn-trigger-grok" class="button primary">用 Grok 4.7 重算判词</button>
+          <button type="button" id="btn-trigger-grok" class="button primary">🧠 让 Grok 4.7 生成深度判词</button>
         </div>
       </div>
 
@@ -173,8 +190,8 @@
         <span class="jump-nav-label">复盘目录 (已全面去重)：</span>
         <a href="#draft-combo-section" class="jump-chip">① 阵容BP与配合</a>
         <a href="#verdict-and-blame-section" id="jump-chip-verdict" class="jump-chip">② 胜局庆功 / 败局分锅</a>
-        <a href="#tactical-microscope-section" class="jump-chip highlight">③ 🔬 战术显微镜 (大招/眼位/堆野开雾/对线/TP)</a>
-        <a href="#charts-hub-section" class="jump-chip">④ 全局曲线与集火矩阵</a>
+        <a href="#tactical-microscope-section" class="jump-chip highlight">③ 🔬 九维战术显微镜 (大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济信号)</a>
+        <a href="#charts-hub-section" class="jump-chip">④ ⏱️ 逐分钟时间轴沙盘 &amp; 集火矩阵</a>
         <a href="#phase-review-section" class="jump-chip">⑤ 前中后期三阶段</a>
         <a href="#players-forensics-section" class="jump-chip">⑥ 1~5号位个人卷宗</a>
       </nav>
@@ -239,12 +256,12 @@
       </article>
     </section>
 
-    <!-- 模块三（全新核心）：🔬 录像级战术显微镜 —— 专治英雄大招时机、辅助眼位进攻/防守、堆野与开雾找节奏、对线拉野走门莲花经验符、TP救人及时性 -->
+    <!-- 模块三（九维核心）：🔬 录像级战术显微镜 -->
     <section id="tactical-microscope-section" class="tactical-microscope-section" aria-labelledby="tactical-microscope-heading">
       <div class="section-heading">
         <div>
-          <h2 id="tactical-microscope-heading">③ 🔬 录像级战术显微镜 · 英雄大招审判 / 辅助眼位深浅 / 堆野开雾 / 对线细节 / TP救人</h2>
-          <p class="section-caption">直击录像底层事件流：猛犸/潮汐大招大到几个人及憋大暴毙团战、辅助每颗假眼的进攻/防守坐标与存活秒数、辅助堆野与每次开雾 90 秒战果、对线拉野/莲花/智慧符/走门、以及 TP 救人及时性与见死不救抓包</p>
+          <h2 id="tactical-microscope-heading">③ 🔬 录像级九维战术显微镜 · 大招审判 / 憋死救命装 / 地图空间与带线被抓 / 承伤防装 / 眼位 / 堆野开雾 / 对线 / TP / 经济信号</h2>
+          <p class="section-caption">全量拆解录像底层日志：谁身怀 BKB/推推/分身却在团战 0 按键暴毙？谁喜欢带无聊危险线一个人乱逛被抓死？谁承受了成吨法系爆发却不出 BKB？</p>
         </div>
         <div class="microscope-header-controls">
           <div class="team-tab-group" role="group" aria-label="显微镜阵营切换">
@@ -254,38 +271,73 @@
         </div>
       </div>
 
-      <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜五大维度">
+      <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜九大维度">
         <button type="button" class="microscope-tab-btn active" data-micro-tab="hero_ult" role="tab" aria-selected="true">
           🎯 1. 英雄绝活与大招审判
         </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="unpressed_saves" role="tab" aria-selected="false">
+          💀 2. 憋死BKB/救命装与0技能秒躺
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="map_space" role="tab" aria-selected="false">
+          🗺️ 3. 地图空间理解与落单带线被抓
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="damage_received" role="tab" aria-selected="false">
+          🛡️ 4. 承伤来源拆解与防装审计
+        </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="vision" role="tab" aria-selected="false">
-          👁️ 2. 辅助眼位进攻/防守与寿命
+          👁️ 5. 辅助眼位进攻/防守与寿命
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="stack_smoke" role="tab" aria-selected="false">
-          🌾 3. 辅助堆野 &amp; 开雾找节奏
+          🌾 6. 辅助堆野 &amp; 开雾找节奏
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="laning" role="tab" aria-selected="false">
-          🌱 4. 对线拉野·走门·莲花·经验符
+          🌱 7. 对线拉野·走门·莲花·经验符
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="tp_save" role="tab" aria-selected="false">
-          🆘 5. TP 救人及时性与缺席抓包
+          🆘 8. TP 救人及时性与缺席抓包
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="econ_pings" role="tab" aria-selected="false">
+          💰 9. 经济来源结构 &amp; 信号/暂停互动
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="all" role="tab" aria-selected="false">
-          📑 同屏展开全部 5 项
+          📑 同屏展开全部 9 项
         </button>
       </div>
 
       <div id="tactical-microscope-body" class="tactical-microscope-body"></div>
     </section>
 
-    <!-- 模块四：四大可视化战术图表中心 + 5v5 集火流向矩阵 -->
+    <!-- 模块四：逐分钟时空回放沙盘 + 四大可视化战术图表中心 + 5v5 集火流向矩阵 -->
     <section id="charts-hub-section" class="charts-hub-section" aria-labelledby="charts-hub-heading">
       <div class="section-heading">
         <div>
-          <h2 id="charts-hub-heading">④ 全局战术图表与 5v5 集火伤害矩阵</h2>
-          <p class="section-caption">团队经济/经验走势、十人分钟级净资产曲线、2D 眼位/对线热力/团战阵亡坐标小地图、十人三维横评与 5v5 集火伤害矩阵</p>
+          <h2 id="charts-hub-heading">④ ⏱️ 逐分钟比赛时间轴回放器 &amp; 全局战术图表中心</h2>
+          <p class="section-caption">拖动下方分钟滑块（00:00 → 终局），实时回放任意一分钟的十人经济排位、正反补、当时已合成装备、击杀掉塔战报，并支持与 2D 战术小地图联动</p>
         </div>
       </div>
+
+      <!-- 全新交互：0:00 ~ 终局逐分钟时间轴拖拽回放器 -->
+      <article id="minute-scrubber-box" class="chart-box minute-scrubber-box" aria-labelledby="scrubber-title">
+        <div class="scrubber-top-bar">
+          <div>
+            <h3 id="scrubber-title">⏱️ 逐分钟时空回放沙盘 · 拖动滑块复盘任意时刻十人经济、成装与场上局势</h3>
+            <p class="chart-sub">看看关键肉山团或高地团开打前那一分钟，双方大哥到底差了多少经济、谁已经偷偷掏出了 BKB/跳刀</p>
+          </div>
+          <div class="scrubber-controls">
+            <button type="button" id="btn-scrub-prev" class="button secondary" style="padding:4px 10px;">◀ -1分钟</button>
+            <span id="scrubber-time-badge" class="status-pill connected" style="font-size:14px;padding:4px 12px;">10:00</span>
+            <button type="button" id="btn-scrub-next" class="button secondary" style="padding:4px 10px;">+1分钟 ▶</button>
+            <button type="button" id="btn-scrub-sync-map" class="button secondary" style="padding:4px 10px;" title="在下方2D小地图高亮显示该分钟前后的眼位">🗺️ 同步定位小地图眼位</button>
+          </div>
+        </div>
+        <div class="scrubber-slider-row">
+          <span class="scrub-bound-label">00:00</span>
+          <input type="range" id="minute-scrubber-range" min="0" max="40" value="10" step="1" aria-label="逐分钟时间轴回放滑块" />
+          <span id="scrubber-max-label" class="scrub-bound-label">40:00</span>
+        </div>
+        <div id="scrubber-quick-jumps" class="checkpoints-strip" style="margin-bottom:10px;"></div>
+        <div id="minute-scrubber-content" class="scrubber-content-grid"></div>
+      </article>
 
       <div class="charts-grid-2x2">
         <!-- 图表 1: 团队累计经济差 & 经验差曲线 + 肉山/兵营/团战标记 -->
@@ -420,6 +472,7 @@
       <div id="players-forensics-container" class="players-forensics-list"></div>
     </section>
     </div>
+    </div>
   </main>
 
   <!-- 车队花名册与大模型 API 配置弹窗 (<dialog closedby="any"> 符合现代 Web 规范) -->
@@ -504,18 +557,19 @@
   <dialog id="share-poster-dialog" class="settings-dialog share-poster-dialog" closedby="any" aria-labelledby="poster-dialog-title">
     <div class="dialog-inner">
       <div class="dialog-header">
-        <h2 id="poster-dialog-title">📜 群聊处刑判决书 &amp; 高清战报卡片导出</h2>
+        <h2 id="poster-dialog-title">📜 群聊处刑/庆功表彰书 &amp; 高清战报卡片导出</h2>
         <button type="button" id="btn-close-poster-dialog" class="text-button" aria-label="关闭战报窗口">关闭 ✕</button>
       </div>
       <div class="dialog-body">
         <div class="poster-actions-row">
-          <button type="button" id="btn-copy-verdict-text" class="button primary">📋 一键复制群聊文字判决书 (直接发微信/QQ/Discord)</button>
-          <button type="button" id="btn-download-poster-png" class="button secondary">🖼️ 下载高清 PNG 处刑战报长图</button>
+          <button type="button" id="btn-copy-verdict-text" class="button primary">📋 一键复制群聊文字战报 (含公开分享链接)</button>
+          <button type="button" id="btn-modal-share-link" class="button secondary">🔗 仅复制本局公开分享链接</button>
+          <button type="button" id="btn-download-poster-png" class="button secondary">🖼️ 下载高清 PNG 战报长图</button>
         </div>
         <div class="poster-split-grid">
           <div class="poster-text-box">
             <label class="field">
-              <span>群聊文字版判决书（可自由编辑或一键复制）</span>
+              <span>群聊文字版战报（可自由编辑或一键复制）</span>
               <textarea id="share-verdict-textarea" rows="16" readonly></textarea>
             </label>
           </div>
@@ -536,6 +590,6 @@
     <span>有据才喷，数据来自 OpenDota 录像解析与 xAI Grok 4.7</span>
   </footer>
 
-  <script src="/app.js?v=4.3" defer></script>
+  <script src="/app.js?v=4.4" defer></script>
 </body>
 </html>
