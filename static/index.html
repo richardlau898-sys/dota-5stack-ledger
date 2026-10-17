@@ -4,51 +4,137 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=4.8" />
+  <link rel="stylesheet" href="/styles.css?v=5.2" />
 </head>
 <body>
   <header class="site-header">
     <div class="header-inner">
-      <div class="brand-group">
-        <span class="brand-mark" aria-hidden="true">刀</span>
-        <div>
-          <h1 class="brand-title">战后算账 &amp; 赛前锦囊</h1>
-          <p class="brand-subtitle">五黑车队录像级复盘 · 十一维战术显微镜与赛前作战室</p>
+      <div class="header-top-bar">
+        <div class="brand-group" id="brand-home-trigger" role="button" tabindex="0" title="点击返回战后算账首页（全部比赛记录大厅）">
+          <span class="brand-mark" aria-hidden="true">刀</span>
+          <div>
+            <h1 class="brand-title">战后算账 &amp; 赛前锦囊</h1>
+            <p class="brand-subtitle">五黑车队录像级复盘 · 十一维战术显微镜与赛前作战室</p>
+          </div>
         </div>
+
+        <!-- 手机端一键展开/收起查比赛与设置工具栏按钮（桌面端自动隐藏） -->
+        <button
+          type="button"
+          id="btn-toggle-mobile-tools"
+          class="button secondary mobile-tools-toggle"
+          aria-expanded="false"
+          aria-controls="header-collapsible-tools"
+        >
+          🔍 查比赛 / 设置
+        </button>
       </div>
 
-      <!-- 顶部双工作台切换：赛后算账复盘 vs 赛前五黑BP锦囊 -->
+      <!-- 顶部三工作台切换：首页比赛列表 vs 单局算账复盘 vs 赛前五黑BP锦囊 -->
       <nav class="workspace-nav" aria-label="核心功能切换">
-        <button type="button" id="nav-mode-postgame" class="ws-nav-btn active" data-ws-mode="postgame">
-          📊 赛后算账复盘
+        <button type="button" id="nav-mode-home" class="ws-nav-btn active" data-ws-mode="home">
+          🏠 首页 · 比赛列表
+        </button>
+        <button type="button" id="nav-mode-postgame" class="ws-nav-btn" data-ws-mode="postgame">
+          📊 单局复盘详情
         </button>
         <button type="button" id="nav-mode-pregame" class="ws-nav-btn" data-ws-mode="pregame">
-          ⚔️ 赛前五黑BP锦囊 (选完人怎么打)
+          ⚔️ 赛前五黑BP锦囊
         </button>
       </nav>
 
-      <search class="header-search" id="header-search-box" aria-label="查询比赛或玩家">
-        <form id="quick-search-form" class="search-form">
-          <label for="search-input" class="sr-only">输入比赛编号 Match ID、好友 ID 或 Steam 链接</label>
-          <input
-            id="search-input"
-            type="search"
-            placeholder="输入比赛编号 (如 9048059832) 或 Steam 链接 / 好友 ID..."
-            autocomplete="off"
-          />
-          <button type="submit" id="btn-analyze-search" class="button primary">查询战绩</button>
-          <button type="button" id="btn-Refresh-match" class="button secondary" title="强制从 OpenDota 重新拉取并重算">重新分析</button>
-        </form>
-      </search>
+      <div id="header-collapsible-tools" class="header-collapsible-tools">
+        <search class="header-search" id="header-search-box" aria-label="查询比赛或玩家">
+          <form id="quick-search-form" class="search-form">
+            <label for="search-input" class="sr-only">输入比赛编号 Match ID、好友 ID 或 Steam 链接</label>
+            <input
+              id="search-input"
+              type="search"
+              placeholder="输入比赛编号 (如 9048059832) 或好友 ID..."
+              autocomplete="off"
+            />
+            <button type="submit" id="btn-analyze-search" class="button primary">查询战绩</button>
+            <button type="button" id="btn-Refresh-match" class="button secondary" title="强制从 OpenDota 重新拉取并重算">重新分析</button>
+          </form>
+        </search>
 
-      <div class="header-right">
-        <div id="llm-status-pill" class="model-status connected">已接入 XAI / grok-4.7</div>
-        <button type="button" id="btn-open-settings" class="button secondary">⚙️ 车队与模型设置</button>
+        <div class="header-right">
+          <div id="llm-status-pill" class="model-status connected">已接入 XAI / grok-4.7</div>
+          <button type="button" id="btn-open-settings" class="button secondary">⚙️ 车队与模型设置</button>
+        </div>
       </div>
     </div>
   </header>
 
   <main class="main-container">
+    <!-- =========================================================================
+         工作台 0 (默认首页)：清爽比赛记录大厅 (点击任意比赛卡片进入单局深度复盘)
+         ========================================================================= -->
+    <div id="home-workspace" class="home-workspace">
+      <section class="home-hero-banner" aria-labelledby="home-hero-heading">
+        <div class="home-hero-left">
+          <div class="match-meta">DOTA 2 5-STACK FORENSICS HUB · 录像级赛后算账与赛前作战大厅</div>
+          <h2 id="home-hero-heading" class="home-hero-title" tabindex="-1">选择一局比赛记录，开启十一维录像级算账复盘</h2>
+          <p class="home-hero-desc">
+            告别一进页面就被密密麻麻的数据淹没。在这里先浏览近期战绩账本，点击任意一局比赛即可进入该局的
+            <b>六大章节深度复盘</b>、<b>Grok 4.7 毒舌/庆功评书</b> 与 <b>原生矢量 PDF 报告导出</b>。
+          </p>
+          <div id="home-player-kpis" class="home-kpi-strip">
+            <span class="status-pill connected">正在加载主视角玩家战绩...</span>
+          </div>
+        </div>
+        <div class="home-hero-right">
+          <div class="home-quick-actions home-hero-actions">
+            <button type="button" id="btn-home-open-latest" class="button primary">
+              📊 查看最新已复盘比赛 →
+            </button>
+            <button type="button" id="btn-home-go-pregame" class="button secondary">
+              ⚔️ 进入赛前五黑 BP 锦囊
+            </button>
+            <button type="button" id="btn-home-scroll-ledger" class="button secondary">
+              🏆 展开五黑跨局惯犯总账 ↓
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 首页核心：宽敞呼吸感最近比赛记录卡片网格 -->
+      <section class="home-matches-section" aria-labelledby="home-matches-heading">
+        <div class="home-matches-header">
+          <div>
+            <h3 id="home-matches-heading">📋 最近比赛记录（点击任意比赛卡片进入单局深度复盘）</h3>
+            <p class="section-caption">带「✅ 已生成 AI 复盘」的比赛点击即可秒开完整报告；带「⚡ 待 AI 分析」的比赛点击后可按需一键启动录像解析</p>
+          </div>
+          <div class="home-filter-tabs" role="tablist" aria-label="筛选比赛记录">
+            <button type="button" class="filter-chip active" data-home-filter="all">全部比赛</button>
+            <button type="button" class="filter-chip" data-home-filter="analyzed">✅ 已生成 AI 复盘</button>
+            <button type="button" class="filter-chip" data-home-filter="party">👥 五黑/多排局</button>
+            <button type="button" class="filter-chip" data-home-filter="win">🏆 获胜局</button>
+            <button type="button" class="filter-chip" data-home-filter="loss">💀 落败局</button>
+          </div>
+        </div>
+        <div id="home-matches-grid" class="home-matches-grid" role="list" aria-label="首页最近比赛卡片网格">
+          <div class="empty-state compact">正在读取最近比赛记录...</div>
+        </div>
+      </section>
+
+      <!-- 跨比赛多局惯犯档案：放在首页大厅底部，按需展开 -->
+      <details id="squad-ledger-details" class="squad-ledger-details">
+        <summary class="squad-ledger-summary">
+          <div class="squad-ledger-summary-left">
+            <span class="status-pill connected" id="squad-ledger-badge">跨比赛历史档案</span>
+            <strong>五黑车队多局惯犯档案 · 跨比赛累计分锅总账与绝活红黑榜</strong>
+            <span class="section-caption">（点击展开查看多局累计大腿/战犯排行与车队常驻成员档案）</span>
+          </div>
+          <span class="squad-ledger-summary-arrow">展开历史总账 ▾</span>
+        </summary>
+        <section id="squad-ledger-section" class="squad-ledger-section" aria-labelledby="squad-ledger-heading">
+          <h2 id="squad-ledger-heading" class="sr-only">五黑车队多局惯犯档案</h2>
+          <div id="squad-ledger-container"></div>
+        </section>
+      </details>
+    </div>
+
     <!-- =========================================================================
          工作台 B：赛前五黑 BP 锦囊 · 选人完毕 10 秒作战室 (/pregame)
          ========================================================================= -->
@@ -56,7 +142,7 @@
       <section class="pregame-header-banner">
         <div>
           <div class="match-meta">PRE-GAME 5-STACK LIVE TACTICAL ROOM · 选完英雄10秒内发进语音群</div>
-          <h2 class="match-headline">五黑赛前作战室 · 选完人这把怎么配合、前中后期干什么</h2>
+          <h2 id="pregame-title" class="match-headline" tabindex="-1">五黑赛前作战室 · 选完人这把怎么配合、前中后期干什么</h2>
           <p class="section-caption">点选你们五黑刚刚选好的 1~5 号位英雄（可选填入对面英雄），立即生成核心 Combo 口令、三路对线重点、前中后期节奏与每人推荐出装</p>
         </div>
         <div class="pregame-top-actions">
@@ -107,41 +193,16 @@
     </div>
 
     <!-- =========================================================================
-         工作台 A：赛后录像级复盘与车队分锅账本 (默认主工作台)
+         工作台 A：单局录像级复盘与车队分锅账本 (点击某局比赛或打开分享链接后直接展示该局，不含最近战绩列表)
          ========================================================================= -->
-    <div id="postgame-workspace">
-    <!-- 最近比赛横条 -->
-    <section class="matches-section" aria-labelledby="recent-heading">
-      <div class="section-heading compact">
-        <div class="heading-left">
-          <h2 id="recent-heading">最近战绩账本（带「✅ 已复盘」可直接调阅与公开分享，未分析比赛点击后按需启动 AI 分析）</h2>
-          <span id="current-player-badge" class="status-pill connected">主视角加载中...</span>
-        </div>
-        <div class="recent-actions">
-          <button type="button" id="btn-toggle-squad-ledger" class="text-button">展开/收起五黑车队多局惯犯总账 ↓</button>
-          <button type="button" id="btn-load-latest" class="text-button">调阅最新已复盘比赛 →</button>
-        </div>
-      </div>
-      <div id="recent-matches-strip" class="recent-list" role="list" aria-label="最近比赛列表">
-        <div class="empty-state compact">正在读取最近比赛记录...</div>
-      </div>
-    </section>
-
-    <!-- 跨比赛多局惯犯档案：默认收起在 <details> 中，避免干扰单局深度复盘，同时支持页内搜索自动展开 -->
-    <details id="squad-ledger-details" class="squad-ledger-details">
-      <summary class="squad-ledger-summary">
-        <div class="squad-ledger-summary-left">
-          <span class="status-pill connected" id="squad-ledger-badge">跨比赛历史档案</span>
-          <strong>五黑车队多局惯犯档案 · 跨比赛累计分锅总账与绝活红黑榜</strong>
-          <span class="section-caption">（点击展开查看多局累计大腿/战犯排行，单局复盘已在下方去重呈现）</span>
-        </div>
-        <span class="squad-ledger-summary-arrow">展开历史总账 ▾</span>
-      </summary>
-      <section id="squad-ledger-section" class="squad-ledger-section" aria-labelledby="squad-ledger-heading">
-        <h2 id="squad-ledger-heading" class="sr-only">五黑车队多局惯犯档案</h2>
-        <div id="squad-ledger-container"></div>
-      </section>
-    </details>
+    <div id="postgame-workspace" hidden>
+    <!-- 单局顶部极简导航条：只保留返回首页按钮与主视角状态，不放任何最近战局列表 -->
+    <div class="postgame-top-nav-bar">
+      <button type="button" id="btn-back-to-home" class="button secondary back-home-btn">
+        ← 返回首页 · 全部比赛记录
+      </button>
+      <span id="current-player-badge" class="status-pill connected">主视角加载中...</span>
+    </div>
 
     <!-- 按需 AI 分析门控面板：当用户点击一局尚未分析的比赛时呈现，只有用户点击按钮才执行 AI 复盘分析 -->
     <section id="on-demand-analysis-gate" class="on-demand-gate" hidden aria-labelledby="gate-title">
@@ -163,7 +224,7 @@
       <div class="overview-top-row">
         <div>
           <div id="match-meta-line" class="match-meta">加载中...</div>
-          <h2 id="match-overview-title" class="match-headline">正在读取比赛数据...</h2>
+          <h2 id="match-overview-title" class="match-headline" tabindex="-1">正在读取比赛数据...</h2>
         </div>
         <div class="overview-actions">
           <label class="team-perspective-field">
@@ -193,7 +254,7 @@
         <a href="#phase-review-section" class="jump-chip highlight">③ 前·中·后期三阶段 &amp; 关键团战故事</a>
         <a href="#tactical-microscope-section" class="jump-chip">④ 🔬 十一维战术显微镜 (大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/1v1对位/买活死&amp;7.38附魔)</a>
         <a href="#charts-hub-section" class="jump-chip">⑤ ⏱️ 逐分钟时间轴沙盘 &amp; 集火矩阵</a>
-        <a href="#players-forensics-section" class="jump-chip">⑥ 1~5号位个人卷宗</a>
+        <a href="#players-forensics-section" class="jump-chip">⑥ 1~5号位个人卷宗 (0-100评分)</a>
       </nav>
     </section>
 
@@ -230,8 +291,10 @@
         <div id="grok-team-practice-box" class="grok-practice-strip"></div>
       </article>
 
-      <!-- 胜局：头号首功(MVP) + 破阵二当家 / 败局：全场真大腿 + 头号大锅 -->
-      <div class="verdict-grid">
+      <!-- 三张前·中·后期全链路点评核心焦点卡：
+           胜局：1. 头号首功(MVP) + 2. 二号功臣(破阵二当家) + 3. 惊险躺赢锦鲤(为什么这把拉胯算账)
+           败局：1. 败方孤胆院长(尽力大腿) + 2. 本方头号大锅(一级战犯) + 3. 二号背锅位(次锅共犯) -->
+      <div class="verdict-grid verdict-grid-3col">
         <article id="mvp-card" class="verdict-card mvp-theme" aria-labelledby="mvp-card-title">
           <div id="mvp-card-label" class="verdict-card-label">👑 全场头号功臣 · MVP</div>
           <h3 id="mvp-card-title" class="sr-only">全场 MVP</h3>
@@ -242,6 +305,12 @@
           <div id="culprit-card-label" class="verdict-card-label">🚨 本方头号大锅 · 一级战犯</div>
           <h3 id="culprit-card-title" class="sr-only">次席核心焦点</h3>
           <div id="culprit-card-body"></div>
+        </article>
+
+        <article id="third-verdict-card" class="verdict-card shortcoming-theme" aria-labelledby="third-card-title">
+          <div id="third-verdict-card-label" class="verdict-card-label">🐟 惊险躺赢/短板算账 · 为什么这把表现不行</div>
+          <h3 id="third-card-title" class="sr-only">第三核心焦点</h3>
+          <div id="third-verdict-card-body"></div>
         </article>
       </div>
 
@@ -640,6 +709,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=4.8" defer></script>
+  <script src="/app.js?v=5.2" defer></script>
 </body>
 </html>

@@ -84,9 +84,43 @@ def is_match_already_analyzed(match_id: Any) -> bool:
     )
 
 
+_RECENT_MATCHES_CACHE: Dict[int, Dict[str, Any]] = {}
+
+
 def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
+    import time
+
+    now_ts = time.time()
+    cached = _RECENT_MATCHES_CACHE.get(account_id)
+    if cached and (now_ts - cached.get("ts", 0) < 120) and cached.get("items"):
+        out_cached = cached["items"]
+        for item in out_cached:
+            item["is_analyzed"] = is_match_already_analyzed(item.get("match_id"))
+        return out_cached[:limit]
+
     hero_map, _ = get_hero_constants_map()
-    raw_list = api_get(f"/players/{account_id}/recentMatches")
+    recent_cache_file = REPORTS_DIR / f"recent_matches_{account_id}.json"
+    tmp_recent_cache_file = TMP_REPORTS_DIR / f"recent_matches_{account_id}.json"
+
+    raw_list = None
+    try:
+        raw_list = api_get(f"/players/{account_id}/recentMatches")
+        if isinstance(raw_list, list) and raw_list:
+            try:
+                REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
+            except OSError:
+                TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                tmp_recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        for cf in (recent_cache_file, tmp_recent_cache_file):
+            if cf.exists():
+                try:
+                    raw_list = json.loads(cf.read_text(encoding="utf-8"))
+                    break
+                except Exception:
+                    raw_list = None
+
     out = []
     for m in (raw_list or [])[:limit]:
         mid = m.get("match_id")
@@ -125,6 +159,47 @@ def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
             "is_analyzed": is_match_already_analyzed(mid),
             "mode_str": get_mode_and_lobby(m.get("game_mode", 0), m.get("lobby_type", 0)),
         })
+
+    if not out:
+        # Synthesize fallback list from local analyzed match_*.json files so /api/init never fails
+        for mf in sorted(REPORTS_DIR.glob("match_*.json"), reverse=True)[:limit]:
+            try:
+                rep = json.loads(mf.read_text(encoding="utf-8"))
+                mid = rep.get("match_id")
+                if not mid:
+                    continue
+                all_p = (rep.get("radiant_pos_1_to_5") or []) + (rep.get("dire_pos_1_to_5") or [])
+                me_p = next((p for p in all_p if p.get("is_me")), None) or (all_p[0] if all_p else {})
+                won = bool(rep.get("user_won", rep.get("radiant_win")))
+                out.append({
+                    "match_id": mid,
+                    "start_time_str": rep.get("start_time_str", ""),
+                    "won": won,
+                    "result": "胜利" if won else "失败",
+                    "hero_id": me_p.get("hero_id", 0),
+                    "hero_name": me_p.get("hero_name", ""),
+                    "hero_short_zh": me_p.get("hero_short_zh", "未知英雄"),
+                    "hero_img": me_p.get("hero_img", ""),
+                    "hero_icon": me_p.get("hero_icon", ""),
+                    "kills": me_p.get("kills", 0),
+                    "deaths": me_p.get("deaths", 0),
+                    "assists": me_p.get("assists", 0),
+                    "kda": me_p.get("kda", "0/0/0"),
+                    "gpm": me_p.get("gpm", 0),
+                    "xpm": me_p.get("xpm", 0),
+                    "duration": rep.get("duration_str", ""),
+                    "duration_str": rep.get("duration_str", ""),
+                    "party_size": 5,
+                    "party_label": "5人黑",
+                    "is_parsed": bool(rep.get("is_parsed", True)),
+                    "is_analyzed": True,
+                    "mode_str": rep.get("mode_str", "全英雄选择"),
+                })
+            except Exception:
+                pass
+
+    if out:
+        _RECENT_MATCHES_CACHE[account_id] = {"ts": now_ts, "items": out}
     return out
 
 

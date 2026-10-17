@@ -9,7 +9,8 @@ const state = {
   profileData: null,
   squadLedger: null,
   heroesCatalog: [],
-  workspaceMode: "postgame", // "postgame" | "pregame"
+  workspaceMode: "home", // "home" | "postgame" | "pregame"
+  homeFilter: "all", // "all" | "analyzed" | "party" | "win" | "loss"
   pregameOwnPicks: [
     { pos: 1, hero_id: 8, player_name: "Flame = ez mute" },
     { pos: 2, hero_id: 45, player_name: "Replica" },
@@ -156,6 +157,10 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function formatMdBold(value) {
+  return escapeHtml(value).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
 function fmtNum(n) {
   const num = Number(n || 0);
   return num.toLocaleString("en-US");
@@ -164,6 +169,116 @@ function fmtNum(n) {
 function fmtSigned(n) {
   const num = Math.round(Number(n || 0));
   return num > 0 ? `+${fmtNum(num)}` : fmtNum(num);
+}
+
+/**
+ * Compute 0..100 integer score for any player (100 highest, 0 lowest)
+ */
+function getHeroScore100(p) {
+  if (!p) return 60;
+  if (p.score_100 !== undefined && p.score_100 !== null) {
+    return Math.max(0, Math.min(100, Math.round(Number(p.score_100))));
+  }
+  const raw = Number(p.rating_score ?? 6.0);
+  const scaled = raw <= 10.5 ? raw * 10 : raw;
+  return Math.max(0, Math.min(100, Math.round(scaled)));
+}
+
+function getScore100Tier(score100, won = true) {
+  const s = Number(score100 || 0);
+  if (s >= 90) return { grade: "S+", label: "封神真神", cls: "score-s" };
+  if (s >= 80) return { grade: "A", label: won ? "凯旋主力" : "孤胆院长", cls: "score-a" };
+  if (s >= 70) return { grade: "B", label: "合格执行", cls: "score-b" };
+  if (s >= 60) return { grade: "C", label: won ? "惊险躺赢" : "节奏迷失", cls: "score-c" };
+  return { grade: "D", label: won ? "短板隐身" : "犯罪背锅", cls: "score-d" };
+}
+
+/**
+ * Find hero mini-logo URL by Chinese hero name from current match or global catalog
+ */
+function findMatchHeroImg(heroNameZh, report = state.currentReport) {
+  if (!heroNameZh) return "";
+  const clean = String(heroNameZh).trim();
+  if (report) {
+    const all = [
+      ...(report.radiant_pos_1_to_5 || report.radiant_players || []),
+      ...(report.dire_pos_1_to_5 || report.dire_players || []),
+    ];
+    const found = all.find((p) => p.hero_short_zh === clean || p.hero_name === clean);
+    if (found && found.hero_img) return found.hero_img;
+  }
+  const cat = (state.heroesCatalog || []).find(
+    (h) => h.short_zh === clean || h.full_zh === clean || h.name_zh === clean
+  );
+  return cat?.img || "";
+}
+
+/**
+ * Render a table player cell with Hero Mini-Logo + Position + Hero Name + Player Nickname
+ */
+function renderHeroCellWithLogo(
+  pos,
+  heroZh,
+  personaname = "",
+  reportOrImg = state.currentReport,
+  explicitImg = ""
+) {
+  const report =
+    reportOrImg && typeof reportOrImg === "object" ? reportOrImg : state.currentReport;
+  const rawImg =
+    typeof reportOrImg === "string"
+      ? reportOrImg
+      : typeof explicitImg === "string"
+      ? explicitImg
+      : "";
+  const imgUrl = rawImg || findMatchHeroImg(heroZh, report);
+  const posPrefix = pos !== undefined && pos !== null && pos !== "" ? `${pos}号位 · ` : "";
+  const pNameHtml = personaname
+    ? ` <span class="micro-cell-player">(${escapeHtml(personaname)})</span>`
+    : "";
+  return `<span class="micro-hero-cell-inline">${
+    imgUrl
+      ? `<img class="micro-table-hero-logo" src="${escapeHtml(imgUrl)}" alt="${escapeHtml(
+          heroZh || ""
+        )}" loading="lazy" />`
+      : ""
+  }<span><b>${escapeHtml(posPrefix)}${escapeHtml(heroZh || "")}</b>${pNameHtml}</span></span>`;
+}
+
+/**
+ * Inject inline Hero Mini-Logos next to any of the 10 match heroes' Chinese names in already-escaped HTML
+ */
+function injectHeroLogosIntoHtml(safeHtml, report = state.currentReport) {
+  if (!safeHtml || !report) return safeHtml || "";
+  const all = [
+    ...(report.radiant_pos_1_to_5 || report.radiant_players || []),
+    ...(report.dire_pos_1_to_5 || report.dire_players || []),
+  ];
+  const heroMap = new Map();
+  all.forEach((p) => {
+    const name = (p.hero_short_zh || "").trim();
+    if (name && p.hero_img && !heroMap.has(name)) {
+      heroMap.set(name, p.hero_img);
+    }
+  });
+  if (heroMap.size === 0) return safeHtml;
+  const names = [...heroMap.keys()].sort((a, b) => b.length - a.length);
+  const escapedNames = names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const pattern = new RegExp(`(${escapedNames.join("|")})`, "g");
+
+  return String(safeHtml)
+    .split(/(<[^>]+>)/g)
+    .map((chunk) => {
+      if (chunk.startsWith("<")) return chunk;
+      return chunk.replace(pattern, (match) => {
+        const img = heroMap.get(match);
+        if (!img) return match;
+        return `<span class="inline-hero-chip"><img class="inline-hero-logo" src="${escapeHtml(
+          img
+        )}" alt="" loading="lazy" />${match}</span>`;
+      });
+    })
+    .join("");
 }
 
 function showToast(msg, durationMs = 3200) {
@@ -545,7 +660,7 @@ function buildTeamfightDotaStory(tf, fObj, idx, { side, sideZh, oppZh, grokWin }
     tone: mappedTone,
     storyTitle,
     storyText,
-    storyHtml: escapeHtml(storyText),
+    storyHtml: injectHeroLogosIntoHtml(escapeHtml(storyText), state.currentReport),
   };
 }
 
@@ -561,6 +676,8 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
   const dn10 = p.laning_10m?.dn10 ?? 0;
   const laneEff = p.lane_efficiency_pct || 0;
   const dmgPerGold = p.net_worth ? (p.hero_damage / p.net_worth).toFixed(2) : "0.00";
+  const score100 = getHeroScore100(p);
+  const scoreTier = getScore100Tier(score100, pWon);
 
   // Item timing narrative
   const coreItems = (p.final_items_rich || []).filter((it) => it.purchase_time_str);
@@ -627,38 +744,38 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
 
   // Closing punchline (Dota 2 veteran tone)
   let punchline = "";
-  let badge = "🎙️ AI 老炮个人点评";
+  let badge = `🎙️ AI 老炮个人点评 · ${score100}/100分`;
   let tone = "mixed";
   const rating = Number(p.rating_score || 6.0);
   if (pWon) {
-    if (isMvp || rating >= 8.0) {
-      badge = "👑 AI 封神表彰评书";
+    if (isMvp || score100 >= 88) {
+      badge = `👑 AI 封神表彰评书 · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
-      punchline = `全场贡献 ${cPct}% 胜局功勋（评分 ${rating.toFixed(1)}），从对线一路C到终局的绝对真神，这把赢球全队得给你敬一杯！`;
-    } else if ((p.dead_seconds || 0) >= 180) {
-      badge = "🌶️ AI 胜局毒舌敲打";
+      punchline = `本局百人制打分砍下 ${score100}/100 分（全场贡献 ${cPct}% 胜局功勋），从对线一路 C 到终局的绝对真神，这把赢球全队得给 ${heroShort} 敬一杯！`;
+    } else if ((p.dead_seconds || 0) >= 180 || score100 < 78) {
+      badge = `🌶️ AI 胜局毒舌敲打 · ${score100}/100分 (${scoreTier.label})`;
       tone = "mixed";
-      punchline = `虽然最后躺赢拿下比赛（贡献 ${cPct}%），但全场在泉水读秒长达 ${p.dead_seconds} 秒，属于边送边赢的“气氛组功臣”，下把少走两步危险线！`;
+      punchline = `本局百人制得分仅 ${score100}/100 分（贡献 ${cPct}%）——虽然最后跟着车队躺赢拿下比赛，但 ${heroShort} 全场在泉水读秒长达 ${p.dead_seconds} 秒，属于边送边赢的“惊险气氛组”，下把少走两步危险黑图！`;
     } else {
-      badge = "🏆 AI 凯旋功臣点评";
+      badge = `🏆 AI 凯旋功臣点评 · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
-      punchline = `稳健拿下 ${cPct}% 胜局贡献（评分 ${rating.toFixed(1)}），完美执行了 ${p.pos} 号位本职工作，是车队赢球不可或缺的坚实拼图！`;
+      punchline = `本局百人制斩获 ${score100}/100 高分（稳健拿下 ${cPct}% 胜局贡献），${heroShort} 扎实完成了 ${p.pos} 号位本职工作，是车队赢球不可或缺的坚实拼图！`;
     }
   } else {
-    if (isTopCulprit || Number(bPct) >= 25) {
-      badge = "🚨 AI 一级战犯处刑词";
+    if (isTopCulprit || Number(bPct) >= 25 || score100 < 52) {
+      badge = `🚨 AI 一级战犯处刑词 · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
-      punchline = `全场背下 ${bPct}% 头号大锅（泉水读秒 ${p.dead_seconds || 0} 秒 / 阵亡掉钱 -${fmtNum(
+      punchline = `本局百人制仅得 ${score100}/100 分，背下全队 ${bPct}% 头号大锅（泉水读秒 ${p.dead_seconds || 0} 秒 / 阵亡掉钱 -${fmtNum(
         p.death_gold_lost || 0
       )}）！${
         p.pos <= 3 && (p.tower_damage || 0) < 1200
           ? `占着 ${fmtNum(p.net_worth)} 净资产却只摸了 ${fmtNum(p.tower_damage || 0)} 点建筑伤害，纯纯的刷钱不拆塔提款机，`
           : ""
-      }这把输球你得在群里主动发红包谢罪！`;
-    } else if (rating >= 7.2 || Number(p.hero_damage_share_pct) >= 28) {
-      badge = "🛡️ AI 悲情院长平反词";
+      }这把输球 ${heroShort} 得在群里主动发红包谢罪！`;
+    } else if (rating >= 7.2 || Number(p.hero_damage_share_pct) >= 28 || score100 >= 72) {
+      badge = `🛡️ AI 悲情院长平反词 · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
-      punchline = `虽败犹荣的“悲情院长”（评分 ${rating.toFixed(1)}，背锅仅 ${bPct}%）！一个人扛起全队 ${
+      punchline = `本局百人制拿到 ${score100}/100 分（背锅仅 ${bPct}%），堪称虽败犹荣的“悲情孤胆院长”！${heroShort} 一个人扛起全队 ${
         p.hero_damage_share_pct
       }% 的英雄输出，${
         p.pos <= 2 && (p.tower_damage || 0) < 1000
@@ -666,14 +783,14 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
           : ""
       }奈何身边队友倒得比野怪还快，实在带不动！`;
     } else {
-      badge = "⚖️ AI 败局算账点评";
+      badge = `⚖️ AI 败局算账点评 · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
-      punchline = `本局分摊 ${bPct}% 败局责任（泉水读秒 ${p.dead_seconds || 0} 秒），中后期几波关键团战走位与技能衔接跟着全队一起随波逐流，下把急需找回状态！`;
+      punchline = `本局百人制得分 ${score100}/100 分，分摊 ${bPct}% 败局责任（泉水读秒 ${p.dead_seconds || 0} 秒），${heroShort} 中后期几波关键团战走位与技能衔接跟着全队一起随波逐流，下把急需找回状态！`;
     }
   }
 
   const baseStory =
-    `前10分钟在${p.lane_role || "线上"}交出 ${lh10}/${dn10} 补刀（效率 ${laneEff}%），装备按「${itemRouteStr}」成型；` +
+    `【${heroShort} 本局评分：${score100}/100分】前10分钟在${p.lane_role || "线上"}交出 ${lh10}/${dn10} 补刀（效率 ${laneEff}%），装备按「${itemRouteStr}」成型；` +
     `${activeAuditClause}` +
     `实战交出 ${p.kda}（参战 ${p.kill_participation_pct}%），轰出 ${fmtNum(p.hero_damage)} 英雄伤害（占全队 ${
       p.hero_damage_share_pct
@@ -690,8 +807,9 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
   return {
     badge,
     tone,
+    score100,
     storyText: fullText,
-    storyHtml: escapeHtml(fullText),
+    storyHtml: injectHeroLogosIntoHtml(escapeHtml(fullText), state.currentReport),
     toString() {
       return fullText;
     },
@@ -1464,7 +1582,8 @@ function buildStructuredFullReportHtml(report) {
                   : ""
               }
               <div>
-                <b>${p.pos}号位 · ${escapeHtml(heroShort)}</b><br/>
+                <b>${p.pos}号位 · ${escapeHtml(heroShort)}</b>
+                <span style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:900;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;">🏆 ${getHeroScore100(p)} / 100分</span><br/>
                 <span class="fs-sub">${escapeHtml(p.personaname || "")} · KDA ${escapeHtml(p.kda)}</span><br/>
                 <span class="fs-sub">10m补刀 ${p.laning_10m?.lh10 ?? "-"}/${p.laning_10m?.dn10 ?? "-"} · 伤转 ${
         p.net_worth ? (p.hero_damage / p.net_worth).toFixed(2) : "0.00"
@@ -1563,12 +1682,8 @@ function buildStructuredFullReportHtml(report) {
             }</strong>
             <small>${
               ownWon
-                ? `胜局贡献 ${contribMap.get(Number(topMvp?.player_slot)) ?? 25}% · 评分 ${
-                    topMvp?.rating_score ?? 8.5
-                  }`
-                : `分锅占比 ${blameMap.get(Number(topCulprit?.player_slot)) ?? 30}% · 评分 ${
-                    topCulprit?.rating_score ?? 5.0
-                  }`
+                ? `胜局贡献 ${contribMap.get(Number(topMvp?.player_slot)) ?? 25}% · 评分 ${getHeroScore100(topMvp)}/100`
+                : `分锅占比 ${blameMap.get(Number(topCulprit?.player_slot)) ?? 30}% · 评分 ${getHeroScore100(topCulprit)}/100`
             }</small>
           </div>
         </div>
@@ -1723,7 +1838,7 @@ function buildStructuredFullReportHtml(report) {
           </table>
         </div>
 
-        <h3 class="fs-subtable-title">⚔️ 全场最高烈度关键胜负手团战故事回放与经济拐点明细</h3>
+        <h3 class="fs-subtable-title">⚔️ 全场最高强度关键胜负手团战故事回放与经济拐点明细</h3>
         <div class="fs-table-wrap">
           <table class="fs-structured-table">
             <thead>
@@ -2926,7 +3041,7 @@ async function downloadStructuredReportPdf() {
         `${fmtNum(p.hero_damage)}\n(占全队 ${p.hero_damage_share_pct ?? 0}%)`,
         `${fmtNum(p.damage_taken)}\n(读秒 ${p.dead_seconds ?? 0}s)`,
         `${fmtNum(p.tower_damage)}\n(控制 ${p.stuns_sec ?? 0}s)`,
-        `${p.rating_score ?? 0} 分\n${ownWon ? p.contrib_tier || "功臣" : p.rating_tier || ""}`,
+        `${getHeroScore100(p)} / 100分\n${ownWon ? p.contrib_tier || "功臣" : p.rating_tier || ""}`,
         ownWon ? `功勋 ${sharePct}%` : `分锅 ${sharePct}%`,
         roleNote,
       ];
@@ -2940,7 +3055,7 @@ async function downloadStructuredReportPdf() {
         "英雄伤害 (占比)",
         "承伤 & 读秒",
         "推塔 & 控制",
-        "综合评分",
+        "本局百人制评分",
         ownWon ? "100% 功勋" : "100% 分锅",
         "核心定性判词",
       ],
@@ -3049,7 +3164,7 @@ async function downloadStructuredReportPdf() {
     const keyTfs = (report.key_teamfights || []).slice(0, 6);
     const tfForensicsList = df.teamfight_forensics || [];
     if (keyTfs.length > 0) {
-      drawSubSectionTitle("3.2 全场最高烈度关键胜负手团战故事回放与经济拐点明细（AI 刀塔老炮复盘评书）");
+      drawSubSectionTitle("3.2 全场最高强度关键胜负手团战故事回放与经济拐点明细（AI 刀塔老炮复盘评书）");
       const ch3TfRows = keyTfs.map((tf, idx) => {
         const matchedTfIdx = tfForensicsList.findIndex((f) => f.time_range === tf.time_range);
         const fObj = tfForensicsList[matchedTfIdx >= 0 ? matchedTfIdx : idx];
@@ -3533,7 +3648,7 @@ async function downloadStructuredReportPdf() {
           .map((ab) => `${ab.zh_name || ab.key}×${ab.count}`)
           .join(" / ") || "无记录";
       return [
-        `${p.pos}号位 · ${heroShort}\n${p.personaname || ""}\nKDA ${p.kda}\n10m补刀 ${
+        `${p.pos}号位 · ${heroShort}\n${p.personaname || ""}\n评分 ${getHeroScore100(p)}/100分 · KDA ${p.kda}\n10m补刀 ${
           p.laning_10m?.lh10 ?? "-"
         }/${p.laning_10m?.dn10 ?? "-"}`,
         `【合成时间】${itemsStr}\n【技能频次】${abilStr}\n【${cleanPdfVectorText(aiStoryObj.badge)}】${
@@ -3823,7 +3938,7 @@ async function downloadStructuredReportHtml() {
 }
 
 function syncMatchUrlInAddressBar(matchId) {
-  if (!matchId || state.workspaceMode === "pregame") return;
+  if (!matchId || state.workspaceMode !== "postgame") return;
   try {
     if (window.history?.replaceState) {
       const side = state.currentReport ? getAuditedSide(state.currentReport) : state.perspective;
@@ -3924,8 +4039,23 @@ async function initApp() {
     window.location.pathname.includes("/pregame") ||
     new URLSearchParams(window.location.search).get("mode") === "pregame"
   ) {
-    switchWorkspaceMode("pregame", { pushUrl: false });
+    switchWorkspaceMode("pregame", { pushUrl: false, animate: false });
+  } else if (urlMatchId) {
+    switchWorkspaceMode("postgame", { pushUrl: false, animate: false });
+  } else {
+    switchWorkspaceMode("home", { pushUrl: false, animate: false });
   }
+  // If user opened a direct shared match URL (?match=<id>), load that match report immediately!
+  let directMatchLoaded = false;
+  if (urlMatchId) {
+    try {
+      await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true });
+      directMatchLoaded = true;
+    } catch (e) {
+      console.warn("Direct match pre-load warning:", e);
+    }
+  }
+
   try {
     const res = await fetch(`/api/init?account_id=${encodeURIComponent(state.accountId)}`);
     const data = await res.json();
@@ -3938,25 +4068,26 @@ async function initApp() {
     state.llmStatus = data.llm_status || {};
     state.accountId = state.roster.main_account_id || 86080912;
 
-    renderHeaderStatus();
-    renderRecentMatchesStrip(data.recent_matches || state.profileData.recent_matches || []);
-    renderSquadLedgerSection(state.squadLedger);
-    populateSettingsDialog();
-    initPregameWorkspace();
-
     const firstReport = data.latest_match_report || data.latest_report;
-    if (urlMatchId && (!firstReport || Number(firstReport.match_id) !== Number(urlMatchId))) {
-      // Shared URL with explicit ?match=<id> always loads/builds the full match report directly
-      await loadMatchReport(urlMatchId, { analyzeNow: true });
-    } else if (firstReport) {
+    if (!directMatchLoaded && firstReport) {
       state.currentMatchId = firstReport.match_id;
       state.currentReport = firstReport;
       toggleOnDemandGate(false);
       renderFullMatchReport(state.currentReport);
+    }
+
+    renderHeaderStatus();
+    renderRecentMatchesStrip(data.recent_matches || state.profileData.recent_matches || []);
+    renderSquadLedgerSection(state.squadLedger);
+    renderHomeWorkspace();
+    populateSettingsDialog();
+    initPregameWorkspace();
+
+    if (urlMatchId && !directMatchLoaded) {
+      await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true });
+    } else if (state.currentMatchId) {
       highlightSelectedMatchCard(state.currentMatchId);
-      syncMatchUrlInAddressBar(state.currentMatchId);
-    } else if ((data.recent_matches || []).length > 0) {
-      await loadMatchReport(data.recent_matches[0].match_id);
+      if (urlMatchId) syncMatchUrlInAddressBar(state.currentMatchId);
     }
 
     if (urlViewReport && state.currentReport) {
@@ -3964,16 +4095,79 @@ async function initApp() {
     }
   } catch (err) {
     console.error(err);
-    showToast(`读取初始数据失败: ${err.message}`);
+    if (!directMatchLoaded) {
+      showToast(`读取初始数据失败: ${err.message}`);
+    }
   }
 }
 
 function bindEvents() {
-  // Workspace mode switcher (Post-game Forensics vs Pre-game 5-Stack Strategy Planner)
+  // Workspace mode switcher (Home vs Post-game Forensics vs Pre-game 5-Stack Strategy Planner)
   document.querySelectorAll("[data-ws-mode]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const m = btn.getAttribute("data-ws-mode") || "postgame";
+      const m = btn.getAttribute("data-ws-mode") || "home";
       switchWorkspaceMode(m, { pushUrl: true });
+    });
+  });
+
+  // Brand logo & Back-to-Home buttons
+  ["brand-home-trigger", "btn-back-to-home"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("click", () => {
+        switchWorkspaceMode("home", { pushUrl: true });
+      });
+    }
+  });
+
+  // Mobile Header Collapsible Search & Tools Toggle
+  const btnToggleMobileTools = document.getElementById("btn-toggle-mobile-tools");
+  const headerCollapsibleTools = document.getElementById("header-collapsible-tools");
+  if (btnToggleMobileTools && headerCollapsibleTools) {
+    btnToggleMobileTools.addEventListener("click", () => {
+      const isOpen = headerCollapsibleTools.classList.toggle("is-open");
+      btnToggleMobileTools.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      btnToggleMobileTools.textContent = isOpen ? "✕ 收起工具" : "🔍 查比赛 / 设置";
+    });
+  }
+
+  // Home Hero quick action buttons
+  const btnHomeOpenLatest = document.getElementById("btn-home-open-latest");
+  if (btnHomeOpenLatest) {
+    btnHomeOpenLatest.addEventListener("click", async () => {
+      const list = state.profileData?.recent_matches || [];
+      const latestAnalyzed = list.find((m) => m.is_analyzed) || list[0];
+      if (state.currentReport && (!latestAnalyzed || Number(state.currentMatchId) === Number(latestAnalyzed.match_id))) {
+        switchWorkspaceMode("postgame", { pushUrl: true });
+        syncMatchUrlInAddressBar(state.currentMatchId);
+      } else if (latestAnalyzed) {
+        await loadMatchReport(latestAnalyzed.match_id, { switchToPostgame: true });
+      }
+    });
+  }
+  const btnHomeGoPregame = document.getElementById("btn-home-go-pregame");
+  if (btnHomeGoPregame) {
+    btnHomeGoPregame.addEventListener("click", () => {
+      switchWorkspaceMode("pregame", { pushUrl: true });
+    });
+  }
+  const btnHomeScrollLedger = document.getElementById("btn-home-scroll-ledger");
+  if (btnHomeScrollLedger) {
+    btnHomeScrollLedger.addEventListener("click", () => {
+      const det = document.getElementById("squad-ledger-details");
+      if (det) det.open = true;
+      document.getElementById("squad-ledger-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  // Home Match Filter tabs
+  document.querySelectorAll("[data-home-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.homeFilter = btn.getAttribute("data-home-filter") || "all";
+      document.querySelectorAll("[data-home-filter]").forEach((b) =>
+        b.classList.toggle("active", b === btn)
+      );
+      renderHomeWorkspace();
     });
   });
 
@@ -4064,9 +4258,6 @@ function bindEvents() {
         showToast("请输入比赛编号 (如 9046364324) 或 Steam 链接 / 好友 ID");
         return;
       }
-      if (state.workspaceMode !== "postgame") {
-        switchWorkspaceMode("postgame", { pushUrl: true });
-      }
       await handleSmartQuery(raw);
     });
   }
@@ -4076,20 +4267,23 @@ function bindEvents() {
   if (refreshBtn) {
     refreshBtn.addEventListener("click", async () => {
       if (!state.currentMatchId) return;
-      await loadMatchReport(state.currentMatchId, { forceRefresh: true });
+      await loadMatchReport(state.currentMatchId, { forceRefresh: true, switchToPostgame: true });
     });
   }
 
   const toggleSquadBtn = document.getElementById("btn-toggle-squad-ledger");
   if (toggleSquadBtn) {
     toggleSquadBtn.addEventListener("click", () => {
+      if (state.workspaceMode !== "home") {
+        switchWorkspaceMode("home", { pushUrl: true });
+      }
       const det = document.getElementById("squad-ledger-details");
       if (det) {
-        det.open = !det.open;
-      } else {
-        const sec = document.getElementById("squad-ledger-section");
-        if (sec) sec.classList.toggle("collapsed");
+        det.open = true;
       }
+      setTimeout(() => {
+        document.getElementById("squad-ledger-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
     });
   }
 
@@ -4099,7 +4293,7 @@ function bindEvents() {
       const list = state.profileData?.recent_matches || [];
       const latestAnalyzed = list.find((m) => m.is_analyzed) || list[0];
       if (latestAnalyzed) {
-        await loadMatchReport(latestAnalyzed.match_id);
+        await loadMatchReport(latestAnalyzed.match_id, { switchToPostgame: true });
       }
     });
   }
@@ -4561,10 +4755,217 @@ function renderRecentMatchesStrip(matches) {
   });
 }
 
+function renderHomeWorkspace() {
+  const kpiWrap = document.getElementById("home-player-kpis");
+  const grid = document.getElementById("home-matches-grid");
+  const matches = state.profileData?.recent_matches || [];
+  const analyzedMap = new Map(
+    ((state.squadLedger && state.squadLedger.analyzed_matches) || []).map((am) => [Number(am.match_id), am])
+  );
+
+  // Render Home Hero KPI Strip
+  if (kpiWrap) {
+    const p = state.profileData?.profile || {};
+    const wl = state.profileData?.wl || {};
+    const members = state.squadLedger?.squad_members_rank || [];
+    const topCarry = [...members].sort(
+      (a, b) => (b.mvp_count || 0) - (a.mvp_count || 0) || (b.avg_rating || 0) - (a.avg_rating || 0)
+    )[0];
+    const topCulprit = [...members].sort(
+      (a, b) => (b.culprit_count || 0) - (a.culprit_count || 0) || (b.avg_blame_pct || 0) - (a.avg_blame_pct || 0)
+    )[0];
+    const analyzedCount = matches.filter((m) => m.is_analyzed || analyzedMap.has(Number(m.match_id))).length;
+    const partyCount = matches.filter((m) => Number(m.party_size || 1) >= 2).length;
+    const winCount = matches.filter((m) => (m.won !== undefined ? Boolean(m.won) : m.result === "胜利")).length;
+
+    kpiWrap.innerHTML = `
+      <div class="home-kpi-card">
+        <span class="home-kpi-label">👤 当前主视角账号</span>
+        <strong class="home-kpi-val">${escapeHtml(p.personaname || "Flame = ez mute")}</strong>
+        <span class="home-kpi-sub">Steam ID #${escapeHtml(state.accountId)} · ${escapeHtml(p.rank_label || "万古流芳 5")}</span>
+      </div>
+      <div class="home-kpi-card">
+        <span class="home-kpi-label">📈 近 ${matches.length || 12} 场战绩与开黑率</span>
+        <strong class="home-kpi-val">${winCount} 胜 ${Math.max(0, matches.length - winCount)} 负 (${wl.win_rate ?? 50}% 胜率)</strong>
+        <span class="home-kpi-sub">其中五黑/组排开黑 ${partyCount} 局 · 单排 ${Math.max(0, matches.length - partyCount)} 局</span>
+      </div>
+      <div class="home-kpi-card">
+        <span class="home-kpi-label">✅ 已生成 AI 深度复盘</span>
+        <strong class="home-kpi-val" style="color:var(--green-light);">${analyzedCount} 局录像卷宗已就绪</strong>
+        <span class="home-kpi-sub">点击下方任意比赛卡片即可秒开六大章节复盘</span>
+      </div>
+      <div class="home-kpi-card">
+        <span class="home-kpi-label">👑 车队历史大腿 vs 锅王</span>
+        <strong class="home-kpi-val">大腿 ${escapeHtml(topCarry?.personaname || "Make Your Choice")}</strong>
+        <span class="home-kpi-sub">锅王：${escapeHtml(topCulprit?.personaname || "TheReal")} (场均锅 ${topCulprit?.avg_blame_pct ?? 24}%)</span>
+      </div>
+    `;
+  }
+
+  if (!grid) return;
+  if (!matches.length) {
+    grid.innerHTML = `<div class="empty-state">暂无最近比赛记录，请在上方输入比赛编号或 Steam 好友 ID 查询</div>`;
+    return;
+  }
+
+  const filterMode = state.homeFilter || "all";
+  const filtered = matches.filter((m) => {
+    const isWin = m.won !== undefined ? Boolean(m.won) : m.result === "胜利";
+    const isAnalyzed = Boolean(m.is_analyzed || analyzedMap.has(Number(m.match_id)));
+    const isParty = Number(m.party_size || 1) >= 2 || String(m.party_label || "").includes("黑");
+    if (filterMode === "analyzed") return isAnalyzed;
+    if (filterMode === "party") return isParty;
+    if (filterMode === "win") return isWin;
+    if (filterMode === "loss") return !isWin;
+    return true;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state">当前筛选条件下暂无比赛记录，请切换上方筛选标签</div>`;
+    return;
+  }
+
+  const activeMid = state.pendingMatchId || state.currentMatchId;
+  grid.innerHTML = filtered
+    .map((m) => {
+      const mid = Number(m.match_id);
+      const isWin = m.won !== undefined ? Boolean(m.won) : m.result === "胜利";
+      const isAnalyzed = Boolean(m.is_analyzed || analyzedMap.has(mid));
+      const arch = analyzedMap.get(mid);
+      const heroShort = m.hero_short_zh || m.hero_name || "未知英雄";
+      const partyLabel = m.party_label || (m.party_size >= 2 ? `${m.party_size}人黑` : "单排");
+      const durText = m.duration_str || m.duration || "";
+      const timeAgo = m.start_time_str || m.time_ago || "";
+      const sideLabel = m.side_zh || m.side || (arch ? arch.side_zh : "");
+      const isCurrent = Number(activeMid) === mid;
+
+      let summaryPreviewHtml = "";
+      if (arch) {
+        if (arch.won) {
+          summaryPreviewHtml = `
+            <div class="hmc-verdict-preview win">
+              <span>🏆 终局比分 <b>${escapeHtml(arch.score || "")}</b></span>
+              <span>👑 首功 MVP：<b>${escapeHtml(arch.mvp_hero || "")}</b> (${arch.mvp_contrib_pct ?? 25}%)</span>
+              ${arch.runner_up_hero ? `<span>⚔️ 二功：<b>${escapeHtml(arch.runner_up_hero)}</b> (${arch.runner_up_contrib_pct ?? 22}%)</span>` : ""}
+            </div>
+          `;
+        } else {
+          summaryPreviewHtml = `
+            <div class="hmc-verdict-preview loss">
+              <span>⚖️ 终局比分 <b>${escapeHtml(arch.score || "")}</b></span>
+              <span>🛡️ 尽力王：<b>${escapeHtml(arch.mvp_hero || "")}</b></span>
+              <span>🚨 头号大锅：<b>${escapeHtml(arch.culprit_hero || "")}</b> (锅 ${arch.culprit_blame_pct ?? 28}%)</span>
+            </div>
+          `;
+        }
+      } else {
+        summaryPreviewHtml = `
+          <div class="hmc-verdict-preview pending">
+            <span>📋 录像模式：${escapeHtml(m.game_mode_str || "全英雄选择")} · ${escapeHtml(partyLabel)}</span>
+            <span>💡 点击卡片可按需启动 AI 十一维显微镜复盘并生成分享链接</span>
+          </div>
+        `;
+      }
+
+      return `
+        <article
+          class="home-match-card ${isWin ? "win-card" : "loss-card"} ${isCurrent ? "active-card" : ""}"
+          data-home-match-id="${escapeHtml(mid)}"
+        >
+          <div class="hmc-top">
+            <div class="hmc-hero-box">
+              ${
+                m.hero_img
+                  ? `<img class="hmc-hero-img" src="${escapeHtml(m.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
+                  : ""
+              }
+              <div class="hmc-hero-meta">
+                <div class="hmc-hero-line">
+                  <strong class="hmc-hero-name">${escapeHtml(heroShort)}</strong>
+                  <span class="hmc-party-pill">${escapeHtml(partyLabel)}</span>
+                  ${sideLabel ? `<span class="hmc-side-pill">${escapeHtml(sideLabel)}</span>` : ""}
+                </div>
+                <div class="hmc-id-line">
+                  <span>比赛 #${escapeHtml(mid)}</span>
+                  ${timeAgo ? `<span>· ${escapeHtml(timeAgo)}</span>` : ""}
+                </div>
+              </div>
+            </div>
+            <span class="result-pill ${isWin ? "win" : "loss"}">${isWin ? "🏆 胜利" : "💀 落败"}</span>
+          </div>
+
+          <div class="hmc-stats-strip">
+            <div class="hmc-stat-cell">
+              <span>本局战绩 K / D / A</span>
+              <strong>${escapeHtml(m.kda || "0/0/0")}</strong>
+            </div>
+            <div class="hmc-stat-cell">
+              <span>比赛时长</span>
+              <strong>${escapeHtml(durText || "-")}</strong>
+            </div>
+            <div class="hmc-stat-cell">
+              <span>AI 复盘状态</span>
+              <strong style="color:${isAnalyzed ? "var(--green-light)" : "var(--gold-light)"};">
+                ${isAnalyzed ? "✅ 已生成复盘" : "⚡ 待按需分析"}
+              </strong>
+            </div>
+          </div>
+
+          ${summaryPreviewHtml}
+
+          <div class="hmc-actions-bar">
+            <button type="button" class="button primary hmc-open-btn" data-open-match="${escapeHtml(mid)}">
+              ${isAnalyzed ? "📊 进入本局复盘详情 →" : "⚡ 查看并启动 AI 复盘 →"}
+            </button>
+            ${
+              isAnalyzed
+                ? `
+              <button type="button" class="button secondary hmc-sub-btn" data-home-pdf="${escapeHtml(mid)}" title="导出原生矢量 PDF 报告">📄 PDF</button>
+              <button type="button" class="button secondary hmc-sub-btn" data-home-share="${escapeHtml(mid)}" title="复制本局公开分享链接">🔗 分享</button>
+            `
+                : ""
+            }
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  grid.querySelectorAll("[data-home-match-id]").forEach((card) => {
+    card.addEventListener("click", async (e) => {
+      const pdfBtn = e.target.closest("[data-home-pdf]");
+      if (pdfBtn) {
+        e.stopPropagation();
+        const mid = Number(pdfBtn.getAttribute("data-home-pdf"));
+        if (mid) await exportMatchPdfReport(mid);
+        return;
+      }
+      const shareBtn = e.target.closest("[data-home-share]");
+      if (shareBtn) {
+        e.stopPropagation();
+        const mid = Number(shareBtn.getAttribute("data-home-share"));
+        if (mid) {
+          const shareUrl = getPublicShareUrl(mid);
+          await copyTextToClipboard(shareUrl, `比赛 #${mid} 公开复盘分享链接`);
+        }
+        return;
+      }
+      const mid = Number(card.getAttribute("data-home-match-id"));
+      if (mid) {
+        await loadMatchReport(mid, { switchToPostgame: true });
+      }
+    });
+  });
+}
+
 function highlightSelectedMatchCard(matchId) {
   document.querySelectorAll("[data-match-card]").forEach((btn) => {
     const mid = Number(btn.getAttribute("data-match-card"));
     btn.classList.toggle("selected", mid === Number(matchId));
+  });
+  document.querySelectorAll("[data-home-match-id]").forEach((card) => {
+    const mid = Number(card.getAttribute("data-home-match-id"));
+    card.classList.toggle("active-card", mid === Number(matchId));
   });
 }
 
@@ -4601,13 +5002,13 @@ function toggleOnDemandGate(showGate, matchId = null) {
   }
   if (summaryEl) {
     summaryEl.textContent =
-      "已开启「按需 AI 分析」模式（不自动分析每一局比赛）。当你确认需要复盘这局时，点击下方按钮即可拉取该局录像底层日志、运行九维战术显微镜，并生成可公开分享给群友的复盘链接。";
+      "已开启「按需 AI 分析」模式（不自动分析每一局比赛）。当你确认需要复盘这局时，点击下方按钮即可拉取该局录像底层日志、运行十一维战术显微镜，并生成可公开分享给群友的复盘链接。";
   }
 }
 
 async function handleSmartQuery(raw) {
   if (/^\d{9,11}$/.test(raw) && Number(raw) >= 1500000000 && Number(raw) < 76561190000000000) {
-    await loadMatchReport(Number(raw));
+    await loadMatchReport(Number(raw), { switchToPostgame: true });
     return;
   }
   showToast("正在解析玩家 ID 并拉取最近比赛...");
@@ -4623,6 +5024,7 @@ async function handleSmartQuery(raw) {
     }
     renderHeaderStatus();
     renderRecentMatchesStrip(data.recent_matches || []);
+    renderHomeWorkspace();
     if (data.latest_match_report) {
       state.currentMatchId = data.latest_match_report.match_id;
       state.currentReport = data.latest_match_report;
@@ -4637,7 +5039,16 @@ async function handleSmartQuery(raw) {
   }
 }
 
-async function loadMatchReport(matchId, { forceRefresh = false, analyzeNow = false } = {}) {
+async function loadMatchReport(
+  matchId,
+  { forceRefresh = false, analyzeNow = false, switchToPostgame = true } = {}
+) {
+  if (switchToPostgame && state.workspaceMode !== "postgame") {
+    switchWorkspaceMode("postgame", { pushUrl: false });
+  }
+  const quickDrawer = document.getElementById("quick-switch-matches-drawer");
+  if (quickDrawer) quickDrawer.open = false;
+
   if (analyzeNow || forceRefresh) {
     showToast(`🤖 AI 正在深度拆解比赛 #${matchId} 录像日志并生成分享链接...`, 4000);
   }
@@ -4663,7 +5074,7 @@ async function loadMatchReport(matchId, { forceRefresh = false, analyzeNow = fal
     state.selectedTeamfightIndex = null;
     state.scrubSyncMapMinute = null;
 
-    // Mark match as analyzed in recent_matches strip so its badge turns green immediately
+    // Mark match as analyzed in recent_matches strip & home grid so its badge turns green immediately
     const recentList = state.profileData?.recent_matches || [];
     const foundRecent = recentList.find((m) => Number(m.match_id) === Number(state.currentMatchId));
     if (foundRecent && !foundRecent.is_analyzed) {
@@ -4675,6 +5086,7 @@ async function loadMatchReport(matchId, { forceRefresh = false, analyzeNow = fal
       state.squadLedger = data.squad_ledger;
       renderSquadLedgerSection(state.squadLedger);
     }
+    renderHomeWorkspace();
     highlightSelectedMatchCard(state.currentMatchId);
     renderFullMatchReport(state.currentReport);
     syncMatchUrlInAddressBar(state.currentMatchId);
@@ -5244,7 +5656,7 @@ function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, othe
         .join("");
 
       const insightsHtml = (p.special_insights || [])
-        .map((ins) => `<li>${escapeHtml(ins)}</li>`)
+        .map((ins) => `<li>${injectHeroLogosIntoHtml(escapeHtml(ins), report)}</li>`)
         .join("");
 
       const hasHeldUltWarning = ultAudits.some(
@@ -5280,11 +5692,11 @@ function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, othe
       <div class="micro-pane-banner">
         <div>
           <h3>🎯 1. 英雄绝活与大招释放质量审判 (${escapeHtml(targetSideZh)} 1~5 号位)</h3>
-          <p><strong>${escapeHtml(targetSideZh)}大招与关键技能兑现：</strong>${escapeHtml(ownSummaryText)}${
+          <p><strong>${escapeHtml(targetSideZh)}大招与关键技能兑现：</strong>${injectHeroLogosIntoHtml(escapeHtml(ownSummaryText), report)}${
     oppSummaryText
-      ? `<br/><span style="color:var(--muted);">对照${escapeHtml(otherSideZh)}表现：${escapeHtml(
+      ? `<br/><span style="color:var(--muted);">对照${escapeHtml(otherSideZh)}表现：${injectHeroLogosIntoHtml(escapeHtml(
           oppSummaryText
-        )}</span>`
+        ), report)}</span>`
       : ""
   }</p>
         </div>
@@ -5320,7 +5732,7 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
     .map(
       (s) => `
       <tr>
-        <td><b>${s.pos ?? "?"}号位 · ${escapeHtml(s.hero_short_zh || "")}</b> (${escapeHtml(s.personaname || "")})</td>
+        <td>${renderHeroCellWithLogo(s.pos, s.hero_short_zh, s.personaname, report, s.hero_img)}</td>
         <td><b>${s.obs_total ?? s.obs_placed ?? 0} 颗假眼</b> / ${s.sen_total ?? s.sen_placed ?? 0} 真眼</td>
         <td>⚔️ 进攻 ${s.aggressive_cnt ?? s.aggressive ?? 0} / ⚖️ 河道 ${s.river_cnt ?? s.river_roshan ?? 0} / 🛡️ 防守 ${s.defensive_cnt ?? s.defensive ?? 0}</td>
         <td><b>${s.avg_lifespan_sec ?? 0}s</b> / 360s</td>
@@ -5356,13 +5768,16 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
       ? instantList
           .map(
             (w) =>
-              `<li><b>${escapeHtml(w.time_str || "")}</b> · ${escapeHtml(
-                w.planter_hero || w.hero_short_zh || ""
-              )} 插在 <b>${escapeHtml(w.zone_zh || "")} (${escapeHtml(
-                w.coords || `${w.x ?? ""},${w.y ?? ""}`
-              )})</b> 的【${escapeHtml(w.posture_zh || w.posture_label || "假眼")}】仅存活 <b>${
-                w.lifespan_sec ?? 0
-              } 秒</b>即被 ${escapeHtml(w.dewarded_by || "敌方")} 秒排！</li>`
+              `<li>${injectHeroLogosIntoHtml(
+                `<b>${escapeHtml(w.time_str || "")}</b> · ${escapeHtml(
+                  w.planter_hero || w.hero_short_zh || ""
+                )} 插在 <b>${escapeHtml(w.zone_zh || "")} (${escapeHtml(
+                  w.coords || `${w.x ?? ""},${w.y ?? ""}`
+                )})</b> 的【${escapeHtml(w.posture_zh || w.posture_label || "假眼")}】仅存活 <b>${
+                  w.lifespan_sec ?? 0
+                } 秒</b>即被 ${escapeHtml(w.dewarded_by || "敌方")} 秒排！`,
+                report
+              )}</li>`
           )
           .join("")
       : `<li>✓ 本局未出现插下 2 分钟内被秒排的白给假眼</li>`;
@@ -5397,13 +5812,13 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
       <tr>
         <td>#${idx + 1}</td>
         <td><b>${escapeHtml(w.time_str || "")}</b></td>
-        <td>${w.planter_pos ?? w.pos ?? "?"}号位 · ${escapeHtml(w.planter_hero || w.hero_short_zh || "")}</td>
+        <td>${renderHeroCellWithLogo(w.planter_pos ?? w.pos, w.planter_hero || w.hero_short_zh, "", report)}</td>
         <td><b>${escapeHtml(w.zone_zh || "")}</b> <span style="color:var(--muted);">(${w.x ?? "?"}, ${w.y ?? "?"})</span></td>
         <td>${escapeHtml(w.posture_zh || w.posture_label || "")}</td>
         <td><b style="color:${
           isInstant ? "var(--red-light)" : wasDew ? "var(--gold-light)" : "var(--green-light)"
         }">${life} 秒</b> / 360 秒</td>
-        <td>${escapeHtml(w.fate_zh || fateText)}</td>
+        <td>${injectHeroLogosIntoHtml(escapeHtml(w.fate_zh || fateText), report)}</td>
       </tr>
     `;
     })
@@ -5414,7 +5829,7 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
       <div class="micro-pane-banner">
         <div>
           <h3>👁️ 2. 辅助眼位进攻/防守倾向与存活寿命审计 (${escapeHtml(targetSideZh)})</h3>
-          <p>${escapeHtml(vis.posture_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(vis.posture_verdict || ""), report)}</p>
         </div>
       </div>
 
@@ -5554,7 +5969,7 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
       const roleLabel = r.role_tag || (r.pos >= 4 ? "辅助屯野" : "核心自拉");
       return `
       <tr>
-        <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+        <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
         <td>${escapeHtml(roleLabel)}</td>
         <td><b style="color:${(r.camps_stacked ?? 0) > 0 ? "var(--gold-light)" : "var(--muted)"}">${
           r.camps_stacked ?? 0
@@ -5582,11 +5997,14 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
       (sm) => `
       <tr>
         <td><b>${escapeHtml(sm.time_str || "")}</b> (${escapeHtml(sm.phase_tag || sm.phase_zh || "")})</td>
-        <td>${sm.initiator_pos ?? sm.activator_pos ?? "?"}号位 · ${escapeHtml(
-        sm.initiator_hero || sm.activator_hero || ""
-      )} (${escapeHtml(sm.initiator_player || sm.activator_player || "")})</td>
+        <td>${renderHeroCellWithLogo(
+          sm.initiator_pos ?? sm.activator_pos,
+          sm.initiator_hero || sm.activator_hero,
+          sm.initiator_player || sm.activator_player,
+          report
+        )}</td>
         <td><b>${escapeHtml(sm.outcome_label || "")}</b></td>
-        <td>${escapeHtml(sm.detail || "")}</td>
+        <td>${injectHeroLogosIntoHtml(escapeHtml(sm.detail || ""), report)}</td>
       </tr>
     `
     )
@@ -5597,8 +6015,9 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
       <div class="micro-grid-2col">
         <div class="micro-card">
           <h4>🌾 辅助堆野屯矿 vs 大哥自拉野审计 (${escapeHtml(targetSideZh)}合计堆野 ${totalStacks} 组)</h4>
-          <p style="margin:0; font-size:12.5px; color:var(--text); line-height:1.55;">${escapeHtml(
-            ss.stack_verdict || ""
+          <p style="margin:0; font-size:12.5px; color:var(--text); line-height:1.55;">${injectHeroLogosIntoHtml(
+            escapeHtml(ss.stack_verdict || ""),
+            report
           )}</p>
           <div class="micro-kpi-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
             <div class="micro-kpi-cell">
@@ -5631,8 +6050,9 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
 
         <div class="micro-card">
           <h4>💨 诡计之雾 (Smoke of Deceit) 开雾找节奏全记录 (${smokeUses} 波)</h4>
-          <p style="margin:0; font-size:12.5px; color:var(--text); line-height:1.55;">${escapeHtml(
-            ss.smoke_verdict || ""
+          <p style="margin:0; font-size:12.5px; color:var(--text); line-height:1.55;">${injectHeroLogosIntoHtml(
+            escapeHtml(ss.smoke_verdict || ""),
+            report
           )}</p>
           <div class="micro-kpi-row">
             <div class="micro-kpi-cell">
@@ -5687,14 +6107,14 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
     .map(
       (r) => `
       <tr>
-        <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+        <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
         <td><b>${r.pull_ticks ?? r.pull_zone_samples ?? 0}</b> 次采样 (占比 ${r.pull_ratio_pct ?? r.pull_presence_pct ?? 0}%)</td>
         <td><b>${r.early_sentries ?? r.early_sentries_placed ?? 0} 颗真眼</b></td>
         <td>10m 正/反补 <b>${r.lh10 ?? 0}/${r.dn10 ?? 0} 刀</b></td>
         <td><span class="status-pill ${
           (r.status_tag || "").includes("积极") ? "connected" : ""
         }">${escapeHtml(r.status_tag || "常规保线")}</span></td>
-        <td>${escapeHtml(r.comment || r.assessment || "")}</td>
+        <td>${injectHeroLogosIntoHtml(escapeHtml(r.comment || r.assessment || ""), report)}</td>
       </tr>
     `
     )
@@ -5705,9 +6125,12 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
     .filter((r) => (r.lotus_used ?? 0) > 0)
     .map(
       (r) =>
-        `<span class="micro-exec-badge good">${r.pos}号位 · ${escapeHtml(r.hero_short_zh || "")} (${escapeHtml(
-          r.personaname || ""
-        )})：<b>吃莲花 ×${r.lotus_used}</b></span>`
+        `<span class="micro-exec-badge good">${injectHeroLogosIntoHtml(
+          `${r.pos}号位 · ${escapeHtml(r.hero_short_zh || "")} (${escapeHtml(
+            r.personaname || ""
+          )})：<b>吃莲花 ×${r.lotus_used}</b>`,
+          report
+        )}</span>`
     )
     .join("");
 
@@ -5715,11 +6138,14 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
   const wisdomPills = wisdomTimeline
     .map(
       (w) =>
-        `<span class="micro-exec-badge ${w.side === targetSide ? "good" : "warn"}"><b>${escapeHtml(
-          w.time_str || ""
-        )}</b> · ${escapeHtml(w.side_zh || "")} ${w.pos ?? "?"}号位 ${escapeHtml(
-          w.hero_short_zh || ""
-        )} (${escapeHtml(w.personaname || "")}) 摘取智慧符</span>`
+        `<span class="micro-exec-badge ${w.side === targetSide ? "good" : "warn"}">${injectHeroLogosIntoHtml(
+          `<b>${escapeHtml(w.time_str || "")}</b> · ${escapeHtml(w.side_zh || "")} ${
+            w.pos ?? "?"
+          }号位 ${escapeHtml(w.hero_short_zh || "")} (${escapeHtml(
+            w.personaname || ""
+          )}) 摘取智慧符`,
+          report
+        )}</span>`
     )
     .join("");
 
@@ -5727,9 +6153,12 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
     .filter((g) => (g.twin_gate ?? 0) > 0 || (g.watcher_lamp ?? 0) > 0)
     .map(
       (g) =>
-        `<span class="micro-exec-badge ${g.twin_gate > 0 ? "good" : ""}">${g.pos}号位 · ${escapeHtml(
-          g.hero_short_zh || ""
-        )}：<b>走门 ×${g.twin_gate ?? 0}</b> / 点灯 ×${g.watcher_lamp ?? 0} / 抢哨 ×${g.outpost_capture ?? 0}</span>`
+        `<span class="micro-exec-badge ${g.twin_gate > 0 ? "good" : ""}">${injectHeroLogosIntoHtml(
+          `${g.pos}号位 · ${escapeHtml(g.hero_short_zh || "")}：<b>走门 ×${g.twin_gate ?? 0}</b> / 点灯 ×${
+            g.watcher_lamp ?? 0
+          } / 抢哨 ×${g.outpost_capture ?? 0}`,
+          report
+        )}</span>`
     )
     .join("");
 
@@ -5737,9 +6166,12 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
   const waterPills = waterTimeline
     .map(
       (w) =>
-        `<span class="micro-exec-badge ${w.side === targetSide ? "good" : ""}">${escapeHtml(
-          w.time_str || ""
-        )} · ${escapeHtml(w.side_zh || "")} ${escapeHtml(w.hero_short_zh || "")} 控水符</span>`
+        `<span class="micro-exec-badge ${w.side === targetSide ? "good" : ""}">${injectHeroLogosIntoHtml(
+          `${escapeHtml(w.time_str || "")} · ${escapeHtml(w.side_zh || "")} ${escapeHtml(
+            w.hero_short_zh || ""
+          )} 控水符`,
+          report
+        )}</span>`
     )
     .join("");
 
@@ -5803,7 +6235,10 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
           <h3>🌱 4. 对线期拉野·封野·走门·莲花·智慧经验符全维审计 (${escapeHtml(targetSideZh)} vs ${escapeHtml(
     otherSideZh
   )})</h3>
-          <p>${escapeHtml(lm.lotus_verdict || "")} ｜ ${escapeHtml(lm.wisdom_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(
+            `${escapeHtml(lm.lotus_verdict || "")} ｜ ${escapeHtml(lm.wisdom_verdict || "")}`,
+            report
+          )}</p>
         </div>
       </div>
 
@@ -5848,7 +6283,10 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
       <div class="micro-grid-2col">
         <div class="micro-card">
           <h4>🌺 疗伤莲花 (Lotus) &amp; 💧 2/4m 中路水符归属明细</h4>
-          <p style="margin:0; font-size:12px; color:var(--muted);">${escapeHtml(lm.lotus_verdict || "")}</p>
+          <p style="margin:0; font-size:12px; color:var(--muted);">${injectHeroLogosIntoHtml(
+            escapeHtml(lm.lotus_verdict || ""),
+            report
+          )}</p>
           <div class="micro-badges-wrap">${lotusPills || `<span class="micro-exec-badge">本方未记录到吃莲花事件</span>`}</div>
           ${
             waterPills
@@ -5859,7 +6297,10 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
 
         <div class="micro-card">
           <h4>📚 智慧神符 (经验符) 时间轴 &amp; 🚪 双生门传送 (Twin Gate)</h4>
-          <p style="margin:0; font-size:12px; color:var(--muted);">${escapeHtml(lm.wisdom_verdict || "")}</p>
+          <p style="margin:0; font-size:12px; color:var(--muted);">${injectHeroLogosIntoHtml(
+            escapeHtml(lm.wisdom_verdict || ""),
+            report
+          )}</p>
           <div class="micro-badges-wrap">${wisdomPills || `<span class="micro-exec-badge">无智慧神符拾取记录</span>`}</div>
           <div style="margin-top:6px;">
             <strong style="font-size:12px; color:var(--gold-light);">🚪 双生门传送与观察者点灯明细：</strong>
@@ -5892,7 +6333,7 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
       const tfAbsentTimes = r.tf_absent_times || r.spectator_times || [];
       return `
       <tr>
-        <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+        <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
         <td><b>${tpUsed} 次</b></td>
         <td><b style="color:${tpBought === 0 ? "var(--red-light)" : "var(--text)"}">${tpBought} 张</b>${
         tpBought === 0 ? " (全靠复活白嫖!)" : ""
@@ -5904,7 +6345,7 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
         <td><b style="color:${tfAbsentCnt > 0 ? "var(--red-light)" : "var(--green-light)"}">${tfAbsentCnt} 波</b>${
         tfAbsentTimes.length > 0 ? ` (${escapeHtml(tfAbsentTimes.join("、"))})` : ""
       }</td>
-        <td>${escapeHtml(r.verdict || "")}</td>
+        <td>${injectHeroLogosIntoHtml(escapeHtml(r.verdict || ""), report)}</td>
       </tr>
     `;
     })
@@ -5915,17 +6356,23 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
       const saviors = (ev.tp_saviors || [])
         .map(
           (s) =>
-            `<span class="micro-tf-pill">🟢 ${s.pos ?? "?"}号位·${escapeHtml(
-              s.hero_short_zh || ""
-            )} 亮TP支援 (打${fmtNum(s.damage || 0)}伤)</span>`
+            `<span class="micro-tf-pill">🟢 ${injectHeroLogosIntoHtml(
+              `${s.pos ?? "?"}号位·${escapeHtml(s.hero_short_zh || "")} 亮TP支援 (打${fmtNum(
+                s.damage || 0
+              )}伤)`,
+              report
+            )}</span>`
         )
         .join("");
       const specs = (ev.spectators || [])
         .map(
           (sp) =>
-            `<span class="micro-tf-pill held-die">🔴 ${sp.pos ?? "?"}号位·${escapeHtml(
-              sp.hero_short_zh || ""
-            )} (${escapeHtml(sp.personaname || "")}) 0伤害0技能未亮TP旁观</span>`
+            `<span class="micro-tf-pill held-die">🔴 ${injectHeroLogosIntoHtml(
+              `${sp.pos ?? "?"}号位·${escapeHtml(sp.hero_short_zh || "")} (${escapeHtml(
+                sp.personaname || ""
+              )}) 0伤害0技能未亮TP旁观`,
+              report
+            )}</span>`
         )
         .join("");
       return `
@@ -5946,7 +6393,7 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
       <div class="micro-pane-banner">
         <div>
           <h3>🆘 8. TP 救人及时性、主动买 TP 习惯与团战边缘 OB 抓包 (${escapeHtml(targetSideZh)})</h3>
-          <p>${escapeHtml(tp.tp_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(tp.tp_verdict || ""), report)}</p>
         </div>
       </div>
 
@@ -6011,14 +6458,14 @@ function renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh) {
       const zeroCnt = Number(r.zero_spell_cnt ?? 0);
       return `
         <tr>
-          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+          <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
           <td><b>${r.tf_deaths ?? 0} 次</b></td>
           <td><b style="color:${coreCnt > 0 ? "var(--red-light)" : "var(--green-light)"}">${coreCnt} 次</b>${
         wandCnt > 0 ? ` <span style="color:var(--gold-light);">(+魔棒/刃甲未按 ${wandCnt} 次)</span>` : ""
       }</td>
           <td><b style="color:${zeroCnt > 0 ? "var(--red-light)" : "var(--green-light)"}">${zeroCnt} 次</b></td>
           <td style="font-size:11.5px;color:var(--muted);">${escapeHtml(r.owned_saves_str || "未合成主动保命装")}</td>
-          <td>${escapeHtml(r.verdict || "")}</td>
+          <td>${injectHeroLogosIntoHtml(escapeHtml(r.verdict || ""), report)}</td>
         </tr>
       `;
     })
@@ -6035,9 +6482,12 @@ function renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh) {
               inc.time_range || ""
             )}
           </span>
-          <b>${inc.pos ?? "?"}号位 · ${escapeHtml(inc.hero_short_zh || "")} (${escapeHtml(
+          ${injectHeroLogosIntoHtml(
+            `<b>${inc.pos ?? "?"}号位 · ${escapeHtml(inc.hero_short_zh || "")} (${escapeHtml(
               inc.personaname || ""
-            )})</b>：${escapeHtml(inc.detail || "")}
+            )})</b>：${escapeHtml(inc.detail || "")}`,
+            report
+          )}
         </li>
       `
           )
@@ -6049,7 +6499,7 @@ function renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh) {
       <div class="micro-pane-banner">
         <div>
           <h3>💀 2. 憋死 BKB / 救命装与团战 0 技能秒躺尸检 (${escapeHtml(targetSideZh)})</h3>
-          <p>${escapeHtml(us.side_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(us.side_verdict || ""), report)}</p>
         </div>
       </div>
 
@@ -6115,8 +6565,8 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
       const isGood = r.grade === "good";
       return `
         <tr>
-          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
-          <td><span class="micro-exec-badge ${isBad ? "warn" : isGood ? "good" : ""}">${escapeHtml(
+          <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
+          <td class="micro-badge-cell"><span class="micro-exec-badge ${isBad ? "warn" : isGood ? "good" : ""}">${escapeHtml(
         r.space_style_badge || "常规驻守"
       )}</span></td>
           <td>兵线 <b>${r.lane_kills ?? 0}</b> (${r.lane_farm_pct ?? 0}%) / 野区 <b>${r.neutral_kills ?? 0}</b> (${r.jungle_farm_pct ?? 0}%)</td>
@@ -6126,27 +6576,31 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
           <td><b style="color:${soloCnt >= 2 ? "var(--red-light)" : soloCnt === 0 ? "var(--green-light)" : "var(--gold-light)"}">${soloCnt} 次</b> (送 ${fmtNum(
         r.solo_gold_fed || 0
       )} 金)</td>
-          <td>${escapeHtml(r.verdict || "")}</td>
+          <td>${injectHeroLogosIntoHtml(escapeHtml(r.verdict || ""), report)}</td>
         </tr>
       `;
     })
     .join("");
 
   const evRowsHtml = events
-    .map(
-      (ev) => `
+    .map((ev) => {
+      const killerImg = findMatchHeroImg(ev.killer_zh || "", report);
+      const killerHtml = killerImg
+        ? `<span class="inline-hero-chip"><img class="inline-hero-logo" src="${escapeHtml(killerImg)}" alt="" /><b>${escapeHtml(ev.killer_zh || "敌方")}</b></span>`
+        : `<b>${escapeHtml(ev.killer_zh || "敌方")}</b>`;
+      return `
       <tr>
         <td><b>${escapeHtml(ev.time_str || "")}</b></td>
-        <td><b>${ev.pos ?? "?"}号位 · ${escapeHtml(ev.hero_short_zh || "")}</b> (${escapeHtml(ev.personaname || "")})</td>
-        <td><b>${escapeHtml(ev.zone_zh || "")}</b> (被 ${escapeHtml(ev.killer_zh || "敌方")} 抓死)</td>
+        <td>${renderHeroCellWithLogo(ev.pos, ev.hero_short_zh, ev.personaname, report, ev.hero_img)}</td>
+        <td><b>${escapeHtml(ev.zone_zh || "")}</b> (被 ${killerHtml} 抓死)</td>
         <td>${escapeHtml(ev.vision_tag || "")}</td>
         <td>读秒 <b>${ev.time_dead ?? 0}s</b> · 送 <b>${fmtNum(ev.gold_fed || 0)} 金</b></td>
         <td><b style="color:${
           (ev.consequence || "").includes("无战略收益") ? "var(--gold-light)" : "var(--red-light)"
         }">${escapeHtml(ev.consequence || "")}</b></td>
       </tr>
-    `
-    )
+    `;
+    })
     .join("");
 
   return `
@@ -6154,7 +6608,7 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
       <div class="micro-pane-banner">
         <div>
           <h3>🗺️ 3. 地图空间理解与「大哥带无聊危险线 / 落单乱逛被抓死」空间取证 (${escapeHtml(targetSideZh)})</h3>
-          <p>${escapeHtml(ms.side_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(ms.side_verdict || ""), report)}</p>
         </div>
       </div>
 
@@ -6231,14 +6685,14 @@ function renderMicroDamageReceivedPane(report, df, targetSide, targetSideZh) {
 
       return `
         <tr>
-          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
+          <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
           <td><b>${fmtNum(r.total_dmg_taken || 0)}</b></td>
           <td>🔮 技能/法系 <b>${r.spell_pct ?? 0}%</b> (${fmtNum(r.spell_dmg || 0)})<br/>🗡️ 物理平A <b>${
         r.auto_pct ?? 0
       }%</b> (${fmtNum(r.auto_dmg || 0)})</td>
           <td><div class="micro-tf-pills">${killersStr || "平A为主"}</div></td>
           <td><div class="micro-badges-wrap">${defItemsStr}</div></td>
-          <td>${escapeHtml(r.verdict || "")}</td>
+          <td>${injectHeroLogosIntoHtml(escapeHtml(r.verdict || ""), report)}</td>
         </tr>
       `;
     })
@@ -6249,7 +6703,7 @@ function renderMicroDamageReceivedPane(report, df, targetSide, targetSideZh) {
       <div class="micro-pane-banner">
         <div>
           <h3>🛡️ 4. 承伤来源拆解（物理平A vs 技能爆发）与防装合规审计 (${escapeHtml(targetSideZh)})</h3>
-          <p>${escapeHtml(dr.side_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(dr.side_verdict || ""), report)}</p>
         </div>
       </div>
 
@@ -6289,8 +6743,8 @@ function renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh) {
     .map(
       (r) => `
       <tr>
-        <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(r.personaname || "")})</td>
-        <td><span class="micro-exec-badge">${escapeHtml(r.econ_tag || "均衡发育")}</span></td>
+        <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
+        <td class="micro-badge-cell"><span class="micro-exec-badge">${escapeHtml(r.econ_tag || "均衡发育")}</span></td>
         <td>🌾 <b>${fmtNum(r.lane_gold || 0)}</b> (${r.lane_pct ?? 0}%)</td>
         <td>🌲 <b>${fmtNum(r.jungle_gold || 0)}</b> (${r.jungle_pct ?? 0}%)</td>
         <td>⚔️ <b>${fmtNum(r.kill_gold || 0)}</b> (${r.kill_pct ?? 0}%)</td>
@@ -6313,7 +6767,7 @@ function renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh) {
           <h3>💰 9. 经济来源结构拆解（兵线/野区/人头/塔盾/阵亡买活损耗）与局内信号互动 (${escapeHtml(
             targetSideZh
           )})</h3>
-          <p>${escapeHtml(ep.side_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(ep.side_verdict || ""), report)}</p>
         </div>
       </div>
 
@@ -6515,7 +6969,7 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
           </div>
 
           <div style="font-size:12px; color:var(--text-dim); line-height:1.45;">
-            📋 ${escapeHtml(r.summary_txt || "")}
+            📋 ${injectHeroLogosIntoHtml(escapeHtml(r.summary_txt || ""), report)}
           </div>
         </article>
       `;
@@ -6529,7 +6983,7 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
           <h3>⚔️ 10. 1~5 号位同位置宿敌 1v1 正面对位审判 &amp; OpenDota 全球同英雄百分位标尺 (${escapeHtml(
             targetSideZh
           )} vs ${escapeHtml(otherSideZh)})</h3>
-          <p>${escapeHtml(rm.side_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(rm.side_verdict || ""), report)}</p>
         </div>
       </div>
 
@@ -6582,9 +7036,12 @@ function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
             <span class="micro-tf-pill ${ev.severity === "critical" ? "held-die" : ""}">
               ${escapeHtml(ev.outcome_tag || "买活记录")} · ${escapeHtml(ev.time_str || "")}
             </span>
-            <b>${ev.pos ?? "?"}号位 · ${escapeHtml(ev.hero_short_zh || "")} (${escapeHtml(
-              ev.personaname || ""
-            )})</b>：${escapeHtml(ev.detail || "")}
+            ${injectHeroLogosIntoHtml(
+              `<b>${ev.pos ?? "?"}号位 · ${escapeHtml(ev.hero_short_zh || "")} (${escapeHtml(
+                ev.personaname || ""
+              )})</b>：${escapeHtml(ev.detail || "")}`,
+              report
+            )}
           </li>
         `
           )
@@ -6594,7 +7051,7 @@ function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
   const roshEvents = mo.roshan_events || [];
   const roshHtml =
     roshEvents.length > 0
-      ? roshEvents.map((r) => `<li>${escapeHtml(r)}</li>`).join("")
+      ? roshEvents.map((r) => `<li>${injectHeroLogosIntoHtml(escapeHtml(r), report)}</li>`).join("")
       : `<li>本局录像未记录到肉山盾拾取或抢盾事件。</li>`;
 
   const courierEvents = mo.courier_events || [];
@@ -6607,7 +7064,7 @@ function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
             <span class="micro-tf-pill ${ce.is_own_lost ? "held-die" : ""}">
               ${escapeHtml(ce.event_tag || "信使事件")}
             </span>
-            ${escapeHtml(ce.detail || "")}
+            ${injectHeroLogosIntoHtml(escapeHtml(ce.detail || ""), report)}
           </li>
         `
           )
@@ -6626,14 +7083,12 @@ function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
           : `<span style="color:var(--text-dim);">无锻造切换记录</span>`;
       return `
         <tr>
-          <td><b>${cr.pos ?? "?"}号位 · ${escapeHtml(cr.hero_short_zh || "")}</b> (${escapeHtml(
-        cr.personaname || ""
-      )})</td>
+          <td>${renderHeroCellWithLogo(cr.pos, cr.hero_short_zh, cr.personaname, report, cr.hero_img)}</td>
           <td><b>${escapeHtml(cr.shard_str || "未获魔晶")}</b></td>
           <td>${stepsPills}</td>
           <td style="color:${
             cr.grade === "warn" ? "var(--gold-light)" : "var(--green-light)"
-          }">${escapeHtml(cr.craft_verdict || "")}</td>
+          }">${injectHeroLogosIntoHtml(escapeHtml(cr.craft_verdict || ""), report)}</td>
         </tr>
       `;
     })
@@ -6646,7 +7101,7 @@ function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
           <h3>🐉 11. 买活死 (Dieback) 尸检 · 信使掉鸡惨案 · 肉山魔晶 &amp; Dota 2 7.38 中立装备附魔审计 (${escapeHtml(
             targetSideZh
           )})</h3>
-          <p>${escapeHtml(mo.side_verdict || "")}</p>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(mo.side_verdict || ""), report)}</p>
         </div>
       </div>
 
@@ -6816,7 +7271,564 @@ function toggleVoiceBroadcast() {
 }
 
 /**
- * 2. Render Grok 4.7 Verdict Banner + MVP Card + Culprit Card + 5-Stack Blame Ledger
+ * Build rich 4-stage replay cards with inline Hero Mini-Logos for Chapter ②
+ * Covers:
+ *  1) 00:00-10:00 对线期三路表现 · 游走Gank与抢符拉野
+ *  2) 10:00-25:00 中期 Gank · 开雾情况 · 打团齐整度(谁没来/落单)与大哥打钱节奏
+ *  3) 25:00-终局 决胜团战 · 肉山高地 · 买活博弈与后期刷钱转化
+ *  4) 全局五人硬实力 · 团队执行力与同位置 1v1 对位总账
+ */
+function buildRichFourStageCardsHtml(report) {
+  const { side, sideZh, own, opp } = getOwnAndOppPlayers(report);
+  const oppZh = side === "radiant" ? "夜魇" : "天辉";
+  const df = report.deep_forensics || {};
+  const rawPhases = report.phases_data || [];
+  const phasesList = Array.isArray(rawPhases) ? rawPhases : Object.values(rawPhases);
+  const byPhase = new Map(phasesList.map((pd) => [pd.key, pd]));
+  const lanePd = byPhase.get("lane");
+  const midPd = byPhase.get("mid");
+  const latePd = byPhase.get("late");
+  const signMult = side === (report.focus_side || "dire") ? 1 : -1;
+
+  // --- STAGE 1: 00:00 - 10:00 对线期三路表现 · 游走Gank与抢符拉野 ---
+  const laneOwnP = (lanePd?.players || []).filter((p) => p.side === side);
+  const laneOppP = (lanePd?.players || []).filter((p) => p.side !== side);
+  const laneOwnKills = laneOwnP.reduce((s, p) => s + (p.kills_count || 0), 0);
+  const laneOppKills = laneOppP.reduce((s, p) => s + (p.kills_count || 0), 0);
+  const gold10Diff = Math.round(Number(lanePd?.team_summary?.income_diff_end || 0) * signMult);
+  const lm = df.laning_mechanics_by_side?.[side] || {};
+  const tp = df.tp_rotation_by_side?.[side] || {};
+  const rm = df.role_mirror_by_side?.[side] || {};
+  const lanes = df.lane_matchups || [];
+
+  const laneOverviewBullet = `<span class="stage-key-pill">10m 对线总账</span> 10分钟人头比 <b>${sideZh} ${laneOwnKills} : ${laneOppKills} ${oppZh}</b>，经济差 <b style="color:${
+    gold10Diff >= 0 ? "var(--green-light)" : "var(--red-light)"
+  }">${fmtSigned(gold10Diff)} 金</b>（同位置10m经济占优 <b>${rm.won_lanes_cnt ?? "-"} / 5</b> 路）。`;
+
+  const laneMatchupBullets = lanes.map((ln) => {
+    const direHeroes = (ln.dire_heroes || [])
+      .map((h) => `${h.hero_short_zh}(${h.lh10 ?? 0}/${h.dn10 ?? 0}刀·${fmtNum(h.gold10 || 0)}金)`)
+      .join("+");
+    const radHeroes = (ln.radiant_heroes || [])
+      .map((h) => `${h.hero_short_zh}(${h.lh10 ?? 0}/${h.dn10 ?? 0}刀·${fmtNum(h.gold10 || 0)}金)`)
+      .join("+");
+    const ownLine = side === "dire" ? `夜魇 ${direHeroes}` : `天辉 ${radHeroes}`;
+    const oppLine = side === "dire" ? `天辉 ${radHeroes}` : `夜魇 ${direHeroes}`;
+    const laneName = (ln.title || "分路").split(" ")[0];
+    return `<span class="stage-key-pill">${escapeHtml(laneName)}</span> ${escapeHtml(ownLine)} 对阵 ${escapeHtml(
+      oppLine
+    )} <span class="stage-outcome-pill">→ ${escapeHtml(ln.verdict_zh || "均势")}</span>`;
+  });
+
+  // Roaming / Twin Gate / early TP rotations / early gankers
+  const gateUsers = (lm.map_interact_rows || [])
+    .filter((g) => (g.twin_gate ?? 0) > 0)
+    .map((g) => `${g.pos}号位${g.hero_short_zh}(走门×${g.twin_gate})`);
+  const earlyTpUsers = (tp.player_tp_rows || [])
+    .filter((r) => (r.early_tp_cnt ?? r.early_tp_rotations_12m ?? 0) > 0)
+    .map((r) => `${r.pos}号位${r.hero_short_zh}(前12m亮TP×${r.early_tp_cnt ?? r.early_tp_rotations_12m})`);
+  const earlyKillLeaders = [...laneOwnP]
+    .filter((p) => (p.kills_count || 0) >= 2)
+    .sort((a, b) => (b.kills_count || 0) - (a.kills_count || 0))
+    .map((p) => `${p.pos}号位${p.hero_short_zh}(${p.kills_count}杀/${p.deaths_count}死)`);
+  const earlyVictims = [...laneOwnP]
+    .filter((p) => (p.deaths_count || 0) >= 2)
+    .sort((a, b) => (b.deaths_count || 0) - (a.deaths_count || 0))
+    .map((p) => `${p.pos}号位${p.hero_short_zh}(被抓${p.deaths_count}死)`);
+
+  const roamAndGankBullet = `<span class="stage-key-pill">前期游走与支援</span> 双生门传送 <b>${
+    lm.own_gate_total ?? 0
+  } : ${lm.opp_gate_total ?? 0}</b>（${
+    gateUsers.length > 0 ? escapeHtml(gateUsers.join("、")) : "本方前10m未走双生门绕后"
+  }）；前12m支援/回线TP：${
+    earlyTpUsers.length > 0 ? escapeHtml(earlyTpUsers.join("、")) : "无主动支援TP"
+  }。${
+    earlyKillLeaders.length > 0
+      ? `对线期打开节奏：<b>${escapeHtml(earlyKillLeaders.join("、"))}</b>；`
+      : ""
+  }${earlyVictims.length > 0 ? `抗压/被游走针对：<b>${escapeHtml(earlyVictims.join("、"))}</b>。` : ""}`;
+
+  const pullSummary = (lm.pulling_rows || lm.pull_rows || [])
+    .map(
+      (r) =>
+        `${r.pos}号位${r.hero_short_zh}(拉野驻留${r.pull_ratio_pct ?? r.pull_presence_pct ?? 0}%·真眼${
+          r.early_sentries ?? r.early_sentries_placed ?? 0
+        }颗·${r.status_tag || "保线"})`
+    )
+    .join("、");
+  const waterStr = (lm.water_runes_timeline || lm.water_events || [])
+    .map((w) => `${w.time_str} ${w.hero_short_zh}`)
+    .join(" / ");
+  const resourcesBullet = `<span class="stage-key-pill">抢符·拉野·封野</span> 疗伤莲花 <b>${
+    lm.own_lotus_total ?? 0
+  } : ${lm.opp_lotus_total ?? 0}</b>，智慧神符 <b>${lm.own_wisdom_cnt ?? 0} : ${
+    lm.opp_wisdom_cnt ?? 0
+  }</b>${waterStr ? `，中路水符(${escapeHtml(waterStr)})` : ""}；辅助拉野封野：${
+    pullSummary ? escapeHtml(pullSummary) : "常规保线"
+  }。`;
+
+  // --- STAGE 2: 10:00 - 25:00 中期 Gank · 开雾情况 · 打团齐整度与大哥打钱节奏 ---
+  const midOwnP = (midPd?.players || [])
+    .filter((p) => p.side === side)
+    .sort((a, b) => (a.pos || 9) - (b.pos || 9));
+  const midOppP = (midPd?.players || []).filter((p) => p.side !== side);
+  const midOwnKills = midOwnP.reduce((s, p) => s + (p.kills_count || 0), 0);
+  const midOppKills = midOppP.reduce((s, p) => s + (p.kills_count || 0), 0);
+  const midGoldDelta = Math.round(Number(midPd?.team_summary?.income_diff_change || 0) * signMult);
+  const midGoldEnd = Math.round(Number(midPd?.team_summary?.income_diff_end || 0) * signMult);
+  const ss = df.stacking_and_smoke_by_side?.[side] || {};
+  const ms = df.map_space_by_side?.[side] || {};
+
+  const midOverviewBullet = `<span class="stage-key-pill">中期控图节奏</span> 10–25m 爆发人头 <b>${sideZh} ${midOwnKills} : ${midOppKills} ${oppZh}</b>，阶段经济净变动 <b style="color:${
+    midGoldDelta >= 0 ? "var(--green-light)" : "var(--red-light)"
+  }">${fmtSigned(midGoldDelta)} 金</b>（25m累计经济差 <b>${fmtSigned(midGoldEnd)} 金</b>），推塔 <b>${
+    midPd?.team_summary?.towers_taken ?? 0
+  }</b> 座 / 掉塔 <b>${midPd?.team_summary?.towers_lost ?? 0}</b> 座。`;
+
+  const smokeEvents = ss.smoke_events || [];
+  const smokeDetailsStr =
+    smokeEvents.length > 0
+      ? smokeEvents
+          .slice(0, 4)
+          .map(
+            (sm) =>
+              `${sm.time_str} ${sm.initiator_hero || sm.activator_hero || "全队"}捏雾 → ${
+                sm.outcome_label || ""
+              }`
+          )
+          .join("；")
+      : "整局 0 开雾记录";
+  const smokeBullet = `<span class="stage-key-pill">开雾 Gank 审计</span> 全队买雾 <b>${
+    ss.smoke_total_bought ?? smokeEvents.length
+  }</b> 颗 / 开雾 <b>${ss.own_smoke_uses ?? smokeEvents.length}</b> 波（🟢破雾大捷 <b>${
+    ss.smoke_success_count ?? 0
+  }</b> 波 · 🟡哑火空雾 <b>${ss.smoke_dry_count ?? 0}</b> 波 · 🔴撞墙 <b>${
+    ss.smoke_backfire_count ?? 0
+  }</b> 波）：${escapeHtml(smokeDetailsStr)}。`;
+
+  // Teamfight attendance (who didn't show up / 0 TP bought) & Solo Pickoffs in 9-25m
+  const absentRows = (tp.player_tp_rows || []).filter(
+    (r) => (r.tf_absent_cnt ?? r.spectator_teamfights ?? 0) > 0
+  );
+  const zeroTpBuyers = (tp.player_tp_rows || []).filter((r) => Number(r.tp_bought ?? 1) === 0);
+  const midSoloEvents = (ms.solo_pickoff_events || []).filter((ev) => {
+    const m = parseInt(String(ev.time_str || "0").split(":")[0], 10);
+    return m >= 9 && m <= 26;
+  });
+  const attendanceParts = [];
+  if (absentRows.length > 0) {
+    attendanceParts.push(
+      `团战缺席/边缘OB：<b>${escapeHtml(
+        absentRows
+          .map(
+            (r) =>
+              `${r.pos}号位${r.hero_short_zh}缺席${r.tf_absent_cnt ?? r.spectator_teamfights}波(${(
+                r.tf_absent_times ||
+                r.spectator_times ||
+                []
+              ).join("/")})`
+          )
+          .join("、")
+      )}</b>`
+    );
+  } else {
+    attendanceParts.push(`正面团战全员齐整到场（0次团战边缘OB）`);
+  }
+  if (zeroTpBuyers.length > 0) {
+    attendanceParts.push(
+      `⚠️ <b>${escapeHtml(
+        zeroTpBuyers.map((r) => `${r.pos}号位${r.hero_short_zh}`).join("、")
+      )}</b> 整局主动花钱买 0 张 TP`
+    );
+  }
+  if (midSoloEvents.length > 0) {
+    attendanceParts.push(
+      `🚨 中期脱离团队落单被抓 <b>${midSoloEvents.length}</b> 次：${escapeHtml(
+        midSoloEvents
+          .slice(0, 4)
+          .map(
+            (ev) =>
+              `${ev.time_str} ${ev.pos}号位${ev.hero_short_zh}在${ev.zone_zh}被${ev.killer_zh || "敌方"}抓死`
+          )
+          .join("；")
+      )}`
+    );
+  } else {
+    attendanceParts.push(`中期 0 次盲区落单掉点`);
+  }
+  const attendanceBullet = `<span class="stage-key-pill">打团齐整度与掉点</span> ${attendanceParts.join("；")}。`;
+
+  // Core farming pace (Pos 1-3 in 10-25m + item timings + stacks)
+  const coreFarmingStr = midOwnP
+    .filter((p) => (p.pos || 9) <= 3)
+    .map((c) => {
+      const fullP = own.find((x) => Number(x.player_slot) === Number(c.player_slot)) || c;
+      const itemsStr = (c.items_bought || [])
+        .slice(0, 2)
+        .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
+        .join("/");
+      return `${c.pos}号位${c.hero_short_zh}(+${fmtNum(c.gold_gain || 0)}金/+${
+        c.lh_gain || 0
+      }刀·GPM ${fullP.gpm || "-"}${itemsStr ? `·出装:${itemsStr}` : ""})`;
+    })
+    .join(" ｜ ");
+  const farmingBullet = `<span class="stage-key-pill">大哥打钱节奏与屯野</span> 全队堆野 <b>${
+    ss.total_stacks ?? 0
+  }</b> 组（辅助屯野 ${ss.support_stacks ?? 0} 组 / 核心自拉 ${
+    ss.core_stacks ?? 0
+  } 组）；10–25m三大哥发育：${escapeHtml(coreFarmingStr || "数据正常")}。`;
+
+  // --- STAGE 3: 25:00 - 终局 决胜团战 · 肉山高地 · 买活博弈与后期刷钱转化 ---
+  const lateOwnP = (latePd?.players || [])
+    .filter((p) => p.side === side)
+    .sort((a, b) => (a.pos || 9) - (b.pos || 9));
+  const lateOppP = (latePd?.players || []).filter((p) => p.side !== side);
+  const lateOwnKills = lateOwnP.reduce((s, p) => s + (p.kills_count || 0), 0);
+  const lateOppKills = lateOppP.reduce((s, p) => s + (p.kills_count || 0), 0);
+  const lateGoldDelta = Math.round(Number(latePd?.team_summary?.income_diff_change || 0) * signMult);
+  const topLateCarry = [...lateOwnP].sort(
+    (a, b) => (b.hero_damage_gain || 0) + (b.gold_gain || 0) - ((a.hero_damage_gain || 0) + (a.gold_gain || 0))
+  )[0];
+  const mo = df.macro_objectives_by_side?.[side] || {};
+  const us = df.unpressed_saves_by_side?.[side] || {};
+  const peakTf = (report.key_teamfights || [])[0];
+
+  const lateOverviewBullet = `<span class="stage-key-pill">后期决战走势</span> 25m–终局人头交换 <b>${sideZh} ${lateOwnKills} : ${lateOppKills} ${oppZh}</b>，经济差再拉开 <b style="color:${
+    lateGoldDelta >= 0 ? "var(--green-light)" : "var(--red-light)"
+  }">${fmtSigned(lateGoldDelta)} 金</b>，推塔 <b>${
+    latePd?.team_summary?.towers_taken ?? 0
+  }</b> 座。${
+    topLateCarry
+      ? `后期最强刷钱输出引擎为 <b>${topLateCarry.pos}号位${escapeHtml(
+          topLateCarry.hero_short_zh
+        )}</b>（后期 +${fmtNum(topLateCarry.gold_gain || 0)}金 / 打出 ${fmtNum(
+          topLateCarry.hero_damage_gain || 0
+        )} 英雄伤害）。`
+      : ""
+  }`;
+
+  const peakTfBullet = peakTf
+    ? `<span class="stage-key-pill">决胜高强度团战</span> 爆发于 <b>${escapeHtml(
+        peakTf.time_range || ""
+      )}</b>，双方打出 <b>${escapeHtml(peakTf.kills_trade || "")}</b>（经济波动 <b>${escapeHtml(
+        peakTf.gold_swing || ""
+      )}</b>），单波最高输出为 <b>${escapeHtml(peakTf.top_damage_hero || "")}</b>。`
+    : `<span class="stage-key-pill">决胜高强度团战</span> 后期通过带线牵制与高地推进完成终结。`;
+
+  const lateSoloEvents = (ms.solo_pickoff_events || []).filter((ev) => {
+    const m = parseInt(String(ev.time_str || "0").split(":")[0], 10);
+    return m > 26;
+  });
+  const roshStr =
+    (mo.roshan_events || []).length > 0
+      ? mo.roshan_events.slice(0, 2).join("；")
+      : "本局无肉山盾记录";
+  const roshAndPickoffBullet = `<span class="stage-key-pill">肉山盾奶与后期掉点</span> ${escapeHtml(
+    roshStr
+  )}；${
+    lateSoloEvents.length > 0
+      ? `🚨 26m后关键期落单被抓：${escapeHtml(
+          lateSoloEvents
+            .map((ev) => `${ev.time_str} ${ev.pos}号位${ev.hero_short_zh}在${ev.zone_zh}被${ev.killer_zh || "敌方"}击杀`)
+            .join("、")
+        )}`
+      : "✓ 26m后决胜期 0 次无脑落单白给"
+  }。`;
+
+  const bbSummary =
+    (mo.buyback_events || []).length > 0
+      ? mo.buyback_events
+          .slice(0, 2)
+          .map((b) => `${b.time_str} ${b.pos}号位${b.hero_short_zh}(${b.outcome_tag})`)
+          .join("、")
+      : "全员0买活死";
+  const buybackAndSaveBullet = `<span class="stage-key-pill">买活博弈与保命审计</span> 救世买活 <b>${
+    mo.clutch_bb_cnt ?? 0
+  }</b> 次 / 致命买活死 <b>${mo.dieback_cnt ?? 0}</b> 次（${escapeHtml(
+    bbSummary
+  )}）；团战憋死保命装 <b>${us.critical_total ?? 0}</b> 人次，终局比分定格 <b>${
+    report.radiant_score
+  } : ${report.dire_score}</b> (${escapeHtml(report.duration_str)})。`;
+
+  // --- STAGE 4: 全局五人硬实力 · 团队执行力与同位置 1v1 对位总账 ---
+  const ownStuns = own.reduce((s, p) => s + Number(p.stuns_sec || 0), 0).toFixed(1);
+  const oppStuns = opp.reduce((s, p) => s + Number(p.stuns_sec || 0), 0).toFixed(1);
+  const topStunner = [...own].sort((a, b) => Number(b.stuns_sec || 0) - Number(a.stuns_sec || 0))[0];
+  const vis = df.support_vision_by_side?.[side] || {};
+  const oppVis = df.support_vision_by_side?.[side === "dire" ? "radiant" : "dire"] || {};
+  const topWarder = [...own].sort(
+    (a, b) =>
+      Number(b.obs_placed || 0) +
+      Number(b.sen_placed || 0) -
+      (Number(a.obs_placed || 0) + Number(a.sen_placed || 0))
+  )[0];
+  const ownDmg = own.reduce((s, p) => s + Number(p.hero_damage || 0), 0);
+  const oppDmg = opp.reduce((s, p) => s + Number(p.hero_damage || 0), 0);
+  const ownTd = own.reduce((s, p) => s + Number(p.tower_damage || 0), 0);
+  const oppTd = opp.reduce((s, p) => s + Number(p.tower_damage || 0), 0);
+  const topDmgHero = [...own].sort((a, b) => Number(b.hero_damage || 0) - Number(a.hero_damage || 0))[0];
+  const topPusherHero = [...own].sort((a, b) => Number(b.tower_damage || 0) - Number(a.tower_damage || 0))[0];
+  const ownDeadSec = own.reduce((s, p) => s + Number(p.dead_seconds || 0), 0);
+  const oppDeadSec = opp.reduce((s, p) => s + Number(p.dead_seconds || 0), 0);
+  const mostDeadHero = [...own].sort((a, b) => Number(b.dead_seconds || 0) - Number(a.dead_seconds || 0))[0];
+
+  const stage4Bullets = [
+    `<span class="stage-key-pill">① 控制链与大招兑现</span> 全队硬控 <b>${ownStuns}秒 vs ${oppStuns}秒</b>（控制王：<b>${
+      topStunner?.pos ?? "?"
+    }号位${escapeHtml(topStunner?.hero_short_zh || "")} ${topStunner?.stuns_sec ?? 0}秒</b>）。`,
+    `<span class="stage-key-pill">② 视野统治力与反眼</span> 假眼 <b>${vis.total_obs ?? 0} vs ${
+      oppVis.total_obs ?? 0
+    }</b>，真眼 <b>${vis.total_sen ?? 0} vs ${
+      oppVis.total_sen ?? 0
+    }</b>，假眼均寿 <b>${vis.avg_lifespan_sec ?? 0}s/360s</b>（视野劳模：<b>${
+      topWarder?.pos ?? 5
+    }号位${escapeHtml(topWarder?.hero_short_zh || "")} ${topWarder?.obs_placed ?? 0}假${
+      topWarder?.sen_placed ?? 0
+    }真</b>）。`,
+    `<span class="stage-key-pill">③ 输出转化与推塔拆迁</span> 英雄总伤害 <b>${fmtNum(ownDmg)} vs ${fmtNum(
+      oppDmg
+    )}</b>（输出王：<b>${escapeHtml(topDmgHero?.hero_short_zh || "")} ${fmtNum(
+      topDmgHero?.hero_damage || 0
+    )}</b>）；建筑推塔 <b>${fmtNum(ownTd)} vs ${fmtNum(oppTd)}</b>（拆迁王：<b>${escapeHtml(
+      topPusherHero?.hero_short_zh || ""
+    )} ${fmtNum(topPusherHero?.tower_damage || 0)}</b>）。`,
+    `<span class="stage-key-pill">④ 泉水读秒与同位对位</span> 全队泉水读秒 <b>${ownDeadSec}秒 vs ${oppDeadSec}秒</b>（读秒最多：<b>${escapeHtml(
+      mostDeadHero?.hero_short_zh || ""
+    )} ${mostDeadHero?.dead_seconds ?? 0}秒</b>）；1~5号位同位置正面对位 <b>${
+      rm.won_overall_cnt ?? 3
+    } / 5 胜出</b>。`,
+  ];
+
+  const richStages = [
+    {
+      icon: "🌅",
+      badge: "阶段 1",
+      title: "00:00 - 10:00 对线期三路表现 · 游走Gank与抢符拉野",
+      bullets: [laneOverviewBullet, ...laneMatchupBullets, roamAndGankBullet, resourcesBullet],
+    },
+    {
+      icon: "⚔️",
+      badge: "阶段 2",
+      title: "10:00 - 25:00 中期 Gank · 开雾情况 · 打团齐整度与大哥打钱节奏",
+      bullets: [midOverviewBullet, smokeBullet, attendanceBullet, farmingBullet],
+    },
+    {
+      icon: "🔥",
+      badge: "阶段 3",
+      title: "25:00 - 终局 决胜团战 · 肉山高地 · 买活博弈与后期刷钱转化",
+      bullets: [lateOverviewBullet, peakTfBullet, roshAndPickoffBullet, buybackAndSaveBullet],
+    },
+    {
+      icon: "📊",
+      badge: "阶段 4",
+      title: "全局五人硬实力 · 团队执行力与同位置 1v1 对位总账",
+      bullets: stage4Bullets,
+    },
+  ];
+
+  return `<div class="verdict-stages-grid">
+    ${richStages
+      .map(
+        (st) => `
+        <div class="verdict-stage-card">
+          <div class="verdict-stage-head">
+            <span class="verdict-stage-badge">${st.icon} ${escapeHtml(st.badge)}</span>
+            <strong class="verdict-stage-title">${escapeHtml(st.title)}</strong>
+          </div>
+          <ul class="verdict-stage-bullets">
+            ${st.bullets.map((b) => `<li>${injectHeroLogosIntoHtml(b, report)}</li>`).join("")}
+          </ul>
+        </div>
+      `
+      )
+      .join("")}
+  </div>`;
+}
+
+/**
+ * Build a cohesive early -> mid -> late game chronology story paragraph for a player card
+ * (`roleType`: "mvp" | "runnerup" | "struggle" | "culprit1" | "culprit2" | "svp")
+ */
+function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
+  if (!p) return "";
+  const { side } = getOwnAndOppPlayers(report);
+  const df = report.deep_forensics || {};
+  const rawPhases = report.phases_data || [];
+  const phasesList = Array.isArray(rawPhases) ? rawPhases : Object.values(rawPhases);
+  const findPhasePlayer = (phaseKey) => {
+    const pd = phasesList.find((x) => x.key === phaseKey);
+    return (pd?.players || []).find(
+      (pp) =>
+        Number(pp.player_slot) === Number(p.player_slot) ||
+        pp.hero_short_zh === p.hero_short_zh
+    );
+  };
+
+  const laneP = findPhasePlayer("lane");
+  const midP = findPhasePlayer("mid");
+  const lateP = findPhasePlayer("late");
+
+  const ms = df.map_space_by_side?.[side] || {};
+  const spaceRow = (ms.player_space_rows || []).find(
+    (r) => r.hero_short_zh === p.hero_short_zh || Number(r.pos) === Number(p.pos)
+  );
+  const soloEvents = (ms.solo_pickoff_events || []).filter(
+    (ev) => ev.hero_short_zh === p.hero_short_zh
+  );
+  const tpRow = (df.tp_rotation_by_side?.[side]?.player_tp_rows || []).find(
+    (r) => r.hero_short_zh === p.hero_short_zh || Number(r.pos) === Number(p.pos)
+  );
+  const mirrorRow = (df.role_mirror_by_side?.[side]?.mirror_rows || []).find(
+    (r) => r.own_hero === p.hero_short_zh || Number(r.pos) === Number(p.pos)
+  );
+
+  const heroShort = p.hero_short_zh || p.hero_name || "";
+  const oppHero = mirrorRow?.opp_hero || "同位宿敌";
+  const score100 = getHeroScore100(p);
+  const lh10 = p.laning_10m?.lh10 ?? laneP?.lh_gain ?? 0;
+  const dn10 = p.laning_10m?.dn10 ?? laneP?.dn_gain ?? 0;
+  const gold10 = p.laning_10m?.gold10 ?? laneP?.gold_gain ?? 0;
+  const g10Diff = Number(mirrorRow?.gold10_diff ?? 0);
+
+  // 1) Early Game (0-10m)
+  const laneK = laneP?.kills_count ?? 0;
+  const laneD = laneP?.deaths_count ?? 0;
+  const earlyDiffText =
+    g10Diff >= 250
+      ? `压制对位 ${oppHero} +${fmtNum(g10Diff)} 金`
+      : g10Diff <= -250
+      ? `对位落后 ${oppHero} ${fmtNum(g10Diff)} 金`
+      : `与对位 ${oppHero} 经济持平`;
+  const earlySegment = `<b>【前期 0–10m】</b>操刀 ${p.pos}号位 ${heroShort} 交出 <b>${lh10}/${dn10} 补刀、10m 经济 ${fmtNum(
+    gold10
+  )}（对线效率 ${p.lane_efficiency_pct || 0}% · ${earlyDiffText}）</b>，前10分钟战绩 <b>${laneK}杀/${laneD}死</b>${
+    (tpRow?.early_tp_cnt ?? 0) > 0 ? `，并亮出 <b>${tpRow.early_tp_cnt} 次前12m支援/回线TP</b>` : ""
+  }。`;
+
+  // 2) Mid Game (10-25m)
+  const midK = midP?.kills_count ?? 0;
+  const midD = midP?.deaths_count ?? 0;
+  const midGold = midP?.gold_gain ?? 0;
+  const midDmg = midP?.hero_damage_gain ?? 0;
+  const midItems = (midP?.items_bought || [])
+    .slice(0, 3)
+    .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
+    .join("、");
+  const midSoloList = soloEvents.filter((ev) => {
+    const m = parseInt(String(ev.time_str || "0").split(":")[0], 10);
+    return m >= 9 && m <= 26;
+  });
+
+  let midSegment = `<b>【中期 10–25m】</b>阶段战绩 <b>${midK}杀/${midD}死</b>，进账 <b>+${fmtNum(
+    midGold
+  )} 金</b>、倾泻 <b>${fmtNum(midDmg)} 英雄伤害</b>${
+    midItems ? `，做出核心装 <b>${midItems}</b>` : ""
+  }`;
+  if (roleType === "struggle" || roleType === "culprit1" || roleType === "culprit2") {
+    if (midSoloList.length > 0) {
+      midSegment += `；但中期多次脱离大部队在危险线/黑图落单被抓（<b>${midSoloList
+        .map((e) => `${e.time_str}在${e.zone_zh}被${e.killer_zh || "敌方"}提款`)
+        .join("、")}</b>）`;
+    } else if (midD >= 3) {
+      midSegment += `；但中期连续阵亡 <b>${midD} 次</b>导致刷钱与参战节奏断档`;
+    }
+    if ((tpRow?.tf_absent_cnt ?? 0) > 0) {
+      midSegment += `，且有 <b>${tpRow.tf_absent_cnt} 波队友阵亡团战 0伤害未亮TP旁观</b>`;
+    }
+    midSegment += "。";
+  } else {
+    if (midSoloList.length === 0) {
+      midSegment += `，中期走位稳健 <b>0 次落单掉点</b>，紧跟团队节奏将经济优势持续滚大。`;
+    } else {
+      midSegment += `，虽偶有被抓但正面团战输出与控制拉满。`;
+    }
+  }
+
+  // 3) Late Game (25m+) & Verdict Conclusion
+  const lateK = lateP?.kills_count ?? 0;
+  const lateD = lateP?.deaths_count ?? 0;
+  const lateDmg = lateP?.hero_damage_gain ?? 0;
+  const lateItems = (lateP?.items_bought || [])
+    .slice(0, 2)
+    .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
+    .join("、");
+  const ultAudit = (p.hero_execution_audit?.ult_audits || [])[0];
+  const ultSummary = ultAudit
+    ? `关键技能【${ultAudit.ability_zh}】全场释放 <b>${ultAudit.casts ?? 0} 次</b>`
+    : `全场硬控 <b>${p.stuns_sec || 0} 秒</b>`;
+
+  let lateConclusion = "";
+  if (roleType === "mvp") {
+    lateConclusion = `<b>【后期 25m+ & 为什么他是 MVP】</b>决胜期再砍 <b>${lateK}杀/${lateD}死、+${fmtNum(
+      lateDmg
+    )} 伤害</b>${lateItems ? `（成型 ${lateItems}）` : ""}，${ultSummary}。全场交出 <b>${
+      p.kda
+    }（${p.kill_participation_pct}% 参战率）、${fmtNum(p.hero_damage)} 英雄伤害（全队 ${
+      p.hero_damage_share_pct || 0
+    }%）、${fmtNum(p.tower_damage || 0)} 推塔伤害</b>，以 <b>${score100}/100 分</b> 独占全队最高的 <b>${sharePct}% 胜局贡献</b>，从对线到决胜团全程兜底，当之无愧本局真神 MVP！`;
+  } else if (roleType === "runnerup") {
+    const supExtra =
+      p.pos >= 4
+        ? `铺设 <b>${p.obs_placed || 0} 假眼 / ${p.sen_placed || 0} 真眼</b>、贡献 <b>${
+            p.stuns_sec || 0
+          } 秒硬控</b>`
+        : `倾泻 <b>${fmtNum(p.hero_damage)} 伤害</b> 与 <b>${fmtNum(p.tower_damage || 0)} 推塔</b>`;
+    lateConclusion = `<b>【后期 25m+ & 为什么他是二号功臣】</b>后期团战打出 <b>${lateK}杀/${lateD}死、+${fmtNum(
+      lateDmg
+    )} 伤害</b>，${ultSummary}，全场${supExtra}，参战率高达 <b>${
+      p.kill_participation_pct
+    }%</b>。从前期保线/游走到中后期团战先手反手无缝衔接，拿到 <b>${score100}/100 分（胜局贡献 ${sharePct}%）</b>，是仅次于 MVP 的定海神针！`;
+  } else if (roleType === "struggle") {
+    const struggleReasons = [];
+    if (soloEvents.length > 0) {
+      struggleReasons.push(
+        `9分钟后脱离团队落单被抓 <b>${soloEvents.length} 次</b>（送出 ${fmtNum(
+          spaceRow?.solo_gold_fed || 0
+        )} 金）`
+      );
+    }
+    if ((p.dead_seconds || 0) >= 180) {
+      struggleReasons.push(`泉水读秒长达 <b>${p.dead_seconds} 秒</b>（阵亡掉钱 -${fmtNum(p.death_gold_lost || 0)}）`);
+    }
+    if ((p.pos || 1) <= 3 && (p.tower_damage || 0) < 500) {
+      struggleReasons.push(`身为 ${p.pos}号位核心整局建筑推塔伤害仅有 <b>${fmtNum(p.tower_damage || 0)}</b>`);
+    }
+    if (Number(tpRow?.tp_bought ?? 1) === 0) {
+      struggleReasons.push(`整局主动花钱买 TP <b>0 张</b>`);
+    }
+    if (mirrorRow && Number(mirrorRow.nw_diff || 0) < -1000) {
+      struggleReasons.push(
+        `对位被敌方 ${oppHero} 净资产反超 <b>${fmtNum(Math.abs(mirrorRow.nw_diff))} 金</b>`
+      );
+    }
+    if (struggleReasons.length === 0) {
+      struggleReasons.push(`全场阵亡 <b>${p.deaths || 0} 次</b>、参战率仅 <b>${p.kill_participation_pct}%</b>`);
+    }
+    lateConclusion = `<b>【后期 25m+ & 为什么这把 ${heroShort} 表现不行】</b>后期阶段 <b>${lateK}杀/${lateD}死</b>。纵观全局，${heroShort} 之所以仅得 <b>${score100}/100 分</b>，核心症结在于：${struggleReasons.join(
+      "；"
+    )}。好在队友正面对局够硬带飞全场，下把务必戒掉无视野危险线单带！`;
+  } else if (roleType === "svp") {
+    lateConclusion = `<b>【后期 25m+ & 为什么他是败方孤胆院长】</b>逆风局后期依然死命打出 <b>${lateK}杀/${lateD}死、+${fmtNum(
+      lateDmg
+    )} 伤害</b>，全场交出 <b>${p.kda}、${fmtNum(p.hero_damage)} 伤害（全队 ${
+      p.hero_damage_share_pct || 0
+    }%）</b>，拿下全队最高 <b>${score100}/100 分</b>，虽败犹荣！`;
+  } else {
+    lateConclusion = `<b>【后期 25m+ & 战犯定责】</b>后期再吞 <b>${lateD} 次阵亡</b>，全场泉水读秒 <b>${
+      p.dead_seconds || 0
+    } 秒</b>、阵亡掉钱 <b>-${fmtNum(p.death_gold_lost || 0)}</b>${
+      soloEvents.length > 0 ? `、落单被抓 <b>${soloEvents.length} 次</b>` : ""
+    }，本局评分仅 <b>${score100}/100 分（背锅占比 ${sharePct}%）</b>，是导致局势崩盘的关键出血点！`;
+  }
+
+  return injectHeroLogosIntoHtml(
+    `<div class="verdict-chronology-story">${earlySegment} ${midSegment} ${lateConclusion}</div>`,
+    report
+  );
+}
+
+/**
+ * 2. Render Grok 4.7 Verdict Banner + 3 Verdict Cards (MVP / #2 / #3 Struggle or 2nd Culprit) + 5-Stack Blame Ledger
  */
 function renderVerdictAndBlameSection(report) {
   const { side, sideZh, own, all } = getOwnAndOppPlayers(report);
@@ -6827,6 +7839,7 @@ function renderVerdictAndBlameSection(report) {
 
   const grok = report.grok_coaching;
   const mvpData = report.mvp || {};
+  const df = report.deep_forensics || {};
 
   // Update Jump Chip, Section Heading, Card Labels, and Ledger Header dynamically based on WIN vs LOSS
   const jumpChip = document.getElementById("jump-chip-verdict");
@@ -6835,6 +7848,8 @@ function renderVerdictAndBlameSection(report) {
   const mvpCardLabel = document.getElementById("mvp-card-label");
   const secondCardEl = document.getElementById("culprit-card");
   const secondCardLabel = document.getElementById("culprit-card-label");
+  const thirdCardEl = document.getElementById("third-verdict-card");
+  const thirdCardLabel = document.getElementById("third-verdict-card-label");
   const ledgerTitle = document.getElementById("blame-ledger-title");
   const ledgerCaption = document.getElementById("blame-ledger-caption");
   const shareBtn1 = document.getElementById("btn-open-share-poster");
@@ -6843,11 +7858,11 @@ function renderVerdictAndBlameSection(report) {
   if (won) {
     if (jumpChip) jumpChip.textContent = "② 🏆 凯旋庆功与100%贡献榜";
     if (secHeading) {
-      secHeading.textContent = `② 🏆 ${sideZh}凯旋庆功封神榜 · 谁是头号首功 & 100% 胜局贡献排座次`;
+      secHeading.textContent = `② 🏆 ${sideZh}凯旋庆功封神榜 · 谁是头号首功、二号功臣与短板复盘`;
     }
     if (secCaption) {
       secCaption.textContent =
-        "赢球不背锅，全员论功行赏！结合英雄输出转化、推塔终结、团战控制与视野节奏核算五人 100% 胜局贡献度";
+        "赢球论功行赏 + 毒舌捉虫！从前期对线、中期Gank开雾到后期决战全周期复盘头号MVP、二当家与本局暴露短板";
     }
     if (mvpCardLabel) mvpCardLabel.textContent = "👑 头号首功 · 本局擎天真大腿 (MVP)";
     if (secondCardEl) {
@@ -6855,10 +7870,15 @@ function renderVerdictAndBlameSection(report) {
       secondCardEl.classList.add("runnerup-theme");
     }
     if (secondCardLabel) secondCardLabel.textContent = "⚔️ 二号功臣 · 破阵二当家 & 定海神针";
+    if (thirdCardEl) {
+      thirdCardEl.classList.remove("culprit-theme");
+      thirdCardEl.classList.add("struggle-theme");
+    }
+    if (thirdCardLabel) thirdCardLabel.textContent = "🐟 惊险躺赢/短板算账 · 为什么这把表现不行";
     if (ledgerTitle) ledgerTitle.textContent = `🎉 ${sideZh}五黑 100% 胜局贡献庆功榜 · 谁的军功章最大一目了然`;
     if (ledgerCaption) {
       ledgerCaption.textContent =
-        "按本局五人综合战功归一化为 100% 胜局贡献度，点击任意行右侧按钮可直接复制夸人/庆功贺电发群里";
+        "按本局五人综合战功归一化为 100% 胜局贡献度 + 0~100 分制打分，点击右侧按钮可直接复制夸人/庆功贺电发群里";
     }
     if (shareBtn1) shareBtn1.textContent = "🏆 导出群聊庆功榜";
     if (shareBtn2) shareBtn2.textContent = "🏆 导出群聊庆功榜";
@@ -6869,14 +7889,19 @@ function renderVerdictAndBlameSection(report) {
     }
     if (secCaption) {
       secCaption.textContent =
-        "输球不留情面，硬核数据定责！一屏看清全场真大腿、败方孤胆院长、头号战犯与 100% 责任切分";
+        "输球不留情面，硬核数据定责！从前期、中期到后期全周期审讯败方孤胆院长、头号战犯与二号背锅位";
     }
-    if (mvpCardLabel) mvpCardLabel.textContent = "👑 全场头号功臣 · MVP / 败方孤胆院长";
+    if (mvpCardLabel) mvpCardLabel.textContent = "👑 败方孤胆院长 · 全场尽力大腿 (SVP)";
     if (secondCardEl) {
       secondCardEl.classList.remove("runnerup-theme");
       secondCardEl.classList.add("culprit-theme");
     }
     if (secondCardLabel) secondCardLabel.textContent = "🚨 本方头号大锅 · 一级战犯逮捕令";
+    if (thirdCardEl) {
+      thirdCardEl.classList.remove("struggle-theme");
+      thirdCardEl.classList.add("culprit-theme");
+    }
+    if (thirdCardLabel) thirdCardLabel.textContent = "⚠️ 二号背锅位 · 次锅共犯审讯室";
     if (ledgerTitle) ledgerTitle.textContent = `⚖️ ${sideZh}五人 100% 败局分锅账本 · 谁该在群里发致歉红包`;
     if (ledgerCaption) {
       ledgerCaption.textContent =
@@ -6914,70 +7939,48 @@ function renderVerdictAndBlameSection(report) {
     }))
     .sort((a, b) => b.blameShare - a.blameShare);
 
-  // 2.1 Grok Verdict Banner (Structured 2x2 Stage Cards + Scannable Verdict Highlights)
+  // Pick the 3rd card player in a WIN: among the remaining 3 players (excluding #1 MVP and #2 Runner-Up),
+  // pick the player with the highest struggle index (solo pickoffs, fountain dead time, low rating, core with 0 tower dmg)
+  const top1 = sortedByContrib[0]?.player;
+  const top2 = sortedByContrib[1]?.player;
+  const msSide = df.map_space_by_side?.[side] || {};
+  const computeStruggleIndex = (p) => {
+    if (!p) return 0;
+    const spRow = (msSide.player_space_rows || []).find(
+      (r) => r.hero_short_zh === p.hero_short_zh || Number(r.pos) === Number(p.pos)
+    );
+    const soloCnt = Number(
+      spRow?.solo_pickoff_cnt ??
+        (msSide.solo_pickoff_events || []).filter((ev) => ev.hero_short_zh === p.hero_short_zh).length
+    );
+    const deadSec = Number(p.dead_seconds || 0);
+    const deaths = Number(p.deaths || 0);
+    const ratingPenalty = Math.max(0, 8.6 - Number(p.rating_score || 7.5)) * 10;
+    const coreZeroTdPenalty = (p.pos || 5) <= 3 && Number(p.tower_damage || 0) < 500 ? 48 : 0;
+    const blameShare = Number(p.blame_share_pct || 15);
+    return soloCnt * 28 + deadSec * 0.25 + deaths * 8.5 + ratingPenalty + coreZeroTdPenalty + blameShare;
+  };
+  const remainingCandidates = sortedByContrib
+    .slice(2)
+    .map((entry) => ({
+      ...entry,
+      struggleIdx: computeStruggleIndex(entry.player),
+    }))
+    .sort((a, b) => b.struggleIdx - a.struggleIdx);
+  const struggleEntry = remainingCandidates[0] || sortedByContrib[sortedByContrib.length - 1];
+  const strugglePlayer = struggleEntry?.player || sortedByContrib[sortedByContrib.length - 1]?.player;
+
+  const topBlame1 = sortedByBlame[0]?.player;
+  const topBlame2 = sortedByBlame[1]?.player;
+
+  // 2.1 Grok Verdict Banner (Rich 2x2 Stage Cards with Hero Mini-Logos + Scannable Verdict Highlights)
   const authorEl = document.getElementById("grok-author-label");
   const titleEl = document.getElementById("grok-title-text");
   const summaryEl = document.getElementById("grok-summary-text");
   const verdictEl = document.getElementById("grok-verdict-text");
   const practiceEl = document.getElementById("grok-team-practice-box");
-  const stages = report.match_narrative?.stages || [];
 
-  const formatStageContentToBullets = (rawContent) => {
-    const cleaned = sanitizeMixedEnglishClient(String(rawContent || ""))
-      .replace(/三路10分钟对账：/g, "。")
-      .replace(/主视角（[^）]+）车队全局数据对比：/g, "。");
-    const parts = cleaned
-      .split(/[；。]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    return parts
-      .map((item) => {
-        let html = escapeHtml(item);
-        // Highlight key prefixes like 上路 / 中路 / 下路 / ① 控制时长 / ② 视野与开雾 / ③ 建筑伤害 / ④ 全队泉水读秒总时长
-        html = html.replace(
-          /^(上路|中路|下路|①\s*[^：:]+|②\s*[^：:]+|③\s*[^：:]+|④\s*[^：:]+|10分钟对线期结束|对线与前中期信使击杀|全场最高权重胜负手团战爆发于|肉山争夺记录)([：:\s]*)/,
-          '<span class="stage-key-pill">$1</span> '
-        );
-        // Highlight lane or battle outcomes after →
-        html = html.replace(
-          /→\s*([^；。]+)/g,
-          '<span class="stage-outcome-pill">→ $1</span>'
-        );
-        return `<li>${html}</li>`;
-      })
-      .join("");
-  };
-
-  const stageIcons = ["🌅", "⚔️", "🔥", "📊"];
-  const stagesGridHtml =
-    stages.length > 0
-      ? `<div class="verdict-stages-grid">
-          ${stages
-            .map((s, idx) => {
-              const stTitle = s.stage || s.title || `阶段 ${idx + 1}`;
-              const stBody = s.summary || s.content || "";
-              const icon = stageIcons[idx % stageIcons.length];
-              return `
-                <div class="verdict-stage-card">
-                  <div class="verdict-stage-head">
-                    <span class="verdict-stage-badge">${icon} 阶段 ${idx + 1}</span>
-                    <strong class="verdict-stage-title">${escapeHtml(stTitle)}</strong>
-                  </div>
-                  <ul class="verdict-stage-bullets">
-                    ${formatStageContentToBullets(stBody)}
-                  </ul>
-                </div>
-              `;
-            })
-            .join("")}
-        </div>`
-      : "";
-
-  const top1 = sortedByContrib[0]?.player;
-  const top2 = sortedByContrib[1]?.player;
-  const lucky5 = sortedByContrib[sortedByContrib.length - 1]?.player;
-  const topBlame1 = sortedByBlame[0]?.player;
-  const topBlame2 = sortedByBlame[1]?.player;
+  const stagesGridHtml = buildRichFourStageCardsHtml(report);
 
   const buildStructuredVerdictHtml = (extraText = "") => {
     const extraClean = sanitizeMixedEnglishClient(String(extraText || "")).trim();
@@ -6998,7 +8001,7 @@ function renderVerdictAndBlameSection(report) {
               <strong>${top1?.pos ?? 1}号位 ${escapeHtml(top1?.hero_short_zh || "")}</strong>
               <span class="verdict-hl-player">(${escapeHtml(top1?.personaname || "")})</span>
             </div>
-            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[0]?.contribShare ?? 25}%</b> · 评分 <b>${top1?.rating_score ?? 8.5}</b></span>
+            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[0]?.contribShare ?? 25}%</b> · 本局打分 <b>${getHeroScore100(top1)}/100分</b></span>
           </div>
           <div class="verdict-hl-item green">
             <span class="verdict-hl-tag">⚔️ 破阵二当家</span>
@@ -7007,22 +8010,22 @@ function renderVerdictAndBlameSection(report) {
               <strong>${top2?.pos ?? 2}号位 ${escapeHtml(top2?.hero_short_zh || "")}</strong>
               <span class="verdict-hl-player">(${escapeHtml(top2?.personaname || "")})</span>
             </div>
-            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[1]?.contribShare ?? 22}%</b> · 评分 <b>${top2?.rating_score ?? 8.0}</b></span>
+            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[1]?.contribShare ?? 22}%</b> · 本局打分 <b>${getHeroScore100(top2)}/100分</b></span>
           </div>
           <div class="verdict-hl-item muted">
-            <span class="verdict-hl-tag">🐟 惊险躺赢锦鲤</span>
+            <span class="verdict-hl-tag">🐟 惊险躺赢/短板提醒</span>
             <div class="verdict-hl-main">
-              ${lucky5?.hero_img ? `<img src="${escapeHtml(lucky5.hero_img)}" width="32" height="18" alt="" />` : ""}
-              <strong>${lucky5?.pos ?? 5}号位 ${escapeHtml(lucky5?.hero_short_zh || "")}</strong>
-              <span class="verdict-hl-player">(${escapeHtml(lucky5?.personaname || "")})</span>
+              ${strugglePlayer?.hero_img ? `<img src="${escapeHtml(strugglePlayer.hero_img)}" width="32" height="18" alt="" />` : ""}
+              <strong>${strugglePlayer?.pos ?? 5}号位 ${escapeHtml(strugglePlayer?.hero_short_zh || "")}</strong>
+              <span class="verdict-hl-player">(${escapeHtml(strugglePlayer?.personaname || "")})</span>
             </div>
-            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[sortedByContrib.length - 1]?.contribShare ?? 12}%</b> · 评分 <b>${lucky5?.rating_score ?? 6.5}</b></span>
+            <span class="verdict-hl-metric">本局打分 <b>${getHeroScore100(strugglePlayer)}/100分</b> · 读秒 <b>${strugglePlayer?.dead_seconds ?? 0}s</b></span>
           </div>
         </div>
         ${
           extraBullets.length > 0
             ? `<ul class="verdict-rationale-list">${extraBullets
-                .map((b) => `<li>${escapeHtml(b)}</li>`)
+                .map((b) => `<li>${injectHeroLogosIntoHtml(escapeHtml(b), report)}</li>`)
                 .join("")}</ul>`
             : ""
         }
@@ -7042,7 +8045,7 @@ function renderVerdictAndBlameSection(report) {
             <strong>${topBlame1?.pos ?? 1}号位 ${escapeHtml(topBlame1?.hero_short_zh || "")}</strong>
             <span class="verdict-hl-player">(${escapeHtml(topBlame1?.personaname || "")})</span>
           </div>
-          <span class="verdict-hl-metric">分锅占比 <b>${sortedByBlame[0]?.blameShare ?? 30}%</b> · 评分 <b>${topBlame1?.rating_score ?? 5.0}</b></span>
+          <span class="verdict-hl-metric">分锅占比 <b>${sortedByBlame[0]?.blameShare ?? 30}%</b> · 本局打分 <b>${getHeroScore100(topBlame1)}/100分</b></span>
         </div>
         <div class="verdict-hl-item warn">
           <span class="verdict-hl-tag">⚠️ 次锅背锅位</span>
@@ -7051,7 +8054,7 @@ function renderVerdictAndBlameSection(report) {
             <strong>${topBlame2?.pos ?? 2}号位 ${escapeHtml(topBlame2?.hero_short_zh || "")}</strong>
             <span class="verdict-hl-player">(${escapeHtml(topBlame2?.personaname || "")})</span>
           </div>
-          <span class="verdict-hl-metric">分锅占比 <b>${sortedByBlame[1]?.blameShare ?? 24}%</b> · 评分 <b>${topBlame2?.rating_score ?? 5.5}</b></span>
+          <span class="verdict-hl-metric">分锅占比 <b>${sortedByBlame[1]?.blameShare ?? 24}%</b> · 本局打分 <b>${getHeroScore100(topBlame2)}/100分</b></span>
         </div>
         <div class="verdict-hl-item green">
           <span class="verdict-hl-tag">🛡️ 本方尽力大腿</span>
@@ -7062,13 +8065,13 @@ function renderVerdictAndBlameSection(report) {
           </div>
           <span class="verdict-hl-metric">仅分锅 <b>${
             sortedByBlame[sortedByBlame.length - 1]?.blameShare ?? 10
-          }%</b> · 评分 <b>${top1?.rating_score ?? 7.5}</b></span>
+          }%</b> · 本局打分 <b>${getHeroScore100(top1)}/100分</b></span>
         </div>
       </div>
       ${
         rationales.length > 0
           ? `<ul class="verdict-rationale-list">${rationales
-              .map((r) => `<li>${escapeHtml(r)}</li>`)
+              .map((r) => `<li>${injectHeroLogosIntoHtml(escapeHtml(r), report)}</li>`)
               .join("")}</ul>`
           : ""
       }
@@ -7083,7 +8086,7 @@ function renderVerdictAndBlameSection(report) {
     if (titleEl) titleEl.textContent = sanitizeMixedEnglishClient(grok.title || (won ? "凯旋庆功与战术复盘" : "本局赛后复盘总账"));
     if (summaryEl) {
       const leadSummary = grok.summary
-        ? `<div class="verdict-lead-callout">${escapeHtml(grok.summary)}</div>`
+        ? `<div class="verdict-lead-callout">${injectHeroLogosIntoHtml(escapeHtml(grok.summary), report)}</div>`
         : "";
       summaryEl.innerHTML = `${leadSummary}${stagesGridHtml}`;
     }
@@ -7092,15 +8095,15 @@ function renderVerdictAndBlameSection(report) {
     }
     if (practiceEl) {
       practiceEl.innerHTML = grok.team_practice
-        ? `<strong>${won ? "乘胜追击 · 下把更稳铁律：" : "痛定思痛 · 下把车队铁律："}</strong>${escapeHtml(grok.team_practice)}`
+        ? `<strong>${won ? "乘胜追击 · 下把更稳铁律：" : "痛定思痛 · 下把车队铁律："}</strong>${injectHeroLogosIntoHtml(escapeHtml(grok.team_practice), report)}`
         : "";
       practiceEl.hidden = !grok.team_practice;
     }
   } else {
     if (authorEl) {
       authorEl.textContent = won
-        ? "录像级庆功引擎 · 四阶段对账与论功行赏 (可点右上角用 Grok 4.7 深度重算)"
-        : "录像级算账引擎 · 四阶段对账与分锅判词 (可点右上角用 Grok 4.7 深度重算)";
+        ? "录像级庆功引擎 · 四阶段全细节对账与论功行赏 (含英雄小图标 · 可点右上角用 Grok 4.7 深度重算)"
+        : "录像级算账引擎 · 四阶段全细节对账与分锅判词 (含英雄小图标 · 可点右上角用 Grok 4.7 深度重算)";
     }
     if (titleEl) {
       titleEl.textContent = won
@@ -7121,15 +8124,27 @@ function renderVerdictAndBlameSection(report) {
     }
   }
 
-  // 2.2 Left Card: When WON -> #1 Top Contributor on our winning team; When LOST -> Match MVP / Our SVP
+  // Helper to render non-wrapping stat pills inside the 3 verdict cards
+  const renderCardStatPills = (p, isTrouble = false) => {
+    const pills = [
+      `<span class="v-stat-pill">KDA <b>${escapeHtml(p.kda)}</b> (${p.kill_participation_pct}%参战)</span>`,
+      `<span class="v-stat-pill">GPM <b>${p.gpm}</b></span>`,
+      `<span class="v-stat-pill">伤害 <b>${fmtNum(p.hero_damage)}</b> (${p.hero_damage_share_pct || 0}%)</span>`,
+    ];
+    if (isTrouble || (p.dead_seconds || 0) >= 160) {
+      pills.push(`<span class="v-stat-pill warn">泉水读秒 <b>${p.dead_seconds || 0}秒</b></span>`);
+    }
+    if ((p.pos || 1) >= 4 && (p.obs_placed || 0) + (p.sen_placed || 0) > 0) {
+      pills.push(`<span class="v-stat-pill">视野 <b>${p.obs_placed || 0}假/${p.sen_placed || 0}真</b></span>`);
+    } else {
+      pills.push(`<span class="v-stat-pill">拆塔 <b>${fmtNum(p.tower_damage || 0)}</b></span>`);
+    }
+    return `<div class="verdict-stat-pills-row">${pills.join("")}</div>`;
+  };
+
+  // 2.2 Card 1 (#mvp-card): Our #1 Top Contributor (MVP in Win / SVP in Loss)
   const mvpBody = document.getElementById("mvp-card-body");
-  let mvpPlayer = won ? sortedByContrib[0]?.player : mvpData.mvp_player || all[0];
-  const grokMvp = grok?.mvp && (!grok.side || grok.side === side) ? grok.mvp : null;
-  if (!won && grokMvp && bySlot.has(Number(grokMvp.slot))) {
-    mvpPlayer = bySlot.get(Number(grokMvp.slot));
-  } else if (mvpPlayer && bySlot.has(Number(mvpPlayer.player_slot))) {
-    mvpPlayer = bySlot.get(Number(mvpPlayer.player_slot));
-  }
+  let mvpPlayer = sortedByContrib[0]?.player || own[0];
   const mvpContribPct =
     sortedByContrib.find((x) => Number(x.player.player_slot) === Number(mvpPlayer?.player_slot))
       ?.contribShare ??
@@ -7138,26 +8153,30 @@ function renderVerdictAndBlameSection(report) {
 
   if (mvpBody && mvpPlayer) {
     const heroShort = mvpPlayer.hero_short_zh || mvpPlayer.hero_name;
+    const mvpScore100 = getHeroScore100(mvpPlayer);
     const grokMvpPlayer = (grok?.players || []).find(
       (gp) => Number(gp.slot) === Number(mvpPlayer.player_slot)
     );
     const evidences = [];
     if (Array.isArray(mvpPlayer.strengths)) {
-      mvpPlayer.strengths.slice(0, 3).forEach((r) => evidences.push(r));
+      mvpPlayer.strengths.slice(0, 2).forEach((r) => evidences.push(r));
     }
     if (Array.isArray(grokMvpPlayer?.good)) {
       grokMvpPlayer.good.slice(0, 2).forEach((g) => {
         if (!evidences.includes(g)) evidences.push(g);
       });
     }
-    if (evidences.length === 0 && grokMvp?.reason) evidences.push(grokMvp.reason);
-    if (evidences.length === 0 && Array.isArray(mvpData.rationale_list)) {
-      mvpData.rationale_list.slice(0, 3).forEach((r) => evidences.push(r));
-    }
+
+    const mvpChronologyHtml = buildPlayerChronologyStoryHtml(
+      mvpPlayer,
+      report,
+      won ? "mvp" : "svp",
+      Number(mvpContribPct).toFixed(1)
+    );
 
     const mvpCopyText = won
-      ? `🏆【凯旋头号首功 MVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：独占全队 ${mvpContribPct}% 胜局贡献！KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}，推塔 ${fmtNum(mvpPlayer.tower_damage)}。${mvpPlayer.praise_talk || evidences[0] || ""}`
-      : `【本局大腿 MVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}。${evidences[0] || ""}`;
+      ? `🏆【凯旋头号首功 MVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：本局打分 ${mvpScore100}/100 分，独占全队 ${mvpContribPct}% 胜局贡献！KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}，推塔 ${fmtNum(mvpPlayer.tower_damage)}。${mvpPlayer.praise_talk || evidences[0] || ""}`
+      : `👑【败方孤胆院长 SVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：本局打分 ${mvpScore100}/100 分！KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}。${evidences[0] || ""}`;
 
     mvpBody.innerHTML = `
       <div class="verdict-hero-row">
@@ -7171,36 +8190,31 @@ function renderVerdictAndBlameSection(report) {
             <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
             <span class="verdict-player-name">${escapeHtml(mvpPlayer.personaname)}${mvpPlayer.is_me ? " [我]" : ""}</span>
             <span class="status-pill connected">${escapeHtml(mvpPlayer.pos_label)} · ${escapeHtml(
-      won ? mvpPlayer.contrib_tier || "👑 头号首功" : mvpPlayer.rating_tier || "全场真大腿"
+      won ? mvpPlayer.contrib_tier || "👑 头号首功" : "👑 孤胆院长"
     )}</span>
           </div>
-          <div class="verdict-sub-meta">
-            KDA ${escapeHtml(mvpPlayer.kda)} (${mvpPlayer.kill_participation_pct}% 参战) · GPM ${mvpPlayer.gpm} · 伤害 ${fmtNum(mvpPlayer.hero_damage)} (${mvpPlayer.hero_damage_share_pct || 0}%) · 拆塔 ${fmtNum(mvpPlayer.tower_damage)}
-          </div>
+          ${renderCardStatPills(mvpPlayer, false)}
         </div>
         <div class="verdict-score-box">
-          <div class="verdict-score-num">${
-            won
-              ? `${Number(mvpContribPct).toFixed(1)}%`
-              : Number(mvpPlayer.mvp_score || mvpPlayer.rating_score || 85).toFixed(1)
-          }</div>
+          <div class="verdict-score-num">${mvpScore100}<small>/100</small></div>
           <div class="verdict-score-sub">${
-            won ? `胜局贡献度 (评分 ${mvpPlayer.rating_score})` : "MVP 战功分"
+            won ? `本局评分 · 贡献 ${Number(mvpContribPct).toFixed(1)}%` : `本局评分 · 贡献 ${Number(mvpContribPct).toFixed(1)}%`
           }</div>
         </div>
       </div>
+      ${mvpChronologyHtml}
       <ul class="verdict-evidence-list">
         ${evidences
-          .slice(0, 4)
-          .map((item) => `<li>${escapeHtml(item)}</li>`)
+          .slice(0, 2)
+          .map((item) => `<li>${injectHeroLogosIntoHtml(formatMdBold(item), report)}</li>`)
           .join("")}
       </ul>
       <div class="verdict-quote-bar">
         <span>${escapeHtml(
           won
             ? mvpPlayer.praise_talk ||
-                `「${heroShort} 这把真神降临包揽 ${mvpContribPct}% 胜局贡献，今晚车队全员排队敬茶！」`
-            : `「这把要不是 ${heroShort} 死命顶着局势，早就提前十五分钟敲 GG 了。」`
+                `「${heroShort} 这把真神降临砍下 ${mvpScore100}/100 分包揽 ${mvpContribPct}% 胜局贡献，今晚车队全员排队敬茶！」`
+            : `「这把要不是 ${heroShort} (${mvpScore100}/100分) 死命顶着局势，早就提前十五分钟敲 GG 了。」`
         )}</span>
         <button type="button" class="button secondary" data-copy-quote="${escapeHtml(mvpCopyText)}">${
       won ? "复制首功贺电" : "复制表彰词"
@@ -7209,17 +8223,16 @@ function renderVerdictAndBlameSection(report) {
     `;
   }
 
-  // 2.3 Right Card:
-  // - When WON: Show #2 Contributor ("⚔️ 二号功臣 · 破阵二当家") + fun shoutout to the 5th contributor ("🎉 躺赢锦鲤")!
-  // - When LOST: Show #1 Blame Culprit ("🚨 本方头号大锅 · 一级战犯逮捕令")!
+  // 2.3 Card 2 (#culprit-card):
+  // - When WON: #2 Contributor ("⚔️ 二号功臣 · 破阵二当家 & 定海神针") with early->mid->late chronology!
+  // - When LOST: #1 Blame Culprit ("🚨 本方头号大锅 · 一级战犯逮捕令") with early->mid->late chronology!
   const culpritBody = document.getElementById("culprit-card-body");
   if (culpritBody) {
     if (won) {
       const runnerEntry = sortedByContrib[1] || sortedByContrib[0];
       const runner = runnerEntry?.player || own[0];
       const runnerShare = runnerEntry?.contribShare ?? runner?.contrib_share_pct ?? 22.0;
-      const luckyEntry = sortedByContrib[sortedByContrib.length - 1];
-      const luckyPlayer = luckyEntry?.player;
+      const runnerScore100 = getHeroScore100(runner);
       const grokRunner = (grok?.players || []).find(
         (gp) => Number(gp.slot) === Number(runner?.player_slot)
       );
@@ -7227,20 +8240,22 @@ function renderVerdictAndBlameSection(report) {
       const heroShort = runner.hero_short_zh || runner.hero_name;
       const highlights = [];
       if (Array.isArray(runner.strengths)) {
-        runner.strengths.slice(0, 3).forEach((s) => highlights.push(s));
+        runner.strengths.slice(0, 2).forEach((s) => highlights.push(s));
       }
       if (Array.isArray(grokRunner?.good)) {
         grokRunner.good.slice(0, 2).forEach((g) => {
           if (!highlights.includes(g)) highlights.push(g);
         });
       }
-      if (luckyPlayer && Number(luckyPlayer.player_slot) !== Number(runner.player_slot)) {
-        highlights.push(
-          `🎉 本局气氛组/躺赢锦鲤提名：${luckyPlayer.pos}号位 ${luckyPlayer.hero_short_zh} (${luckyPlayer.personaname}) — 贡献 ${luckyEntry.contribShare}%（KDA ${luckyPlayer.kda}），成功吸引敌方火力，赢球全员免锅！`
-        );
-      }
 
-      const runnerCopyText = `⚔️【凯旋二号功臣】${runner.personaname} (${heroShort} · ${runner.pos_label}) 本局胜局贡献 ${runnerShare}%（综合评分 ${runner.rating_score}）！KDA ${runner.kda}，参战率 ${runner.kill_participation_pct}%，英雄伤害 ${fmtNum(runner.hero_damage)}。${
+      const runnerChronologyHtml = buildPlayerChronologyStoryHtml(
+        runner,
+        report,
+        "runnerup",
+        Number(runnerShare).toFixed(1)
+      );
+
+      const runnerCopyText = `⚔️【凯旋二号功臣】${runner.personaname} (${heroShort} · ${runner.pos_label}) 本局打分 ${runnerScore100}/100 分，胜局贡献 ${runnerShare}%！KDA ${runner.kda}，参战率 ${runner.kill_participation_pct}%，英雄伤害 ${fmtNum(runner.hero_damage)}。${
         runner.praise_talk || highlights[0] || ""
       }`;
 
@@ -7259,24 +8274,23 @@ function renderVerdictAndBlameSection(report) {
         runner.contrib_tier || "⚔️ 破阵二当家"
       )}</span>
             </div>
-            <div class="verdict-sub-meta">
-              KDA ${escapeHtml(runner.kda)} · 参战率 ${runner.kill_participation_pct}% · 伤害 ${fmtNum(runner.hero_damage)} (${runner.hero_damage_share_pct || 0}%) · 控制 ${runner.stuns_sec || 0}秒
-            </div>
+            ${renderCardStatPills(runner, false)}
           </div>
           <div class="verdict-score-box">
-            <div class="verdict-score-num">${Number(runnerShare).toFixed(1)}%</div>
-            <div class="verdict-score-sub">胜局贡献度 (评分 ${runner.rating_score})</div>
+            <div class="verdict-score-num">${runnerScore100}<small>/100</small></div>
+            <div class="verdict-score-sub">本局评分 · 贡献 ${Number(runnerShare).toFixed(1)}%</div>
           </div>
         </div>
+        ${runnerChronologyHtml}
         <ul class="verdict-evidence-list">
           ${highlights
-            .slice(0, 4)
-            .map((item) => `<li>${escapeHtml(item)}</li>`)
+            .slice(0, 2)
+            .map((item) => `<li>${injectHeroLogosIntoHtml(formatMdBold(item), report)}</li>`)
             .join("")}
         </ul>
         <div class="verdict-quote-bar">
           <span>${escapeHtml(
-            runner.praise_talk || `「左膀右臂定海神针！这把赢下来必须记 ${heroShort} 半座军功章！」`
+            runner.praise_talk || `「左膀右臂定海神针！这把赢下来必须记 ${heroShort} (${runnerScore100}/100分) 半座军功章！」`
           )}</span>
           <button type="button" class="button secondary" data-copy-quote="${escapeHtml(runnerCopyText)}">复制庆功词</button>
         </div>
@@ -7285,6 +8299,7 @@ function renderVerdictAndBlameSection(report) {
       const culpritEntry = sortedByBlame[0];
       const culprit = culpritEntry?.player || own[0];
       const culpritShare = culpritEntry?.blameShare ?? culprit?.blame_share_pct ?? 25.0;
+      const culpritScore100 = getHeroScore100(culprit);
       const grokCulprit = (grok?.players || []).find(
         (gp) => Number(gp.slot) === Number(culprit?.player_slot)
       );
@@ -7298,7 +8313,14 @@ function renderVerdictAndBlameSection(report) {
         culprit.weaknesses.forEach((b) => crimes.push(b));
       }
 
-      const culpritCopyText = `【头号战犯逮捕令】${culprit.personaname} (${heroShort} · ${culprit.pos_label}) 本局分锅占比 ${culpritShare}%！KDA ${culprit.kda}，泉水读秒 ${culprit.dead_seconds || 0} 秒。${
+      const culpritChronologyHtml = buildPlayerChronologyStoryHtml(
+        culprit,
+        report,
+        "culprit1",
+        Number(culpritShare).toFixed(1)
+      );
+
+      const culpritCopyText = `【头号战犯逮捕令】${culprit.personaname} (${heroShort} · ${culprit.pos_label}) 本局打分 ${culpritScore100}/100 分，分锅占比 ${culpritShare}%！KDA ${culprit.kda}，泉水读秒 ${culprit.dead_seconds || 0} 秒。${
         culprit.trash_talk || crimes[0] || ""
       }`;
 
@@ -7315,24 +8337,137 @@ function renderVerdictAndBlameSection(report) {
               <span class="verdict-player-name">${escapeHtml(culprit.personaname)}${culprit.is_me ? " [我]" : ""}</span>
               <span class="status-pill">${escapeHtml(culprit.pos_label)} · ${escapeHtml(culprit.rating_tier || "头号大锅")}</span>
             </div>
-            <div class="verdict-sub-meta">
-              KDA ${escapeHtml(culprit.kda)} · 参战率 ${culprit.kill_participation_pct}% · 泉水读秒 ${culprit.dead_seconds || 0}秒 · 阵亡掉钱 ${fmtNum(culprit.death_gold_lost || 0)}
-            </div>
+            ${renderCardStatPills(culprit, true)}
           </div>
           <div class="verdict-score-box">
-            <div class="verdict-score-num">${Number(culpritShare).toFixed(1)}%</div>
-            <div class="verdict-score-sub">全队分锅占比</div>
+            <div class="verdict-score-num">${culpritScore100}<small>/100</small></div>
+            <div class="verdict-score-sub">本局评分 · 背锅 ${Number(culpritShare).toFixed(1)}%</div>
           </div>
         </div>
+        ${culpritChronologyHtml}
         <ul class="verdict-evidence-list">
           ${crimes
-            .slice(0, 4)
-            .map((item) => `<li>${escapeHtml(item)}</li>`)
+            .slice(0, 2)
+            .map((item) => `<li>${injectHeroLogosIntoHtml(formatMdBold(item), report)}</li>`)
             .join("")}
         </ul>
         <div class="verdict-quote-bar">
           <span>${escapeHtml(grokCulprit?.headline || culprit.trash_talk || "这把大锅请稳稳背好，群里发个红包不过分吧？")}</span>
           <button type="button" class="button primary" data-copy-quote="${escapeHtml(culpritCopyText)}">复制处刑词</button>
+        </div>
+      `;
+    }
+  }
+
+  // 2.3b Card 3 (#third-verdict-card):
+  // - When WON: Show the struggling / lucky-ride player (e.g., Lina in 8774383260) and explain from early->mid->late why they struggled!
+  // - When LOST: Show #2 Blame Culprit ("⚠️ 二号背锅位 · 次锅共犯审讯室")!
+  const thirdBody = document.getElementById("third-verdict-card-body");
+  if (thirdBody) {
+    if (won && strugglePlayer) {
+      const heroShort = strugglePlayer.hero_short_zh || strugglePlayer.hero_name;
+      const stScore100 = getHeroScore100(strugglePlayer);
+      const stContribShare =
+        sortedByContrib.find((x) => Number(x.player.player_slot) === Number(strugglePlayer.player_slot))
+          ?.contribShare ?? 16.0;
+      const badPoints = [];
+      if (Array.isArray(strugglePlayer.weaknesses)) {
+        strugglePlayer.weaknesses.slice(0, 2).forEach((w) => badPoints.push(w));
+      }
+      if (Array.isArray(strugglePlayer.improvements) && badPoints.length < 2) {
+        strugglePlayer.improvements.slice(0, 1).forEach((imp) => badPoints.push(`下把改进：${imp}`));
+      }
+
+      const struggleChronologyHtml = buildPlayerChronologyStoryHtml(
+        strugglePlayer,
+        report,
+        "struggle",
+        Number(stContribShare).toFixed(1)
+      );
+
+      const struggleCopyText = `🐟【胜局短板复盘 · 惊险躺赢提醒】${strugglePlayer.personaname} (${heroShort} · ${strugglePlayer.pos_label}) 本局打分 ${stScore100}/100 分（KDA ${strugglePlayer.kda}，泉水读秒 ${strugglePlayer.dead_seconds || 0} 秒）：${
+        badPoints[0] || strugglePlayer.trash_talk || "赢球免锅，但中后期走位与落单问题必须复盘！"
+      }`;
+
+      thirdBody.innerHTML = `
+        <div class="verdict-hero-row">
+          ${
+            strugglePlayer.hero_img
+              ? `<img class="verdict-portrait" src="${escapeHtml(strugglePlayer.hero_img)}" alt="${escapeHtml(heroShort)}" />`
+              : ""
+          }
+          <div class="verdict-identity">
+            <div class="verdict-title-line">
+              <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
+              <span class="verdict-player-name">${escapeHtml(strugglePlayer.personaname)}${strugglePlayer.is_me ? " [我]" : ""}</span>
+              <span class="status-pill">${escapeHtml(strugglePlayer.pos_label)} · ⚠️ 胜局短板复盘</span>
+            </div>
+            ${renderCardStatPills(strugglePlayer, true)}
+          </div>
+          <div class="verdict-score-box">
+            <div class="verdict-score-num">${stScore100}<small>/100</small></div>
+            <div class="verdict-score-sub">本局评分 · 贡献 ${Number(stContribShare).toFixed(1)}%</div>
+          </div>
+        </div>
+        ${struggleChronologyHtml}
+        <ul class="verdict-evidence-list">
+          ${badPoints
+            .slice(0, 2)
+            .map((item) => `<li>${injectHeroLogosIntoHtml(formatMdBold(item), report)}</li>`)
+            .join("")}
+        </ul>
+        <div class="verdict-quote-bar">
+          <span>${escapeHtml(
+            strugglePlayer.trash_talk ||
+              `「赢球虽然免大锅，但这把 ${heroShort} (${stScore100}/100分) 中后期连续迷路掉点，全靠大哥和辅助硬抬过关！」`
+          )}</span>
+          <button type="button" class="button secondary" data-copy-quote="${escapeHtml(struggleCopyText)}">复制短板提醒</button>
+        </div>
+      `;
+    } else if (!won && topBlame2) {
+      const heroShort = topBlame2.hero_short_zh || topBlame2.hero_name;
+      const c2Score100 = getHeroScore100(topBlame2);
+      const c2Share = sortedByBlame[1]?.blameShare ?? topBlame2.blame_share_pct ?? 22.0;
+      const crimes2 = (topBlame2.weaknesses || []).slice(0, 2);
+      const c2ChronologyHtml = buildPlayerChronologyStoryHtml(
+        topBlame2,
+        report,
+        "culprit2",
+        Number(c2Share).toFixed(1)
+      );
+      const c2CopyText = `⚠️【二号背锅位逮捕令】${topBlame2.personaname} (${heroShort} · ${topBlame2.pos_label}) 本局打分 ${c2Score100}/100 分，分锅占比 ${c2Share}%！KDA ${topBlame2.kda}，${
+        crimes2[0] || topBlame2.trash_talk || ""
+      }`;
+
+      thirdBody.innerHTML = `
+        <div class="verdict-hero-row">
+          ${
+            topBlame2.hero_img
+              ? `<img class="verdict-portrait" src="${escapeHtml(topBlame2.hero_img)}" alt="${escapeHtml(heroShort)}" />`
+              : ""
+          }
+          <div class="verdict-identity">
+            <div class="verdict-title-line">
+              <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
+              <span class="verdict-player-name">${escapeHtml(topBlame2.personaname)}${topBlame2.is_me ? " [我]" : ""}</span>
+              <span class="status-pill">${escapeHtml(topBlame2.pos_label)} · ⚠️ 二号背锅位</span>
+            </div>
+            ${renderCardStatPills(topBlame2, true)}
+          </div>
+          <div class="verdict-score-box">
+            <div class="verdict-score-num">${c2Score100}<small>/100</small></div>
+            <div class="verdict-score-sub">本局评分 · 背锅 ${Number(c2Share).toFixed(1)}%</div>
+          </div>
+        </div>
+        ${c2ChronologyHtml}
+        <ul class="verdict-evidence-list">
+          ${crimes2
+            .map((item) => `<li>${injectHeroLogosIntoHtml(formatMdBold(item), report)}</li>`)
+            .join("")}
+        </ul>
+        <div class="verdict-quote-bar">
+          <span>${escapeHtml(topBlame2.trash_talk || `「头锅吃肉，次锅喝汤，这把 ${heroShort} 的失误也难辞其咎！」`)}</span>
+          <button type="button" class="button secondary" data-copy-quote="${escapeHtml(c2CopyText)}">复制次锅算账</button>
         </div>
       `;
     }
@@ -7353,15 +8488,16 @@ function renderVerdictAndBlameSection(report) {
     stackedBar.innerHTML = listToDisplay
       .map(({ player: p, share }, idx) => {
         const heroShort = p.hero_short_zh || p.hero_name;
+        const sc100 = getHeroScore100(p);
         let innerLabel = "";
         if (share >= 15) {
-          innerLabel = `${escapeHtml(heroShort)} ${share}%`;
+          innerLabel = `${escapeHtml(heroShort)} ${share}% (${sc100}分)`;
         } else if (share >= 9) {
           innerLabel = `${share}%`;
         }
         const tooltip = won
-          ? `${p.pos_label} ${heroShort} (${p.personaname}): 胜局贡献度 ${share}%`
-          : `${p.pos_label} ${heroShort} (${p.personaname}): 败局分锅占比 ${share}%`;
+          ? `${p.pos_label} ${heroShort} (${p.personaname}): 胜局贡献度 ${share}% · 评分 ${sc100}/100`
+          : `${p.pos_label} ${heroShort} (${p.personaname}): 败局分锅占比 ${share}% · 评分 ${sc100}/100`;
         return `
           <div
             class="blame-seg rank-${idx}"
@@ -7376,6 +8512,7 @@ function renderVerdictAndBlameSection(report) {
     rankingRows.innerHTML = listToDisplay
       .map(({ player: p, share }, idx) => {
         const heroShort = p.hero_short_zh || p.hero_name;
+        const sc100 = getHeroScore100(p);
         const grokP = (grok?.players || []).find((gp) => Number(gp.slot) === Number(p.player_slot));
 
         if (won) {
@@ -7389,10 +8526,10 @@ function renderVerdictAndBlameSection(report) {
               ? "👑 头号首功"
               : idx === 1
               ? "⚔️ 破阵次功"
-              : idx === 4 && (p.deaths || 0) >= 8
-              ? "🎉 躺赢锦鲤"
+              : Number(p.player_slot) === Number(strugglePlayer?.player_slot) && sc100 <= 82
+              ? "🐟 惊险躺赢"
               : "🔥 凯旋功臣";
-          const copyQuote = `🏆【凯旋庆功榜 #${idx + 1} · ${tierTag}】${p.personaname} (${heroShort} · ${p.pos_label}) 胜局贡献 ${share}% (评分 ${p.rating_score})：KDA ${p.kda}，${oneLinePraise}`;
+          const copyQuote = `🏆【凯旋庆功榜 #${idx + 1} · ${tierTag}】${p.personaname} (${heroShort} · ${p.pos_label}) 本局评分 ${sc100}/100 分，胜局贡献 ${share}%：KDA ${p.kda}，${oneLinePraise}`;
           const extraStat =
             p.pos >= 4
               ? `视野 ${(p.obs_placed || 0) + (p.sen_placed || 0)}颗 · 控制 ${p.stuns_sec || 0}s`
@@ -7410,6 +8547,7 @@ function renderVerdictAndBlameSection(report) {
                 <div class="blame-row-title">
                   <strong>${escapeHtml(heroShort)}</strong>
                   <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
+                  <span class="hero-score-100-inline">${sc100}分</span>
                 </div>
                 <div class="blame-row-sub">
                   ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} (${p.kill_participation_pct}%参战) · ${extraStat}
@@ -7419,7 +8557,7 @@ function renderVerdictAndBlameSection(report) {
                 <div class="blame-row-bar-track">
                   <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, share))}%"></div>
                 </div>
-                <div class="blame-row-quote" title="${escapeHtml(oneLinePraise)}">${escapeHtml(oneLinePraise)}</div>
+                <div class="blame-row-quote" title="${escapeHtml(oneLinePraise)}">${injectHeroLogosIntoHtml(escapeHtml(oneLinePraise), report)}</div>
               </div>
               <span class="blame-badge">${tierTag} · 贡献 ${share.toFixed(1)}%</span>
               <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制贺电</button>
@@ -7431,7 +8569,7 @@ function renderVerdictAndBlameSection(report) {
             (p.weaknesses && p.weaknesses[0]) ||
             p.trash_talk ||
             "本局表现中规中矩";
-          const copyQuote = `【分锅账单 #${idx + 1}】${p.personaname} (${heroShort} · ${p.pos_label}) 背锅占比 ${share}%：KDA ${p.kda}，${oneLineCrime}`;
+          const copyQuote = `【分锅账单 #${idx + 1}】${p.personaname} (${heroShort} · ${p.pos_label}) 本局评分 ${sc100}/100 分，背锅占比 ${share}%：KDA ${p.kda}，${oneLineCrime}`;
 
           return `
             <div class="blame-row rank-${idx}">
@@ -7445,6 +8583,7 @@ function renderVerdictAndBlameSection(report) {
                 <div class="blame-row-title">
                   <strong>${escapeHtml(heroShort)}</strong>
                   <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
+                  <span class="hero-score-100-inline">${sc100}分</span>
                 </div>
                 <div class="blame-row-sub">
                   ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} · 参战 ${p.kill_participation_pct}% · 读秒 ${p.dead_seconds || 0}s
@@ -7454,7 +8593,7 @@ function renderVerdictAndBlameSection(report) {
                 <div class="blame-row-bar-track">
                   <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, share))}%"></div>
                 </div>
-                <div class="blame-row-quote" title="${escapeHtml(oneLineCrime)}">${escapeHtml(oneLineCrime)}</div>
+                <div class="blame-row-quote" title="${escapeHtml(oneLineCrime)}">${injectHeroLogosIntoHtml(escapeHtml(oneLineCrime), report)}</div>
               </div>
               <span class="blame-badge">背锅 ${share.toFixed(1)}%</span>
               <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制算账</button>
@@ -8495,10 +9634,10 @@ function renderPhaseSection(report) {
     </div>
 
     <div class="phase-narrative-box">
-      <p>${escapeHtml(summaryText)}</p>
+      <p>${injectHeroLogosIntoHtml(escapeHtml(summaryText), report)}</p>
       ${
         turningText
-          ? `<div class="phase-turning-bar"><strong>阶段胜负拐点：</strong>${escapeHtml(turningText)}</div>`
+          ? `<div class="phase-turning-bar"><strong>阶段胜负拐点：</strong>${injectHeroLogosIntoHtml(escapeHtml(turningText), report)}</div>`
           : ""
       }
     </div>
@@ -8507,19 +9646,19 @@ function renderPhaseSection(report) {
       <div class="phase-team-diag-card good">
         <h4>✓ 本阶段全队哪里做得好 (${escapeHtml(activePd.label)})</h4>
         <ul>
-          ${goodBullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          ${goodBullets.map((item) => `<li>${injectHeroLogosIntoHtml(escapeHtml(item), report)}</li>`).join("")}
         </ul>
       </div>
       <div class="phase-team-diag-card bad">
         <h4>✕ 本阶段全队哪里做得不好 (复盘扣分项)</h4>
         <ul>
-          ${badBullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          ${badBullets.map((item) => `<li>${injectHeroLogosIntoHtml(escapeHtml(item), report)}</li>`).join("")}
         </ul>
       </div>
       <div class="phase-team-diag-card action">
         <h4>→ 团队在${escapeHtml(activePd.label)}应该怎么做 (进步指南)</h4>
         <ul>
-          ${actionBullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          ${actionBullets.map((item) => `<li>${injectHeroLogosIntoHtml(escapeHtml(item), report)}</li>`).join("")}
         </ul>
       </div>
     </div>
@@ -8596,23 +9735,23 @@ function renderPhaseSection(report) {
                   : `<div style="font-size: 10px; color: var(--dim);">本阶段无核心成装更新</div>`
               }
 
-              <div class="phase-p-prose">${escapeHtml(assessmentText)}</div>
+              <div class="phase-p-prose">${injectHeroLogosIntoHtml(escapeHtml(assessmentText), report)}</div>
 
               <div class="phase-p-eval-block">
                 <div class="phase-eval-group good">
                   <b>✓ 哪里做得好</b>
                   <ul>
-                    ${goodItems.slice(0, 2).map((g) => `<li>${escapeHtml(g)}</li>`).join("")}
+                    ${goodItems.slice(0, 2).map((g) => `<li>${injectHeroLogosIntoHtml(escapeHtml(g), report)}</li>`).join("")}
                   </ul>
                 </div>
                 <div class="phase-eval-group bad">
                   <b>✕ 哪里做得不好</b>
                   <ul>
-                    ${badItems.slice(0, 2).map((b) => `<li>${escapeHtml(b)}</li>`).join("")}
+                    ${badItems.slice(0, 2).map((b) => `<li>${injectHeroLogosIntoHtml(escapeHtml(b), report)}</li>`).join("")}
                   </ul>
                 </div>
                 <div class="phase-eval-focus">
-                  <strong>阶段改进：</strong>${escapeHtml(focusText)}
+                  <strong>阶段改进：</strong>${injectHeroLogosIntoHtml(escapeHtml(focusText), report)}
                 </div>
               </div>
             </article>
@@ -8653,7 +9792,7 @@ function renderKeyWindowsSection(report) {
         </div>
         <div class="window-story-box praise">
           <span class="window-story-tag">🎙️ AI 刀塔老炮复盘评书</span>
-          <div class="window-story-text">${escapeHtml(w.detail || "")}</div>
+          <div class="window-story-text">${injectHeroLogosIntoHtml(escapeHtml(w.detail || ""), report)}</div>
         </div>
       </article>
     `);
@@ -8690,7 +9829,7 @@ function renderKeyWindowsSection(report) {
         <div class="window-head">
           <span class="window-time-badge">${escapeHtml(tf.time_range)}</span>
           <span class="window-tone-badge ${escapeHtml(storyObj.tone)}">${escapeHtml(storyObj.badge)}</span>
-          <h3 class="window-title">高烈度团战 #${idx + 1} · ${escapeHtml(tf.kills_trade)} (${escapeHtml(tf.gold_swing)})</h3>
+          <h3 class="window-title">高强度团战 #${idx + 1} · ${escapeHtml(tf.kills_trade)} (${escapeHtml(tf.gold_swing)})</h3>
           ${
             deathCount > 0
               ? `<button type="button" class="button secondary" style="margin-left:auto;padding:3px 8px;font-size:11px;" data-locate-tf="${tfIdxToUse}">📍 在地图定位墓碑 (${deathCount})</button>`
@@ -8702,13 +9841,13 @@ function renderKeyWindowsSection(report) {
           <div class="window-story-text">${storyObj.storyHtml}</div>
         </div>
         <div class="window-stat-strip">
-          <span>💥 最高输出：<b>${escapeHtml(tf.top_damage_hero || "-")}</b></span>
+          <span>💥 最高输出：<b>${injectHeroLogosIntoHtml(escapeHtml(tf.top_damage_hero || "-"), report)}</b></span>
           ${
             buybacksList.length > 0
-              ? `<span>💰 交出买活：<b>${escapeHtml(buybacksList.join("、"))}</b></span>`
+              ? `<span>💰 交出买活：<b>${injectHeroLogosIntoHtml(escapeHtml(buybacksList.join("、")), report)}</b></span>`
               : ""
           }
-          <span class="window-participants-inline">${escapeHtml(pRows)}</span>
+          <span class="window-participants-inline">${injectHeroLogosIntoHtml(escapeHtml(pRows), report)}</span>
         </div>
       </article>
     `);
@@ -8788,6 +9927,8 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const pWon = Boolean(p.won);
   const contribPct = Number(p.contrib_share_pct ?? p.blame_share_pct ?? 20).toFixed(1);
   const blamePct = Number(p.blame_share_pct || 0).toFixed(1);
+  const score100 = getHeroScore100(p);
+  const scoreTier = getScore100Tier(score100, pWon);
 
   // Final 6-slot items + neutral item
   const slotsHtml = (p.final_items_rich || [])
@@ -8901,8 +10042,8 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
     : p.trash_talk || headlineText || badList[0] || "";
 
   const copyText = pWon
-    ? `【${p.pos_label}庆功表彰】${p.personaname} (${heroShort})：KDA ${p.kda}，GPM ${p.gpm}，胜局贡献 ${contribPct}%。${footerQuote}`
-    : `【${p.pos_label}算账单】${p.personaname} (${heroShort})：KDA ${p.kda}，GPM ${p.gpm}，分锅占比 ${blamePct}%。${footerQuote}`;
+    ? `【${p.pos_label}庆功表彰】${p.personaname} (${heroShort})：本局评分 ${score100}/100 分，KDA ${p.kda}，GPM ${p.gpm}，胜局贡献 ${contribPct}%。${footerQuote}`
+    : `【${p.pos_label}算账单】${p.personaname} (${heroShort})：本局评分 ${score100}/100 分，KDA ${p.kda}，GPM ${p.gpm}，分锅占比 ${blamePct}%。${footerQuote}`;
 
   const lh10 = p.laning_10m?.lh10 ?? "-";
   const dn10 = p.laning_10m?.dn10 ?? "-";
@@ -8976,7 +10117,11 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
         </div>
 
         <div class="forensic-badges-right">
-          <span class="status-pill connected">综合评分 ${Number(p.rating_score || 60).toFixed(1)}</span>
+          <div class="hero-score-100-pill ${escapeHtml(scoreTier.cls)}" title="百分制综合表现打分（100分最高，0分最低）">
+            <span class="hs-label">本局打分</span>
+            <strong class="hs-value">${score100}<small>/100分</small></strong>
+            <span class="hs-tier">${escapeHtml(scoreTier.label)}</span>
+          </div>
           ${
             pWon
               ? `<span class="blame-badge" style="color:#a8e5a7;border-color:#3a6a40;background:#152317;">🏆 胜局贡献 ${contribPct}% · ${escapeHtml(
@@ -9123,7 +10268,7 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
 
         <div class="radar-mini-box">
           ${renderHexRadarSvg(p.radar)}
-          <div class="radar-mini-scores">${escapeHtml(radarMiniSummary)}</div>
+          <div class="radar-mini-scores"><b>本局打分 ${score100}/100</b> · ${escapeHtml(radarMiniSummary)}</div>
         </div>
       </div>
 
@@ -9131,19 +10276,19 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
         <div class="prose-col good">
           <h4>${pWon ? "🏆 凯旋高光与胜局贡献" : "哪里干得漂亮 (高光与贡献)"}</h4>
           <ul>
-            ${goodList.map((g) => `<li>${escapeHtml(g)}</li>`).join("")}
+            ${goodList.map((g) => `<li>${injectHeroLogosIntoHtml(escapeHtml(g), state.currentReport)}</li>`).join("")}
           </ul>
         </div>
         <div class="prose-col bad">
           <h4>${pWon ? "🔍 胜局复盘小瑕疵 (美中不足)" : "哪里在犯罪 (背锅铁证)"}</h4>
           <ul>
-            ${badList.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}
+            ${badList.map((b) => `<li>${injectHeroLogosIntoHtml(escapeHtml(b), state.currentReport)}</li>`).join("")}
           </ul>
         </div>
         <div class="prose-col fix">
           <h4>${pWon ? "🚀 乘胜追击进阶建议" : "下把怎么改 (具体可执行动作)"}</h4>
           <ul>
-            ${fixList.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}
+            ${fixList.map((f) => `<li>${injectHeroLogosIntoHtml(escapeHtml(f), state.currentReport)}</li>`).join("")}
           </ul>
         </div>
       </div>
@@ -9960,35 +11105,78 @@ function drawVerdictPosterCanvas(
 /**
  * 15. Workspace Mode Switcher & Pre-Game 5-Stack Live Draft Coach (/pregame)
  */
-function switchWorkspaceMode(mode, { pushUrl = true } = {}) {
-  state.workspaceMode = mode === "pregame" ? "pregame" : "postgame";
-  const isPregame = state.workspaceMode === "pregame";
+function switchWorkspaceMode(mode, { pushUrl = true, animate = true } = {}) {
+  const validMode =
+    mode === "pregame" ? "pregame" : mode === "postgame" ? "postgame" : "home";
+  const prevMode = state.workspaceMode;
+  state.workspaceMode = validMode;
 
-  const postView = document.getElementById("postgame-workspace");
-  const preView = document.getElementById("pregame-workspace");
-  if (postView) postView.hidden = isPregame;
-  if (preView) preView.hidden = !isPregame;
+  const applyDomUpdate = () => {
+    const homeView = document.getElementById("home-workspace");
+    const postView = document.getElementById("postgame-workspace");
+    const preView = document.getElementById("pregame-workspace");
 
-  document
-    .getElementById("nav-mode-postgame")
-    ?.classList.toggle("active", !isPregame);
-  document
-    .getElementById("nav-mode-pregame")
-    ?.classList.toggle("active", isPregame);
+    if (homeView) homeView.hidden = validMode !== "home";
+    if (postView) postView.hidden = validMode !== "postgame";
+    if (preView) preView.hidden = validMode !== "pregame";
 
-  if (pushUrl && window.history?.replaceState) {
-    const targetPath = isPregame ? "/pregame" : "/";
-    if (window.location.pathname !== targetPath) {
-      window.history.replaceState({}, "", targetPath);
+    document
+      .getElementById("nav-mode-home")
+      ?.classList.toggle("active", validMode === "home");
+    document
+      .getElementById("nav-mode-postgame")
+      ?.classList.toggle("active", validMode === "postgame");
+    document
+      .getElementById("nav-mode-pregame")
+      ?.classList.toggle("active", validMode === "pregame");
+
+    if (pushUrl && window.history?.replaceState) {
+      if (validMode === "pregame") {
+        if (window.location.pathname !== "/pregame") {
+          window.history.replaceState({}, "", "/pregame");
+        }
+      } else if (validMode === "home") {
+        window.history.replaceState({}, "", "/");
+      } else if (validMode === "postgame") {
+        const matchId = state.currentMatchId || state.currentReport?.match_id;
+        if (matchId) {
+          syncMatchUrlInAddressBar(matchId, state.selectedSide || "dire");
+        }
+      }
     }
-  }
 
-  if (isPregame) {
-    renderPregameSlots();
-    renderPregameHeroGrid();
-    if (!state.pregamePlan) {
-      requestAndRenderPregamePlan({ useLlm: false });
+    if (validMode === "pregame") {
+      renderPregameSlots();
+      renderPregameHeroGrid();
+      if (!state.pregamePlan) {
+        requestAndRenderPregamePlan({ useLlm: false });
+      }
+    } else if (validMode === "home") {
+      renderHomeWorkspace();
     }
+
+    if (prevMode !== validMode) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      const targetHeading =
+        validMode === "home"
+          ? document.getElementById("home-hero-heading")
+          : validMode === "postgame"
+          ? document.getElementById("match-overview-title")
+          : document.getElementById("pregame-title");
+      targetHeading?.focus?.({ preventScroll: true });
+    }
+  };
+
+  if (
+    animate &&
+    prevMode !== validMode &&
+    typeof document !== "undefined" &&
+    typeof document.startViewTransition === "function" &&
+    !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+  ) {
+    document.startViewTransition(() => applyDomUpdate());
+  } else {
+    applyDomUpdate();
   }
 }
 
