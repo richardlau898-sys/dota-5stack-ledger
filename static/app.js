@@ -243,6 +243,66 @@ async function exportMatchPdfReport(targetMatchId = null, { autoDownloadPdf = fa
   }
 }
 
+const NOTO_SANS_SC_TTF_URL =
+  "https://fonts.gstatic.com/s/notosanssc/v41/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_FnYxNavzT.ttf";
+let _cjkFontLoadPromise = null;
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  const chunks = [];
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize)));
+  }
+  return btoa(chunks.join(""));
+}
+
+async function ensureCjkVectorFontBase64() {
+  if (window._cachedNotoSansScBase64) {
+    return window._cachedNotoSansScBase64;
+  }
+  if (!_cjkFontLoadPromise) {
+    _cjkFontLoadPromise = (async () => {
+      const res = await fetch(NOTO_SANS_SC_TTF_URL, { mode: "cors", cache: "force-cache" });
+      if (!res.ok) throw new Error(`字体加载失败 (${res.status})`);
+      const buf = await res.arrayBuffer();
+      const b64 = arrayBufferToBase64(buf);
+      window._cachedNotoSansScBase64 = b64;
+      return b64;
+    })().catch((err) => {
+      _cjkFontLoadPromise = null;
+      throw err;
+    });
+  }
+  return _cjkFontLoadPromise;
+}
+
+function cleanPdfVectorText(raw) {
+  let s = sanitizeMixedEnglishClient(String(raw ?? ""));
+  s = s
+    .replace(/\*\*/g, "")
+    .replace(/\(评级\s*good\)/gi, "(评级:优)")
+    .replace(/\(评级\s*bad\)/gi, "(评级:差)")
+    .replace(/\(评级\s*warn\)/gi, "(评级:中)")
+    .replace(/👑/g, "[MVP] ")
+    .replace(/🚨/g, "[重点] ")
+    .replace(/⚠️/g, "[注意] ")
+    .replace(/✅|🟢|✓/g, "• ")
+    .replace(/❌|🔴|✕/g, "× ")
+    .replace(/📌|▸/g, "› ")
+    .replace(/⚔️/g, "")
+    .replace(/🛡️/g, "")
+    .replace(/💀|⚰️/g, "")
+    .replace(/🗺️|🧭/g, "")
+    .replace(/👁️/g, "")
+    .replace(/🌾|💨/g, "")
+    .replace(/🌱|🌺|📚|🚪|🏮|💧|🪝/g, "")
+    .replace(/🆘|📜|📋|📊|📈|📉|🎯|💥|🔮|🗡️|🏰|🌲|💸|📡|🐉|🐔|💎|🛠️|⚖️|🏆|🌍|🎉|🐟|🌅|🔥/g, "");
+  // Remove any remaining supplementary plane emoji characters or variation selectors so NotoSansSC never renders tofu boxes
+  s = s.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}]/gu, "");
+  return s.replace(/[ \t]{2,}/g, " ").trim();
+}
+
 function openFullscreenStructuredReport(report = state.currentReport) {
   if (!report) return;
   const dlg = document.getElementById("fullscreen-report-dialog");
@@ -250,6 +310,9 @@ function openFullscreenStructuredReport(report = state.currentReport) {
   const topTitle = document.getElementById("fs-report-top-title");
   const fsPerspSelect = document.getElementById("fs-perspective-select");
   if (!dlg || !paper) return;
+
+  // Pre-warm the CJK vector font in the background so clicking "直接下载 PDF" is instantaneous
+  ensureCjkVectorFontBase64().catch(() => {});
 
   const { side, sideZh } = getOwnAndOppPlayers(report);
   const ownWon =
@@ -266,7 +329,6 @@ function openFullscreenStructuredReport(report = state.currentReport) {
   }
 
   paper.innerHTML = buildStructuredFullReportHtml(report);
-  // Expand all <details> inside the structured report so all 11 dimensions and ward logs are visible
   paper.querySelectorAll("details").forEach((det) => {
     det.open = true;
   });
@@ -276,6 +338,437 @@ function openFullscreenStructuredReport(report = state.currentReport) {
   }
   const viewport = document.getElementById("fs-report-scroll-viewport");
   if (viewport) viewport.scrollTop = 0;
+}
+
+function buildStructuredMicroTablesHtml(report, df, side, sideZh, oppSide, oppZh) {
+  const gradeZhMap = { good: "优", bad: "差", warn: "中" };
+  // 4.1 英雄绝活与大招释放质量审判总表
+  const execData = df.hero_execution_by_side?.[side];
+  const execPlayers = Array.isArray(execData) ? execData : execData?.players || [];
+  const ultRowsHtml = execPlayers
+    .map((p) => {
+      const badgesStr = (p.headline_badges || [])
+        .map((b) => (typeof b === "string" ? b : b?.text || ""))
+        .filter(Boolean)
+        .join(" ｜ ");
+      const ults = p.ult_audits || p.signature_spells || [];
+      const ultDesc = ults
+        .map((sp) => {
+          const casts = sp.casts ?? 0;
+          const hits = sp.hits ?? sp.hero_hits ?? 0;
+          const avg = sp.avg_hits ?? sp.avg_heroes_per_cast ?? 0;
+          const dmg = sp.damage ?? sp.total_damage ?? 0;
+          const unit = sp.unit_label || "人次";
+          const gZh = gradeZhMap[sp.grade] || sp.grade || "良";
+          return `<b>${escapeHtml(sp.ability_zh || "关键大招")}</b> (评级:${escapeHtml(
+            gZh
+          )})：释放 <b>${casts}</b> 次${hits > 0 ? `，命中 <b>${hits}</b> ${escapeHtml(unit)} (均 ${avg})` : ""}${
+            dmg > 0 ? `，伤害 <b>${fmtNum(dmg)}</b>` : ""
+          }`;
+        })
+        .join("<br/>");
+      const skillDesc = (p.skillshot_audits || [])
+        .map(
+          (sk) =>
+            `${escapeHtml(sk.ability_zh || "")}：${sk.casts ?? 0}放/${sk.hits ?? 0}中 (<b>${
+              sk.hit_pct ?? 0
+            }%</b> · ${fmtNum(sk.damage || 0)}伤)`
+        )
+        .join("<br/>");
+      const heldWaves = ults.flatMap((sp) => sp.tf_held_death_waves || []);
+      const castWaves = ults.flatMap((sp) => sp.tf_casts_waves || []);
+      const verdictStr =
+        ults.map((sp) => sp.verdict_text || sp.verdict || "").filter(Boolean).join("；") ||
+        (p.special_insights || []).slice(0, 2).join("；") ||
+        "技能衔接正常";
+
+      return `
+        <tr>
+          <td>
+            <b>${p.pos ?? "?"}号位 · ${escapeHtml(p.hero_short_zh || "")}</b><br/>
+            <span class="fs-sub">${escapeHtml(p.personaname || "")} · 全场硬控 ${p.stuns_sec ?? 0}s</span>
+          </td>
+          <td>${escapeHtml(badgesStr || "常规释放")}</td>
+          <td>${ultDesc || "无主动大招"}</td>
+          <td>${skillDesc || "-"}</td>
+          <td>
+            ${
+              castWaves.length > 0
+                ? `<div class="txt-win">✓ 开大团战：${escapeHtml(castWaves.join("、"))}</div>`
+                : ""
+            }
+            ${
+              heldWaves.length > 0
+                ? `<div class="txt-loss">✕ 憋大阵亡：${escapeHtml(heldWaves.join("、"))}</div>`
+                : `<div class="fs-sub">✓ 0次团战憋大阵亡</div>`
+            }
+          </td>
+          <td class="fs-verdict-cell">${escapeHtml(verdictStr)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // 4.2 憋死 BKB / 救命装与 0 技能秒躺尸检总表
+  const us = df.unpressed_saves_by_side?.[side] || {};
+  const usRowsHtml = (us.player_rows || [])
+    .map((r) => {
+      const coreCnt = Number(r.unpressed_core_cnt ?? 0);
+      const zeroCnt = Number(r.zero_spell_cnt ?? 0);
+      return `
+        <tr>
+          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(
+        r.personaname || ""
+      )})</td>
+          <td><b>${r.tf_deaths ?? 0} 次</b></td>
+          <td><b class="${coreCnt > 0 ? "txt-loss" : "txt-win"}">${coreCnt} 次</b></td>
+          <td><b class="${zeroCnt > 0 ? "txt-loss" : "txt-win"}">${zeroCnt} 次</b></td>
+          <td>${escapeHtml(r.owned_saves_str || "未合成主动保命装")}</td>
+          <td class="fs-verdict-cell">${escapeHtml(r.verdict || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // 4.3 地图空间理解与 9m 后落单被抓表
+  const ms = df.map_space_by_side?.[side] || {};
+  const msRowsHtml = (ms.player_space_rows || [])
+    .map((r) => {
+      const soloCnt = Number(r.solo_pickoff_cnt ?? 0);
+      return `
+        <tr>
+          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(
+        r.personaname || ""
+      )})</td>
+          <td><b>${escapeHtml(r.space_style_badge || "常规驻守")}</b></td>
+          <td>兵线 <b>${r.lane_kills ?? 0}</b> (${r.lane_farm_pct ?? 0}%) / 野区 <b>${
+        r.neutral_kills ?? 0
+      }</b> (${r.jungle_farm_pct ?? 0}%)</td>
+          <td><b>${fmtNum(r.tower_damage || 0)}</b></td>
+          <td><b class="${soloCnt >= 2 ? "txt-loss" : soloCnt === 0 ? "txt-win" : ""}">${soloCnt} 次</b> (送 ${fmtNum(
+        r.solo_gold_fed || 0
+      )} 金)</td>
+          <td class="fs-verdict-cell">${escapeHtml(r.verdict || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const msEvents = ms.solo_pickoff_events || [];
+  const msEventsSummary =
+    msEvents.length > 0
+      ? msEvents
+          .map(
+            (ev) =>
+              `[${ev.time_str}] ${ev.pos}号位${ev.hero_short_zh} 在【${ev.zone_zh}】(${ev.vision_tag}) 被 ${ev.killer_zh} 抓死，读秒 ${ev.time_dead}s 送 ${ev.gold_fed} 金 → ${ev.consequence}`
+          )
+          .join("；")
+      : "本局 9 分钟后未发生脱离团队无聊带线或黑图落单被抓事故。";
+
+  // 4.4 承伤来源与防装合规审计表
+  const dr = df.damage_received_by_side?.[side] || {};
+  const drRowsHtml = (dr.rows || [])
+    .map((r) => {
+      const killers = (r.top_killers || [])
+        .slice(0, 3)
+        .map((k) => `${k.zh_name}(${fmtNum(k.damage || 0)}/${k.share_pct ?? 0}%)`)
+        .join("、");
+      const defs = (r.def_items_owned || []).join("、") || "未出针对防装";
+      return `
+        <tr>
+          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(
+        r.personaname || ""
+      )})</td>
+          <td><b>${fmtNum(r.total_dmg_taken || 0)}</b></td>
+          <td>技能爆发 <b>${r.spell_pct ?? 0}%</b> / 物理平A <b>${r.auto_pct ?? 0}%</b></td>
+          <td>${escapeHtml(killers || "平A为主")}</td>
+          <td><b>${escapeHtml(defs)}</b></td>
+          <td class="fs-verdict-cell">${escapeHtml(r.verdict || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // 4.5 辅助眼位 + 4.6 堆野开雾 + 4.7 对线细节 综合运维结构表
+  const vis = df.support_vision_by_side?.[side] || {};
+  const ss = df.stacking_and_smoke_by_side?.[side] || {};
+  const lm = df.laning_mechanics_by_side?.[side] || {};
+  const smokeEvents = ss.smoke_events || [];
+  const smokeUses = ss.own_smoke_uses ?? ss.smoke_total_uses ?? smokeEvents.length;
+  const smokeBought =
+    ss.smoke_total_bought ??
+    (ss.per_player_smokes || []).reduce((acc, item) => acc + Number(item.bought || 0), 0);
+  const smokeSuccessCnt =
+    ss.smoke_success_count ?? smokeEvents.filter((e) => e.outcome === "success").length;
+  const smokeBackfireCnt =
+    ss.smoke_backfire_count ?? smokeEvents.filter((e) => e.outcome === "backfire").length;
+  const smokeDryCnt =
+    ss.smoke_dry_count ?? smokeEvents.filter((e) => e.outcome === "wasted").length;
+
+  const ownLotus = lm.own_lotus_total ?? lm.lotus_own_total ?? 0;
+  const oppLotus = lm.opp_lotus_total ?? lm.lotus_opp_total ?? 0;
+  const ownWisdom = lm.own_wisdom_cnt ?? lm.wisdom_own_count ?? 0;
+  const oppWisdom = lm.opp_wisdom_cnt ?? lm.wisdom_opp_count ?? 0;
+  const ownGate = lm.own_gate_total ?? lm.gate_own_count ?? 0;
+  const oppGate = lm.opp_gate_total ?? lm.gate_opp_count ?? 0;
+  const ownLamp = lm.own_lamp_total ?? lm.lamp_own_count ?? 0;
+  const oppLamp = lm.opp_lamp_total ?? lm.lamp_opp_count ?? 0;
+
+  const macroOpsRowsHtml = `
+    <tr>
+      <td><b>4.5 辅助视野与反眼博弈</b></td>
+      <td>
+        总假眼 <b>${vis.total_obs ?? vis.obs_total ?? 0}</b> 颗 / 真眼 <b>${
+    vis.total_sen ?? vis.sen_total ?? 0
+  }</b> 颗<br/>
+        <span class="fs-sub">平均寿命 ${vis.avg_lifespan_sec ?? 0}s/360s · 被排 ${
+    vis.dewarded_total ?? 0
+  } 颗 (${vis.dewarded_pct ?? 0}%)</span>
+      </td>
+      <td>
+        进攻眼 <b>${vis.posture_counts?.aggressive ?? 0}</b> (${vis.posture_pcts?.aggressive ?? 0}%) / 河道眼 <b>${
+    vis.posture_counts?.river_roshan ?? 0
+  }</b> (${vis.posture_pcts?.river_roshan ?? 0}%) / 防守眼 <b>${
+    vis.posture_counts?.defensive ?? 0
+  }</b> (${vis.posture_pcts?.defensive ?? 0}%)
+      </td>
+      <td class="fs-verdict-cell">
+        ${escapeHtml(vis.posture_verdict || "")}
+        ${
+          (vis.instant_dewards || []).length > 0
+            ? `<br/><span class="txt-loss">秒排白给眼 (≤90s)：${escapeHtml(
+                vis.instant_dewards
+                  .map((w) => `${w.time_str} ${w.planter_hero || ""}于${w.zone_zh}(仅活${w.lifespan_sec}s)`)
+                  .join("；")
+              )}</span>`
+            : ""
+        }
+      </td>
+    </tr>
+    <tr>
+      <td><b>4.6 辅助堆野 &amp; 开雾转化</b></td>
+      <td>
+        全队堆野 <b>${ss.total_stacks ?? ss.total_team_stacks ?? 0} 组</b> (${
+    ss.total_creeps_stacked ?? 0
+  } 只野)<br/>
+        <span class="fs-sub">辅助堆 ${ss.support_stacks ?? 0} 组 / 大哥自拉 ${
+    ss.core_stacks ?? ss.core_self_stacks ?? 0
+  } 组</span>
+      </td>
+      <td>
+        买雾 <b>${smokeBought}</b> / 开雾 <b>${smokeUses}</b> 波<br/>
+        <span class="fs-sub">破雾大捷 ${smokeSuccessCnt} 波 / 撞墙 ${smokeBackfireCnt} 波 / 空雾 ${smokeDryCnt} 波</span>
+      </td>
+      <td class="fs-verdict-cell">
+        ${escapeHtml(ss.stack_verdict || "")} ｜ ${escapeHtml(ss.smoke_verdict || "")}
+      </td>
+    </tr>
+    <tr>
+      <td><b>4.7 对线莲花·智慧符·走门</b></td>
+      <td>
+        疗伤莲花 <b>${ownLotus} : ${oppLotus}</b><br/>
+        <span class="fs-sub">7/14/21m 智慧符 <b>${ownWisdom} : ${oppWisdom}</b></span>
+      </td>
+      <td>
+        双生门传送 <b>${ownGate} : ${oppGate}</b><br/>
+        <span class="fs-sub">观察者点灯 <b>${ownLamp} : ${oppLamp}</b></span>
+      </td>
+      <td class="fs-verdict-cell">
+        ${escapeHtml(lm.lotus_verdict || "")} ｜ ${escapeHtml(lm.wisdom_verdict || "")}
+      </td>
+    </tr>
+  `;
+
+  // 4.8 TP 救人与团战缺席抓包 + 4.9 经济来源结构 合并五人表
+  const tp = df.tp_rotation_by_side?.[side] || {};
+  const ep = df.economy_and_pings_by_side?.[side] || {};
+  const tpMap = new Map((tp.player_tp_rows || []).map((r) => [Number(r.pos), r]));
+  const epRows = ep.econ_rows || [];
+  const tpEconRowsHtml = epRows
+    .map((r) => {
+      const tr = tpMap.get(Number(r.pos)) || {};
+      const tfTpCnt = tr.tf_tp_cnt ?? tr.teamfight_tp_saves ?? 0;
+      const tfAbsentCnt = tr.tf_absent_cnt ?? tr.spectator_teamfights ?? 0;
+      const lossGold = (r.death_loss || 0) + (r.buyback_loss || 0);
+      return `
+        <tr>
+          <td><b>${r.pos ?? "?"}号位 · ${escapeHtml(r.hero_short_zh || "")}</b> (${escapeHtml(
+        r.personaname || ""
+      )})</td>
+          <td>用 <b>${tr.tp_used ?? 0}</b> / 买 <b>${tr.tp_bought ?? 0}</b> 张 (前12m支援 ${
+        tr.early_tp_cnt ?? 0
+      } 次)</td>
+          <td>
+            <span class="${tfTpCnt > 0 ? "txt-win" : ""}">亮TP救人 ${tfTpCnt} 次</span> /
+            <span class="${tfAbsentCnt > 0 ? "txt-loss" : "txt-win"}">团战0参与OB ${tfAbsentCnt} 波</span>
+          </td>
+          <td>兵线 <b>${fmtNum(r.lane_gold || 0)}</b> (${r.lane_pct ?? 0}%) / 野区 <b>${fmtNum(
+        r.jungle_gold || 0
+      )}</b> (${r.jungle_pct ?? 0}%)</td>
+          <td>人头 <b>${fmtNum(r.kill_gold || 0)}</b> (${r.kill_pct ?? 0}%) / 塔盾 <b>${fmtNum(
+        r.obj_gold || 0
+      )}</b> (${r.obj_pct ?? 0}%)</td>
+          <td><b class="${lossGold >= 2200 ? "txt-loss" : ""}">-${fmtNum(lossGold)} 金</b> (信号 ${
+        r.pings ?? 0
+      } 次)</td>
+          <td class="fs-verdict-cell">${escapeHtml(tr.verdict || r.econ_tag || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // 4.10 买活死尸检 · 信使惨案 · 肉山魔晶 & 7.38 中立装备附魔审计表
+  const mo = df.macro_objectives_by_side?.[side] || {};
+  const craftRowsHtml = (mo.neutral_craft_rows || [])
+    .map((cr) => {
+      const stepsStr = (cr.craft_steps || []).join(" → ") || "无锻造记录";
+      return `
+        <tr>
+          <td><b>${cr.pos ?? "?"}号位 · ${escapeHtml(cr.hero_short_zh || "")}</b> (${escapeHtml(
+        cr.personaname || ""
+      )})</td>
+          <td><b>${escapeHtml(cr.shard_str || "未获魔晶")}</b></td>
+          <td>${escapeHtml(stepsStr)}</td>
+          <td class="fs-verdict-cell">${escapeHtml(cr.craft_verdict || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const bbSummary =
+    (mo.buyback_events || []).map((ev) => `[${ev.time_str}] ${ev.pos}号${ev.hero_short_zh}：${ev.detail}`).join("；") ||
+    "0次买活死 (Dieback)";
+  const roshSummary = (mo.roshan_events || []).join("；") || "无肉山盾拾取记录";
+
+  return `
+    <div class="fs-micro-tables-group">
+      <h3 class="fs-subtable-title">4.1 英雄绝活与大招释放质量审判总表 (${escapeHtml(sideZh)} 1~5 号位)</h3>
+      <div class="fs-table-wrap">
+        <table class="fs-structured-table">
+          <thead>
+            <tr>
+              <th>位置 &amp; 选手</th>
+              <th>绝活核心指标</th>
+              <th>关键大招释放 / 命中 / 伤害审计</th>
+              <th>非指向技能命中率</th>
+              <th>团战开大 vs 憋大阵亡</th>
+              <th>大招与技能复盘判词</th>
+            </tr>
+          </thead>
+          <tbody>${ultRowsHtml}</tbody>
+        </table>
+      </div>
+
+      <h3 class="fs-subtable-title">4.2 憋死 BKB / 救命装与团战 0 技能秒躺尸检总表（共憋死核心保命装 ${
+        us.critical_total ?? 0
+      } 人次 · 0技能秒躺 ${us.zero_spell_total ?? 0} 人次）</h3>
+      <div class="fs-table-wrap">
+        <table class="fs-structured-table">
+          <thead>
+            <tr>
+              <th>位置 &amp; 选手</th>
+              <th>团战阵亡</th>
+              <th>憋死核心保命装</th>
+              <th>团战0技能秒躺</th>
+              <th>本局合成保命装与全场按键次数</th>
+              <th>团战保命反应与抓包笔录</th>
+            </tr>
+          </thead>
+          <tbody>${usRowsHtml}</tbody>
+        </table>
+      </div>
+
+      <h3 class="fs-subtable-title">4.3 地图空间理解与 9 分钟后落单带危险线被抓审计表（共落单被抓 ${
+        ms.total_solo_pickoffs ?? 0
+      } 次）</h3>
+      <p class="fs-chapter-desc">📋 落单被抓流水：${escapeHtml(msEventsSummary)}</p>
+      <div class="fs-table-wrap">
+        <table class="fs-structured-table">
+          <thead>
+            <tr>
+              <th>位置 &amp; 选手</th>
+              <th>地图空间画像</th>
+              <th>兵线补刀 vs 野区发育占比</th>
+              <th>推塔建筑伤害</th>
+              <th>9m后落单被抓 &amp; 送金</th>
+              <th>空间利用与带线纪律判词</th>
+            </tr>
+          </thead>
+          <tbody>${msRowsHtml}</tbody>
+        </table>
+      </div>
+
+      <h3 class="fs-subtable-title">4.4 承伤来源拆解（物理平A vs 技能爆发）与防装合规审计表</h3>
+      <div class="fs-table-wrap">
+        <table class="fs-structured-table">
+          <thead>
+            <tr>
+              <th>位置 &amp; 选手</th>
+              <th>总承受英雄伤害</th>
+              <th>技能爆发 vs 物理平A占比</th>
+              <th>头号致死敌方技能 Top 3</th>
+              <th>已出针对性防装</th>
+              <th>防装选择合规判词</th>
+            </tr>
+          </thead>
+          <tbody>${drRowsHtml}</tbody>
+        </table>
+      </div>
+
+      <h3 class="fs-subtable-title">4.5–4.7 辅助视野质量 · 堆野开雾转化 · 对线拉野/莲花/智慧符/双生门综合审计表</h3>
+      <div class="fs-table-wrap">
+        <table class="fs-structured-table">
+          <thead>
+            <tr>
+              <th>战术审计维度</th>
+              <th>核心数量与效率指标</th>
+              <th>结构分布与对抗比</th>
+              <th>录像取证结论与抓包明细</th>
+            </tr>
+          </thead>
+          <tbody>${macroOpsRowsHtml}</tbody>
+        </table>
+      </div>
+
+      <h3 class="fs-subtable-title">4.8–4.9 TP 救人及时性 · 团战旁观抓包 · 经济来源结构与死亡损耗总表</h3>
+      <div class="fs-table-wrap">
+        <table class="fs-structured-table">
+          <thead>
+            <tr>
+              <th>位置 &amp; 选手</th>
+              <th>TP 使用 / 主动购买</th>
+              <th>团战亮 TP 支援 vs 0参与旁观</th>
+              <th>兵线 vs 野区进账</th>
+              <th>人头 vs 塔盾进账</th>
+              <th>阵亡+买活扣钱 &amp; 信号</th>
+              <th>支援与财政习惯判词</th>
+            </tr>
+          </thead>
+          <tbody>${tpEconRowsHtml}</tbody>
+        </table>
+      </div>
+
+      <h3 class="fs-subtable-title">4.10 买活死 (Dieback) 尸检 · 信使博弈 · 肉山魔晶 &amp; Dota 2 7.38 中立装备附魔表</h3>
+      <p class="fs-chapter-desc">⚰️ 买活审计：${escapeHtml(bbSummary)} ｜ 🐉 肉山记录：${escapeHtml(
+    roshSummary
+  )} ｜ 🐔 信使博弈：击杀敌鸡 ${mo.own_couriers_killed ?? 0} 只 / 本方掉鸡 ${
+    mo.own_couriers_lost ?? 0
+  } 只</p>
+      <div class="fs-table-wrap">
+        <table class="fs-structured-table">
+          <thead>
+            <tr>
+              <th>位置 &amp; 选手</th>
+              <th>阿哈利姆魔晶时间</th>
+              <th>7.38 中立装备锻造与附魔词条时间轴</th>
+              <th>词条合规与锻造节奏判词</th>
+            </tr>
+          </thead>
+          <tbody>${craftRowsHtml}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
 }
 
 function buildStructuredFullReportHtml(report) {
@@ -315,7 +808,6 @@ function buildStructuredFullReportHtml(report) {
   );
 
   const topMvp = sortedByContrib[0] || own[0];
-  const topRunner = sortedByContrib[1] || own[1] || own[0];
   const topCulprit = sortedByBlame[0] || own[0];
 
   // Chapter I: 4-Stage Audit Grid
@@ -453,22 +945,12 @@ function buildStructuredFullReportHtml(report) {
     })
     .join("");
 
-  // Chapter IV: All 11 Tactical Microscope Dimensions (reuse existing structured pane builders)
-  const microAllHtml = [
-    renderMicroHeroExecutionPane(report, df, side, sideZh, oppSide, oppZh),
-    renderMicroUnpressedSavesPane(report, df, side, sideZh),
-    renderMicroMapSpacePane(report, df, side, sideZh),
-    renderMicroDamageReceivedPane(report, df, side, sideZh),
-    renderMicroSupportVisionPane(report, df, side, sideZh),
-    renderMicroStackAndSmokePane(report, df, side, sideZh),
-    renderMicroLaningMechanicsPane(report, df, side, sideZh, oppZh),
-    renderMicroTpRotationPane(report, df, side, sideZh),
-    renderMicroEconomyAndPingsPane(report, df, side, sideZh),
-    renderMicroMacroObjectivesPane(report, df, side, sideZh),
-  ].join("");
+  // Chapter IV: Full-width structured tables for all Tactical Microscope dimensions
+  const microAllHtml = buildStructuredMicroTablesHtml(report, df, side, sideZh, oppSide, oppZh);
 
   // Chapter V: 3-Phase Differential Table + Key Teamfights Table
-  const phasesList = report.phase_breakdown?.phases || [];
+  const rawPhases = report.phases_data || report.phase_breakdown?.phases || [];
+  const phasesList = Array.isArray(rawPhases) ? rawPhases : Object.values(rawPhases);
   const signMult = side === (report.focus_side || "dire") ? 1 : -1;
   const phaseTableRows = phasesList
     .map((pd) => {
@@ -493,9 +975,9 @@ function buildStructuredFullReportHtml(report) {
             <b class="${deltaAdv >= 0 ? "txt-win" : "txt-loss"}">阶段净变动 ${fmtSigned(deltaAdv)} 金</b><br/>
             <span class="fs-sub">阶段末累计差：${fmtSigned(endAdv)} 金</span>
           </td>
-          <td class="fs-verdict-cell">✓ ${escapeHtml(goodStr || "维持基础运营")}</td>
-          <td class="fs-verdict-cell">✕ ${escapeHtml(badStr || "局部联动脱节")}</td>
-          <td class="fs-verdict-cell">📌 ${escapeHtml(actStr || "抓核心成装强势期抱团推进")}</td>
+          <td class="fs-verdict-cell">✓ ${escapeHtml((goodStr || "维持基础运营").replace(/\*\*/g, ""))}</td>
+          <td class="fs-verdict-cell">✕ ${escapeHtml((badStr || "局部联动脱节").replace(/\*\*/g, ""))}</td>
+          <td class="fs-verdict-cell">📌 ${escapeHtml((actStr || "抓核心成装强势期抱团推进").replace(/\*\*/g, ""))}</td>
         </tr>
       `;
     })
@@ -544,9 +1026,18 @@ function buildStructuredFullReportHtml(report) {
           .slice(0, 5)
           .map((ab) => `${ab.zh_name || ab.key}×${ab.count}`)
           .join(" / ") || "无主动技能记录";
-      const goods = (p.strengths || []).slice(0, 3).map((g) => `<div>✓ ${escapeHtml(g)}</div>`).join("");
-      const bads = (p.weaknesses || []).slice(0, 3).map((b) => `<div>✕ ${escapeHtml(b)}</div>`).join("");
-      const fixes = (p.improvements || []).slice(0, 2).map((f) => `<div>📌 ${escapeHtml(f)}</div>`).join("");
+      const goods = (p.strengths || [])
+        .slice(0, 3)
+        .map((g) => `<div>✓ ${escapeHtml(String(g).replace(/\*\*/g, ""))}</div>`)
+        .join("");
+      const bads = (p.weaknesses || [])
+        .slice(0, 3)
+        .map((b) => `<div>✕ ${escapeHtml(String(b).replace(/\*\*/g, ""))}</div>`)
+        .join("");
+      const fixes = (p.improvements || [])
+        .slice(0, 2)
+        .map((f) => `<div>📌 ${escapeHtml(String(f).replace(/\*\*/g, ""))}</div>`)
+        .join("");
       return `
         <tr>
           <td>
@@ -707,13 +1198,13 @@ function buildStructuredFullReportHtml(report) {
         </div>
       </section>
 
-      <!-- 第四章：十一维战术显微镜全量取证账本 -->
+      <!-- 第四章：十一维战术显微镜全量取证账本（全宽结构化大表） -->
       <section class="fs-chapter deferred-chapter">
         <div class="fs-chapter-head">
           <span class="fs-chapter-num">第四章</span>
           <h2>录像级十一维战术显微镜全量取证账本（大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/买活死&amp;7.38附魔）</h2>
         </div>
-        <div class="fs-micro-all-stack">${microAllHtml}</div>
+        ${microAllHtml}
       </section>
 
       <!-- 第五章：前/中/后期三阶段差分账本与关键胜负手团战 -->
@@ -780,17 +1271,24 @@ function buildStructuredFullReportHtml(report) {
   `;
 }
 
+/**
+ * 100% True Native Vector PDF Generator (jsPDF + jspdf-autotable + embedded NotoSansSC TTF)
+ * Produces selectable, searchable vector text & multi-page consulting tables with zero bitmap screenshots.
+ */
 async function downloadStructuredReportPdf() {
   const report = state.currentReport;
-  const paper = document.getElementById("fs-report-paper");
   const btn = document.getElementById("btn-fs-download-pdf");
-  if (!report || !paper) return;
+  if (!report) return;
 
-  const { sideZh } = getOwnAndOppPlayers(report);
-  const filename = `Dota2_结构化复盘报告_Match_${report.match_id}_${sideZh}视角.pdf`;
+  const { side, sideZh, oppZh, own, opp } = getOwnAndOppPlayers(report);
+  const ownWon =
+    (side === "radiant" && Boolean(report.radiant_win)) ||
+    (side === "dire" && !Boolean(report.radiant_win));
+  const filename = `Dota2_原生矢量复盘报告_Match_${report.match_id}_${sideZh}视角.pdf`;
 
-  if (typeof window.html2pdf !== "function") {
-    showToast("正在加载 PDF 导出引擎，已先为你下载独立全屏 HTML 报告文件");
+  const JsPDFCtor = window.jspdf?.jsPDF || window.jsPDF;
+  if (typeof JsPDFCtor !== "function") {
+    showToast("正在加载矢量 PDF 引擎，已先为您下载独立全屏 HTML 报告");
     downloadStructuredReportHtml();
     return;
   }
@@ -798,37 +1296,812 @@ async function downloadStructuredReportPdf() {
   const origText = btn ? btn.textContent : "";
   if (btn) {
     btn.disabled = true;
-    btn.textContent = "⏳ 正在生成 PDF 文件 (约2~4秒)...";
+    btn.textContent = "⏳ 正在装载中文字体并构建原生矢量 PDF...";
   }
-  showToast(`⏳ 正在直接生成并下载《${filename}》，无需打印弹窗...`, 4000);
-
-  // Temporarily force all deferred chapters visible for complete canvas capture
-  paper.classList.add("capturing-export");
+  showToast(`⏳ 正在生成 100% 原生矢量文字与表格 PDF《${filename}》...`, 4500);
 
   try {
-    const opt = {
-      margin: [6, 6, 6, 6],
-      filename,
-      image: { type: "jpeg", quality: 0.96 },
-      html2canvas: {
-        scale: 1.75,
-        useCORS: true,
-        backgroundColor: "#141613",
-        logging: false,
-        ignoreElements: (el) =>
-          el.tagName === "IMG" && el.getAttribute("data-html2canvas-ignore") === "true",
-      },
-      jsPDF: { unit: "mm", format: "a3", orientation: "landscape" },
-      pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".fs-stage-card", ".micro-card"] },
+    const fontBase64 = await ensureCjkVectorFontBase64();
+    const doc = new JsPDFCtor({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+      compress: true,
+    });
+
+    doc.addFileToVFS("NotoSansSC.ttf", fontBase64);
+    doc.addFont("NotoSansSC.ttf", "NotoSansSC", "normal");
+    doc.addFont("NotoSansSC.ttf", "NotoSansSC", "bold");
+    doc.setFont("NotoSansSC", "normal");
+
+    const pageW = doc.internal.pageSize.getWidth(); // 297mm
+    const pageH = doc.internal.pageSize.getHeight(); // 210mm
+    const marginX = 10;
+    const contentW = pageW - marginX * 2; // 277mm
+    let curY = 12;
+
+    const df = report.deep_forensics || {};
+    const grok = report.grok_coaching || {};
+    const draft = report.draft_and_combo?.[side] || report.draft_and_combo || {};
+    const rm = df.role_mirror_by_side?.[side] || {};
+
+    // Normalize 100% contribution and blame shares
+    const rawContribSum =
+      own.reduce((s, p) => s + Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)), 0) || 100;
+    const contribMap = new Map();
+    own.forEach((p) => {
+      contribMap.set(
+        Number(p.player_slot),
+        Number(((Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)) / rawContribSum) * 100).toFixed(1))
+      );
+    });
+    const rawBlameSum =
+      own.reduce((s, p) => s + Math.max(1, Number(p.blame_share_pct || 20)), 0) || 100;
+    const blameMap = new Map();
+    own.forEach((p) => {
+      blameMap.set(
+        Number(p.player_slot),
+        Number(((Math.max(1, Number(p.blame_share_pct || 20)) / rawBlameSum) * 100).toFixed(1))
+      );
+    });
+
+    const sortedByContrib = [...own].sort(
+      (a, b) => (contribMap.get(Number(b.player_slot)) || 0) - (contribMap.get(Number(a.player_slot)) || 0)
+    );
+    const sortedByBlame = [...own].sort(
+      (a, b) => (blameMap.get(Number(b.player_slot)) || 0) - (blameMap.get(Number(a.player_slot)) || 0)
+    );
+    const topMvp = sortedByContrib[0] || own[0];
+    const topCulprit = sortedByBlame[0] || own[0];
+
+    const ensureSpace = (needMm = 28) => {
+      if (curY + needMm > pageH - 14) {
+        doc.addPage();
+        curY = 16;
+      }
     };
-    await window.html2pdf().set(opt).from(paper).save();
-    showToast(`✅ PDF 报告已直接下载：${filename}`, 4200);
+
+    const drawChapterHeader = (chapterTag, titleStr) => {
+      ensureSpace(26);
+      doc.setFillColor(20, 27, 45);
+      doc.rect(marginX, curY, contentW, 8.2, "F");
+      doc.setFillColor(180, 138, 62);
+      doc.rect(marginX, curY, 20, 8.2, "F");
+
+      doc.setFont("NotoSansSC", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(255, 255, 255);
+      doc.text(cleanPdfVectorText(chapterTag), marginX + 10, curY + 5.5, { align: "center" });
+
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      doc.text(cleanPdfVectorText(titleStr), marginX + 23, curY + 5.6);
+      curY += 10.5;
+    };
+
+    const drawSubSectionTitle = (subTitle) => {
+      ensureSpace(20);
+      doc.setFillColor(241, 245, 249);
+      doc.rect(marginX, curY, contentW, 6.2, "F");
+      doc.setFillColor(180, 138, 62);
+      doc.rect(marginX, curY, 2.2, 6.2, "F");
+      doc.setFont("NotoSansSC", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(20, 27, 45);
+      doc.text(cleanPdfVectorText(subTitle), marginX + 4.5, curY + 4.3);
+      curY += 7.5;
+    };
+
+    const runVectorTable = (headCols, bodyRows, colStyles = {}, extraOpts = {}) => {
+      doc.autoTable({
+        startY: curY,
+        margin: { left: marginX, right: marginX, top: 15, bottom: 13 },
+        head: [headCols.map((c) => cleanPdfVectorText(c))],
+        body: bodyRows.map((row) => row.map((cell) => cleanPdfVectorText(cell))),
+        theme: "grid",
+        rowPageBreak: "avoid",
+        showHead: "everyPage",
+        styles: {
+          font: "NotoSansSC",
+          fontStyle: "normal",
+          fontSize: 7.6,
+          cellPadding: { top: 2.1, right: 2.4, bottom: 2.1, left: 2.4 },
+          textColor: [24, 30, 42],
+          lineColor: [208, 215, 226],
+          lineWidth: 0.15,
+          overflow: "linebreak",
+          valign: "middle",
+        },
+        headStyles: {
+          font: "NotoSansSC",
+          fontStyle: "bold",
+          fontSize: 8,
+          fillColor: [25, 34, 54],
+          textColor: [245, 232, 200],
+          lineColor: [45, 58, 86],
+          lineWidth: 0.2,
+          valign: "middle",
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252],
+        },
+        columnStyles: colStyles,
+        ...extraOpts,
+      });
+      curY = (doc.lastAutoTable?.finalY || curY) + 5.5;
+    };
+
+    // =========================================================================
+    // COVER BANNER & 4 EXECUTIVE KPI CARDS (Page 1 Top)
+    // =========================================================================
+    doc.setFillColor(18, 25, 43);
+    doc.rect(marginX, curY, contentW, 21, "F");
+    doc.setFillColor(180, 138, 62);
+    doc.rect(marginX, curY, 3.2, 21, "F");
+
+    doc.setFont("NotoSansSC", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(218, 182, 110);
+    doc.text(
+      "DOTA 2 FIVE-STACK POST-GAME FORENSICS DOSSIER · 五黑车队录像级结构化复盘报告 (100% 原生矢量文档)",
+      marginX + 7,
+      curY + 5.5
+    );
+
+    doc.setFontSize(14);
+    doc.setTextColor(255, 255, 255);
+    doc.text(
+      cleanPdfVectorText(
+        `比赛 #${report.match_id} · ${sideZh}视角深度复盘报告 [${
+          ownWon ? `${sideZh}凯旋获胜` : `${sideZh}遗憾落败`
+        }]`
+      ),
+      marginX + 7,
+      curY + 12.8
+    );
+
+    doc.setFont("NotoSansSC", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(203, 213, 225);
+    const shareUrl = getPublicShareUrl(report.match_id);
+    doc.text(
+      cleanPdfVectorText(
+        `比赛时间：${report.start_time_str || "-"}  |  模式：${
+          report.game_mode_str || "全英雄选择"
+        }  |  终局比分：天辉 ${report.radiant_score} : ${report.dire_score} 夜魇 (${
+          report.duration_str
+        })  |  在线复盘链接：${shareUrl}`
+      ),
+      marginX + 7,
+      curY + 18.2
+    );
+    curY += 23.5;
+
+    // 4 Executive KPI Cards
+    const kpiItems = [
+      {
+        label: "审计阵营 & 终局比分",
+        val: `${sideZh}视角 (${ownWon ? "胜局庆功卷宗" : "败局分锅卷宗"})`,
+        sub: `天辉 ${report.radiant_score} : ${report.dire_score} 夜魇 · 时长 ${report.duration_str || ""}`,
+      },
+      {
+        label: `本方 1~5 号位阵容 (${sideZh})`,
+        val: own.map((p) => `${p.pos}${p.hero_short_zh}`).join("/"),
+        sub: `阵容成色评级：${draft.grade || "A 级"}`,
+      },
+      {
+        label: `敌方 1~5 号位阵容 (${oppZh})`,
+        val: opp.map((p) => `${p.pos}${p.hero_short_zh}`).join("/"),
+        sub: `同位置 1v1 对位胜出：${rm.won_overall_cnt ?? 0} / 5 路`,
+      },
+      {
+        label: ownWon ? "头号首功 MVP" : "本方头号背锅战犯",
+        val: ownWon
+          ? `${topMvp?.pos}号位 ${topMvp?.hero_short_zh || ""} (${topMvp?.personaname || ""})`
+          : `${topCulprit?.pos}号位 ${topCulprit?.hero_short_zh || ""} (${topCulprit?.personaname || ""})`,
+        sub: ownWon
+          ? `胜局贡献 ${contribMap.get(Number(topMvp?.player_slot)) ?? 25}% · 综合评分 ${topMvp?.rating_score ?? 8.5}`
+          : `分锅占比 ${blameMap.get(Number(topCulprit?.player_slot)) ?? 30}% · 综合评分 ${topCulprit?.rating_score ?? 5.0}`,
+      },
+    ];
+    const gapMm = 3;
+    const cardW = (contentW - gapMm * 3) / 4;
+    const cardH = 16.5;
+    kpiItems.forEach((item, idx) => {
+      const cx = marginX + idx * (cardW + gapMm);
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.2);
+      doc.rect(cx, curY, cardW, cardH, "FD");
+      doc.setFillColor(180, 138, 62);
+      doc.rect(cx, curY, cardW, 1.2, "F");
+
+      doc.setFont("NotoSansSC", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.text(cleanPdfVectorText(item.label), cx + 2.5, curY + 4.8);
+
+      doc.setFont("NotoSansSC", "bold");
+      doc.setFontSize(idx === 1 || idx === 2 ? 6.9 : 7.8);
+      doc.setTextColor(15, 23, 42);
+      const valClipped = doc.splitTextToSize(cleanPdfVectorText(item.val), cardW - 4.5)[0] || "";
+      doc.text(valClipped, cx + 2.5, curY + 9.8);
+
+      doc.setFont("NotoSansSC", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(71, 85, 105);
+      const subClipped = doc.splitTextToSize(cleanPdfVectorText(item.sub), cardW - 4.5)[0] || "";
+      doc.text(subClipped, cx + 2.5, curY + 14.3);
+    });
+    curY += cardH + 5;
+
+    // =========================================================================
+    // CHAPTER I: 赛后总账与四阶段复盘矩阵
+    // =========================================================================
+    drawChapterHeader(
+      "第一章",
+      "赛后总账与四阶段复盘矩阵（00:00 对线期 → 10:00-25:00 中期节奏 → 25:00-终局 决胜团战 → 全局硬实力）"
+    );
+    const stages = report.match_narrative?.stages || [];
+    const stageRows = stages.map((s, idx) => [
+      `阶段 0${idx + 1}\n${s.stage || s.title || ""}`,
+      (s.summary || s.content || "")
+        .replace(/三路10分钟对账：/g, "；")
+        .replace(/主视角（[^）]+）车队全局数据对比：/g, "；"),
+    ]);
+    if (grok.summary) {
+      stageRows.unshift(["Grok 4.7 核心总评", grok.summary]);
+    }
+    runVectorTable(["阶段维度", "录像级核心对账数据与关键胜负节点还原"], stageRows, {
+      0: { cellWidth: 44, fontStyle: "bold" },
+      1: { cellWidth: contentW - 44 },
+    });
+
+    // =========================================================================
+    // CHAPTER II: 本方五人 100% 胜局功勋 / 败局分锅定责总表
+    // =========================================================================
+    drawChapterHeader(
+      "第二章",
+      `${sideZh}五人 100% ${ownWon ? "胜局功勋表彰总表" : "败局分锅定责总表"}（数据归一化定责）`
+    );
+    const ch2Rows = own.map((p) => {
+      const heroShort = p.hero_short_zh || p.hero_name || "";
+      const sharePct = ownWon
+        ? contribMap.get(Number(p.player_slot)) ?? 20.0
+        : blameMap.get(Number(p.player_slot)) ?? 20.0;
+      const roleNote = ownWon
+        ? p.praise_talk || (p.strengths || [])[0] || "稳定发挥完成战术任务"
+        : p.trash_talk || (p.weaknesses || [])[0] || "存在团战或对线细节失误";
+      return [
+        `${p.pos}号位 (${p.pos_label || ""})`,
+        `${heroShort}\n${p.personaname || ""}${p.is_me ? " [我]" : ""}`,
+        `${p.kda}\n(参战 ${p.kill_participation_pct ?? 0}%)`,
+        `${fmtNum(p.net_worth)} 金\nGPM ${p.gpm} / XPM ${p.xpm}`,
+        `${fmtNum(p.hero_damage)}\n(占全队 ${p.hero_damage_share_pct ?? 0}%)`,
+        `${fmtNum(p.damage_taken)}\n(读秒 ${p.dead_seconds ?? 0}s)`,
+        `${fmtNum(p.tower_damage)}\n(控制 ${p.stuns_sec ?? 0}s)`,
+        `${p.rating_score ?? 0} 分\n${ownWon ? p.contrib_tier || "功臣" : p.rating_tier || ""}`,
+        ownWon ? `功勋 ${sharePct}%` : `分锅 ${sharePct}%`,
+        roleNote,
+      ];
+    });
+    runVectorTable(
+      [
+        "位置",
+        "英雄 & 选手",
+        "K/D/A (参战)",
+        "终局净值 & GPM",
+        "英雄伤害 (占比)",
+        "承伤 & 读秒",
+        "推塔 & 控制",
+        "综合评分",
+        ownWon ? "100% 功勋" : "100% 分锅",
+        "核心定性判词",
+      ],
+      ch2Rows,
+      {
+        0: { cellWidth: 19, fontStyle: "bold" },
+        1: { cellWidth: 28, fontStyle: "bold" },
+        2: { cellWidth: 21 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 24 },
+        5: { cellWidth: 22 },
+        6: { cellWidth: 21 },
+        7: { cellWidth: 20 },
+        8: {
+          cellWidth: 21,
+          fontStyle: "bold",
+          textColor: ownWon ? [21, 128, 61] : [185, 28, 28],
+        },
+        9: { cellWidth: contentW - 201 },
+      }
+    );
+
+    // =========================================================================
+    // CHAPTER III: 1~5 号位同位置宿敌 1v1 对位审判全表
+    // =========================================================================
+    drawChapterHeader(
+      "第三章",
+      "1~5 号位同位置宿敌 1v1 正面对位审判全表（含 OpenDota 全球同英雄百分位）"
+    );
+    if (rm.side_verdict) {
+      drawSubSectionTitle(rm.side_verdict);
+    }
+    const ch3Rows = (rm.mirror_rows || []).map((r) => [
+      `${r.pos}号位对决`,
+      `${r.own_hero || ""} (${r.own_player || ""})\nKDA ${r.own_kda || ""} · 评分 ${r.own_rating ?? 0} · 全球超 ${
+        r.own_bm_avg ?? 50
+      }%`,
+      `${r.opp_hero || ""} (${r.opp_player || ""})\nKDA ${r.opp_kda || ""} · 评分 ${r.opp_rating ?? 0} · 全球超 ${
+        r.opp_bm_avg ?? 50
+      }%`,
+      `${fmtSigned(r.gold10_diff)} 金\n补刀 ${r.lh10_own || "0/0"} vs ${r.lh10_opp || "0/0"}`,
+      `${fmtSigned(r.nw_diff)} 金\n${fmtNum(r.nw_own)} vs ${fmtNum(r.nw_opp)}`,
+      `${r.h2h_own_kills ?? 0} : ${r.h2h_opp_kills ?? 0}`,
+      `${fmtSigned(r.dmg_diff)}\n塔伤 ${fmtNum(r.td_own)} vs ${fmtNum(r.td_opp)}`,
+      r.verdict_tag || "旗鼓相当",
+      r.summary_txt || "",
+    ]);
+    runVectorTable(
+      [
+        "位置",
+        `本方 (${sideZh})`,
+        `敌方宿敌 (${oppZh})`,
+        "10m经济差 & 补刀",
+        "终局净值差",
+        "正面单杀",
+        "伤害差 & 塔伤",
+        "对位结论",
+        "录像对位复盘",
+      ],
+      ch3Rows,
+      {
+        0: { cellWidth: 18, fontStyle: "bold" },
+        1: { cellWidth: 38 },
+        2: { cellWidth: 38 },
+        3: { cellWidth: 26 },
+        4: { cellWidth: 26 },
+        5: { cellWidth: 16, halign: "center", fontStyle: "bold" },
+        6: { cellWidth: 27 },
+        7: { cellWidth: 24, fontStyle: "bold" },
+        8: { cellWidth: contentW - 213 },
+      }
+    );
+
+    // =========================================================================
+    // CHAPTER IV: 录像级十一维战术显微镜全量取证账本 (Structured Vector Tables)
+    // =========================================================================
+    drawChapterHeader(
+      "第四章",
+      "录像级十一维战术显微镜全量取证账本（大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/买活死&7.38附魔）"
+    );
+
+    // 4.1 大招与绝活释放审判
+    const gradeZhMap = { good: "优", bad: "差", warn: "中" };
+    drawSubSectionTitle(`4.1 英雄绝活与大招释放质量审判总表 (${sideZh} 1~5 号位)`);
+    const execData = df.hero_execution_by_side?.[side];
+    const execPlayers = Array.isArray(execData) ? execData : execData?.players || [];
+    const t41Rows = execPlayers.map((p) => {
+      const badges = (p.headline_badges || [])
+        .map((b) => (typeof b === "string" ? b : b?.text || ""))
+        .filter(Boolean)
+        .join(" | ");
+      const ults = p.ult_audits || p.signature_spells || [];
+      const ultStr = ults
+        .map(
+          (sp) =>
+            `${sp.ability_zh || "大招"}(评级:${gradeZhMap[sp.grade] || sp.grade || "良"}): 放${sp.casts ?? 0}次/中${
+              sp.hits ?? sp.hero_hits ?? 0
+            }${sp.unit_label || "人次"}`
+        )
+        .join("；");
+      const skillStr = (p.skillshot_audits || [])
+        .map((sk) => `${sk.ability_zh}: ${sk.casts ?? 0}放/${sk.hits ?? 0}中(${sk.hit_pct ?? 0}%)`)
+        .join("；");
+      const heldWaves = ults.flatMap((sp) => sp.tf_held_death_waves || []);
+      const castWaves = ults.flatMap((sp) => sp.tf_casts_waves || []);
+      const verdictStr =
+        ults.map((sp) => sp.verdict_text || sp.verdict || "").filter(Boolean).join("；") ||
+        (p.special_insights || []).slice(0, 2).join("；");
+      return [
+        `${p.pos}号位 · ${p.hero_short_zh || ""}\n(${p.personaname || ""})`,
+        badges || `硬控 ${p.stuns_sec ?? 0}s`,
+        ultStr || "无主动大招",
+        skillStr || "-",
+        `${castWaves.length ? `开大: ${castWaves.join("、")}` : ""}${
+          heldWaves.length ? `\n憋大死: ${heldWaves.join("、")}` : "\n0次憋大阵亡"
+        }`,
+        verdictStr || "技能衔接正常",
+      ];
+    });
+    runVectorTable(
+      ["位置 & 选手", "绝活核心指标", "大招释放与命中统计", "非指向技能命中", "团战开大 vs 憋大死", "大招与技能复盘判词"],
+      t41Rows,
+      {
+        0: { cellWidth: 32, fontStyle: "bold" },
+        1: { cellWidth: 36 },
+        2: { cellWidth: 42 },
+        3: { cellWidth: 34 },
+        4: { cellWidth: 42 },
+        5: { cellWidth: contentW - 186 },
+      }
+    );
+
+    // 4.2 憋死 BKB / 救命装与 0 技能秒躺尸检表
+    const us = df.unpressed_saves_by_side?.[side] || {};
+    drawSubSectionTitle(
+      `4.2 憋死 BKB / 救命装与团战 0 技能秒躺尸检总表（憋死核心救命装 ${us.critical_total ?? 0} 人次 · 0技能秒躺 ${
+        us.zero_spell_total ?? 0
+      } 人次）`
+    );
+    const t42Rows = (us.player_rows || []).map((r) => [
+      `${r.pos}号位 · ${r.hero_short_zh || ""} (${r.personaname || ""})`,
+      `${r.tf_deaths ?? 0} 次`,
+      `${r.unpressed_core_cnt ?? 0} 次`,
+      `${r.zero_spell_cnt ?? 0} 次`,
+      r.owned_saves_str || "未合成主动保命装",
+      r.verdict || "",
+    ]);
+    runVectorTable(
+      ["位置 & 选手", "团战阵亡", "憋死核心保命装", "0技能秒躺", "已合成保命装与按键次数", "团战保命反应与抓包笔录"],
+      t42Rows,
+      {
+        0: { cellWidth: 42, fontStyle: "bold" },
+        1: { cellWidth: 18, halign: "center" },
+        2: { cellWidth: 24, halign: "center", fontStyle: "bold" },
+        3: { cellWidth: 20, halign: "center" },
+        4: { cellWidth: 56 },
+        5: { cellWidth: contentW - 160 },
+      }
+    );
+
+    // 4.3 地图空间理解与 9m 后落单被抓表
+    const ms = df.map_space_by_side?.[side] || {};
+    drawSubSectionTitle(
+      `4.3 地图空间理解与 9 分钟后落单带危险线被抓审计表（共落单被抓 ${ms.total_solo_pickoffs ?? 0} 次）`
+    );
+    const t43Rows = (ms.player_space_rows || []).map((r) => [
+      `${r.pos}号位 · ${r.hero_short_zh || ""} (${r.personaname || ""})`,
+      r.space_style_badge || "常规驻守",
+      `兵线 ${r.lane_kills ?? 0} (${r.lane_farm_pct ?? 0}%) / 野区 ${r.neutral_kills ?? 0} (${
+        r.jungle_farm_pct ?? 0
+      }%)`,
+      fmtNum(r.tower_damage || 0),
+      `${r.solo_pickoff_cnt ?? 0} 次 (送 ${fmtNum(r.solo_gold_fed || 0)} 金)`,
+      r.verdict || "",
+    ]);
+    runVectorTable(
+      ["位置 & 选手", "空间理解画像", "收线补刀 vs 野区占比", "推塔伤害", "9m后落单被抓 & 送金", "空间利用与带线纪律判词"],
+      t43Rows,
+      {
+        0: { cellWidth: 42, fontStyle: "bold" },
+        1: { cellWidth: 26 },
+        2: { cellWidth: 42 },
+        3: { cellWidth: 20, halign: "right" },
+        4: { cellWidth: 32, fontStyle: "bold" },
+        5: { cellWidth: contentW - 162 },
+      }
+    );
+
+    // 4.4 承伤来源与防装合规审计表
+    const dr = df.damage_received_by_side?.[side] || {};
+    drawSubSectionTitle("4.4 承伤来源拆解（物理平A vs 技能爆发）与防装合规审计表");
+    const t44Rows = (dr.rows || []).map((r) => [
+      `${r.pos}号位 · ${r.hero_short_zh || ""} (${r.personaname || ""})`,
+      fmtNum(r.total_dmg_taken || 0),
+      `法系爆发 ${r.spell_pct ?? 0}% / 物理平A ${r.auto_pct ?? 0}%`,
+      (r.top_killers || [])
+        .slice(0, 3)
+        .map((k) => `${k.zh_name}(${fmtNum(k.damage || 0)})`)
+        .join("、") || "平A为主",
+      (r.def_items_owned || []).join("、") || "未出针对防装",
+      r.verdict || "",
+    ]);
+    runVectorTable(
+      ["位置 & 选手", "总承受伤害", "法系 vs 物理平A占比", "头号致死敌方技能 Top 3", "已出针对防装", "防装选择合规判词"],
+      t44Rows,
+      {
+        0: { cellWidth: 42, fontStyle: "bold" },
+        1: { cellWidth: 22, halign: "right" },
+        2: { cellWidth: 36 },
+        3: { cellWidth: 48 },
+        4: { cellWidth: 38 },
+        5: { cellWidth: contentW - 186 },
+      }
+    );
+
+    // 4.5–4.7 辅助视野 · 堆野开雾 · 对线拉野莲花智慧符综合表
+    const vis = df.support_vision_by_side?.[side] || {};
+    const ss = df.stacking_and_smoke_by_side?.[side] || {};
+    const lm = df.laning_mechanics_by_side?.[side] || {};
+    const smokeEvents = ss.smoke_events || [];
+    const smokeUses = ss.own_smoke_uses ?? ss.smoke_total_uses ?? smokeEvents.length;
+    const smokeBought =
+      ss.smoke_total_bought ??
+      (ss.per_player_smokes || []).reduce((acc, item) => acc + Number(item.bought || 0), 0);
+    const smokeSuccessCnt =
+      ss.smoke_success_count ?? smokeEvents.filter((e) => e.outcome === "success").length;
+    const smokeBackfireCnt =
+      ss.smoke_backfire_count ?? smokeEvents.filter((e) => e.outcome === "backfire").length;
+    const smokeDryCnt =
+      ss.smoke_dry_count ?? smokeEvents.filter((e) => e.outcome === "wasted").length;
+    const ownLotus = lm.own_lotus_total ?? lm.lotus_own_total ?? 0;
+    const oppLotus = lm.opp_lotus_total ?? lm.lotus_opp_total ?? 0;
+    const ownWisdom = lm.own_wisdom_cnt ?? lm.wisdom_own_count ?? 0;
+    const oppWisdom = lm.opp_wisdom_cnt ?? lm.wisdom_opp_count ?? 0;
+    const ownGate = lm.own_gate_total ?? lm.gate_own_count ?? 0;
+    const oppGate = lm.opp_gate_total ?? lm.gate_opp_count ?? 0;
+    const ownLamp = lm.own_lamp_total ?? lm.lamp_own_count ?? 0;
+    const oppLamp = lm.opp_lamp_total ?? lm.lamp_opp_count ?? 0;
+
+    drawSubSectionTitle("4.5–4.7 辅助视野质量 · 堆野开雾转化 · 对线拉野/莲花/智慧符/双生门综合审计表");
+    const t45Rows = [
+      [
+        "4.5 辅助视野与反眼",
+        `假眼 ${vis.total_obs ?? vis.obs_total ?? 0} 颗 / 真眼 ${vis.total_sen ?? vis.sen_total ?? 0} 颗\n平均寿命 ${
+          vis.avg_lifespan_sec ?? 0
+        }s/360s · 被排 ${vis.dewarded_total ?? 0} 颗 (${vis.dewarded_pct ?? 0}%)`,
+        `进攻眼 ${vis.posture_counts?.aggressive ?? 0} (${vis.posture_pcts?.aggressive ?? 0}%) / 河道眼 ${
+          vis.posture_counts?.river_roshan ?? 0
+        } / 防守眼 ${vis.posture_counts?.defensive ?? 0}`,
+        vis.posture_verdict || "",
+      ],
+      [
+        "4.6 堆野 & 开雾节奏",
+        `全队堆野 ${ss.total_stacks ?? ss.total_team_stacks ?? 0} 组 (${ss.total_creeps_stacked ?? 0} 只野)\n辅助堆 ${
+          ss.support_stacks ?? 0
+        } 组 / 大哥自拉 ${ss.core_stacks ?? ss.core_self_stacks ?? 0} 组`,
+        `买雾 ${smokeBought} / 开雾 ${smokeUses} 波\n(大捷 ${smokeSuccessCnt} / 撞墙 ${smokeBackfireCnt} / 空雾 ${smokeDryCnt})`,
+        `${ss.stack_verdict || ""} | ${ss.smoke_verdict || ""}`,
+      ],
+      [
+        "4.7 对线莲花·智慧符",
+        `疗伤莲花 ${ownLotus} : ${oppLotus}\n7/14/21m 智慧符 ${ownWisdom} : ${oppWisdom}`,
+        `双生门传送 ${ownGate} : ${oppGate}\n观察者点灯 ${ownLamp} : ${oppLamp}`,
+        `${lm.lotus_verdict || ""} | ${lm.wisdom_verdict || ""}`,
+      ],
+    ];
+    runVectorTable(["战术审计维度", "核心数量与效率指标", "结构分布与对抗比", "录像取证结论与抓包明细"], t45Rows, {
+      0: { cellWidth: 36, fontStyle: "bold" },
+      1: { cellWidth: 58 },
+      2: { cellWidth: 58 },
+      3: { cellWidth: contentW - 152 },
+    });
+
+    // 4.8–4.9 TP 救人 · 团战旁观抓包 · 经济来源结构与死亡损耗总表
+    const tp = df.tp_rotation_by_side?.[side] || {};
+    const ep = df.economy_and_pings_by_side?.[side] || {};
+    const tpMap = new Map((tp.player_tp_rows || []).map((r) => [Number(r.pos), r]));
+    drawSubSectionTitle("4.8–4.9 TP 救人及时性 · 团战旁观抓包 · 经济来源结构与死亡损耗总表");
+    const t48Rows = (ep.econ_rows || []).map((r) => {
+      const tr = tpMap.get(Number(r.pos)) || {};
+      const tfTpCnt = tr.tf_tp_cnt ?? tr.teamfight_tp_saves ?? 0;
+      const tfAbsentCnt = tr.tf_absent_cnt ?? tr.spectator_teamfights ?? 0;
+      const lossGold = (r.death_loss || 0) + (r.buyback_loss || 0);
+      return [
+        `${r.pos}号位 · ${r.hero_short_zh || ""} (${r.personaname || ""})`,
+        `用 ${tr.tp_used ?? 0} / 买 ${tr.tp_bought ?? 0} 张\n(前12m支援 ${tr.early_tp_cnt ?? 0} 次)`,
+        `亮TP救人 ${tfTpCnt} 次\n0参与OB ${tfAbsentCnt} 波`,
+        `兵线 ${fmtNum(r.lane_gold || 0)} (${r.lane_pct ?? 0}%)\n野区 ${fmtNum(r.jungle_gold || 0)} (${
+          r.jungle_pct ?? 0
+        }%)`,
+        `人头 ${fmtNum(r.kill_gold || 0)} (${r.kill_pct ?? 0}%)\n塔盾 ${fmtNum(r.obj_gold || 0)} (${
+          r.obj_pct ?? 0
+        }%)`,
+        `-${fmtNum(lossGold)} 金\n(信号 ${r.pings ?? 0} 次)`,
+        tr.verdict || r.econ_tag || "",
+      ];
+    });
+    runVectorTable(
+      ["位置 & 选手", "TP 使用/购买", "亮TP支援 vs 旁观", "兵线 vs 野区进账", "人头 vs 塔盾进账", "阵亡+买活损耗", "支援与财政判词"],
+      t48Rows,
+      {
+        0: { cellWidth: 40, fontStyle: "bold" },
+        1: { cellWidth: 28 },
+        2: { cellWidth: 28 },
+        3: { cellWidth: 34 },
+        4: { cellWidth: 34 },
+        5: { cellWidth: 26 },
+        6: { cellWidth: contentW - 190 },
+      }
+    );
+
+    // 4.10 买活死尸检 · 信使博弈 · 肉山魔晶 & 7.38 中立装备附魔表
+    const mo = df.macro_objectives_by_side?.[side] || {};
+    drawSubSectionTitle(
+      `4.10 买活死尸检 (${mo.dieback_cnt ?? 0}次) · 信使博弈 (杀敌${mo.own_couriers_killed ?? 0}/掉鸡${
+        mo.own_couriers_lost ?? 0
+      }) · 7.38 中立装备附魔审计表`
+    );
+    const t410Rows = (mo.neutral_craft_rows || []).map((cr) => [
+      `${cr.pos}号位 · ${cr.hero_short_zh || ""} (${cr.personaname || ""})`,
+      cr.shard_str || "未获魔晶",
+      (cr.craft_steps || []).join(" → ") || "无锻造记录",
+      cr.craft_verdict || "",
+    ]);
+    runVectorTable(
+      ["位置 & 选手", "阿哈利姆魔晶时间", "7.38 中立装备锻造与附魔词条轨迹", "词条合规与锻造节奏判词"],
+      t410Rows,
+      {
+        0: { cellWidth: 44, fontStyle: "bold" },
+        1: { cellWidth: 34 },
+        2: { cellWidth: 105 },
+        3: { cellWidth: contentW - 183 },
+      }
+    );
+
+    // =========================================================================
+    // CHAPTER V: 前·中·后期三阶段差分表与关键胜负手团战明细
+    // =========================================================================
+    drawChapterHeader("第五章", "前·中·后期三阶段差分数据表与关键胜负手团战记录");
+    const rawPhases = report.phases_data || report.phase_breakdown?.phases || [];
+    const phasesList = Array.isArray(rawPhases) ? rawPhases : Object.values(rawPhases);
+    const signMult = side === (report.focus_side || "dire") ? 1 : -1;
+    const ch5PhaseRows = phasesList.map((pd) => {
+      const ownP = (pd.players || []).filter((p) => p.side === side);
+      const oppP = (pd.players || []).filter((p) => p.side !== side);
+      const ownK = ownP.reduce((s, p) => s + (p.kills_count || 0), 0);
+      const oppK = oppP.reduce((s, p) => s + (p.kills_count || 0), 0);
+      const ts = pd.team_summary || {};
+      const deltaAdv = (ts.income_diff_change || 0) * signMult;
+      const endAdv = (ts.income_diff_end || 0) * signMult;
+      const diag = pd.team_diagnostics?.[side] || {};
+      const goodStr = Array.isArray(diag.team_good) ? diag.team_good.join("；") : diag.team_good || "";
+      const badStr = Array.isArray(diag.team_bad) ? diag.team_bad.join("；") : diag.team_bad || "";
+      const actStr = Array.isArray(diag.team_action) ? diag.team_action.join("；") : diag.team_action || "";
+      return [
+        `${pd.label}\n(${pd.time_label})`,
+        `${ownK} : ${oppK}\n(推${ts.towers_taken || 0}塔/掉${ts.towers_lost || 0}塔)`,
+        `净变动 ${fmtSigned(deltaAdv)} 金\n(末累计 ${fmtSigned(endAdv)} 金)`,
+        goodStr || "维持基础运营",
+        badStr || "局部联动脱节",
+        actStr || "抓核心强势期推进",
+      ];
+    });
+    runVectorTable(
+      ["比赛阶段", "阶段人头 & 塔数", "阶段经济差波动", "• 本阶段亮点", "× 本阶段扣分项", "› 阶段改进处方"],
+      ch5PhaseRows,
+      {
+        0: { cellWidth: 28, fontStyle: "bold" },
+        1: { cellWidth: 26 },
+        2: { cellWidth: 34, fontStyle: "bold" },
+        3: { cellWidth: 62 },
+        4: { cellWidth: 62 },
+        5: { cellWidth: contentW - 212 },
+      }
+    );
+
+    const keyTfs = (report.key_teamfights || []).slice(0, 6);
+    if (keyTfs.length > 0) {
+      drawSubSectionTitle("5.2 全场最高烈度关键胜负手团战与经济拐点明细");
+      const ch5TfRows = keyTfs.map((tf, idx) => [
+        `团战 #${idx + 1}\n(${tf.time_range || ""})`,
+        tf.kills_trade || "",
+        tf.gold_swing || "",
+        tf.top_damage_hero || "-",
+        (tf.participants || [])
+          .sort((a, b) => (b.damage || 0) - (a.damage || 0))
+          .slice(0, 5)
+          .map(
+            (p) =>
+              `${p.hero_short_zh}: ${fmtNum(p.damage)}伤${p.deaths ? "(阵亡)" : ""}${
+                p.buybacks ? "[买活]" : ""
+              }`
+          )
+          .join(" | "),
+      ]);
+      runVectorTable(
+        ["团战编号 & 时间窗", "双方人头交换", "经济拐点波动", "最高输出英雄", "核心参战英雄伤害与阵亡/买活明细"],
+        ch5TfRows,
+        {
+          0: { cellWidth: 32, fontStyle: "bold" },
+          1: { cellWidth: 34 },
+          2: { cellWidth: 38, fontStyle: "bold" },
+          3: { cellWidth: 36 },
+          4: { cellWidth: contentW - 140 },
+        }
+      );
+    }
+
+    // =========================================================================
+    // CHAPTER VI: 本方 1~5 号位个人完整证据卷宗
+    // =========================================================================
+    drawChapterHeader("第六章", `${sideZh} 1~5 号位个人完整证据卷宗（出装时间轴、主动按键、高光、失误与下把铁律）`);
+    const ch6Rows = own.map((p) => {
+      const heroShort = p.hero_short_zh || p.hero_name || "";
+      const itemsStr =
+        (p.final_items_rich || [])
+          .map(
+            (it) =>
+              `${it.zh_name || it.key}${it.purchase_time_str ? `(${it.purchase_time_str})` : ""}${
+                it.use_count ? `[按${it.use_count}次]` : ""
+              }`
+          )
+          .join(" → ") || "无记录";
+      const abilStr =
+        (p.ability_uses_rich || [])
+          .slice(0, 5)
+          .map((ab) => `${ab.zh_name || ab.key}×${ab.count}`)
+          .join(" / ") || "无记录";
+      return [
+        `${p.pos}号位 · ${heroShort}\n${p.personaname || ""}\nKDA ${p.kda} · 10m补刀 ${
+          p.laning_10m?.lh10 ?? "-"
+        }/${p.laning_10m?.dn10 ?? "-"}`,
+        `【合成与按键】${itemsStr}\n【技能频次】${abilStr}`,
+        (p.strengths || []).slice(0, 3).map((g) => `✓ ${g}`).join("\n") || "✓ 完成本职任务",
+        (p.weaknesses || []).slice(0, 3).map((b) => `✕ ${b}`).join("\n") || "✕ 无重大失误",
+        (p.improvements || []).slice(0, 2).map((f) => `▸ ${f}`).join("\n") || "▸ 保持当前节奏",
+      ];
+    });
+    runVectorTable(
+      ["位置 & 选手", "终局核心出装时间轴 & 技能释放频次", "✓ 本局高光表现", "✕ 关键失误抓包", "▸ 下把改进铁律"],
+      ch6Rows,
+      {
+        0: { cellWidth: 36, fontStyle: "bold" },
+        1: { cellWidth: 68 },
+        2: { cellWidth: 58 },
+        3: { cellWidth: 58 },
+        4: { cellWidth: contentW - 220 },
+      }
+    );
+
+    // =========================================================================
+    // STAMP RUNNING HEADERS & FOOTERS (Page X / Y) ON ALL PAGES
+    // =========================================================================
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      if (i > 1) {
+        doc.setFillColor(18, 25, 43);
+        doc.rect(marginX, 5.5, contentW, 6.5, "F");
+        doc.setFont("NotoSansSC", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(245, 232, 200);
+        doc.text(
+          cleanPdfVectorText(
+            `DOTA 2 录像级结构化复盘报告  |  比赛 #${report.match_id} · ${sideZh}视角 (${
+              ownWon ? "胜局庆功卷宗" : "败局定责卷宗"
+            })`
+          ),
+          marginX + 3,
+          9.9
+        );
+        doc.setFont("NotoSansSC", "normal");
+        doc.setTextColor(203, 213, 225);
+        doc.text(
+          cleanPdfVectorText(`天辉 ${report.radiant_score} : ${report.dire_score} 夜魇 (${report.duration_str})`),
+          pageW - marginX - 3,
+          9.9,
+          { align: "right" }
+        );
+      }
+
+      // Bottom running footer line + page number
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.2);
+      doc.line(marginX, pageH - 9.5, pageW - marginX, pageH - 9.5);
+      doc.setFont("NotoSansSC", "normal");
+      doc.setFontSize(7.2);
+      doc.setTextColor(100, 116, 139);
+      doc.text(
+        cleanPdfVectorText(
+          `战后算账 · Dota 2 五黑录像级复盘工作台 (OpenDota 录像解析 + xAI Grok 4.7)  |  ${shareUrl}`
+        ),
+        marginX,
+        pageH - 5.5
+      );
+      doc.setFont("NotoSansSC", "bold");
+      doc.setTextColor(30, 41, 59);
+      doc.text(`第 ${i} 页 / 共 ${totalPages} 页`, pageW - marginX, pageH - 5.5, { align: "right" });
+    }
+
+    doc.save(filename);
+    showToast(`✅ 100% 原生矢量 PDF 报告已下载：${filename}（支持文字选中/搜索，共 ${totalPages} 页）`, 4500);
   } catch (err) {
-    console.error("PDF generation error:", err);
-    showToast("PDF 直接生成遇到浏览器限制，已自动为您下载独立全屏报告 (.html)");
+    console.error("Native vector PDF generation error:", err);
+    showToast(`原生矢量 PDF 构建异常 (${err.message})，已为您下载独立全屏 HTML 报告`);
     downloadStructuredReportHtml();
   } finally {
-    paper.classList.remove("capturing-export");
     if (btn) {
       btn.disabled = false;
       btn.textContent = origText || "⬇️ 直接下载 PDF 报告 (.pdf)";
