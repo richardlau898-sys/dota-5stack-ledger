@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=4.5" />
+  <link rel="stylesheet" href="/styles.css?v=4.6" />
 </head>
 <body>
   <header class="site-header">
@@ -44,7 +44,7 @@
       <div class="header-right">
         <div id="llm-status-pill" class="model-status connected">已接入 XAI / grok-4.7</div>
         <button type="button" id="btn-copy-share-link" class="button secondary" title="复制当前已分析比赛的公开分享链接，发给群友直接点开查看完整复盘">🔗 分享链接</button>
-        <button type="button" id="btn-header-export-pdf" class="button secondary" title="将本局完整复盘导出为多页高清 PDF 报告发给队友">📄 导出 PDF</button>
+        <button type="button" id="btn-header-export-pdf" class="button secondary" title="全屏打开结构化复盘报告，并支持一键直接下载 PDF / HTML / 长图文件">📊 全屏报告 / 下载PDF</button>
         <button type="button" id="btn-open-share-poster" class="button primary" title="一键生成群聊文字判决书与高清PNG战报卡片">📜 导出群聊战报</button>
         <button type="button" id="btn-open-settings" class="button secondary">车队与模型设置</button>
       </div>
@@ -179,7 +179,7 @@
           </label>
           <button type="button" id="btn-request-parse" class="button secondary" hidden>请求录像解析</button>
           <button type="button" id="btn-voice-broadcast" class="button secondary" title="用中文语音大声朗读本局胜负庆功/分锅、对位差距与显微镜铁证">🔊 语音播报复盘</button>
-          <button type="button" id="btn-export-pdf" class="button secondary" title="将本局完整复盘报告导出为 PDF 文件发给队友查看">📄 导出 PDF 分析报告</button>
+          <button type="button" id="btn-export-pdf" class="button secondary" title="全屏展示结构化复盘报告，并支持直接下载 PDF / 独立网页 / 长图文件">📊 全屏结构化报告 &amp; 下载PDF</button>
           <button type="button" id="btn-hero-share-link" class="button secondary" title="复制本局公开分享链接发到微信/Discord群">🔗 复制本局分享链接</button>
           <button type="button" id="btn-open-share-poster-2" class="button secondary">📜 导出群聊战报</button>
           <button type="button" id="btn-trigger-grok" class="button primary">🧠 让 Grok 4.7 生成深度判词</button>
@@ -574,7 +574,7 @@
           <button type="button" id="btn-copy-verdict-text" class="button primary">📋 一键复制群聊文字战报 (含公开分享链接)</button>
           <button type="button" id="btn-modal-share-link" class="button secondary">🔗 仅复制本局公开分享链接</button>
           <button type="button" id="btn-download-poster-png" class="button secondary">🖼️ 下载高清 PNG 战报长图</button>
-          <button type="button" id="btn-modal-export-pdf" class="button secondary">📄 导出完整 PDF 复盘报告</button>
+          <button type="button" id="btn-modal-export-pdf" class="button secondary">📊 打开全屏结构化报告 / 下载PDF</button>
         </div>
         <div class="poster-split-grid">
           <div class="poster-text-box">
@@ -592,6 +592,46 @@
     </div>
   </dialog>
 
+  <!-- 全屏结构化赛后深度复盘报告阅读与一键直接下载中心 (替代原生 window.print) -->
+  <dialog id="fullscreen-report-dialog" class="fullscreen-report-dialog" closedby="any" aria-labelledby="fs-report-top-title">
+    <div class="fs-report-shell">
+      <header class="fs-report-toolbar">
+        <div class="fs-toolbar-left">
+          <span class="fs-report-badge">STRUCTURED DOSSIER</span>
+          <h2 id="fs-report-top-title" class="fs-toolbar-title">Dota 2 录像级结构化赛后复盘报告</h2>
+          <label class="fs-persp-switch">
+            <span>审计视角：</span>
+            <select id="fs-perspective-select">
+              <option value="dire">夜魇阵营视角</option>
+              <option value="radiant">天辉阵营视角</option>
+            </select>
+          </label>
+        </div>
+        <div class="fs-toolbar-actions">
+          <button type="button" id="btn-fs-download-pdf" class="button primary" title="直接生成并下载多页 PDF 报告文件到电脑/手机，无需调起浏览器打印弹窗">
+            ⬇️ 直接下载 PDF 报告 (.pdf)
+          </button>
+          <button type="button" id="btn-fs-download-html" class="button secondary" title="直接下载单文件独立全屏报告 (.html)，发到微信/QQ双击即可离线全屏阅读">
+            ⬇️ 下载独立全屏报告 (.html)
+          </button>
+          <button type="button" id="btn-fs-download-png" class="button secondary" title="将整份六章结构化报告直接导出为一张高清长图 (.png) 发进微信群">
+            🖼️ 下载全景报告长图 (.png)
+          </button>
+          <button type="button" id="btn-fs-copy-link" class="button secondary" title="复制直接打开本全屏结构化报告的公开分享链接">
+            🔗 复制全屏报告链接
+          </button>
+          <button type="button" id="btn-fs-close" class="button secondary" aria-label="关闭全屏结构化报告">
+            ✕ 返回主工作台
+          </button>
+        </div>
+      </header>
+
+      <div id="fs-report-scroll-viewport" class="fs-report-scroll-viewport">
+        <div id="fs-report-paper" class="fs-report-paper"></div>
+      </div>
+    </div>
+  </dialog>
+
   <div id="toast-banner" class="toast-banner" role="status" aria-live="polite" hidden></div>
 
   <footer class="site-footer">
@@ -600,6 +640,7 @@
     <span>有据才喷，数据来自 OpenDota 录像解析与 xAI Grok 4.7</span>
   </footer>
 
-  <script src="/app.js?v=4.5" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+  <script src="/app.js?v=4.6" defer></script>
 </body>
 </html>

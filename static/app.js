@@ -192,7 +192,7 @@ async function copyTextToClipboard(text, label = "算账金句") {
   }
 }
 
-function getPublicShareUrl(matchId = state.currentMatchId) {
+function getPublicShareUrl(matchId = state.currentMatchId, { viewReport = false } = {}) {
   const mid = matchId || state.currentMatchId || state.pendingMatchId || "";
   const origin =
     window.location?.origin && window.location.origin !== "null"
@@ -201,86 +201,762 @@ function getPublicShareUrl(matchId = state.currentMatchId) {
   if (!mid) return origin;
   const side = state.currentReport ? getAuditedSide(state.currentReport) : state.perspective;
   const sideParam = side === "dire" || side === "radiant" ? `&side=${encodeURIComponent(side)}` : "";
-  return `${origin}/?match=${encodeURIComponent(mid)}${sideParam}`;
+  const viewParam = viewReport ? "&view=report" : "";
+  return `${origin}/?match=${encodeURIComponent(mid)}${sideParam}${viewParam}`;
 }
 
-async function copyMatchShareLink() {
+async function copyMatchShareLink({ viewReport = false } = {}) {
   if (!state.currentMatchId || !state.currentReport) {
     showToast("请先完成本局 AI 分析后再复制公开分享链接");
     return;
   }
-  const shareUrl = getPublicShareUrl(state.currentMatchId);
+  const shareUrl = getPublicShareUrl(state.currentMatchId, { viewReport });
   const { sideZh } = getOwnAndOppPlayers(state.currentReport);
   const shareTitle = state.currentReport.grok_coaching?.title || `比赛 #${state.currentMatchId}`;
   await copyTextToClipboard(
     shareUrl,
-    `比赛 #${state.currentMatchId} (${sideZh}视角 · ${shareTitle}) 公开复盘分享链接`
+    viewReport
+      ? `比赛 #${state.currentMatchId} (${sideZh}视角) 全屏结构化报告直达链接`
+      : `比赛 #${state.currentMatchId} (${sideZh}视角 · ${shareTitle}) 公开复盘分享链接`
   );
 }
 
-async function exportMatchPdfReport(targetMatchId = null) {
+async function exportMatchPdfReport(targetMatchId = null, { autoDownloadPdf = false } = {}) {
   if (targetMatchId && Number(targetMatchId) !== Number(state.currentMatchId)) {
-    await loadMatchReport(Number(targetMatchId));
+    await loadMatchReport(Number(targetMatchId), { analyzeNow: true });
   }
   if (!state.currentReport || !state.currentMatchId) {
-    showToast("请先选择或完成一局比赛的 AI 复盘后再导出 PDF 报告");
+    showToast("请先选择或完成一局比赛的 AI 复盘后再打开结构化报告");
     return;
   }
 
-  // Close any open dialogs before printing
+  // Close other dialogs first
   document.getElementById("share-poster-dialog")?.close?.();
   document.getElementById("settings-dialog")?.close?.();
 
-  if (state.workspaceMode !== "postgame") {
-    switchWorkspaceMode("postgame", { pushUrl: false });
+  openFullscreenStructuredReport(state.currentReport);
+
+  if (autoDownloadPdf) {
+    setTimeout(() => {
+      downloadStructuredReportPdf();
+    }, 260);
+  }
+}
+
+function openFullscreenStructuredReport(report = state.currentReport) {
+  if (!report) return;
+  const dlg = document.getElementById("fullscreen-report-dialog");
+  const paper = document.getElementById("fs-report-paper");
+  const topTitle = document.getElementById("fs-report-top-title");
+  const fsPerspSelect = document.getElementById("fs-perspective-select");
+  if (!dlg || !paper) return;
+
+  const { side, sideZh } = getOwnAndOppPlayers(report);
+  const ownWon =
+    (side === "radiant" && Boolean(report.radiant_win)) ||
+    (side === "dire" && !Boolean(report.radiant_win));
+
+  if (fsPerspSelect) {
+    fsPerspSelect.value = side;
+  }
+  if (topTitle) {
+    topTitle.textContent = `比赛 #${report.match_id} · ${sideZh}视角结构化复盘报告（${
+      ownWon ? "凯旋庆功卷宗" : "败局定责卷宗"
+    } · ${report.duration_str || ""}）`;
   }
 
-  const report = state.currentReport;
-  const { sideZh } = getOwnAndOppPlayers(report);
-  const prevTitle = document.title;
-  const prevMicroTab = state.microTab;
+  paper.innerHTML = buildStructuredFullReportHtml(report);
+  // Expand all <details> inside the structured report so all 11 dimensions and ward logs are visible
+  paper.querySelectorAll("details").forEach((det) => {
+    det.open = true;
+  });
 
-  // Expand all 11 tactical microscope dimensions for complete PDF report
-  state.microTab = "all";
-  renderTacticalMicroscopeSection(report);
-
-  // Temporarily open all <details> inside analyzed report content so nothing is collapsed in PDF
-  const reportRoot = document.getElementById("analyzed-report-content");
-  const closedDetails = [];
-  if (reportRoot) {
-    reportRoot.querySelectorAll("details:not([open])").forEach((det) => {
-      closedDetails.push(det);
-      det.open = true;
-    });
+  if (!dlg.open) {
+    dlg.showModal();
   }
+  const viewport = document.getElementById("fs-report-scroll-viewport");
+  if (viewport) viewport.scrollTop = 0;
+}
 
-  document.title = `Dota2_赛后深度复盘_Match_${report.match_id}_${sideZh}视角`;
-  document.body.classList.add("exporting-pdf");
-  showToast(`📄 正在生成比赛 #${report.match_id} PDF 复盘报告，请在打印窗口选择「另存为 PDF」`, 4200);
+function buildStructuredFullReportHtml(report) {
+  const { side, sideZh, oppZh, own, opp } = getOwnAndOppPlayers(report);
+  const oppSide = side === "radiant" ? "dire" : "radiant";
+  const ownWon =
+    (side === "radiant" && Boolean(report.radiant_win)) ||
+    (side === "dire" && !Boolean(report.radiant_win));
+  const df = report.deep_forensics || {};
+  const grok = report.grok_coaching || {};
+  const draft = report.draft_and_combo?.[side] || report.draft_and_combo || {};
 
-  const restoreAfterPrint = () => {
-    document.body.classList.remove("exporting-pdf");
-    document.title = prevTitle;
-    closedDetails.forEach((det) => {
-      det.open = false;
-    });
-    if (state.microTab !== prevMicroTab) {
-      state.microTab = prevMicroTab;
-      renderTacticalMicroscopeSection(report);
-    }
-    window.removeEventListener("afterprint", restoreAfterPrint);
+  // Normalize 100% contribution and 100% blame shares
+  const rawContribSum =
+    own.reduce((s, p) => s + Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)), 0) || 100;
+  const contribMap = new Map();
+  own.forEach((p) => {
+    const pct = Number(
+      ((Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)) / rawContribSum) * 100).toFixed(1)
+    );
+    contribMap.set(Number(p.player_slot), pct);
+  });
+
+  const rawBlameSum =
+    own.reduce((s, p) => s + Math.max(1, Number(p.blame_share_pct || 20)), 0) || 100;
+  const blameMap = new Map();
+  own.forEach((p) => {
+    const pct = Number(((Math.max(1, Number(p.blame_share_pct || 20)) / rawBlameSum) * 100).toFixed(1));
+    blameMap.set(Number(p.player_slot), pct);
+  });
+
+  const sortedByContrib = [...own].sort(
+    (a, b) => (contribMap.get(Number(b.player_slot)) || 0) - (contribMap.get(Number(a.player_slot)) || 0)
+  );
+  const sortedByBlame = [...own].sort(
+    (a, b) => (blameMap.get(Number(b.player_slot)) || 0) - (blameMap.get(Number(a.player_slot)) || 0)
+  );
+
+  const topMvp = sortedByContrib[0] || own[0];
+  const topRunner = sortedByContrib[1] || own[1] || own[0];
+  const topCulprit = sortedByBlame[0] || own[0];
+
+  // Chapter I: 4-Stage Audit Grid
+  const stages = report.match_narrative?.stages || [];
+  const stageIcons = ["🌅", "⚔️", "🔥", "📊"];
+  const formatStageBullets = (rawContent) => {
+    const cleaned = sanitizeMixedEnglishClient(String(rawContent || ""))
+      .replace(/三路10分钟对账：/g, "。")
+      .replace(/主视角（[^）]+）车队全局数据对比：/g, "。");
+    return cleaned
+      .split(/[；。]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((item) => {
+        let html = escapeHtml(item);
+        html = html.replace(
+          /^(上路|中路|下路|①\s*[^：:]+|②\s*[^：:]+|③\s*[^：:]+|④\s*[^：:]+|10分钟对线期结束|对线与前中期信使击杀|全场最高权重胜负手团战爆发于|肉山争夺记录)([：:\s]*)/,
+          '<span class="stage-key-pill">$1</span> '
+        );
+        html = html.replace(/→\s*([^；。]+)/g, '<span class="stage-outcome-pill">→ $1</span>');
+        return `<li>${html}</li>`;
+      })
+      .join("");
   };
 
-  window.addEventListener("afterprint", restoreAfterPrint, { once: true });
+  const stagesGridHtml = stages
+    .map((s, idx) => {
+      const stTitle = s.stage || s.title || `阶段 ${idx + 1}`;
+      const stBody = s.summary || s.content || "";
+      return `
+        <div class="fs-stage-card">
+          <div class="fs-stage-head">
+            <span class="fs-stage-badge">${stageIcons[idx % stageIcons.length]} 阶段 0${idx + 1}</span>
+            <strong>${escapeHtml(stTitle)}</strong>
+          </div>
+          <ul class="fs-stage-list">${formatStageBullets(stBody)}</ul>
+        </div>
+      `;
+    })
+    .join("");
 
-  setTimeout(() => {
-    try {
-      window.print();
-    } finally {
-      // Fallback cleanup in case afterprint does not fire in some headless/mobile environments
-      setTimeout(restoreAfterPrint, 1200);
+  // Chapter II: 5-Player 100% Contribution / Blame Ledger Table
+  const ledgerRowsHtml = own
+    .map((p) => {
+      const heroShort = p.hero_short_zh || p.hero_name || "";
+      const cPct = contribMap.get(Number(p.player_slot)) ?? 20.0;
+      const bPct = blameMap.get(Number(p.player_slot)) ?? 20.0;
+      const sharePct = ownWon ? cPct : bPct;
+      const roleNote = ownWon
+        ? p.praise_talk || (p.strengths || [])[0] || "稳定发挥完成战术任务"
+        : p.trash_talk || (p.weaknesses || [])[0] || "存在团战或对线细节失误";
+      const isHighlight = ownWon
+        ? Number(p.player_slot) === Number(topMvp?.player_slot)
+        : Number(p.player_slot) === Number(topCulprit?.player_slot);
+      return `
+        <tr class="${isHighlight ? (ownWon ? "fs-row-mvp" : "fs-row-culprit") : ""}">
+          <td><b>${p.pos}号位</b><br/><span class="fs-sub">${escapeHtml(p.pos_label || "")}</span></td>
+          <td>
+            <div class="fs-hero-cell">
+              <img class="fs-hero-avatar" data-html2canvas-ignore="true" src="${escapeHtml(p.hero_img || "")}" alt="" />
+              <div>
+                <b>${escapeHtml(heroShort)}</b>
+                <div class="fs-sub">${escapeHtml(p.personaname || "")}${p.is_me ? " [主视角]" : ""}</div>
+              </div>
+            </div>
+          </td>
+          <td><b>${escapeHtml(p.kda)}</b><br/><span class="fs-sub">参战 ${p.kill_participation_pct ?? 0}%</span></td>
+          <td><b>${fmtNum(p.net_worth)} 金</b><br/><span class="fs-sub">GPM ${p.gpm} / XPM ${p.xpm}</span></td>
+          <td><b>${fmtNum(p.hero_damage)}</b><br/><span class="fs-sub">占全队 ${p.hero_damage_share_pct ?? 0}%</span></td>
+          <td><b>${fmtNum(p.damage_taken)}</b><br/><span class="fs-sub">读秒 ${p.dead_seconds ?? 0}s</span></td>
+          <td><b>${fmtNum(p.tower_damage)}</b><br/><span class="fs-sub">硬控 ${p.stuns_sec ?? 0}s</span></td>
+          <td><b>${p.rating_score ?? 0} 分</b><br/><span class="fs-sub">${escapeHtml(
+        ownWon ? p.contrib_tier || "核心功臣" : p.rating_tier || "常规表现"
+      )}</span></td>
+          <td>
+            <span class="fs-share-pill ${ownWon ? "win" : "loss"}">
+              ${ownWon ? `功勋 ${sharePct}%` : `分锅 ${sharePct}%`}
+            </span>
+          </td>
+          <td class="fs-verdict-cell">${escapeHtml(roleNote)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // Chapter III: 1~5 Positional 1v1 Mirror Table
+  const rm = df.role_mirror_by_side?.[side] || {};
+  const mirrorRows = rm.mirror_rows || [];
+  const mirrorTableRowsHtml = mirrorRows
+    .map((r) => {
+      const g10Diff = Number(r.gold10_diff ?? 0);
+      const nwDiff = Number(r.nw_diff ?? 0);
+      const dmgDiff = Number(r.dmg_diff ?? 0);
+      const toneCls = r.grade === "good" ? "win" : r.grade === "bad" ? "loss" : "even";
+      return `
+        <tr>
+          <td><b>${r.pos}号位对决</b></td>
+          <td>
+            <b>${escapeHtml(r.own_hero || "")}</b> (${escapeHtml(r.own_player || "")})<br/>
+            <span class="fs-sub">KDA ${escapeHtml(r.own_kda || "")} · 评分 ${r.own_rating ?? 0} · 全球超 ${
+        r.own_bm_avg ?? 50
+      }%</span>
+          </td>
+          <td>
+            <b>${escapeHtml(r.opp_hero || "")}</b> (${escapeHtml(r.opp_player || "")})<br/>
+            <span class="fs-sub">KDA ${escapeHtml(r.opp_kda || "")} · 评分 ${r.opp_rating ?? 0} · 全球超 ${
+        r.opp_bm_avg ?? 50
+      }%</span>
+          </td>
+          <td>
+            <b class="${g10Diff >= 300 ? "txt-win" : g10Diff <= -300 ? "txt-loss" : ""}">${fmtSigned(
+        g10Diff
+      )} 金</b><br/>
+            <span class="fs-sub">补刀 ${escapeHtml(r.lh10_own || "0/0")} vs ${escapeHtml(
+        r.lh10_opp || "0/0"
+      )}</span>
+          </td>
+          <td>
+            <b class="${nwDiff >= 1500 ? "txt-win" : nwDiff <= -1500 ? "txt-loss" : ""}">${fmtSigned(
+        nwDiff
+      )} 金</b><br/>
+            <span class="fs-sub">${fmtNum(r.nw_own)} vs ${fmtNum(r.nw_opp)}</span>
+          </td>
+          <td><b>${r.h2h_own_kills ?? 0} : ${r.h2h_opp_kills ?? 0}</b></td>
+          <td>
+            <b class="${dmgDiff >= 2000 ? "txt-win" : dmgDiff <= -2000 ? "txt-loss" : ""}">${fmtSigned(
+        dmgDiff
+      )}</b><br/>
+            <span class="fs-sub">塔伤 ${fmtNum(r.td_own)} vs ${fmtNum(r.td_opp)}</span>
+          </td>
+          <td><span class="fs-share-pill ${toneCls}">${escapeHtml(r.verdict_tag || "旗鼓相当")}</span></td>
+          <td class="fs-verdict-cell">${escapeHtml(r.summary_txt || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // Chapter IV: All 11 Tactical Microscope Dimensions (reuse existing structured pane builders)
+  const microAllHtml = [
+    renderMicroHeroExecutionPane(report, df, side, sideZh, oppSide, oppZh),
+    renderMicroUnpressedSavesPane(report, df, side, sideZh),
+    renderMicroMapSpacePane(report, df, side, sideZh),
+    renderMicroDamageReceivedPane(report, df, side, sideZh),
+    renderMicroSupportVisionPane(report, df, side, sideZh),
+    renderMicroStackAndSmokePane(report, df, side, sideZh),
+    renderMicroLaningMechanicsPane(report, df, side, sideZh, oppZh),
+    renderMicroTpRotationPane(report, df, side, sideZh),
+    renderMicroEconomyAndPingsPane(report, df, side, sideZh),
+    renderMicroMacroObjectivesPane(report, df, side, sideZh),
+  ].join("");
+
+  // Chapter V: 3-Phase Differential Table + Key Teamfights Table
+  const phasesList = report.phase_breakdown?.phases || [];
+  const signMult = side === (report.focus_side || "dire") ? 1 : -1;
+  const phaseTableRows = phasesList
+    .map((pd) => {
+      const ownP = (pd.players || []).filter((p) => p.side === side);
+      const oppP = (pd.players || []).filter((p) => p.side !== side);
+      const ownK = ownP.reduce((s, p) => s + (p.kills_count || 0), 0);
+      const oppK = oppP.reduce((s, p) => s + (p.kills_count || 0), 0);
+      const ts = pd.team_summary || {};
+      const deltaAdv = (ts.income_diff_change || 0) * signMult;
+      const endAdv = (ts.income_diff_end || 0) * signMult;
+      const diag = pd.team_diagnostics?.[side] || {};
+      const goodStr = Array.isArray(diag.team_good) ? diag.team_good.join("；") : diag.team_good || "";
+      const badStr = Array.isArray(diag.team_bad) ? diag.team_bad.join("；") : diag.team_bad || "";
+      const actStr = Array.isArray(diag.team_action) ? diag.team_action.join("；") : diag.team_action || "";
+      return `
+        <tr>
+          <td><b>${escapeHtml(pd.label)}</b><br/><span class="fs-sub">${escapeHtml(pd.time_label)}</span></td>
+          <td><b>${ownK} : ${oppK}</b><br/><span class="fs-sub">推${ts.towers_taken || 0}塔 / 掉${
+        ts.towers_lost || 0
+      }塔</span></td>
+          <td>
+            <b class="${deltaAdv >= 0 ? "txt-win" : "txt-loss"}">阶段净变动 ${fmtSigned(deltaAdv)} 金</b><br/>
+            <span class="fs-sub">阶段末累计差：${fmtSigned(endAdv)} 金</span>
+          </td>
+          <td class="fs-verdict-cell">✓ ${escapeHtml(goodStr || "维持基础运营")}</td>
+          <td class="fs-verdict-cell">✕ ${escapeHtml(badStr || "局部联动脱节")}</td>
+          <td class="fs-verdict-cell">📌 ${escapeHtml(actStr || "抓核心成装强势期抱团推进")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const keyTfs = (report.key_teamfights || []).slice(0, 6);
+  const tfTableRows = keyTfs
+    .map((tf, idx) => {
+      const pSummary = (tf.participants || [])
+        .sort((a, b) => (b.damage || 0) - (a.damage || 0))
+        .slice(0, 5)
+        .map(
+          (p) =>
+            `${p.hero_short_zh}: ${fmtNum(p.damage)}伤${p.deaths ? "(阵亡)" : ""}${
+              p.buybacks ? "[买活]" : ""
+            }`
+        )
+        .join(" ｜ ");
+      return `
+        <tr>
+          <td><b>团战 #${idx + 1}</b><br/><span class="fs-sub">${escapeHtml(tf.time_range || "")}</span></td>
+          <td><b>${escapeHtml(tf.kills_trade || "")}</b></td>
+          <td><b>${escapeHtml(tf.gold_swing || "")}</b></td>
+          <td><b>${escapeHtml(tf.top_damage_hero || "-")}</b></td>
+          <td class="fs-verdict-cell">${escapeHtml(pSummary)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // Chapter VI: Pos 1~5 Individual Forensics Dossiers
+  const dossierRowsHtml = own
+    .map((p) => {
+      const heroShort = p.hero_short_zh || p.hero_name || "";
+      const itemsStr =
+        (p.final_items_rich || [])
+          .map(
+            (it) =>
+              `${it.zh_name || it.key}${it.purchase_time_str ? `(${it.purchase_time_str})` : ""}${
+                it.use_count ? `[按${it.use_count}次]` : ""
+              }`
+          )
+          .join(" → ") || "无记录";
+      const abilStr =
+        (p.ability_uses_rich || [])
+          .slice(0, 5)
+          .map((ab) => `${ab.zh_name || ab.key}×${ab.count}`)
+          .join(" / ") || "无主动技能记录";
+      const goods = (p.strengths || []).slice(0, 3).map((g) => `<div>✓ ${escapeHtml(g)}</div>`).join("");
+      const bads = (p.weaknesses || []).slice(0, 3).map((b) => `<div>✕ ${escapeHtml(b)}</div>`).join("");
+      const fixes = (p.improvements || []).slice(0, 2).map((f) => `<div>📌 ${escapeHtml(f)}</div>`).join("");
+      return `
+        <tr>
+          <td>
+            <b>${p.pos}号位 · ${escapeHtml(heroShort)}</b><br/>
+            <span class="fs-sub">${escapeHtml(p.personaname || "")} · KDA ${escapeHtml(p.kda)}</span><br/>
+            <span class="fs-sub">10m补刀 ${p.laning_10m?.lh10 ?? "-"}/${p.laning_10m?.dn10 ?? "-"} · 伤转 ${
+        p.net_worth ? (p.hero_damage / p.net_worth).toFixed(2) : "0.00"
+      }</span>
+          </td>
+          <td class="fs-verdict-cell">
+            <div><b>合成时间轴与按键：</b>${escapeHtml(itemsStr)}</div>
+            <div style="margin-top:4px;color:var(--muted);"><b>技能释放频次：</b>${escapeHtml(abilStr)}</div>
+          </td>
+          <td class="fs-verdict-cell">${goods || "✓ 完成本职任务"}</td>
+          <td class="fs-verdict-cell">${bads || "✕ 无重大失误"}</td>
+          <td class="fs-verdict-cell">${fixes || "📌 保持当前打法与出装节奏"}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const shareUrl = getPublicShareUrl(report.match_id);
+
+  return `
+    <article class="fs-dossier-doc">
+      <!-- 报告封面与核心元数据总表 -->
+      <header class="fs-cover-header">
+        <div class="fs-cover-top">
+          <div>
+            <div class="fs-doc-kicker">DOTA 2 REPLAY FORENSICS DOSSIER · 五黑车队录像级结构化复盘报告</div>
+            <h1 class="fs-doc-title">
+              比赛 #${escapeHtml(report.match_id)} · ${escapeHtml(sideZh)}视角深度复盘报告
+              <span class="fs-outcome-tag ${ownWon ? "win" : "loss"}">${
+    ownWon ? `🎉 ${sideZh}凯旋获胜` : `⚖️ ${sideZh}遗憾落败`
+  }</span>
+            </h1>
+            <p class="fs-doc-sub">
+              比赛时间：${escapeHtml(report.start_time_str || "-")} ｜ 模式：${escapeHtml(
+    report.game_mode_str || "全英雄选择"
+  )} ｜ 赛果：${escapeHtml(report.winner || "")}获胜（天辉 ${report.radiant_score} : ${
+    report.dire_score
+  } 夜魇 · 时长 ${escapeHtml(report.duration_str)}） ｜ 在线复盘链接：${escapeHtml(shareUrl)}
+            </p>
+          </div>
+        </div>
+
+        <div class="fs-cover-kpi-grid">
+          <div class="fs-kpi-box">
+            <span>审计阵营 &amp; 最终比分</span>
+            <strong>${escapeHtml(sideZh)}视角 (${ownWon ? "胜局庆功" : "败局算账"})</strong>
+            <small>天辉 ${report.radiant_score} : ${report.dire_score} 夜魇 (${escapeHtml(
+    report.duration_str
+  )})</small>
+          </div>
+          <div class="fs-kpi-box">
+            <span>本方 1~5 号位阵容 (${escapeHtml(sideZh)})</span>
+            <strong>${own.map((p) => `${p.pos}号${p.hero_short_zh}`).join(" / ")}</strong>
+            <small>阵容评级：${escapeHtml(draft.grade || "A 级")}</small>
+          </div>
+          <div class="fs-kpi-box">
+            <span>敌方 1~5 号位阵容 (${escapeHtml(oppZh)})</span>
+            <strong>${opp.map((p) => `${p.pos}号${p.hero_short_zh}`).join(" / ")}</strong>
+            <small>同位置对位胜出：${rm.won_overall_cnt ?? 0} / 5 路</small>
+          </div>
+          <div class="fs-kpi-box">
+            <span>${ownWon ? "👑 头号首功 MVP" : "🚨 头号背锅战犯"}</span>
+            <strong>${
+              ownWon
+                ? `${topMvp?.pos}号位 ${escapeHtml(topMvp?.hero_short_zh || "")} (${escapeHtml(
+                    topMvp?.personaname || ""
+                  )})`
+                : `${topCulprit?.pos}号位 ${escapeHtml(topCulprit?.hero_short_zh || "")} (${escapeHtml(
+                    topCulprit?.personaname || ""
+                  )})`
+            }</strong>
+            <small>${
+              ownWon
+                ? `胜局贡献 ${contribMap.get(Number(topMvp?.player_slot)) ?? 25}% · 评分 ${
+                    topMvp?.rating_score ?? 8.5
+                  }`
+                : `分锅占比 ${blameMap.get(Number(topCulprit?.player_slot)) ?? 30}% · 评分 ${
+                    topCulprit?.rating_score ?? 5.0
+                  }`
+            }</small>
+          </div>
+        </div>
+      </header>
+
+      <!-- 第一章：赛后总账与四阶段复盘矩阵 -->
+      <section class="fs-chapter">
+        <div class="fs-chapter-head">
+          <span class="fs-chapter-num">第一章</span>
+          <h2>赛后总账与四阶段复盘矩阵（00:00 对线 → 中期节奏 → 决胜团战 → 全局硬实力）</h2>
+        </div>
+        ${
+          grok.summary
+            ? `<div class="fs-exec-callout"><strong>Grok 4.7 核心定性：</strong>${escapeHtml(
+                grok.summary
+              )}</div>`
+            : ""
+        }
+        <div class="fs-stages-grid-2x2">${stagesGridHtml}</div>
+      </section>
+
+      <!-- 第二章：本方五人 100% 胜局功勋榜 / 败局分锅定责总表 -->
+      <section class="fs-chapter">
+        <div class="fs-chapter-head">
+          <span class="fs-chapter-num">第二章</span>
+          <h2>${escapeHtml(sideZh)}五人 100% ${
+    ownWon ? "胜局功勋表彰总表" : "败局分锅定责总表"
+  }（数据归一化定责）</h2>
+        </div>
+        <div class="fs-table-wrap">
+          <table class="fs-structured-table">
+            <thead>
+              <tr>
+                <th>位置</th>
+                <th>英雄 &amp; 选手</th>
+                <th>K / D / A (参战)</th>
+                <th>终局净值 &amp; GPM</th>
+                <th>英雄伤害 (占比)</th>
+                <th>承伤 &amp; 读秒</th>
+                <th>建筑伤害 &amp; 控制</th>
+                <th>综合评分</th>
+                <th>100% ${ownWon ? "功勋占比" : "分锅占比"}</th>
+                <th>核心定性判词</th>
+              </tr>
+            </thead>
+            <tbody>${ledgerRowsHtml}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 第三章：1~5 号位同位置宿敌 1v1 正面对位审判全表 -->
+      <section class="fs-chapter">
+        <div class="fs-chapter-head">
+          <span class="fs-chapter-num">第三章</span>
+          <h2>1~5 号位同位置宿敌 1v1 对位审判全表（含 OpenDota 全球同英雄百分位）</h2>
+        </div>
+        <p class="fs-chapter-desc">${escapeHtml(rm.side_verdict || "")}</p>
+        <div class="fs-table-wrap">
+          <table class="fs-structured-table">
+            <thead>
+              <tr>
+                <th>对位位置</th>
+                <th>本方 (${escapeHtml(sideZh)})</th>
+                <th>敌方宿敌 (${escapeHtml(oppZh)})</th>
+                <th>10m 对线经济差 &amp; 补刀</th>
+                <th>终局净值差</th>
+                <th>正面单杀比</th>
+                <th>英雄伤害差 &amp; 塔伤</th>
+                <th>对位审判结论</th>
+                <th>录像对位复盘</th>
+              </tr>
+            </thead>
+            <tbody>${mirrorTableRowsHtml}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 第四章：十一维战术显微镜全量取证账本 -->
+      <section class="fs-chapter deferred-chapter">
+        <div class="fs-chapter-head">
+          <span class="fs-chapter-num">第四章</span>
+          <h2>录像级十一维战术显微镜全量取证账本（大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/买活死&amp;7.38附魔）</h2>
+        </div>
+        <div class="fs-micro-all-stack">${microAllHtml}</div>
+      </section>
+
+      <!-- 第五章：前/中/后期三阶段差分账本与关键胜负手团战 -->
+      <section class="fs-chapter deferred-chapter">
+        <div class="fs-chapter-head">
+          <span class="fs-chapter-num">第五章</span>
+          <h2>前·中·后期三阶段差分数据表与关键胜负手团战记录</h2>
+        </div>
+        <div class="fs-table-wrap">
+          <table class="fs-structured-table">
+            <thead>
+              <tr>
+                <th>比赛阶段</th>
+                <th>阶段人头 &amp; 塔数</th>
+                <th>阶段经济差波动</th>
+                <th>✓ 本阶段亮点</th>
+                <th>✕ 本阶段扣分项</th>
+                <th>📌 阶段改进处方</th>
+              </tr>
+            </thead>
+            <tbody>${phaseTableRows}</tbody>
+          </table>
+        </div>
+
+        <h3 class="fs-subtable-title">⚔️ 全场最高烈度关键团战与经济拐点明细</h3>
+        <div class="fs-table-wrap">
+          <table class="fs-structured-table">
+            <thead>
+              <tr>
+                <th>团战编号 &amp; 时间窗</th>
+                <th>人头交换</th>
+                <th>经济拐点波动</th>
+                <th>团战最高输出</th>
+                <th>核心参战英雄伤害与阵亡/买活明细</th>
+              </tr>
+            </thead>
+            <tbody>${tfTableRows}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 第六章：本方 1~5 号位个人完整证据卷宗 -->
+      <section class="fs-chapter deferred-chapter">
+        <div class="fs-chapter-head">
+          <span class="fs-chapter-num">第六章</span>
+          <h2>${escapeHtml(sideZh)} 1~5 号位个人完整证据卷宗（出装时间轴、主动按键、高光、失误与下把铁律）</h2>
+        </div>
+        <div class="fs-table-wrap">
+          <table class="fs-structured-table">
+            <thead>
+              <tr>
+                <th>位置 &amp; 选手</th>
+                <th>终局核心出装时间轴 &amp; 技能释放频次</th>
+                <th>✅ 本局高光表现</th>
+                <th>❌ 关键失误抓包</th>
+                <th>📌 下把改进铁律</th>
+              </tr>
+            </thead>
+            <tbody>${dossierRowsHtml}</tbody>
+          </table>
+        </div>
+      </section>
+    </article>
+  `;
+}
+
+async function downloadStructuredReportPdf() {
+  const report = state.currentReport;
+  const paper = document.getElementById("fs-report-paper");
+  const btn = document.getElementById("btn-fs-download-pdf");
+  if (!report || !paper) return;
+
+  const { sideZh } = getOwnAndOppPlayers(report);
+  const filename = `Dota2_结构化复盘报告_Match_${report.match_id}_${sideZh}视角.pdf`;
+
+  if (typeof window.html2pdf !== "function") {
+    showToast("正在加载 PDF 导出引擎，已先为你下载独立全屏 HTML 报告文件");
+    downloadStructuredReportHtml();
+    return;
+  }
+
+  const origText = btn ? btn.textContent : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⏳ 正在生成 PDF 文件 (约2~4秒)...";
+  }
+  showToast(`⏳ 正在直接生成并下载《${filename}》，无需打印弹窗...`, 4000);
+
+  // Temporarily force all deferred chapters visible for complete canvas capture
+  paper.classList.add("capturing-export");
+
+  try {
+    const opt = {
+      margin: [6, 6, 6, 6],
+      filename,
+      image: { type: "jpeg", quality: 0.96 },
+      html2canvas: {
+        scale: 1.75,
+        useCORS: true,
+        backgroundColor: "#141613",
+        logging: false,
+        ignoreElements: (el) =>
+          el.tagName === "IMG" && el.getAttribute("data-html2canvas-ignore") === "true",
+      },
+      jsPDF: { unit: "mm", format: "a3", orientation: "landscape" },
+      pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".fs-stage-card", ".micro-card"] },
+    };
+    await window.html2pdf().set(opt).from(paper).save();
+    showToast(`✅ PDF 报告已直接下载：${filename}`, 4200);
+  } catch (err) {
+    console.error("PDF generation error:", err);
+    showToast("PDF 直接生成遇到浏览器限制，已自动为您下载独立全屏报告 (.html)");
+    downloadStructuredReportHtml();
+  } finally {
+    paper.classList.remove("capturing-export");
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = origText || "⬇️ 直接下载 PDF 报告 (.pdf)";
     }
-  }, 120);
+  }
+}
+
+async function downloadStructuredReportPng() {
+  const report = state.currentReport;
+  const paper = document.getElementById("fs-report-paper");
+  const btn = document.getElementById("btn-fs-download-png");
+  if (!report || !paper) return;
+
+  const { sideZh } = getOwnAndOppPlayers(report);
+  const filename = `Dota2_全景复盘长图_Match_${report.match_id}_${sideZh}视角.png`;
+  const origText = btn ? btn.textContent : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⏳ 正在渲染全景长图...";
+  }
+  showToast(`⏳ 正在生成高清结构化长图《${filename}》...`, 3500);
+  paper.classList.add("capturing-export");
+
+  try {
+    if (typeof window.html2canvas === "function") {
+      const canvas = await window.html2canvas(paper, {
+        scale: 1.6,
+        useCORS: true,
+        backgroundColor: "#141613",
+        logging: false,
+        ignoreElements: (el) =>
+          el.tagName === "IMG" && el.getAttribute("data-html2canvas-ignore") === "true",
+      });
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      showToast(`✅ 全景报告长图已直接下载：${filename}`, 4000);
+    } else if (typeof window.html2pdf === "function") {
+      const imgDataUrl = await window
+        .html2pdf()
+        .set({
+          html2canvas: {
+            scale: 1.6,
+            useCORS: true,
+            backgroundColor: "#141613",
+            logging: false,
+            ignoreElements: (el) =>
+              el.tagName === "IMG" && el.getAttribute("data-html2canvas-ignore") === "true",
+          },
+        })
+        .from(paper)
+        .outputImg("datauristring");
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = imgDataUrl;
+      link.click();
+      showToast(`✅ 全景报告长图已直接下载：${filename}`, 4000);
+    }
+  } catch (err) {
+    console.error("PNG export error:", err);
+    showToast(`导出长图失败: ${err.message}`);
+  } finally {
+    paper.classList.remove("capturing-export");
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = origText || "🖼️ 下载全景报告长图 (.png)";
+    }
+  }
+}
+
+async function downloadStructuredReportHtml() {
+  const report = state.currentReport;
+  const paper = document.getElementById("fs-report-paper");
+  if (!report || !paper) return;
+
+  const { sideZh } = getOwnAndOppPlayers(report);
+  const filename = `Dota2_结构化复盘报告_Match_${report.match_id}_${sideZh}视角.html`;
+
+  let cssText = "";
+  try {
+    const res = await fetch("/styles.css?v=4.6");
+    if (res.ok) cssText = await res.text();
+  } catch {
+    // fallback if offline
+  }
+
+  const standaloneHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dota 2 结构化赛后复盘报告 · 比赛 #${escapeHtml(report.match_id)} (${escapeHtml(sideZh)}视角)</title>
+  <style>
+    ${cssText}
+    body {
+      background: #111310;
+      color: #e8e4d9;
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .standalone-report-wrap {
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    .fs-chapter.deferred-chapter {
+      content-visibility: visible !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="standalone-report-wrap">
+    ${paper.innerHTML}
+  </div>
+</body>
+</html>`;
+
+  const blob = new Blob([standaloneHtml], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+  showToast(`✅ 已直接下载独立全屏报告文件：${filename}（发给队友双击即可全屏打开）`, 4200);
 }
 
 function syncMatchUrlInAddressBar(matchId) {
@@ -332,12 +1008,13 @@ function getOwnAndOppPlayers(report) {
 }
 
 /**
- * Extract requested match_id from URL (?match=12345 or /match/12345)
+ * Extract requested match_id, side, and view mode from URL (?match=12345&side=dire&view=report)
  */
 function getUrlRequestedMatchAndSide() {
   const params = new URLSearchParams(window.location.search || "");
   const qMatch = params.get("match") || params.get("match_id");
   const qSide = params.get("side");
+  const qView = params.get("view");
   let matchId = qMatch && /^\d{8,12}$/.test(qMatch.trim()) ? Number(qMatch.trim()) : null;
   if (!matchId) {
     const mPath = (window.location.pathname || "").match(/\/match\/(\d{8,12})/);
@@ -346,7 +1023,8 @@ function getUrlRequestedMatchAndSide() {
     }
   }
   const side = qSide === "dire" || qSide === "radiant" ? qSide : null;
-  return { matchId, side };
+  const viewReport = qView === "report";
+  return { matchId, side, viewReport };
 }
 
 /**
@@ -354,7 +1032,7 @@ function getUrlRequestedMatchAndSide() {
  */
 async function initApp() {
   bindEvents();
-  const { matchId: urlMatchId, side: urlSide } = getUrlRequestedMatchAndSide();
+  const { matchId: urlMatchId, side: urlSide, viewReport: urlViewReport } = getUrlRequestedMatchAndSide();
   if (urlSide) {
     state.perspective = urlSide;
     const perspSelect = document.getElementById("perspective-select");
@@ -386,7 +1064,8 @@ async function initApp() {
 
     const firstReport = data.latest_match_report || data.latest_report;
     if (urlMatchId && (!firstReport || Number(firstReport.match_id) !== Number(urlMatchId))) {
-      await loadMatchReport(urlMatchId);
+      // Shared URL with explicit ?match=<id> always loads/builds the full match report directly
+      await loadMatchReport(urlMatchId, { analyzeNow: true });
     } else if (firstReport) {
       state.currentMatchId = firstReport.match_id;
       state.currentReport = firstReport;
@@ -396,6 +1075,10 @@ async function initApp() {
       syncMatchUrlInAddressBar(state.currentMatchId);
     } else if ((data.recent_matches || []).length > 0) {
       await loadMatchReport(data.recent_matches[0].match_id);
+    }
+
+    if (urlViewReport && state.currentReport) {
+      openFullscreenStructuredReport(state.currentReport);
     }
   } catch (err) {
     console.error(err);
@@ -665,7 +1348,7 @@ function bindEvents() {
     }
   });
 
-  // PDF Export buttons (Header, Match Overview, and Share Modal)
+  // PDF / Full-Screen Structured Report buttons (Header, Match Overview, and Share Modal)
   ["btn-export-pdf", "btn-header-export-pdf", "btn-modal-export-pdf"].forEach((id) => {
     const btn = document.getElementById(id);
     if (btn) {
@@ -674,6 +1357,43 @@ function bindEvents() {
       });
     }
   });
+
+  // Full-Screen Structured Report Toolbar bindings
+  const fsDlg = document.getElementById("fullscreen-report-dialog");
+  const btnFsClose = document.getElementById("btn-fs-close");
+  const btnFsPdf = document.getElementById("btn-fs-download-pdf");
+  const btnFsHtml = document.getElementById("btn-fs-download-html");
+  const btnFsPng = document.getElementById("btn-fs-download-png");
+  const btnFsCopyLink = document.getElementById("btn-fs-copy-link");
+  const fsPerspSelect = document.getElementById("fs-perspective-select");
+
+  if (btnFsClose && fsDlg) {
+    btnFsClose.addEventListener("click", () => fsDlg.close());
+  }
+  if (btnFsPdf) {
+    btnFsPdf.addEventListener("click", () => downloadStructuredReportPdf());
+  }
+  if (btnFsHtml) {
+    btnFsHtml.addEventListener("click", () => downloadStructuredReportHtml());
+  }
+  if (btnFsPng) {
+    btnFsPng.addEventListener("click", () => downloadStructuredReportPng());
+  }
+  if (btnFsCopyLink) {
+    btnFsCopyLink.addEventListener("click", () => copyMatchShareLink({ viewReport: true }));
+  }
+  if (fsPerspSelect) {
+    fsPerspSelect.addEventListener("change", () => {
+      state.perspective = fsPerspSelect.value || "dire";
+      const mainPersp = document.getElementById("perspective-select");
+      if (mainPersp) mainPersp.value = state.perspective;
+      if (state.currentReport) {
+        renderFullMatchReport(state.currentReport);
+        syncMatchUrlInAddressBar(state.currentMatchId);
+        openFullscreenStructuredReport(state.currentReport);
+      }
+    });
+  }
 
   // Voice Broadcast Button (TTS Chinese Coach Read-Aloud)
   const voiceBtn = document.getElementById("btn-voice-broadcast");
