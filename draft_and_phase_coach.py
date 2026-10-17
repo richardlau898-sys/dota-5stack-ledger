@@ -35,7 +35,7 @@ HERO_ARCHETYPES: Dict[int, Dict[str, Any]] = {
         "roles": ["授予力量刷钱引擎", "跳刀两极反转团控", "巨角冲撞破坏阵型"],
         "scores": {"init": 95, "burst": 65, "tf": 96, "push": 72, "pick": 78, "late": 88, "tank": 75},
         "dmg_type": "mixed",
-        "key_spells": ["授予力量(Empower)", "巨角冲撞(拱)", "两极反转(大招RP)"],
+        "key_spells": ["授予力量(分裂)", "巨角冲撞(拱)", "两极反转(大招)"],
         "synergy_tags": ["aoe_vacuum_stun", "empower_buffer", "reposition"],
     },
     9: {  # 米拉娜 Mirana
@@ -241,14 +241,14 @@ def build_team_combos(
                     {"short": c_short, "img": carry["hero_img"], "pos": carry["pos"], "personaname": carry["personaname"]},
                 ],
                 "how_to_play": (
-                    f"1) 发育期：马格纳斯必须卡 CD 给 {c_short} 套上『授予力量 (Empower)』，让 {c_short} 拥有分裂与额外攻击力高速清远古与兵线；"
-                    f"2) 团战期：马格纳斯切忌第一波裸跳送死，等敌方关键救人/反手（如{'、'.join(opp_names[:2])}）露头后，跳刀『两极反转 (RP)』吸住多人或把核心拱回，"
+                    f"1) 发育期：马格纳斯必须卡冷却给 {c_short} 套上『授予力量』，让 {c_short} 拥有分裂与额外攻击力高速清远古与兵线；"
+                    f"2) 团战期：马格纳斯切忌第一波裸跳送死，等敌方关键救人/反手（如{'、'.join(opp_names[:2])}）露头后，跳刀『两极反转』吸住多人或把核心拱回，"
                     f"{c_short} 立即接大招/溅射输出瞬间融化敌方前排。"
                 ),
                 "execution_audit": (
-                    f"本局实战验货：马格纳斯整局释放『授予力量』{emp_cnt} 次、『两极反转(RP)』{rp_cnt} 次、『巨角冲撞』{skewer_cnt} 次；"
+                    f"本局实战验货：马格纳斯整局释放『授予力量』{emp_cnt} 次、『两极反转』{rp_cnt} 次、『巨角冲撞』{skewer_cnt} 次；"
                     f"{c_short} 终局刷出 {carry['gpm']} GPM（净资产 {carry['net_worth']:,} 金，英雄伤害 {carry['hero_damage']:,}）。"
-                    f"{'这套猛犸赋能+RP体系在后期团战成功兑现，是翻盘的核心引擎。' if carry['gpm'] >= 600 and rp_cnt >= 4 else '但本局中期多次出现猛犸与大哥脱节、RP 控住人时核心不在场的断档情况，配合熟练度还得练！'}"
+                    f"{'这套猛犸赋能+大招体系在后期团战成功兑现，是翻盘的核心引擎。' if carry['gpm'] >= 600 and rp_cnt >= 4 else '但本局中期多次出现猛犸与大哥脱节、大招控住人时核心不在场的断档情况，配合熟练度还得练！'}"
                 ),
             })
 
@@ -371,7 +371,7 @@ def build_team_combos(
         if len(combos) < 2:
             combos.append({
                 "title": f"【{p4['hero_short_zh']} + {p5['hero_short_zh']} + {p2['hero_short_zh']}】双辅助控符游走与中路联动",
-                "window": "04:00–15:00 · 6分钟动力符与夜晚第一波Gank",
+                "window": "04:00–15:00 · 6分钟动力符与夜晚第一波游走抓人",
                 "heroes": [
                     {"short": p2["hero_short_zh"], "img": p2["hero_img"], "pos": p2["pos"], "personaname": p2["personaname"]},
                     {"short": p4["hero_short_zh"], "img": p4["hero_img"], "pos": p4["pos"], "personaname": p4["personaname"]},
@@ -679,7 +679,7 @@ def enrich_phases_with_evaluations(
                         good_list.append(f"中期接团技能释放果断：阶段贡献 {kills} 杀与 {hd_gain:,} 伤害" + (f"（出装：{items_str}）。" if items_str else "。"))
 
                 if deaths == 0:
-                    good_list.append("中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！")
+                    good_list.append("中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！")
                 elif deaths >= 4:
                     bad_list.append(f"中期沦为突破口：15分钟内连续暴毙 {deaths} 次（{', '.join(death_times[:4])}），把前期积攒的节奏全送了出去！")
                 elif deaths >= 2:
@@ -881,7 +881,7 @@ def build_deep_replay_forensics(
             elif pick_seq <= 8:
                 stage_tag = f"第{pick_seq}手 · 二轮核心"
             else:
-                stage_tag = f"第{pick_seq}手 · 尾手康特(Counter)"
+                stage_tag = f"第{pick_seq}手 · 尾手针对绝活"
 
         picks_order.append({
             "order": int(pb.get("order") or 0) + 1,

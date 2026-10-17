@@ -497,9 +497,9 @@ def build_tactical_microscope(
                     ally_emp_details.append(f"{ally_p['hero_short_zh']}(溅射{a_hh}刀/{a_dmg:,}伤)")
             emp_tone = "good" if emp_casts >= int(duration_min * 0.75) else "bad"
             emp_msg = (
-                f"《授予力量》Buff 覆盖审计：{duration_min:.0f} 分钟比赛共施放 {emp_casts} 次（分均仅 {emp_per_min} 次）"
+                f"《授予力量》增益覆盖审计：{duration_min:.0f} 分钟比赛共施放 {emp_casts} 次（分均仅 {emp_per_min} 次）"
                 + (f"，帮助队友打出 {'、'.join(ally_emp_details)}。" if ally_emp_details else "。")
-                + ("⚠️ 作为工具人猛犸，中后期给主C续 Buff 的频率偏低，刷钱与打团前务必保持主C身上常驻分裂！" if emp_tone == "bad" else "")
+                + ("⚠️ 作为工具人猛犸，中后期给主C续分裂增益的频率偏低，刷钱与打团前务必保持主C身上常驻分裂！" if emp_tone == "bad" else "")
             )
             special_insights.append(emp_msg)
             headline_badges.append({"text": f"授予力量: {emp_casts}次(分均{emp_per_min})", "tone": emp_tone})
@@ -2392,7 +2392,7 @@ def build_tactical_microscope(
 
             if edge_pts >= 6.5:
                 won_overall_cnt += 1
-                verdict_tag = "👑 对位完爆 (GAP)"
+                verdict_tag = "👑 对位完爆 (大优)"
                 grade = "good"
             elif edge_pts >= 2.0:
                 won_overall_cnt += 1
@@ -2584,7 +2584,7 @@ def build_tactical_microscope(
                     dieback_cnt += 1
                     db_t = int(dieback_death.get("time") or bb_sec)
                     db_dead_s = int(dieback_death.get("time_dead") or 80)
-                    outcome_tag = "💀 致命买活死 (Dieback)"
+                    outcome_tag = "💀 致命买活死"
                     severity = "bad"
                     detail = (
                         f"在 {fmt_mmss(bb_sec)} 交出买活后仅存活 {db_t - bb_sec} 秒，于 {fmt_mmss(db_t)} 再次暴毙（买活死读秒 {db_dead_s}s 无法买活）！"

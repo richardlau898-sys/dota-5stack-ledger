@@ -39,7 +39,7 @@ from dota_analyst import (
     render_markdown_report,
     save_roster,
 )
-from dota_constants_zh import get_hero_name, get_mode_and_lobby
+from dota_constants_zh import get_hero_name, get_mode_and_lobby, sanitize_report_mixed_english
 from draft_and_phase_coach import build_pregame_strategy_plan, build_squad_history_ledger
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -149,9 +149,10 @@ def get_or_build_match_report(
                     cached_rep = json.loads(jc.read_text(encoding="utf-8"))
                     if (
                         isinstance(cached_rep, dict)
+                        and cached_rep.get("_zh_schema_v") == 2
                         and cached_rep.get("deep_forensics", {}).get("unpressed_saves_by_side") is not None
                     ):
-                        return cached_rep
+                        return sanitize_report_mixed_english(cached_rep)
                 except Exception:
                     pass
 
@@ -496,8 +497,9 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     base_url=base_url,
                 )
                 if res.get("ok") and res.get("structured"):
+                    res["structured"] = sanitize_report_mixed_english(res["structured"])
                     report["grok_coaching"] = res["structured"]
-                res["report"] = report
+                res["report"] = sanitize_report_mixed_english(report)
                 self._send_json(res)
                 return
 

@@ -34,8 +34,10 @@ from dota_constants_zh import (
     get_ability_zh,
     get_hero_default_pos,
     get_hero_name,
+    get_item_zh,
     get_mode_and_lobby,
     get_rank_name,
+    sanitize_report_mixed_english,
 )
 from ai_coach_engine import (
     assign_team_blame_percentages,
@@ -236,7 +238,7 @@ def get_item_constants_map() -> Tuple[Dict[int, Dict[str, Any]], Dict[str, Dict[
         if isinstance(val, dict) and "id" in val:
             item_id = int(val["id"])
             dname = val.get("dname") or key
-            zh_name = ITEMS_ZH.get(key, dname)
+            zh_name = get_item_zh(key, dname)
             raw_img = (val.get("img") or f"/apps/dota2/images/dota_react/items/{key}.png").split("?")[0]
             img_url = f"{VALVE_CDN}{raw_img}" if raw_img.startswith("/") else raw_img
             cost = int(val.get("cost") or 0)
@@ -578,7 +580,7 @@ def extract_rich_items_and_abilities(
         if key in KEY_TIMING_ITEMS and key not in seen_keys and t > 0:
             seen_keys.add(key)
             info = item_by_key.get(key) or {}
-            zh = ITEMS_ZH.get(key) or info.get("zh_name") or key
+            zh = get_item_zh(key) or info.get("zh_name") or "战术道具"
             img_url = info.get("img") or f"{VALVE_CDN}/apps/dota2/images/dota_react/items/{key}.png"
             t_str = format_duration(t)
             timings.append(f"{t_str} {zh}")
@@ -594,7 +596,7 @@ def extract_rich_items_and_abilities(
     active_item_uses: Dict[str, Dict[str, Any]] = {}
     for k, cnt in sorted(item_uses.items(), key=lambda x: x[1], reverse=True):
         info = item_by_key.get(k) or {}
-        zh = ITEMS_ZH.get(k) or info.get("zh_name") or k
+        zh = get_item_zh(k) or info.get("zh_name") or "战术道具"
         img_url = info.get("img") or f"{VALVE_CDN}/apps/dota2/images/dota_react/items/{k}.png"
         active_item_uses[k] = {
             "key": k,
@@ -819,7 +821,7 @@ def build_three_phases_breakdown(
                                 "time": pti,
                                 "time_str": format_duration(pti),
                                 "key": ikey,
-                                "zh_name": ITEMS_ZH.get(ikey) or info.get("zh_name") or ikey,
+                                "zh_name": get_item_zh(ikey) or info.get("zh_name") or "战术道具",
                                 "img": info.get("img") or f"{VALVE_CDN}/apps/dota2/images/dota_react/items/{ikey}.png",
                             })
 
@@ -1281,8 +1283,9 @@ def analyze_match_data(
                         if get_ability_zh(ak)
                     ]
                     it_used = [
-                        f"{ITEMS_ZH.get(ik, ik)}×{cnt}"
+                        f"{get_item_zh(ik)}×{cnt}"
                         for ik, cnt in (tp.get("item_uses") or {}).items()
+                        if get_item_zh(ik)
                     ]
                     if dmg_v > 0 or d_v > 0 or ab_used:
                         participants_detail.append({
@@ -1396,14 +1399,15 @@ def analyze_match_data(
 
     all_wards_map.sort(key=lambda w: w["time_sec"])
 
-    return {
+    raw_report_out = {
+        "_zh_schema_v": 2,
         "match_id": match_id,
         "mode_str": get_mode_and_lobby(match.get("game_mode", 0), match.get("lobby_type", 0)),
         "start_time_str": start_dt,
         "duration_str": format_duration(duration),
         "duration_min": round(duration_min, 1),
         "is_parsed": is_parsed,
-        "winner": "天辉 (Radiant)" if radiant_win else "夜魇 (Dire)",
+        "winner": "天辉" if radiant_win else "夜魇",
         "radiant_win": radiant_win,
         "radiant_score": radiant_score,
         "dire_score": dire_score,
@@ -1434,6 +1438,7 @@ def analyze_match_data(
         "radiant_pos_1_to_5": radiant_report,
         "dire_pos_1_to_5": dire_report,
     }
+    return sanitize_report_mixed_english(raw_report_out)
 
 
 def render_markdown_report(report: Dict[str, Any]) -> str:

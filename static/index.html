@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=4.4" />
+  <link rel="stylesheet" href="/styles.css?v=4.5" />
 </head>
 <body>
   <header class="site-header">
@@ -13,7 +13,7 @@
         <span class="brand-mark" aria-hidden="true">刀</span>
         <div>
           <h1 class="brand-title">战后算账 &amp; 赛前锦囊</h1>
-          <p class="brand-subtitle">DOTA 2 5-STACK FORENSICS &amp; LIVE DRAFT PLANNER</p>
+          <p class="brand-subtitle">五黑车队录像级复盘 · 十一维战术显微镜与赛前作战室</p>
         </div>
       </div>
 
@@ -33,7 +33,7 @@
           <input
             id="search-input"
             type="search"
-            placeholder="输入比赛编号 (如 9046364324) 或 Steam 链接 / 好友 ID..."
+            placeholder="输入比赛编号 (如 9048059832) 或 Steam 链接 / 好友 ID..."
             autocomplete="off"
           />
           <button type="submit" id="btn-analyze-search" class="button primary">查询战绩</button>
@@ -43,7 +43,8 @@
 
       <div class="header-right">
         <div id="llm-status-pill" class="model-status connected">已接入 XAI / grok-4.7</div>
-        <button type="button" id="btn-copy-share-link" class="button secondary" title="复制当前已分析比赛的公开分享链接，发给群友直接点开查看完整复盘">🔗 分享本局链接</button>
+        <button type="button" id="btn-copy-share-link" class="button secondary" title="复制当前已分析比赛的公开分享链接，发给群友直接点开查看完整复盘">🔗 分享链接</button>
+        <button type="button" id="btn-header-export-pdf" class="button secondary" title="将本局完整复盘导出为多页高清 PDF 报告发给队友">📄 导出 PDF</button>
         <button type="button" id="btn-open-share-poster" class="button primary" title="一键生成群聊文字判决书与高清PNG战报卡片">📜 导出群聊战报</button>
         <button type="button" id="btn-open-settings" class="button secondary">车队与模型设置</button>
       </div>
@@ -172,12 +173,13 @@
             <span>看哪边视角</span>
             <select id="perspective-select">
               <option value="auto">按我的车队阵营</option>
-              <option value="dire">夜魇 (Dire)</option>
-              <option value="radiant">天辉 (Radiant)</option>
+              <option value="dire">夜魇阵营</option>
+              <option value="radiant">天辉阵营</option>
             </select>
           </label>
           <button type="button" id="btn-request-parse" class="button secondary" hidden>请求录像解析</button>
           <button type="button" id="btn-voice-broadcast" class="button secondary" title="用中文语音大声朗读本局胜负庆功/分锅、对位差距与显微镜铁证">🔊 语音播报复盘</button>
+          <button type="button" id="btn-export-pdf" class="button secondary" title="将本局完整复盘报告导出为 PDF 文件发给队友查看">📄 导出 PDF 分析报告</button>
           <button type="button" id="btn-hero-share-link" class="button secondary" title="复制本局公开分享链接发到微信/Discord群">🔗 复制本局分享链接</button>
           <button type="button" id="btn-open-share-poster-2" class="button secondary">📜 导出群聊战报</button>
           <button type="button" id="btn-trigger-grok" class="button primary">🧠 让 Grok 4.7 生成深度判词</button>
@@ -226,7 +228,7 @@
           <span class="grok-tag" id="grok-author-label">XAI / GROK-4.7 赛后总账</span>
           <span id="grok-title-text" class="grok-banner-title">正在装载赛后判词...</span>
         </div>
-        <p id="grok-summary-text" class="grok-summary-p"></p>
+        <div id="grok-summary-text" class="grok-summary-p"></div>
         <div id="grok-verdict-text" class="grok-verdict-box"></div>
         <div id="grok-team-practice-box" class="grok-practice-strip"></div>
       </article>
@@ -572,6 +574,7 @@
           <button type="button" id="btn-copy-verdict-text" class="button primary">📋 一键复制群聊文字战报 (含公开分享链接)</button>
           <button type="button" id="btn-modal-share-link" class="button secondary">🔗 仅复制本局公开分享链接</button>
           <button type="button" id="btn-download-poster-png" class="button secondary">🖼️ 下载高清 PNG 战报长图</button>
+          <button type="button" id="btn-modal-export-pdf" class="button secondary">📄 导出完整 PDF 复盘报告</button>
         </div>
         <div class="poster-split-grid">
           <div class="poster-text-box">
@@ -597,6 +600,6 @@
     <span>有据才喷，数据来自 OpenDota 录像解析与 xAI Grok 4.7</span>
   </footer>
 
-  <script src="/app.js?v=4.4" defer></script>
+  <script src="/app.js?v=4.5" defer></script>
 </body>
 </html>

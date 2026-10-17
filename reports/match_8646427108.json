@@ -1,11 +1,12 @@
 {
+  "_zh_schema_v": 2,
   "match_id": 8646427108,
-  "mode_str": "⚡ 加速模式 (Turbo)",
+  "mode_str": "⚡ 加速模式",
   "start_time_str": "2026-01-12 21:21",
   "duration_str": "36:18",
   "duration_min": 36.3,
   "is_parsed": false,
-  "winner": "夜魇 (Dire)",
+  "winner": "夜魇",
   "radiant_win": false,
   "radiant_score": 32,
   "dire_score": 45,
@@ -57,7 +58,7 @@
     "combos": [
       {
         "title": "【司夜刺客 + 工程师 + 昆卡】双辅助控符游走与中路联动",
-        "window": "04:00–15:00 · 6分钟动力符与夜晚第一波Gank",
+        "window": "04:00–15:00 · 6分钟动力符与夜晚第一波游走抓人",
         "heroes": [
           {
             "short": "昆卡",
@@ -216,7 +217,7 @@
       "combos": [
         {
           "title": "【杰奇洛 + 寒冬飞龙 + 幽鬼】双辅助控符游走与中路联动",
-          "window": "04:00–15:00 · 6分钟动力符与夜晚第一波Gank",
+          "window": "04:00–15:00 · 6分钟动力符与夜晚第一波游走抓人",
           "heroes": [
             {
               "short": "幽鬼",
@@ -375,7 +376,7 @@
       "combos": [
         {
           "title": "【司夜刺客 + 工程师 + 昆卡】双辅助控符游走与中路联动",
-          "window": "04:00–15:00 · 6分钟动力符与夜晚第一波Gank",
+          "window": "04:00–15:00 · 6分钟动力符与夜晚第一波游走抓人",
           "heroes": [
             {
               "short": "昆卡",
@@ -612,7 +613,7 @@
         "is_pick": true,
         "side": "dire",
         "side_zh": "夜魇",
-        "stage_tag": "第9手 · 尾手康特(Counter)",
+        "stage_tag": "第9手 · 尾手针对绝活",
         "hero_id": 23,
         "hero_short_zh": "昆卡",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
@@ -625,7 +626,7 @@
         "is_pick": true,
         "side": "radiant",
         "side_zh": "天辉",
-        "stage_tag": "第10手 · 尾手康特(Counter)",
+        "stage_tag": "第10手 · 尾手针对绝活",
         "hero_id": 112,
         "hero_short_zh": "寒冬飞龙",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
@@ -2212,10 +2213,10 @@
             "spell_pct": 0.0,
             "top_killers": [],
             "def_items_owned": [
-              "大推推"
+              "飓风长戟(大推推)"
             ],
             "grade": "good",
-            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【大推推】。"
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【飓风长戟(大推推)】。"
           },
           {
             "pos": 2,
@@ -2229,12 +2230,12 @@
             "spell_pct": 0.0,
             "top_killers": [],
             "def_items_owned": [
-              "笛子",
-              "莲花",
+              "洞察烟斗(笛子)",
+              "清莲宝珠(莲花)",
               "刃甲"
             ],
             "grade": "good",
-            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【笛子、莲花、刃甲】。"
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【洞察烟斗(笛子)、清莲宝珠(莲花)、刃甲】。"
           },
           {
             "pos": 3,
@@ -2249,11 +2250,11 @@
             "top_killers": [],
             "def_items_owned": [
               "永世法衣",
-              "希瓦",
-              "莲花"
+              "希瓦的守护(冰甲)",
+              "清莲宝珠(莲花)"
             ],
             "grade": "good",
-            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【永世法衣、希瓦、莲花】。"
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【永世法衣、希瓦的守护(冰甲)、清莲宝珠(莲花)】。"
           },
           {
             "pos": 4,
@@ -2353,10 +2354,10 @@
             "top_killers": [],
             "def_items_owned": [
               "微光披风",
-              "大推推"
+              "飓风长戟(大推推)"
             ],
             "grade": "good",
-            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【微光披风、大推推】。"
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【微光披风、飓风长戟(大推推)】。"
           },
           {
             "pos": 5,
@@ -2370,11 +2371,11 @@
             "spell_pct": 0.0,
             "top_killers": [],
             "def_items_owned": [
-              "盘子(永恒之盘)",
-              "希瓦"
+              "永恒之盘(盘子)",
+              "希瓦的守护(冰甲)"
             ],
             "grade": "good",
-            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【盘子(永恒之盘)、希瓦】。"
+            "verdict": "✓ 承伤结构：0.0% 技能伤害（0） vs 0.0% 物理平A（0），最大威胁源为 平A普攻，已配防装【永恒之盘(盘子)、希瓦的守护(冰甲)】。"
           }
         ]
       }
@@ -2879,7 +2880,7 @@
             ],
             "own_share_pct": 57.9,
             "opp_share_pct": 42.1,
-            "verdict_tag": "👑 对位完爆 (GAP)",
+            "verdict_tag": "👑 对位完爆 (大优)",
             "grade": "good",
             "summary_txt": "10m对线经济 0 vs 0（+0）｜终局经济 58,282 vs 38,295（+19,987）｜英雄输出 65,436 vs 51,597｜正面对位互杀 0 : 0。"
           },
@@ -3069,7 +3070,7 @@
             ],
             "own_share_pct": 59.0,
             "opp_share_pct": 41.0,
-            "verdict_tag": "👑 对位完爆 (GAP)",
+            "verdict_tag": "👑 对位完爆 (大优)",
             "grade": "good",
             "summary_txt": "参战率 65.9% vs 54.8%｜真假眼 0颗(排0) vs 0颗(排0)｜硬控 0.0s vs 0.0s｜正面对位互杀 0 : 0。"
           }
@@ -3267,7 +3268,7 @@
             ],
             "own_share_pct": 67.1,
             "opp_share_pct": 32.9,
-            "verdict_tag": "👑 对位完爆 (GAP)",
+            "verdict_tag": "👑 对位完爆 (大优)",
             "grade": "good",
             "summary_txt": "10m对线经济 0 vs 0（+0）｜终局经济 41,392 vs 30,488（+10,904）｜英雄输出 68,023 vs 18,562｜正面对位互杀 0 : 0。"
           },
@@ -3457,7 +3458,7 @@
             ],
             "own_share_pct": 60.5,
             "opp_share_pct": 39.5,
-            "verdict_tag": "👑 对位完爆 (GAP)",
+            "verdict_tag": "👑 对位完爆 (大优)",
             "grade": "good",
             "summary_txt": "参战率 64.5% vs 38.6%｜真假眼 0颗(排0) vs 0颗(排0)｜硬控 0.0s vs 0.0s｜正面对位互杀 0 : 0。"
           },
@@ -4117,7 +4118,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
@@ -4152,7 +4153,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
@@ -4187,7 +4188,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
@@ -4221,7 +4222,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
@@ -4255,7 +4256,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
@@ -4289,7 +4290,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
@@ -4324,7 +4325,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
@@ -4359,7 +4360,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
@@ -4393,7 +4394,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
@@ -4427,7 +4428,7 @@
           "items_bought": [],
           "assessment": "05:00–15:00 阶段斩获 0 杀 0 死，经济 +0 (GPM 0)，英雄伤害 +0，推塔 +0。",
           "good": [
-            "中期 15 分钟保持 0 阵亡，走位与防 Gank 警觉性极高！"
+            "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
             "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
@@ -4838,7 +4839,7 @@
       "side": "夜魇",
       "pos": 3,
       "pos_label": "3号位 · 劣势路核心",
-      "hero_name": "帕吉(屠夫/Pudge)",
+      "hero_name": "帕吉(屠夫)",
       "hero_short_zh": "帕吉",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
@@ -4865,7 +4866,7 @@
       "side": "夜魇",
       "pos": 1,
       "pos_label": "1号位 · 优势路核心",
-      "hero_name": "狙击手(火枪/Sniper)",
+      "hero_name": "狙击手(火枪)",
       "hero_short_zh": "狙击手",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
@@ -4893,7 +4894,7 @@
       "side": "天辉",
       "pos": 1,
       "pos_label": "1号位 · 优势路核心",
-      "hero_name": "主宰(剑圣/Jugg)",
+      "hero_name": "主宰(剑圣)",
       "hero_short_zh": "主宰",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
@@ -4913,7 +4914,7 @@
       "side": "夜魇",
       "pos": 2,
       "pos_label": "2号位 · 中路核心",
-      "hero_name": "昆卡(船长/Kunkka)",
+      "hero_name": "昆卡(船长)",
       "hero_short_zh": "昆卡",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
@@ -4936,7 +4937,7 @@
       "player_slot": 128,
       "side": "夜魇",
       "pos": 4,
-      "hero_name": "司夜刺客(小强/NA)",
+      "hero_name": "司夜刺客(小强)",
       "hero_short_zh": "司夜刺客",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
@@ -4950,7 +4951,7 @@
     "focus_team_blame_ranking": [
       {
         "pos": 2,
-        "hero_name": "昆卡(船长/Kunkka)",
+        "hero_name": "昆卡(船长)",
         "hero_short_zh": "昆卡",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
@@ -4969,7 +4970,7 @@
       },
       {
         "pos": 4,
-        "hero_name": "司夜刺客(小强/NA)",
+        "hero_name": "司夜刺客(小强)",
         "hero_short_zh": "司夜刺客",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
@@ -4988,7 +4989,7 @@
       },
       {
         "pos": 5,
-        "hero_name": "工程师(炸弹人/Techies)",
+        "hero_name": "工程师(炸弹人)",
         "hero_short_zh": "工程师",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
@@ -5007,7 +5008,7 @@
       },
       {
         "pos": 1,
-        "hero_name": "狙击手(火枪/Sniper)",
+        "hero_name": "狙击手(火枪)",
         "hero_short_zh": "狙击手",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
@@ -5026,7 +5027,7 @@
       },
       {
         "pos": 3,
-        "hero_name": "帕吉(屠夫/Pudge)",
+        "hero_name": "帕吉(屠夫)",
         "hero_short_zh": "帕吉",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
@@ -5047,7 +5048,7 @@
     "focus_team_contrib_ranking": [
       {
         "pos": 3,
-        "hero_name": "帕吉(屠夫/Pudge)",
+        "hero_name": "帕吉(屠夫)",
         "hero_short_zh": "帕吉",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
@@ -5065,7 +5066,7 @@
       },
       {
         "pos": 1,
-        "hero_name": "狙击手(火枪/Sniper)",
+        "hero_name": "狙击手(火枪)",
         "hero_short_zh": "狙击手",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
@@ -5083,7 +5084,7 @@
       },
       {
         "pos": 5,
-        "hero_name": "工程师(炸弹人/Techies)",
+        "hero_name": "工程师(炸弹人)",
         "hero_short_zh": "工程师",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
@@ -5101,7 +5102,7 @@
       },
       {
         "pos": 4,
-        "hero_name": "司夜刺客(小强/NA)",
+        "hero_name": "司夜刺客(小强)",
         "hero_short_zh": "司夜刺客",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
@@ -5119,7 +5120,7 @@
       },
       {
         "pos": 2,
-        "hero_name": "昆卡(船长/Kunkka)",
+        "hero_name": "昆卡(船长)",
         "hero_short_zh": "昆卡",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
@@ -5183,9 +5184,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 8,
-      "hero_name": "主宰(剑圣/Jugg)",
+      "hero_name": "主宰(剑圣)",
       "hero_short_zh": "主宰",
-      "hero_alias": "剑圣/Jugg",
+      "hero_alias": "剑圣",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
       "raw_lane": null,
@@ -5242,11 +5243,11 @@
       "final_items": [
         "狂战斧",
         "否决挂坠",
-        "分身斧",
-        "大隐刀",
-        "冰眼",
+        "幻影斧(分身斧)",
+        "白银之锋(大隐刀)",
+        "斯嘉蒂之眼(冰眼)",
         "金箍棒(MKB)",
-        "[中立]Stygian Desolator",
+        "[中立]寂灭",
         "[A杖加持]",
         "[魔晶加持]"
       ],
@@ -5272,7 +5273,7 @@
         {
           "slot": 2,
           "key": "manta",
-          "zh_name": "分身斧",
+          "zh_name": "幻影斧(分身斧)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/manta.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5281,7 +5282,7 @@
         {
           "slot": 3,
           "key": "silver_edge",
-          "zh_name": "大隐刀",
+          "zh_name": "白银之锋(大隐刀)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/silver_edge.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5290,7 +5291,7 @@
         {
           "slot": 4,
           "key": "skadi",
-          "zh_name": "冰眼",
+          "zh_name": "斯嘉蒂之眼(冰眼)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/skadi.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5310,28 +5311,28 @@
         {
           "slot": 0,
           "key": "greater_famango",
-          "zh_name": "Greater Healing Lotus",
+          "zh_name": "特大疗伤莲花",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/greater_famango.png",
           "use_count": 0
         },
         {
           "slot": 1,
           "key": "great_famango",
-          "zh_name": "Great Healing Lotus",
+          "zh_name": "大疗伤莲花",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/great_famango.png",
           "use_count": 0
         },
         {
           "slot": 2,
           "key": "travel_boots",
-          "zh_name": "飞鞋",
+          "zh_name": "远行鞋(飞鞋)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/travel_boots.png",
           "use_count": 0
         }
       ],
       "neutral_item_rich": {
         "key": "desolator_2",
-        "zh_name": "Stygian Desolator",
+        "zh_name": "寂灭",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/desolator_2.png",
         "use_count": 0
       },
@@ -5501,11 +5502,11 @@
       "personaname": "Tulok",
       "friend_tag": null,
       "is_me": false,
-      "rank": "中军 (Crusader)[3星]",
+      "rank": "中军[3星]",
       "hero_id": 67,
-      "hero_name": "幽鬼(UG/Spectre)",
+      "hero_name": "幽鬼(幽鬼)",
       "hero_short_zh": "幽鬼",
-      "hero_alias": "UG/Spectre",
+      "hero_alias": "幽鬼",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/spectre.png",
       "raw_lane": null,
@@ -5560,20 +5561,20 @@
         "xp10": null
       },
       "final_items": [
-        "龙心",
-        "分身斧",
-        "大散失(驱散之刃)",
-        "大晕锤",
+        "恐鳌之心(龙心)",
+        "幻影斧(分身斧)",
+        "驱散之刃(大散失)",
+        "深渊之刃(大晕锤)",
         "辉耀",
-        "假腿",
-        "[中立]Stygian Desolator",
+        "动力鞋(假腿)",
+        "[中立]寂灭",
         "[魔晶加持]"
       ],
       "final_items_rich": [
         {
           "slot": 0,
           "key": "heart",
-          "zh_name": "龙心",
+          "zh_name": "恐鳌之心(龙心)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5582,7 +5583,7 @@
         {
           "slot": 1,
           "key": "manta",
-          "zh_name": "分身斧",
+          "zh_name": "幻影斧(分身斧)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/manta.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5591,7 +5592,7 @@
         {
           "slot": 2,
           "key": "disperser",
-          "zh_name": "大散失(驱散之刃)",
+          "zh_name": "驱散之刃(大散失)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/disperser.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5600,7 +5601,7 @@
         {
           "slot": 3,
           "key": "abyssal_blade",
-          "zh_name": "大晕锤",
+          "zh_name": "深渊之刃(大晕锤)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/abyssal_blade.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5618,7 +5619,7 @@
         {
           "slot": 5,
           "key": "power_treads",
-          "zh_name": "假腿",
+          "zh_name": "动力鞋(假腿)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5636,7 +5637,7 @@
       ],
       "neutral_item_rich": {
         "key": "desolator_2",
-        "zh_name": "Stygian Desolator",
+        "zh_name": "寂灭",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/desolator_2.png",
         "use_count": 0
       },
@@ -5774,9 +5775,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 22,
-      "hero_name": "宙斯(Zeus)",
+      "hero_name": "宙斯(众神之王)",
       "hero_short_zh": "宙斯",
-      "hero_alias": "Zeus",
+      "hero_alias": "众神之王",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/zuus.png",
       "raw_lane": null,
@@ -5832,12 +5833,12 @@
       },
       "final_items": [
         "刷新球",
-        "大吹风",
-        "飞鞋",
+        "风之杖(大吹风)",
+        "远行鞋(飞鞋)",
         "魔瓶",
         "绝刃(大灵匣)",
         "蝴蝶",
-        "[中立]Disgraced Regalia",
+        "[中立]蒙羞华服",
         "[A杖加持]",
         "[魔晶加持]"
       ],
@@ -5854,7 +5855,7 @@
         {
           "slot": 1,
           "key": "wind_waker",
-          "zh_name": "大吹风",
+          "zh_name": "风之杖(大吹风)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wind_waker.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5863,7 +5864,7 @@
         {
           "slot": 2,
           "key": "travel_boots",
-          "zh_name": "飞鞋",
+          "zh_name": "远行鞋(飞鞋)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/travel_boots.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -5901,21 +5902,21 @@
         {
           "slot": 0,
           "key": "greater_famango",
-          "zh_name": "Greater Healing Lotus",
+          "zh_name": "特大疗伤莲花",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/greater_famango.png",
           "use_count": 0
         },
         {
           "slot": 1,
           "key": "great_famango",
-          "zh_name": "Great Healing Lotus",
+          "zh_name": "大疗伤莲花",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/great_famango.png",
           "use_count": 0
         }
       ],
       "neutral_item_rich": {
         "key": "divine_regalia_broken",
-        "zh_name": "Disgraced Regalia",
+        "zh_name": "蒙羞华服",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/divine_regalia_broken.png",
         "use_count": 0
       },
@@ -6053,9 +6054,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 64,
-      "hero_name": "杰奇洛(双头龙/THD)",
+      "hero_name": "杰奇洛(双头龙)",
       "hero_short_zh": "杰奇洛",
-      "hero_alias": "双头龙/THD",
+      "hero_alias": "双头龙",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/jakiro.png",
       "raw_lane": null,
@@ -6110,13 +6111,13 @@
         "xp10": null
       },
       "final_items": [
-        "大推推",
+        "飓风长戟(大推推)",
         "微光披风",
-        "Veil of Discord",
+        "纷争面纱",
         "秘法鞋",
-        "Observer and Sentry Wards",
+        "真假眼合装包",
         "以太之镜",
-        "[中立]Fallen Sky",
+        "[中立]天崩",
         "[A杖加持]",
         "[魔晶加持]"
       ],
@@ -6124,7 +6125,7 @@
         {
           "slot": 0,
           "key": "hurricane_pike",
-          "zh_name": "大推推",
+          "zh_name": "飓风长戟(大推推)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/hurricane_pike.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6142,7 +6143,7 @@
         {
           "slot": 2,
           "key": "veil_of_discord",
-          "zh_name": "Veil of Discord",
+          "zh_name": "纷争面纱",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/veil_of_discord.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6160,7 +6161,7 @@
         {
           "slot": 4,
           "key": "ward_dispenser",
-          "zh_name": "Observer and Sentry Wards",
+          "zh_name": "真假眼合装包",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ward_dispenser.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6180,14 +6181,14 @@
         {
           "slot": 0,
           "key": "platemail",
-          "zh_name": "Platemail",
+          "zh_name": "板甲",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/platemail.png",
           "use_count": 0
         }
       ],
       "neutral_item_rich": {
         "key": "fallen_sky",
-        "zh_name": "Fallen Sky",
+        "zh_name": "天崩",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/fallen_sky.png",
         "use_count": 0
       },
@@ -6322,9 +6323,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 112,
-      "hero_name": "寒冬飞龙(冰龙/WW)",
+      "hero_name": "寒冬飞龙(冰龙)",
       "hero_short_zh": "寒冬飞龙",
-      "hero_alias": "冰龙/WW",
+      "hero_alias": "冰龙",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/winter_wyvern.png",
       "raw_lane": null,
@@ -6379,20 +6380,20 @@
         "xp10": null
       },
       "final_items": [
-        "希瓦",
-        "大骨灰",
-        "跳刀",
+        "希瓦的守护(冰甲)",
+        "魂之灵瓮(大骨灰)",
+        "闪烁匕首(跳刀)",
         "秘法鞋",
-        "盘子(永恒之盘)",
+        "永恒之盘(盘子)",
         "以太之镜",
-        "[中立]Fallen Sky",
+        "[中立]天崩",
         "[魔晶加持]"
       ],
       "final_items_rich": [
         {
           "slot": 0,
           "key": "shivas_guard",
-          "zh_name": "希瓦",
+          "zh_name": "希瓦的守护(冰甲)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/shivas_guard.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6401,7 +6402,7 @@
         {
           "slot": 1,
           "key": "spirit_vessel",
-          "zh_name": "大骨灰",
+          "zh_name": "魂之灵瓮(大骨灰)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/spirit_vessel.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6410,7 +6411,7 @@
         {
           "slot": 2,
           "key": "blink",
-          "zh_name": "跳刀",
+          "zh_name": "闪烁匕首(跳刀)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6428,7 +6429,7 @@
         {
           "slot": 4,
           "key": "aeon_disk",
-          "zh_name": "盘子(永恒之盘)",
+          "zh_name": "永恒之盘(盘子)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aeon_disk.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6448,21 +6449,21 @@
         {
           "slot": 0,
           "key": "roshans_banner",
-          "zh_name": "Roshan's Banner",
+          "zh_name": "肉山战旗",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/roshans_banner.png",
           "use_count": 0
         },
         {
           "slot": 1,
           "key": "point_booster",
-          "zh_name": "Point Booster",
+          "zh_name": "精气之球",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/point_booster.png",
           "use_count": 0
         }
       ],
       "neutral_item_rich": {
         "key": "fallen_sky",
-        "zh_name": "Fallen Sky",
+        "zh_name": "天崩",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/fallen_sky.png",
         "use_count": 0
       },
@@ -6601,9 +6602,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 35,
-      "hero_name": "狙击手(火枪/Sniper)",
+      "hero_name": "狙击手(火枪)",
       "hero_short_zh": "狙击手",
-      "hero_alias": "火枪/Sniper",
+      "hero_alias": "火枪",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
       "raw_lane": null,
@@ -6658,13 +6659,13 @@
         "xp10": null
       },
       "final_items": [
-        "大隐刀",
-        "大炮",
-        "大推推",
-        "撒旦",
+        "白银之锋(大隐刀)",
+        "代达罗斯之殇(大炮)",
+        "飓风长戟(大推推)",
+        "撒旦之邪力",
         "金箍棒(MKB)",
-        "大电锤",
-        "[中立]Giant's Maul",
+        "雷神之锤(大电锤)",
+        "[中立]巨型战锤",
         "[A杖加持]",
         "[魔晶加持]"
       ],
@@ -6672,7 +6673,7 @@
         {
           "slot": 0,
           "key": "silver_edge",
-          "zh_name": "大隐刀",
+          "zh_name": "白银之锋(大隐刀)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/silver_edge.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6681,7 +6682,7 @@
         {
           "slot": 1,
           "key": "greater_crit",
-          "zh_name": "大炮",
+          "zh_name": "代达罗斯之殇(大炮)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/greater_crit.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6690,7 +6691,7 @@
         {
           "slot": 2,
           "key": "hurricane_pike",
-          "zh_name": "大推推",
+          "zh_name": "飓风长戟(大推推)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/hurricane_pike.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6699,7 +6700,7 @@
         {
           "slot": 3,
           "key": "satanic",
-          "zh_name": "撒旦",
+          "zh_name": "撒旦之邪力",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/satanic.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6717,7 +6718,7 @@
         {
           "slot": 5,
           "key": "mjollnir",
-          "zh_name": "大电锤",
+          "zh_name": "雷神之锤(大电锤)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/mjollnir.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6735,7 +6736,7 @@
       ],
       "neutral_item_rich": {
         "key": "giant_maul",
-        "zh_name": "Giant's Maul",
+        "zh_name": "巨型战锤",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/giant_maul.png",
         "use_count": 0
       },
@@ -6877,9 +6878,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 23,
-      "hero_name": "昆卡(船长/Kunkka)",
+      "hero_name": "昆卡(船长)",
       "hero_short_zh": "昆卡",
-      "hero_alias": "船长/Kunkka",
+      "hero_alias": "船长",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
       "raw_lane": null,
@@ -6935,12 +6936,12 @@
       },
       "final_items": [
         "相位鞋",
-        "笛子",
-        "莲花",
+        "洞察烟斗(笛子)",
+        "清莲宝珠(莲花)",
         "玲珑心",
         "刃甲",
-        "缚灵索(大电锤缠绕)",
-        "[中立]Spider Legs",
+        "缚灵索",
+        "[中立]蜘蛛腿",
         "[A杖加持]",
         "[魔晶加持]"
       ],
@@ -6957,7 +6958,7 @@
         {
           "slot": 1,
           "key": "pipe",
-          "zh_name": "笛子",
+          "zh_name": "洞察烟斗(笛子)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/pipe.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6966,7 +6967,7 @@
         {
           "slot": 2,
           "key": "lotus_orb",
-          "zh_name": "莲花",
+          "zh_name": "清莲宝珠(莲花)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/lotus_orb.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -6993,7 +6994,7 @@
         {
           "slot": 5,
           "key": "gungir",
-          "zh_name": "缚灵索(大电锤缠绕)",
+          "zh_name": "缚灵索",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/gungir.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7003,7 +7004,7 @@
       "backpack_items_rich": [],
       "neutral_item_rich": {
         "key": "spider_legs",
-        "zh_name": "Spider Legs",
+        "zh_name": "蜘蛛腿",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/spider_legs.png",
         "use_count": 0
       },
@@ -7143,9 +7144,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 14,
-      "hero_name": "帕吉(屠夫/Pudge)",
+      "hero_name": "帕吉(屠夫)",
       "hero_short_zh": "帕吉",
-      "hero_alias": "屠夫/Pudge",
+      "hero_alias": "屠夫",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
       "raw_lane": null,
@@ -7200,13 +7201,13 @@
         "xp10": null
       },
       "final_items": [
-        "莲花",
-        "希瓦",
-        "力量跳刀",
-        "龙心",
-        "龙心",
+        "清莲宝珠(莲花)",
+        "希瓦的守护(冰甲)",
+        "盛势闪光(力量跳)",
+        "恐鳌之心(龙心)",
+        "恐鳌之心(龙心)",
         "永世法衣",
-        "[中立]Fallen Sky",
+        "[中立]天崩",
         "[A杖加持]",
         "[魔晶加持]"
       ],
@@ -7214,7 +7215,7 @@
         {
           "slot": 0,
           "key": "lotus_orb",
-          "zh_name": "莲花",
+          "zh_name": "清莲宝珠(莲花)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/lotus_orb.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7223,7 +7224,7 @@
         {
           "slot": 1,
           "key": "shivas_guard",
-          "zh_name": "希瓦",
+          "zh_name": "希瓦的守护(冰甲)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/shivas_guard.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7232,7 +7233,7 @@
         {
           "slot": 2,
           "key": "overwhelming_blink",
-          "zh_name": "力量跳刀",
+          "zh_name": "盛势闪光(力量跳)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/overwhelming_blink.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7241,7 +7242,7 @@
         {
           "slot": 3,
           "key": "heart",
-          "zh_name": "龙心",
+          "zh_name": "恐鳌之心(龙心)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7250,7 +7251,7 @@
         {
           "slot": 4,
           "key": "heart",
-          "zh_name": "龙心",
+          "zh_name": "恐鳌之心(龙心)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7270,14 +7271,14 @@
         {
           "slot": 0,
           "key": "travel_boots_2",
-          "zh_name": "大飞鞋",
+          "zh_name": "远行鞋二级(大飞鞋)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/travel_boots_2.png",
           "use_count": 0
         }
       ],
       "neutral_item_rich": {
         "key": "fallen_sky",
-        "zh_name": "Fallen Sky",
+        "zh_name": "天崩",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/fallen_sky.png",
         "use_count": 0
       },
@@ -7441,9 +7442,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 88,
-      "hero_name": "司夜刺客(小强/NA)",
+      "hero_name": "司夜刺客(小强)",
       "hero_short_zh": "司夜刺客",
-      "hero_alias": "小强/NA",
+      "hero_alias": "小强",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
       "raw_lane": null,
@@ -7498,19 +7499,19 @@
         "xp10": null
       },
       "final_items": [
-        "大鞋(卫士胫甲)",
+        "卫士胫甲(大鞋)",
         "五级红杖",
-        "虚灵刀",
-        "大吹风",
+        "虚灵之刃",
+        "风之杖(大吹风)",
         "绝刃(大灵匣)",
-        "[中立]Fallen Sky",
+        "[中立]天崩",
         "[A杖加持]"
       ],
       "final_items_rich": [
         {
           "slot": 0,
           "key": "guardian_greaves",
-          "zh_name": "大鞋(卫士胫甲)",
+          "zh_name": "卫士胫甲(大鞋)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/guardian_greaves.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7528,7 +7529,7 @@
         {
           "slot": 2,
           "key": "ethereal_blade",
-          "zh_name": "虚灵刀",
+          "zh_name": "虚灵之刃",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ethereal_blade.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7537,7 +7538,7 @@
         {
           "slot": 3,
           "key": "wind_waker",
-          "zh_name": "大吹风",
+          "zh_name": "风之杖(大吹风)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wind_waker.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7556,7 +7557,7 @@
       "backpack_items_rich": [],
       "neutral_item_rich": {
         "key": "fallen_sky",
-        "zh_name": "Fallen Sky",
+        "zh_name": "天崩",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/fallen_sky.png",
         "use_count": 0
       },
@@ -7691,9 +7692,9 @@
       "is_me": false,
       "rank": "未知段位",
       "hero_id": 105,
-      "hero_name": "工程师(炸弹人/Techies)",
+      "hero_name": "工程师(炸弹人)",
       "hero_short_zh": "工程师",
-      "hero_alias": "炸弹人/Techies",
+      "hero_alias": "炸弹人",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
       "raw_lane": null,
@@ -7748,19 +7749,19 @@
         "xp10": null
       },
       "final_items": [
-        "虚灵刀",
-        "羊刀",
+        "虚灵之刃",
+        "邪恶镰刀(羊刀)",
         "刷新球",
-        "跳刀",
-        "大飞鞋",
+        "闪烁匕首(跳刀)",
+        "远行鞋二级(大飞鞋)",
         "玲珑心",
-        "[中立]Spider Legs"
+        "[中立]蜘蛛腿"
       ],
       "final_items_rich": [
         {
           "slot": 0,
           "key": "ethereal_blade",
-          "zh_name": "虚灵刀",
+          "zh_name": "虚灵之刃",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ethereal_blade.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7769,7 +7770,7 @@
         {
           "slot": 1,
           "key": "sheepstick",
-          "zh_name": "羊刀",
+          "zh_name": "邪恶镰刀(羊刀)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/sheepstick.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7787,7 +7788,7 @@
         {
           "slot": 3,
           "key": "blink",
-          "zh_name": "跳刀",
+          "zh_name": "闪烁匕首(跳刀)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7796,7 +7797,7 @@
         {
           "slot": 4,
           "key": "travel_boots_2",
-          "zh_name": "大飞鞋",
+          "zh_name": "远行鞋二级(大飞鞋)",
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/travel_boots_2.png",
           "purchase_time_sec": null,
           "purchase_time_str": null,
@@ -7815,7 +7816,7 @@
       "backpack_items_rich": [],
       "neutral_item_rich": {
         "key": "spider_legs",
-        "zh_name": "Spider Legs",
+        "zh_name": "蜘蛛腿",
         "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/spider_legs.png",
         "use_count": 0
       },

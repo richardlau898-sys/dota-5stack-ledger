@@ -68,8 +68,87 @@ const TRIVIAL_ACTIVE_ITEMS = new Set([
   "madstone_bundle",
 ]);
 
+const CLIENT_EN_TO_ZH_MAP = {
+  ringmaster_impalement: "穿刺飞刀(匕首减速)",
+  ringmaster_tame_the_beasts: "驯兽术(皮鞭恐惧)",
+  ringmaster_tame_the_beasts_crack: "皮鞭抽击",
+  ringmaster_the_box: "逃生暗箱(救人箱)",
+  ringmaster_wheel: "奇观之轮(大招转盘)",
+  ringmaster_spotlight: "聚光灯(魔晶照明)",
+  ringmaster_funhouse_mirror: "哈哈镜(马戏幻象)",
+  ringmaster_strongman_tonic: "大力士药水(强力合剂)",
+  ringmaster_whoopee_cushion: "放屁坐垫(位移减速)",
+  ringmaster_summon_unicycle: "召唤独轮车",
+  centaur_stampede: "奔袭冲撞(大招车)",
+  centaur_hoof_stomp: "马蹄践踏(踩)",
+  centaur_double_edge: "双刃剑",
+  centaur_work_horse: "套马索(A杖拉车)",
+  tidehunter_dead_in_the_water: "死水锚链(魔晶拴人)",
+  night_stalker_midnight_feast: "午夜盛宴(魔晶吃怪)",
+  night_stalker_darkness: "黑暗飞升(大招黑夜)",
+  rubick_telekinesis_land: "隔空取物落点",
+  rubick_telekinesis_land_self: "隔空取物落点",
+  twin_gate_portal_warp: "双子门传送",
+  ability_lamp_use: "点亮观察者",
+  ability_pluck_famango: "采摘疗伤莲花",
+  tpscroll: "回城卷轴",
+  famango: "疗伤莲花",
+  great_famango: "大疗伤莲花",
+  greater_famango: "特大疗伤莲花",
+  madstone_bundle: "狂石捆",
+  blood_grenade: "血腥榴弹",
+  "The Beasts": "驯兽术(皮鞭恐惧)",
+  "Beasts Crack": "皮鞭抽击",
+  "Funhouse Mirror": "哈哈镜(马戏幻象)",
+  "Strongman Tonic": "大力士药水(强力合剂)",
+  "Summon Unicycle": "召唤独轮车",
+  "The Box": "逃生暗箱(救人箱)",
+  "Whoopee Cushion": "放屁坐垫(位移减速)",
+  "The Water": "死水锚链(魔晶拴人)",
+  "Midnight Feast": "午夜盛宴(魔晶吃怪)",
+  "Acid Spray": "酸性喷雾",
+  "Chemical Rage": "化学狂暴(大招)",
+  "Unstable Concoction": "不稳定化合物",
+  "Concoction Throw": "投掷化合物",
+  "Cold Feet": "寒霜之足",
+  "Ice Blast": "冰晶爆轰(大招)",
+  "Blast Release": "冰晶引爆",
+  "Ice Vortex": "冰霜漩涡",
+  "Battle Hunger": "战斗饥渴",
+  "Berserkers Call": "狂战士之吼",
+  "Culling Blade": "淘汰之刃(大招)",
+  "Shuriken Toss": "投掷飞镖",
+  "Hunter Track": "追踪术(大招)",
+  "Wind Walk": "暗影步",
+  "Double Edge": "双刃剑",
+  "Hoof Stomp": "马蹄践踏",
+  "Carrion Swarm": "食腐蝠群",
+  "Prophet Exorcism": "驱使恶灵(大招)",
+  "Prophet Silence": "沉默魔法",
+  "Spirit Siphon": "吸魂巫术",
+  "earth_spirit": "大地之灵",
+};
+
+function sanitizeMixedEnglishClient(raw) {
+  const s = String(raw ?? "");
+  if (!s || s.startsWith("http://") || s.startsWith("https://") || s.startsWith("/apps/")) {
+    return s;
+  }
+  let out = s;
+  for (const [enKey, zhVal] of Object.entries(CLIENT_EN_TO_ZH_MAP)) {
+    if (out.includes(enKey)) {
+      out = out.replaceAll(enKey, zhVal);
+    }
+  }
+  // If string contains Chinese characters and still has snake_case raw ability/item keys, scrub them
+  if (/[\u4e00-\u9fff]/.test(out) && /[a-z]{3,}_[a-z_]{3,}/.test(out)) {
+    out = out.replace(/\b([a-z]{3,}_[a-z0-9_]{3,})\b/g, (m) => CLIENT_EN_TO_ZH_MAP[m] || "专属技能");
+  }
+  return out;
+}
+
 function escapeHtml(value) {
-  return String(value ?? "")
+  return sanitizeMixedEnglishClient(String(value ?? ""))
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -137,6 +216,71 @@ async function copyMatchShareLink() {
     shareUrl,
     `比赛 #${state.currentMatchId} (${sideZh}视角 · ${shareTitle}) 公开复盘分享链接`
   );
+}
+
+async function exportMatchPdfReport(targetMatchId = null) {
+  if (targetMatchId && Number(targetMatchId) !== Number(state.currentMatchId)) {
+    await loadMatchReport(Number(targetMatchId));
+  }
+  if (!state.currentReport || !state.currentMatchId) {
+    showToast("请先选择或完成一局比赛的 AI 复盘后再导出 PDF 报告");
+    return;
+  }
+
+  // Close any open dialogs before printing
+  document.getElementById("share-poster-dialog")?.close?.();
+  document.getElementById("settings-dialog")?.close?.();
+
+  if (state.workspaceMode !== "postgame") {
+    switchWorkspaceMode("postgame", { pushUrl: false });
+  }
+
+  const report = state.currentReport;
+  const { sideZh } = getOwnAndOppPlayers(report);
+  const prevTitle = document.title;
+  const prevMicroTab = state.microTab;
+
+  // Expand all 11 tactical microscope dimensions for complete PDF report
+  state.microTab = "all";
+  renderTacticalMicroscopeSection(report);
+
+  // Temporarily open all <details> inside analyzed report content so nothing is collapsed in PDF
+  const reportRoot = document.getElementById("analyzed-report-content");
+  const closedDetails = [];
+  if (reportRoot) {
+    reportRoot.querySelectorAll("details:not([open])").forEach((det) => {
+      closedDetails.push(det);
+      det.open = true;
+    });
+  }
+
+  document.title = `Dota2_赛后深度复盘_Match_${report.match_id}_${sideZh}视角`;
+  document.body.classList.add("exporting-pdf");
+  showToast(`📄 正在生成比赛 #${report.match_id} PDF 复盘报告，请在打印窗口选择「另存为 PDF」`, 4200);
+
+  const restoreAfterPrint = () => {
+    document.body.classList.remove("exporting-pdf");
+    document.title = prevTitle;
+    closedDetails.forEach((det) => {
+      det.open = false;
+    });
+    if (state.microTab !== prevMicroTab) {
+      state.microTab = prevMicroTab;
+      renderTacticalMicroscopeSection(report);
+    }
+    window.removeEventListener("afterprint", restoreAfterPrint);
+  };
+
+  window.addEventListener("afterprint", restoreAfterPrint, { once: true });
+
+  setTimeout(() => {
+    try {
+      window.print();
+    } finally {
+      // Fallback cleanup in case afterprint does not fire in some headless/mobile environments
+      setTimeout(restoreAfterPrint, 1200);
+    }
+  }, 120);
 }
 
 function syncMatchUrlInAddressBar(matchId) {
@@ -521,6 +665,16 @@ function bindEvents() {
     }
   });
 
+  // PDF Export buttons (Header, Match Overview, and Share Modal)
+  ["btn-export-pdf", "btn-header-export-pdf", "btn-modal-export-pdf"].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener("click", () => {
+        exportMatchPdfReport();
+      });
+    }
+  });
+
   // Voice Broadcast Button (TTS Chinese Coach Read-Aloud)
   const voiceBtn = document.getElementById("btn-voice-broadcast");
   if (voiceBtn) {
@@ -755,7 +909,10 @@ function renderRecentMatchesStrip(matches) {
       const durText = m.duration_str || m.duration || "";
       const isAnalyzed = Boolean(m.is_analyzed);
       const aiBadgeHtml = isAnalyzed
-        ? `<span class="analyzed-badge ready" title="已生成AI复盘报告，点击直接秒开并可复制分享链接">✅ 已复盘·可分享</span>`
+        ? `<span class="analyzed-badge-group">
+            <span class="analyzed-badge ready" title="已生成AI复盘报告，点击直接秒开并可复制分享链接">✅ 已复盘</span>
+            <span class="pdf-mini-pill" data-export-pdf-match="${escapeHtml(m.match_id)}" title="直接将本局复盘报告导出为 PDF 发给别人">📄 PDF</span>
+          </span>`
         : `<span class="analyzed-badge pending" title="尚未执行AI分析，点击后可按需启动AI复盘">⚡ 待AI分析</span>`;
       return `
         <button
@@ -788,7 +945,14 @@ function renderRecentMatchesStrip(matches) {
     .join("");
 
   strip.querySelectorAll("[data-match-card]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
+    btn.addEventListener("click", async (e) => {
+      const pdfTrigger = e.target.closest("[data-export-pdf-match]");
+      if (pdfTrigger) {
+        e.stopPropagation();
+        const pdfMid = Number(pdfTrigger.getAttribute("data-export-pdf-match"));
+        if (pdfMid) await exportMatchPdfReport(pdfMid);
+        return;
+      }
       const mid = Number(btn.getAttribute("data-match-card"));
       if (mid) await loadMatchReport(mid);
     });
@@ -3148,21 +3312,182 @@ function renderVerdictAndBlameSection(report) {
     }))
     .sort((a, b) => b.blameShare - a.blameShare);
 
-  // 2.1 Grok Verdict Banner
+  // 2.1 Grok Verdict Banner (Structured 2x2 Stage Cards + Scannable Verdict Highlights)
   const authorEl = document.getElementById("grok-author-label");
   const titleEl = document.getElementById("grok-title-text");
   const summaryEl = document.getElementById("grok-summary-text");
   const verdictEl = document.getElementById("grok-verdict-text");
   const practiceEl = document.getElementById("grok-team-practice-box");
+  const stages = report.match_narrative?.stages || [];
+
+  const formatStageContentToBullets = (rawContent) => {
+    const cleaned = sanitizeMixedEnglishClient(String(rawContent || ""))
+      .replace(/三路10分钟对账：/g, "。")
+      .replace(/主视角（[^）]+）车队全局数据对比：/g, "。");
+    const parts = cleaned
+      .split(/[；。]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return parts
+      .map((item) => {
+        let html = escapeHtml(item);
+        // Highlight key prefixes like 上路 / 中路 / 下路 / ① 控制时长 / ② 视野与开雾 / ③ 建筑伤害 / ④ 全队泉水读秒总时长
+        html = html.replace(
+          /^(上路|中路|下路|①\s*[^：:]+|②\s*[^：:]+|③\s*[^：:]+|④\s*[^：:]+|10分钟对线期结束|对线与前中期信使击杀|全场最高权重胜负手团战爆发于|肉山争夺记录)([：:\s]*)/,
+          '<span class="stage-key-pill">$1</span> '
+        );
+        // Highlight lane or battle outcomes after →
+        html = html.replace(
+          /→\s*([^；。]+)/g,
+          '<span class="stage-outcome-pill">→ $1</span>'
+        );
+        return `<li>${html}</li>`;
+      })
+      .join("");
+  };
+
+  const stageIcons = ["🌅", "⚔️", "🔥", "📊"];
+  const stagesGridHtml =
+    stages.length > 0
+      ? `<div class="verdict-stages-grid">
+          ${stages
+            .map((s, idx) => {
+              const stTitle = s.stage || s.title || `阶段 ${idx + 1}`;
+              const stBody = s.summary || s.content || "";
+              const icon = stageIcons[idx % stageIcons.length];
+              return `
+                <div class="verdict-stage-card">
+                  <div class="verdict-stage-head">
+                    <span class="verdict-stage-badge">${icon} 阶段 ${idx + 1}</span>
+                    <strong class="verdict-stage-title">${escapeHtml(stTitle)}</strong>
+                  </div>
+                  <ul class="verdict-stage-bullets">
+                    ${formatStageContentToBullets(stBody)}
+                  </ul>
+                </div>
+              `;
+            })
+            .join("")}
+        </div>`
+      : "";
+
+  const top1 = sortedByContrib[0]?.player;
+  const top2 = sortedByContrib[1]?.player;
+  const lucky5 = sortedByContrib[sortedByContrib.length - 1]?.player;
+  const topBlame1 = sortedByBlame[0]?.player;
+  const topBlame2 = sortedByBlame[1]?.player;
+
+  const buildStructuredVerdictHtml = (extraText = "") => {
+    const extraClean = sanitizeMixedEnglishClient(String(extraText || "")).trim();
+    const extraBullets = extraClean
+      ? extraClean
+          .split(/(?<=[。！？!?])\s*/)
+          .map((x) => x.trim())
+          .filter(Boolean)
+      : [];
+
+    if (won) {
+      return `
+        <div class="verdict-highlight-grid">
+          <div class="verdict-hl-item gold">
+            <span class="verdict-hl-tag">👑 头号首功 MVP</span>
+            <div class="verdict-hl-main">
+              ${top1?.hero_img ? `<img src="${escapeHtml(top1.hero_img)}" width="32" height="18" alt="" />` : ""}
+              <strong>${top1?.pos ?? 1}号位 ${escapeHtml(top1?.hero_short_zh || "")}</strong>
+              <span class="verdict-hl-player">(${escapeHtml(top1?.personaname || "")})</span>
+            </div>
+            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[0]?.contribShare ?? 25}%</b> · 评分 <b>${top1?.rating_score ?? 8.5}</b></span>
+          </div>
+          <div class="verdict-hl-item green">
+            <span class="verdict-hl-tag">⚔️ 破阵二当家</span>
+            <div class="verdict-hl-main">
+              ${top2?.hero_img ? `<img src="${escapeHtml(top2.hero_img)}" width="32" height="18" alt="" />` : ""}
+              <strong>${top2?.pos ?? 2}号位 ${escapeHtml(top2?.hero_short_zh || "")}</strong>
+              <span class="verdict-hl-player">(${escapeHtml(top2?.personaname || "")})</span>
+            </div>
+            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[1]?.contribShare ?? 22}%</b> · 评分 <b>${top2?.rating_score ?? 8.0}</b></span>
+          </div>
+          <div class="verdict-hl-item muted">
+            <span class="verdict-hl-tag">🐟 惊险躺赢锦鲤</span>
+            <div class="verdict-hl-main">
+              ${lucky5?.hero_img ? `<img src="${escapeHtml(lucky5.hero_img)}" width="32" height="18" alt="" />` : ""}
+              <strong>${lucky5?.pos ?? 5}号位 ${escapeHtml(lucky5?.hero_short_zh || "")}</strong>
+              <span class="verdict-hl-player">(${escapeHtml(lucky5?.personaname || "")})</span>
+            </div>
+            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[sortedByContrib.length - 1]?.contribShare ?? 12}%</b> · 评分 <b>${lucky5?.rating_score ?? 6.5}</b></span>
+          </div>
+        </div>
+        ${
+          extraBullets.length > 0
+            ? `<ul class="verdict-rationale-list">${extraBullets
+                .map((b) => `<li>${escapeHtml(b)}</li>`)
+                .join("")}</ul>`
+            : ""
+        }
+      `;
+    }
+
+    const rationales =
+      extraBullets.length > 0
+        ? extraBullets
+        : (mvpData.rationale_list || []).map((r) => sanitizeMixedEnglishClient(r));
+    return `
+      <div class="verdict-highlight-grid">
+        <div class="verdict-hl-item crimson">
+          <span class="verdict-hl-tag">🚨 本局首锅战犯</span>
+          <div class="verdict-hl-main">
+            ${topBlame1?.hero_img ? `<img src="${escapeHtml(topBlame1.hero_img)}" width="32" height="18" alt="" />` : ""}
+            <strong>${topBlame1?.pos ?? 1}号位 ${escapeHtml(topBlame1?.hero_short_zh || "")}</strong>
+            <span class="verdict-hl-player">(${escapeHtml(topBlame1?.personaname || "")})</span>
+          </div>
+          <span class="verdict-hl-metric">分锅占比 <b>${sortedByBlame[0]?.blameShare ?? 30}%</b> · 评分 <b>${topBlame1?.rating_score ?? 5.0}</b></span>
+        </div>
+        <div class="verdict-hl-item warn">
+          <span class="verdict-hl-tag">⚠️ 次锅背锅位</span>
+          <div class="verdict-hl-main">
+            ${topBlame2?.hero_img ? `<img src="${escapeHtml(topBlame2.hero_img)}" width="32" height="18" alt="" />` : ""}
+            <strong>${topBlame2?.pos ?? 2}号位 ${escapeHtml(topBlame2?.hero_short_zh || "")}</strong>
+            <span class="verdict-hl-player">(${escapeHtml(topBlame2?.personaname || "")})</span>
+          </div>
+          <span class="verdict-hl-metric">分锅占比 <b>${sortedByBlame[1]?.blameShare ?? 24}%</b> · 评分 <b>${topBlame2?.rating_score ?? 5.5}</b></span>
+        </div>
+        <div class="verdict-hl-item green">
+          <span class="verdict-hl-tag">🛡️ 本方尽力大腿</span>
+          <div class="verdict-hl-main">
+            ${top1?.hero_img ? `<img src="${escapeHtml(top1.hero_img)}" width="32" height="18" alt="" />` : ""}
+            <strong>${top1?.pos ?? 1}号位 ${escapeHtml(top1?.hero_short_zh || "")}</strong>
+            <span class="verdict-hl-player">(${escapeHtml(top1?.personaname || "")})</span>
+          </div>
+          <span class="verdict-hl-metric">仅分锅 <b>${
+            sortedByBlame[sortedByBlame.length - 1]?.blameShare ?? 10
+          }%</b> · 评分 <b>${top1?.rating_score ?? 7.5}</b></span>
+        </div>
+      </div>
+      ${
+        rationales.length > 0
+          ? `<ul class="verdict-rationale-list">${rationales
+              .map((r) => `<li>${escapeHtml(r)}</li>`)
+              .join("")}</ul>`
+          : ""
+      }
+    `;
+  };
 
   if (grok && (!grok.side || grok.side === side)) {
     const modelTag = grok._meta?.model
       ? `${String(grok._meta.provider || "XAI").toUpperCase()} / ${grok._meta.model} ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`
       : `XAI / GROK-4.7 ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`;
     if (authorEl) authorEl.textContent = modelTag;
-    if (titleEl) titleEl.textContent = grok.title || (won ? "凯旋庆功与战术复盘" : "本局赛后复盘总账");
-    if (summaryEl) summaryEl.textContent = grok.summary || "";
-    if (verdictEl) verdictEl.textContent = grok.verdict || "";
+    if (titleEl) titleEl.textContent = sanitizeMixedEnglishClient(grok.title || (won ? "凯旋庆功与战术复盘" : "本局赛后复盘总账"));
+    if (summaryEl) {
+      const leadSummary = grok.summary
+        ? `<div class="verdict-lead-callout">${escapeHtml(grok.summary)}</div>`
+        : "";
+      summaryEl.innerHTML = `${leadSummary}${stagesGridHtml}`;
+    }
+    if (verdictEl) {
+      verdictEl.innerHTML = buildStructuredVerdictHtml(grok.verdict || "");
+    }
     if (practiceEl) {
       practiceEl.innerHTML = grok.team_practice
         ? `<strong>${won ? "乘胜追击 · 下把更稳铁律：" : "痛定思痛 · 下把车队铁律："}</strong>${escapeHtml(grok.team_practice)}`
@@ -3170,11 +3495,10 @@ function renderVerdictAndBlameSection(report) {
       practiceEl.hidden = !grok.team_practice;
     }
   } else {
-    const stages = report.match_narrative?.stages || [];
     if (authorEl) {
       authorEl.textContent = won
-        ? "录像级庆功引擎 · 自动论功行赏 (可点右上角用 Grok 4.7 深度重算)"
-        : "录像级算账引擎 · 自动分锅判词 (可点右上角用 Grok 4.7 深度重算)";
+        ? "录像级庆功引擎 · 四阶段对账与论功行赏 (可点右上角用 Grok 4.7 深度重算)"
+        : "录像级算账引擎 · 四阶段对账与分锅判词 (可点右上角用 Grok 4.7 深度重算)";
     }
     if (titleEl) {
       titleEl.textContent = won
@@ -3182,22 +3506,15 @@ function renderVerdictAndBlameSection(report) {
         : `⚖️ ${sideZh}败局算账：终局比分 ${report.radiant_score} : ${report.dire_score} (${report.duration_str})`;
     }
     if (summaryEl) {
-      summaryEl.textContent = stages.map((s) => `${s.stage || s.title}：${s.summary || s.content}`).join(" ");
+      summaryEl.innerHTML = stagesGridHtml;
     }
     if (verdictEl) {
-      if (won) {
-        const top1 = sortedByContrib[0]?.player;
-        const top2 = sortedByContrib[1]?.player;
-        const lucky5 = sortedByContrib[sortedByContrib.length - 1]?.player;
-        verdictEl.textContent = `🏆 本局 ${sideZh} 获胜论功行赏：头号首功 ${top1?.pos}号位 ${top1?.hero_short_zh}（${top1?.personaname}，胜局贡献 ${sortedByContrib[0]?.contribShare}% · 评分 ${top1?.rating_score}）与破阵二当家 ${top2?.pos}号位 ${top2?.hero_short_zh}（${top2?.personaname}，胜局贡献 ${sortedByContrib[1]?.contribShare}% · 评分 ${top2?.rating_score}）携手主宰比赛！本局惊险躺赢锦鲤：${lucky5?.pos}号位 ${lucky5?.hero_short_zh}（${lucky5?.personaname}，贡献 ${sortedByContrib[sortedByContrib.length - 1]?.contribShare}%）。`;
-      } else {
-        verdictEl.textContent = (mvpData.rationale_list || []).join(" ");
-      }
+      verdictEl.innerHTML = buildStructuredVerdictHtml("");
     }
     if (practiceEl) {
-      practiceEl.innerHTML = `<strong>提示：</strong>点击右上角「用 Grok 4.7 重算判词」即可调用服务端已配置的 xAI Grok 4.7 生成针对『${escapeHtml(
+      practiceEl.innerHTML = `<strong>提示：</strong>点击右上角「让 Grok 4.7 生成深度判词」即可调用服务端已配置的 xAI Grok 4.7 生成针对『${escapeHtml(
         sideZh
-      )}』阵容的深度复盘。`;
+      )}』阵容的毒舌复盘；或点击「📄 导出 PDF 分析报告」一键保存完整复盘文档发给队友。`;
       practiceEl.hidden = false;
     }
   }
@@ -3733,36 +4050,122 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       ? eventsList.map((ev) => `<li>${escapeHtml(ev)}</li>`).join("")
       : `<li>本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 双方平稳对线/刷钱发育，无英雄击杀或建筑摧毁</li>`;
 
+  // Compute live 5v5 team snapshot aggregates for the right column so no space is wasted
+  const radPlayers = players.filter((p) => p.side === "radiant");
+  const direPlayers = players.filter((p) => p.side === "dire");
+  const sumBy = (arr, fn) => arr.reduce((acc, x) => acc + Number(fn(x) || 0), 0);
+
+  const radTotalNw = sumBy(radPlayers, (p) => p.networth);
+  const direTotalNw = sumBy(direPlayers, (p) => p.networth);
+  const totalNwBoth = Math.max(1, radTotalNw + direTotalNw);
+  const radNwSharePct = Math.round((radTotalNw / totalNwBoth) * 100);
+
+  const radCoresNw = sumBy(
+    radPlayers.filter((p) => Number(p.pos) <= 3),
+    (p) => p.networth
+  );
+  const direCoresNw = sumBy(
+    direPlayers.filter((p) => Number(p.pos) <= 3),
+    (p) => p.networth
+  );
+  const radSupsNw = sumBy(
+    radPlayers.filter((p) => Number(p.pos) >= 4),
+    (p) => p.networth
+  );
+  const direSupsNw = sumBy(
+    direPlayers.filter((p) => Number(p.pos) >= 4),
+    (p) => p.networth
+  );
+  const radTotalLh = sumBy(radPlayers, (p) => p.lh);
+  const direTotalLh = sumBy(direPlayers, (p) => p.lh);
+  const radTotalDn = sumBy(radPlayers, (p) => p.dn);
+  const direTotalDn = sumBy(direPlayers, (p) => p.dn);
+
+  // Positional 1-5 head-to-head net worth delta at this exact minute
+  const posDeltaRowsHtml = [1, 2, 3, 4, 5]
+    .map((posNum) => {
+      const rp = radPlayers.find((p) => Number(p.pos) === posNum);
+      const dp = direPlayers.find((p) => Number(p.pos) === posNum);
+      if (!rp || !dp) return "";
+      const diff = Number(rp.networth || 0) - Number(dp.networth || 0);
+      const leadTxt =
+        diff > 0
+          ? `天辉 +${fmtNum(diff)}`
+          : diff < 0
+          ? `夜魇 +${fmtNum(Math.abs(diff))}`
+          : "均势 0";
+      const leadCls = diff > 250 ? "rad-lead" : diff < -250 ? "dire-lead" : "even-lead";
+      return `
+        <div class="scrub-pos-vs-row">
+          <span class="scrub-pos-side rad">${posNum}号位 ${escapeHtml(rp.hero_short_zh || "")} <b>${fmtNum(rp.networth || 0)}</b></span>
+          <span class="scrub-pos-diff ${leadCls}">${leadTxt}</span>
+          <span class="scrub-pos-side dire"><b>${fmtNum(dp.networth || 0)}</b> ${escapeHtml(dp.hero_short_zh || "")} ${posNum}号位</span>
+        </div>
+      `;
+    })
+    .join("");
+
   contentEl.innerHTML = `
     <div class="scrub-left-col">
       <div class="scrub-col-title">
-        <strong>🏆 ${escapeHtml(snap.time_str || "")} 时刻 · 十人实时净资产 (Net Worth) &amp; 当时已出核心装排位</strong>
-        <span>正补/反补同步定格</span>
+        <strong>🏆 ${escapeHtml(snap.time_str || "")} 时刻 · 十人实时净资产与已出核心装排位</strong>
+        <span>正补/反补与装备栏同步定格</span>
       </div>
       <div class="scrub-players-list">${barsHtml}</div>
     </div>
     <div class="scrub-right-col">
-      <div class="scrub-kpi-card">
-        <span>💰 ${escapeHtml(snap.time_str || "")} 团队经济差</span>
-        <strong style="color:${
-          radGoldAdv === 0
-            ? "var(--text)"
-            : (radGoldAdv > 0 && side === "radiant") || (radGoldAdv < 0 && side === "dire")
-            ? "var(--green-light)"
-            : "var(--red-light)"
-        }">${goldLeadTeam} ${radGoldAdv === 0 ? "0" : `+${fmtNum(Math.abs(radGoldAdv))}`} 金</strong>
+      <div class="scrub-kpi-grid">
+        <div class="scrub-kpi-card">
+          <span>💰 ${escapeHtml(snap.time_str || "")} 经济差</span>
+          <strong style="color:${
+            radGoldAdv === 0
+              ? "var(--text)"
+              : (radGoldAdv > 0 && side === "radiant") || (radGoldAdv < 0 && side === "dire")
+              ? "var(--green-light)"
+              : "var(--red-light)"
+          }">${goldLeadTeam} ${radGoldAdv === 0 ? "0" : `+${fmtNum(Math.abs(radGoldAdv))}`}</strong>
+        </div>
+        <div class="scrub-kpi-card">
+          <span>📚 ${escapeHtml(snap.time_str || "")} 经验差</span>
+          <strong>${xpLeadTeam} ${radXpAdv === 0 ? "0" : `+${fmtNum(Math.abs(radXpAdv))}`}</strong>
+        </div>
+        <div class="scrub-kpi-card">
+          <span>👁️ 场上存活假眼</span>
+          <strong>天辉 ${radObsNow} / 夜魇 ${direObsNow}</strong>
+        </div>
       </div>
-      <div class="scrub-kpi-card">
-        <span>📚 ${escapeHtml(snap.time_str || "")} 团队经验差</span>
-        <strong>${xpLeadTeam} ${radXpAdv === 0 ? "0" : `+${fmtNum(Math.abs(radXpAdv))}`} XP</strong>
-      </div>
-      <div class="scrub-kpi-card">
-        <span>👁️ 当时地图存活假眼数</span>
-        <strong>天辉 ${radObsNow} 颗 / 夜魇 ${direObsNow} 颗</strong>
-      </div>
+
       <div class="scrub-events-box">
         <h4>⚔️ 本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 关键交火与推塔战报</h4>
         <ul class="micro-insights-list">${eventsHtml}</ul>
+      </div>
+
+      <div class="scrub-team-compare-box">
+        <div class="scrub-compare-head">
+          <h4>⚖️ ${escapeHtml(snap.time_str || "")} 时刻 · 双方团队与 1~5 号位对位净值横评</h4>
+          <span>天辉 ${fmtNum(radTotalNw)} 金 (${radNwSharePct}%) vs 夜魇 ${fmtNum(direTotalNw)} 金 (${100 - radNwSharePct}%)</span>
+        </div>
+        <div class="scrub-tug-bar">
+          <div class="scrub-tug-rad" style="width:${radNwSharePct}%"></div>
+          <div class="scrub-tug-dire" style="width:${100 - radNwSharePct}%"></div>
+        </div>
+        <div class="scrub-team-metrics-grid">
+          <div class="scrub-tm-pill">
+            <span>三大哥(1-3号位)总经济</span>
+            <strong>天辉 ${fmtNum(radCoresNw)} vs 夜魇 ${fmtNum(direCoresNw)}</strong>
+          </div>
+          <div class="scrub-tm-pill">
+            <span>双辅助(4-5号位)总经济</span>
+            <strong>天辉 ${fmtNum(radSupsNw)} vs 夜魇 ${fmtNum(direSupsNw)}</strong>
+          </div>
+          <div class="scrub-tm-pill">
+            <span>全队累计正补 / 反补</span>
+            <strong>天辉 ${radTotalLh}/${radTotalDn} vs 夜魇 ${direTotalLh}/${direTotalDn}</strong>
+          </div>
+        </div>
+        <div class="scrub-pos-vs-list">
+          ${posDeltaRowsHtml}
+        </div>
       </div>
     </div>
   `;
