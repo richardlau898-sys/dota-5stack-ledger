@@ -521,6 +521,14 @@ function bindEvents() {
     }
   });
 
+  // Voice Broadcast Button (TTS Chinese Coach Read-Aloud)
+  const voiceBtn = document.getElementById("btn-voice-broadcast");
+  if (voiceBtn) {
+    voiceBtn.addEventListener("click", () => {
+      toggleVoiceBroadcast();
+    });
+  }
+
   // On-Demand AI Analysis Gate Confirmation Button
   const confirmAnalyzeBtn = document.getElementById("btn-confirm-analyze-match");
   if (confirmAnalyzeBtn) {
@@ -528,7 +536,7 @@ function bindEvents() {
       const targetMid = state.pendingMatchId || state.currentMatchId;
       if (!targetMid) return;
       confirmAnalyzeBtn.disabled = true;
-      confirmAnalyzeBtn.textContent = "🤖 AI 正在拉取录像并执行九维显微镜分析 (约3~8秒)...";
+      confirmAnalyzeBtn.textContent = "🤖 AI 正在拉取录像并执行十一维显微镜分析 (约3~8秒)...";
       try {
         await loadMatchReport(targetMid, { analyzeNow: true });
       } finally {
@@ -1306,6 +1314,12 @@ function renderTacticalMicroscopeSection(report) {
   }
   if (tab === "econ_pings" || tab === "all") {
     blocks.push(renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh));
+  }
+  if (tab === "role_mirror" || tab === "all") {
+    blocks.push(renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSideZh));
+  }
+  if (tab === "macro_neutrals" || tab === "all") {
+    blocks.push(renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh));
   }
 
   bodyEl.innerHTML = blocks.join("");
@@ -2561,6 +2575,479 @@ function renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh) {
   `;
 }
 
+/**
+ * Tab 10: ⚔️ 1~5号位同位置宿敌 1v1 正面对位审判 & OpenDota 全球同英雄百分位标尺
+ */
+function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSideZh) {
+  const rm = df.role_mirror_by_side?.[targetSide];
+  if (!rm) {
+    return `<div class="empty-state compact">当前比赛暂无 1~5 号位同位置宿敌 1v1 对位数据</div>`;
+  }
+
+  const rows = rm.mirror_rows || [];
+  const wonOverall = Number(rm.won_overall_cnt ?? 0);
+  const wonLanes = Number(rm.won_lanes_cnt ?? 0);
+  const avgOwnBm = rows.length
+    ? (rows.reduce((s, r) => s + Number(r.own_bm_avg ?? 50), 0) / rows.length).toFixed(1)
+    : "50.0";
+  const avgOppBm = rows.length
+    ? (rows.reduce((s, r) => s + Number(r.opp_bm_avg ?? 50), 0) / rows.length).toFixed(1)
+    : "50.0";
+
+  const fmtBmTop = (bmArr) => {
+    if (!Array.isArray(bmArr) || bmArr.length === 0) {
+      return typeof bmArr === "string" && bmArr ? bmArr : "全球均值";
+    }
+    return bmArr
+      .slice(0, 2)
+      .map((b) => `${b.label_zh || b.key || "指标"}超${b.pct ?? 50}%`)
+      .join(" / ");
+  };
+
+  const cardsHtml = rows
+    .map((r) => {
+      const g10Diff = Number(r.gold10_diff ?? 0);
+      const nwDiff = Number(r.nw_diff ?? 0);
+      const dmgDiff = Number(r.dmg_diff ?? 0);
+      const ownShare = Number(r.own_share_pct ?? 50);
+      const oppShare = Number(r.opp_share_pct ?? 50);
+      const gradeCls = r.grade === "good" ? "grade-good" : r.grade === "bad" ? "grade-bad" : "grade-warn";
+      const badgeTone = r.grade === "good" ? "good" : r.grade === "bad" ? "warn" : "";
+      const ownBmTopStr = fmtBmTop(r.own_bm_top);
+      const oppBmTopStr = fmtBmTop(r.opp_bm_top);
+
+      return `
+        <article class="role-mirror-card ${gradeCls}">
+          <div class="mirror-vs-header">
+            <div class="mirror-side-box own">
+              ${
+                r.own_img
+                  ? `<img class="mirror-hero-avatar" src="${escapeHtml(r.own_img)}" alt="${escapeHtml(
+                      r.own_hero || ""
+                    )}" loading="lazy" />`
+                  : ""
+              }
+              <div>
+                <div>
+                  <strong>[${escapeHtml(targetSideZh)} ${r.pos ?? "?"}号位] ${escapeHtml(
+        r.own_hero || ""
+      )}</strong>
+                  <span style="color:var(--text-dim); font-size:11.5px;">(${escapeHtml(
+                    r.own_player || ""
+                  )})</span>
+                </div>
+                <div style="font-size:11.5px; color:var(--text-dim); margin-top:2px;">
+                  KDA <b>${escapeHtml(r.own_kda || "0/0/0")}</b> · 评分 <b>${
+        r.own_rating ?? 0
+      }</b> · <span class="bm-percentile-pill">🌍 全球超越 ${r.own_bm_avg ?? 50}% (${escapeHtml(
+        ownBmTopStr
+      )})</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mirror-vs-center">
+              <span class="micro-exec-badge ${badgeTone}">${escapeHtml(
+        r.verdict_tag || "⚖️ 旗鼓相当"
+      )}</span>
+              <span class="mirror-h2h-pill">⚔️ 正面单杀/击杀 ${r.h2h_own_kills ?? 0} : ${
+        r.h2h_opp_kills ?? 0
+      }</span>
+            </div>
+
+            <div class="mirror-side-box opp">
+              ${
+                r.opp_img
+                  ? `<img class="mirror-hero-avatar" src="${escapeHtml(r.opp_img)}" alt="${escapeHtml(
+                      r.opp_hero || ""
+                    )}" loading="lazy" />`
+                  : ""
+              }
+              <div>
+                <div>
+                  <strong>[${escapeHtml(otherSideZh)} ${r.pos ?? "?"}号位] ${escapeHtml(
+        r.opp_hero || ""
+      )}</strong>
+                  <span style="color:var(--text-dim); font-size:11.5px;">(${escapeHtml(
+                    r.opp_player || ""
+                  )})</span>
+                </div>
+                <div style="font-size:11.5px; color:var(--text-dim); margin-top:2px;">
+                  <span class="bm-percentile-pill">🌍 全球超越 ${r.opp_bm_avg ?? 50}% (${escapeHtml(
+        oppBmTopStr
+      )})</span> · 评分 <b>${r.opp_rating ?? 0}</b> · KDA <b>${escapeHtml(
+        r.opp_kda || "0/0/0"
+      )}</b>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mirror-tug-bar" title="同位置压制力占比：本方 ${ownShare}% vs 敌方 ${oppShare}%">
+            <div class="mirror-tug-own" style="width:${ownShare}%"></div>
+            <div class="mirror-tug-opp" style="width:${oppShare}%"></div>
+          </div>
+
+          <div class="mirror-metrics-grid">
+            <div class="mirror-metric-cell">
+              <div class="mirror-metric-label">🌱 10m 对线经济 &amp; 补刀</div>
+              <div class="mirror-metric-val">
+                ${fmtNum(r.gold10_own || 0)} vs ${fmtNum(r.gold10_opp || 0)}
+                <span style="color:${
+                  g10Diff >= 300
+                    ? "var(--green-light)"
+                    : g10Diff <= -300
+                    ? "var(--red-light)"
+                    : "var(--text-dim)"
+                }">(${g10Diff >= 0 ? "+" : ""}${fmtNum(g10Diff)})</span>
+                · 刀 ${escapeHtml(r.lh10_own || "0/0")} vs ${escapeHtml(r.lh10_opp || "0/0")}
+              </div>
+            </div>
+            <div class="mirror-metric-cell">
+              <div class="mirror-metric-label">💰 终局净资产 &amp; GPM</div>
+              <div class="mirror-metric-val">
+                ${fmtNum(r.nw_own || 0)} vs ${fmtNum(r.nw_opp || 0)}
+                <span style="color:${
+                  nwDiff >= 1500
+                    ? "var(--green-light)"
+                    : nwDiff <= -1500
+                    ? "var(--red-light)"
+                    : "var(--text-dim)"
+                }">(${nwDiff >= 0 ? "+" : ""}${fmtNum(nwDiff)})</span>
+                · GPM ${r.gpm_own ?? 0}/${r.gpm_opp ?? 0}
+              </div>
+            </div>
+            <div class="mirror-metric-cell">
+              <div class="mirror-metric-label">💥 英雄伤害对比</div>
+              <div class="mirror-metric-val">
+                ${fmtNum(r.dmg_own || 0)} vs ${fmtNum(r.dmg_opp || 0)}
+                <span style="color:${
+                  dmgDiff >= 2000
+                    ? "var(--green-light)"
+                    : dmgDiff <= -2000
+                    ? "var(--red-light)"
+                    : "var(--text-dim)"
+                }">(${dmgDiff >= 0 ? "+" : ""}${fmtNum(dmgDiff)})</span>
+              </div>
+            </div>
+            <div class="mirror-metric-cell">
+              <div class="mirror-metric-label">🏰 推塔建筑伤害</div>
+              <div class="mirror-metric-val">${fmtNum(r.td_own || 0)} vs ${fmtNum(r.td_opp || 0)}</div>
+            </div>
+            <div class="mirror-metric-cell">
+              <div class="mirror-metric-label">⚡ 参战率 &amp; 硬控时长</div>
+              <div class="mirror-metric-val">参战 ${r.kp_own ?? 0}% vs ${r.kp_opp ?? 0}% · 控 ${
+        r.stuns_own ?? 0
+      }s vs ${r.stuns_opp ?? 0}s</div>
+            </div>
+            <div class="mirror-metric-cell">
+              <div class="mirror-metric-label">👁️ 视野插眼与反眼</div>
+              <div class="mirror-metric-val">${escapeHtml(r.wards_own || "0眼/排0")} vs ${escapeHtml(
+        r.wards_opp || "0眼/排0"
+      )}</div>
+            </div>
+          </div>
+
+          <div style="font-size:12px; color:var(--text-dim); line-height:1.45;">
+            📋 ${escapeHtml(r.summary_txt || "")}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>⚔️ 10. 1~5 号位同位置宿敌 1v1 正面对位审判 &amp; OpenDota 全球同英雄百分位标尺 (${escapeHtml(
+            targetSideZh
+          )} vs ${escapeHtml(otherSideZh)})</h3>
+          <p>${escapeHtml(rm.side_verdict || "")}</p>
+        </div>
+      </div>
+
+      <div class="micro-kpi-row" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+        <div class="micro-kpi-cell">
+          <span>🏆 全场同位置对位胜出数</span>
+          <strong style="color:${
+            wonOverall >= 3 ? "var(--green-light)" : "var(--red-light)"
+          }">${wonOverall} / 5 个位置占优</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🌱 10分钟对线同位置经济占优</span>
+          <strong style="color:${
+            wonLanes >= 3 ? "var(--green-light)" : "var(--gold-light)"
+          }">${wonLanes} / 5 路对位领先</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🌍 全队全球同英雄百分位均值</span>
+          <strong>本方超越 ${avgOwnBm}% vs 对手超越 ${avgOppBm}%</strong>
+        </div>
+      </div>
+
+      <div class="role-mirror-list">${cardsHtml}</div>
+    </div>
+  `;
+}
+
+/**
+ * Tab 11: 🐉 买活死 (Dieback) 尸检 · 信使惨案 · 肉山魔晶时间轴 & Dota 2 7.38 中立装备附魔审计
+ */
+function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
+  const mo = df.macro_objectives_by_side?.[targetSide];
+  if (!mo) {
+    return `<div class="empty-state compact">当前比赛暂无买活死尸检与 7.38 中立装备附魔数据</div>`;
+  }
+
+  const diebackCnt = Number(mo.dieback_cnt ?? 0);
+  const clutchBbCnt = Number(mo.clutch_bb_cnt ?? 0);
+  const couriersLost = Number(mo.own_couriers_lost ?? 0);
+  const couriersKilled = Number(mo.own_couriers_killed ?? 0);
+  const shardCount = Number(mo.shard_count ?? 0);
+
+  const bbEvents = mo.buyback_events || [];
+  const bbHtml =
+    bbEvents.length > 0
+      ? bbEvents
+          .map(
+            (ev) => `
+          <li>
+            <span class="micro-tf-pill ${ev.severity === "critical" ? "held-die" : ""}">
+              ${escapeHtml(ev.outcome_tag || "买活记录")} · ${escapeHtml(ev.time_str || "")}
+            </span>
+            <b>${ev.pos ?? "?"}号位 · ${escapeHtml(ev.hero_short_zh || "")} (${escapeHtml(
+              ev.personaname || ""
+            )})</b>：${escapeHtml(ev.detail || "")}
+          </li>
+        `
+          )
+          .join("")
+      : `<li>✓ 本局 ${escapeHtml(targetSideZh)} 未交出买活，0 次买活死 (Dieback) 记录。</li>`;
+
+  const roshEvents = mo.roshan_events || [];
+  const roshHtml =
+    roshEvents.length > 0
+      ? roshEvents.map((r) => `<li>${escapeHtml(r)}</li>`).join("")
+      : `<li>本局录像未记录到肉山盾拾取或抢盾事件。</li>`;
+
+  const courierEvents = mo.courier_events || [];
+  const courierHtml =
+    courierEvents.length > 0
+      ? courierEvents
+          .map(
+            (ce) => `
+          <li>
+            <span class="micro-tf-pill ${ce.is_own_lost ? "held-die" : ""}">
+              ${escapeHtml(ce.event_tag || "信使事件")}
+            </span>
+            ${escapeHtml(ce.detail || "")}
+          </li>
+        `
+          )
+          .join("")
+      : `<li>✓ 本局双方信使平安，未发生对线掉鸡断补给惨案。</li>`;
+
+  const craftRows = mo.neutral_craft_rows || [];
+  const craftRowsHtml = craftRows
+    .map((cr) => {
+      const steps = cr.craft_steps || [];
+      const stepsPills =
+        steps.length > 0
+          ? steps
+              .map((s) => `<span class="micro-tf-pill" style="margin-right:4px;">${escapeHtml(s)}</span>`)
+              .join("")
+          : `<span style="color:var(--text-dim);">无锻造切换记录</span>`;
+      return `
+        <tr>
+          <td><b>${cr.pos ?? "?"}号位 · ${escapeHtml(cr.hero_short_zh || "")}</b> (${escapeHtml(
+        cr.personaname || ""
+      )})</td>
+          <td><b>${escapeHtml(cr.shard_str || "未获魔晶")}</b></td>
+          <td>${stepsPills}</td>
+          <td style="color:${
+            cr.grade === "warn" ? "var(--gold-light)" : "var(--green-light)"
+          }">${escapeHtml(cr.craft_verdict || "")}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>🐉 11. 买活死 (Dieback) 尸检 · 信使掉鸡惨案 · 肉山魔晶 &amp; Dota 2 7.38 中立装备附魔审计 (${escapeHtml(
+            targetSideZh
+          )})</h3>
+          <p>${escapeHtml(mo.side_verdict || "")}</p>
+        </div>
+      </div>
+
+      <div class="micro-kpi-row" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+        <div class="micro-kpi-cell">
+          <span>💀 致命买活死 (Dieback)</span>
+          <strong style="color:${
+            diebackCnt > 0 ? "var(--red-light)" : "var(--green-light)"
+          }">${diebackCnt} 次</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🟢 救世有效买活</span>
+          <strong style="color:${
+            clutchBbCnt > 0 ? "var(--green-light)" : "var(--text)"
+          }">${clutchBbCnt} 次</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🐔 信使博弈 (狙杀敌鸡 / 本方掉鸡)</span>
+          <strong style="color:${
+            couriersLost > couriersKilled ? "var(--red-light)" : "var(--green-light)"
+          }">杀敌 ${couriersKilled} 只 / 掉鸡 ${couriersLost} 只</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>💎 阿哈利姆魔晶普及率</span>
+          <strong>${shardCount} / 5 人已装备</strong>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>⚰️ 买活战果与「买活死 (Dieback)」逐笔尸检 &amp; 肉山不朽盾事件簿</h4>
+        <ul class="micro-insights-list">${bbHtml}${roshHtml}</ul>
+      </div>
+
+      <div class="micro-card">
+        <h4>🐔 全场信使狙杀与对线期掉鸡断补给惨案时间轴</h4>
+        <ul class="micro-insights-list">${courierHtml}</ul>
+      </div>
+
+      <div class="micro-card">
+        <h4>🛠️ Dota 2 7.38 中立装备锻造轨迹 · 附魔词条合规审计（排查核心误选贪婪扣攻击力）&amp; 魔晶时间表</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄</th>
+                <th>💎 阿哈利姆魔晶时间</th>
+                <th>🛠️ 7.38 中立装备锻造与附魔词条时间轴</th>
+                <th>⚖️ 词条合规与锻造节奏判词</th>
+              </tr>
+            </thead>
+            <tbody>${craftRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * 🔊 语音播报讲评台 (Web Speech TTS 中文毒舌教练 / 庆功司仪一键朗读)
+ */
+function toggleVoiceBroadcast() {
+  const btn = document.getElementById("btn-voice-broadcast");
+  const report = state.currentReport;
+  if (!report) return;
+
+  if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      if (btn) {
+        btn.classList.remove("speaking");
+        btn.textContent = "🔊 语音播报复盘";
+      }
+      showToast("已停止语音播报");
+      return;
+    }
+  }
+
+  const { side, sideZh, own } = getOwnAndOppPlayers(report);
+  const won =
+    (side === "radiant" && Boolean(report.radiant_win)) ||
+    (side === "dire" && !report.radiant_win);
+  const grok = report.grok_coaching;
+  const df = report.deep_forensics || {};
+
+  const sortedBlame = [...own].sort(
+    (a, b) => (b.blame_share_pct || 0) - (a.blame_share_pct || 0)
+  );
+  const sortedContrib = [...own].sort(
+    (a, b) =>
+      (b.contrib_share_pct ?? b.rating_score ?? 0) -
+      (a.contrib_share_pct ?? a.rating_score ?? 0)
+  );
+  const topCulprit = sortedBlame[0];
+  const mvpPlayer = sortedContrib[0];
+  const runnerUp = sortedContrib[1] || sortedContrib[0];
+
+  const speechParts = [
+    `刀塔二五黑战后复盘语音播报。比赛编号 ${report.match_id}，${sideZh}${
+      won ? "凯旋获胜" : "遗憾落败"
+    }，终局比分 ${report.radiant_score} 比 ${report.dire_score}，时长 ${report.duration_str}。`,
+  ];
+
+  if (won) {
+    speechParts.push(
+      `本局论功行赏：头号首功是 ${mvpPlayer?.pos ?? 1}号位 ${mvpPlayer?.hero_short_zh || ""} ${
+        mvpPlayer?.personaname || ""
+      }，战绩 ${mvpPlayer?.kda || ""}，综合评分 ${mvpPlayer?.rating_score || 0}。破阵二当家是 ${
+        runnerUp?.pos ?? 2
+      }号位 ${runnerUp?.hero_short_zh || ""} ${runnerUp?.personaname || ""}。`
+    );
+  } else {
+    speechParts.push(
+      `本局败局分锅定责：头号背锅侠是 ${topCulprit?.pos ?? 1}号位 ${
+        topCulprit?.hero_short_zh || ""
+      } ${topCulprit?.personaname || ""}，战绩 ${topCulprit?.kda || ""}，分锅占比高达百分之 ${
+        topCulprit?.blame_share_pct || 0
+      }。败方尽力王是 ${mvpPlayer?.pos ?? 1}号位 ${mvpPlayer?.hero_short_zh || ""} ${
+        mvpPlayer?.personaname || ""
+      }。`
+    );
+  }
+
+  if (grok?.verdict) {
+    speechParts.push(grok.verdict);
+  }
+  const rmVerdict = df.role_mirror_by_side?.[side]?.side_verdict;
+  if (rmVerdict) speechParts.push(rmVerdict);
+
+  const savesVerdict = df.unpressed_saves_by_side?.[side]?.side_verdict;
+  if (savesVerdict) speechParts.push(savesVerdict);
+
+  const spaceVerdict = df.map_space_by_side?.[side]?.side_verdict;
+  if (spaceVerdict) speechParts.push(spaceVerdict);
+
+  const macroVerdict = df.macro_objectives_by_side?.[side]?.side_verdict;
+  if (macroVerdict) speechParts.push(macroVerdict);
+
+  const fullText = speechParts.join(" ").replace(/[🎯💀🗺️🛡️👁️🌾🌱🆘💰⚔️🐉🚨⚠️✓👑🏆🎉⚖️💎🐔]/g, "");
+
+  if (typeof window !== "undefined" && "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined") {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(fullText);
+    utter.lang = "zh-CN";
+    utter.rate = 1.08;
+    utter.onend = () => {
+      if (btn) {
+        btn.classList.remove("speaking");
+        btn.textContent = "🔊 语音播报复盘";
+      }
+    };
+    utter.onerror = () => {
+      if (btn) {
+        btn.classList.remove("speaking");
+        btn.textContent = "🔊 语音播报复盘";
+      }
+    };
+    if (btn) {
+      btn.classList.add("speaking");
+      btn.textContent = "⏹️ 停止语音播报";
+    }
+    window.speechSynthesis.speak(utter);
+    showToast("🔊 正在为您语音播报本局五黑复盘判决书（再次点击可停止）");
+  } else {
+    copyTextToClipboard(fullText, "语音播报讲稿");
+  }
+}
 
 /**
  * 2. Render Grok 4.7 Verdict Banner + MVP Card + Culprit Card + 5-Stack Blame Ledger
@@ -5170,6 +5657,8 @@ function openSharePosterDialog(report) {
   const microStack = df.stacking_and_smoke_by_side?.[side]?.stack_verdict || "";
   const microSmoke = df.stacking_and_smoke_by_side?.[side]?.smoke_verdict || "";
   const microTp = df.tp_rotation_by_side?.[side]?.tp_verdict || "";
+  const microMirror = df.role_mirror_by_side?.[side]?.side_verdict || "";
+  const microMacro = df.macro_objectives_by_side?.[side]?.side_verdict || "";
   const shareUrl = getPublicShareUrl(report.match_id);
 
   const lines = won
@@ -5197,13 +5686,15 @@ function openSharePosterDialog(report) {
             b0Txt ? ` | 🔬 ${b0Txt}` : ""
           }`;
         }),
-        ...(microExec || microSaves || microSpace || microVis || microTp
+        ...(microExec || microSaves || microSpace || microVis || microTp || microMirror || microMacro
           ? [
               `────────────────────`,
               `🔬 录像级高光操作回放：`,
+              ...(microMirror ? [`• 【1v1同位置对位】${microMirror}`] : []),
               ...(microExec ? [`• 【大招与绝活】${microExec}`] : []),
               ...(microSaves ? [`• 【保命装与反应】${microSaves}`] : []),
               ...(microSpace ? [`• 【地图空间牵制】${microSpace}`] : []),
+              ...(microMacro ? [`• 【买活与信使魔晶】${microMacro}`] : []),
               ...(microVis ? [`• 【辅助眼位】${microVis}`] : []),
               ...(microStack ? [`• 【堆野屯矿】${microStack}`] : []),
               ...(microSmoke ? [`• 【开雾节奏】${microSmoke}`] : []),
@@ -5233,13 +5724,15 @@ function openSharePosterDialog(report) {
             b0Txt ? ` | 🔬 ${b0Txt}` : ""
           }`;
         }),
-        ...(microExec || microSaves || microSpace || microVis || microTp
+        ...(microExec || microSaves || microSpace || microVis || microTp || microMirror || microMacro
           ? [
               `────────────────────`,
               `🔬 录像级战术显微镜实锤：`,
+              ...(microMirror ? [`• 【1v1同位置对位】${microMirror}`] : []),
               ...(microExec ? [`• 【大招与绝活】${microExec}`] : []),
               ...(microSaves ? [`• 【憋死BKB/救命装】${microSaves}`] : []),
               ...(microSpace ? [`• 【地图空间与落单带线】${microSpace}`] : []),
+              ...(microMacro ? [`• 【买活死与掉鸡审计】${microMacro}`] : []),
               ...(microVis ? [`• 【辅助眼位】${microVis}`] : []),
               ...(microStack ? [`• 【堆野屯矿】${microStack}`] : []),
               ...(microSmoke ? [`• 【开雾节奏】${microSmoke}`] : []),

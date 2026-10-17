@@ -16305,6 +16305,10 @@
             {
               "text": "🗺️ 迷雾落单被抓 ×4次",
               "tone": "bad"
+            },
+            {
+              "text": "💀 31:42 致命买活死",
+              "tone": "bad"
             }
           ],
           "special_insights": [
@@ -16371,6 +16375,10 @@
             },
             {
               "text": "🗺️ 迷雾落单被抓 ×4次",
+              "tone": "bad"
+            },
+            {
+              "text": "💀 31:38 致命买活死",
               "tone": "bad"
             }
           ],
@@ -19892,6 +19900,1226 @@
             "pings": 16,
             "chatwheel_cnt": 1,
             "econ_tag": "🌾 扎实兵线收割机"
+          }
+        ]
+      }
+    },
+    "role_mirror_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "1~5 号位同位置正面对账：本方在 4/5 个位置上打出对位优势（10 分钟对线期占优 3/5 路）。 最大对位压制点：【2号位 莱恩 vs 龙骑士】； 最大对位出血点：【5号位 远古冰魄 vs 巫妖】。",
+        "won_lanes_cnt": 3,
+        "won_overall_cnt": 4,
+        "mirror_rows": [
+          {
+            "pos": 1,
+            "own_hero": "炼金术士",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
+            "own_player": "𐂃Tiny dela rosa",
+            "own_kda": "12/3/3",
+            "own_rating": 7.7,
+            "opp_hero": "主宰",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "opp_player": "Flame = ez mute",
+            "opp_kda": "7/12/4",
+            "opp_rating": 4.0,
+            "h2h_own_kills": 1,
+            "h2h_opp_kills": 0,
+            "gold10_own": 4202,
+            "gold10_opp": 3894,
+            "gold10_diff": 308,
+            "lh10_own": "53/7",
+            "lh10_opp": "44/7",
+            "nw_own": 22356,
+            "nw_opp": 15758,
+            "nw_diff": 6598,
+            "gpm_own": 1082,
+            "gpm_opp": 485,
+            "dmg_own": 20144,
+            "dmg_opp": 8395,
+            "dmg_diff": 11749,
+            "td_own": 2319,
+            "td_opp": 0,
+            "kp_own": 28.8,
+            "kp_opp": 50.0,
+            "stuns_own": 15.4,
+            "stuns_opp": 0.0,
+            "wards_own": "0眼/排0",
+            "wards_opp": "0眼/排0",
+            "own_bm_avg": 86.0,
+            "opp_bm_avg": 16.0,
+            "own_bm_top": [
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 99.1,
+                "raw": 1082.0
+              },
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 98.2,
+                "raw": 13.3
+              },
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 94.3,
+                "raw": 0.3
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 90.4,
+                "raw": 1068.0
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 37.5,
+                "raw": 0.2
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 17.2,
+                "raw": 485.0
+              },
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 16.1,
+                "raw": 6.8
+              },
+              {
+                "key": "hero_healing_per_min",
+                "label_zh": "团队治疗",
+                "pct": 12.6,
+                "raw": 22.8
+              }
+            ],
+            "own_share_pct": 64.3,
+            "opp_share_pct": 35.7,
+            "verdict_tag": "👑 对位完爆 (GAP)",
+            "grade": "good",
+            "summary_txt": "10m对线经济 4,202 vs 3,894（+308）｜终局经济 22,356 vs 15,758（+6,598）｜英雄输出 20,144 vs 8,395｜正面对位互杀 1 : 0。"
+          },
+          {
+            "pos": 2,
+            "own_hero": "莱恩",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "own_player": "palwa sa lubi",
+            "own_kda": "26/3/13",
+            "own_rating": 9.9,
+            "opp_hero": "龙骑士",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "opp_player": "Paphets",
+            "opp_kda": "5/9/7",
+            "opp_rating": 4.1,
+            "h2h_own_kills": 2,
+            "h2h_opp_kills": 1,
+            "gold10_own": 4152,
+            "gold10_opp": 3847,
+            "gold10_diff": 305,
+            "lh10_own": "58/5",
+            "lh10_opp": "57/8",
+            "nw_own": 28652,
+            "nw_opp": 15357,
+            "nw_diff": 13295,
+            "gpm_own": 740,
+            "gpm_opp": 461,
+            "dmg_own": 36840,
+            "dmg_opp": 16222,
+            "dmg_diff": 20618,
+            "td_own": 15284,
+            "td_opp": 1605,
+            "kp_own": 75.0,
+            "kp_opp": 54.5,
+            "stuns_own": 101.2,
+            "stuns_opp": 39.3,
+            "wards_own": "2眼/排0",
+            "wards_opp": "1眼/排1",
+            "own_bm_avg": 98.3,
+            "opp_bm_avg": 32.2,
+            "own_bm_top": [
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 99.9,
+                "raw": 15284.0
+              },
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 99.5,
+                "raw": 0.7
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 99.4,
+                "raw": 740.0
+              },
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 99.4,
+                "raw": 6.8
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 48.1,
+                "raw": 730.0
+              },
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 37.4,
+                "raw": 5.8
+              },
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 34.5,
+                "raw": 0.1
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 31.1,
+                "raw": 1605.0
+              }
+            ],
+            "own_share_pct": 68.8,
+            "opp_share_pct": 31.2,
+            "verdict_tag": "👑 对位完爆 (GAP)",
+            "grade": "good",
+            "summary_txt": "10m对线经济 4,152 vs 3,847（+305）｜终局经济 28,652 vs 15,357（+13,295）｜英雄输出 36,840 vs 16,222｜正面对位互杀 2 : 1。"
+          },
+          {
+            "pos": 3,
+            "own_hero": "马格纳斯",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+            "own_player": "Tuwalya",
+            "own_kda": "3/5/30",
+            "own_rating": 8.6,
+            "opp_hero": "半人马战行者",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "opp_player": "Make Your Choice",
+            "opp_kda": "2/7/11",
+            "opp_rating": 5.0,
+            "h2h_own_kills": 0,
+            "h2h_opp_kills": 0,
+            "gold10_own": 3042,
+            "gold10_opp": 4066,
+            "gold10_diff": -1024,
+            "lh10_own": "36/3",
+            "lh10_opp": "58/14",
+            "nw_own": 17618,
+            "nw_opp": 14496,
+            "nw_diff": 3122,
+            "gpm_own": 424,
+            "gpm_opp": 418,
+            "dmg_own": 21391,
+            "dmg_opp": 14143,
+            "dmg_diff": 7248,
+            "td_own": 1226,
+            "td_opp": 192,
+            "kp_own": 63.5,
+            "kp_opp": 59.1,
+            "stuns_own": 62.8,
+            "stuns_opp": 33.5,
+            "wards_own": "10眼/排1",
+            "wards_opp": "0眼/排0",
+            "own_bm_avg": 45.5,
+            "opp_bm_avg": 32.2,
+            "own_bm_top": [
+              {
+                "key": "hero_damage_per_min",
+                "label_zh": "英雄输出",
+                "pct": 77.1,
+                "raw": 585.0
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 63.6,
+                "raw": 1226.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 46.5,
+                "raw": 424.0
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 34.0,
+                "raw": 571.0
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 59.1,
+                "raw": 6.0
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 34.8,
+                "raw": 573.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 32.4,
+                "raw": 418.0
+              },
+              {
+                "key": "hero_damage_per_min",
+                "label_zh": "英雄输出",
+                "pct": 24.9,
+                "raw": 386.8
+              }
+            ],
+            "own_share_pct": 56.9,
+            "opp_share_pct": 43.1,
+            "verdict_tag": "👑 对位完爆 (GAP)",
+            "grade": "good",
+            "summary_txt": "10m对线经济 3,042 vs 4,066（-1,024）｜终局经济 17,618 vs 14,496（+3,122）｜英雄输出 21,391 vs 14,143｜正面对位互杀 0 : 0。"
+          },
+          {
+            "pos": 4,
+            "own_hero": "森海飞霞",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "own_player": "X!",
+            "own_kda": "6/7/28",
+            "own_rating": 8.5,
+            "opp_hero": "帕格纳",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "opp_player": "Replica",
+            "opp_kda": "3/14/7",
+            "opp_rating": 4.6,
+            "h2h_own_kills": 2,
+            "h2h_opp_kills": 2,
+            "gold10_own": 2036,
+            "gold10_opp": 1576,
+            "gold10_diff": 460,
+            "lh10_own": "6/1",
+            "lh10_opp": "2/3",
+            "nw_own": 16642,
+            "nw_opp": 11179,
+            "nw_diff": 5463,
+            "gpm_own": 376,
+            "gpm_opp": 362,
+            "dmg_own": 16983,
+            "dmg_opp": 15638,
+            "dmg_diff": 1345,
+            "td_own": 634,
+            "td_opp": 198,
+            "kp_own": 65.4,
+            "kp_opp": 45.5,
+            "stuns_own": 71.7,
+            "stuns_opp": 0.0,
+            "wards_own": "18眼/排1",
+            "wards_opp": "13眼/排1",
+            "own_bm_avg": 61.2,
+            "opp_bm_avg": 32.9,
+            "own_bm_top": [
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 69.5,
+                "raw": 659.0
+              },
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 68.2,
+                "raw": 0.2
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 61.7,
+                "raw": 634.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 60.2,
+                "raw": 376.0
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 69.3,
+                "raw": 2.9
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 42.9,
+                "raw": 524.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 41.0,
+                "raw": 362.0
+              },
+              {
+                "key": "hero_healing_per_min",
+                "label_zh": "团队治疗",
+                "pct": 26.4,
+                "raw": 28.7
+              }
+            ],
+            "own_share_pct": 64.2,
+            "opp_share_pct": 35.8,
+            "verdict_tag": "👑 对位完爆 (GAP)",
+            "grade": "good",
+            "summary_txt": "参战率 65.4% vs 45.5%｜真假眼 18颗(排1) vs 13颗(排1)｜硬控 71.7s vs 0.0s｜正面对位互杀 2 : 2。"
+          },
+          {
+            "pos": 5,
+            "own_hero": "远古冰魄",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "own_player": "Sansan",
+            "own_kda": "5/5/24",
+            "own_rating": 7.9,
+            "opp_hero": "巫妖",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "opp_player": "Mr. Brightside",
+            "opp_kda": "5/11/13",
+            "opp_rating": 7.6,
+            "h2h_own_kills": 0,
+            "h2h_opp_kills": 1,
+            "gold10_own": 1473,
+            "gold10_opp": 1894,
+            "gold10_diff": -421,
+            "lh10_own": "4/0",
+            "lh10_opp": "4/7",
+            "nw_own": 15595,
+            "nw_opp": 7392,
+            "nw_diff": 8203,
+            "gpm_own": 334,
+            "gpm_opp": 266,
+            "dmg_own": 13337,
+            "dmg_opp": 15896,
+            "dmg_diff": -2559,
+            "td_own": 365,
+            "td_opp": 0,
+            "kp_own": 55.8,
+            "kp_opp": 81.8,
+            "stuns_own": 36.9,
+            "stuns_opp": 18.5,
+            "wards_own": "18眼/排0",
+            "wards_opp": "22眼/排3",
+            "own_bm_avg": 38.9,
+            "opp_bm_avg": 26.3,
+            "own_bm_top": [
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 60.9,
+                "raw": 0.1
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 58.1,
+                "raw": 365.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 44.4,
+                "raw": 334.0
+              },
+              {
+                "key": "hero_damage_per_min",
+                "label_zh": "英雄输出",
+                "pct": 35.8,
+                "raw": 364.7
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 53.5,
+                "raw": 0.1
+              },
+              {
+                "key": "hero_damage_per_min",
+                "label_zh": "英雄输出",
+                "pct": 38.1,
+                "raw": 434.7
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 24.6,
+                "raw": 0.0
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 19.8,
+                "raw": 417.0
+              }
+            ],
+            "own_share_pct": 43.8,
+            "opp_share_pct": 56.2,
+            "verdict_tag": "⚠️ 对位小劣 (被压)",
+            "grade": "warn",
+            "summary_txt": "参战率 55.8% vs 81.8%｜真假眼 18颗(排0) vs 22颗(排3)｜硬控 36.9s vs 18.5s｜正面对位互杀 0 : 1。"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "1~5 号位同位置正面对账：本方在 1/5 个位置上打出对位优势（10 分钟对线期占优 2/5 路）。 最大对位压制点：【5号位 巫妖 vs 远古冰魄】； 最大对位出血点：【2号位 龙骑士 vs 莱恩】。",
+        "won_lanes_cnt": 2,
+        "won_overall_cnt": 1,
+        "mirror_rows": [
+          {
+            "pos": 1,
+            "own_hero": "主宰",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "own_player": "Flame = ez mute",
+            "own_kda": "7/12/4",
+            "own_rating": 4.0,
+            "opp_hero": "炼金术士",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
+            "opp_player": "𐂃Tiny dela rosa",
+            "opp_kda": "12/3/3",
+            "opp_rating": 7.7,
+            "h2h_own_kills": 0,
+            "h2h_opp_kills": 1,
+            "gold10_own": 3894,
+            "gold10_opp": 4202,
+            "gold10_diff": -308,
+            "lh10_own": "44/7",
+            "lh10_opp": "53/7",
+            "nw_own": 15758,
+            "nw_opp": 22356,
+            "nw_diff": -6598,
+            "gpm_own": 485,
+            "gpm_opp": 1082,
+            "dmg_own": 8395,
+            "dmg_opp": 20144,
+            "dmg_diff": -11749,
+            "td_own": 0,
+            "td_opp": 2319,
+            "kp_own": 50.0,
+            "kp_opp": 28.8,
+            "stuns_own": 0.0,
+            "stuns_opp": 15.4,
+            "wards_own": "0眼/排0",
+            "wards_opp": "0眼/排0",
+            "own_bm_avg": 16.0,
+            "opp_bm_avg": 86.0,
+            "own_bm_top": [
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 37.5,
+                "raw": 0.2
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 17.2,
+                "raw": 485.0
+              },
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 16.1,
+                "raw": 6.8
+              },
+              {
+                "key": "hero_healing_per_min",
+                "label_zh": "团队治疗",
+                "pct": 12.6,
+                "raw": 22.8
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 99.1,
+                "raw": 1082.0
+              },
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 98.2,
+                "raw": 13.3
+              },
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 94.3,
+                "raw": 0.3
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 90.4,
+                "raw": 1068.0
+              }
+            ],
+            "own_share_pct": 35.7,
+            "opp_share_pct": 64.3,
+            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
+            "grade": "bad",
+            "summary_txt": "10m对线经济 3,894 vs 4,202（-308）｜终局经济 15,758 vs 22,356（-6,598）｜英雄输出 8,395 vs 20,144｜正面对位互杀 0 : 1。"
+          },
+          {
+            "pos": 2,
+            "own_hero": "龙骑士",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "own_player": "Paphets",
+            "own_kda": "5/9/7",
+            "own_rating": 4.1,
+            "opp_hero": "莱恩",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "opp_player": "palwa sa lubi",
+            "opp_kda": "26/3/13",
+            "opp_rating": 9.9,
+            "h2h_own_kills": 1,
+            "h2h_opp_kills": 2,
+            "gold10_own": 3847,
+            "gold10_opp": 4152,
+            "gold10_diff": -305,
+            "lh10_own": "57/8",
+            "lh10_opp": "58/5",
+            "nw_own": 15357,
+            "nw_opp": 28652,
+            "nw_diff": -13295,
+            "gpm_own": 461,
+            "gpm_opp": 740,
+            "dmg_own": 16222,
+            "dmg_opp": 36840,
+            "dmg_diff": -20618,
+            "td_own": 1605,
+            "td_opp": 15284,
+            "kp_own": 54.5,
+            "kp_opp": 75.0,
+            "stuns_own": 39.3,
+            "stuns_opp": 101.2,
+            "wards_own": "1眼/排1",
+            "wards_opp": "2眼/排0",
+            "own_bm_avg": 32.2,
+            "opp_bm_avg": 98.3,
+            "own_bm_top": [
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 48.1,
+                "raw": 730.0
+              },
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 37.4,
+                "raw": 5.8
+              },
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 34.5,
+                "raw": 0.1
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 31.1,
+                "raw": 1605.0
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 99.9,
+                "raw": 15284.0
+              },
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 99.5,
+                "raw": 0.7
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 99.4,
+                "raw": 740.0
+              },
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 99.4,
+                "raw": 6.8
+              }
+            ],
+            "own_share_pct": 31.2,
+            "opp_share_pct": 68.8,
+            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
+            "grade": "bad",
+            "summary_txt": "10m对线经济 3,847 vs 4,152（-305）｜终局经济 15,357 vs 28,652（-13,295）｜英雄输出 16,222 vs 36,840｜正面对位互杀 1 : 2。"
+          },
+          {
+            "pos": 3,
+            "own_hero": "半人马战行者",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "own_player": "Make Your Choice",
+            "own_kda": "2/7/11",
+            "own_rating": 5.0,
+            "opp_hero": "马格纳斯",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+            "opp_player": "Tuwalya",
+            "opp_kda": "3/5/30",
+            "opp_rating": 8.6,
+            "h2h_own_kills": 0,
+            "h2h_opp_kills": 0,
+            "gold10_own": 4066,
+            "gold10_opp": 3042,
+            "gold10_diff": 1024,
+            "lh10_own": "58/14",
+            "lh10_opp": "36/3",
+            "nw_own": 14496,
+            "nw_opp": 17618,
+            "nw_diff": -3122,
+            "gpm_own": 418,
+            "gpm_opp": 424,
+            "dmg_own": 14143,
+            "dmg_opp": 21391,
+            "dmg_diff": -7248,
+            "td_own": 192,
+            "td_opp": 1226,
+            "kp_own": 59.1,
+            "kp_opp": 63.5,
+            "stuns_own": 33.5,
+            "stuns_opp": 62.8,
+            "wards_own": "0眼/排0",
+            "wards_opp": "10眼/排1",
+            "own_bm_avg": 32.2,
+            "opp_bm_avg": 45.5,
+            "own_bm_top": [
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 59.1,
+                "raw": 6.0
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 34.8,
+                "raw": 573.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 32.4,
+                "raw": 418.0
+              },
+              {
+                "key": "hero_damage_per_min",
+                "label_zh": "英雄输出",
+                "pct": 24.9,
+                "raw": 386.8
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "hero_damage_per_min",
+                "label_zh": "英雄输出",
+                "pct": 77.1,
+                "raw": 585.0
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 63.6,
+                "raw": 1226.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 46.5,
+                "raw": 424.0
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 34.0,
+                "raw": 571.0
+              }
+            ],
+            "own_share_pct": 43.1,
+            "opp_share_pct": 56.9,
+            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
+            "grade": "bad",
+            "summary_txt": "10m对线经济 4,066 vs 3,042（+1,024）｜终局经济 14,496 vs 17,618（-3,122）｜英雄输出 14,143 vs 21,391｜正面对位互杀 0 : 0。"
+          },
+          {
+            "pos": 4,
+            "own_hero": "帕格纳",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "own_player": "Replica",
+            "own_kda": "3/14/7",
+            "own_rating": 4.6,
+            "opp_hero": "森海飞霞",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "opp_player": "X!",
+            "opp_kda": "6/7/28",
+            "opp_rating": 8.5,
+            "h2h_own_kills": 2,
+            "h2h_opp_kills": 2,
+            "gold10_own": 1576,
+            "gold10_opp": 2036,
+            "gold10_diff": -460,
+            "lh10_own": "2/3",
+            "lh10_opp": "6/1",
+            "nw_own": 11179,
+            "nw_opp": 16642,
+            "nw_diff": -5463,
+            "gpm_own": 362,
+            "gpm_opp": 376,
+            "dmg_own": 15638,
+            "dmg_opp": 16983,
+            "dmg_diff": -1345,
+            "td_own": 198,
+            "td_opp": 634,
+            "kp_own": 45.5,
+            "kp_opp": 65.4,
+            "stuns_own": 0.0,
+            "stuns_opp": 71.7,
+            "wards_own": "13眼/排1",
+            "wards_opp": "18眼/排1",
+            "own_bm_avg": 32.9,
+            "opp_bm_avg": 61.2,
+            "own_bm_top": [
+              {
+                "key": "last_hits_per_min",
+                "label_zh": "补刀效率",
+                "pct": 69.3,
+                "raw": 2.9
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 42.9,
+                "raw": 524.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 41.0,
+                "raw": 362.0
+              },
+              {
+                "key": "hero_healing_per_min",
+                "label_zh": "团队治疗",
+                "pct": 26.4,
+                "raw": 28.7
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 69.5,
+                "raw": 659.0
+              },
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 68.2,
+                "raw": 0.2
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 61.7,
+                "raw": 634.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 60.2,
+                "raw": 376.0
+              }
+            ],
+            "own_share_pct": 35.8,
+            "opp_share_pct": 64.2,
+            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
+            "grade": "bad",
+            "summary_txt": "参战率 45.5% vs 65.4%｜真假眼 13颗(排1) vs 18颗(排1)｜硬控 0.0s vs 71.7s｜正面对位互杀 2 : 2。"
+          },
+          {
+            "pos": 5,
+            "own_hero": "巫妖",
+            "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "own_player": "Mr. Brightside",
+            "own_kda": "5/11/13",
+            "own_rating": 7.6,
+            "opp_hero": "远古冰魄",
+            "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "opp_player": "Sansan",
+            "opp_kda": "5/5/24",
+            "opp_rating": 7.9,
+            "h2h_own_kills": 1,
+            "h2h_opp_kills": 0,
+            "gold10_own": 1894,
+            "gold10_opp": 1473,
+            "gold10_diff": 421,
+            "lh10_own": "4/7",
+            "lh10_opp": "4/0",
+            "nw_own": 7392,
+            "nw_opp": 15595,
+            "nw_diff": -8203,
+            "gpm_own": 266,
+            "gpm_opp": 334,
+            "dmg_own": 15896,
+            "dmg_opp": 13337,
+            "dmg_diff": 2559,
+            "td_own": 0,
+            "td_opp": 365,
+            "kp_own": 81.8,
+            "kp_opp": 55.8,
+            "stuns_own": 18.5,
+            "stuns_opp": 36.9,
+            "wards_own": "22眼/排3",
+            "wards_opp": "18眼/排0",
+            "own_bm_avg": 26.3,
+            "opp_bm_avg": 38.9,
+            "own_bm_top": [
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 53.5,
+                "raw": 0.1
+              },
+              {
+                "key": "hero_damage_per_min",
+                "label_zh": "英雄输出",
+                "pct": 38.1,
+                "raw": 434.7
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 24.6,
+                "raw": 0.0
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 19.8,
+                "raw": 417.0
+              }
+            ],
+            "opp_bm_top": [
+              {
+                "key": "kills_per_min",
+                "label_zh": "击杀效率",
+                "pct": 60.9,
+                "raw": 0.1
+              },
+              {
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 58.1,
+                "raw": 365.0
+              },
+              {
+                "key": "gold_per_min",
+                "label_zh": "GPM打钱",
+                "pct": 44.4,
+                "raw": 334.0
+              },
+              {
+                "key": "hero_damage_per_min",
+                "label_zh": "英雄输出",
+                "pct": 35.8,
+                "raw": 364.7
+              }
+            ],
+            "own_share_pct": 56.2,
+            "opp_share_pct": 43.8,
+            "verdict_tag": "⚔️ 对位压制 (小优)",
+            "grade": "good",
+            "summary_txt": "参战率 81.8% vs 55.8%｜真假眼 22颗(排3) vs 18颗(排0)｜硬控 18.5s vs 36.9s｜正面对位互杀 1 : 0。"
+          }
+        ]
+      }
+    },
+    "macro_objectives_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "全队共交出 0 次买活（其中 0 次致命买活死、0 次有效救世买活）｜信使博弈：击杀敌方 4 只信使 / 本方掉鸡 0 只｜阿哈利姆魔晶普及率：2/5 人。",
+        "dieback_cnt": 0,
+        "clutch_bb_cnt": 0,
+        "own_couriers_lost": 0,
+        "own_couriers_killed": 4,
+        "shard_count": 2,
+        "buyback_events": [],
+        "courier_events": [
+          {
+            "time_str": "01:23",
+            "time_sec": 83,
+            "is_own_lost": false,
+            "event_tag": "🎯 狙杀敌方信使",
+            "detail": "01:23 敌方信使被 5号位 远古冰魄(Sansan) 击杀（对线期断运鞋/大药/魔瓶，极大伤线！）"
+          },
+          {
+            "time_str": "02:09",
+            "time_sec": 129,
+            "is_own_lost": false,
+            "event_tag": "🎯 狙杀敌方信使",
+            "detail": "02:09 敌方信使被 5号位 远古冰魄(Sansan) 击杀（对线期断运鞋/大药/魔瓶，极大伤线！）"
+          },
+          {
+            "time_str": "04:00",
+            "time_sec": 240,
+            "is_own_lost": false,
+            "event_tag": "🎯 狙杀敌方信使",
+            "detail": "04:00 敌方信使被 5号位 远古冰魄(Sansan) 击杀（对线期断运鞋/大药/魔瓶，极大伤线！）"
+          },
+          {
+            "time_str": "06:23",
+            "time_sec": 383,
+            "is_own_lost": false,
+            "event_tag": "🎯 狙杀敌方信使",
+            "detail": "06:23 敌方信使被 3号位 马格纳斯(Tuwalya) 击杀（对线期断运鞋/大药/魔瓶，极大伤线！）"
+          }
+        ],
+        "roshan_events": [],
+        "neutral_craft_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "炼金术士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
+            "personaname": "𐂃Tiny dela rosa",
+            "shard_str": "未获魔晶",
+            "craft_steps": [
+              "11:14【休眠珍品 · 迅捷(+移速)】",
+              "16:34 附魔【迅捷(+移速)】",
+              "27:01 附魔【迅捷(+移速)】",
+              "36:09【剥皮者皮囊 · 坚韧(+护甲/攻)】"
+            ],
+            "craft_verdict": "✓ 共迭代 4 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "莱恩",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lion.png",
+            "personaname": "palwa sa lubi",
+            "shard_str": "💎 34:18 获得魔晶",
+            "craft_steps": [
+              "11:26【休眠珍品 · 迅捷(+移速)】",
+              "18:54【守护甲壳 · 迅捷(+移速)】",
+              "28:52【锯齿短刀 · 迅捷(+移速)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "马格纳斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png",
+            "personaname": "Tuwalya",
+            "shard_str": "未获魔晶",
+            "craft_steps": [
+              "11:00【附魔面具 · 生机(+生命恢复)】",
+              "19:26【灼热印记 · 贪婪(+GPM/-攻击)】",
+              "28:37【游击队烙印 · 贪婪(+GPM/-攻击)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "X!",
+            "shard_str": "未获魔晶",
+            "craft_steps": [
+              "13:09【狗头人酒杯 · 迅捷(+移速)】",
+              "18:14【弹跳玩偶 · 迅捷(+移速)】",
+              "28:17【火药护手 · 迅捷(+移速)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "远古冰魄",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ancient_apparition.png",
+            "personaname": "Sansan",
+            "shard_str": "💎 21:00 获得魔晶",
+            "craft_steps": [
+              "13:13【狗头人酒杯 · 迅捷(+移速)】",
+              "19:41【弹跳玩偶 · 贪婪(+GPM/-攻击)】",
+              "28:39 附魔【贪婪(+GPM/-攻击)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "全队共交出 2 次买活（其中 2 次致命买活死、0 次有效救世买活）｜信使博弈：击杀敌方 0 只信使 / 本方掉鸡 4 只｜阿哈利姆魔晶普及率：3/5 人。",
+        "dieback_cnt": 2,
+        "clutch_bb_cnt": 0,
+        "own_couriers_lost": 4,
+        "own_couriers_killed": 0,
+        "shard_count": 3,
+        "buyback_events": [
+          {
+            "time_str": "31:28",
+            "time_sec": 1888,
+            "pos": 5,
+            "hero_short_zh": "巫妖",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "personaname": "Mr. Brightside",
+            "outcome_tag": "💀 致命买活死 (Dieback)",
+            "severity": "bad",
+            "detail": "在 31:28 交出买活后仅存活 10 秒，于 31:38 再次暴毙（买活死读秒 73s 无法买活）！"
+          },
+          {
+            "time_str": "31:29",
+            "time_sec": 1889,
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica",
+            "outcome_tag": "💀 致命买活死 (Dieback)",
+            "severity": "bad",
+            "detail": "在 31:29 交出买活后仅存活 13 秒，于 31:42 再次暴毙（买活死读秒 75s 无法买活）！"
+          }
+        ],
+        "courier_events": [
+          {
+            "time_str": "01:23",
+            "time_sec": 83,
+            "is_own_lost": true,
+            "event_tag": "🚨 本方掉鸡惨案 (对线断补给)",
+            "detail": "01:23 本方信使被 5号位 远古冰魄(Sansan) 击杀（对线期断运鞋/大药/魔瓶，极大伤线！）"
+          },
+          {
+            "time_str": "02:09",
+            "time_sec": 129,
+            "is_own_lost": true,
+            "event_tag": "🚨 本方掉鸡惨案 (对线断补给)",
+            "detail": "02:09 本方信使被 5号位 远古冰魄(Sansan) 击杀（对线期断运鞋/大药/魔瓶，极大伤线！）"
+          },
+          {
+            "time_str": "04:00",
+            "time_sec": 240,
+            "is_own_lost": true,
+            "event_tag": "🚨 本方掉鸡惨案 (对线断补给)",
+            "detail": "04:00 本方信使被 5号位 远古冰魄(Sansan) 击杀（对线期断运鞋/大药/魔瓶，极大伤线！）"
+          },
+          {
+            "time_str": "06:23",
+            "time_sec": 383,
+            "is_own_lost": true,
+            "event_tag": "🚨 本方掉鸡惨案 (对线断补给)",
+            "detail": "06:23 本方信使被 3号位 马格纳斯(Tuwalya) 击杀（对线期断运鞋/大药/魔瓶，极大伤线！）"
+          }
+        ],
+        "roshan_events": [],
+        "neutral_craft_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Flame = ez mute",
+            "shard_str": "未获魔晶",
+            "craft_steps": [
+              "10:34【决斗家手套 · 机敏(+攻速/夜视)】",
+              "17:52【弹跳玩偶 · 机敏(+攻速/夜视)】",
+              "28:07【锯齿短刀 · 机敏(+攻速/夜视)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets",
+            "shard_str": "💎 24:53 获得魔晶",
+            "craft_steps": [
+              "11:18【决斗家手套 · 坚韧(+护甲/攻)】",
+              "21:30 附魔【强壮(+生命/回血)】",
+              "29:08【锯齿短刀 · 强壮(+生命/回血)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "半人马战行者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/centaur.png",
+            "personaname": "Make Your Choice",
+            "shard_str": "未获魔晶",
+            "craft_steps": [
+              "13:46【休眠珍品 · 强壮(+生命/回血)】",
+              "20:46【勇气勋章 · 坚韧(+护甲/攻)】",
+              "29:07【造风者 · 强壮(+生命/回血)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "帕格纳",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png",
+            "personaname": "Replica",
+            "shard_str": "💎 27:05 获得魔晶",
+            "craft_steps": [
+              "13:16【狗头人酒杯 · 神秘(+回蓝/魔抗)】",
+              "20:53 附魔【神秘(+回蓝/魔抗)】",
+              "29:44【火焰斗篷 · 敏锐(+施法距离)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "巫妖",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/lich.png",
+            "personaname": "Mr. Brightside",
+            "shard_str": "💎 19:05 获得魔晶",
+            "craft_steps": [
+              "12:49【蝌蚪护符 · 迅捷(+移速)】",
+              "19:41【灼热印记 · 敏锐(+施法距离)】",
+              "29:48【造风者 · 敏锐(+施法距离)】"
+            ],
+            "craft_verdict": "✓ 共迭代 3 次中立装与附魔词条，节奏正常。",
+            "grade": "good"
           }
         ]
       }
@@ -38271,6 +39499,10 @@
           {
             "text": "🗺️ 迷雾落单被抓 ×4次",
             "tone": "bad"
+          },
+          {
+            "text": "💀 31:42 致命买活死",
+            "tone": "bad"
           }
         ],
         "special_insights": [
@@ -38998,6 +40230,10 @@
           },
           {
             "text": "🗺️ 迷雾落单被抓 ×4次",
+            "tone": "bad"
+          },
+          {
+            "text": "💀 31:38 致命买活死",
             "tone": "bad"
           }
         ],

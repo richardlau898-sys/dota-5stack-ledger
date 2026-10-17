@@ -177,6 +177,7 @@
             </select>
           </label>
           <button type="button" id="btn-request-parse" class="button secondary" hidden>请求录像解析</button>
+          <button type="button" id="btn-voice-broadcast" class="button secondary" title="用中文语音大声朗读本局胜负庆功/分锅、对位差距与显微镜铁证">🔊 语音播报复盘</button>
           <button type="button" id="btn-hero-share-link" class="button secondary" title="复制本局公开分享链接发到微信/Discord群">🔗 复制本局分享链接</button>
           <button type="button" id="btn-open-share-poster-2" class="button secondary">📜 导出群聊战报</button>
           <button type="button" id="btn-trigger-grok" class="button primary">🧠 让 Grok 4.7 生成深度判词</button>
@@ -190,7 +191,7 @@
         <span class="jump-nav-label">复盘目录 (已全面去重)：</span>
         <a href="#draft-combo-section" class="jump-chip">① 阵容BP与配合</a>
         <a href="#verdict-and-blame-section" id="jump-chip-verdict" class="jump-chip">② 胜局庆功 / 败局分锅</a>
-        <a href="#tactical-microscope-section" class="jump-chip highlight">③ 🔬 九维战术显微镜 (大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济信号)</a>
+        <a href="#tactical-microscope-section" class="jump-chip highlight">③ 🔬 十一维战术显微镜 (大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/1v1对位/买活死&amp;7.38附魔)</a>
         <a href="#charts-hub-section" class="jump-chip">④ ⏱️ 逐分钟时间轴沙盘 &amp; 集火矩阵</a>
         <a href="#phase-review-section" class="jump-chip">⑤ 前中后期三阶段</a>
         <a href="#players-forensics-section" class="jump-chip">⑥ 1~5号位个人卷宗</a>
@@ -256,12 +257,12 @@
       </article>
     </section>
 
-    <!-- 模块三（九维核心）：🔬 录像级战术显微镜 -->
+    <!-- 模块三（十一维核心）：🔬 录像级战术显微镜 -->
     <section id="tactical-microscope-section" class="tactical-microscope-section" aria-labelledby="tactical-microscope-heading">
       <div class="section-heading">
         <div>
-          <h2 id="tactical-microscope-heading">③ 🔬 录像级九维战术显微镜 · 大招审判 / 憋死救命装 / 地图空间与带线被抓 / 承伤防装 / 眼位 / 堆野开雾 / 对线 / TP / 经济信号</h2>
-          <p class="section-caption">全量拆解录像底层日志：谁身怀 BKB/推推/分身却在团战 0 按键暴毙？谁喜欢带无聊危险线一个人乱逛被抓死？谁承受了成吨法系爆发却不出 BKB？</p>
+          <h2 id="tactical-microscope-heading">③ 🔬 录像级十一维战术显微镜 · 大招审判 / 憋死救命装 / 地图空间 / 承伤防装 / 眼位 / 堆野开雾 / 对线 / TP / 经济 / 1v1宿敌对位 / 买活死&amp;7.38附魔</h2>
+          <p class="section-caption">全量拆解录像底层日志：谁身怀 BKB/推推却 0 按键暴毙？谁带危险线落单被抓？谁在 1v1 同位置对位中被打穿？谁交出致命买活死或掉了对线信使？</p>
         </div>
         <div class="microscope-header-controls">
           <div class="team-tab-group" role="group" aria-label="显微镜阵营切换">
@@ -271,7 +272,7 @@
         </div>
       </div>
 
-      <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜九大维度">
+      <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜十一大维度">
         <button type="button" class="microscope-tab-btn active" data-micro-tab="hero_ult" role="tab" aria-selected="true">
           🎯 1. 英雄绝活与大招审判
         </button>
@@ -299,8 +300,14 @@
         <button type="button" class="microscope-tab-btn" data-micro-tab="econ_pings" role="tab" aria-selected="false">
           💰 9. 经济来源结构 &amp; 信号/暂停互动
         </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="role_mirror" role="tab" aria-selected="false">
+          ⚔️ 10. 同位置1v1宿敌对位 &amp; 全球百分位
+        </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="macro_neutrals" role="tab" aria-selected="false">
+          🐉 11. 买活死尸检·掉鸡·肉山魔晶 &amp; 7.38附魔
+        </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="all" role="tab" aria-selected="false">
-          📑 同屏展开全部 9 项
+          📑 同屏展开全部 11 项
         </button>
       </div>
 
