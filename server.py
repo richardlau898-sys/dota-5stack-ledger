@@ -196,6 +196,48 @@ def get_or_build_match_report(
     return report
 
 
+import base64
+from concurrent.futures import ThreadPoolExecutor
+
+_ICON_B64_CACHE: Dict[str, str] = {}
+
+
+def fetch_match_icons_base64(match_id: int) -> Dict[str, str]:
+    report = get_or_build_match_report(match_id, allow_build=True)
+    if not report:
+        return {}
+    players = (report.get("radiant_pos_1_to_5") or []) + (report.get("dire_pos_1_to_5") or [])
+    urls = set()
+    for p in players:
+        if p.get("hero_img"):
+            urls.add(p["hero_img"])
+        for it in (p.get("final_items_rich") or []):
+            if it.get("img"):
+                urls.add(it["img"])
+        if (p.get("neutral_item_rich") or {}).get("img"):
+            urls.add(p["neutral_item_rich"]["img"])
+
+    missing = [u for u in urls if u and u not in _ICON_B64_CACHE]
+    if missing:
+        def _dl(u: str):
+            try:
+                req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    raw = resp.read()
+                    if raw:
+                        return u, "data:image/png;base64," + base64.b64encode(raw).decode("ascii")
+            except Exception:
+                pass
+            return u, ""
+
+        with ThreadPoolExecutor(max_workers=20) as ex:
+            for u, b64 in ex.map(_dl, missing):
+                if b64:
+                    _ICON_B64_CACHE[u] = b64
+
+    return {u: _ICON_B64_CACHE[u] for u in urls if u in _ICON_B64_CACHE}
+
+
 class DotaAnalystHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args: Any) -> None:
         sys.stderr.write(f"[DotaLedgerServer] {self.address_string()} - {fmt % args}\n")
@@ -249,6 +291,13 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
         path, qs = self._resolve_path_and_qs()
 
         try:
+            if path == "/api/match_icons":
+                mid_str = (qs.get("match_id") or [""])[0].strip()
+                mid = int(mid_str) if mid_str.isdigit() else 0
+                icons = fetch_match_icons_base64(mid) if mid else {}
+                self._send_json({"ok": True, "match_id": mid, "icons": icons})
+                return
+
             if path == "/api/heroes":
                 hero_map, _ = get_hero_constants_map()
                 heroes_list = sorted(hero_map.values(), key=lambda x: x["id"])

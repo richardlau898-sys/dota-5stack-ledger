@@ -1511,19 +1511,19 @@ select:hover {
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .window-head {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .window-time-badge {
   font-family: var(--serif);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--gold-light);
   background: #2b271c;
@@ -1532,10 +1532,96 @@ select:hover {
   white-space: nowrap;
 }
 
+.window-tone-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  border: 1px solid #59523e;
+  background: #252219;
+  color: var(--gold-light);
+}
+
+.window-tone-badge.praise {
+  background: #17271a;
+  border-color: #3d6e45;
+  color: #a4e4a9;
+}
+
+.window-tone-badge.roast {
+  background: #2b1816;
+  border-color: #7c3830;
+  color: #f4a298;
+}
+
+.window-tone-badge.mixed {
+  background: #282317;
+  border-color: #6b5832;
+  color: #ebd094;
+}
+
 .window-title {
   font-size: 14px;
   font-weight: 650;
   color: var(--text);
+}
+
+.window-story-box {
+  background: #151713;
+  border: 1px solid #2e3128;
+  border-left: 3px solid var(--gold);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.window-story-box.praise {
+  border-left-color: #469653;
+  background: linear-gradient(90deg, rgba(35, 68, 41, 0.22), rgba(21, 23, 19, 0.95));
+}
+
+.window-story-box.roast {
+  border-left-color: #b54538;
+  background: linear-gradient(90deg, rgba(82, 30, 25, 0.24), rgba(21, 23, 19, 0.95));
+}
+
+.window-story-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.03em;
+}
+
+.window-story-text {
+  font-size: 12.5px;
+  color: #e3ddd0;
+  line-height: 1.78;
+}
+
+.window-story-text b {
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+.window-stat-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--dim);
+  padding-top: 2px;
+  border-top: 1px dashed #2b2d26;
+}
+
+.window-stat-strip b {
+  color: var(--text);
+}
+
+.window-participants-inline {
+  color: var(--muted);
 }
 
 .window-detail {
@@ -1580,7 +1666,7 @@ select:hover {
 .forensic-card {
   background: var(--panel);
   border: 1px solid var(--line);
-  padding: 18px 20px;
+  padding: 16px 18px;
 }
 
 .forensic-card.is-me {
@@ -1595,8 +1681,8 @@ select:hover {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
-  padding-bottom: 14px;
+  gap: 12px;
+  padding-bottom: 12px;
   border-bottom: 1px solid #32342c;
   flex-wrap: wrap;
 }
@@ -1604,8 +1690,9 @@ select:hover {
 .forensic-identity {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
+  flex: 1;
 }
 
 .forensic-pos-num {
@@ -1613,14 +1700,14 @@ select:hover {
   font-size: 24px;
   font-weight: 700;
   color: var(--gold);
-  width: 28px;
+  width: 26px;
   text-align: center;
   flex-shrink: 0;
 }
 
 .forensic-portrait {
-  width: 78px;
-  height: 44px;
+  width: 74px;
+  height: 42px;
   object-fit: cover;
   border: 1px solid #59523e;
   background: #141515;
@@ -1629,12 +1716,13 @@ select:hover {
 
 .forensic-title-block {
   min-width: 0;
+  flex: 1;
 }
 
 .forensic-name-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
@@ -1654,7 +1742,7 @@ select:hover {
 .forensic-sub-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   flex-wrap: wrap;
   margin-top: 4px;
   font-size: 11px;
@@ -1666,15 +1754,24 @@ select:hover {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
-/* 核心指标 8 格栏 */
+/* 核心指标 8 格栏 (防溢出独立小卡片) */
 .forensic-metrics-grid {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 10px;
-  padding: 13px 0;
+  gap: 7px;
+  padding: 11px 0;
   border-bottom: 1px solid #32342c;
+}
+
+.f-metric {
+  background: #151713;
+  border: 1px solid #2b2e26;
+  padding: 6px 8px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .f-metric span {
@@ -1682,31 +1779,113 @@ select:hover {
   font-size: 10px;
   color: var(--dim);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
 }
 
 .f-metric strong {
-  font-size: 15px;
-  font-weight: 600;
+  display: block;
+  font-size: 12.2px;
+  font-weight: 650;
   color: #dcd6c6;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 装备图标栏 + 技能图标栏 + 雷达图与击杀关系 */
+/* 第六章 AI 毒舌/封神个人结案陈词横幅 */
+.forensic-ai-story-box {
+  margin-top: 10px;
+  padding: 10px 13px;
+  background: #151814;
+  border: 1px solid #33362c;
+  border-left: 3px solid var(--gold);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.forensic-ai-story-box.praise {
+  border-left-color: #469653;
+  background: linear-gradient(90deg, rgba(35, 68, 41, 0.22), rgba(21, 24, 20, 0.96));
+}
+
+.forensic-ai-story-box.roast {
+  border-left-color: #b54538;
+  background: linear-gradient(90deg, rgba(84, 30, 25, 0.24), rgba(21, 24, 20, 0.96));
+}
+
+.forensic-ai-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: #272318;
+  border: 1px solid #655739;
+  color: var(--gold-light);
+  margin-top: 1px;
+}
+
+.forensic-ai-badge.praise {
+  background: #17271a;
+  border-color: #3d6e45;
+  color: #a4e4a9;
+}
+
+.forensic-ai-badge.roast {
+  background: #2b1816;
+  border-color: #7c3830;
+  color: #f4a298;
+}
+
+.forensic-ai-text {
+  font-size: 12.5px;
+  color: #e4ded1;
+  line-height: 1.72;
+  min-width: 0;
+  flex: 1;
+}
+
+.forensic-ai-text b {
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+/* 紧凑三栏 Bento 矩阵：左栏(六神装+指向目标) ｜ 中栏(技能释放+提款关系+全球百分位) ｜ 右栏(六维雷达图) */
 .forensic-visual-row {
   display: grid;
-  grid-template-columns: 1.25fr 1fr 220px;
-  gap: 18px;
-  padding: 14px 0;
+  grid-template-columns: 1.15fr 1.15fr 205px;
+  gap: 14px;
+  padding: 12px 0;
   border-bottom: 1px solid #32342c;
-  align-items: start;
+  align-items: stretch;
+}
+
+.forensic-bento-col {
+  background: #151713;
+  border: 1px solid #2b2d25;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.f-bento-subblock {
+  padding-top: 8px;
+  border-top: 1px dashed #2d3027;
 }
 
 .visual-sub-title {
   font-size: 11px;
   font-weight: 600;
   color: var(--gold);
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1772,7 +1951,7 @@ select:hover {
 .abilities-casts-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 7px;
 }
 
 .ability-cast-card {
@@ -1785,8 +1964,8 @@ select:hover {
 }
 
 .ability-cast-card img {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   object-fit: cover;
   border: 1px solid #4c483a;
 }
@@ -1808,7 +1987,7 @@ select:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 9px;
+  margin-top: 8px;
 }
 
 .nemesis-pill {
@@ -1836,17 +2015,29 @@ select:hover {
 }
 
 .radar-mini-box {
+  background: #151713;
+  border: 1px solid #2b2d25;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.radar-mini-scores {
+  font-size: 9.5px;
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.4;
 }
 
 /* 亮点 / 罪状 / 改进建议 三栏账本 */
 .forensic-prose-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
-  padding-top: 14px;
+  gap: 14px;
+  padding-top: 12px;
 }
 
 .prose-col h4 {
@@ -5353,10 +5544,43 @@ dialog::backdrop {
   gap: 14px;
 }
 
+.fs-charts-matrix-2x2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.fs-chart-card {
+  background: #141612;
+  border: 1px solid #38392e;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fs-chart-card h3 {
+  margin: 0;
+  font-size: 13px;
+  color: var(--gold-light);
+  border-bottom: 1px solid #2b2d24;
+  padding-bottom: 6px;
+}
+
+.fs-minimap-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
 @media (max-width: 1100px) {
   .fs-cover-kpi-grid,
-  .fs-stages-grid-2x2 {
+  .fs-stages-grid-2x2,
+  .fs-charts-matrix-2x2,
+  .fs-minimap-row {
     grid-template-columns: 1fr;
   }
 }
+
 
