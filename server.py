@@ -209,6 +209,8 @@ def get_or_build_match_report(
     force_refresh: bool = False,
     allow_build: bool = True,
 ) -> Optional[Dict[str, Any]]:
+    import time
+
     json_cache = REPORTS_DIR / f"match_{match_id}.json"
     md_cache = REPORTS_DIR / f"match_{match_id}.md"
     raw_cache = REPORTS_DIR / f"raw_{match_id}.json"
@@ -217,6 +219,7 @@ def get_or_build_match_report(
     tmp_md_cache = TMP_REPORTS_DIR / f"match_{match_id}.md"
     tmp_raw_cache = TMP_REPORTS_DIR / f"raw_{match_id}.json"
 
+    fallback_unparsed_rep = None
     if not force_refresh:
         for jc in (json_cache, tmp_json_cache):
             if jc.exists():
@@ -227,7 +230,10 @@ def get_or_build_match_report(
                         and cached_rep.get("_zh_schema_v") == 2
                         and cached_rep.get("deep_forensics", {}).get("unpressed_saves_by_side") is not None
                     ):
-                        return sanitize_report_mixed_english(cached_rep)
+                        # Only serve immediately if replay is parsed OR allow_build is False
+                        if cached_rep.get("is_parsed") or not allow_build:
+                            return sanitize_report_mixed_english(cached_rep)
+                        fallback_unparsed_rep = cached_rep
                 except Exception:
                     pass
 
@@ -242,20 +248,39 @@ def get_or_build_match_report(
         for rc in (raw_cache, tmp_raw_cache):
             if rc.exists():
                 try:
-                    raw_match = json.loads(rc.read_text(encoding="utf-8"))
-                    break
+                    candidate_raw = json.loads(rc.read_text(encoding="utf-8"))
+                    if candidate_raw and candidate_raw.get("version"):
+                        raw_match = candidate_raw
+                        break
                 except Exception:
                     raw_match = None
 
     if not raw_match:
-        raw_match = api_get(f"/matches/{match_id}")
-        raw_txt = json.dumps(raw_match, ensure_ascii=False)
         try:
-            REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-            raw_cache.write_text(raw_txt, encoding="utf-8")
-        except OSError:
-            TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-            tmp_raw_cache.write_text(raw_txt, encoding="utf-8")
+            raw_match = api_get(f"/matches/{match_id}")
+            # If the match just ended and OpenDota hasn't parsed the .dem replay yet, auto-request parse!
+            if raw_match and not raw_match.get("version"):
+                try:
+                    api_post(f"/request/{match_id}")
+                    time.sleep(3.0)
+                    retry_raw = api_get(f"/matches/{match_id}")
+                    if retry_raw and retry_raw.get("version"):
+                        raw_match = retry_raw
+                except Exception:
+                    pass
+            # Only cache raw_match on disk if it is parsed (version is not None)
+            if raw_match and raw_match.get("version"):
+                raw_txt = json.dumps(raw_match, ensure_ascii=False)
+                try:
+                    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                    raw_cache.write_text(raw_txt, encoding="utf-8")
+                except OSError:
+                    TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                    tmp_raw_cache.write_text(raw_txt, encoding="utf-8")
+        except Exception:
+            if fallback_unparsed_rep:
+                return sanitize_report_mixed_english(fallback_unparsed_rep)
+            raise
 
     report = analyze_match_data(raw_match, roster, focus_account_id=aid)
     md_text = render_markdown_report(report)
@@ -623,6 +648,12 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 if res.get("ok") and res.get("structured"):
                     res["structured"] = sanitize_report_mixed_english(res["structured"])
                     report["grok_coaching"] = res["structured"]
+                    rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
+                    try:
+                        (REPORTS_DIR / f"match_{mid}.json").write_text(rep_txt, encoding="utf-8")
+                    except OSError:
+                        TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                        (TMP_REPORTS_DIR / f"match_{mid}.json").write_text(rep_txt, encoding="utf-8")
                 res["report"] = sanitize_report_mixed_english(report)
                 self._send_json(res)
                 return

@@ -5090,13 +5090,65 @@ async function loadMatchReport(
     highlightSelectedMatchCard(state.currentMatchId);
     renderFullMatchReport(state.currentReport);
     syncMatchUrlInAddressBar(state.currentMatchId);
-    if (analyzeNow) {
-      showToast(`✅ 比赛 #${state.currentMatchId} AI 深度复盘已完成！点击右上角「分享本局链接」即可发群`);
+
+    const isParsedNow = Boolean(state.currentReport?.is_parsed);
+    const hasGrokNow = Boolean(state.currentReport?.grok_coaching?.title);
+
+    if (!isParsedNow) {
+      showToast(
+        `⏳ 比赛 #${state.currentMatchId} 刚结束，OpenDota 正在解析 .dem 录像（当前为基础统计），已自动提交解析并为您轮询更新...`,
+        6500
+      );
+      scheduleAutoReplayParsePoll(state.currentMatchId);
+    } else if ((analyzeNow || forceRefresh) && !hasGrokNow && !state.isGeneratingGrok) {
+      showToast(
+        `✅ 录像级 11 维拆解已完成！正在自动调用 Grok 4.7 生成本局毒舌大标题与深度判词...`,
+        5000
+      );
+      triggerGrokReview({ force: false });
+    } else if (analyzeNow) {
+      showToast(`✅ 比赛 #${state.currentMatchId} AI 完整深度复盘已成功！点击右上角「分享本局链接」即可发群`);
     }
   } catch (err) {
     console.error(err);
     showToast(`拉取比赛 #${matchId} 失败: ${err.message}`);
   }
+}
+
+let _autoParsePollTimer = null;
+function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
+  clearTimeout(_autoParsePollTimer);
+  if (attempt > 5) return;
+  if (attempt === 1) {
+    fetch("/api/request_parse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ match_id: matchId }),
+    }).catch(() => {});
+  }
+  _autoParsePollTimer = setTimeout(async () => {
+    if (Number(state.currentMatchId) !== Number(matchId) || state.currentReport?.is_parsed) return;
+    try {
+      const res = await fetch(
+        `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
+          state.accountId
+        )}&refresh=1&analyze=1`
+      );
+      const data = await res.json();
+      if (data.ok && data.report?.is_parsed) {
+        state.currentReport = data.report;
+        renderFullMatchReport(state.currentReport);
+        showToast(`🎉 OpenDota 录像解析已完成！已自动升级为完整 11 维录像级数据并启动 Grok 4.7 算账`, 5500);
+        if (!state.currentReport.grok_coaching?.title && !state.isGeneratingGrok) {
+          triggerGrokReview({ force: true });
+        }
+        return;
+      }
+    } catch (_e) {
+      // ignore poll error
+    }
+    scheduleAutoReplayParsePoll(matchId, attempt + 1);
+  }, 6000);
 }
 
 async function triggerGrokReview({ force = true } = {}) {
@@ -5174,31 +5226,40 @@ function renderMatchOverview(report) {
   const won =
     (side === "radiant" && Boolean(report.radiant_win)) ||
     (side === "dire" && !report.radiant_win);
+  const grok = report.grok_coaching;
+  const isParsed = Boolean(report.is_parsed);
+  const hasGrok = Boolean(grok?.title);
 
   const metaEl = document.getElementById("match-meta-line");
   if (metaEl) {
+    const statusText =
+      isParsed && hasGrok
+        ? "✅ AI 完整判定已成功 (OpenDota 录像级11维解析 + Grok 4.7 深度判词已就绪)"
+        : isParsed
+        ? "🟢 OpenDota 录像级解析已成功 (可点下方「用 Grok 4.7 重算判词」生成大模型标题)"
+        : "🟡 当前仅基础统计 (刚结束的比赛 OpenDota 尚未解析 .dem 录像，系统正自动请求解析)";
     metaEl.textContent = `比赛编号 #${report.match_id} · ${report.start_time_str || ""} · ${
       report.mode_str || ""
-    } · 当前审视阵营：${sideZh} (${side.toUpperCase()}) · ${
-      report.is_parsed ? "OpenDota 录像级解析已就绪" : "基础统计模式 (可请求录像解析)"
-    }`;
+    } · 当前审视阵营：${sideZh} (${side.toUpperCase()}) · ${statusText}`;
   }
 
   const parseBadge = document.getElementById("parse-quality-badge");
   if (parseBadge) {
-    parseBadge.textContent = report.is_parsed
-      ? "录像级解析 (含眼位/时间轴/按键次数)"
-      : "未解析录像 (点击上方可请求解析)";
-    parseBadge.classList.toggle("connected", Boolean(report.is_parsed));
+    parseBadge.textContent =
+      isParsed && hasGrok
+        ? "✅ 录像级 + Grok 4.7 完整判定已就绪"
+        : isParsed
+        ? "🟢 录像级解析已就绪 (含眼位/时间轴/按键次数)"
+        : "🟡 未解析录像 (正在自动请求 OpenDota 解析...)";
+    parseBadge.classList.toggle("connected", isParsed);
   }
 
   const reqParseBtn = document.getElementById("btn-request-parse");
   if (reqParseBtn) {
-    reqParseBtn.hidden = Boolean(report.is_parsed);
+    reqParseBtn.hidden = isParsed;
   }
 
   const titleEl = document.getElementById("match-overview-title");
-  const grok = report.grok_coaching;
   if (titleEl) {
     const tagHtml = `<span class="${won ? "win-tag" : "loss-tag"}">[${sideZh}${won ? "获胜" : "落败"}]</span>`;
     const mainHeadline =
