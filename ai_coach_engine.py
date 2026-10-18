@@ -13,6 +13,7 @@ import os
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
+from hero_profiles_126 import audit_hero_mechanism_and_timing, get_hero_profile_126
 
 
 def clamp(val: float, lo: float, hi: float) -> float:
@@ -582,7 +583,11 @@ def evaluate_player_deeply(
     if fountain_deaths > 0:
         strengths.append(f"终局虐泉打卡：比赛结束前冲进敌方泉水被激光击杀 {fountain_deaths} 次。")
 
-    # --- (H) 录像级：前中期刷钱不参战 / 团战0伤害卖队友独刷 (AFK Farming Core) 严厉甄别 ---
+    # --- (H) 录像级：结合英雄内置强势期曲线 (timing_curve) 区分「大核合理避战刷钱->后期收割」与「毒瘤独刷不参战」 ---
+    hmp = audit_hero_mechanism_and_timing(p, team_players, enemy_players, duration_min, won)
+    p["hero_mechanism_profile"] = hmp
+    is_late_hyper_carry = hmp.get("timing_curve") == "late_hyper_carry"
+
     pt = p.get("phase_telemetry") or {}
     lane_hdmg = int(pt.get("lane_hdmg_gain") or 0)
     mid_gold = int(pt.get("mid_gold_gain") or 0)
@@ -598,8 +603,11 @@ def evaluate_player_deeply(
     is_afk_farmer = False
     if pos in (1, 2, 3) and duration_min >= 20 and not is_turbo:
         if is_parsed and mid_gold > 0:
-            # Must have both low overall KP and severe mid-game gold-vs-damage disparity
-            if (
+            # 如果是天生后期大核 (敌法/美杜莎/幽鬼/TB/猴子/水人/露娜/虚空等)，前中期(10-25m)避战刷钱是合理的！
+            # 只有当他属于前中期节奏核，或者大核在后期也没参战(kp < 42% 或 assists <= 4)时，才判定为毒瘤独刷
+            if is_late_hyper_carry and hmp.get("late_harvest_fulfilled") and kp >= 42.0 and assists >= 5:
+                is_afk_farmer = False
+            elif (
                 kp < 48.5
                 and mid_gold_share >= 22.5
                 and mid_hdmg_share <= 14.5
@@ -652,7 +660,7 @@ def evaluate_player_deeply(
         if won and rating_score >= 8.3:
             rating_tier = "S+ 擎天战神"
 
-    # --- (I) 英雄专属机制、团队博弈、单带被抓、魔晶/克制装缺失与炮台输出兑现深度审计 ---
+    # --- (I) 全 126 英雄专属机制、前中后期强势期契约、单带被抓、魔晶/克制装与炮台兑现深度审计 ---
     hid_cur = int(p.get("hero_id") or 0)
     has_shard = bool(p.get("aghanims_shard"))
     solo_pickoffs = pt.get("solo_pickoffs") or []
@@ -663,8 +671,8 @@ def evaluate_player_deeply(
     late_hdmg_share = float(pt.get("late_hdmg_share_pct") or 20.0)
     dmg_per_death = hdmg / max(1, deaths)
 
-    # 1) 脆皮高爆发炮台核心 (莉娜/宙斯/天怒/狙击手) 「虽死犹荣 · 火力倾泻兑现」判定
-    is_glass_cannon_turret = hid_cur in (25, 22, 101, 35)
+    # 1) 脆皮高爆发炮台核心 (莉娜/宙斯/天怒/狙击手/修补匠/卡尔/黑鸟等) 「虽死犹荣 · 火力倾泻兑现」判定
+    is_glass_cannon_turret = hmp.get("timing_curve") == "glass_cannon_turret" or hid_cur in (25, 22, 101, 35)
     is_turret_fulfilled = (
         is_glass_cannon_turret
         and duration_min >= 20
@@ -789,8 +797,17 @@ def evaluate_player_deeply(
                 "斯拉克在团队局的核心价值是「双黑雾救人拉扯 + 叠满敏捷收割」：① 20分钟必须第一时间补出 1,400 金魔晶《深海劫掠》，队友被屠夫咬或帕克大住时立刻给魔晶黑雾救人，自己依靠【大招暗影之舞 + 魔晶深海劫掠】两团黑雾反复进出战场叠出 20+ 层敏捷；② 面对蝴蝶+撒旦先知与酒仙，中期狂战刷完必须果断转【冰眼 + 金箍棒/血棘】而非散件标枪；③ 敌方帕克/屠夫小地图消失时严禁无视野单带过河道。",
             )
     elif pos in (1, 2) and not is_turret_fulfilled and duration_min >= 25:
-        # 通用 1/2 号位：检查「多次单带被抓」与「后期吃高经济却极低输出」
-        if len(solo_pickoffs) >= 2 and late_gold_share >= 22.0 and late_hdmg_share <= 17.0:
+        # 4) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」&「单带被抓」审计
+        if hmp.get("late_harvest_fulfilled") and not is_afk_farmer:
+            strengths.insert(0, hmp["late_phase_note"])
+        elif hmp.get("late_harvest_failed"):
+            blame_points += 20.0
+            weaknesses.insert(0, hmp["late_phase_note"])
+            trash_candidates.append((
+                104,
+                f"@{pname} 玩个{hero_name}前中期全队给你让资源避战刷钱完全合理，结果25分钟出山期你吃下全队{late_gold_share:.0f}%经济却只打了{late_hdmg_share:.0f}%后期伤害，刷最肥的钱打最低的输出，后期收割呢？",
+            ))
+        elif len(solo_pickoffs) >= 2 and late_gold_share >= 22.0 and late_hdmg_share <= 17.0:
             pickoff_str = "、".join(f"{sp['time_str']}(被{sp['killer']}抓)" for sp in solo_pickoffs[:4])
             blame_points += 18.0
             weaknesses.insert(
@@ -800,11 +817,27 @@ def evaluate_player_deeply(
                 + (f"，在 {', '.join(low_dmg_tfs[:3])} 团战中近乎零输出阵亡！" if low_dmg_tfs else "！"),
             )
 
+    # 5) 针对全 126 英雄的「节奏核闷头刷错失强势期」「先手肉核敢死开团功臣」「救人辅助保核兑现」「必出命脉魔晶缺失」审计
+    if hmp.get("mid_tempo_wasted") and hid_cur != 93 and not is_afk_farmer:
+        blame_points += 14.0
+        weaknesses.insert(0, hmp["mid_phase_note"])
+    if hmp.get("sacrificial_initiator_fulfilled"):
+        blame_points = max(8.0, blame_points - 18.0)
+        strengths.insert(0, hmp["mechanism_summary"])
+    if hmp.get("save_support_fulfilled"):
+        strengths.insert(0, hmp["mechanism_summary"])
+    if hmp.get("missing_mandatory_shard") and hid_cur != 93:
+        blame_points += 12.0
+        weaknesses.insert(
+            0,
+            f"核心命脉魔晶缺失：比赛打到 {duration_min:.0f} 分钟仍未购买 {hero_name} 仅售 1,400 金的质变魔晶【{hmp['shard_desc']}】，导致英雄核心团战机制残缺！",
+        )
+
     if deaths <= 4 and duration_min >= 30 and not is_afk_farmer:
         strengths.append(
             f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次（读秒总计 {dead_min}分{dead_rem_s:02d}秒，仅占全场 {dead_pct:.1f}%），团战站位拉扯极佳。"
         )
-    elif deaths >= 8 and not is_turret_fulfilled:
+    elif deaths >= 8 and not is_turret_fulfilled and not hmp.get("sacrificial_initiator_fulfilled"):
         blame_points += (deaths - 6) * 5.5
         gold_lost_txt = f"，光阵亡直接扣掉 **{death_gold_lost:,} 金币**" if death_gold_lost > 0 else ""
         weaknesses.append(
@@ -834,7 +867,7 @@ def evaluate_player_deeply(
         )
     if not improvements:
         improvements.append(
-            f"保持当前 {hero_name} 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+            f"保持当前 {hero_name} 的刷钱与参战节奏（推荐核心出装：{hmp.get('core_item_hint') or '关键保命/输出装'}），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
         )
 
     # 计算胜局贡献点数 (raw_contrib_points) 与凯旋庆功贺词 (praise_talk)
@@ -862,13 +895,15 @@ def evaluate_player_deeply(
             contrib_points += 9.0
         if stacked >= 4:
             contrib_points += 8.0
-    if deaths >= 10 and not is_turret_fulfilled:
+    if deaths >= 10 and not is_turret_fulfilled and not hmp.get("sacrificial_initiator_fulfilled"):
         contrib_points = max(6.0, contrib_points * 0.72)
 
     if is_afk_farmer:
         praise_talk = f"@{pname} 这把 {hero_name} 前中期闷头独刷 25 分钟（参战率仅 {kp:.1f}% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！"
     elif pos == 1 and tdmg_share >= 48.0 and tdmg >= 9000:
         praise_talk = f"@{pname} 擎天一号位真核！{hero_name} 顶着前中期少人压力参战接团，单人狂拆 {tdmg:,} 建筑伤害（包揽全队 {tdmg_share:.0f}% 拆塔量）+ {hdmg:,} 伤害，当之无愧本局头号首功！"
+    elif hmp.get("late_harvest_fulfilled"):
+        praise_talk = f"@{pname} 教科书式大核节奏！{hero_name} 前中期隐忍刷钱成型，25m+ 决胜期出山狂轰 {late_hdmg:,} 后期伤害（占全队后期伤害 {late_hdmg_share:.1f}%）完成终极收割！"
     elif pos in (1, 2) and (hdmg_share >= 26.0 or is_turret_fulfilled):
         praise_talk = f"@{pname} 这把 {hero_name} 炮台火力全开狂轰 {hdmg:,} 伤害（占全队 {hdmg_share:.1f}% 输出，场均每死换 {int(dmg_per_death):,} 伤害），真正做到倒下前把所有技能灌满！"
     elif tdmg >= 5500 or (tdmg_share >= 45.0 and tdmg >= 3000):
@@ -892,6 +927,7 @@ def evaluate_player_deeply(
 
     return {
         "is_afk_farmer": is_afk_farmer,
+        "hero_mechanism_profile": hmp,
         "radar": radar,
         "rating_score": rating_score,
         "rating_tier": rating_tier,
@@ -1458,6 +1494,7 @@ def call_llm_coach_review(
                 "active_item_uses": {k: v["count"] for k, v in (p.get("active_item_uses") or {}).items()},
                 "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:5]},
                 "is_afk_farmer": p.get("is_afk_farmer", False),
+                "hero_mechanism_profile": p.get("hero_mechanism_profile"),
                 "phoenix_egg_audit": p.get("phoenix_egg_audit"),
                 "slark_mechanism_audit": p.get("slark_mechanism_audit"),
                 "phase_telemetry": p.get("phase_telemetry"),
@@ -1499,14 +1536,17 @@ def call_llm_coach_review(
     )
 
     system_prompt = (
-        "你是懂 Dota 2 高端局机制与团队博弈的开黑老哥，给车队五人做赛后算账复盘。全中文输出（严禁夹杂英文变量名或英文道具名），像损友聊天：拒绝只看伤害/拆塔面板的浅薄分析（尤其是败局全队都没摸到高地时，绝不要怪1号位0建筑伤害），必须从【英雄核心机制、魔晶/克制出装、单带被抓、团战技能兑现与他原本能为团队做什么】深度思考！\n"
+        "你是懂 Dota 2 全 126 英雄核心机制与团队博弈的开黑老哥，给车队五人做赛后算账复盘。全中文输出（严禁夹杂任何英文变量名如 solo_pickoffs/rating_score_100/contrib_share_pct），像损友聊天：拒绝只看伤害/拆塔面板的浅薄分析（尤其是败局全队都没摸到高地时，绝不要怪1号位0建筑伤害），必须严格按照每个英雄的【内置强势期曲线 hero_mechanism_profile.timing_curve_zh 与专属核心机制】深度思考！\n"
         "核心铁律：\n"
-        "1) 结合每个人前期(0-10m对线)、中期(10-25m节奏与是否单带无故被抓 solo_pickoffs)、后期(25m+吃经济占比 vs 后期伤害占比 late_hdmg_share_pct)进行复盘。\n"
+        "1) 区分英雄强势期曲线（hero_mechanism_profile）：\n"
+        "   - 大后期刷钱收割核（late_hyper_carry，如敌法/美杜莎/幽鬼/TB/猴子/水人/露娜/虚空等）：前期弱势、10-22m避战刷关键装完全合理，绝不要因为中期刷钱少参团而乱骂；但必须重点考核其【25m+ 成型后是否出山接管比赛完成收割（late_harvest_fulfilled vs late_harvest_failed）】！\n"
+        "   - 前中期干架节奏核（mid_tempo_brawler，如斯拉克/拍拍熊/帕克/蓝猫/火猫/女王/影魔/哈斯卡等）：10-25m是黄金强势期，严禁闷头当刷子！\n"
+        "   - 先手开团肉盾（frontline_initiator）与救人保核辅助（save_healer_support）：考核先手控制承伤转化与救人技能（薄葬/暗箱/禁锢/雪球/无光之盾）兑现度，为团队开团或救人牺牲绝不背死得多的黑锅！\n"
         + afk_rule_str +
         "3) 深度机制铁律：\n"
         "   - 若 1号位（如斯拉克）单带多次无故被抓、拒不出 1,400 金关键魔晶（如斯拉克不出《深海劫掠》导致既救不了被屠夫咬/帕克大的队友、自己也少黑雾叠敏捷 A 不过人）、面对敌方蝴蝶撒旦先知/酒仙不出金箍棒/冰眼、且后期吃满经济却毫无输出，必须一针见血拆穿这三点！\n"
-        "   - 若 3号位是凤凰，绝不要无脑喷不出BKB或拆塔少，必须重点审判其《超新星(变蛋)》在团战中成功炸出几次 vs 被打碎几次（phoenix_egg_audit 团战碎蛋率）、变蛋前是否挂了《烈火精灵》减攻速、以及《烈日炙烤(激光)》是否严重少按！\n"
-        "   - 若 2号位是脆皮高爆发炮台（如莉娜/宙斯/火枪），只要她对线打出优势且倒下前把伤害灌满（高英雄伤害占比、场均每死换3000+伤害），死了也完全尽责（虽死犹荣），必须肯定其炮台输出兑现度，并从团队博弈角度建议大推推等解先知发芽/帕克大的出装可能性。\n"
+        "   - 若 3号位是凤凰，绝不要无脑喷不出BKB或拆塔少，必须重点审判其《超新星(变蛋)》在团战中成功炸出几次 vs 被打碎几次（团战碎蛋率）、变蛋前是否挂了《烈火精灵》减攻速、以及《烈日炙烤(激光)》是否严重少按！\n"
+        "   - 若 2号位是脆皮高爆发炮台（如莉娜/宙斯/火枪/天怒），只要她对线打出优势且倒下前把伤害灌满（高英雄伤害占比、场均每死换3000+伤害），死了也完全尽责（虽死犹荣），必须肯定其炮台输出兑现度，并从团队博弈角度建议大推推等解先知发芽/帕克大的出装可能性。\n"
         f"4) 胜局或队内最佳 MVP 定为『{top1_hero}』，二当家定为『{top2_hero}』。\n"
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"

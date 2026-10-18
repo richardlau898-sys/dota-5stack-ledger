@@ -16410,6 +16410,12 @@
           "hero_short_zh": "先知",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
           "personaname": "Flame = ez mute",
+          "timing_curve": "zoo_split_pusher",
+          "hero_roles": [
+            "全图传送支援收割与带球牵制",
+            "发芽框人克制无推推近战",
+            "自然之怒全图增伤收割"
+          ],
           "stuns_sec": 0.0,
           "ult_audits": [
             {
@@ -16481,7 +16487,8 @@
           ],
           "special_insights": [
             "大招中规中矩：全场释放 18 次，累计 28 人次（场均每大 1.56 人次，伤害 5,918）；但在 17:19–17:53, 30:00–30:53 团战中未放出大招即阵亡！",
-            "《发芽 (先知框人)》全场施放 27 次，命中敌方英雄 18 人次（有效命中比 66.7%，造成 2,145 伤害）。"
+            "《发芽 (先知框人)》全场施放 27 次，命中敌方英雄 18 人次（有效命中比 66.7%，造成 2,145 伤害）。",
+            "【英雄定位：全图传送支援收割与带球牵制】技能释放：《自然之力(招树人)》×59、《发芽(框)》×27(中18人/2,145伤)、《传送(飞)》×24。"
           ]
         },
         {
@@ -16492,6 +16499,12 @@
           "hero_short_zh": "克林克兹",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/clinkz.png",
           "personaname": "DDW",
+          "timing_curve": "mid_tempo_brawler",
+          "hero_roles": [
+            "骨隐步全图隐身抓单偷塔",
+            "炽烈火雨+焦油炸弹减甲点杀脆皮",
+            "身板脆怕反隐强留的刺客核"
+          ],
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
@@ -16502,7 +16515,7 @@
             }
           ],
           "special_insights": [
-            "核心技能释放与转化：《骨隐步(隐身)》释放 50 次(命中 0 人次 / 0 伤害)；《死亡契约(吃兵)》释放 36 次(命中 0 人次 / 0 伤害)；《扫射》释放 25 次(命中 0 人次 / 0 伤害)。"
+            "【骨隐步全图隐身抓单偷塔】招牌技能兑现：《骨隐步(隐身)》×50；《死亡契约(吃兵)》×36；《扫射》×25。"
           ]
         },
         {
@@ -16513,6 +16526,12 @@
           "hero_short_zh": "龙骑士",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
           "personaname": "Replica",
+          "timing_curve": "frontline_initiator",
+          "hero_roles": [
+            "瞬发神龙摆尾稳定点控先手",
+            "古龙形态腐蚀溅射强推外塔",
+            "龙族血统高护甲前排顶梁柱"
+          ],
           "stuns_sec": 63.8,
           "ult_audits": [],
           "skillshot_audits": [
@@ -16567,6 +16586,12 @@
           "hero_short_zh": "工程师",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
           "personaname": "Paphets",
+          "timing_curve": "glass_cannon_turret",
+          "hero_roles": [
+            "爆破起飞远程跳脸沉默群伤",
+            "感应地雷阵地封锁与清线磨塔",
+            "粘性炸弹拉扯轰炸"
+          ],
           "stuns_sec": 24.3,
           "ult_audits": [],
           "skillshot_audits": [],
@@ -16581,7 +16606,8 @@
             }
           ],
           "special_insights": [
-            "全场累计对敌方英雄造成 24.3 秒硬控眩晕（平均每分钟控制 0.61 秒）。"
+            "全场累计对敌方英雄造成 24.3 秒硬控眩晕（平均每分钟控制 0.61 秒）。",
+            "【英雄定位：爆破起飞远程跳脸沉默群伤】技能释放：《感应地雷(大招红雷)》×72(中44人/14,208伤)、《活性电击》×29(中13人/1,417伤)、《爆破起飞(自爆跳)》×16(中23人/2,584伤)。"
           ]
         },
         {
@@ -16592,6 +16618,12 @@
           "hero_short_zh": "寒冬飞龙",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
           "personaname": "Merl",
+          "timing_curve": "teamfight_ult_engine",
+          "hero_roles": [
+            "寒冬诅咒无视BKB反手团控让敌方队友自相残杀",
+            "极寒之拥物理免疫百分比回血救人",
+            "严寒烧灼超远距离百分比消耗"
+          ],
           "stuns_sec": 28.8,
           "ult_audits": [],
           "skillshot_audits": [],
@@ -16606,7 +16638,8 @@
             }
           ],
           "special_insights": [
-            "全场累计对敌方英雄造成 28.8 秒硬控眩晕（平均每分钟控制 0.72 秒）。"
+            "全场累计对敌方英雄造成 28.8 秒硬控眩晕（平均每分钟控制 0.72 秒）。",
+            "【英雄定位：寒冬诅咒无视BKB反手团控让敌方队友自相残杀】技能释放：《严寒烧灼》×31(中186人/2,056伤)、《碎裂冲击》×28(中15人/3,161伤)、《极寒之拥(冰箱)》×26。"
           ]
         }
       ],
@@ -16619,6 +16652,12 @@
           "hero_short_zh": "斯拉克",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slark.png",
           "personaname": "GANASIA",
+          "timing_curve": "mid_tempo_brawler",
+          "hero_roles": [
+            "能量转移无限偷属性越打越猛",
+            "黑暗契约强解一切非光环硬控",
+            "暗影之舞+魔晶深海劫掠双黑雾无敌切入与救人"
+          ],
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [
@@ -16648,7 +16687,8 @@
           ],
           "special_insights": [
             "🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》12 次、《黑暗契约》84 次、《突袭》34 放 0 中；魔晶《深海劫掠》释放 2 次掩护队友。此外在 16:09–16:47(280伤), 17:19–17:53(70伤), 25:41–26:15(403伤), 30:00–30:53(885伤/死) 等中后期关键团战中近乎 0 输出蒸发或边缘OB！",
-            "《突袭 (小鱼跳锁人)》全场施放 34 次，命中敌方英雄 0 人次（有效命中比 0.0%，造成 0 伤害），大量技能落空或仅用于清兵逃生。"
+            "《突袭 (小鱼跳锁人)》全场施放 34 次，命中敌方英雄 0 人次（有效命中比 0.0%，造成 0 伤害），大量技能落空或仅用于清兵逃生。",
+            "【英雄定位：能量转移无限偷属性越打越猛】技能释放：《黑暗契约(C解状态)》×84(中1031人/3,484伤)、《突袭(跳留人)》×34、《暗影之舞(大招黑雾)》×12。"
           ]
         },
         {
@@ -16659,6 +16699,12 @@
           "hero_short_zh": "殁境神蚀者",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/obsidian_destroyer.png",
           "personaname": "ksk77v",
+          "timing_curve": "glass_cannon_turret",
+          "hero_roles": [
+            "星体禁锢断节奏救队友/留人",
+            "奥术天球纯粹法球巨额点杀肉核",
+            "神智之蚀大招清场"
+          ],
           "stuns_sec": 100.1,
           "ult_audits": [
             {
@@ -16716,7 +16762,8 @@
           ],
           "special_insights": [
             "大招中规中矩：全场释放 8 次，累计 12 人次（场均每大 1.5 人次，伤害 5,953）；但在 16:09–16:47, 22:42–23:30 团战中未放出大招即阵亡！",
-            "全场累计对敌方英雄造成 100.1 秒硬控眩晕（平均每分钟控制 2.51 秒）。"
+            "全场累计对敌方英雄造成 100.1 秒硬控眩晕（平均每分钟控制 2.51 秒）。",
+            "【英雄定位：星体禁锢断节奏救队友/留人】技能释放：《星体禁锢(关)》×39(中30人/5,514伤)、《申斥(魔晶护盾)》×29、《神智之蚀(大招)》×8(中12人/5,953伤)。"
           ]
         },
         {
@@ -16727,12 +16774,24 @@
           "hero_short_zh": "破晓辰星",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dawnbreaker.png",
           "personaname": "Hira",
+          "timing_curve": "frontline_initiator",
+          "hero_roles": [
+            "天光现世全图空降回血群晕反打（天克抓单/带球体系）",
+            "星破天惊+熠熠生辉高额前排肉搏回血",
+            "上界重锤封路减速"
+          ],
           "stuns_sec": 12.6,
           "ult_audits": [],
           "skillshot_audits": [],
-          "headline_badges": [],
+          "headline_badges": [
+            {
+              "text": "🚫 40m未出命脉魔晶!",
+              "tone": "bad"
+            }
+          ],
           "special_insights": [
-            "核心技能释放与转化：《上界重锤(掷锤)》释放 43 次(命中 42 人次 / 3,976 伤害)；《星破天惊(大锤三连)》释放 38 次(命中 36 人次 / 9,926 伤害)；《天光现世(大招全图降临)》释放 9 次(命中 51 人次 / 2,178 伤害)。"
+            "🚨 专属魔晶缺失：打到 40 分钟仍未购买该英雄质变魔晶【星破天惊施放期间获得技能免疫并可自由转向（必出命脉魔晶）】！",
+            "【英雄定位：天光现世全图空降回血群晕反打（天克抓单/带球体系）】技能释放：《上界重锤(掷锤)》×43(中42人/3,976伤)、《星破天惊(大锤三连)》×38(中36人/9,926伤)、《天光现世(大招全图降临)》×9(中51人/2,178伤)。"
           ]
         },
         {
@@ -16743,6 +16802,12 @@
           "hero_short_zh": "司夜刺客",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
           "personaname": "hakase",
+          "timing_curve": "roaming_pickoff_support",
+          "hero_roles": [
+            "复仇隐身超高爆发猎杀脆皮远程核",
+            "尖刺外壳完美反弹敌方AOE先手",
+            "穿刺+心灵焦灼控制消蓝"
+          ],
           "stuns_sec": 80.2,
           "ult_audits": [],
           "skillshot_audits": [
@@ -16793,6 +16858,12 @@
           "hero_short_zh": "干扰者",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/disruptor.png",
           "personaname": "hikoku",
+          "timing_curve": "teamfight_ult_engine",
+          "hero_roles": [
+            "恶念瞥视千里抓回TP与逃生英雄",
+            "静态风暴+动能场框大范围沉默禁用物品",
+            "天克高机动游走核"
+          ],
           "stuns_sec": 0.0,
           "ult_audits": [
             {
@@ -16844,7 +16915,8 @@
             }
           ],
           "special_insights": [
-            "大招质量极高！全场释放 10 次，累计打出 132 人次（场均每大 13.2 人次，造成 1,880 点伤害），在 14:04–14:46(×1), 16:09–16:47(×1), 18:10–18:53(×1), 25:41–26:15(×1) 团战完美兑现；主要灌伤目标：工程师(701伤)、寒冬飞龙(458伤)、先知(334伤)。"
+            "大招质量极高！全场释放 10 次，累计打出 132 人次（场均每大 13.2 人次，造成 1,880 点伤害），在 14:04–14:46(×1), 16:09–16:47(×1), 18:10–18:53(×1), 25:41–26:15(×1) 团战完美兑现；主要灌伤目标：工程师(701伤)、寒冬飞龙(458伤)、先知(334伤)。",
+            "【英雄定位：恶念瞥视千里抓回TP与逃生英雄】技能释放：《雷霆之击(霹雳)》×35(中74人/3,824伤)、《动能立场(框)》×20、《恶念瞥视(D回)》×14(中13人/1,653伤)。"
           ]
         }
       ]
@@ -37689,15 +37761,16 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png"
             }
           ],
+          "timing_curve_zh": "⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷）",
           "assessment": "00:00–10:00 阶段斩获 0 杀 1 死，经济 +2,351 (GPM 235)，英雄伤害 +1,658，推塔 +0。",
           "good": [
             "按部就班做出前期过渡装：04:19 速度之靴(草鞋)、08:10 魔杖(大魔棒)、08:10 动力鞋(假腿)。"
           ],
           "bad": [
-            "对线补刀严重不达标：作为 1 号位前10分钟仅有 32 刀（经济 +2,351），早期发育直接断档。",
+            "对线补刀严重不达标：作为 1 号位（⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷））前10分钟仅有 32 刀（经济 +2,351），早期发育直接断档。",
             "在 05:59(被寒冬飞龙击杀) 阵亡 1 次，断了一波线上节奏与补给。"
           ],
-          "focus": "前期改进重点：注意 03:00 莲花与 06:00 河道动力符时间点，残血及时补大药别硬拼送人头。"
+          "focus": "前期改进重点（注意 03:00 莲花与 06:00 河道动力符时间点，残血及时补大药别硬拼送人头。）"
         },
         {
           "slot": 0,
@@ -37732,15 +37805,16 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/boots.png"
             }
           ],
+          "timing_curve_zh": "🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤）",
           "assessment": "00:00–10:00 阶段斩获 0 杀 0 死，经济 +2,824 (GPM 282)，英雄伤害 +3,211，推塔 +196。",
           "good": [
-            "抗压补刀合格：10分钟补出 38 正补 / 15 反补（经济 +2,824），稳住了核心发育线。",
+            "抗压补刀合格（🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤））：10分钟补出 38 正补 / 15 反补（经济 +2,824），稳住了核心发育线。",
             "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
           ],
           "bad": [
             "前10分钟推塔伤害为 196，对线期拿到优势后未能进一步磨掉敌方一塔血量。"
           ],
-          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+          "focus": "前期改进重点（保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。）"
         },
         {
           "slot": 3,
@@ -37788,15 +37862,16 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/phase_boots.png"
             }
           ],
+          "timing_curve_zh": "🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤）",
           "assessment": "00:00–10:00 阶段斩获 1 杀 0 死，经济 +2,824 (GPM 282)，英雄伤害 +1,204，推塔 +0。",
           "good": [
-            "劣势路占线出色：10分钟补刀 34/1，打出 1,204 对线消耗伤害。",
+            "劣势路占线出色（🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤））：10分钟补刀 34/1，打出 1,204 对线消耗伤害。",
             "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
           ],
           "bad": [
             "前10分钟推塔伤害为 0，对线期拿到优势后未能进一步磨掉敌方一塔血量。"
           ],
-          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+          "focus": "前期改进重点（保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。）"
         },
         {
           "slot": 1,
@@ -37831,6 +37906,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/arcane_boots.png"
             }
           ],
+          "timing_curve_zh": "🏹 游走抓人控图辅助（考核前中期游走控制与视野反隐）",
           "assessment": "00:00–10:00 阶段斩获 0 杀 0 死，经济 +1,561 (GPM 156)，英雄伤害 +1,393，推塔 +0。",
           "good": [
             "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
@@ -37838,7 +37914,7 @@
           "bad": [
             "前10分钟推塔伤害为 0，对线期拿到优势后未能进一步磨掉敌方一塔血量。"
           ],
-          "focus": "前期改进重点：保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。"
+          "focus": "前期改进重点（保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。）"
         },
         {
           "slot": 2,
@@ -37888,15 +37964,16 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/dust.png"
             }
           ],
+          "timing_curve_zh": "🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化）",
           "assessment": "00:00–10:00 阶段斩获 0 杀 1 死，经济 +1,367 (GPM 137)，英雄伤害 +2,733，推塔 +0。",
           "good": [
-            "线上消耗与游走积极：前期打出 2,733 英雄伤害，有效压低了敌方血量。",
+            "线上消耗与游走积极（🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化））：前期打出 2,733 英雄伤害，有效压低了敌方血量。",
             "前期视野勤勉：前10分钟插下 2 假眼 / 3 真眼保障线眼与抢符视野。"
           ],
           "bad": [
             "在 05:17(被龙骑士击杀) 阵亡 1 次，断了一波线上节奏与补给。"
           ],
-          "focus": "前期改进重点：注意 03:00 莲花与 06:00 河道动力符时间点，残血及时补大药别硬拼送人头。"
+          "focus": "前期改进重点（注意 03:00 莲花与 06:00 河道动力符时间点，残血及时补大药别硬拼送人头。）"
         },
         {
           "slot": 129,
@@ -37952,10 +38029,11 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/magic_wand.png"
             }
           ],
+          "timing_curve_zh": "🏰 召唤推进与全图牵制核（考核推塔拆迁与带线牵制空间）",
           "assessment": "56刀10反补、GPM364、假腿04:53、标枪07:17，0死，推塔818，这就是无解肥。",
           "good": [
             "补刀和发育全队最高",
-            "对线基本功扎实：前10分钟斩获 56 正补 / 10 反补，阶段 GPM 高达 364，无解肥发育。",
+            "对线基本功扎实（🏰 召唤推进与全图牵制核（考核推塔拆迁与带线牵制空间））：前10分钟斩获 56 正补 / 10 反补，阶段 GPM 高达 364，无解肥发育。",
             "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
           ],
           "bad": [
@@ -38004,10 +38082,11 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png"
             }
           ],
+          "timing_curve_zh": "⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷）",
           "assessment": "46刀7反补、假腿05:54、0死，水符两瓶、莲花1朵、双生门1次，中路没崩。",
           "good": [
             "10分钟GPM307且0死",
-            "抗压补刀合格：10分钟补出 46 正补 / 7 反补（经济 +3,072），稳住了核心发育线。",
+            "抗压补刀合格（⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷））：10分钟补出 46 正补 / 7 反补（经济 +3,072），稳住了核心发育线。",
             "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
           ],
           "bad": [
@@ -38062,10 +38141,11 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png"
             }
           ],
+          "timing_curve_zh": "🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤）",
           "assessment": "44/13、伤害3480、推塔904、05:17杀电棍，假腿08:46，劣势路占成优势路。",
           "good": [
             "0死且单杀辅助",
-            "劣势路占线出色：10分钟补刀 44/13，打出 3,480 对线消耗伤害。",
+            "劣势路占线出色（🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤））：10分钟补刀 44/13，打出 3,480 对线消耗伤害。",
             "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。"
           ],
           "bad": [
@@ -38129,10 +38209,11 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/magic_wand.png"
             }
           ],
+          "timing_curve_zh": "🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤）",
           "assessment": "伤害3032但08:41被破晓收头，绿鞋07:51，真眼只1颗，拉野倒是勤。",
           "good": [
             "拉野占比51.2%，线上消耗够",
-            "线上消耗与游走积极：前期打出 3,032 英雄伤害，有效压低了敌方血量。"
+            "线上消耗与游走积极（🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤））：前期打出 3,032 英雄伤害，有效压低了敌方血量。"
           ],
           "bad": [
             "被三号位单杀，游走没换到人头",
@@ -38179,10 +38260,11 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/boots.png"
             }
           ],
+          "timing_curve_zh": "🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化）",
           "assessment": "05:59杀小鱼，2假2真，经验符07:09进账，拉野42.9%，草鞋05:22。",
           "good": [
             "杀核心且0死，线眼到位",
-            "线上消耗与游走积极：前期打出 2,985 英雄伤害，在 05:59(杀斯拉克) 拿人头打开局面。",
+            "线上消耗与游走积极（🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化））：前期打出 2,985 英雄伤害，在 05:59(杀斯拉克) 拿人头打开局面。",
             "前期视野勤勉：前10分钟插下 2 假眼 / 2 真眼保障线眼与抢符视野。"
           ],
           "bad": [
@@ -38335,6 +38417,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png"
             }
           ],
+          "timing_curve_zh": "⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷）",
           "assessment": "10:00–25:00 阶段斩获 3 杀 1 死，经济 +7,941 (GPM 529)，英雄伤害 +3,306，推塔 +0。",
           "good": [
             "中期稳步过渡，经济增量 +7,941，造成 3,306 伤害。"
@@ -38342,7 +38425,7 @@
           "bad": [
             "中期打架参与度偏低：15分钟内仅打出 3,306 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
+          "focus": "中期改进重点（中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。）"
         },
         {
           "slot": 0,
@@ -38452,6 +38535,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/force_staff.png"
             }
           ],
+          "timing_curve_zh": "🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤）",
           "assessment": "10:00–25:00 阶段斩获 2 杀 5 死，经济 +5,983 (GPM 399)，英雄伤害 +4,543，推塔 +120。",
           "good": [
             "中期稳步过渡，经济增量 +5,983，造成 4,543 伤害。"
@@ -38461,7 +38545,7 @@
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 399（经济 +5,983），核心装备成型过慢。",
             "中期沦为突破口：15分钟内连续暴毙 5 次（10:00(被龙骑士击杀), 16:32(被先知击杀), 17:38(被工程师击杀), 20:31(被克林克兹击杀)），把前期积攒的节奏全送了出去！"
           ],
-          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
+          "focus": "中期改进重点（第一件关键装到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！）"
         },
         {
           "slot": 3,
@@ -38552,14 +38636,15 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ogre_axe.png"
             }
           ],
+          "timing_curve_zh": "🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤）",
           "assessment": "10:00–25:00 阶段斩获 1 杀 2 死，经济 +7,335 (GPM 489)，英雄伤害 +5,017，推塔 +0。",
           "good": [
-            "中期关键先手/团队装成型：10:16 魔杖(大魔棒)、11:24 秘银锤、15:07 秘银锤、15:41 暗灭，阶段打出 5,017 伤害与 1 次击杀。"
+            "中期关键先手/团队装成型（🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤））：10:16 魔杖(大魔棒)、11:24 秘银锤、15:07 秘银锤、15:41 暗灭，阶段打出 5,017 伤害与 1 次击杀。"
           ],
           "bad": [
             "中期阵亡 2 次（16:32(被先知击杀), 23:15(被克林克兹击杀)），多次在团战或带线时被抓断节奏。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
+          "focus": "中期改进重点（中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。）"
         },
         {
           "slot": 1,
@@ -38673,6 +38758,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/dagon.png"
             }
           ],
+          "timing_curve_zh": "🏹 游走抓人控图辅助（考核前中期游走控制与视野反隐）",
           "assessment": "10:00–25:00 阶段斩获 7 杀 3 死，经济 +4,828 (GPM 322)，英雄伤害 +6,484，推塔 +18。",
           "good": [
             "中期视野铺设到位：10~25分钟插下 2 颗假眼与 7 颗真眼，努力支撑团队视野。",
@@ -38681,7 +38767,7 @@
           "bad": [
             "中期阵亡 3 次（17:34(被先知击杀), 18:27(被克林克兹击杀), 23:11(被先知击杀)），多次在团战或带线时被抓断节奏。"
           ],
-          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
+          "focus": "中期改进重点（第一件关键装到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！）"
         },
         {
           "slot": 2,
@@ -38765,6 +38851,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/glimmer_cape.png"
             }
           ],
+          "timing_curve_zh": "🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化）",
           "assessment": "10:00–25:00 阶段斩获 1 杀 2 死，经济 +4,140 (GPM 276)，英雄伤害 +3,867，推塔 +0。",
           "good": [
             "中期视野铺设到位：10~25分钟插下 1 颗假眼与 6 颗真眼，努力支撑团队视野。"
@@ -38772,7 +38859,7 @@
           "bad": [
             "中期阵亡 2 次（16:27(被克林克兹击杀), 18:38(被克林克兹击杀)），多次在团战或带线时被抓断节奏。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
+          "focus": "中期改进重点（中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。）"
         },
         {
           "slot": 129,
@@ -38911,6 +38998,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/lesser_crit.png"
             }
           ],
+          "timing_curve_zh": "🏰 召唤推进与全图牵制核（考核推塔拆迁与带线牵制空间）",
           "assessment": "经济+12445、GPM830、补刀+226，雷神16:47、BKB22:05，5杀12880伤害，17:35被黑鸟换掉一次。",
           "good": [
             "装备和伤害都是中期天花板",
@@ -39017,6 +39105,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/orchid.png"
             }
           ],
+          "timing_curve_zh": "⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷）",
           "assessment": "5杀0死，散失15:11、紫怨21:03，伤害5142。10:47和14:04两波没TP。",
           "good": [
             "15分钟0死，专抓电棍和小强",
@@ -39103,10 +39192,11 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/splintmail.png"
             }
           ],
+          "timing_curve_zh": "🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤）",
           "assessment": "跳刀13:28、魔晶18:10，但11:20、14:28被小强戳死，23:14再死，1杀3死。",
           "good": [
             "16:09亮TP进团，拍晕和喷火都交了",
-            "中期关键先手/团队装成型：13:28 闪烁匕首(跳刀)、18:10 阿哈利姆魔晶、23:24 护胫甲，阶段打出 5,386 伤害与 1 次击杀。"
+            "中期关键先手/团队装成型（🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤））：13:28 闪烁匕首(跳刀)、18:10 阿哈利姆魔晶、23:24 护胫甲，阶段打出 5,386 伤害与 1 次击杀。"
           ],
           "bad": [
             "跳刀后仍被单抓，没有立刻开雾",
@@ -39203,6 +39293,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/glimmer_cape.png"
             }
           ],
+          "timing_curve_zh": "🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤）",
           "assessment": "1杀5死，15:10雾是功，其余时间是提款机，微光拖到23:25。",
           "good": [
             "那一罐雾换出16:32的3换2",
@@ -39303,6 +39394,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
             }
           ],
+          "timing_curve_zh": "🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化）",
           "assessment": "5假8真视野勤，但1杀5死，跳刀24:40才出，堆野0，16:24、23:09连续送。",
           "good": [
             "眼是中期唯一能看的东西",
@@ -39460,6 +39552,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
             }
           ],
+          "timing_curve_zh": "⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷）",
           "assessment": "25:00–39:51 阶段斩获 2 杀 4 死，经济 +6,644 (GPM 447)，英雄伤害 +7,564，推塔 +162。",
           "good": [
             "后期阶段贡献 2 杀、经济 +6,644、英雄伤害 +7,564。"
@@ -39607,6 +39700,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/point_booster.png"
             }
           ],
+          "timing_curve_zh": "🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤）",
           "assessment": "25:00–39:51 阶段斩获 5 杀 4 死，经济 +8,946 (GPM 602)，英雄伤害 +14,947，推塔 +270。",
           "good": [
             "后期决战火力全开：单阶段砍下 5 杀、轰出 14,947 英雄伤害，更新 25:05 闪电指套、26:15 空明杖、26:48 巫师之刃、28:03 食人魔之斧。"
@@ -39761,11 +39855,13 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/assault.png"
             }
           ],
+          "timing_curve_zh": "🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤）",
           "assessment": "25:00–39:51 阶段斩获 8 杀 1 死，经济 +13,303 (GPM 896)，英雄伤害 +17,313，推塔 +1,409。",
           "good": [
             "后期决战火力全开：单阶段砍下 8 杀、轰出 17,313 英雄伤害，更新 25:03 秘银锤、27:13 黑皇杖(BKB)、30:00 食人魔之斧、30:36 阔剑。"
           ],
           "bad": [
+            "整局拒出 1400 金质变魔晶（星破天惊施放期间获得技能免疫并可自由转向（必出命脉魔晶）），后期团战少一个关键救人/切入/输出机制！",
             "后期阵亡 1 次（38:50(被龙骑士击杀)），后期高地/肉山团站位与自保装需更到位。"
           ],
           "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
@@ -39892,6 +39988,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/dagon_4.png"
             }
           ],
+          "timing_curve_zh": "🏹 游走抓人控图辅助（考核前中期游走控制与视野反隐）",
           "assessment": "25:00–39:51 阶段斩获 2 杀 5 死，经济 +5,855 (GPM 394)，英雄伤害 +13,647，推塔 +0。",
           "good": [
             "后期决战火力全开：单阶段砍下 2 杀、轰出 13,647 英雄伤害，更新 26:35 阿哈利姆魔晶、26:47 显影之尘(粉)、30:00 二级红杖、32:12 显影之尘(粉)。",
@@ -40019,6 +40116,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/smoke_of_deceit.png"
             }
           ],
+          "timing_curve_zh": "🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化）",
           "assessment": "25:00–39:51 阶段斩获 1 杀 5 死，经济 +6,914 (GPM 466)，英雄伤害 +4,169，推塔 +0。",
           "good": [
             "后期辅助尽职尽责：插下 7 假眼 / 8 真眼，做出 27:06 诡计之雾、27:07 诡计之雾、32:17 幽魂权杖(绿杖)、35:16 活力之球 保护核心。"
@@ -40146,6 +40244,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/hurricane_pike.png"
             }
           ],
+          "timing_curve_zh": "🏰 召唤推进与全图牵制核（考核推塔拆迁与带线牵制空间）",
           "assessment": "4杀5死，大炮29:07、大推推32:34，伤害24137、塔伤9709，但25:03到34:35连死，买活死是致命伤。",
           "good": [
             "拆家9709，终局4490伤害还在",
@@ -40336,6 +40435,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/hydras_breath.png"
             }
           ],
+          "timing_curve_zh": "⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷）",
           "assessment": "9杀3死，大炮30:29，后期伤害30138、塔伤9741，终局团0死。26:30和34:17被黑鸟换掉。",
           "good": [
             "终局收割和拆家都是主力",
@@ -40473,14 +40573,16 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/octarine_core.png"
             }
           ],
+          "timing_curve_zh": "🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤）",
           "assessment": "冰甲28:51、玲珑心38:23，4杀4死，终局跳刀4次、摆尾3次、火球3次，伤害5379。25:56先被三塔收了。",
           "good": [
             "终局前排输出全场第二，冰甲按了13次",
+            "前排先手开团与承伤兑现（🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤））：全场贡献 63.8 秒硬控并抗下全队 0% 伤害，果断肉身开团为后排创造输出空间！",
             "后期决战火力全开：单阶段砍下 4 杀、轰出 16,373 英雄伤害，更新 28:30 板甲、28:51 希瓦的守护(冰甲)、32:20 精气之球、32:20 活力之球。"
           ],
           "bad": [
             "高地抗塔过深，31:38、34:29连续送",
-            "后期高价值人头连送 4 次（25:56(被npc_dota_goodguys_tower3_top击杀), 28:51(被破晓辰星击杀), 31:38(被干扰者击杀), 34:29(被破晓辰星击杀)），后期每一次读秒都直接让队伍少人接团/守高地！"
+            "后期阵亡 4 次（25:56(被npc_dota_goodguys_tower3_top击杀), 28:51(被破晓辰星击杀), 31:38(被干扰者击杀), 34:29(被破晓辰星击杀)），后期高地/肉山团站位与自保装需更到位。"
           ],
           "focus": "带盾再上高地，冰甲交完立刻撤去打肉山"
         },
@@ -40567,6 +40669,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/cyclone.png"
             }
           ],
+          "timing_curve_zh": "🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤）",
           "assessment": "0杀5死，风杖35:39，伤害14559靠雷，26:01和33:58两波TP进来都没拦住崩盘。",
           "good": [
             "后期雷伤还在，2假5真没完全弃疗",
@@ -40652,6 +40755,7 @@
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/force_staff.png"
             }
           ],
+          "timing_curve_zh": "🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化）",
           "assessment": "2杀3死，推推32:21，5假11真，终局诅咒、冰箱、碎裂都交了，伤害2259。26:17和34:13仍被抓。",
           "good": [
             "终局技能没憋死，眼撑到了肉山",
@@ -41006,7 +41110,7 @@
       "rating_score": 9.2,
       "rating_tier": "S+ 擎天战神",
       "mvp_score": 92.4,
-      "blame_share_pct": 4.1,
+      "blame_share_pct": 4.5,
       "contrib_share_pct": 31.3,
       "contrib_tier": "👑 头号首功 · 擎天真神",
       "gpm": 776,
@@ -41038,7 +41142,7 @@
       "kill_participation_pct": 76.5,
       "rating_score": 8.4,
       "rating_tier": "S 凯旋真核",
-      "blame_share_pct": 7.9,
+      "blame_share_pct": 8.6,
       "contrib_share_pct": 24.1,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "strengths": [
@@ -41067,8 +41171,8 @@
       "kill_participation_pct": 85.7,
       "rating_score": 8.4,
       "rating_tier": "A 尽力大腿",
-      "blame_share_pct": 7.1,
-      "contrib_share_pct": 36.7
+      "blame_share_pct": 7.9,
+      "contrib_share_pct": 31.2
     },
     "culprit_player": {
       "player_slot": 128,
@@ -41084,7 +41188,7 @@
       "kda": "1/12/14",
       "rating_score": 5.7,
       "rating_tier": "B 躺赢福将",
-      "blame_share_pct": 38.6,
+      "blame_share_pct": 41.7,
       "contrib_share_pct": 6.5,
       "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "dead_seconds": 421,
@@ -41095,19 +41199,19 @@
       "verdict": "凯旋庆功总结：夜魇头号首功 先知（Flame = ez mute，贡献 31.3%）与二当家 克林克兹（DDW，贡献 24.1%）携手带飞！ 本局惊险躺赢锦鲤：4号位 工程师（Paphets，贡献 6.5%）。"
     },
     "second_culprit_player": {
-      "player_slot": 130,
+      "player_slot": 131,
       "side": "夜魇",
-      "pos": 3,
-      "hero_name": "龙骑士(龙骑)",
-      "hero_short_zh": "龙骑士",
-      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
-      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dragon_knight.png",
-      "personaname": "Replica",
-      "kda": "6/7/14",
-      "rating_score": 6.8,
-      "blame_share_pct": 25.4,
-      "contrib_share_pct": 15.0,
-      "main_crime": "头铁拒出 BKB：面对敌方 193 秒强控，全场阵亡 7 次直到终局都没出黑皇杖，团战容错率极低。"
+      "pos": 5,
+      "hero_name": "寒冬飞龙(冰龙)",
+      "hero_short_zh": "寒冬飞龙",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/winter_wyvern.png",
+      "personaname": "Merl",
+      "kda": "4/8/21",
+      "rating_score": 7.9,
+      "blame_share_pct": 26.0,
+      "contrib_share_pct": 23.1,
+      "main_crime": "零买雾消极节奏：全场购买诡计之雾次数为 0，缺乏主动拉人开雾抓单意识。"
     },
     "focus_team_blame_ranking": [
       {
@@ -41118,7 +41222,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
         "personaname": "Paphets",
         "friend_tag": "车队好友 · Paphets",
-        "blame_share_pct": 38.6,
+        "blame_share_pct": 41.7,
         "contrib_share_pct": 6.5,
         "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
         "rating_score": 5.7,
@@ -41130,25 +41234,6 @@
         "praise_talk": "@Paphets 最佳幕后功臣！工程师 全场点亮 3 假 9 真视野 + 参战率 44%，吃草挤奶把大哥伺候得明明白白！"
       },
       {
-        "pos": 3,
-        "hero_name": "龙骑士(龙骑)",
-        "hero_short_zh": "龙骑士",
-        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
-        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dragon_knight.png",
-        "personaname": "Replica",
-        "friend_tag": "车队好友 · Replica",
-        "blame_share_pct": 25.4,
-        "contrib_share_pct": 15.0,
-        "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
-        "rating_score": 6.8,
-        "rating_tier": "B+ 稳健功臣",
-        "kda": "6/7/14",
-        "dead_seconds": 338,
-        "death_gold_lost": 1684,
-        "trash_talk": "@Replica 死了7次硬是不出BKB，BKB这件装备在你的商店里是被G胖下架了吗？",
-        "praise_talk": "@Replica 铁血三号位！龙骑士 参战率 59% 肉身扛下 37,455 伤害（全队 28%）外加 63.8 秒硬控，完美团战发动机！"
-      },
-      {
         "pos": 5,
         "hero_name": "寒冬飞龙(冰龙)",
         "hero_short_zh": "寒冬飞龙",
@@ -41156,7 +41241,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/winter_wyvern.png",
         "personaname": "Merl",
         "friend_tag": "车队好友 · Merl",
-        "blame_share_pct": 24.0,
+        "blame_share_pct": 26.0,
         "contrib_share_pct": 23.1,
         "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
         "rating_score": 7.9,
@@ -41168,6 +41253,25 @@
         "praise_talk": "@Merl 最佳幕后功臣！寒冬飞龙 全场点亮 12 假 21 真视野 + 参战率 74%，吃草挤奶把大哥伺候得明明白白！"
       },
       {
+        "pos": 3,
+        "hero_name": "龙骑士(龙骑)",
+        "hero_short_zh": "龙骑士",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dragon_knight.png",
+        "personaname": "Replica",
+        "friend_tag": "车队好友 · Replica",
+        "blame_share_pct": 19.2,
+        "contrib_share_pct": 15.0,
+        "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
+        "rating_score": 6.8,
+        "rating_tier": "B+ 稳健功臣",
+        "kda": "6/7/14",
+        "dead_seconds": 338,
+        "death_gold_lost": 1684,
+        "trash_talk": "@Replica 死了7次硬是不出BKB，BKB这件装备在你的商店里是被G胖下架了吗？",
+        "praise_talk": "@Replica 铁血三号位！龙骑士 参战率 59% 肉身扛下 37,455 伤害（全队 28%）外加 63.8 秒硬控，完美团战发动机！"
+      },
+      {
         "pos": 2,
         "hero_name": "克林克兹(小骷髅)",
         "hero_short_zh": "克林克兹",
@@ -41175,7 +41279,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/clinkz.png",
         "personaname": "DDW",
         "friend_tag": null,
-        "blame_share_pct": 7.9,
+        "blame_share_pct": 8.6,
         "contrib_share_pct": 24.1,
         "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
         "rating_score": 8.4,
@@ -41194,7 +41298,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/furion.png",
         "personaname": "Flame = ez mute",
         "friend_tag": "我 · Flame = ez mute",
-        "blame_share_pct": 4.1,
+        "blame_share_pct": 4.5,
         "contrib_share_pct": 31.3,
         "contrib_tier": "👑 头号首功 · 擎天真神",
         "rating_score": 9.2,
@@ -41217,7 +41321,7 @@
         "friend_tag": "我 · Flame = ez mute",
         "contrib_share_pct": 31.3,
         "contrib_tier": "👑 头号首功 · 擎天真神",
-        "blame_share_pct": 4.1,
+        "blame_share_pct": 4.5,
         "rating_score": 9.2,
         "rating_tier": "S+ 擎天战神",
         "kda": "9/6/17",
@@ -41235,7 +41339,7 @@
         "friend_tag": null,
         "contrib_share_pct": 24.1,
         "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
-        "blame_share_pct": 7.9,
+        "blame_share_pct": 8.6,
         "rating_score": 8.4,
         "rating_tier": "S 凯旋真核",
         "kda": "14/3/12",
@@ -41253,7 +41357,7 @@
         "friend_tag": "车队好友 · Merl",
         "contrib_share_pct": 23.1,
         "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
-        "blame_share_pct": 24.0,
+        "blame_share_pct": 26.0,
         "rating_score": 7.9,
         "rating_tier": "A 功勋大腿",
         "kda": "4/8/21",
@@ -41271,7 +41375,7 @@
         "friend_tag": "车队好友 · Replica",
         "contrib_share_pct": 15.0,
         "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
-        "blame_share_pct": 25.4,
+        "blame_share_pct": 19.2,
         "rating_score": 6.8,
         "rating_tier": "B+ 稳健功臣",
         "kda": "6/7/14",
@@ -41289,7 +41393,7 @@
         "friend_tag": "车队好友 · Paphets",
         "contrib_share_pct": 6.5,
         "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
-        "blame_share_pct": 38.6,
+        "blame_share_pct": 41.7,
         "rating_score": 5.7,
         "rating_tier": "B 躺赢福将",
         "kda": "1/12/14",
@@ -41887,6 +41991,12 @@
         "hero_short_zh": "斯拉克",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slark.png",
         "personaname": "GANASIA",
+        "timing_curve": "mid_tempo_brawler",
+        "hero_roles": [
+          "能量转移无限偷属性越打越猛",
+          "黑暗契约强解一切非光环硬控",
+          "暗影之舞+魔晶深海劫掠双黑雾无敌切入与救人"
+        ],
         "stuns_sec": 0.0,
         "ult_audits": [],
         "skillshot_audits": [
@@ -41916,7 +42026,8 @@
         ],
         "special_insights": [
           "🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》12 次、《黑暗契约》84 次、《突袭》34 放 0 中；魔晶《深海劫掠》释放 2 次掩护队友。此外在 16:09–16:47(280伤), 17:19–17:53(70伤), 25:41–26:15(403伤), 30:00–30:53(885伤/死) 等中后期关键团战中近乎 0 输出蒸发或边缘OB！",
-          "《突袭 (小鱼跳锁人)》全场施放 34 次，命中敌方英雄 0 人次（有效命中比 0.0%，造成 0 伤害），大量技能落空或仅用于清兵逃生。"
+          "《突袭 (小鱼跳锁人)》全场施放 34 次，命中敌方英雄 0 人次（有效命中比 0.0%，造成 0 伤害），大量技能落空或仅用于清兵逃生。",
+          "【英雄定位：能量转移无限偷属性越打越猛】技能释放：《黑暗契约(C解状态)》×84(中1031人/3,484伤)、《突袭(跳留人)》×34、《暗影之舞(大招黑雾)》×12。"
         ]
       },
       "phase_telemetry": {
@@ -41952,6 +42063,33 @@
           "38:24–39:16(仅160伤)"
         ]
       },
+      "hero_mechanism_profile": {
+        "hero_id": 93,
+        "hero_short_zh": "斯拉克",
+        "timing_curve": "mid_tempo_brawler",
+        "timing_curve_zh": "⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷）",
+        "roles": [
+          "能量转移无限偷属性越打越猛",
+          "黑暗契约强解一切非光环硬控",
+          "暗影之舞+魔晶深海劫掠双黑雾无敌切入与救人"
+        ],
+        "signature_abilities_summary": "黑暗契约(C解状态)×84 / 突袭(跳留人)×34 / 暗影之舞(大招黑雾)×12",
+        "shard_desc": "深海劫掠（必出命脉魔晶：制造3秒群体黑雾救队友化解点控，并为自己提供第二团黑雾叠能量转移属性）",
+        "core_item_hint": "阿哈利姆魔晶(必出) + 散失/回音战刃 + 黑皇杖(BKB) + 斯嘉蒂之眼(冰眼)/金箍棒/深渊之刃",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "",
+        "badges": [],
+        "mechanism_summary": "",
+        "early_phase_note": "对线期身板偏弱，6级出大招被动回血后利用阴影频繁进出换血发育。",
+        "mid_phase_note": "小鱼人绝不是纯刷子大核！中期必须靠《突袭》留人+《黑暗契约》解控抓单打团，且**20分钟必须第一时间补出仅售 1,400 金的命脉魔晶《深海劫掠》**（既能丢3秒群体黑雾救下被屠夫肢解/帕克大招控住的队友，又能靠【大招+魔晶】双黑雾反复拉扯叠出20+层敏捷）。",
+        "late_phase_note": "后期严禁无视野独自带线被帕吉/帕克单抓断节奏；面对敌方蝴蝶/撒旦/酒仙等高闪避高吸血核心，必须果断出【冰眼 + 金箍棒/大晕锤/血棘】，绝不能吃满全队第一经济却在团战0输出暴毙！"
+      },
       "is_afk_farmer": true,
       "radar": {
         "farm": 36,
@@ -41986,8 +42124,8 @@
       ],
       "trash_talk": "@GANASIA 玩个1号位小鱼人45分钟不出1400块的魔晶《深海劫掠》救队友叠属性，单带连环被抓，后期狂吃6,644金就打了7,564伤害（全队倒数第一比5号位还低），团战既救不了人又A不过对面先知酒仙，全场参战率38%纯隐身人！",
       "praise_talk": "@GANASIA 这把 斯拉克 前中期闷头独刷 25 分钟（参战率仅 42.9% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！",
-      "blame_share_pct": 46.9,
-      "contrib_share_pct": 0.8,
+      "blame_share_pct": 52.1,
+      "contrib_share_pct": 0.7,
       "contrib_rank": 5,
       "contrib_tier": "🥂 凯旋功臣 · 团队拼图"
     },
@@ -42544,6 +42682,12 @@
         "hero_short_zh": "殁境神蚀者",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/obsidian_destroyer.png",
         "personaname": "ksk77v",
+        "timing_curve": "glass_cannon_turret",
+        "hero_roles": [
+          "星体禁锢断节奏救队友/留人",
+          "奥术天球纯粹法球巨额点杀肉核",
+          "神智之蚀大招清场"
+        ],
         "stuns_sec": 100.1,
         "ult_audits": [
           {
@@ -42601,7 +42745,8 @@
         ],
         "special_insights": [
           "大招中规中矩：全场释放 8 次，累计 12 人次（场均每大 1.5 人次，伤害 5,953）；但在 16:09–16:47, 22:42–23:30 团战中未放出大招即阵亡！",
-          "全场累计对敌方英雄造成 100.1 秒硬控眩晕（平均每分钟控制 2.51 秒）。"
+          "全场累计对敌方英雄造成 100.1 秒硬控眩晕（平均每分钟控制 2.51 秒）。",
+          "【英雄定位：星体禁锢断节奏救队友/留人】技能释放：《星体禁锢(关)》×39(中30人/5,514伤)、《申斥(魔晶护盾)》×29、《神智之蚀(大招)》×8(中12人/5,953伤)。"
         ]
       },
       "phase_telemetry": {
@@ -42647,39 +42792,66 @@
           "22:42–23:30(仅0伤/阵亡)"
         ]
       },
+      "hero_mechanism_profile": {
+        "hero_id": 76,
+        "hero_short_zh": "殁境神蚀者",
+        "timing_curve": "glass_cannon_turret",
+        "timing_curve_zh": "🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤）",
+        "roles": [
+          "星体禁锢断节奏救队友/留人",
+          "奥术天球纯粹法球巨额点杀肉核",
+          "神智之蚀大招清场"
+        ],
+        "signature_abilities_summary": "星体禁锢(关)×39 / 神智之蚀(大招)×8",
+        "shard_desc": "星体禁锢期间友方单位可缓慢移动脱困",
+        "core_item_hint": "飓风长戟(大推推) + 黑皇杖(BKB) + 邪恶镰刀(羊刀) + 阿哈利姆神杖",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "",
+        "badges": [],
+        "mechanism_summary": "",
+        "early_phase_note": "中路利用《星体禁锢》关人控补刀，必打出对线压制。",
+        "mid_phase_note": "中期拿到魔龙枪+流星锤/巫师之刃后，用纯粹法球几下点穿敌方前排，并用《星体禁锢》救下被屠夫咬/虚空罩的队友。",
+        "late_phase_note": "后期开启BKB+大推推站桩轰出成吨纯粹伤害，最后一下《神智之蚀》轰平全场。"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 26,
-        "damage": 44,
-        "tempo": 48,
+        "damage": 85,
+        "tempo": 72,
         "push": 18,
         "utility": 79,
-        "survival": 44
+        "survival": 60
       },
-      "rating_score": 4.2,
-      "rating_tier": "D 头号战犯",
-      "mvp_score": 41.5,
-      "raw_blame_points": 113.0,
-      "raw_contrib_points": 56.6,
+      "rating_score": 7.3,
+      "rating_tier": "B+ 悲情炮台",
+      "mvp_score": 73.0,
+      "raw_blame_points": 60.5,
+      "raw_contrib_points": 193.5,
       "strengths": [
+        "炮台火力彻底兑现（哪怕阵亡也把输出灌满）：作为无位移脆皮高爆发核心，全场狂甩 星体禁锢(关)×39 + 申斥(魔晶护盾)×29 + 神智之蚀(大招)×8，轰出 **22,974 点英雄伤害（占全队 25.0%，平均每次阵亡前倾泻 2,552 点高额伤害，25m+ 后期再轰 14,947 伤害）**外加 100.1 秒硬控！在团队前排与救人匮乏的逆境下，真正做到了倒下前把每一滴输出倾泻干净。",
         "救人装高频救场：推推棒 全场精准开启 10 次，多次在关键团战帮队友死里逃生。",
         "切入发动机：15:35 摸出跳刀后全场高频切入 27 次，把控先手节奏。",
         "全场核心技能施放统计：星体禁锢(关) 39次 / 申斥(魔晶护盾) 29次 / 神智之蚀(大招) 8次（操作频率 168 APM）。"
       ],
       "weaknesses": [
-        "核心发育严重滞后：2号位 殁境神蚀者 全场 GPM 仅有 448（补刀 184，仅超越 25% 同英雄），中期刷钱路线完全断档。",
-        "BKB 严重难产 + 团战空放/少按：面对敌方合计 117 秒控制，拖到 34:44 才摸出 BKB，且整局只按出了 2 次（全场却死了 9 次），中期团战全在肉身接技能。",
-        "高频阵亡提款机：全场阵亡 **9 次**（其中被敌方【克林克兹】单人提款 4 次），黑白屏幕读秒长达 **6分27秒（占整局比赛 16.2% 时间）**，光阵亡直接扣掉 **2,094 金币**！"
+        "绝境生存与留人反制博弈：作为己方唯一能威胁敌方后排的高爆发炮台，被敌方切入与点控重点针对阵亡 9 次（其中被敌方【克林克兹】单人提款 4 次）；在队友缺乏魔晶救人与前排支点的局面下，单靠 BKB 结束后仍容易被敌方框人/留人技能链限制走位。",
+        "核心发育严重滞后：2号位 殁境神蚀者 全场 GPM 仅有 448（补刀 184，仅超越 25% 同英雄），中期刷钱路线完全断档。"
       ],
       "improvements": [
+        "殁境神蚀者 本局输出职责已超额完成（场均每死换 2,552 伤害）；若从团队可能性出发进一步提升残局容错，面对敌方先知发芽框人/帕克梦境缠绕/屠夫钩时，可将一件纯法系输出装替换为【飓风长戟（大推推）】（既能推开自己秒解发芽树圈与缠绕、拉开切入距离，又能白嫖超远射程点人）。",
         "2号位在 12~24 分钟大招冷却或关键装未齐时，少在河道跟辅助抱团干瞪眼，先把危险线推过河道再回头收远古，保证 GPM 稳定在 600+。",
-        "面对高控制阵容，2号位 殁境神蚀者 必须在第2或第3大件（23~26分钟前）准时做出 BKB，且第一波切入前提前开启，切忌省BKB被瞬秒。",
-        "核心位阵亡 9 次严重拖垮发育节奏：当敌方 克林克兹 在小地图消失时，立刻放弃无视野兵线退回安全区。"
+        "面对高控制阵容，2号位 殁境神蚀者 必须在第2或第3大件（23~26分钟前）准时做出 BKB，且第一波切入前提前开启，切忌省BKB被瞬秒。"
       ],
-      "trash_talk": "@ksk77v 一局死 9 次，看了整整 6分27秒 黑白电视（其中被敌方【克林克兹】单人提款 4 次），光死就扣了 2094 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@ksk77v 稳健上分拼图！殁境神蚀者 交出 7/9/9（参战率 46% · 伤害 22,974），关键团战从不掉链子！",
-      "blame_share_pct": 27.7,
-      "contrib_share_pct": 7.2,
+      "trash_talk": "@ksk77v 这把殁境神蚀者对线压爆中路、全场狂灌 22,974 伤害（每死换 2,552 伤）已经把炮台火力彻底拉满了，唯一遗憾是没早点出把大推推自救解先知发芽，纯纯被前排碎蛋和小鱼人不出魔晶坑惨的悲情炮台！",
+      "praise_talk": "@ksk77v 这把 殁境神蚀者 炮台火力全开狂轰 22,974 伤害（占全队 25.0% 输出，场均每死换 2,552 伤害），真正做到倒下前把所有技能灌满！",
+      "blame_share_pct": 16.4,
+      "contrib_share_pct": 21.0,
       "contrib_rank": 4,
       "contrib_tier": "🔥 黄金拼图 · 稳健节奏"
     },
@@ -43214,12 +43386,24 @@
         "hero_short_zh": "破晓辰星",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dawnbreaker.png",
         "personaname": "Hira",
+        "timing_curve": "frontline_initiator",
+        "hero_roles": [
+          "天光现世全图空降回血群晕反打（天克抓单/带球体系）",
+          "星破天惊+熠熠生辉高额前排肉搏回血",
+          "上界重锤封路减速"
+        ],
         "stuns_sec": 12.6,
         "ult_audits": [],
         "skillshot_audits": [],
-        "headline_badges": [],
+        "headline_badges": [
+          {
+            "text": "🚫 40m未出命脉魔晶!",
+            "tone": "bad"
+          }
+        ],
         "special_insights": [
-          "核心技能释放与转化：《上界重锤(掷锤)》释放 43 次(命中 42 人次 / 3,976 伤害)；《星破天惊(大锤三连)》释放 38 次(命中 36 人次 / 9,926 伤害)；《天光现世(大招全图降临)》释放 9 次(命中 51 人次 / 2,178 伤害)。"
+          "🚨 专属魔晶缺失：打到 40 分钟仍未购买该英雄质变魔晶【星破天惊施放期间获得技能免疫并可自由转向（必出命脉魔晶）】！",
+          "【英雄定位：天光现世全图空降回血群晕反打（天克抓单/带球体系）】技能释放：《上界重锤(掷锤)》×43(中42人/3,976伤)、《星破天惊(大锤三连)》×38(中36人/9,926伤)、《天光现世(大招全图降临)》×9(中51人/2,178伤)。"
         ]
       },
       "phase_telemetry": {
@@ -43246,6 +43430,35 @@
         "solo_pickoffs": [],
         "low_dmg_tfs": []
       },
+      "hero_mechanism_profile": {
+        "hero_id": 135,
+        "hero_short_zh": "破晓辰星",
+        "timing_curve": "frontline_initiator",
+        "timing_curve_zh": "🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤）",
+        "roles": [
+          "天光现世全图空降回血群晕反打（天克抓单/带球体系）",
+          "星破天惊+熠熠生辉高额前排肉搏回血",
+          "上界重锤封路减速"
+        ],
+        "signature_abilities_summary": "星破天惊(大锤三连)×38 / 上界重锤(掷锤)×43 / 天光现世(大招全图降临)×9",
+        "shard_desc": "星破天惊施放期间获得技能免疫并可自由转向（必出命脉魔晶）",
+        "core_item_hint": "阿哈利姆魔晶 + 回音战刃/双刀 + 黑皇杖 + 强袭胸甲",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": true,
+        "verdict_tag": "",
+        "badges": [
+          "🚫 40m未出命脉魔晶!"
+        ],
+        "mechanism_summary": "",
+        "early_phase_note": "对线期W+Q二连高爆发极强，占住边路线权。",
+        "mid_phase_note": "中期可以单带收危险线，一旦队友在地图任何角落被抓，立刻开启《天光现世》全图空降奶满队友并反手砸晕敌方。",
+        "late_phase_note": "必出魔晶（星破天惊期间获得技能免疫）与BKB/冰甲/强袭顶在前排。"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 79,
@@ -43258,7 +43471,7 @@
       "rating_score": 7.3,
       "rating_tier": "B 随波逐流",
       "mvp_score": 72.8,
-      "raw_blame_points": 29.2,
+      "raw_blame_points": 41.2,
       "raw_contrib_points": 203.5,
       "strengths": [
         "前排支点作用显著：参战率高达 77.1%（KDA 11/3/16），提供 12.6 秒控制并扛下 41,603 伤害（占全队承伤 24.8%）。",
@@ -43266,15 +43479,15 @@
         "极高生存容错：40 分钟高强度对抗仅阵亡 3 次（读秒总计 2分28秒，仅占全场 6.2%），团战站位拉扯极佳。"
       ],
       "weaknesses": [
-        "整体发挥稳健：全场仅阵亡 3 次（读秒 2分28秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+        "核心命脉魔晶缺失：比赛打到 40 分钟仍未购买 破晓辰星 仅售 1,400 金的质变魔晶【星破天惊施放期间获得技能免疫并可自由转向（必出命脉魔晶）】，导致英雄核心团战机制残缺！"
       ],
       "improvements": [
-        "保持当前 破晓辰星 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+        "保持当前 破晓辰星 的刷钱与参战节奏（推荐核心出装：阿哈利姆魔晶 + 回音战刃/双刀 + 黑皇杖 + 强袭胸甲），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
-      "trash_talk": "@Hira 这把 11/3/16 标准打卡下班，背锅占比 29 点，赢了跟着笑，输了怪队友！",
+      "trash_talk": "@Hira 这把 11/3/16 标准打卡下班，背锅占比 41 点，赢了跟着笑，输了怪队友！",
       "praise_talk": "@Hira 铁血三号位！破晓辰星 参战率 77% 肉身扛下 41,603 伤害（全队 25%）外加 12.6 秒硬控，完美团战发动机！",
-      "blame_share_pct": 7.1,
-      "contrib_share_pct": 26.0,
+      "blame_share_pct": 11.2,
+      "contrib_share_pct": 22.1,
       "contrib_rank": 3,
       "contrib_tier": "🛡️ 定海神针 · 中坚功臣"
     },
@@ -43787,6 +44000,12 @@
         "hero_short_zh": "司夜刺客",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
         "personaname": "hakase",
+        "timing_curve": "roaming_pickoff_support",
+        "hero_roles": [
+          "复仇隐身超高爆发猎杀脆皮远程核",
+          "尖刺外壳完美反弹敌方AOE先手",
+          "穿刺+心灵焦灼控制消蓝"
+        ],
         "stuns_sec": 80.2,
         "ult_audits": [],
         "skillshot_audits": [
@@ -43864,6 +44083,33 @@
         ],
         "low_dmg_tfs": []
       },
+      "hero_mechanism_profile": {
+        "hero_id": 88,
+        "hero_short_zh": "司夜刺客",
+        "timing_curve": "roaming_pickoff_support",
+        "timing_curve_zh": "🏹 游走抓人控图辅助（考核前中期游走控制与视野反隐）",
+        "roles": [
+          "复仇隐身超高爆发猎杀脆皮远程核",
+          "尖刺外壳完美反弹敌方AOE先手",
+          "穿刺+心灵焦灼控制消蓝"
+        ],
+        "signature_abilities_summary": "穿刺(戳)×44 / 尖刺外壳(壳)×21 / 复仇(大招隐身)×16",
+        "shard_desc": "",
+        "core_item_hint": "达贡之神力(红杖) + 闪烁匕首 + 阿哈利姆魔晶",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "",
+        "badges": [],
+        "mechanism_summary": "",
+        "early_phase_note": "前期抗压混到6级。",
+        "mid_phase_note": "到6级后必须开启《复仇》深入敌方半区当移动侦察眼并配合队友/红杖秒杀敌方脆皮法师（如火女/宙斯/先知）。",
+        "late_phase_note": "团战开启《尖刺外壳》主动踩敌方AOE（如火女龙破斩/帕克波/凤凰飞）弹晕对手反打。"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 46,
@@ -43889,8 +44135,8 @@
       ],
       "trash_talk": "@hakase 一局死 8 次，看了整整 5分54秒 黑白电视（其中被敌方【克林克兹】单人提款 4 次），光死就扣了 1438 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@hakase 最佳幕后功臣！司夜刺客 全场点亮 5 假 11 真视野 + 参战率 86%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 7.1,
-      "contrib_share_pct": 36.7,
+      "blame_share_pct": 7.9,
+      "contrib_share_pct": 31.2,
       "contrib_rank": 1,
       "contrib_tier": "👑 头号首功 · 擎天真神"
     },
@@ -44480,6 +44726,12 @@
         "hero_short_zh": "干扰者",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/disruptor.png",
         "personaname": "hikoku",
+        "timing_curve": "teamfight_ult_engine",
+        "hero_roles": [
+          "恶念瞥视千里抓回TP与逃生英雄",
+          "静态风暴+动能场框大范围沉默禁用物品",
+          "天克高机动游走核"
+        ],
         "stuns_sec": 0.0,
         "ult_audits": [
           {
@@ -44531,7 +44783,8 @@
           }
         ],
         "special_insights": [
-          "大招质量极高！全场释放 10 次，累计打出 132 人次（场均每大 13.2 人次，造成 1,880 点伤害），在 14:04–14:46(×1), 16:09–16:47(×1), 18:10–18:53(×1), 25:41–26:15(×1) 团战完美兑现；主要灌伤目标：工程师(701伤)、寒冬飞龙(458伤)、先知(334伤)。"
+          "大招质量极高！全场释放 10 次，累计打出 132 人次（场均每大 13.2 人次，造成 1,880 点伤害），在 14:04–14:46(×1), 16:09–16:47(×1), 18:10–18:53(×1), 25:41–26:15(×1) 团战完美兑现；主要灌伤目标：工程师(701伤)、寒冬飞龙(458伤)、先知(334伤)。",
+          "【英雄定位：恶念瞥视千里抓回TP与逃生英雄】技能释放：《雷霆之击(霹雳)》×35(中74人/3,824伤)、《动能立场(框)》×20、《恶念瞥视(D回)》×14(中13人/1,653伤)。"
         ]
       },
       "phase_telemetry": {
@@ -44567,6 +44820,33 @@
           "30:00–30:53(仅193伤/阵亡)"
         ]
       },
+      "hero_mechanism_profile": {
+        "hero_id": 87,
+        "hero_short_zh": "干扰者",
+        "timing_curve": "teamfight_ult_engine",
+        "timing_curve_zh": "🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化）",
+        "roles": [
+          "恶念瞥视千里抓回TP与逃生英雄",
+          "静态风暴+动能场框大范围沉默禁用物品",
+          "天克高机动游走核"
+        ],
+        "signature_abilities_summary": "雷霆之击(霹雳)×35 / 恶念瞥视(D回)×14 / 动能立场(框)×20 / 静态风暴(大招沉默大)×10",
+        "shard_desc": "",
+        "core_item_hint": "微光披风/原力法杖 + 阿哈利姆神杖 + 以太之镜",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "",
+        "badges": [],
+        "mechanism_summary": "",
+        "early_phase_note": "线上挂雷霆之击开视野消耗，用瞥视抓回残血。",
+        "mid_phase_note": "中期每波团战与守塔必须盯紧敌方TP与切入核心，用《恶念瞥视》D回原地接《动能立场》+《静态风暴》框大。",
+        "late_phase_note": "后期做出A杖后《静态风暴》直接禁用敌方BKB与一切物品，框住即团灭。"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 59,
@@ -44596,8 +44876,8 @@
       ],
       "trash_talk": "@hikoku 一局死 8 次，看了整整 4分59秒 黑白电视（其中被敌方【克林克兹】单人提款 4 次），光死就扣了 1024 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@hikoku 最佳幕后功臣！干扰者 全场点亮 10 假 17 真视野 + 参战率 77%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 11.2,
-      "contrib_share_pct": 29.3,
+      "blame_share_pct": 12.4,
+      "contrib_share_pct": 25.0,
       "contrib_rank": 2,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂"
     }
@@ -45162,6 +45442,12 @@
         "hero_short_zh": "先知",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
         "personaname": "Flame = ez mute",
+        "timing_curve": "zoo_split_pusher",
+        "hero_roles": [
+          "全图传送支援收割与带球牵制",
+          "发芽框人克制无推推近战",
+          "自然之怒全图增伤收割"
+        ],
         "stuns_sec": 0.0,
         "ult_audits": [
           {
@@ -45233,7 +45519,8 @@
         ],
         "special_insights": [
           "大招中规中矩：全场释放 18 次，累计 28 人次（场均每大 1.56 人次，伤害 5,918）；但在 17:19–17:53, 30:00–30:53 团战中未放出大招即阵亡！",
-          "《发芽 (先知框人)》全场施放 27 次，命中敌方英雄 18 人次（有效命中比 66.7%，造成 2,145 伤害）。"
+          "《发芽 (先知框人)》全场施放 27 次，命中敌方英雄 18 人次（有效命中比 66.7%，造成 2,145 伤害）。",
+          "【英雄定位：全图传送支援收割与带球牵制】技能释放：《自然之力(招树人)》×59、《发芽(框)》×27(中18人/2,145伤)、《传送(飞)》×24。"
         ]
       },
       "phase_telemetry": {
@@ -45266,6 +45553,33 @@
         ],
         "low_dmg_tfs": []
       },
+      "hero_mechanism_profile": {
+        "hero_id": 53,
+        "hero_short_zh": "先知",
+        "timing_curve": "zoo_split_pusher",
+        "timing_curve_zh": "🏰 召唤推进与全图牵制核（考核推塔拆迁与带线牵制空间）",
+        "roles": [
+          "全图传送支援收割与带球牵制",
+          "发芽框人克制无推推近战",
+          "自然之怒全图增伤收割"
+        ],
+        "signature_abilities_summary": "发芽(框)×27 / 传送(飞)×24 / 自然之怒(大招)×18",
+        "shard_desc": "",
+        "core_item_hint": "紫怨/血棘 + 缚灵索/雷神之锤 + 黑皇杖 + 蝴蝶/撒旦",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "",
+        "badges": [],
+        "mechanism_summary": "",
+        "early_phase_note": "前10分钟必须利用《传送》频繁飞边路形成多打少击杀并抢经验符。",
+        "mid_phase_note": "中期利用《发芽》框死没带补刀斧/推推的敌人，正面打不过时立刻全图带球逼敌方回防。",
+        "late_phase_note": "后期转型蝴蝶+撒旦+大炮/血棘的机动炮台，既要抓单收割也要拆光外塔，切忌飞进人堆脸上白给。"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 93,
@@ -45292,11 +45606,11 @@
         "整体发挥稳健：全场仅阵亡 6 次（读秒 5分45秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
       ],
       "improvements": [
-        "保持当前 先知 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+        "保持当前 先知 的刷钱与参战节奏（推荐核心出装：紫怨/血棘 + 缚灵索/雷神之锤 + 黑皇杖 + 蝴蝶/撒旦），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@Flame = ez mute 这把 先知 中路打出线优+全场狂灌 41,195 伤害（每死换 6,865 血），已经把炮台输出拉满了，奈何带不动不出魔晶的小鱼和连碎5颗蛋的凤凰！",
       "praise_talk": "@Flame = ez mute 这把 先知 炮台火力全开狂轰 41,195 伤害（占全队 29.6% 输出，场均每死换 6,865 伤害），真正做到倒下前把所有技能灌满！",
-      "blame_share_pct": 4.1,
+      "blame_share_pct": 4.5,
       "contrib_share_pct": 31.3,
       "contrib_rank": 1,
       "contrib_tier": "👑 头号首功 · 擎天真神"
@@ -45801,6 +46115,12 @@
         "hero_short_zh": "克林克兹",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/clinkz.png",
         "personaname": "DDW",
+        "timing_curve": "mid_tempo_brawler",
+        "hero_roles": [
+          "骨隐步全图隐身抓单偷塔",
+          "炽烈火雨+焦油炸弹减甲点杀脆皮",
+          "身板脆怕反隐强留的刺客核"
+        ],
         "stuns_sec": 0.0,
         "ult_audits": [],
         "skillshot_audits": [],
@@ -45811,7 +46131,7 @@
           }
         ],
         "special_insights": [
-          "核心技能释放与转化：《骨隐步(隐身)》释放 50 次(命中 0 人次 / 0 伤害)；《死亡契约(吃兵)》释放 36 次(命中 0 人次 / 0 伤害)；《扫射》释放 25 次(命中 0 人次 / 0 伤害)。"
+          "【骨隐步全图隐身抓单偷塔】招牌技能兑现：《骨隐步(隐身)》×50；《死亡契约(吃兵)》×36；《扫射》×25。"
         ]
       },
       "phase_telemetry": {
@@ -45844,6 +46164,33 @@
         ],
         "low_dmg_tfs": []
       },
+      "hero_mechanism_profile": {
+        "hero_id": 56,
+        "hero_short_zh": "克林克兹",
+        "timing_curve": "mid_tempo_brawler",
+        "timing_curve_zh": "⚡ 前中期干架节奏核（10-25m黄金强势期·严禁闷头纯刷）",
+        "roles": [
+          "骨隐步全图隐身抓单偷塔",
+          "炽烈火雨+焦油炸弹减甲点杀脆皮",
+          "身板脆怕反隐强留的刺客核"
+        ],
+        "signature_abilities_summary": "扫射×25 / 死亡契约(吃兵)×36 / 骨隐步(隐身)×50",
+        "shard_desc": "炽烈火雨提供巨额锥形AOE爆发与清线",
+        "core_item_hint": "阿哈利姆魔晶 + 紫怨/血棘 + 暗灭 + 邪恶镰刀/黑皇杖",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "",
+        "badges": [],
+        "mechanism_summary": "",
+        "early_phase_note": "线上利用焦油炸弹点人与吃大怪撑血。",
+        "mid_phase_note": "10-25分钟拿到紫怨/暗灭+魔晶《炽烈火雨》后必须全图猎杀落单辅助并在团战侧翼偷塔。",
+        "late_phase_note": "后期补出羊刀/否决/BKB秒杀后排，切忌在敌方真眼下正面第一个现身。"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 53,
@@ -45869,11 +46216,11 @@
         "整体发挥稳健：全场仅阵亡 3 次（读秒 2分31秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
       ],
       "improvements": [
-        "保持当前 克林克兹 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+        "保持当前 克林克兹 的刷钱与参战节奏（推荐核心出装：阿哈利姆魔晶 + 紫怨/血棘 + 暗灭 + 邪恶镰刀/黑皇杖），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@DDW 这把 14/3/12 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
       "praise_talk": "@DDW 这把 克林克兹 炮台火力全开狂轰 38,137 伤害（占全队 27.4% 输出，场均每死换 12,712 伤害），真正做到倒下前把所有技能灌满！",
-      "blame_share_pct": 7.9,
+      "blame_share_pct": 8.6,
       "contrib_share_pct": 24.1,
       "contrib_rank": 2,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂"
@@ -46465,6 +46812,12 @@
         "hero_short_zh": "龙骑士",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
         "personaname": "Replica",
+        "timing_curve": "frontline_initiator",
+        "hero_roles": [
+          "瞬发神龙摆尾稳定点控先手",
+          "古龙形态腐蚀溅射强推外塔",
+          "龙族血统高护甲前排顶梁柱"
+        ],
         "stuns_sec": 63.8,
         "ult_audits": [],
         "skillshot_audits": [
@@ -46541,6 +46894,35 @@
         ],
         "low_dmg_tfs": []
       },
+      "hero_mechanism_profile": {
+        "hero_id": 49,
+        "hero_short_zh": "龙骑士",
+        "timing_curve": "frontline_initiator",
+        "timing_curve_zh": "🛡️ 跳刀先手开团肉盾（考核先手控制时长与顶前排吃伤）",
+        "roles": [
+          "瞬发神龙摆尾稳定点控先手",
+          "古龙形态腐蚀溅射强推外塔",
+          "龙族血统高护甲前排顶梁柱"
+        ],
+        "signature_abilities_summary": "火焰气息(喷火)×86 / 神龙摆尾(拍晕)×30 / 古龙形态(变龙)×12",
+        "shard_desc": "火球区域持续灼烧清兵并封锁团战走位",
+        "core_item_hint": "闪烁匕首 + 黑皇杖 + 阿哈利姆神杖 + 魔龙枪/强袭",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": true,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "敢死先手开团顶梁柱",
+        "badges": [
+          "🛡️ 先手开团顶伤: 0%承伤/64s控"
+        ],
+        "mechanism_summary": "【先手肉核职责兑现】作为3号位开团手，全场打出 63.8 秒硬控、扛下全队 0.0% 伤害（参战率 58.8%），哪怕先手进场阵亡 7 次也是为后排炮台撑起输出空间的战略牺牲。",
+        "early_phase_note": "对线期高护甲高回血稳占线权，到6级开《古龙形态》直接毒掉敌方一塔。",
+        "mid_phase_note": "中期拿到跳刀后必须配合队友开雾，用变龙远程瞬发《神龙摆尾》先手留人并带队推塔。",
+        "late_phase_note": "后期做出BKB+A杖黑龙无视地形切入，顶在最前面吃控打满溅射。"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 52,
@@ -46553,9 +46935,10 @@
       "rating_score": 6.8,
       "rating_tier": "B+ 稳健功臣",
       "mvp_score": 67.8,
-      "raw_blame_points": 59.2,
+      "raw_blame_points": 41.2,
       "raw_contrib_points": 156.5,
       "strengths": [
+        "【先手肉核职责兑现】作为3号位开团手，全场打出 63.8 秒硬控、扛下全队 0.0% 伤害（参战率 58.8%），哪怕先手进场阵亡 7 次也是为后排炮台撑起输出空间的战略牺牲。",
         "对线基本功扎实：前10分钟交出 44正/13反（10m经济 3,309，效率 66%），撑起了前中期基础节奏。",
         "操作细节拉满：全场高频切假腿 52 次（APM 258），属性转换极其细腻。",
         "切入发动机：13:28 摸出跳刀后全场高频切入 37 次，把控先手节奏。",
@@ -46566,11 +46949,11 @@
         "越塔犯罪记录：本局有 **1 次直接死于敌方防御塔攻击**，冲塔上头未能计算防御塔仇恨与伤害。"
       ],
       "improvements": [
-        "保持当前 龙骑士 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+        "保持当前 龙骑士 的刷钱与参战节奏（推荐核心出装：闪烁匕首 + 黑皇杖 + 阿哈利姆神杖 + 魔龙枪/强袭），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@Replica 死了7次硬是不出BKB，BKB这件装备在你的商店里是被G胖下架了吗？",
       "praise_talk": "@Replica 铁血三号位！龙骑士 参战率 59% 肉身扛下 37,455 伤害（全队 28%）外加 63.8 秒硬控，完美团战发动机！",
-      "blame_share_pct": 25.4,
+      "blame_share_pct": 19.2,
       "contrib_share_pct": 15.0,
       "contrib_rank": 4,
       "contrib_tier": "🔥 黄金拼图 · 稳健节奏"
@@ -47108,6 +47491,12 @@
         "hero_short_zh": "工程师",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
         "personaname": "Paphets",
+        "timing_curve": "glass_cannon_turret",
+        "hero_roles": [
+          "爆破起飞远程跳脸沉默群伤",
+          "感应地雷阵地封锁与清线磨塔",
+          "粘性炸弹拉扯轰炸"
+        ],
         "stuns_sec": 24.3,
         "ult_audits": [],
         "skillshot_audits": [],
@@ -47122,7 +47511,8 @@
           }
         ],
         "special_insights": [
-          "全场累计对敌方英雄造成 24.3 秒硬控眩晕（平均每分钟控制 0.61 秒）。"
+          "全场累计对敌方英雄造成 24.3 秒硬控眩晕（平均每分钟控制 0.61 秒）。",
+          "【英雄定位：爆破起飞远程跳脸沉默群伤】技能释放：《感应地雷(大招红雷)》×72(中44人/14,208伤)、《活性电击》×29(中13人/1,417伤)、《爆破起飞(自爆跳)》×16(中23人/2,584伤)。"
         ]
       },
       "phase_telemetry": {
@@ -47153,6 +47543,33 @@
           "26:01–26:45(仅355伤)"
         ]
       },
+      "hero_mechanism_profile": {
+        "hero_id": 105,
+        "hero_short_zh": "工程师",
+        "timing_curve": "glass_cannon_turret",
+        "timing_curve_zh": "🔥 脆皮高爆发远程炮台（考核死前灌满输出·每死换伤）",
+        "roles": [
+          "爆破起飞远程跳脸沉默群伤",
+          "感应地雷阵地封锁与清线磨塔",
+          "粘性炸弹拉扯轰炸"
+        ],
+        "signature_abilities_summary": "粘性炸弹×6 / 活性电击×29 / 爆破起飞(自爆跳)×16 / 感应地雷(大招红雷)×72",
+        "shard_desc": "活性电击可对友军施放并造成位移眩晕",
+        "core_item_hint": "原力法杖/微光披风 + 阿哈利姆魔晶 + 以太之镜",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "",
+        "badges": [],
+        "mechanism_summary": "",
+        "early_phase_note": "线上用粘性炸弹减速消耗，配合队友用《爆破起飞》沉默击杀。",
+        "mid_phase_note": "中期在推进塔下与肉山路口布满《感应地雷》，团战跳入人群沉默接三颗红雷秒人。",
+        "late_phase_note": "后期给己方冲脸前排套魔晶《活性电击》缴械敌方平A核。"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 38,
@@ -47179,7 +47596,7 @@
       ],
       "trash_talk": "@Paphets 一局死 12 次，看了整整 7分1秒 黑白电视（其中被敌方【破晓辰星】单人提款 5 次），光死就扣了 1400 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Paphets 最佳幕后功臣！工程师 全场点亮 3 假 9 真视野 + 参战率 44%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 38.6,
+      "blame_share_pct": 41.7,
       "contrib_share_pct": 6.5,
       "contrib_rank": 5,
       "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将"
@@ -47810,6 +48227,12 @@
         "hero_short_zh": "寒冬飞龙",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
         "personaname": "Merl",
+        "timing_curve": "teamfight_ult_engine",
+        "hero_roles": [
+          "寒冬诅咒无视BKB反手团控让敌方队友自相残杀",
+          "极寒之拥物理免疫百分比回血救人",
+          "严寒烧灼超远距离百分比消耗"
+        ],
         "stuns_sec": 28.8,
         "ult_audits": [],
         "skillshot_audits": [],
@@ -47824,7 +48247,8 @@
           }
         ],
         "special_insights": [
-          "全场累计对敌方英雄造成 28.8 秒硬控眩晕（平均每分钟控制 0.72 秒）。"
+          "全场累计对敌方英雄造成 28.8 秒硬控眩晕（平均每分钟控制 0.72 秒）。",
+          "【英雄定位：寒冬诅咒无视BKB反手团控让敌方队友自相残杀】技能释放：《严寒烧灼》×31(中186人/2,056伤)、《碎裂冲击》×28(中15人/3,161伤)、《极寒之拥(冰箱)》×26。"
         ]
       },
       "phase_telemetry": {
@@ -47857,6 +48281,33 @@
           "33:58–34:50(仅254伤/阵亡)"
         ]
       },
+      "hero_mechanism_profile": {
+        "hero_id": 112,
+        "hero_short_zh": "寒冬飞龙",
+        "timing_curve": "teamfight_ult_engine",
+        "timing_curve_zh": "🌋 团战阵地大招支点（考核变蛋/墓碑/团控大招存活与转化）",
+        "roles": [
+          "寒冬诅咒无视BKB反手团控让敌方队友自相残杀",
+          "极寒之拥物理免疫百分比回血救人",
+          "严寒烧灼超远距离百分比消耗"
+        ],
+        "signature_abilities_summary": "严寒烧灼×31 / 碎裂冲击×28 / 极寒之拥(冰箱)×26 / 寒冬诅咒(大招)×9",
+        "shard_desc": "",
+        "core_item_hint": "微光披风 + 闪烁匕首/原力法杖 + 阿哈利姆魔晶",
+        "early_farm_reasonable": false,
+        "late_harvest_fulfilled": false,
+        "late_harvest_failed": false,
+        "mid_tempo_wasted": false,
+        "sacrificial_initiator_fulfilled": false,
+        "save_support_fulfilled": false,
+        "missing_mandatory_shard": false,
+        "verdict_tag": "",
+        "badges": [],
+        "mechanism_summary": "",
+        "early_phase_note": "线上开启严寒烧灼超远距离百分比折磨敌方英雄。",
+        "mid_phase_note": "中期用《极寒之拥（冰箱）》救下被敌方物理核切入的队友，并用《寒冬诅咒》定住敌方抱团核心让其身旁的物理大哥亲手A死队友。",
+        "late_phase_note": "切忌在己方正准备集火秒人的时候乱放《寒冬诅咒》导致敌方免伤救了对手！"
+      },
       "is_afk_farmer": false,
       "radar": {
         "farm": 54,
@@ -47888,7 +48339,7 @@
       ],
       "trash_talk": "@Merl 一局死 8 次，看了整整 5分19秒 黑白电视（其中被敌方【斯拉克】单人提款 3 次），光死就扣了 934 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Merl 最佳幕后功臣！寒冬飞龙 全场点亮 12 假 21 真视野 + 参战率 74%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 24.0,
+      "blame_share_pct": 26.0,
       "contrib_share_pct": 23.1,
       "contrib_rank": 3,
       "contrib_tier": "👁️ 视野统帅 · 幕后功臣"

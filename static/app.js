@@ -743,27 +743,40 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
       : "";
 
   // Closing punchline (Dota 2 veteran tone)
+  const hmp = p.hero_mechanism_profile || {};
+  const tCurveTag = hmp.timing_curve_zh ? ` · ${hmp.timing_curve_zh}` : "";
   let punchline = "";
-  let badge = `🎙️ AI 老炮个人点评 · ${score100}/100分`;
+  let badge = `🎙️ AI 老炮个人点评${tCurveTag} · ${score100}/100分`;
   let tone = "mixed";
   const rating = Number(p.rating_score || 6.0);
   if (pWon) {
     if (isMvp || score100 >= 88) {
-      badge = `👑 AI 封神表彰评书 · ${score100}/100分 (${scoreTier.label})`;
+      badge = `👑 AI 封神表彰评书${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
-      punchline = `本局百人制打分砍下 ${score100}/100 分（全场贡献 ${cPct}% 胜局功勋），从对线一路 C 到终局的绝对真神，这把赢球全队得给 ${heroShort} 敬一杯！`;
+      const harvestPraise = hmp.late_harvest_fulfilled
+        ? `前中期弱势期隐忍刷出核心装（合理避战不盲目送团），25m+ 决胜期出山狂轰全队 ${hmp.late_hdmg_share_pct || p.hero_damage_share_pct}% 伤害完成终极收割，`
+        : "从对线一路 C 到终局的绝对真神，";
+      punchline = `本局百人制打分砍下 ${score100}/100 分（全场贡献 ${cPct}% 胜局功勋），${harvestPraise}这把赢球全队得给 ${heroShort} 敬一杯！`;
     } else if ((p.dead_seconds || 0) >= 180 || score100 < 78) {
-      badge = `🌶️ AI 胜局毒舌敲打 · ${score100}/100分 (${scoreTier.label})`;
+      badge = `🌶️ AI 胜局毒舌敲打${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "mixed";
-      punchline = `本局百人制得分仅 ${score100}/100 分（贡献 ${cPct}%）——虽然最后跟着车队躺赢拿下比赛，但 ${heroShort} 全场在泉水读秒长达 ${p.dead_seconds} 秒，属于边送边赢的“惊险气氛组”，下把少走两步危险黑图！`;
+      const tempoRoast = hmp.mid_tempo_wasted
+        ? `身为【${hmp.timing_curve_zh || "中期节奏核"}】却在 10~25m 强势期当大核闷头独刷不参战，`
+        : `全场在泉水读秒长达 ${p.dead_seconds} 秒，`;
+      punchline = `本局百人制得分仅 ${score100}/100 分（贡献 ${cPct}%）——虽然最后跟着车队躺赢拿下比赛，但 ${heroShort} ${tempoRoast}属于边混边赢的“惊险气氛组”，下把务必按英雄强势期打节奏！`;
     } else {
-      badge = `🏆 AI 凯旋功臣点评 · ${score100}/100分 (${scoreTier.label})`;
+      badge = `🏆 AI 凯旋功臣点评${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
-      punchline = `本局百人制斩获 ${score100}/100 高分（稳健拿下 ${cPct}% 胜局贡献），${heroShort} 扎实完成了 ${p.pos} 号位本职工作，是车队赢球不可或缺的坚实拼图！`;
+      const roleNote = hmp.late_harvest_fulfilled
+        ? "前中期稳健刷钱成型、后期团战完美兑现大核收割职责"
+        : hmp.sacrificial_initiator_fulfilled
+        ? `果断肉身跳刀先手开团（硬控 ${p.stuns_sec || 0} 秒 / 吃下全队 ${p.damage_taken_share_pct || 0}% 伤害）`
+        : `扎实完成了 ${p.pos} 号位（${hmp.timing_curve_zh || "核心/辅助"}）本职工作`;
+      punchline = `本局百人制斩获 ${score100}/100 高分（稳健拿下 ${cPct}% 胜局贡献），${heroShort} ${roleNote}，是车队赢球不可或缺的坚实拼图！`;
     }
   } else {
     if (isTopCulprit || Number(bPct) >= 25 || score100 < 52) {
-      badge = `🚨 AI 一级战犯处刑词 · ${score100}/100分 (${scoreTier.label})`;
+      badge = `🚨 AI 一级战犯处刑词${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
       let mechCrimeClause = "";
       if (p.slark_mechanism_audit) {
@@ -778,16 +791,29 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
         mechCrimeClause = `团战大招《超新星》变蛋 ${pe.tf_egg_casts} 次竟有 ${pe.shattered_cnt} 次被集火打碎（碎蛋率 ${
           pe.shatter_rate_pct
         }%：${(pe.shattered_times || []).join("、")}），且全场仅放 ${pe.sun_ray_casts} 次《烈日炙烤》激光，`;
+      } else if (hmp.late_harvest_failed) {
+        mechCrimeClause = `前中期吃了团队大量安全线与野区资源，但 25m+ 决胜期吃下 ${hmp.late_gold_share_pct || 22}% 经济却仅打出 ${
+          hmp.late_hdmg_share_pct || 15
+        }% 伤害，完全没能兑现【${hmp.timing_curve_zh || "大核"}】后期收割职责${
+          hmp.missing_mandatory_shard ? `（且拒出 1400 金质变魔晶：${hmp.shard_desc}）` : ""
+        }；`;
       } else if (Array.isArray(p.weaknesses) && p.weaknesses[0]) {
         mechCrimeClause = `${String(p.weaknesses[0]).replace(/\*\*/g, "")}；`;
       }
       punchline = `本局百人制仅得 ${score100}/100 分，背下全队 ${bPct}% 头号大锅（泉水读秒 ${p.dead_seconds || 0} 秒 / 阵亡掉钱 -${fmtNum(
         p.death_gold_lost || 0
       )}）！${mechCrimeClause}这把输球 ${heroShort} 得在群里主动发红包谢罪！`;
-    } else if (p.is_turret_fulfilled || rating >= 7.2 || Number(p.hero_damage_share_pct) >= 28 || score100 >= 72) {
+    } else if (
+      p.is_turret_fulfilled ||
+      hmp.sacrificial_initiator_fulfilled ||
+      hmp.save_support_fulfilled ||
+      rating >= 7.2 ||
+      Number(p.hero_damage_share_pct) >= 28 ||
+      score100 >= 72
+    ) {
       badge = p.is_turret_fulfilled
-        ? `🔥 AI 悲情炮台认证 · ${score100}/100分 (${scoreTier.label})`
-        : `🛡️ AI 悲情院长平反词 · ${score100}/100分 (${scoreTier.label})`;
+        ? `🔥 AI 悲情炮台认证${tCurveTag} · ${score100}/100分 (${scoreTier.label})`
+        : `🛡️ AI 悲情院长平反词${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
       const dpd = p.dmg_per_death || Math.round((p.hero_damage || 0) / Math.max(1, p.deaths || 1));
       punchline = `本局百人制拿到 ${score100}/100 分（背锅仅 ${bPct}%），堪称虽败犹荣的“${
@@ -796,18 +822,20 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
         dpd
       )} 点实打实伤害），无状态炮台只要死前把伤害灌满就绝不背大锅，奈何前排控制与救人体系崩塌实在带不动！`;
     } else {
-      badge = `⚖️ AI 败局算账点评 · ${score100}/100分 (${scoreTier.label})`;
+      badge = `⚖️ AI 败局算账点评${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
       const extraWeak =
         p.phoenix_egg_audit && p.phoenix_egg_audit.shattered_cnt >= 2
           ? `团战 ${p.phoenix_egg_audit.tf_egg_casts} 次变蛋被打碎 ${p.phoenix_egg_audit.shattered_cnt} 次（碎蛋率 ${p.phoenix_egg_audit.shatter_rate_pct}%），`
+          : hmp.missing_mandatory_shard
+          ? `整局漏出 1400 金核心魔晶（${hmp.shard_desc}），`
           : "";
       punchline = `本局百人制得分 ${score100}/100 分，分摊 ${bPct}% 败局责任（泉水读秒 ${p.dead_seconds || 0} 秒），${extraWeak}${heroShort} 中后期几波关键团战走位与技能机制配合失误明显，下把急需找回状态！`;
     }
   }
 
   const baseStory =
-    `【${heroShort} 本局评分：${score100}/100分】前10分钟在${p.lane_role || "线上"}交出 ${lh10}/${dn10} 补刀（效率 ${laneEff}%），装备按「${itemRouteStr}」成型；` +
+    `【${heroShort}${tCurveTag ? `（${hmp.timing_curve_zh}）` : ""} 本局评分：${score100}/100分】前10分钟在${p.lane_role || "线上"}交出 ${lh10}/${dn10} 补刀（效率 ${laneEff}%），装备按「${itemRouteStr}」成型；` +
     `${activeAuditClause}` +
     `实战交出 ${p.kda}（参战 ${p.kill_participation_pct}%），轰出 ${fmtNum(p.hero_damage)} 英雄伤害（占全队 ${
       p.hero_damage_share_pct
@@ -7820,9 +7848,11 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     return m >= 9 && m <= 26;
   });
 
+  const hmp = p.hero_mechanism_profile || {};
+  const tCurveZh = hmp.timing_curve_zh || "";
   let midSegment = "";
   if (hasTimelineTelemetry) {
-    midSegment = `<b>【中期 10–25m】</b>阶段战绩 <b>${midK}杀/${midD}死</b>，进账 <b>+${fmtNum(
+    midSegment = `<b>【中期 10–25m${tCurveZh ? ` · ${tCurveZh}` : ""}】</b>阶段战绩 <b>${midK}杀/${midD}死</b>，进账 <b>+${fmtNum(
       midGold
     )} 金${midGoldShare > 0 ? `（占全队中期经济 ${midGoldShare}%）` : ""}</b>、打出 <b>${fmtNum(
       midDmg
@@ -7830,16 +7860,20 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       midItems ? `，做出核心装 <b>${midItems}</b>` : ""
     }`;
     if (p.is_afk_farmer) {
-      midSegment += `；但<b>全程闷头刷野拒绝参战</b>——中期吃下全队最高档资源却仅打出 <b>${fmtNum(
+      midSegment += `；但<b>身为【${tCurveZh || "核心"}】全程闷头刷野拒绝参战</b>——中期吃下全队最高档资源却仅打出 <b>${fmtNum(
         midDmg
       )} 伤害（全队垫底 ${midDmgShare}%）</b>${
         tfAfkCnt > 0 ? `，且在 <b>${tfAfkCnt} 波全队浴血团战中 0 伤害卖队友独刷</b>` : ""
       }！`;
+    } else if (hmp.early_farm_reasonable && hmp.late_harvest_fulfilled) {
+      midSegment += `；作为<b>【${tCurveZh || "后期大核"}】前中期弱势期合理避战刷关键装</b>，稳健发育不送人头，为 25m+ 出山接管比赛蓄满战力。`;
     } else if (roleType === "struggle" || roleType === "culprit1" || roleType === "culprit2") {
       if (midSoloList.length > 0) {
         midSegment += `；但中期多次脱离大部队在危险线/黑图落单被抓（<b>${midSoloList
           .map((e) => `${e.time_str}在${e.zone_zh}被${e.killer_zh || "敌方"}提款`)
           .join("、")}</b>）`;
+      } else if (hmp.mid_tempo_wasted) {
+        midSegment += `；但身为<b>【${tCurveZh}】却把 10–25m 最强节奏窗当大核闷头刷钱</b>，正面团战严重缺席`;
       } else if (midD >= 3) {
         midSegment += `；但中期连续阵亡 <b>${midD} 次</b>导致刷钱与参战节奏断档`;
       }
@@ -7855,7 +7889,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       }
     }
   } else {
-    midSegment = `<b>【中期参战与推进】</b>全场参战率 <b>${p.kill_participation_pct || 0}%（KDA ${
+    midSegment = `<b>【中期参战与推进${tCurveZh ? ` · ${tCurveZh}` : ""}】</b>全场参战率 <b>${p.kill_participation_pct || 0}%（KDA ${
       p.kda
     }）</b>，倾泻 <b>${fmtNum(p.hero_damage || 0)} 英雄伤害（全队 ${
       p.hero_damage_share_pct || 0
@@ -7882,7 +7916,10 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
           lateItems ? `（成型 ${lateItems}）` : ""
         }，${ultSummary}。`
       : "";
-    lateConclusion = `<b>【后期 25m+ & 为什么他是 MVP】</b>${lateIntro}全场交出 <b>${
+    const harvestTag = hmp.late_harvest_fulfilled
+      ? `完美兑现<b>【${tCurveZh}】前期刷钱成型、后期出山收割</b>的英雄定位，`
+      : "";
+    lateConclusion = `<b>【后期 25m+ & 为什么他是 MVP】</b>${lateIntro}${harvestTag}全场交出 <b>${
       p.kda
     }（${p.kill_participation_pct}% 参战率）、${fmtNum(p.hero_damage)} 英雄伤害（全队 ${
       p.hero_damage_share_pct || 0
@@ -7904,7 +7941,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     const struggleReasons = [];
     if (p.is_afk_farmer) {
       struggleReasons.push(
-        `身为 ${p.pos}号位核心全场参战率仅 <b>${p.kill_participation_pct}%（全队垫底，仅 ${p.assists || 0} 个助攻）</b>，前期 0–10m 仅打 <b>${fmtNum(
+        `身为 ${p.pos}号位（${tCurveZh || "核心"}）全场参战率仅 <b>${p.kill_participation_pct}%（全队垫底，仅 ${p.assists || 0} 个助攻）</b>，前期 0–10m 仅打 <b>${fmtNum(
           laneDmg
         )} 伤害</b>，中期 10–25m 狂刷 <b>+${fmtNum(midGold)} 金（占全队 ${midGoldShare}%）</b>却只打 <b>${fmtNum(
           midDmg
@@ -7947,7 +7984,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     )}。${closingAdvice}`;
   } else if (roleType === "svp") {
     const turretNote = p.is_turret_fulfilled
-      ? `（作为玻璃大炮法核场均每死换出 <b>${fmtNum(
+      ? `（作为【${tCurveZh || "玻璃大炮法核"}】场均每死换出 <b>${fmtNum(
           p.dmg_per_death || Math.round((p.hero_damage || 0) / Math.max(1, p.deaths || 1))
         )} 伤害</b>，输出职责完全达标）`
       : "";
@@ -7982,6 +8019,14 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       ).join("、")}）</b>，面对敌方高攻速物理核未提前铺满《烈火精灵》减攻速或卡高台视野变蛋，且整局仅放 <b>${
         pe.sun_ray_casts
       } 次《烈日炙烤》激光（治疗仅 ${fmtNum(pe.hero_healing)}）</b>`;
+    } else if (hmp.late_harvest_failed) {
+      mechReasonHtml = `身为<b>【${tCurveZh || "后期大核"}】前期吃了团队让出的大量安全发育资源，但 25m+ 决胜期吃下 +${fmtNum(
+        lateGoldGain
+      )} 金（占全队 ${lateGoldShare}%）却仅打出 ${fmtNum(
+        lateDmg
+      )} 伤害（占全队 ${lateDmgShare}%）</b>，后期团战收割完全断档${
+        hmp.missing_mandatory_shard ? `，且整局拒出 1400 金质变魔晶（<b>${hmp.shard_desc}</b>）` : ""
+      }${soloEvents.length > 0 ? `，外加落单被抓 <b>${soloEvents.length} 次</b>` : ""}`;
     } else {
       mechReasonHtml = `后期再吞 <b>${lateD} 次阵亡</b>（后期进账 +${fmtNum(
         lateGoldGain
@@ -7989,7 +8034,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
         p.dead_seconds || 0
       } 秒</b>、阵亡掉钱 <b>-${fmtNum(p.death_gold_lost || 0)}</b>${
         soloEvents.length > 0 ? `、脱离团队落单被抓 <b>${soloEvents.length} 次</b>` : ""
-      }`;
+      }${hmp.missing_mandatory_shard ? `、漏出核心魔晶（${hmp.shard_desc}）` : ""}`;
     }
     lateConclusion = `<b>【后期 25m+ & 战犯定责】</b>${mechReasonHtml}，本局评分仅 <b>${score100}/100 分（背锅占比 ${sharePct}%）</b>，是导致正面团战崩盘的关键症结！`;
   }

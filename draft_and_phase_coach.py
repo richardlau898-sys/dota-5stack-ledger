@@ -430,53 +430,43 @@ HERO_ARCHETYPES: Dict[int, Dict[str, Any]] = {
 }
 
 
+from hero_profiles_126 import HERO_PROFILES_126, get_hero_profile_126
+
+# 将 126 英雄全量内置机制画像合并进 HERO_ARCHETYPES（保留手工精调项，补齐全部 126 英雄）
+for _hid, _prof in HERO_PROFILES_126.items():
+    _full_prof = get_hero_profile_126(_hid, 3, _prof.get("short", ""))
+    _tc = _full_prof.get("timing_curve", "mid_tempo_brawler")
+    _tc_zh = _full_prof.get("timing_curve_zh", "中期节奏支点")
+    if _hid not in HERO_ARCHETYPES:
+        HERO_ARCHETYPES[_hid] = {
+            "short": _full_prof["short"],
+            "roles": list(_full_prof["roles"]),
+            "scores": dict(_full_prof["scores"]),
+            "dmg_type": _full_prof["dmg_type"],
+            "synergy_tags": list(_full_prof["synergy_tags"]),
+            "timing_curve": _tc,
+            "timing_curve_zh": _tc_zh,
+            "early_rule": _full_prof.get("early_rule", ""),
+            "mid_rule": _full_prof.get("mid_rule", ""),
+            "late_rule": _full_prof.get("late_rule", ""),
+            "shard_desc": _full_prof.get("shard_desc", ""),
+            "core_item_hint": _full_prof.get("core_item_hint", ""),
+        }
+    else:
+        HERO_ARCHETYPES[_hid]["timing_curve"] = _tc
+        HERO_ARCHETYPES[_hid]["timing_curve_zh"] = _tc_zh
+        for _k in ("early_rule", "mid_rule", "late_rule", "shard_desc", "core_item_hint"):
+            if _k not in HERO_ARCHETYPES[_hid] and _k in _full_prof:
+                HERO_ARCHETYPES[_hid][_k] = _full_prof[_k]
+
+
 def get_hero_archetype(p: Dict[str, Any]) -> Dict[str, Any]:
     hid = int(p.get("hero_id") or 0)
     pos = int(p.get("pos") or 3)
     short = p.get("hero_short_zh") or p.get("hero_name") or f"英雄#{hid}"
     if hid in HERO_ARCHETYPES:
         return HERO_ARCHETYPES[hid]
-
-    # 根据位置与常见属性推断默认画像
-    if pos == 1:
-        return {
-            "short": short,
-            "roles": ["一号位后期主核", "装备成型收割", "高地推进主力"],
-            "scores": {"init": 45, "burst": 78, "tf": 72, "push": 78, "pick": 60, "late": 88, "tank": 62},
-            "dmg_type": "physical",
-            "synergy_tags": ["hard_carry", "empower_carrier"],
-        }
-    if pos == 2:
-        return {
-            "short": short,
-            "roles": ["二号位中单节奏核", "前中期爆发游走", "团战法系/混伤支点"],
-            "scores": {"init": 70, "burst": 85, "tf": 80, "push": 68, "pick": 82, "late": 76, "tank": 58},
-            "dmg_type": "magical",
-            "synergy_tags": ["mid_tempo", "high_magic_nuke"],
-        }
-    if pos == 3:
-        return {
-            "short": short,
-            "roles": ["三号位前排先手", "团战吃伤害开团", "团队光环与控制"],
-            "scores": {"init": 82, "burst": 65, "tf": 84, "push": 65, "pick": 72, "late": 70, "tank": 85},
-            "dmg_type": "mixed",
-            "synergy_tags": ["frontline_tank", "initiator"],
-        }
-    if pos == 4:
-        return {
-            "short": short,
-            "roles": ["四号位游走节奏", "先手留人接控", "中期团战拉扯"],
-            "scores": {"init": 78, "burst": 70, "tf": 74, "push": 45, "pick": 85, "late": 62, "tank": 48},
-            "dmg_type": "magical",
-            "synergy_tags": ["follow_up_stun", "roaming_ganker", "squishy_ranged"],
-        }
-    return {
-        "short": short,
-        "roles": ["五号位保人视野", "反手控制救人", "线上消耗换血"],
-        "scores": {"init": 68, "burst": 68, "tf": 72, "push": 40, "pick": 74, "late": 55, "tank": 38},
-        "dmg_type": "magical",
-        "synergy_tags": ["lane_babysitter", "instant_hex_stun", "squishy_ranged"],
-    }
+    return get_hero_profile_126(hid, pos, short)
 
 
 def compute_team_draft_scores(team_players: List[Dict[str, Any]], opp_players: Optional[List[Dict[str, Any]]] = None) -> Dict[str, int]:
@@ -1057,25 +1047,35 @@ def enrich_phases_with_evaluations(
             slark_audit = full_p.get("slark_mechanism_audit")
             phoenix_audit = full_p.get("phoenix_egg_audit")
             is_turret_ok = bool(full_p.get("is_turret_fulfilled"))
+            hmp = full_p.get("hero_mechanism_profile") or {}
+            t_curve = hmp.get("timing_curve") or ""
+            t_curve_zh = hmp.get("timing_curve_zh") or ""
+            early_farm_ok = bool(hmp.get("early_farm_reasonable"))
+            late_harvest_ok = bool(hmp.get("late_harvest_fulfilled"))
+            late_harvest_fail = bool(hmp.get("late_harvest_failed"))
+            mid_tempo_bad = bool(hmp.get("mid_tempo_wasted"))
+            pp["timing_curve_zh"] = t_curve_zh
 
             # 1. 前期对线 (00:00–10:00) 规则诊断
             if pkey == "lane":
                 if pos in (1, 2):
                     if lh_gain >= 50:
-                        good_list.append(f"对线基本功扎实：前10分钟斩获 {lh_gain} 正补 / {dn_gain} 反补，阶段 GPM 高达 {gpm_p:.0f}，无解肥发育。")
+                        good_list.append(f"对线基本功扎实（{t_curve_zh or '核心'}）：前10分钟斩获 {lh_gain} 正补 / {dn_gain} 反补，阶段 GPM 高达 {gpm_p:.0f}，无解肥发育。")
                     elif lh_gain >= 38:
-                        good_list.append(f"抗压补刀合格：10分钟补出 {lh_gain} 正补 / {dn_gain} 反补（经济 +{gold_gain:,}），稳住了核心发育线。")
+                        good_list.append(f"抗压补刀合格（{t_curve_zh or '核心'}）：10分钟补出 {lh_gain} 正补 / {dn_gain} 反补（经济 +{gold_gain:,}），稳住了核心发育线。")
+                    elif t_curve == "late_hyper_carry" and lh_gain >= 32 and deaths <= 1:
+                        good_list.append(f"大核对线隐忍抗压（{t_curve_zh}）：前期身板弱势情况下稳住 {lh_gain} 补刀（+{gold_gain:,} 金），成功过渡至刷钱装。")
                     else:
-                        bad_list.append(f"对线补刀严重不达标：作为 {pos} 号位前10分钟仅有 {lh_gain} 刀（经济 +{gold_gain:,}），早期发育直接断档。")
+                        bad_list.append(f"对线补刀严重不达标：作为 {pos} 号位（{t_curve_zh or '核心'}）前10分钟仅有 {lh_gain} 刀（经济 +{gold_gain:,}），早期发育直接断档。")
                 elif pos == 3:
                     if lh_gain >= 32:
-                        good_list.append(f"劣势路占线出色：10分钟补刀 {lh_gain}/{dn_gain}，打出 {hd_gain:,} 对线消耗伤害。")
+                        good_list.append(f"劣势路占线出色（{t_curve_zh or '三号位'}）：10分钟补刀 {lh_gain}/{dn_gain}，打出 {hd_gain:,} 对线消耗伤害。")
                     else:
                         bad_list.append(f"劣势路混线艰难：10分钟仅 {lh_gain} 补刀（阶段 GPM {gpm_p:.0f}），未能压制敌方优势路大哥。")
                 else:
                     # 4/5 号位辅助
                     if kills >= 1 or hd_gain >= 2200:
-                        good_list.append(f"线上消耗与游走积极：前期打出 {hd_gain:,} 英雄伤害" + (f"，在 {', '.join(kill_times)} 拿人头打开局面。" if kill_times else "，有效压低了敌方血量。"))
+                        good_list.append(f"线上消耗与游走积极（{t_curve_zh or '辅助'}）：前期打出 {hd_gain:,} 英雄伤害" + (f"，在 {', '.join(kill_times)} 拿人头打开局面。" if kill_times else "，有效压低了敌方血量。"))
                     if obs_p + sen_p >= 3:
                         good_list.append(f"前期视野勤勉：前10分钟插下 {obs_p} 假眼 / {sen_p} 真眼保障线眼与抢符视野。")
                     elif obs_p + sen_p == 0 and pos == 5:
@@ -1094,23 +1094,34 @@ def enrich_phases_with_evaluations(
                     bad_list.append(f"前10分钟推塔伤害为 {td_gain:,}，对线期拿到优势后未能进一步磨掉敌方一塔血量。")
 
                 focus_tip = (
-                    f"前期改进重点：{'注意 03:00 莲花与 06:00 河道动力符时间点，残血及时补大药别硬拼送人头。' if deaths >= 1 else '保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。'}"
+                    f"前期改进重点（{hmp.get('early_rule') or ('注意 03:00 莲花与 06:00 河道动力符时间点，残血及时补大药别硬拼送人头。' if deaths >= 1 else '保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。')}）"
                 )
 
             # 2. 中期运营 (10:00–25:00) 规则诊断
             elif pkey == "mid":
                 if pos in (1, 2):
-                    if gpm_p >= 580:
+                    if early_farm_ok:
+                        good_list.insert(
+                            0,
+                            f"刷核发育期合理避战（{t_curve_zh}）：前中期弱势期不盲目接劣势团，15分钟内高速刷出 +{gold_gain:,} 金（阶段 GPM {gpm_p:.0f}，补刀 +{lh_gain}）"
+                            + (f"，加速成型 {items_str} 为后期出山收割奠定基础。" if items_str else "，为后期出山收割奠定基础。"),
+                        )
+                    elif gpm_p >= 580:
                         good_list.append(f"中期刷钱效率拉满：15分钟内经济狂涨 +{gold_gain:,}（阶段 GPM {gpm_p:.0f}，补刀 +{lh_gain}）" + (f"，顺利掏出 {items_str}。" if items_str else "。"))
                     elif gpm_p < 420:
                         bad_list.append(f"中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 {gpm_p:.0f}（经济 +{gold_gain:,}），核心装备成型过慢。")
                     if hd_gain >= 8000:
                         good_list.append(f"中期团战火力支柱：单阶段轰出 {hd_gain:,} 英雄伤害并斩获 {kills} 个人头。")
-                    elif hd_gain < 4000:
+                    elif mid_tempo_bad:
+                        bad_list.insert(
+                            0,
+                            f"中期干架强势期失职（{t_curve_zh}）：10~25m 本该带队抓人逼塔，却当大核闷头刷钱（阶段 +{gold_gain:,} 金仅打 {hd_gain:,} 伤害），白白浪费英雄最强节奏窗！",
+                        )
+                    elif hd_gain < 4000 and not early_farm_ok:
                         bad_list.append(f"中期打架参与度偏低：15分钟内仅打出 {hd_gain:,} 英雄伤害，队友正面接团时输出存在真空。")
                 elif pos == 3:
                     if items_str:
-                        good_list.append(f"中期关键先手/团队装成型：{items_str}，阶段打出 {hd_gain:,} 伤害与 {kills} 次击杀。")
+                        good_list.append(f"中期关键先手/团队装成型（{t_curve_zh or '三号位'}）：{items_str}，阶段打出 {hd_gain:,} 伤害与 {kills} 次击杀。")
                     if td_gain >= 1000:
                         good_list.append(f"中期主动带队逼塔，造成 {td_gain:,} 点建筑伤害。")
                 else:
@@ -1152,19 +1163,34 @@ def enrich_phases_with_evaluations(
                     bad_list.append("中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。")
 
                 focus_tip = (
-                    f"中期改进重点：{'第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！' if (deaths >= 3 or mid_solos) else '中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。'}"
+                    f"中期改进重点（{hmp.get('mid_rule') or ('第一件关键装到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！' if (deaths >= 3 or mid_solos) else '中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。')}）"
                 )
 
             # 3. 后期决策 (25:00–终局) 规则诊断
             else:
-                if hd_gain >= 12000 or kills >= 5:
+                if late_harvest_ok:
+                    good_list.insert(
+                        0,
+                        f"大核出山收割完全兑现（{t_curve_zh}）：前中期闭关刷钱成型后，25m+ 决胜期轰出 {hd_gain:,} 英雄伤害（占全队 {pt_meta.get('late_hdmg_share_pct', 25)}%）与 {td_gain:,} 推塔伤害，完美回馈团队空间！",
+                    )
+                elif hd_gain >= 12000 or kills >= 5:
                     good_list.append(f"后期决战火力全开：单阶段砍下 {kills} 杀、轰出 {hd_gain:,} 英雄伤害" + (f"，更新 {items_str}。" if items_str else "。"))
                 if is_turret_ok:
                     good_list.insert(
                         0,
-                        f"炮台法核输出职责兑现：后期顶着敌方强切入轰出 {hd_gain:,} 英雄伤害（全场每死换出 {full_p.get('dmg_per_death', 3000):,} 伤害），死前把爆发倾泻拉满！",
+                        f"炮台法核输出职责兑现（{t_curve_zh}）：后期顶着敌方强切入轰出 {hd_gain:,} 英雄伤害（全场每死换出 {full_p.get('dmg_per_death', 3000):,} 伤害），死前把爆发倾泻拉满！",
                     )
-                if td_gain >= 3500:
+                if hmp.get("sacrificial_initiator_fulfilled"):
+                    good_list.insert(
+                        0,
+                        f"前排先手开团与承伤兑现（{t_curve_zh}）：全场贡献 {full_p.get('stuns_sec', 0)} 秒硬控并抗下全队 {full_p.get('damage_taken_share_pct', 0)}% 伤害，果断肉身开团为后排创造输出空间！",
+                    )
+                if hmp.get("save_support_fulfilled"):
+                    good_list.insert(
+                        0,
+                        f"救人续航辅助职责兑现（{t_curve_zh}）：关键团战倾力提供救人技能与 {full_p.get('hero_healing', 0):,} 点英雄治疗，尽心尽力兜底大哥！",
+                    )
+                if td_gain >= 3500 and not late_harvest_ok:
                     good_list.append(f"高地拆迁绝对主力：后期独自轰出 {td_gain:,} 点建筑伤害，打赢团战后拆塔破路毫不手软！")
                 if pos in (4, 5) and (obs_p + sen_p >= 5 or items_str):
                     good_list.append(f"后期辅助尽职尽责：插下 {obs_p} 假眼 / {sen_p} 真眼" + (f"，做出 {items_str} 保护核心。" if items_str else "。"))
@@ -1187,15 +1213,25 @@ def enrich_phases_with_evaluations(
                         0,
                         f"后期团战大招《超新星》变蛋再次被秒碎（{'、'.join(late_shatters) if late_shatters else '碎蛋率 ' + str(phoenix_audit.get('shatter_rate_pct')) + '%'}），全场仅放 {phoenix_audit.get('sun_ray_casts', 0)} 次《烈日炙烤》激光，后期团战零控制零奶量！",
                     )
+                elif late_harvest_fail:
+                    bad_list.insert(
+                        0,
+                        f"后期出山收割断档（{t_curve_zh}）：25m+ 吃下 +{gold_gain:,} 金（占全队 {pt_meta.get('late_gold_share_pct', 22)}%），却仅打出 {hd_gain:,} 伤害（占全队 {pt_meta.get('late_hdmg_share_pct', 15)}%），前中期刷的资源未能转化为决胜团战收割！",
+                    )
+
+                if hmp.get("missing_mandatory_shard") and not slark_audit:
+                    bad_list.append(
+                        f"整局拒出 1400 金质变魔晶（{hmp.get('shard_desc', '核心技能机制加强')}），后期团战少一个关键救人/切入/输出机制！"
+                    )
 
                 if deaths == 0:
                     good_list.append("后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！")
-                elif deaths >= 3 and not is_turret_ok:
+                elif deaths >= 3 and not is_turret_ok and not hmp.get("sacrificial_initiator_fulfilled"):
                     bad_list.append(f"后期高价值人头连送 {deaths} 次（{', '.join(death_times[:4])}），后期每一次读秒都直接让队伍少人接团/守高地！")
                 elif deaths >= 1 and not slark_audit:
                     bad_list.append(f"后期阵亡 {deaths} 次（{', '.join(death_times)}）" + (f"，并交出 {pp.get('buybacks',0)} 次买活。" if pp.get("buybacks") else "，后期高地/肉山团站位与自保装需更到位。"))
 
-                if pos in (1, 2, 3) and hd_gain < 9000 and not slark_audit:
+                if pos in (1, 2, 3) and hd_gain < 9000 and not slark_audit and not late_harvest_fail and not hmp.get("sacrificial_initiator_fulfilled"):
                     bad_list.append(f"后期团战输出匮乏：25分钟后吃下 +{gold_gain:,} 金却仅打出 +{hd_gain:,} 英雄伤害，未能承担核心收割职责。")
 
                 if not good_list:
@@ -1209,6 +1245,8 @@ def enrich_phases_with_evaluations(
                     focus_tip = "后期改进重点：凤凰变蛋前必须先用《烈火精灵》精准挂上敌方物理核减攻速，并卡高坡/树林视野或出希瓦/刷新球保蛋，拉扯期多开《烈日炙烤》激光！"
                 elif is_turret_ok:
                     focus_tip = "后期改进重点：炮台法核输出已拉满，面对先知发芽框人+帕克梦境缠绕务必把隐刀升级为《飓风长戟（大推推）》推开树圈自救！"
+                elif hmp.get("late_rule"):
+                    focus_tip = f"后期改进重点（{hmp.get('late_rule')}）"
                 else:
                     focus_tip = "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
 

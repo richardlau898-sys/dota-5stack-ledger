@@ -13,6 +13,7 @@ Dota 2 录像级深度战术显微镜引擎 (tactical_microscope_engine.py)
 
 from typing import Any, Dict, List, Optional, Tuple
 from dota_constants_zh import get_ability_zh, ITEMS_ZH
+from hero_profiles_126 import get_hero_profile_126
 
 
 RUNE_TYPES_ZH: Dict[str, str] = {
@@ -748,15 +749,30 @@ def build_tactical_microscope(
             })
             special_insights.append(f"全场累计对敌方英雄造成 {stuns_sec} 秒硬控眩晕（平均每分钟控制 {stuns_sec/duration_min:.2f} 秒）。")
 
-        # 兜底：如果该英雄没有在上面特殊目录里命中，自动提取其施放次数最多的前 3 个主动技能与命中人次
-        if not special_insights:
-            top_abs = [
-                (k, v) for k, v in sorted(au.items(), key=lambda x: x[1], reverse=True)
-                if get_ability_zh(k)
-            ][:3]
-            if top_abs:
-                parts = [f"《{get_ability_zh(k)}》释放 {v} 次(命中 {hh.get(k,0)} 人次 / {di.get(k,0):,} 伤害)" for k, v in top_abs]
-                special_insights.append("核心技能释放与转化：" + "；".join(parts) + "。")
+        # 5) 全 126 英雄内置特性与强势期曲线审计 (HERO_PROFILES_126)
+        prof126 = get_hero_profile_126(hid, int(fp["pos"]), fp["hero_short_zh"])
+        curve126 = prof126.get("timing_curve", "")
+        has_shard_any = bool(int(rp.get("aghanims_shard") or 0) or fp.get("aghanims_shard"))
+        if prof126.get("shard_desc") and "必出" in prof126.get("shard_desc", "") and duration_min >= 25 and not has_shard_any and hid != 93:
+            headline_badges.insert(0, {"text": f"🚫 {duration_min:.0f}m未出命脉魔晶!", "tone": "bad"})
+            special_insights.insert(0, f"🚨 专属魔晶缺失：打到 {duration_min:.0f} 分钟仍未购买该英雄质变魔晶【{prof126['shard_desc']}】！")
+
+        # 补充全英雄招牌主动技能释放与命中统计
+        top_abs = [
+            (k, v) for k, v in sorted(au.items(), key=lambda x: x[1], reverse=True)
+            if get_ability_zh(k)
+        ][:3]
+        if top_abs:
+            parts = [
+                f"《{get_ability_zh(k)}》×{v}"
+                + (f"(中{hh.get(k,0)}人/{di.get(k,0):,}伤)" if (hh.get(k, 0) > 0 or di.get(k, 0) > 0) else "")
+                for k, v in top_abs
+            ]
+            role_tag = (prof126.get("roles") or ["核心机制"])[0]
+            if not special_insights:
+                special_insights.append(f"【{role_tag}】招牌技能兑现：" + "；".join(parts) + "。")
+            elif len(special_insights) < 3:
+                special_insights.append(f"【英雄定位：{role_tag}】技能释放：" + "、".join(parts) + "。")
 
         res = {
             "pos": fp["pos"],
@@ -766,6 +782,8 @@ def build_tactical_microscope(
             "hero_short_zh": fp["hero_short_zh"],
             "hero_img": fp["hero_img"],
             "personaname": fp["personaname"],
+            "timing_curve": curve126,
+            "hero_roles": prof126.get("roles", []),
             "stuns_sec": stuns_sec,
             "ult_audits": ult_audits,
             "skillshot_audits": skillshot_audits,
@@ -1968,8 +1986,11 @@ def build_tactical_microscope(
                         "detail": detail_txt,
                     })
 
-            # 判定该选手的「地图空间理解画像」
+            # 判定该选手的「地图空间理解画像」（结合英雄内置强势期曲线 timing_curve）
             is_core = pos_i in (1, 2, 3)
+            prof_space = get_hero_profile_126(int(fp.get("hero_id") or 0), pos_i, fp["hero_short_zh"])
+            is_hyper_carry = prof_space.get("timing_curve") == "late_hyper_carry"
+            hdmg_share_val = float(fp.get("hero_damage_share_pct") or 0.0)
             if is_core and p_solo_cnt >= 2 and tower_dmg < 2500:
                 style_badge = "🚨 危险呆刷 · 无聊带线提款机"
                 grade = "bad"
@@ -1982,12 +2003,19 @@ def build_tactical_microscope(
                     audit_obj.setdefault("headline_badges", []).append(
                         {"text": f"🗺️ 落单带线被抓 ×{p_solo_cnt}次", "tone": "bad"}
                     )
+            elif is_core and is_hyper_carry and jungle_farm_pct >= 52.0 and hdmg_share_val >= 22.0 and p_solo_cnt <= 1:
+                style_badge = "🌾➡️⚔️ 大核闭关成型·出山收割"
+                grade = "good"
+                verdict = (
+                    f"✓ 符合【{fp['hero_short_zh']}】后期大核特性的空间分配：前中期避开无效乱战高效收野（野区 {neutral_kills} / 兵线 {lane_kills}），"
+                    f"核心装成型后出山轰出全队 {hdmg_share_val:.1f}% 英雄伤害且仅 {p_solo_cnt} 次落单被抓，完美兑现『前期避战刷钱 -> 后期接管收割』！"
+                )
             elif is_core and jungle_farm_pct >= 58.0 and tower_dmg < 1800 and kp_pct < 55.0:
-                style_badge = "🧛 缩壳野区吸血鬼"
+                style_badge = "📉 大核刷野未兑现收割" if is_hyper_carry else "🧛 缩壳野区吸血鬼"
                 grade = "warn"
                 verdict = (
-                    f"⚠️ 地图空间利用偏消极：野区补刀占 {jungle_farm_pct}%（{neutral_kills}野 vs {lane_kills}线），"
-                    f"长期缩在自家野区刷安全钱，既少顶危险线牵制（推塔 {tower_dmg}），参战率也仅有 {kp_pct}%。"
+                    f"⚠️ {'身为后期大核前中期钻野发育合理，但出山后未能将经济转化为收割与推塔' if is_hyper_carry else '地图空间利用偏消极'}：野区补刀占 {jungle_farm_pct}%（{neutral_kills}野 vs {lane_kills}线），"
+                    f"推塔 {tower_dmg}，参战率仅有 {kp_pct}%。"
                 )
             elif is_core and tower_dmg >= 4000 and p_solo_cnt <= 1:
                 style_badge = "👑 顶级带线牵制大师"
