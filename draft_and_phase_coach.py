@@ -1051,6 +1051,13 @@ def enrich_phases_with_evaluations(
             bad_list: List[str] = []
             focus_tip = ""
 
+            full_p = full_player_by_slot.get(slot) or {}
+            pt_meta = full_p.get("phase_telemetry") or {}
+            solo_picks = pt_meta.get("solo_pickoffs") or []
+            slark_audit = full_p.get("slark_mechanism_audit")
+            phoenix_audit = full_p.get("phoenix_egg_audit")
+            is_turret_ok = bool(full_p.get("is_turret_fulfilled"))
+
             # 1. 前期对线 (00:00–10:00) 规则诊断
             if pkey == "lane":
                 if pos in (1, 2):
@@ -1113,47 +1120,97 @@ def enrich_phases_with_evaluations(
                     if kills >= 2 or hd_gain >= 4500:
                         good_list.append(f"中期接团技能释放果断：阶段贡献 {kills} 杀与 {hd_gain:,} 伤害" + (f"（出装：{items_str}）。" if items_str else "。"))
 
+                if phoenix_audit and phoenix_audit.get("shattered_cnt", 0) >= 2:
+                    mid_shatters = [t for t in (phoenix_audit.get("shattered_times") or []) if int(t.split(":")[0]) < 25]
+                    if mid_shatters:
+                        bad_list.insert(
+                            0,
+                            f"中期团战大招《超新星》变蛋连续被打碎（{'、'.join(mid_shatters)}），未提前铺满烈火精灵减攻速或卡高坡视野变蛋！",
+                        )
+
+                mid_solos = [
+                    (f"{s.get('time_str')}(被{s.get('killer','敌方')}单抓)" if isinstance(s, dict) else str(s))
+                    for s in solo_picks
+                    if 600 <= int(s.get("time", 0) if isinstance(s, dict) else int(str(s).split(":")[0]) * 60) < 1500
+                ]
+                if mid_solos:
+                    bad_list.insert(
+                        0,
+                        f"中期脱离团队单带无故被抓（{'、'.join(mid_solos)}），直接断送关键装强势期与控图节奏！",
+                    )
+
                 if deaths == 0:
                     good_list.append("中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！")
                 elif deaths >= 4:
                     bad_list.append(f"中期沦为突破口：15分钟内连续暴毙 {deaths} 次（{', '.join(death_times[:4])}），把前期积攒的节奏全送了出去！")
-                elif deaths >= 2:
+                elif deaths >= 2 and not mid_solos:
                     bad_list.append(f"中期阵亡 {deaths} 次（{', '.join(death_times)}），多次在团战或带线时被抓断节奏。")
 
                 if not good_list:
                     good_list.append(f"中期稳步过渡，经济增量 +{gold_gain:,}，造成 {hd_gain:,} 伤害。")
                 if not bad_list:
-                    bad_list.append(f"中期建筑伤害仅 +{td_gain:,}，赢下小规模遭遇战后转推外塔不够果断。")
+                    bad_list.append("中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。")
 
                 focus_tip = (
-                    f"中期改进重点：{'第一件关键装（跳刀/狂战/以太）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前落单给机会！' if deaths >= 3 else '中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。'}"
+                    f"中期改进重点：{'第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！' if (deaths >= 3 or mid_solos) else '中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。'}"
                 )
 
             # 3. 后期决策 (25:00–终局) 规则诊断
             else:
                 if hd_gain >= 12000 or kills >= 5:
-                    good_list.append(f"后期决战接管比赛：单阶段砍下 {kills} 杀、轰出 {hd_gain:,} 英雄伤害" + (f"，更新 {items_str}。" if items_str else "。"))
+                    good_list.append(f"后期决战火力全开：单阶段砍下 {kills} 杀、轰出 {hd_gain:,} 英雄伤害" + (f"，更新 {items_str}。" if items_str else "。"))
+                if is_turret_ok:
+                    good_list.insert(
+                        0,
+                        f"炮台法核输出职责兑现：后期顶着敌方强切入轰出 {hd_gain:,} 英雄伤害（全场每死换出 {full_p.get('dmg_per_death', 3000):,} 伤害），死前把爆发倾泻拉满！",
+                    )
                 if td_gain >= 3500:
                     good_list.append(f"高地拆迁绝对主力：后期独自轰出 {td_gain:,} 点建筑伤害，打赢团战后拆塔破路毫不手软！")
                 if pos in (4, 5) and (obs_p + sen_p >= 5 or items_str):
                     good_list.append(f"后期辅助尽职尽责：插下 {obs_p} 假眼 / {sen_p} 真眼" + (f"，做出 {items_str} 保护核心。" if items_str else "。"))
 
+                if slark_audit:
+                    late_solos = [
+                        (f"{s.get('time_str')}(被{s.get('killer','敌方')}单抓)" if isinstance(s, dict) else str(s))
+                        for s in solo_picks
+                        if int(s.get("time", 0) if isinstance(s, dict) else int(str(s).split(":")[0]) * 60) >= 1500
+                    ]
+                    bad_list.insert(
+                        0,
+                        f"后期机制与输出双重断档：25m+ 吃下全队最高 +{gold_gain:,} 金（占全队 {pt_meta.get('late_gold_share_pct', 26)}%），却仅打出 {hd_gain:,} 伤害（占全队 {pt_meta.get('late_hdmg_share_pct', 15.5)}% 全队倒数第一）；"
+                        + ("且整局拒出 1400 金核心魔晶《深海劫掠》（既救不了被抓队友也叠不起被动敏捷导致正面根本 A 不过人）！" if not slark_audit.get("has_shard") else "")
+                        + (f" 外加 {'、'.join(late_solos)} 单带无故被抓！" if late_solos else ""),
+                    )
+                elif phoenix_audit and phoenix_audit.get("shattered_cnt", 0) >= 2:
+                    late_shatters = [t for t in (phoenix_audit.get("shattered_times") or []) if int(t.split(":")[0]) >= 25]
+                    bad_list.insert(
+                        0,
+                        f"后期团战大招《超新星》变蛋再次被秒碎（{'、'.join(late_shatters) if late_shatters else '碎蛋率 ' + str(phoenix_audit.get('shatter_rate_pct')) + '%'}），全场仅放 {phoenix_audit.get('sun_ray_casts', 0)} 次《烈日炙烤》激光，后期团战零控制零奶量！",
+                    )
+
                 if deaths == 0:
                     good_list.append("后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！")
-                elif deaths >= 3:
-                    bad_list.append(f"后期高价值人头连送 {deaths} 次（{', '.join(death_times[:4])}），后期每一次读秒都直接让队伍少人守高地/控盾！")
-                elif deaths >= 1:
-                    bad_list.append(f"后期阵亡 {deaths} 次（{', '.join(death_times)}）" + (f"，并交出 {pp.get('buybacks',0)} 次买活。" if pp.get("buybacks") else "，后期高地/肉山团站位需更谨慎。"))
+                elif deaths >= 3 and not is_turret_ok:
+                    bad_list.append(f"后期高价值人头连送 {deaths} 次（{', '.join(death_times[:4])}），后期每一次读秒都直接让队伍少人接团/守高地！")
+                elif deaths >= 1 and not slark_audit:
+                    bad_list.append(f"后期阵亡 {deaths} 次（{', '.join(death_times)}）" + (f"，并交出 {pp.get('buybacks',0)} 次买活。" if pp.get("buybacks") else "，后期高地/肉山团站位与自保装需更到位。"))
 
-                if pos in (1, 2, 3) and td_gain < 800 and hd_gain < 7000:
-                    bad_list.append(f"后期声音偏小：25分钟后英雄伤害仅 +{hd_gain:,}、拆塔 +{td_gain:,}，决胜团战未能打出核心应有统治力。")
+                if pos in (1, 2, 3) and hd_gain < 9000 and not slark_audit:
+                    bad_list.append(f"后期团战输出匮乏：25分钟后吃下 +{gold_gain:,} 金却仅打出 +{hd_gain:,} 英雄伤害，未能承担核心收割职责。")
 
                 if not good_list:
                     good_list.append(f"后期阶段贡献 {kills} 杀、经济 +{gold_gain:,}、英雄伤害 +{hd_gain:,}。")
                 if not bad_list:
                     bad_list.append("后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。")
 
-                focus_tip = "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+                if slark_audit:
+                    focus_tip = "后期改进重点：小鱼人 20 分钟后必补 1400 金阿哈利姆魔晶《深海劫掠》（救被控制队友+双倍叠敏捷），面对蝴蝶/高闪避核心必补金箍棒/冰眼，后期严禁无视野单带被抓！"
+                elif phoenix_audit:
+                    focus_tip = "后期改进重点：凤凰变蛋前必须先用《烈火精灵》精准挂上敌方物理核减攻速，并卡高坡/树林视野或出希瓦/刷新球保蛋，拉扯期多开《烈日炙烤》激光！"
+                elif is_turret_ok:
+                    focus_tip = "后期改进重点：炮台法核输出已拉满，面对先知发芽框人+帕克梦境缠绕务必把隐刀升级为《飓风长戟（大推推）》推开树圈自救！"
+                else:
+                    focus_tip = "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
 
             default_assessment = (
                 f"{tlabel} 阶段斩获 {kills} 杀 {deaths} 死，经济 +{gold_gain:,} (GPM {gpm_p:.0f})，英雄伤害 +{hd_gain:,}，推塔 +{td_gain:,}。"

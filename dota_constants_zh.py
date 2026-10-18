@@ -511,6 +511,10 @@ IGNORED_SUB_OR_DUMMY_ABILITIES = {
     "shadow_demon_shadow_poison_release",
     "templar_assassin_trap",
     "rubick_telekinesis_land_self",
+    "phoenix_launch_fire_spirit",
+    "techies_reactive_tazer_stop",
+    "brewmaster_drunken_brawler",
+    "dawnbreaker_UTF",
 }
 
 # 全英雄技能池 100% 纯中文映射（含环轨百戏王 Ringmaster、凯 Kez 及所有常见登场英雄）
@@ -770,6 +774,92 @@ ABILITIES_ZH = {
     # 暗夜魔王补全
     "night_stalker_midnight_feast": "午夜盛宴(魔晶吃怪)",
     "night_stalker_darkness": "黑暗飞升(大招黑夜)",
+    # 斯拉克 (Slark)
+    "slark_dark_pact": "黑暗契约(C解状态)",
+    "slark_pounce": "突袭(跳留人)",
+    "slark_essence_shift": "能量转移(偷属性)",
+    "slark_depth_shroud": "深海劫掠(魔晶救人黑雾)",
+    "slark_shadow_dance": "暗影之舞(大招黑雾)",
+    # 凤凰 (Phoenix)
+    "phoenix_icarus_dive": "伊卡洛斯之翼(F飞)",
+    "phoenix_fire_spirits": "烈火精灵(减攻速小鸟)",
+    "phoenix_launch_fire_spirit": "投掷烈火精灵",
+    "phoenix_sun_ray": "烈日炙烤(激光奶/烧)",
+    "phoenix_supernova": "超新星(大招变蛋)",
+    # 剧毒术士 (Venomancer)
+    "venomancer_venomous_gale": "瘴气(一技能喷)",
+    "venomancer_poison_sting": "毒刺",
+    "venomancer_plague_ward": "瘟疫守卫(蛇棒)",
+    "venomancer_latent_poison": "潜伏剧毒",
+    "venomancer_poison_nova": "剧毒新星",
+    "venomancer_noxious_plague": "恶性瘟疫(大招传染剧毒)",
+    # 酒仙 (Brewmaster)
+    "brewmaster_thunder_clap": "雷霆一击(踩减速)",
+    "brewmaster_cinder_brew": "余烬佳酿(泼酒)",
+    "brewmaster_drunken_brawler": "醉拳(流派切换)",
+    "brewmaster_primal_companion": "元素伙伴(A杖招小熊猫)",
+    "brewmaster_primal_split": "元素分离(大招分身)",
+    # 敌法师 (Anti-Mage)
+    "antimage_mana_break": "法力损毁",
+    "antimage_blink": "闪烁(B)",
+    "antimage_counterspell": "法术反制(反弹壳)",
+    "antimage_counterspell_ally": "法术反制护友(魔晶)",
+    "antimage_mana_overload": "法力过载(Blink幻象)",
+    "antimage_mana_void": "法力虚空(大招爆蓝)",
+    # 破晓辰星 (Dawnbreaker)
+    "dawnbreaker_fire_wreath": "星破天惊(大锤三连)",
+    "dawnbreaker_celestial_hammer": "上界重锤(掷锤)",
+    "dawnbreaker_luminosity": "熠熠生辉",
+    "dawnbreaker_solar_guardian": "天光现世(大招全图降临)",
+    # 干扰者 (Disruptor)
+    "disruptor_thunder_strike": "雷霆之击(霹雳)",
+    "disruptor_glimpse": "恶念瞥视(D回)",
+    "disruptor_kinetic_field": "动能立场(框)",
+    "disruptor_kinetic_fence": "动能栅栏(命石墙)",
+    "disruptor_static_storm": "静态风暴(大招沉默大)",
+    # 瘟疫法师 (Necrophos)
+    "necrolyte_death_pulse": "死亡脉冲(奶/毒)",
+    "necrolyte_ghost_shroud": "幽冥护罩(绿杖技能)",
+    "necrolyte_heartstopper_aura": "竭心光环",
+    "necrolyte_death_seeker": "魔晶寻死冲刺",
+    "necrolyte_reapers_scythe": "死神镰刀(大招斩)",
+    # 影魔 (Shadow Fiend)
+    "nevermore_shadowraze1": "毁灭阴影(近压Z)",
+    "nevermore_shadowraze2": "毁灭阴影(中压X)",
+    "nevermore_shadowraze3": "毁灭阴影(远压C)",
+    "nevermore_frenzy": "狂热(加攻速)",
+    "nevermore_necromastery": "支配死灵",
+    "nevermore_dark_lord": "魔王降临",
+    "nevermore_requiem": "魂之挽歌(大招摇大)",
+    # 幻影长矛手 (Phantom Lancer)
+    "phantom_lancer_spirit_lance": "灵魂之矛(T)",
+    "phantom_lancer_doppelwalk": "神行百变(W躲技能)",
+    "phantom_lancer_phantom_edge": "幻影冲锋",
+    "phantom_lancer_juxtapose": "并列(分身大招)",
+    # 暗影萨满 (Shadow Shaman)
+    "shadow_shaman_ether_shock": "苍穹震击(叉电)",
+    "shadow_shaman_voodoo": "妖术(变羊)",
+    "shadow_shaman_shackles": "枷锁(拉)",
+    "shadow_shaman_mass_serpent_ward": "群蛇守卫(大招蛇棒)",
+    # 裂魂人 (Spirit Breaker)
+    "spirit_breaker_charge_of_darkness": "暗影冲刺(冲)",
+    "spirit_breaker_bulldoze": "威吓(疯狗加速解状态)",
+    "spirit_breaker_greater_bash": "巨力重击(被动推)",
+    "spirit_breaker_planar_pocket": "位面口袋(魔晶吸技能)",
+    "spirit_breaker_nether_strike": "幽冥一击(大招推)",
+    # 树精卫士 (Treant Protector)
+    "treant_natures_grasp": "自然卷握(藤蔓)",
+    "treant_leech_seed": "寄生种子",
+    "treant_living_armor": "活体护甲(修塔奶甲)",
+    "treant_eyes_in_the_forest": "丛林之眼(A杖眼树)",
+    "treant_overgrowth": "疯狂生长(大招捆)",
+    # 宙斯 (Zeus)
+    "zuus_arc_lightning": "弧形闪电(C)",
+    "zuus_lightning_bolt": "雷击(G真视劈)",
+    "zuus_heavenly_jump": "神圣一跃(跳)",
+    "zuus_lightning_hands": "雷电之手",
+    "zuus_cloud": "雷云(A杖)",
+    "zuus_thundergods_wrath": "雷神之怒(大招全图雷)",
 }
 
 # 英雄英文前缀 -> 中文英雄名（用于未知新技能兜底）

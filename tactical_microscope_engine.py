@@ -170,6 +170,34 @@ BIG_ULTIMATE_CATALOG: Dict[str, Dict[str, Any]] = {
         "warn_avg_hits": 1.2,
         "unit_label": "人次",
     },
+    "lina_laguna_blade": {
+        "zh": "神灭斩 (火女大招)",
+        "type": "single_nuke_ult",
+        "good_avg_hits": 0.90,
+        "warn_avg_hits": 0.75,
+        "unit_label": "人次",
+    },
+    "ringmaster_wheel": {
+        "zh": "奇观之轮 (百戏王转盘大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.2,
+        "warn_avg_hits": 1.3,
+        "unit_label": "人次",
+    },
+    "venomancer_noxious_plague": {
+        "zh": "恶性瘟疫 (剧毒传染大)",
+        "type": "aoe_disable_ult",
+        "good_avg_hits": 2.0,
+        "warn_avg_hits": 1.2,
+        "unit_label": "人次",
+    },
+    "brewmaster_primal_split": {
+        "zh": "元素分离 (酒仙大招分身)",
+        "type": "team_buff_ult",
+        "good_avg_hits": 0.0,
+        "warn_avg_hits": 0.0,
+        "unit_label": "次元素分身",
+    },
 }
 
 # 核心非指向性/控制/绝活小技能目录：用于审计技能命中率（如白虎箭、屠夫钩、猛犸拱、人马踩、鱼人踩等）
@@ -185,12 +213,16 @@ SKILLSHOT_CATALOG: Dict[str, Dict[str, Any]] = {
     "nyx_assassin_spiked_carapace": {"zh": "尖刺外壳 (开壳反晕)", "good_pct": 55.0, "warn_pct": 35.0},
     "hoodwink_sharpshooter": {"zh": "一击必杀 (松鼠狙击大)", "good_pct": 70.0, "warn_pct": 45.0},
     "hoodwink_acorn_shot": {"zh": "橡果栗鼠", "good_pct": 65.0, "warn_pct": 40.0},
+    "hoodwink_bushwhack": {"zh": "野地奇袭 (松鼠捆树)", "good_pct": 65.0, "warn_pct": 40.0},
     "dragon_knight_dragon_tail": {"zh": "神龙摆尾 (龙骑拍晕)", "good_pct": 85.0, "warn_pct": 65.0},
     "dragon_knight_fireball": {"zh": "魔晶火球", "good_pct": 80.0, "warn_pct": 50.0},
     "pugna_nether_ward": {"zh": "幽冥守卫 (骨法插棒子电人)", "good_pct": 100.0, "warn_pct": 60.0},
     "pugna_nether_blast": {"zh": "幽冥爆轰 (爆塔/爆人)", "good_pct": 35.0, "warn_pct": 20.0},
     "furion_sprout": {"zh": "发芽 (先知框人)", "good_pct": 70.0, "warn_pct": 45.0},
     "marci_grapple": {"zh": "过肩摔 (玛西背人)", "good_pct": 65.0, "warn_pct": 40.0},
+    "lina_light_strike_array": {"zh": "光击阵 (火女T眩晕)", "good_pct": 58.0, "warn_pct": 38.0},
+    "slark_pounce": {"zh": "突袭 (小鱼跳锁人)", "good_pct": 55.0, "warn_pct": 35.0},
+    "ringmaster_impalement": {"zh": "穿刺飞刀 (百戏王飞刀)", "good_pct": 65.0, "warn_pct": 42.0},
 }
 
 
@@ -568,6 +600,146 @@ def build_tactical_microscope(
             special_insights.append(rub_msg)
             headline_badges.append({"text": f"偷技能: {steal_casts}次", "tone": "good" if steal_casts >= 18 else "warn"})
 
+        # 3e. 凤凰 (Phoenix) 超新星变蛋「成功炸出 vs 蛋被打碎殒命」与烈日炙烤(激光)覆盖率审计
+        if hid == 110 or au.get("phoenix_supernova", 0) > 0:
+            egg_casts = au.get("phoenix_supernova", 0)
+            egg_dmg = di.get("phoenix_supernova", 0)
+            egg_hits = hh.get("phoenix_supernova", 0)
+            ray_casts = au.get("phoenix_sun_ray", 0)
+            ray_dmg = di.get("phoenix_sun_ray", 0)
+            spirits_casts = au.get("phoenix_fire_spirits", 0)
+            dive_casts = au.get("phoenix_icarus_dive", 0)
+            total_heal = int(fp.get("hero_healing") or 0)
+
+            egg_survived_waves = []
+            egg_shattered_waves = []
+            egg_held_death_waves = []
+            for tfr in tf_list:
+                c_egg = int((tfr["ability_uses"] or {}).get("phoenix_supernova", 0))
+                if c_egg > 0:
+                    if tfr["deaths"] == 0:
+                        egg_survived_waves.append(tfr["time_range"])
+                    else:
+                        egg_shattered_waves.append(tfr["time_range"])
+                elif tfr["deaths"] > 0 and tfr["start_sec"] >= 420:
+                    egg_held_death_waves.append(tfr["time_range"])
+
+            tf_egg_total = len(egg_survived_waves) + len(egg_shattered_waves)
+            shatter_cnt = len(egg_shattered_waves)
+            survive_cnt = len(egg_survived_waves)
+            # 非正面大团战（小规模遭遇战）的额外变蛋
+            skirmish_eggs = max(0, egg_casts - tf_egg_total)
+            survive_total_est = survive_cnt + skirmish_eggs
+
+            egg_grade = "bad" if (tf_egg_total >= 2 and shatter_cnt > survive_cnt) else ("good" if survive_cnt >= shatter_cnt and egg_casts >= 4 else "warn")
+            egg_verdict = (
+                f"🥚《超新星(变蛋)》生灭审判：全场共变蛋 {egg_casts} 次（造成 {egg_dmg:,} 伤害），其中在 {tf_egg_total} 波正面大团战中变蛋："
+                f"仅 {survive_cnt} 次成功炸出眩晕（{', '.join(egg_survived_waves) if egg_survived_waves else '无'}），"
+                f"高达 {shatter_cnt} 次蛋被敌方集火打碎殒命（{', '.join(egg_shattered_waves) if egg_shattered_waves else '无'}，团战碎蛋率 {round(shatter_cnt / max(1, tf_egg_total) * 100)}%）"
+                + (f"，另有 {len(egg_held_death_waves)} 波团战（{', '.join(egg_held_death_waves[:3])}）连蛋都没按出来就被秒！" if egg_held_death_waves else "！")
+                + ("变蛋位置过于贴脸且未提前给敌方物理核挂满《烈火精灵》减攻速，导致超新星沦为活靶子！" if shatter_cnt >= 3 else "")
+            )
+            ult_audits.insert(0, {
+                "ability_key": "phoenix_supernova",
+                "ability_zh": "超新星 (凤凰变蛋)",
+                "casts": egg_casts,
+                "hits": survive_total_est,
+                "avg_hits": round(survive_cnt / max(1, tf_egg_total), 2),
+                "unit_label": f"次团战炸出(碎蛋{shatter_cnt}次)",
+                "damage": egg_dmg,
+                "tf_casts_count": tf_egg_total,
+                "tf_casts_waves": [f"{w}(成)" for w in egg_survived_waves] + [f"{w}(碎!)" for w in egg_shattered_waves],
+                "tf_held_death_count": len(egg_held_death_waves),
+                "tf_held_death_waves": egg_held_death_waves,
+                "victim_breakdown": [],
+                "grade": egg_grade,
+                "verdict_text": egg_verdict,
+            })
+            headline_badges.insert(0, {
+                "text": f"🥚 团战变蛋: {tf_egg_total}放/{survive_cnt}成/{shatter_cnt}碎!",
+                "tone": egg_grade,
+            })
+            special_insights.insert(0, egg_verdict)
+
+            ray_grade = "good" if ray_casts >= int(duration_min * 0.45) else "bad"
+            ray_msg = (
+                f"☀️《烈日炙烤(激光) & 烈火精灵》机制审计：{duration_min:.0f} 分钟比赛仅开启《烈日炙烤》{ray_casts} 次（造成 {ray_dmg:,} 伤害、全队治疗仅 {total_heal:,} 点），"
+                f"召唤《烈火精灵》{spirits_casts} 次（造成 {di.get('phoenix_fire_spirits', 0):,} 伤害）、《伊卡洛斯之翼》{dive_casts} 次。"
+                + ("⚠️ 凤凰最核心的远程百分比灼烧/奶人神技《烈日炙烤》全场只按了寥寥几次，打团既没在后排拉激光融化前排，变蛋前也没用烈火精灵糊住先知/酒仙攻速！" if ray_grade == "bad" else "")
+            )
+            headline_badges.insert(1, {
+                "text": f"烈日炙烤: 仅{ray_casts}次(奶{total_heal:,})",
+                "tone": ray_grade,
+            })
+            special_insights.insert(1, ray_msg)
+            fp["phoenix_egg_audit"] = {
+                "total_casts": egg_casts,
+                "tf_egg_total": tf_egg_total,
+                "survived_cnt": survive_cnt,
+                "shattered_cnt": shatter_cnt,
+                "shatter_rate_pct": round(shatter_cnt / max(1, tf_egg_total) * 100, 1),
+                "survived_waves": egg_survived_waves,
+                "shattered_waves": egg_shattered_waves,
+                "held_death_waves": egg_held_death_waves,
+                "sun_ray_casts": ray_casts,
+                "sun_ray_dmg": ray_dmg,
+                "fire_spirits_casts": spirits_casts,
+                "hero_healing": total_heal,
+            }
+
+        # 3f. 斯拉克 (Slark) 魔晶《深海劫掠》缺失、团战叠敏捷与后期隐身审计
+        if hid == 93:
+            has_shard = bool(int(rp.get("aghanims_shard") or 0) or fp.get("aghanims_shard"))
+            shroud_casts = au.get("slark_depth_shroud", 0)
+            dance_casts = au.get("slark_shadow_dance", 0)
+            pact_casts = au.get("slark_dark_pact", 0)
+            pounce_casts = au.get("slark_pounce", 0)
+            pounce_hits = hh.get("slark_pounce", 0)
+            zero_or_low_tfs = [
+                f"{tfr['time_range']}({tfr['damage']}伤{'/死' if tfr['deaths'] > 0 else ''})"
+                for tfr in tf_list
+                if tfr["start_sec"] >= 900 and (tfr["damage"] < 500 or (tfr["deaths"] > 0 and tfr["damage"] < 900))
+            ]
+            shard_tone = "good" if has_shard else "bad"
+            shard_badge = f"深海劫掠(魔晶): {shroud_casts}次救人" if has_shard else f"🚫 {duration_min:.0f}m未出魔晶(深海劫掠)!"
+            headline_badges.insert(0, {"text": shard_badge, "tone": shard_tone})
+            headline_badges.insert(1, {"text": f"暗影之舞(大招): {dance_casts}次", "tone": "good" if dance_casts >= 10 else "warn"})
+            slark_msg = (
+                f"🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》{dance_casts} 次、《黑暗契约》{pact_casts} 次、《突袭》{pounce_casts} 放 {pounce_hits} 中；"
+                + (
+                    f"🚨 致命机制缺失：比赛打到 {duration_min:.0f} 分钟竟然未购买仅 1,400 金的阿哈利姆魔晶《深海劫掠》（0 次释放）！"
+                    f"既少了 3 秒群体黑雾救队友（原本可完美克制屠夫咬与帕克大），自己也少了一团黑雾拉扯叠《能量转移》敏捷层数，导致正面根本 A 不过敌方大哥！"
+                    if not has_shard and duration_min >= 22
+                    else f"魔晶《深海劫掠》释放 {shroud_casts} 次掩护队友。"
+                )
+                + (f"此外在 {', '.join(zero_or_low_tfs[:4])} 等中后期关键团战中近乎 0 输出蒸发或边缘OB！" if zero_or_low_tfs else "")
+            )
+            special_insights.insert(0, slark_msg)
+            fp["slark_mechanism_audit"] = {
+                "has_shard": has_shard,
+                "shroud_casts": shroud_casts,
+                "dance_casts": dance_casts,
+                "pact_casts": pact_casts,
+                "pounce_casts": pounce_casts,
+                "pounce_hits": pounce_hits,
+                "low_dmg_tfs": zero_or_low_tfs,
+            }
+
+        # 3g. 脆皮高爆发炮台核心 (莉娜/宙斯/天怒/狙击手) 「死前火力倾泻与每死换伤兑现度」审计
+        if hid in (25, 22, 101, 35):
+            hdmg = int(fp.get("hero_damage") or 0)
+            deaths_cnt = max(1, int(fp.get("deaths") or 1))
+            dmg_per_death = int(round(hdmg / deaths_cnt))
+            team_total_hdmg = max(1, sum(int(x.get("hero_damage") or 0) for x in allies))
+            hdmg_share = round(hdmg / team_total_hdmg * 100.0, 1)
+            if dmg_per_death >= 3000 or hdmg_share >= 20.0:
+                turret_msg = (
+                    f"🔥《炮台核心死前灌伤兑现》审计：作为无逃生脆皮炮台，虽然全场阵亡 { int(fp.get('deaths') or 0) } 次，但每次倒下前均把技能与平A倾泻干净——"
+                    f"全场轰出 {hdmg:,} 点英雄伤害（占全队 {hdmg_share}%，平均每次阵亡换取 {dmg_per_death:,} 点高额伤害）！"
+                )
+                headline_badges.insert(0, {"text": f"🔥 炮台换伤: {dmg_per_death:,}伤/死({hdmg_share}%)", "tone": "good"})
+                special_insights.insert(0, turret_msg)
+
         # 4) 硬控总时长勋章
         if stuns_sec >= 15.0:
             headline_badges.append({
@@ -580,7 +752,7 @@ def build_tactical_microscope(
         if not special_insights:
             top_abs = [
                 (k, v) for k, v in sorted(au.items(), key=lambda x: x[1], reverse=True)
-                if k not in ("ability_capture", "ability_lamp_use", "twin_gate_portal_warp", "plus_high_five")
+                if get_ability_zh(k)
             ][:3]
             if top_abs:
                 parts = [f"《{get_ability_zh(k)}》释放 {v} 次(命中 {hh.get(k,0)} 人次 / {di.get(k,0):,} 伤害)" for k, v in top_abs]

@@ -64,19 +64,19 @@
             "short": "昆卡",
             "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
             "pos": 2,
-            "personaname": "i jump, i died."
+            "personaname": "匿名玩家"
           },
           {
             "short": "司夜刺客",
             "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
             "pos": 4,
-            "personaname": "n4ix5"
+            "personaname": "匿名玩家"
           },
           {
             "short": "工程师",
             "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
             "pos": 5,
-            "personaname": "Bold ni Carl"
+            "personaname": "匿名玩家"
           }
         ],
         "how_to_play": "每逢 04:00 / 06:00 / 08:00 河道神符刷新前 20 秒，司夜刺客 必须提前靠向河道帮中单 昆卡 抢符；拿到加速/双倍/奥术或到 6 级后，立刻带着 工程师 开雾包抄敌方优势路大哥，打断敌方一号位无解肥节奏。",
@@ -90,19 +90,19 @@
             "short": "帕吉",
             "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
             "pos": 3,
-            "personaname": "抬手就能摸到天"
+            "personaname": "匿名玩家"
           },
           {
             "short": "狙击手",
             "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
             "pos": 1,
-            "personaname": "PUTANGINAMO"
+            "personaname": "匿名玩家"
           },
           {
             "short": "昆卡",
             "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
             "pos": 2,
-            "personaname": "i jump, i died."
+            "personaname": "匿名玩家"
           }
         ],
         "how_to_play": "团战站位铁律：由三号位 帕吉 顶在视野最前方吃第一波先手并反手打控制，一号位 狙击手 与二号位 昆卡 切忌站在同一个圈里吃敌方满额 AOE；等敌方交出关键大招后，双核同时开启 BKB/切入技能直取敌方后排酱油与脆皮炮台。",
@@ -115,7 +115,7 @@
         "pos_label": "1号位 · 优势路核心",
         "hero_short_zh": "狙击手",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-        "personaname": "PUTANGINAMO",
+        "personaname": "匿名玩家",
         "is_me": false,
         "roles": [
           "超远射程无伤点塔与守高地",
@@ -129,7 +129,7 @@
         "pos_label": "2号位 · 中路核心",
         "hero_short_zh": "昆卡",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-        "personaname": "i jump, i died.",
+        "personaname": "匿名玩家",
         "is_me": false,
         "roles": [
           "X标记+洪流+幽灵船三连无解先手",
@@ -143,7 +143,7 @@
         "pos_label": "3号位 · 劣势路核心",
         "hero_short_zh": "帕吉",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-        "personaname": "抬手就能摸到天",
+        "personaname": "匿名玩家",
         "is_me": false,
         "roles": [
           "肉钩超远破阵先手/救人",
@@ -157,7 +157,7 @@
         "pos_label": "4号位 · 游走辅助",
         "hero_short_zh": "司夜刺客",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-        "personaname": "n4ix5",
+        "personaname": "匿名玩家",
         "is_me": false,
         "roles": [
           "复仇隐身超高爆发猎杀脆皮远程核",
@@ -171,7 +171,7 @@
         "pos_label": "5号位 · 纯辅助",
         "hero_short_zh": "工程师",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-        "personaname": "Bold ni Carl",
+        "personaname": "匿名玩家",
         "is_me": false,
         "roles": [
           "爆破起飞远程跳脸沉默群伤",
@@ -231,13 +231,13 @@
               "short": "杰奇洛",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
               "pos": 4,
-              "personaname": "blaziken_91"
+              "personaname": "匿名玩家"
             },
             {
               "short": "寒冬飞龙",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
               "pos": 5,
-              "personaname": "YeShang"
+              "personaname": "匿名玩家"
             }
           ],
           "how_to_play": "每逢 04:00 / 06:00 / 08:00 河道神符刷新前 20 秒，杰奇洛 必须提前靠向河道帮中单 幽鬼 抢符；拿到加速/双倍/奥术或到 6 级后，立刻带着 寒冬飞龙 开雾包抄敌方优势路大哥，打断敌方一号位无解肥节奏。",
@@ -251,13 +251,13 @@
               "short": "宙斯",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
               "pos": 3,
-              "personaname": "GIN KALAMANSI <3"
+              "personaname": "匿名玩家"
             },
             {
               "short": "主宰",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
               "pos": 1,
-              "personaname": "Ss"
+              "personaname": "匿名玩家"
             },
             {
               "short": "幽鬼",
@@ -276,7 +276,7 @@
           "pos_label": "1号位 · 优势路核心",
           "hero_short_zh": "主宰",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-          "personaname": "Ss",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "奶棒推进核",
@@ -304,7 +304,7 @@
           "pos_label": "3号位 · 劣势路核心",
           "hero_short_zh": "宙斯",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-          "personaname": "GIN KALAMANSI <3",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "雷神之怒全图支援与开视野",
@@ -318,7 +318,7 @@
           "pos_label": "4号位 · 游走辅助",
           "hero_short_zh": "杰奇洛",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-          "personaname": "blaziken_91",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "冰封路径超远群控留人",
@@ -332,7 +332,7 @@
           "pos_label": "5号位 · 纯辅助",
           "hero_short_zh": "寒冬飞龙",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-          "personaname": "YeShang",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "寒冬诅咒无视BKB反手团控克制抱团物理核",
@@ -384,19 +384,19 @@
               "short": "昆卡",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
               "pos": 2,
-              "personaname": "i jump, i died."
+              "personaname": "匿名玩家"
             },
             {
               "short": "司夜刺客",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
               "pos": 4,
-              "personaname": "n4ix5"
+              "personaname": "匿名玩家"
             },
             {
               "short": "工程师",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
               "pos": 5,
-              "personaname": "Bold ni Carl"
+              "personaname": "匿名玩家"
             }
           ],
           "how_to_play": "每逢 04:00 / 06:00 / 08:00 河道神符刷新前 20 秒，司夜刺客 必须提前靠向河道帮中单 昆卡 抢符；拿到加速/双倍/奥术或到 6 级后，立刻带着 工程师 开雾包抄敌方优势路大哥，打断敌方一号位无解肥节奏。",
@@ -410,19 +410,19 @@
               "short": "帕吉",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
               "pos": 3,
-              "personaname": "抬手就能摸到天"
+              "personaname": "匿名玩家"
             },
             {
               "short": "狙击手",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
               "pos": 1,
-              "personaname": "PUTANGINAMO"
+              "personaname": "匿名玩家"
             },
             {
               "short": "昆卡",
               "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
               "pos": 2,
-              "personaname": "i jump, i died."
+              "personaname": "匿名玩家"
             }
           ],
           "how_to_play": "团战站位铁律：由三号位 帕吉 顶在视野最前方吃第一波先手并反手打控制，一号位 狙击手 与二号位 昆卡 切忌站在同一个圈里吃敌方满额 AOE；等敌方交出关键大招后，双核同时开启 BKB/切入技能直取敌方后排酱油与脆皮炮台。",
@@ -435,7 +435,7 @@
           "pos_label": "1号位 · 优势路核心",
           "hero_short_zh": "狙击手",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-          "personaname": "PUTANGINAMO",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "超远射程无伤点塔与守高地",
@@ -449,7 +449,7 @@
           "pos_label": "2号位 · 中路核心",
           "hero_short_zh": "昆卡",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-          "personaname": "i jump, i died.",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "X标记+洪流+幽灵船三连无解先手",
@@ -463,7 +463,7 @@
           "pos_label": "3号位 · 劣势路核心",
           "hero_short_zh": "帕吉",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-          "personaname": "抬手就能摸到天",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "肉钩超远破阵先手/救人",
@@ -477,7 +477,7 @@
           "pos_label": "4号位 · 游走辅助",
           "hero_short_zh": "司夜刺客",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-          "personaname": "n4ix5",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "复仇隐身超高爆发猎杀脆皮远程核",
@@ -491,7 +491,7 @@
           "pos_label": "5号位 · 纯辅助",
           "hero_short_zh": "工程师",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-          "personaname": "Bold ni Carl",
+          "personaname": "匿名玩家",
           "is_me": false,
           "roles": [
             "爆破起飞远程跳脸沉默群伤",
@@ -516,7 +516,7 @@
         "hero_short_zh": "主宰",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
         "pos": 1,
-        "personaname": "Ss"
+        "personaname": "匿名玩家"
       },
       {
         "order": 2,
@@ -529,7 +529,7 @@
         "hero_short_zh": "帕吉",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
         "pos": 3,
-        "personaname": "抬手就能摸到天"
+        "personaname": "匿名玩家"
       },
       {
         "order": 3,
@@ -542,7 +542,7 @@
         "hero_short_zh": "司夜刺客",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
         "pos": 4,
-        "personaname": "n4ix5"
+        "personaname": "匿名玩家"
       },
       {
         "order": 4,
@@ -568,7 +568,7 @@
         "hero_short_zh": "狙击手",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
         "pos": 1,
-        "personaname": "PUTANGINAMO"
+        "personaname": "匿名玩家"
       },
       {
         "order": 6,
@@ -581,7 +581,7 @@
         "hero_short_zh": "杰奇洛",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
         "pos": 4,
-        "personaname": "blaziken_91"
+        "personaname": "匿名玩家"
       },
       {
         "order": 7,
@@ -594,7 +594,7 @@
         "hero_short_zh": "工程师",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
         "pos": 5,
-        "personaname": "Bold ni Carl"
+        "personaname": "匿名玩家"
       },
       {
         "order": 8,
@@ -607,7 +607,7 @@
         "hero_short_zh": "宙斯",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
         "pos": 3,
-        "personaname": "GIN KALAMANSI <3"
+        "personaname": "匿名玩家"
       },
       {
         "order": 9,
@@ -620,7 +620,7 @@
         "hero_short_zh": "昆卡",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
         "pos": 2,
-        "personaname": "i jump, i died."
+        "personaname": "匿名玩家"
       },
       {
         "order": 10,
@@ -633,7 +633,7 @@
         "hero_short_zh": "寒冬飞龙",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
         "pos": 5,
-        "personaname": "YeShang"
+        "personaname": "匿名玩家"
       }
     ],
     "lane_matchups": [],
@@ -651,7 +651,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           },
@@ -667,7 +667,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           },
@@ -675,7 +675,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           },
@@ -683,7 +683,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           }
@@ -693,7 +693,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -707,7 +707,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -721,7 +721,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -735,7 +735,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -749,7 +749,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -771,7 +771,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           },
@@ -779,7 +779,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           },
@@ -787,7 +787,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           },
@@ -795,7 +795,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           },
@@ -803,7 +803,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "col_total": 0,
             "col_share_pct": 0.0
           }
@@ -813,7 +813,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -841,7 +841,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -855,7 +855,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -869,7 +869,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "row_total": 0,
             "cells": [
               0,
@@ -893,17 +893,23 @@
           "hero_id": 35,
           "hero_short_zh": "狙击手",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-          "personaname": "PUTANGINAMO",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
           "headline_badges": [
             {
+              "text": "🔥 炮台换伤: 7,993伤/死(21.3%)",
+              "tone": "good"
+            },
+            {
               "text": "🗺️ 顶级带线牵制(塔伤15219)",
               "tone": "good"
             }
           ],
-          "special_insights": []
+          "special_insights": [
+            "🔥《炮台核心死前灌伤兑现》审计：作为无逃生脆皮炮台，虽然全场阵亡 5 次，但每次倒下前均把技能与平A倾泻干净——全场轰出 39,967 点英雄伤害（占全队 21.3%，平均每次阵亡换取 7,993 点高额伤害）！"
+          ]
         },
         {
           "pos": 2,
@@ -912,7 +918,7 @@
           "hero_id": 23,
           "hero_short_zh": "昆卡",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-          "personaname": "i jump, i died.",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
@@ -926,7 +932,7 @@
           "hero_id": 14,
           "hero_short_zh": "帕吉",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-          "personaname": "抬手就能摸到天",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [
             {
@@ -964,7 +970,7 @@
           "hero_id": 88,
           "hero_short_zh": "司夜刺客",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-          "personaname": "n4ix5",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
@@ -978,7 +984,7 @@
           "hero_id": 105,
           "hero_short_zh": "工程师",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-          "personaname": "Bold ni Carl",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
@@ -994,7 +1000,7 @@
           "hero_id": 8,
           "hero_short_zh": "主宰",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-          "personaname": "Ss",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [
             {
@@ -1055,12 +1061,19 @@
           "hero_id": 22,
           "hero_short_zh": "宙斯",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-          "personaname": "GIN KALAMANSI <3",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
-          "headline_badges": [],
-          "special_insights": []
+          "headline_badges": [
+            {
+              "text": "🔥 炮台换伤: 5,160伤/死(23.1%)",
+              "tone": "good"
+            }
+          ],
+          "special_insights": [
+            "🔥《炮台核心死前灌伤兑现》审计：作为无逃生脆皮炮台，虽然全场阵亡 10 次，但每次倒下前均把技能与平A倾泻干净——全场轰出 51,597 点英雄伤害（占全队 23.1%，平均每次阵亡换取 5,160 点高额伤害）！"
+          ]
         },
         {
           "pos": 4,
@@ -1069,7 +1082,7 @@
           "hero_id": 64,
           "hero_short_zh": "杰奇洛",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-          "personaname": "blaziken_91",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
@@ -1083,7 +1096,7 @@
           "hero_id": 112,
           "hero_short_zh": "寒冬飞龙",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-          "personaname": "YeShang",
+          "personaname": "匿名玩家",
           "stuns_sec": 0.0,
           "ult_audits": [],
           "skillshot_audits": [],
@@ -1137,7 +1150,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "obs_total": 0,
             "sen_total": 0,
             "obs_killed": 0,
@@ -1153,7 +1166,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "obs_total": 0,
             "sen_total": 0,
             "obs_killed": 0,
@@ -1214,7 +1227,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "obs_total": 0,
             "sen_total": 0,
             "obs_killed": 0,
@@ -1230,7 +1243,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "obs_total": 0,
             "sen_total": 0,
             "obs_killed": 0,
@@ -1262,7 +1275,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1272,7 +1285,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1282,7 +1295,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1292,7 +1305,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1302,7 +1315,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1316,21 +1329,21 @@
           {
             "pos": 3,
             "hero_short_zh": "帕吉",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "bought": 0,
             "used": 0
           },
           {
             "pos": 4,
             "hero_short_zh": "司夜刺客",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "bought": 0,
             "used": 0
           },
           {
             "pos": 5,
             "hero_short_zh": "工程师",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "bought": 0,
             "used": 0
           }
@@ -1350,7 +1363,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1370,7 +1383,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1380,7 +1393,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1390,7 +1403,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "camps_stacked": 0,
             "creeps_stacked": 0,
             "stack_mins": [],
@@ -1404,21 +1417,21 @@
           {
             "pos": 3,
             "hero_short_zh": "宙斯",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "bought": 0,
             "used": 0
           },
           {
             "pos": 4,
             "hero_short_zh": "杰奇洛",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "bought": 0,
             "used": 0
           },
           {
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "bought": 0,
             "used": 0
           }
@@ -1434,7 +1447,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "pull_ticks": 0,
             "pull_ratio_pct": 0.0,
             "dn10": 0,
@@ -1447,7 +1460,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "pull_ticks": 0,
             "pull_ratio_pct": 0.0,
             "dn10": 0,
@@ -1474,7 +1487,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1488,7 +1501,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1502,7 +1515,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1516,7 +1529,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1530,7 +1543,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1549,7 +1562,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "pull_ticks": 0,
             "pull_ratio_pct": 0.0,
             "dn10": 0,
@@ -1562,7 +1575,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "pull_ticks": 0,
             "pull_ratio_pct": 0.0,
             "dn10": 0,
@@ -1589,7 +1602,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1617,7 +1630,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1631,7 +1644,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1645,7 +1658,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "twin_gate": 0,
             "watcher_lamp": 0,
             "outpost_capture": 0,
@@ -1667,7 +1680,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1685,7 +1698,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1703,7 +1716,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1721,7 +1734,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1739,7 +1752,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1766,7 +1779,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1802,7 +1815,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1820,7 +1833,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1838,7 +1851,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "tp_bought": 0,
             "tp_used": 0,
             "early_tp_cnt": 0,
@@ -1870,7 +1883,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -1883,7 +1896,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -1896,7 +1909,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -1909,7 +1922,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -1922,7 +1935,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -1944,7 +1957,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -1970,7 +1983,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -1983,7 +1996,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -1996,7 +2009,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "tf_deaths": 0,
             "unpressed_core_cnt": 0,
             "unpressed_wand_cnt": 0,
@@ -2019,7 +2032,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2036,7 +2049,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2053,7 +2066,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2070,7 +2083,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2087,7 +2100,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2112,7 +2125,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2146,7 +2159,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2163,7 +2176,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2180,7 +2193,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "lane_kills": 0,
             "neutral_kills": 0,
             "lane_farm_pct": 0.0,
@@ -2207,7 +2220,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2224,7 +2237,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2243,7 +2256,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2262,7 +2275,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2277,7 +2290,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2300,7 +2313,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2330,7 +2343,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2347,7 +2360,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2365,7 +2378,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "total_dmg_taken": 0,
             "auto_dmg": 0,
             "spell_dmg": 0,
@@ -2395,7 +2408,7 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2414,7 +2427,7 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2433,7 +2446,7 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2452,7 +2465,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2471,7 +2484,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2500,7 +2513,7 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2538,7 +2551,7 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2557,7 +2570,7 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2576,7 +2589,7 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
+            "personaname": "匿名玩家",
             "lane_gold": 0,
             "jungle_gold": 0,
             "kill_gold": 0,
@@ -2597,7 +2610,7 @@
     "role_mirror_by_side": {
       "dire": {
         "side": "dire",
-        "side_verdict": "1~5 号位同位置正面对账：本方在 2/5 个位置上打出对位优势（10 分钟对线期占优 0/5 路）。 最大对位压制点：【5号位 工程师 vs 寒冬飞龙】； 最大对位出血点：【2号位 昆卡 vs 幽鬼】。",
+        "side_verdict": "1~5 号位同位置正面对账：本方在 2/5 个位置上打出对位优势（10 分钟对线期占优 0/5 路）。 最大对位压制点：【3号位 帕吉 vs 宙斯】； 最大对位出血点：【2号位 昆卡 vs 幽鬼】。",
         "won_lanes_cnt": 0,
         "won_overall_cnt": 2,
         "mirror_rows": [
@@ -2605,14 +2618,14 @@
             "pos": 1,
             "own_hero": "狙击手",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "own_player": "PUTANGINAMO",
+            "own_player": "匿名玩家",
             "own_kda": "8/5/17",
-            "own_rating": 8.7,
+            "own_rating": 60.0,
             "opp_hero": "主宰",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "opp_player": "Ss",
+            "opp_player": "匿名玩家",
             "opp_kda": "12/4/10",
-            "opp_rating": 7.5,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -2636,8 +2649,8 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 63.2,
-            "opp_bm_avg": 65.9,
+            "own_bm_avg": 64.3,
+            "opp_bm_avg": 64.8,
             "own_bm_top": [
               {
                 "key": "tower_damage",
@@ -2648,19 +2661,19 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 82.1,
+                "pct": 82.5,
                 "raw": 7.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 77.0,
+                "pct": 78.0,
                 "raw": 1497.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 46.6,
+                "pct": 48.8,
                 "raw": 1835.0
               }
             ],
@@ -2668,30 +2681,30 @@
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 77.4,
+                "pct": 77.7,
                 "raw": 1313.3
-              },
-              {
-                "key": "hero_healing_per_min",
-                "label_zh": "团队治疗",
-                "pct": 71.9,
-                "raw": 269.9
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 71.7,
+                "pct": 71.3,
                 "raw": 2372.0
+              },
+              {
+                "key": "hero_healing_per_min",
+                "label_zh": "团队治疗",
+                "pct": 70.3,
+                "raw": 269.9
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 63.0,
+                "pct": 61.4,
                 "raw": 1398.0
               }
             ],
-            "own_share_pct": 50.6,
-            "opp_share_pct": 49.4,
+            "own_share_pct": 50.3,
+            "opp_share_pct": 49.7,
             "verdict_tag": "⚖️ 旗鼓相当 (均势)",
             "grade": "even",
             "summary_txt": "10m对线经济 0 vs 0（+0）｜终局经济 47,476 vs 48,576（-1,100）｜英雄输出 39,967 vs 47,673｜正面对位互杀 0 : 0。"
@@ -2700,14 +2713,14 @@
             "pos": 2,
             "own_hero": "昆卡",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "own_player": "i jump, i died.",
+            "own_player": "匿名玩家",
             "own_kda": "2/9/18",
-            "own_rating": 4.3,
+            "own_rating": 60.0,
             "opp_hero": "幽鬼",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
             "opp_player": "Tulok",
             "opp_kda": "8/13/8",
-            "opp_rating": 5.3,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -2731,31 +2744,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 31.5,
-            "opp_bm_avg": 51.0,
+            "own_bm_avg": 29.6,
+            "opp_bm_avg": 51.7,
             "own_bm_top": [
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 59.5,
+                "pct": 53.7,
                 "raw": 1098.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 53.5,
+                "pct": 49.5,
                 "raw": 1835.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 29.1,
+                "pct": 24.5,
                 "raw": 880.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 18.3,
+                "pct": 19.4,
                 "raw": 511.3
               }
             ],
@@ -2763,30 +2776,30 @@
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 85.3,
+                "pct": 85.4,
                 "raw": 1873.9
-              },
-              {
-                "key": "xp_per_min",
-                "label_zh": "XPM经验",
-                "pct": 50.3,
-                "raw": 2122.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 48.3,
+                "pct": 51.1,
                 "raw": 5.3
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 49.2,
+                "raw": 2122.0
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 47.4,
+                "pct": 48.4,
                 "raw": 2019.0
               }
             ],
-            "own_share_pct": 32.9,
-            "opp_share_pct": 67.1,
+            "own_share_pct": 39.3,
+            "opp_share_pct": 60.7,
             "verdict_tag": "🚨 对位被打穿 (被爆金币)",
             "grade": "bad",
             "summary_txt": "10m对线经济 0 vs 0（+0）｜终局经济 30,488 vs 41,392（-10,904）｜英雄输出 18,562 vs 68,023｜正面对位互杀 0 : 0。"
@@ -2795,14 +2808,14 @@
             "pos": 3,
             "own_hero": "帕吉",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "own_player": "抬手就能摸到天",
+            "own_player": "匿名玩家",
             "own_kda": "12/3/21",
-            "own_rating": 8.3,
+            "own_rating": 60.0,
             "opp_hero": "宙斯",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "opp_player": "GIN KALAMANSI <3",
+            "opp_player": "匿名玩家",
             "opp_kda": "7/10/19",
-            "opp_rating": 6.3,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -2826,31 +2839,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 91.8,
-            "opp_bm_avg": 72.6,
+            "own_bm_avg": 91.9,
+            "opp_bm_avg": 72.8,
             "own_bm_top": [
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 99.0,
+                "pct": 99.1,
                 "raw": 6.5
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 98.5,
+                "pct": 98.3,
                 "raw": 1607.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 97.5,
+                "pct": 97.2,
                 "raw": 1802.6
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 96.3,
+                "pct": 96.0,
                 "raw": 2809.0
               }
             ],
@@ -2858,31 +2871,31 @@
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 93.3,
+                "pct": 93.0,
                 "raw": 2542.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 80.7,
+                "pct": 80.1,
                 "raw": 1304.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 79.3,
+                "pct": 77.9,
                 "raw": 5.3
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 73.7,
+                "pct": 74.4,
                 "raw": 2108.0
               }
             ],
-            "own_share_pct": 57.9,
-            "opp_share_pct": 42.1,
-            "verdict_tag": "👑 对位完爆 (大优)",
+            "own_share_pct": 55.3,
+            "opp_share_pct": 44.7,
+            "verdict_tag": "⚔️ 对位压制 (小优)",
             "grade": "good",
             "summary_txt": "10m对线经济 0 vs 0（+0）｜终局经济 58,282 vs 38,295（+19,987）｜英雄输出 65,436 vs 51,597｜正面对位互杀 0 : 0。"
           },
@@ -2890,14 +2903,14 @@
             "pos": 4,
             "own_hero": "司夜刺客",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "own_player": "n4ix5",
+            "own_player": "匿名玩家",
             "own_kda": "7/7/10",
-            "own_rating": 5.0,
+            "own_rating": 60.0,
             "opp_hero": "杰奇洛",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "opp_player": "blaziken_91",
+            "opp_player": "匿名玩家",
             "opp_kda": "2/7/18",
-            "opp_rating": 5.8,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -2921,31 +2934,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 55.4,
-            "opp_bm_avg": 44.1,
+            "own_bm_avg": 55.9,
+            "opp_bm_avg": 42.8,
             "own_bm_top": [
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 95.4,
+                "pct": 95.1,
                 "raw": 3.5
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 74.2,
+                "pct": 75.0,
                 "raw": 1048.0
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 60.1,
+                "pct": 60.7,
                 "raw": 348.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 48.7,
+                "pct": 49.8,
                 "raw": 1835.0
               }
             ],
@@ -2953,46 +2966,46 @@
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 83.0,
+                "pct": 80.9,
                 "raw": 2150.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 67.4,
+                "pct": 64.8,
                 "raw": 889.9
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 37.9,
+                "pct": 35.9,
                 "raw": 1.9
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 33.5,
+                "pct": 34.1,
                 "raw": 644.0
               }
             ],
-            "own_share_pct": 39.5,
-            "opp_share_pct": 60.5,
-            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
-            "grade": "bad",
+            "own_share_pct": 45.4,
+            "opp_share_pct": 54.6,
+            "verdict_tag": "⚠️ 对位小劣 (被压)",
+            "grade": "warn",
             "summary_txt": "参战率 38.6% vs 64.5%｜真假眼 0颗(排0) vs 0颗(排0)｜硬控 0.0s vs 0.0s｜正面对位互杀 0 : 0。"
           },
           {
             "pos": 5,
             "own_hero": "工程师",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "own_player": "Bold ni Carl",
+            "own_player": "匿名玩家",
             "own_kda": "15/8/14",
-            "own_rating": 6.1,
+            "own_rating": 60.0,
             "opp_hero": "寒冬飞龙",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "opp_player": "YeShang",
+            "opp_player": "匿名玩家",
             "opp_kda": "2/12/15",
-            "opp_rating": 4.8,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -3016,31 +3029,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 64.5,
-            "opp_bm_avg": 31.7,
+            "own_bm_avg": 64.8,
+            "opp_bm_avg": 31.1,
             "own_bm_top": [
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 85.6,
+                "pct": 86.8,
                 "raw": 2490.0
               },
               {
                 "key": "kills_per_min",
                 "label_zh": "击杀效率",
-                "pct": 82.3,
+                "pct": 82.0,
                 "raw": 0.4
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 72.6,
+                "pct": 73.1,
                 "raw": 1120.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 56.6,
+                "pct": 55.7,
                 "raw": 1169.2
               }
             ],
@@ -3048,31 +3061,31 @@
               {
                 "key": "hero_healing_per_min",
                 "label_zh": "团队治疗",
-                "pct": 51.1,
+                "pct": 53.6,
                 "raw": 146.8
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 47.8,
+                "pct": 43.4,
                 "raw": 656.2
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 28.3,
+                "pct": 30.1,
                 "raw": 1433.0
               },
               {
-                "key": "gold_per_min",
-                "label_zh": "GPM打钱",
-                "pct": 26.6,
-                "raw": 647.0
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 26.1,
+                "raw": 0.0
               }
             ],
-            "own_share_pct": 58.9,
-            "opp_share_pct": 41.1,
-            "verdict_tag": "👑 对位完爆 (大优)",
+            "own_share_pct": 54.2,
+            "opp_share_pct": 45.8,
+            "verdict_tag": "⚔️ 对位压制 (小优)",
             "grade": "good",
             "summary_txt": "参战率 65.9% vs 54.8%｜真假眼 0颗(排0) vs 0颗(排0)｜硬控 0.0s vs 0.0s｜正面对位互杀 0 : 0。"
           }
@@ -3080,7 +3093,7 @@
       },
       "radiant": {
         "side": "radiant",
-        "side_verdict": "1~5 号位同位置正面对账：本方在 2/5 个位置上打出对位优势（10 分钟对线期占优 0/5 路）。 最大对位压制点：【2号位 幽鬼 vs 昆卡】； 最大对位出血点：【5号位 寒冬飞龙 vs 工程师】。",
+        "side_verdict": "1~5 号位同位置正面对账：本方在 2/5 个位置上打出对位优势（10 分钟对线期占优 0/5 路）。 最大对位压制点：【2号位 幽鬼 vs 昆卡】； 最大对位出血点：【3号位 宙斯 vs 帕吉】。",
         "won_lanes_cnt": 0,
         "won_overall_cnt": 2,
         "mirror_rows": [
@@ -3088,14 +3101,14 @@
             "pos": 1,
             "own_hero": "主宰",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "own_player": "Ss",
+            "own_player": "匿名玩家",
             "own_kda": "12/4/10",
-            "own_rating": 7.5,
+            "own_rating": 60.0,
             "opp_hero": "狙击手",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "opp_player": "PUTANGINAMO",
+            "opp_player": "匿名玩家",
             "opp_kda": "8/5/17",
-            "opp_rating": 8.7,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -3119,31 +3132,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 65.9,
-            "opp_bm_avg": 63.2,
+            "own_bm_avg": 64.8,
+            "opp_bm_avg": 64.3,
             "own_bm_top": [
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 77.4,
+                "pct": 77.7,
                 "raw": 1313.3
-              },
-              {
-                "key": "hero_healing_per_min",
-                "label_zh": "团队治疗",
-                "pct": 71.9,
-                "raw": 269.9
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 71.7,
+                "pct": 71.3,
                 "raw": 2372.0
+              },
+              {
+                "key": "hero_healing_per_min",
+                "label_zh": "团队治疗",
+                "pct": 70.3,
+                "raw": 269.9
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 63.0,
+                "pct": 61.4,
                 "raw": 1398.0
               }
             ],
@@ -3157,24 +3170,24 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 82.1,
+                "pct": 82.5,
                 "raw": 7.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 77.0,
+                "pct": 78.0,
                 "raw": 1497.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 46.6,
+                "pct": 48.8,
                 "raw": 1835.0
               }
             ],
-            "own_share_pct": 49.4,
-            "opp_share_pct": 50.6,
+            "own_share_pct": 49.7,
+            "opp_share_pct": 50.3,
             "verdict_tag": "⚖️ 旗鼓相当 (均势)",
             "grade": "even",
             "summary_txt": "10m对线经济 0 vs 0（+0）｜终局经济 48,576 vs 47,476（+1,100）｜英雄输出 47,673 vs 39,967｜正面对位互杀 0 : 0。"
@@ -3185,12 +3198,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
             "own_player": "Tulok",
             "own_kda": "8/13/8",
-            "own_rating": 5.3,
+            "own_rating": 60.0,
             "opp_hero": "昆卡",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "opp_player": "i jump, i died.",
+            "opp_player": "匿名玩家",
             "opp_kda": "2/9/18",
-            "opp_rating": 4.3,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -3214,31 +3227,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 51.0,
-            "opp_bm_avg": 31.5,
+            "own_bm_avg": 51.7,
+            "opp_bm_avg": 29.6,
             "own_bm_top": [
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 85.3,
+                "pct": 85.4,
                 "raw": 1873.9
-              },
-              {
-                "key": "xp_per_min",
-                "label_zh": "XPM经验",
-                "pct": 50.3,
-                "raw": 2122.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 48.3,
+                "pct": 51.1,
                 "raw": 5.3
+              },
+              {
+                "key": "xp_per_min",
+                "label_zh": "XPM经验",
+                "pct": 49.2,
+                "raw": 2122.0
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 47.4,
+                "pct": 48.4,
                 "raw": 2019.0
               }
             ],
@@ -3246,30 +3259,30 @@
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 59.5,
+                "pct": 53.7,
                 "raw": 1098.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 53.5,
+                "pct": 49.5,
                 "raw": 1835.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 29.1,
+                "pct": 24.5,
                 "raw": 880.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 18.3,
+                "pct": 19.4,
                 "raw": 511.3
               }
             ],
-            "own_share_pct": 67.1,
-            "opp_share_pct": 32.9,
+            "own_share_pct": 60.7,
+            "opp_share_pct": 39.3,
             "verdict_tag": "👑 对位完爆 (大优)",
             "grade": "good",
             "summary_txt": "10m对线经济 0 vs 0（+0）｜终局经济 41,392 vs 30,488（+10,904）｜英雄输出 68,023 vs 18,562｜正面对位互杀 0 : 0。"
@@ -3278,14 +3291,14 @@
             "pos": 3,
             "own_hero": "宙斯",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "own_player": "GIN KALAMANSI <3",
+            "own_player": "匿名玩家",
             "own_kda": "7/10/19",
-            "own_rating": 6.3,
+            "own_rating": 60.0,
             "opp_hero": "帕吉",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "opp_player": "抬手就能摸到天",
+            "opp_player": "匿名玩家",
             "opp_kda": "12/3/21",
-            "opp_rating": 8.3,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -3309,31 +3322,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 72.6,
-            "opp_bm_avg": 91.8,
+            "own_bm_avg": 72.8,
+            "opp_bm_avg": 91.9,
             "own_bm_top": [
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 93.3,
+                "pct": 93.0,
                 "raw": 2542.0
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 80.7,
+                "pct": 80.1,
                 "raw": 1304.0
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 79.3,
+                "pct": 77.9,
                 "raw": 5.3
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 73.7,
+                "pct": 74.4,
                 "raw": 2108.0
               }
             ],
@@ -3341,46 +3354,46 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 99.0,
+                "pct": 99.1,
                 "raw": 6.5
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 98.5,
+                "pct": 98.3,
                 "raw": 1607.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 97.5,
+                "pct": 97.2,
                 "raw": 1802.6
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 96.3,
+                "pct": 96.0,
                 "raw": 2809.0
               }
             ],
-            "own_share_pct": 42.1,
-            "opp_share_pct": 57.9,
-            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
-            "grade": "bad",
+            "own_share_pct": 44.7,
+            "opp_share_pct": 55.3,
+            "verdict_tag": "⚠️ 对位小劣 (被压)",
+            "grade": "warn",
             "summary_txt": "10m对线经济 0 vs 0（+0）｜终局经济 38,295 vs 58,282（-19,987）｜英雄输出 51,597 vs 65,436｜正面对位互杀 0 : 0。"
           },
           {
             "pos": 4,
             "own_hero": "杰奇洛",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "own_player": "blaziken_91",
+            "own_player": "匿名玩家",
             "own_kda": "2/7/18",
-            "own_rating": 5.8,
+            "own_rating": 60.0,
             "opp_hero": "司夜刺客",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "opp_player": "n4ix5",
+            "opp_player": "匿名玩家",
             "opp_kda": "7/7/10",
-            "opp_rating": 5.0,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -3404,31 +3417,31 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 44.1,
-            "opp_bm_avg": 55.4,
+            "own_bm_avg": 42.8,
+            "opp_bm_avg": 55.9,
             "own_bm_top": [
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 83.0,
+                "pct": 80.9,
                 "raw": 2150.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 67.4,
+                "pct": 64.8,
                 "raw": 889.9
               },
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 37.9,
+                "pct": 35.9,
                 "raw": 1.9
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 33.5,
+                "pct": 34.1,
                 "raw": 644.0
               }
             ],
@@ -3436,31 +3449,31 @@
               {
                 "key": "last_hits_per_min",
                 "label_zh": "补刀效率",
-                "pct": 95.4,
+                "pct": 95.1,
                 "raw": 3.5
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 74.2,
+                "pct": 75.0,
                 "raw": 1048.0
               },
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 60.1,
+                "pct": 60.7,
                 "raw": 348.0
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 48.7,
+                "pct": 49.8,
                 "raw": 1835.0
               }
             ],
-            "own_share_pct": 60.5,
-            "opp_share_pct": 39.5,
-            "verdict_tag": "👑 对位完爆 (大优)",
+            "own_share_pct": 54.6,
+            "opp_share_pct": 45.4,
+            "verdict_tag": "⚔️ 对位压制 (小优)",
             "grade": "good",
             "summary_txt": "参战率 64.5% vs 38.6%｜真假眼 0颗(排0) vs 0颗(排0)｜硬控 0.0s vs 0.0s｜正面对位互杀 0 : 0。"
           },
@@ -3468,14 +3481,14 @@
             "pos": 5,
             "own_hero": "寒冬飞龙",
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "own_player": "YeShang",
+            "own_player": "匿名玩家",
             "own_kda": "2/12/15",
-            "own_rating": 4.8,
+            "own_rating": 60.0,
             "opp_hero": "工程师",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "opp_player": "Bold ni Carl",
+            "opp_player": "匿名玩家",
             "opp_kda": "15/8/14",
-            "opp_rating": 6.1,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 0,
@@ -3499,64 +3512,64 @@
             "stuns_opp": 0.0,
             "wards_own": "0眼/排0",
             "wards_opp": "0眼/排0",
-            "own_bm_avg": 31.7,
-            "opp_bm_avg": 64.5,
+            "own_bm_avg": 31.1,
+            "opp_bm_avg": 64.8,
             "own_bm_top": [
               {
                 "key": "hero_healing_per_min",
                 "label_zh": "团队治疗",
-                "pct": 51.1,
+                "pct": 53.6,
                 "raw": 146.8
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 47.8,
+                "pct": 43.4,
                 "raw": 656.2
               },
               {
                 "key": "xp_per_min",
                 "label_zh": "XPM经验",
-                "pct": 28.3,
+                "pct": 30.1,
                 "raw": 1433.0
               },
               {
-                "key": "gold_per_min",
-                "label_zh": "GPM打钱",
-                "pct": 26.6,
-                "raw": 647.0
+                "key": "tower_damage",
+                "label_zh": "建筑推塔",
+                "pct": 26.1,
+                "raw": 0.0
               }
             ],
             "opp_bm_top": [
               {
                 "key": "tower_damage",
                 "label_zh": "建筑推塔",
-                "pct": 85.6,
+                "pct": 86.8,
                 "raw": 2490.0
               },
               {
                 "key": "kills_per_min",
                 "label_zh": "击杀效率",
-                "pct": 82.3,
+                "pct": 82.0,
                 "raw": 0.4
               },
               {
                 "key": "gold_per_min",
                 "label_zh": "GPM打钱",
-                "pct": 72.6,
+                "pct": 73.1,
                 "raw": 1120.0
               },
               {
                 "key": "hero_damage_per_min",
                 "label_zh": "英雄输出",
-                "pct": 56.6,
+                "pct": 55.7,
                 "raw": 1169.2
               }
             ],
-            "own_share_pct": 41.1,
-            "opp_share_pct": 58.9,
-            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
-            "grade": "bad",
+            "own_share_pct": 45.8,
+            "opp_share_pct": 54.2,
+            "verdict_tag": "⚠️ 对位小劣 (被压)",
+            "grade": "warn",
             "summary_txt": "参战率 54.8% vs 65.9%｜真假眼 0颗(排0) vs 0颗(排0)｜硬控 0.0s vs 0.0s｜正面对位互杀 0 : 0。"
           }
         ]
@@ -3579,8 +3592,8 @@
             "pos": 1,
             "hero_short_zh": "狙击手",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-            "personaname": "PUTANGINAMO",
-            "shard_str": "💎 28:49 获得魔晶",
+            "personaname": "匿名玩家",
+            "shard_str": "💎 已装备魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
             "grade": "warn"
@@ -3589,8 +3602,8 @@
             "pos": 2,
             "hero_short_zh": "昆卡",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-            "personaname": "i jump, i died.",
-            "shard_str": "💎 13:55 获得魔晶",
+            "personaname": "匿名玩家",
+            "shard_str": "💎 已装备魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
             "grade": "warn"
@@ -3599,8 +3612,8 @@
             "pos": 3,
             "hero_short_zh": "帕吉",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-            "personaname": "抬手就能摸到天",
-            "shard_str": "💎 34:02 获得魔晶",
+            "personaname": "匿名玩家",
+            "shard_str": "💎 已装备魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
             "grade": "warn"
@@ -3609,7 +3622,7 @@
             "pos": 4,
             "hero_short_zh": "司夜刺客",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-            "personaname": "n4ix5",
+            "personaname": "匿名玩家",
             "shard_str": "未获魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
@@ -3619,7 +3632,7 @@
             "pos": 5,
             "hero_short_zh": "工程师",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-            "personaname": "Bold ni Carl",
+            "personaname": "匿名玩家",
             "shard_str": "未获魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
@@ -3643,8 +3656,8 @@
             "pos": 1,
             "hero_short_zh": "主宰",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-            "personaname": "Ss",
-            "shard_str": "💎 29:25 获得魔晶",
+            "personaname": "匿名玩家",
+            "shard_str": "💎 已装备魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
             "grade": "warn"
@@ -3654,7 +3667,7 @@
             "hero_short_zh": "幽鬼",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
             "personaname": "Tulok",
-            "shard_str": "💎 23:39 获得魔晶",
+            "shard_str": "💎 已装备魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
             "grade": "warn"
@@ -3663,8 +3676,8 @@
             "pos": 3,
             "hero_short_zh": "宙斯",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-            "personaname": "GIN KALAMANSI <3",
-            "shard_str": "💎 10:25 获得魔晶",
+            "personaname": "匿名玩家",
+            "shard_str": "💎 已装备魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
             "grade": "warn"
@@ -3673,8 +3686,8 @@
             "pos": 4,
             "hero_short_zh": "杰奇洛",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-            "personaname": "blaziken_91",
-            "shard_str": "💎 29:16 获得魔晶",
+            "personaname": "匿名玩家",
+            "shard_str": "💎 已装备魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
             "grade": "warn"
@@ -3683,8 +3696,8 @@
             "pos": 5,
             "hero_short_zh": "寒冬飞龙",
             "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-            "personaname": "YeShang",
-            "shard_str": "💎 31:56 获得魔晶",
+            "personaname": "匿名玩家",
+            "shard_str": "💎 已装备魔晶",
             "craft_steps": [],
             "craft_verdict": "⚠️ 整局未记录到中立装备锻造切换记录。",
             "grade": "warn"
@@ -3719,7 +3732,7 @@
           "slot": 4,
           "side": "radiant",
           "pos": 1,
-          "personaname": "Ss",
+          "personaname": "匿名玩家",
           "hero_id": 8,
           "hero_short_zh": "主宰",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
@@ -3787,7 +3800,7 @@
           "slot": 0,
           "side": "radiant",
           "pos": 3,
-          "personaname": "GIN KALAMANSI <3",
+          "personaname": "匿名玩家",
           "hero_id": 22,
           "hero_short_zh": "宙斯",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
@@ -3821,7 +3834,7 @@
           "slot": 2,
           "side": "radiant",
           "pos": 4,
-          "personaname": "blaziken_91",
+          "personaname": "匿名玩家",
           "hero_id": 64,
           "hero_short_zh": "杰奇洛",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
@@ -3855,7 +3868,7 @@
           "slot": 1,
           "side": "radiant",
           "pos": 5,
-          "personaname": "YeShang",
+          "personaname": "匿名玩家",
           "hero_id": 112,
           "hero_short_zh": "寒冬飞龙",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
@@ -3889,7 +3902,7 @@
           "slot": 130,
           "side": "dire",
           "pos": 1,
-          "personaname": "PUTANGINAMO",
+          "personaname": "匿名玩家",
           "hero_id": 35,
           "hero_short_zh": "狙击手",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
@@ -3923,7 +3936,7 @@
           "slot": 132,
           "side": "dire",
           "pos": 2,
-          "personaname": "i jump, i died.",
+          "personaname": "匿名玩家",
           "hero_id": 23,
           "hero_short_zh": "昆卡",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
@@ -3957,7 +3970,7 @@
           "slot": 131,
           "side": "dire",
           "pos": 3,
-          "personaname": "抬手就能摸到天",
+          "personaname": "匿名玩家",
           "hero_id": 14,
           "hero_short_zh": "帕吉",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
@@ -3991,7 +4004,7 @@
           "slot": 128,
           "side": "dire",
           "pos": 4,
-          "personaname": "n4ix5",
+          "personaname": "匿名玩家",
           "hero_id": 88,
           "hero_short_zh": "司夜刺客",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
@@ -4025,7 +4038,7 @@
           "slot": 129,
           "side": "dire",
           "pos": 5,
-          "personaname": "Bold ni Carl",
+          "personaname": "匿名玩家",
           "hero_id": 105,
           "hero_short_zh": "工程师",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
@@ -4097,7 +4110,7 @@
           "slot": 4,
           "side": "radiant",
           "pos": 1,
-          "personaname": "Ss",
+          "personaname": "匿名玩家",
           "hero_id": 8,
           "hero_short_zh": "主宰",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
@@ -4126,7 +4139,7 @@
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
             "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 3,
@@ -4161,13 +4174,13 @@
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
             "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 0,
           "side": "radiant",
           "pos": 3,
-          "personaname": "GIN KALAMANSI <3",
+          "personaname": "匿名玩家",
           "hero_id": 22,
           "hero_short_zh": "宙斯",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
@@ -4193,15 +4206,15 @@
             "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
-            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+            "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 2,
           "side": "radiant",
           "pos": 4,
-          "personaname": "blaziken_91",
+          "personaname": "匿名玩家",
           "hero_id": 64,
           "hero_short_zh": "杰奇洛",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
@@ -4227,15 +4240,15 @@
             "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
-            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+            "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 1,
           "side": "radiant",
           "pos": 5,
-          "personaname": "YeShang",
+          "personaname": "匿名玩家",
           "hero_id": 112,
           "hero_short_zh": "寒冬飞龙",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
@@ -4261,15 +4274,15 @@
             "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
-            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+            "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 130,
           "side": "dire",
           "pos": 1,
-          "personaname": "PUTANGINAMO",
+          "personaname": "匿名玩家",
           "hero_id": 35,
           "hero_short_zh": "狙击手",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
@@ -4298,13 +4311,13 @@
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
             "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 132,
           "side": "dire",
           "pos": 2,
-          "personaname": "i jump, i died.",
+          "personaname": "匿名玩家",
           "hero_id": 23,
           "hero_short_zh": "昆卡",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
@@ -4333,13 +4346,13 @@
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 0（经济 +0），核心装备成型过慢。",
             "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 131,
           "side": "dire",
           "pos": 3,
-          "personaname": "抬手就能摸到天",
+          "personaname": "匿名玩家",
           "hero_id": 14,
           "hero_short_zh": "帕吉",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
@@ -4365,15 +4378,15 @@
             "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
-            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+            "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 128,
           "side": "dire",
           "pos": 4,
-          "personaname": "n4ix5",
+          "personaname": "匿名玩家",
           "hero_id": 88,
           "hero_short_zh": "司夜刺客",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
@@ -4399,15 +4412,15 @@
             "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
-            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+            "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 129,
           "side": "dire",
           "pos": 5,
-          "personaname": "Bold ni Carl",
+          "personaname": "匿名玩家",
           "hero_id": 105,
           "hero_short_zh": "工程师",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
@@ -4433,9 +4446,9 @@
             "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
-            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+            "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         }
       ],
       "team_diagnostics": {
@@ -4479,7 +4492,7 @@
           "slot": 4,
           "side": "radiant",
           "pos": 1,
-          "personaname": "Ss",
+          "personaname": "匿名玩家",
           "hero_id": 8,
           "hero_short_zh": "主宰",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
@@ -4505,9 +4518,9 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +0 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 3,
@@ -4539,15 +4552,15 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +0 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 0,
           "side": "radiant",
           "pos": 3,
-          "personaname": "GIN KALAMANSI <3",
+          "personaname": "匿名玩家",
           "hero_id": 22,
           "hero_short_zh": "宙斯",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
@@ -4573,15 +4586,15 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +0 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 2,
           "side": "radiant",
           "pos": 4,
-          "personaname": "blaziken_91",
+          "personaname": "匿名玩家",
           "hero_id": 64,
           "hero_short_zh": "杰奇洛",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
@@ -4609,13 +4622,13 @@
           "bad": [
             "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 1,
           "side": "radiant",
           "pos": 5,
-          "personaname": "YeShang",
+          "personaname": "匿名玩家",
           "hero_id": 112,
           "hero_short_zh": "寒冬飞龙",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
@@ -4643,13 +4656,13 @@
           "bad": [
             "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 130,
           "side": "dire",
           "pos": 1,
-          "personaname": "PUTANGINAMO",
+          "personaname": "匿名玩家",
           "hero_id": 35,
           "hero_short_zh": "狙击手",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
@@ -4675,15 +4688,15 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +0 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 132,
           "side": "dire",
           "pos": 2,
-          "personaname": "i jump, i died.",
+          "personaname": "匿名玩家",
           "hero_id": 23,
           "hero_short_zh": "昆卡",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
@@ -4709,15 +4722,15 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +0 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 131,
           "side": "dire",
           "pos": 3,
-          "personaname": "抬手就能摸到天",
+          "personaname": "匿名玩家",
           "hero_id": 14,
           "hero_short_zh": "帕吉",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
@@ -4743,15 +4756,15 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +0 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 128,
           "side": "dire",
           "pos": 4,
-          "personaname": "n4ix5",
+          "personaname": "匿名玩家",
           "hero_id": 88,
           "hero_short_zh": "司夜刺客",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
@@ -4779,13 +4792,13 @@
           "bad": [
             "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 129,
           "side": "dire",
           "pos": 5,
-          "personaname": "Bold ni Carl",
+          "personaname": "匿名玩家",
           "hero_id": 105,
           "hero_short_zh": "工程师",
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
@@ -4813,7 +4826,7 @@
           "bad": [
             "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         }
       ],
       "team_diagnostics": {
@@ -4845,14 +4858,14 @@
       "hero_short_zh": "狙击手",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
-      "personaname": "PUTANGINAMO",
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "kda": "8/5/17",
-      "rating_score": 8.7,
-      "rating_tier": "S+ 擎天战神",
-      "mvp_score": 86.6,
-      "blame_share_pct": 8.3,
-      "contrib_share_pct": 35.7,
+      "rating_score": 8.9,
+      "rating_tier": "A 凯旋炮台",
+      "mvp_score": 89.0,
+      "blame_share_pct": 3.5,
+      "contrib_share_pct": 36.9,
       "contrib_tier": "👑 头号首功 · 擎天真神",
       "gpm": 1497,
       "xpm": 1835,
@@ -4860,8 +4873,8 @@
       "hero_damage_share_pct": 21.3,
       "tower_damage": 15219,
       "kill_participation_pct": 56.8,
-      "trash_talk": "@PUTANGINAMO 这把 8/5/17 标准打卡下班，背锅占比 20 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@PUTANGINAMO 擎天一号位真核！狙击手 顶着前中期少人压力参战接团，单人狂拆 15,219 建筑伤害（包揽全队 71% 拆塔量）+ 39,967 伤害，当之无愧本局头号首功！"
+      "trash_talk": "@匿名玩家 这把狙击手对线压爆中路、全场狂灌 39,967 伤害（每死换 7,993 伤）已经把炮台火力彻底拉满了，唯一遗憾是没早点出把大推推自救解先知发芽，纯纯被前排碎蛋和小鱼人不出魔晶坑惨的悲情炮台！",
+      "praise_talk": "@匿名玩家 擎天一号位真核！狙击手 顶着前中期少人压力参战接团，单人狂拆 15,219 建筑伤害（包揽全队 71% 拆塔量）+ 39,967 伤害，当之无愧本局头号首功！"
     },
     "runner_up_player": {
       "player_slot": 131,
@@ -4872,7 +4885,7 @@
       "hero_short_zh": "帕吉",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
-      "personaname": "抬手就能摸到天",
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "kda": "12/3/21",
       "gpm": 1607,
@@ -4883,33 +4896,33 @@
       "kill_participation_pct": 75.0,
       "rating_score": 8.3,
       "rating_tier": "S 凯旋真核",
-      "blame_share_pct": 7.7,
-      "contrib_share_pct": 33.8,
+      "blame_share_pct": 8.1,
+      "contrib_share_pct": 33.3,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "strengths": [
         "极高生存容错：36 分钟高强度对抗仅阵亡 3 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
       ],
-      "praise_talk": "@抬手就能摸到天 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
+      "praise_talk": "@匿名玩家 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
     },
     "svp_player": {
-      "player_slot": 4,
+      "player_slot": 0,
       "side": "天辉",
-      "pos": 1,
-      "pos_label": "1号位 · 优势路核心",
-      "hero_name": "主宰(剑圣)",
-      "hero_short_zh": "主宰",
-      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/juggernaut.png",
-      "personaname": "Ss",
-      "kda": "12/4/10",
-      "gpm": 1398,
-      "hero_damage": 47673,
-      "tower_damage": 5165,
-      "kill_participation_pct": 71.0,
-      "rating_score": 7.5,
-      "rating_tier": "B 随波逐流",
-      "blame_share_pct": 8.8,
-      "contrib_share_pct": 39.9
+      "pos": 3,
+      "pos_label": "3号位 · 劣势路核心",
+      "hero_name": "宙斯(众神之王)",
+      "hero_short_zh": "宙斯",
+      "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+      "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/zuus.png",
+      "personaname": "匿名玩家",
+      "kda": "7/10/19",
+      "gpm": 1304,
+      "hero_damage": 51597,
+      "tower_damage": 2542,
+      "kill_participation_pct": 83.9,
+      "rating_score": 8.6,
+      "rating_tier": "A 尽力真核",
+      "blame_share_pct": 3.1,
+      "contrib_share_pct": 37.6
     },
     "culprit_player": {
       "player_slot": 132,
@@ -4920,20 +4933,20 @@
       "hero_short_zh": "昆卡",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
-      "personaname": "i jump, i died.",
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "kda": "2/9/18",
       "rating_score": 4.3,
       "rating_tier": "B 躺赢福将",
-      "blame_share_pct": 40.7,
-      "contrib_share_pct": 5.1,
+      "blame_share_pct": 42.9,
+      "contrib_share_pct": 4.8,
       "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "dead_seconds": 0,
       "death_gold_lost": 0,
       "main_crime": "典型高占经低产出：拿了全队 14.5% 的总经济（30,488金），全场却只打出 18,562 伤害（仅占全队 9.9%），每1块钱经济只换来 0.61 点伤害。",
-      "trash_talk": "@i jump, i died. 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@i jump, i died. 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！",
-      "verdict": "凯旋庆功总结：夜魇头号首功 狙击手（PUTANGINAMO，贡献 35.7%）与二当家 帕吉（抬手就能摸到天，贡献 33.8%）携手带飞！ 本局惊险躺赢锦鲤：2号位 昆卡（i jump, i died.，贡献 5.1%）。"
+      "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@匿名玩家 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！",
+      "verdict": "凯旋庆功总结：夜魇头号首功 狙击手（匿名玩家，贡献 36.9%）与二当家 帕吉（匿名玩家，贡献 33.3%）携手带飞！ 本局惊险躺赢锦鲤：2号位 昆卡（匿名玩家，贡献 4.8%）。"
     },
     "second_culprit_player": {
       "player_slot": 128,
@@ -4943,11 +4956,11 @@
       "hero_short_zh": "司夜刺客",
       "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
       "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
-      "personaname": "n4ix5",
+      "personaname": "匿名玩家",
       "kda": "7/7/10",
       "rating_score": 5.0,
-      "blame_share_pct": 21.7,
-      "contrib_share_pct": 8.4,
+      "blame_share_pct": 22.8,
+      "contrib_share_pct": 8.3,
       "main_crime": "整体发挥稳健：全场仅阵亡 7 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
     },
     "focus_team_blame_ranking": [
@@ -4957,18 +4970,18 @@
         "hero_short_zh": "昆卡",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
-        "personaname": "i jump, i died.",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "blame_share_pct": 40.7,
-        "contrib_share_pct": 5.1,
+        "blame_share_pct": 42.9,
+        "contrib_share_pct": 4.8,
         "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
         "rating_score": 4.3,
         "rating_tier": "B 躺赢福将",
         "kda": "2/9/18",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@i jump, i died. 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-        "praise_talk": "@i jump, i died. 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！"
+        "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@匿名玩家 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！"
       },
       {
         "pos": 4,
@@ -4976,18 +4989,18 @@
         "hero_short_zh": "司夜刺客",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
-        "personaname": "n4ix5",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "blame_share_pct": 21.7,
-        "contrib_share_pct": 8.4,
+        "blame_share_pct": 22.8,
+        "contrib_share_pct": 8.3,
         "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
         "rating_score": 5.0,
         "rating_tier": "B 躺赢福将",
         "kda": "7/7/10",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@n4ix5 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！",
-        "praise_talk": "@n4ix5 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！"
+        "trash_talk": "@匿名玩家 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！",
+        "praise_talk": "@匿名玩家 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！"
       },
       {
         "pos": 5,
@@ -4995,37 +5008,18 @@
         "hero_short_zh": "工程师",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
-        "personaname": "Bold ni Carl",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "blame_share_pct": 21.6,
-        "contrib_share_pct": 17.0,
+        "blame_share_pct": 22.7,
+        "contrib_share_pct": 16.7,
         "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
         "rating_score": 6.1,
         "rating_tier": "B 躺赢福将",
         "kda": "15/8/14",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@Bold ni Carl 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-        "praise_talk": "@Bold ni Carl 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！"
-      },
-      {
-        "pos": 1,
-        "hero_name": "狙击手(火枪)",
-        "hero_short_zh": "狙击手",
-        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
-        "personaname": "PUTANGINAMO",
-        "friend_tag": null,
-        "blame_share_pct": 8.3,
-        "contrib_share_pct": 35.7,
-        "contrib_tier": "👑 头号首功 · 擎天真神",
-        "rating_score": 8.7,
-        "rating_tier": "S+ 擎天战神",
-        "kda": "8/5/17",
-        "dead_seconds": 0,
-        "death_gold_lost": 0,
-        "trash_talk": "@PUTANGINAMO 这把 8/5/17 标准打卡下班，背锅占比 20 点，赢了跟着笑，输了怪队友！",
-        "praise_talk": "@PUTANGINAMO 擎天一号位真核！狙击手 顶着前中期少人压力参战接团，单人狂拆 15,219 建筑伤害（包揽全队 71% 拆塔量）+ 39,967 伤害，当之无愧本局头号首功！"
+        "trash_talk": "@匿名玩家 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+        "praise_talk": "@匿名玩家 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！"
       },
       {
         "pos": 3,
@@ -5033,18 +5027,37 @@
         "hero_short_zh": "帕吉",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
-        "personaname": "抬手就能摸到天",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "blame_share_pct": 7.7,
-        "contrib_share_pct": 33.8,
+        "blame_share_pct": 8.1,
+        "contrib_share_pct": 33.3,
         "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
         "rating_score": 8.3,
         "rating_tier": "S 凯旋真核",
         "kda": "12/3/21",
         "dead_seconds": 0,
         "death_gold_lost": 0,
-        "trash_talk": "@抬手就能摸到天 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
-        "praise_talk": "@抬手就能摸到天 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
+        "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
+        "praise_talk": "@匿名玩家 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
+      },
+      {
+        "pos": 1,
+        "hero_name": "狙击手(火枪)",
+        "hero_short_zh": "狙击手",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+        "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
+        "personaname": "匿名玩家",
+        "friend_tag": null,
+        "blame_share_pct": 3.5,
+        "contrib_share_pct": 36.9,
+        "contrib_tier": "👑 头号首功 · 擎天真神",
+        "rating_score": 8.9,
+        "rating_tier": "A 凯旋炮台",
+        "kda": "8/5/17",
+        "dead_seconds": 0,
+        "death_gold_lost": 0,
+        "trash_talk": "@匿名玩家 这把狙击手对线压爆中路、全场狂灌 39,967 伤害（每死换 7,993 伤）已经把炮台火力彻底拉满了，唯一遗憾是没早点出把大推推自救解先知发芽，纯纯被前排碎蛋和小鱼人不出魔晶坑惨的悲情炮台！",
+        "praise_talk": "@匿名玩家 擎天一号位真核！狙击手 顶着前中期少人压力参战接团，单人狂拆 15,219 建筑伤害（包揽全队 71% 拆塔量）+ 39,967 伤害，当之无愧本局头号首功！"
       }
     ],
     "focus_team_contrib_ranking": [
@@ -5054,17 +5067,17 @@
         "hero_short_zh": "狙击手",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/sniper.png",
-        "personaname": "PUTANGINAMO",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "contrib_share_pct": 35.7,
+        "contrib_share_pct": 36.9,
         "contrib_tier": "👑 头号首功 · 擎天真神",
-        "blame_share_pct": 8.3,
-        "rating_score": 8.7,
-        "rating_tier": "S+ 擎天战神",
+        "blame_share_pct": 3.5,
+        "rating_score": 8.9,
+        "rating_tier": "A 凯旋炮台",
         "kda": "8/5/17",
         "hero_damage": 39967,
         "tower_damage": 15219,
-        "praise_talk": "@PUTANGINAMO 擎天一号位真核！狙击手 顶着前中期少人压力参战接团，单人狂拆 15,219 建筑伤害（包揽全队 71% 拆塔量）+ 39,967 伤害，当之无愧本局头号首功！"
+        "praise_talk": "@匿名玩家 擎天一号位真核！狙击手 顶着前中期少人压力参战接团，单人狂拆 15,219 建筑伤害（包揽全队 71% 拆塔量）+ 39,967 伤害，当之无愧本局头号首功！"
       },
       {
         "pos": 3,
@@ -5072,17 +5085,17 @@
         "hero_short_zh": "帕吉",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/pudge.png",
-        "personaname": "抬手就能摸到天",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "contrib_share_pct": 33.8,
+        "contrib_share_pct": 33.3,
         "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
-        "blame_share_pct": 7.7,
+        "blame_share_pct": 8.1,
         "rating_score": 8.3,
         "rating_tier": "S 凯旋真核",
         "kda": "12/3/21",
         "hero_damage": 65436,
         "tower_damage": 2164,
-        "praise_talk": "@抬手就能摸到天 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
+        "praise_talk": "@匿名玩家 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！"
       },
       {
         "pos": 5,
@@ -5090,17 +5103,17 @@
         "hero_short_zh": "工程师",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/techies.png",
-        "personaname": "Bold ni Carl",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "contrib_share_pct": 17.0,
+        "contrib_share_pct": 16.7,
         "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
-        "blame_share_pct": 21.6,
+        "blame_share_pct": 22.7,
         "rating_score": 6.1,
         "rating_tier": "B 躺赢福将",
         "kda": "15/8/14",
         "hero_damage": 42442,
         "tower_damage": 2490,
-        "praise_talk": "@Bold ni Carl 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！"
+        "praise_talk": "@匿名玩家 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！"
       },
       {
         "pos": 4,
@@ -5108,17 +5121,17 @@
         "hero_short_zh": "司夜刺客",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
-        "personaname": "n4ix5",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "contrib_share_pct": 8.4,
+        "contrib_share_pct": 8.3,
         "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
-        "blame_share_pct": 21.7,
+        "blame_share_pct": 22.8,
         "rating_score": 5.0,
         "rating_tier": "B 躺赢福将",
         "kda": "7/7/10",
         "hero_damage": 21298,
         "tower_damage": 348,
-        "praise_talk": "@n4ix5 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！"
+        "praise_talk": "@匿名玩家 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！"
       },
       {
         "pos": 2,
@@ -5126,26 +5139,26 @@
         "hero_short_zh": "昆卡",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/kunkka.png",
-        "personaname": "i jump, i died.",
+        "personaname": "匿名玩家",
         "friend_tag": null,
-        "contrib_share_pct": 5.1,
+        "contrib_share_pct": 4.8,
         "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
-        "blame_share_pct": 40.7,
+        "blame_share_pct": 42.9,
         "rating_score": 4.3,
         "rating_tier": "B 躺赢福将",
         "kda": "2/9/18",
         "hero_damage": 18562,
         "tower_damage": 1098,
-        "praise_talk": "@i jump, i died. 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！"
+        "praise_talk": "@匿名玩家 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！"
       }
     ],
     "rationale_list": [
-      "全场头号首功 (8.7分 · 胜局贡献 35.7%)：夜魇 1号位 狙击手（PUTANGINAMO）交出 8/5/17（参战率 56.8%）。",
+      "全场头号首功 (8.9分 · 胜局贡献 36.9%)：夜魇 1号位 狙击手（匿名玩家）交出 8/5/17（参战率 56.8%）。",
       "核心统治力数据：单人打出 39,967 英雄伤害（占全队 21.3%）+ 15,219 建筑伤害，总经济 47,476（GPM 1497 / XPM 1835）。",
-      "制胜关键：推进终结能力极强：单人打出 15,219 建筑伤害（包揽全队 71% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
-      "胜方二当家（胜局贡献 33.8%）：3号位 帕吉（抬手就能摸到天，评分 8.3）贡献 12/3/21（参战率 75.0%，伤害 65,436）。",
-      "败方孤胆院长 (SVP)：天辉 1号位 主宰（Ss，评分 7.5）交出 12/4/10（伤害 47,673），一神带四坑实在带不动。",
-      "凯旋庆功总结：夜魇头号首功 狙击手（PUTANGINAMO，贡献 35.7%）与二当家 帕吉（抬手就能摸到天，贡献 33.8%）携手带飞！ 本局惊险躺赢锦鲤：2号位 昆卡（i jump, i died.，贡献 5.1%）。"
+      "制胜关键：炮台火力彻底兑现（哪怕阵亡也把输出灌满）：作为无位移脆皮高爆发核心，全场狂甩 高频技能轰炸，轰出 **39,967 点英雄伤害（占全队 21.3%，平均每次阵亡前倾泻 7,993 点高额伤害，25m+ 后期再轰 0 伤害）**外加 0.0 秒硬控！在团队前排与救人匮乏的逆境下，真正做到了倒下前把每一滴输出倾泻干净。",
+      "胜方二当家（胜局贡献 33.3%）：3号位 帕吉（匿名玩家，评分 8.3）贡献 12/3/21（参战率 75.0%，伤害 65,436）。",
+      "败方孤胆院长 (SVP)：天辉 3号位 宙斯（匿名玩家，评分 8.6）交出 7/10/19（伤害 51,597），一神带四坑实在带不动。",
+      "凯旋庆功总结：夜魇头号首功 狙击手（匿名玩家，贡献 36.9%）与二当家 帕吉（匿名玩家，贡献 33.3%）携手带飞！ 本局惊险躺赢锦鲤：2号位 昆卡（匿名玩家，贡献 4.8%）。"
     ]
   },
   "match_narrative": {
@@ -5180,8 +5193,8 @@
       "side": "radiant",
       "pos": 1,
       "pos_label": "1号位 · 优势路核心",
-      "account_id": 789911954,
-      "personaname": "Ss",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
       "rank": "未知段位",
@@ -5345,124 +5358,74 @@
       "active_item_uses": {},
       "ability_uses_rich": [],
       "benchmarks": {
-        "GPM同英雄分位": "超越 63% 同英雄",
-        "XPM同英雄分位": "超越 72% 同英雄",
-        "分均伤害分位": "超越 77% 同英雄",
-        "分均击杀分位": "超越 60% 同英雄",
-        "分均补刀分位": "超越 60% 同英雄",
-        "推塔分位": "超越 57% 同英雄"
+        "GPM同英雄分位": "超越 61% 同英雄",
+        "XPM同英雄分位": "超越 71% 同英雄",
+        "分均伤害分位": "超越 78% 同英雄",
+        "分均击杀分位": "超越 61% 同英雄",
+        "分均补刀分位": "超越 58% 同英雄",
+        "推塔分位": "超越 54% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.6295975768065772,
-        "xp_per_min": 0.7165729121592385,
-        "hero_damage_per_min": 0.7743401125054089,
-        "kills_per_min": 0.6029857204673301,
-        "last_hits_per_min": 0.6049329294677629,
-        "tower_damage": 0.5655560363479013
+        "gold_per_min": 0.6142396427685438,
+        "xp_per_min": 0.7127263706276358,
+        "hero_damage_per_min": 0.7772264946663359,
+        "kills_per_min": 0.6065492433639296,
+        "last_hits_per_min": 0.5790126519474076,
+        "tower_damage": 0.5447779707268667
       },
       "tags": [
         "高参战率 (71%)",
         "推进核心 (塔伤5,165)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 0,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 20.0,
-        "lane_kills": 0,
-        "lane_deaths": 0,
-        "mid_gold_gain": 0,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 20.0,
-        "mid_hdmg_share_pct": 20.0,
-        "mid_kills": 0,
-        "mid_deaths": 0,
-        "late_gold_gain": 0,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 0,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 72,
-        "damage": 71,
-        "tempo": 72,
-        "push": 67,
-        "utility": 50,
-        "survival": 72
-      },
-      "rating_score": 7.5,
-      "rating_tier": "B 随波逐流",
-      "mvp_score": 75.1,
-      "raw_blame_points": 26.9,
-      "raw_contrib_points": 219.4,
-      "strengths": [
-        "推进终结能力极强：单人打出 5,165 建筑伤害（包揽全队 50% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
-        "极高生存容错：36 分钟高强度对抗仅阵亡 4 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
-      ],
-      "weaknesses": [
-        "整体发挥稳健：全场仅阵亡 4 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
-      ],
-      "improvements": [
-        "保持当前 主宰 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
-      ],
-      "trash_talk": "@Ss 这把 12/4/10 标准打卡下班，背锅占比 27 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@Ss 推塔终结机器！主宰 单人拆出 5,165 建筑伤害（占全队 50%），赢团推塔一气呵成！",
-      "blame_share_pct": 8.8,
-      "contrib_share_pct": 39.9,
-      "contrib_rank": 1,
-      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 63.0,
+          "pct": 61.4,
           "raw": 1398.0,
           "tier": "mid"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 71.7,
+          "pct": 71.3,
           "raw": 2372.0,
           "tier": "mid"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 60.3,
+          "pct": 60.7,
           "raw": 0.3,
           "tier": "mid"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 60.5,
+          "pct": 57.9,
           "raw": 7.2,
           "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 77.4,
+          "pct": 77.7,
           "raw": 1313.3,
           "tier": "top"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 71.9,
+          "pct": 70.3,
           "raw": 269.9,
           "tier": "mid"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 56.6,
+          "pct": 54.5,
           "raw": 5165.0,
           "tier": "mid"
         }
@@ -5475,7 +5438,7 @@
         "hero_id": 8,
         "hero_short_zh": "主宰",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
-        "personaname": "Ss",
+        "personaname": "匿名玩家",
         "stuns_sec": 0.0,
         "ult_audits": [
           {
@@ -5514,7 +5477,61 @@
           "整局比赛 无敌斩 (剑圣大) 释放记录为 0！",
           "《治疗守卫 & 剑刃风暴》审计：全场插下 0 根治疗图腾（为队友治疗 9,798 点），转出 0 次剑刃风暴规避控制并打满 AOE。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 0,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 20.0,
+        "lane_kills": 0,
+        "lane_deaths": 0,
+        "mid_gold_gain": 0,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 20.0,
+        "mid_hdmg_share_pct": 20.0,
+        "mid_kills": 0,
+        "mid_deaths": 0,
+        "late_gold_gain": 0,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 0,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 71,
+        "damage": 71,
+        "tempo": 72,
+        "push": 66,
+        "utility": 50,
+        "survival": 72
+      },
+      "rating_score": 7.5,
+      "rating_tier": "B 随波逐流",
+      "mvp_score": 74.5,
+      "raw_blame_points": 27.5,
+      "raw_contrib_points": 216.3,
+      "strengths": [
+        "推进终结能力极强：单人打出 5,165 建筑伤害（包揽全队 50% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
+        "极高生存容错：36 分钟高强度对抗仅阵亡 4 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 4 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 主宰 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@匿名玩家 这把 12/4/10 标准打卡下班，背锅占比 28 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 推塔终结机器！主宰 单人拆出 5,165 建筑伤害（占全队 50%），赢团推塔一气呵成！",
+      "blame_share_pct": 10.8,
+      "contrib_share_pct": 30.9,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂"
     },
     {
       "player_slot": 3,
@@ -5672,122 +5689,73 @@
       "ability_uses_rich": [],
       "benchmarks": {
         "GPM同英雄分位": "超越 42% 同英雄",
-        "XPM同英雄分位": "超越 50% 同英雄",
+        "XPM同英雄分位": "超越 49% 同英雄",
         "分均伤害分位": "超越 85% 同英雄",
-        "分均击杀分位": "超越 33% 同英雄",
-        "分均补刀分位": "超越 48% 同英雄",
-        "推塔分位": "超越 47% 同英雄"
+        "分均击杀分位": "超越 34% 同英雄",
+        "分均补刀分位": "超越 51% 同英雄",
+        "推塔分位": "超越 48% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.41657397107897665,
-        "xp_per_min": 0.5027808676307007,
-        "hero_damage_per_min": 0.8526140155728588,
-        "kills_per_min": 0.332035595105673,
-        "last_hits_per_min": 0.4833147942157953,
-        "tower_damage": 0.4744160177975528
+        "gold_per_min": 0.425,
+        "xp_per_min": 0.4920731707317073,
+        "hero_damage_per_min": 0.8542682926829268,
+        "kills_per_min": 0.3384146341463415,
+        "last_hits_per_min": 0.5109756097560976,
+        "tower_damage": 0.4841463414634146
       },
       "tags": [
         "全队输出支柱 (30%)",
         "核心高频阵亡 (13死)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 0,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 20.0,
-        "lane_kills": 0,
-        "lane_deaths": 0,
-        "mid_gold_gain": 0,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 20.0,
-        "mid_hdmg_share_pct": 20.0,
-        "mid_kills": 0,
-        "mid_deaths": 0,
-        "late_gold_gain": 0,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 0,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 53,
-        "damage": 86,
-        "tempo": 53,
-        "push": 40,
-        "utility": 30,
-        "survival": 15
-      },
-      "rating_score": 5.3,
-      "rating_tier": "D 头号战犯",
-      "mvp_score": 53.5,
-      "raw_blame_points": 87.0,
-      "raw_contrib_points": 71.4,
-      "strengths": [
-        "输出转化率极高：吃下全队 23.9% 经济（41,392金），狂轰 68,023 英雄伤害（占全队 30.4%，超越全网 85% 同英雄）。"
-      ],
-      "weaknesses": [
-        "高频阵亡提款机：全场阵亡 **13 次**，黑白屏幕读秒长达 **0分00秒（占整局比赛 0.0% 时间）**！"
-      ],
-      "improvements": [
-        "核心位阵亡 13 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
-      ],
-      "trash_talk": "@Tulok 一局死 13 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@Tulok 这把 幽鬼 火力全开狂轰 68,023 伤害（包揽全队 30% 输出）+ 2,019 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
-      "blame_share_pct": 28.4,
-      "contrib_share_pct": 13.0,
-      "contrib_rank": 4,
-      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 41.7,
+          "pct": 42.5,
           "raw": 1165.0,
           "tier": "mid"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 50.3,
+          "pct": 49.2,
           "raw": 2122.0,
           "tier": "mid"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 33.2,
+          "pct": 33.8,
           "raw": 0.2,
           "tier": "low"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 48.3,
+          "pct": 51.1,
           "raw": 5.3,
           "tier": "mid"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 85.3,
+          "pct": 85.4,
           "raw": 1873.9,
           "tier": "top"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 90.2,
+          "pct": 89.8,
           "raw": 3.4,
           "tier": "top"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 47.4,
+          "pct": 48.4,
           "raw": 2019.0,
           "tier": "mid"
         }
@@ -5806,15 +5774,68 @@
         "skillshot_audits": [],
         "headline_badges": [],
         "special_insights": []
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 0,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 20.0,
+        "lane_kills": 0,
+        "lane_deaths": 0,
+        "mid_gold_gain": 0,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 20.0,
+        "mid_hdmg_share_pct": 20.0,
+        "mid_kills": 0,
+        "mid_deaths": 0,
+        "late_gold_gain": 0,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 0,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 55,
+        "damage": 86,
+        "tempo": 53,
+        "push": 41,
+        "utility": 30,
+        "survival": 15
+      },
+      "rating_score": 5.4,
+      "rating_tier": "D 头号战犯",
+      "mvp_score": 53.8,
+      "raw_blame_points": 86.7,
+      "raw_contrib_points": 72.3,
+      "strengths": [
+        "输出转化率极高：吃下全队 23.9% 经济（41,392金），狂轰 68,023 英雄伤害（占全队 30.4%，超越全网 85% 同英雄）。"
+      ],
+      "weaknesses": [
+        "高频阵亡提款机：全场阵亡 **13 次**，黑白屏幕读秒长达 **0分00秒（占整局比赛 0.0% 时间）**！"
+      ],
+      "improvements": [
+        "核心位阵亡 13 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
+      ],
+      "trash_talk": "@Tulok 一局死 13 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@Tulok 这把 幽鬼 炮台火力全开狂轰 68,023 伤害（占全队 30.4% 输出，场均每死换 5,232 伤害），真正做到倒下前把所有技能灌满！",
+      "blame_share_pct": 34.1,
+      "contrib_share_pct": 10.3,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏"
     },
     {
       "player_slot": 0,
       "side": "radiant",
       "pos": 3,
       "pos_label": "3号位 · 劣势路核心",
-      "account_id": 1298234574,
-      "personaname": "GIN KALAMANSI <3",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
       "rank": "未知段位",
@@ -5971,25 +5992,100 @@
       "active_item_uses": {},
       "ability_uses_rich": [],
       "benchmarks": {
-        "GPM同英雄分位": "超越 81% 同英雄",
+        "GPM同英雄分位": "超越 80% 同英雄",
         "XPM同英雄分位": "超越 74% 同英雄",
-        "分均伤害分位": "超越 69% 同英雄",
-        "分均击杀分位": "超越 40% 同英雄",
-        "分均补刀分位": "超越 79% 同英雄",
+        "分均伤害分位": "超越 70% 同英雄",
+        "分均击杀分位": "超越 42% 同英雄",
+        "分均补刀分位": "超越 78% 同英雄",
         "推塔分位": "超越 93% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.8065461651196874,
-        "xp_per_min": 0.7369320957498778,
-        "hero_damage_per_min": 0.6914997557401075,
-        "kills_per_min": 0.39741084513922814,
-        "last_hits_per_min": 0.7928676111382511,
-        "tower_damage": 0.932828529555447
+        "gold_per_min": 0.800628391888032,
+        "xp_per_min": 0.7435018566123964,
+        "hero_damage_per_min": 0.7003713224792917,
+        "kills_per_min": 0.41616680948300483,
+        "last_hits_per_min": 0.7786346758069123,
+        "tower_damage": 0.9303056269637247
       },
       "tags": [
         "高参战率 (84%)",
         "阵亡偏多 (10死)"
       ],
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 80.1,
+          "raw": 1304.0,
+          "tier": "top"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 74.4,
+          "raw": 2108.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 41.6,
+          "raw": 0.2,
+          "tier": "mid"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 77.9,
+          "raw": 5.3,
+          "tier": "top"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 70.0,
+          "raw": 1421.4,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 87.1,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 93.0,
+          "raw": 2542.0,
+          "tier": "top"
+        }
+      ],
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 3,
+        "player_slot": 0,
+        "side": "radiant",
+        "hero_id": 22,
+        "hero_short_zh": "宙斯",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [
+          {
+            "text": "🔥 炮台换伤: 5,160伤/死(23.1%)",
+            "tone": "good"
+          }
+        ],
+        "special_insights": [
+          "🔥《炮台核心死前灌伤兑现》审计：作为无逃生脆皮炮台，虽然全场阵亡 10 次，但每次倒下前均把技能与平A倾泻干净——全场轰出 51,597 点英雄伤害（占全队 23.1%，平均每次阵亡换取 5,160 点高额伤害）！"
+        ]
+      },
       "phase_telemetry": {
         "lane_gold_gain": 0,
         "lane_hdmg_gain": 0,
@@ -6004,117 +6100,53 @@
         "mid_deaths": 0,
         "late_gold_gain": 0,
         "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
         "late_kills": 0,
         "late_deaths": 0,
         "tf_total_count": 0,
         "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
       },
       "is_afk_farmer": false,
       "radar": {
         "farm": 81,
-        "damage": 68,
+        "damage": 85,
         "tempo": 94,
         "push": 69,
         "utility": 30,
-        "survival": 43
+        "survival": 60
       },
-      "rating_score": 6.3,
-      "rating_tier": "D 头号战犯",
-      "mvp_score": 63.5,
-      "raw_blame_points": 60.5,
-      "raw_contrib_points": 107.2,
+      "rating_score": 8.6,
+      "rating_tier": "A 尽力真核",
+      "mvp_score": 85.5,
+      "raw_blame_points": 8.0,
+      "raw_contrib_points": 262.4,
       "strengths": [
-        "基础数据合格：交出 7/10/19（参战率 83.9%，英雄伤害 51,597），完成了该位置基础任务。"
+        "炮台火力彻底兑现（哪怕阵亡也把输出灌满）：作为无位移脆皮高爆发核心，全场狂甩 高频技能轰炸，轰出 **51,597 点英雄伤害（占全队 23.1%，平均每次阵亡前倾泻 5,159 点高额伤害，25m+ 后期再轰 0 伤害）**外加 0.0 秒硬控！在团队前排与救人匮乏的逆境下，真正做到了倒下前把每一滴输出倾泻干净。"
       ],
       "weaknesses": [
-        "高频阵亡提款机：全场阵亡 **10 次**，黑白屏幕读秒长达 **0分00秒（占整局比赛 0.0% 时间）**！"
+        "绝境生存与留人反制博弈：作为己方唯一能威胁敌方后排的高爆发炮台，被敌方切入与点控重点针对阵亡 10 次；在队友缺乏魔晶救人与前排支点的局面下，单靠 BKB 结束后仍容易被敌方框人/留人技能链限制走位。"
       ],
       "improvements": [
-        "核心位阵亡 10 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
+        "宙斯 本局输出职责已超额完成（场均每死换 5,159 伤害）；若从团队可能性出发进一步提升残局容错，面对敌方先知发芽框人/帕克梦境缠绕/屠夫钩时，可将一件纯法系输出装替换为【飓风长戟（大推推）】（既能推开自己秒解发芽树圈与缠绕、拉开切入距离，又能白嫖超远射程点人）。"
       ],
-      "trash_talk": "@GIN KALAMANSI <3 一局死 10 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@GIN KALAMANSI <3 虽然这把 宙斯 阵亡 10 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
-      "blame_share_pct": 19.8,
-      "contrib_share_pct": 19.5,
-      "contrib_rank": 2,
-      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
-      "pings_count": 0,
-      "lane_id": 0,
-      "benchmarks_list": [
-        {
-          "key": "gold_per_min",
-          "label": "GPM 打钱速率",
-          "pct": 80.7,
-          "raw": 1304.0,
-          "tier": "top"
-        },
-        {
-          "key": "xp_per_min",
-          "label": "XPM 经验速率",
-          "pct": 73.7,
-          "raw": 2108.0,
-          "tier": "mid"
-        },
-        {
-          "key": "kills_per_min",
-          "label": "分均击杀",
-          "pct": 39.7,
-          "raw": 0.2,
-          "tier": "low"
-        },
-        {
-          "key": "last_hits_per_min",
-          "label": "分均正补",
-          "pct": 79.3,
-          "raw": 5.3,
-          "tier": "top"
-        },
-        {
-          "key": "hero_damage_per_min",
-          "label": "分均英雄伤害",
-          "pct": 69.1,
-          "raw": 1421.4,
-          "tier": "mid"
-        },
-        {
-          "key": "hero_healing_per_min",
-          "label": "分均治疗",
-          "pct": 86.3,
-          "raw": 0.0,
-          "tier": "top"
-        },
-        {
-          "key": "tower_damage",
-          "label": "建筑推塔伤害",
-          "pct": 93.3,
-          "raw": 2542.0,
-          "tier": "top"
-        }
-      ],
-      "ability_targets_list": [],
-      "hero_execution_audit": {
-        "pos": 3,
-        "player_slot": 0,
-        "side": "radiant",
-        "hero_id": 22,
-        "hero_short_zh": "宙斯",
-        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
-        "personaname": "GIN KALAMANSI <3",
-        "stuns_sec": 0.0,
-        "ult_audits": [],
-        "skillshot_audits": [],
-        "headline_badges": [],
-        "special_insights": []
-      }
+      "trash_talk": "@匿名玩家 这把宙斯对线压爆中路、全场狂灌 51,597 伤害（每死换 5,159 伤）已经把炮台火力彻底拉满了，唯一遗憾是没早点出把大推推自救解先知发芽，纯纯被前排碎蛋和小鱼人不出魔晶坑惨的悲情炮台！",
+      "praise_talk": "@匿名玩家 虽然这把 宙斯 阵亡 10 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
+      "blame_share_pct": 3.1,
+      "contrib_share_pct": 37.6,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神"
     },
     {
       "player_slot": 2,
       "side": "radiant",
       "pos": 4,
       "pos_label": "4号位 · 游走辅助",
-      "account_id": 826993923,
-      "personaname": "blaziken_91",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
       "rank": "未知段位",
@@ -6264,22 +6296,90 @@
       "active_item_uses": {},
       "ability_uses_rich": [],
       "benchmarks": {
-        "GPM同英雄分位": "超越 28% 同英雄",
-        "XPM同英雄分位": "超越 83% 同英雄",
-        "分均伤害分位": "超越 67% 同英雄",
-        "分均击杀分位": "超越 15% 同英雄",
-        "分均补刀分位": "超越 38% 同英雄",
+        "GPM同英雄分位": "超越 25% 同英雄",
+        "XPM同英雄分位": "超越 81% 同英雄",
+        "分均伤害分位": "超越 65% 同英雄",
+        "分均击杀分位": "超越 16% 同英雄",
+        "分均补刀分位": "超越 36% 同英雄",
         "推塔分位": "超越 34% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.2796125055041832,
-        "xp_per_min": 0.8304711580801409,
-        "hero_damage_per_min": 0.6737120211360634,
-        "kills_per_min": 0.14707177454865697,
-        "last_hits_per_min": 0.37912813738441214,
-        "tower_damage": 0.33509467195068254
+        "gold_per_min": 0.2535211267605634,
+        "xp_per_min": 0.8087757313109426,
+        "hero_damage_per_min": 0.6484290357529794,
+        "kills_per_min": 0.1581798483206934,
+        "last_hits_per_min": 0.3591549295774648,
+        "tower_damage": 0.34073672806067173
       },
       "tags": [],
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 25.4,
+          "raw": 733.0,
+          "tier": "low"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 80.9,
+          "raw": 2150.0,
+          "tier": "top"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 15.8,
+          "raw": 0.1,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 35.9,
+          "raw": 1.9,
+          "tier": "low"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 64.8,
+          "raw": 889.9,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 72.1,
+          "raw": 3.4,
+          "tier": "mid"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 34.1,
+          "raw": 644.0,
+          "tier": "low"
+        }
+      ],
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 2,
+        "side": "radiant",
+        "hero_id": 64,
+        "hero_short_zh": "杰奇洛",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      },
       "phase_telemetry": {
         "lane_gold_gain": 0,
         "lane_hdmg_gain": 0,
@@ -6294,26 +6394,30 @@
         "mid_deaths": 0,
         "late_gold_gain": 0,
         "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
         "late_kills": 0,
         "late_deaths": 0,
         "tf_total_count": 0,
         "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
       },
       "is_afk_farmer": false,
       "radar": {
-        "farm": 48,
-        "damage": 57,
+        "farm": 46,
+        "damage": 55,
         "tempo": 75,
         "push": 50,
         "utility": 35,
         "survival": 64
       },
-      "rating_score": 5.8,
+      "rating_score": 5.7,
       "rating_tier": "D 头号战犯",
-      "mvp_score": 57.8,
-      "raw_blame_points": 44.2,
-      "raw_contrib_points": 104.8,
+      "mvp_score": 57.4,
+      "raw_blame_points": 44.6,
+      "raw_contrib_points": 103.0,
       "strengths": [
         "基础数据合格：交出 2/7/18（参战率 64.5%，英雄伤害 32,303），完成了该位置基础任务。"
       ],
@@ -6323,91 +6427,23 @@
       "improvements": [
         "保持当前 杰奇洛 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
-      "trash_talk": "@blaziken_91 这把 2/7/18 标准打卡下班，背锅占比 44 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@blaziken_91 稳健上分拼图！杰奇洛 交出 2/7/18（参战率 64% · 伤害 32,303），关键团战从不掉链子！",
-      "blame_share_pct": 14.4,
-      "contrib_share_pct": 19.1,
+      "trash_talk": "@匿名玩家 这把 2/7/18 标准打卡下班，背锅占比 45 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 稳健上分拼图！杰奇洛 交出 2/7/18（参战率 64% · 伤害 32,303），关键团战从不掉链子！",
+      "blame_share_pct": 17.5,
+      "contrib_share_pct": 14.7,
       "contrib_rank": 3,
-      "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
-      "pings_count": 0,
-      "lane_id": 0,
-      "benchmarks_list": [
-        {
-          "key": "gold_per_min",
-          "label": "GPM 打钱速率",
-          "pct": 28.0,
-          "raw": 733.0,
-          "tier": "low"
-        },
-        {
-          "key": "xp_per_min",
-          "label": "XPM 经验速率",
-          "pct": 83.0,
-          "raw": 2150.0,
-          "tier": "top"
-        },
-        {
-          "key": "kills_per_min",
-          "label": "分均击杀",
-          "pct": 14.7,
-          "raw": 0.1,
-          "tier": "low"
-        },
-        {
-          "key": "last_hits_per_min",
-          "label": "分均正补",
-          "pct": 37.9,
-          "raw": 1.9,
-          "tier": "low"
-        },
-        {
-          "key": "hero_damage_per_min",
-          "label": "分均英雄伤害",
-          "pct": 67.4,
-          "raw": 889.9,
-          "tier": "mid"
-        },
-        {
-          "key": "hero_healing_per_min",
-          "label": "分均治疗",
-          "pct": 71.6,
-          "raw": 3.4,
-          "tier": "mid"
-        },
-        {
-          "key": "tower_damage",
-          "label": "建筑推塔伤害",
-          "pct": 33.5,
-          "raw": 644.0,
-          "tier": "low"
-        }
-      ],
-      "ability_targets_list": [],
-      "hero_execution_audit": {
-        "pos": 4,
-        "player_slot": 2,
-        "side": "radiant",
-        "hero_id": 64,
-        "hero_short_zh": "杰奇洛",
-        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
-        "personaname": "blaziken_91",
-        "stuns_sec": 0.0,
-        "ult_audits": [],
-        "skillshot_audits": [],
-        "headline_badges": [],
-        "special_insights": []
-      }
+      "contrib_tier": "👁️ 视野统帅 · 幕后功臣"
     },
     {
       "player_slot": 1,
       "side": "radiant",
       "pos": 5,
       "pos_label": "5号位 · 纯辅助",
-      "account_id": 808568036,
-      "personaname": "YeShang",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
-      "rank": "传奇[5星]",
+      "rank": "未知段位",
       "hero_id": 112,
       "hero_name": "寒冬飞龙(冰龙)",
       "hero_short_zh": "寒冬飞龙",
@@ -6560,24 +6596,92 @@
       "active_item_uses": {},
       "ability_uses_rich": [],
       "benchmarks": {
-        "GPM同英雄分位": "超越 27% 同英雄",
-        "XPM同英雄分位": "超越 28% 同英雄",
-        "分均伤害分位": "超越 48% 同英雄",
-        "分均击杀分位": "超越 20% 同英雄",
-        "分均补刀分位": "超越 25% 同英雄",
-        "推塔分位": "超越 23% 同英雄"
+        "GPM同英雄分位": "超越 25% 同英雄",
+        "XPM同英雄分位": "超越 30% 同英雄",
+        "分均伤害分位": "超越 43% 同英雄",
+        "分均击杀分位": "超越 18% 同英雄",
+        "分均补刀分位": "超越 22% 同英雄",
+        "推塔分位": "超越 26% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.266065388951522,
-        "xp_per_min": 0.2829763246899662,
-        "hero_damage_per_min": 0.47801578354002255,
-        "kills_per_min": 0.19729425028184894,
-        "last_hits_per_min": 0.25366403607666294,
-        "tower_damage": 0.2322435174746336
+        "gold_per_min": 0.24934036939313983,
+        "xp_per_min": 0.3007915567282322,
+        "hero_damage_per_min": 0.4340369393139842,
+        "kills_per_min": 0.17678100263852242,
+        "last_hits_per_min": 0.21767810026385223,
+        "tower_damage": 0.2612137203166227
       },
       "tags": [
         "阵亡偏多 (12死)"
       ],
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 24.9,
+          "raw": 647.0,
+          "tier": "low"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 30.1,
+          "raw": 1433.0,
+          "tier": "low"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 17.7,
+          "raw": 0.1,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 21.8,
+          "raw": 0.9,
+          "tier": "low"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 43.4,
+          "raw": 656.2,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 53.6,
+          "raw": 146.8,
+          "tier": "mid"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 26.1,
+          "raw": 0.0,
+          "tier": "low"
+        }
+      ],
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 1,
+        "side": "radiant",
+        "hero_id": 112,
+        "hero_short_zh": "寒冬飞龙",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      },
       "phase_telemetry": {
         "lane_gold_gain": 0,
         "lane_hdmg_gain": 0,
@@ -6592,26 +6696,30 @@
         "mid_deaths": 0,
         "late_gold_gain": 0,
         "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
         "late_kills": 0,
         "late_deaths": 0,
         "tf_total_count": 0,
         "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
       },
       "is_afk_farmer": false,
       "radar": {
-        "farm": 47,
-        "damage": 41,
+        "farm": 46,
+        "damage": 38,
         "tempo": 56,
-        "push": 44,
+        "push": 46,
         "utility": 45,
         "survival": 42
       },
-      "rating_score": 4.8,
+      "rating_score": 4.7,
       "rating_tier": "D 头号战犯",
-      "mvp_score": 47.6,
-      "raw_blame_points": 87.4,
-      "raw_contrib_points": 46.5,
+      "mvp_score": 47.2,
+      "raw_blame_points": 87.8,
+      "raw_contrib_points": 45.4,
       "strengths": [
         "基础数据合格：交出 2/12/15（参战率 54.8%，英雄伤害 23,819），完成了该位置基础任务。"
       ],
@@ -6621,80 +6729,12 @@
       "improvements": [
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 敌方切入 无限提款。"
       ],
-      "trash_talk": "@YeShang 一局死 12 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@YeShang 虽然这把 寒冬飞龙 阵亡 12 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
-      "blame_share_pct": 28.6,
-      "contrib_share_pct": 8.5,
+      "trash_talk": "@匿名玩家 一局死 12 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@匿名玩家 虽然这把 寒冬飞龙 阵亡 12 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
+      "blame_share_pct": 34.5,
+      "contrib_share_pct": 6.5,
       "contrib_rank": 5,
-      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
-      "pings_count": 0,
-      "lane_id": 0,
-      "benchmarks_list": [
-        {
-          "key": "gold_per_min",
-          "label": "GPM 打钱速率",
-          "pct": 26.6,
-          "raw": 647.0,
-          "tier": "low"
-        },
-        {
-          "key": "xp_per_min",
-          "label": "XPM 经验速率",
-          "pct": 28.3,
-          "raw": 1433.0,
-          "tier": "low"
-        },
-        {
-          "key": "kills_per_min",
-          "label": "分均击杀",
-          "pct": 19.7,
-          "raw": 0.1,
-          "tier": "low"
-        },
-        {
-          "key": "last_hits_per_min",
-          "label": "分均正补",
-          "pct": 25.4,
-          "raw": 0.9,
-          "tier": "low"
-        },
-        {
-          "key": "hero_damage_per_min",
-          "label": "分均英雄伤害",
-          "pct": 47.8,
-          "raw": 656.2,
-          "tier": "mid"
-        },
-        {
-          "key": "hero_healing_per_min",
-          "label": "分均治疗",
-          "pct": 51.1,
-          "raw": 146.8,
-          "tier": "mid"
-        },
-        {
-          "key": "tower_damage",
-          "label": "建筑推塔伤害",
-          "pct": 23.2,
-          "raw": 0.0,
-          "tier": "low"
-        }
-      ],
-      "ability_targets_list": [],
-      "hero_execution_audit": {
-        "pos": 5,
-        "player_slot": 1,
-        "side": "radiant",
-        "hero_id": 112,
-        "hero_short_zh": "寒冬飞龙",
-        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
-        "personaname": "YeShang",
-        "stuns_sec": 0.0,
-        "ult_audits": [],
-        "skillshot_audits": [],
-        "headline_badges": [],
-        "special_insights": []
-      }
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将"
     }
   ],
   "dire_pos_1_to_5": [
@@ -6703,8 +6743,8 @@
       "side": "dire",
       "pos": 1,
       "pos_label": "1号位 · 优势路核心",
-      "account_id": 332187159,
-      "personaname": "PUTANGINAMO",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
       "rank": "未知段位",
@@ -6854,115 +6894,66 @@
       "active_item_uses": {},
       "ability_uses_rich": [],
       "benchmarks": {
-        "GPM同英雄分位": "超越 77% 同英雄",
-        "XPM同英雄分位": "超越 47% 同英雄",
-        "分均伤害分位": "超越 45% 同英雄",
+        "GPM同英雄分位": "超越 78% 同英雄",
+        "XPM同英雄分位": "超越 49% 同英雄",
+        "分均伤害分位": "超越 47% 同英雄",
         "分均击杀分位": "超越 32% 同英雄",
-        "分均补刀分位": "超越 82% 同英雄",
+        "分均补刀分位": "超越 83% 同英雄",
         "推塔分位": "超越 97% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.7704056495319428,
-        "xp_per_min": 0.46608638528494006,
-        "hero_damage_per_min": 0.4481852520939399,
-        "kills_per_min": 0.3153227130891772,
-        "last_hits_per_min": 0.8209886680899984,
-        "tower_damage": 0.9712596485465593
+        "gold_per_min": 0.7802971071149335,
+        "xp_per_min": 0.48846755277560594,
+        "hero_damage_per_min": 0.4702892885066458,
+        "kills_per_min": 0.32212666145426117,
+        "last_hits_per_min": 0.8254495699765442,
+        "tower_damage": 0.9706802189210321
       },
       "tags": [
         "推进核心 (塔伤15,219)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 0,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 20.0,
-        "lane_kills": 0,
-        "lane_deaths": 0,
-        "mid_gold_gain": 0,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 20.0,
-        "mid_hdmg_share_pct": 20.0,
-        "mid_kills": 0,
-        "mid_deaths": 0,
-        "late_gold_gain": 0,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 0,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 88,
-        "damage": 51,
-        "tempo": 58,
-        "push": 99,
-        "utility": 30,
-        "survival": 65
-      },
-      "rating_score": 8.7,
-      "rating_tier": "S+ 擎天战神",
-      "mvp_score": 86.6,
-      "raw_blame_points": 19.9,
-      "raw_contrib_points": 275.6,
-      "strengths": [
-        "推进终结能力极强：单人打出 15,219 建筑伤害（包揽全队 71% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。"
-      ],
-      "weaknesses": [
-        "整体发挥稳健：全场仅阵亡 5 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
-      ],
-      "improvements": [
-        "保持当前 狙击手 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
-      ],
-      "trash_talk": "@PUTANGINAMO 这把 8/5/17 标准打卡下班，背锅占比 20 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@PUTANGINAMO 擎天一号位真核！狙击手 顶着前中期少人压力参战接团，单人狂拆 15,219 建筑伤害（包揽全队 71% 拆塔量）+ 39,967 伤害，当之无愧本局头号首功！",
-      "blame_share_pct": 8.3,
-      "contrib_share_pct": 35.7,
-      "contrib_rank": 1,
-      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 77.0,
+          "pct": 78.0,
           "raw": 1497.0,
           "tier": "top"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 46.6,
+          "pct": 48.8,
           "raw": 1835.0,
           "tier": "mid"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 31.5,
+          "pct": 32.2,
           "raw": 0.2,
           "tier": "low"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 82.1,
+          "pct": 82.5,
           "raw": 7.0,
           "tier": "top"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 44.8,
+          "pct": 47.0,
           "raw": 1101.0,
           "tier": "mid"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 94.6,
+          "pct": 94.3,
           "raw": 0.0,
           "tier": "top"
         },
@@ -6982,29 +6973,89 @@
         "hero_id": 35,
         "hero_short_zh": "狙击手",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
-        "personaname": "PUTANGINAMO",
+        "personaname": "匿名玩家",
         "stuns_sec": 0.0,
         "ult_audits": [],
         "skillshot_audits": [],
         "headline_badges": [
           {
+            "text": "🔥 炮台换伤: 7,993伤/死(21.3%)",
+            "tone": "good"
+          },
+          {
             "text": "🗺️ 顶级带线牵制(塔伤15219)",
             "tone": "good"
           }
         ],
-        "special_insights": []
-      }
+        "special_insights": [
+          "🔥《炮台核心死前灌伤兑现》审计：作为无逃生脆皮炮台，虽然全场阵亡 5 次，但每次倒下前均把技能与平A倾泻干净——全场轰出 39,967 点英雄伤害（占全队 21.3%，平均每次阵亡换取 7,993 点高额伤害）！"
+        ]
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 0,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 20.0,
+        "lane_kills": 0,
+        "lane_deaths": 0,
+        "mid_gold_gain": 0,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 20.0,
+        "mid_hdmg_share_pct": 20.0,
+        "mid_kills": 0,
+        "mid_deaths": 0,
+        "late_gold_gain": 0,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 0,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 89,
+        "damage": 85,
+        "tempo": 72,
+        "push": 99,
+        "utility": 30,
+        "survival": 65
+      },
+      "rating_score": 8.9,
+      "rating_tier": "A 凯旋炮台",
+      "mvp_score": 89.0,
+      "raw_blame_points": 8.0,
+      "raw_contrib_points": 289.2,
+      "strengths": [
+        "炮台火力彻底兑现（哪怕阵亡也把输出灌满）：作为无位移脆皮高爆发核心，全场狂甩 高频技能轰炸，轰出 **39,967 点英雄伤害（占全队 21.3%，平均每次阵亡前倾泻 7,993 点高额伤害，25m+ 后期再轰 0 伤害）**外加 0.0 秒硬控！在团队前排与救人匮乏的逆境下，真正做到了倒下前把每一滴输出倾泻干净。",
+        "推进终结能力极强：单人打出 15,219 建筑伤害（包揽全队 71% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。"
+      ],
+      "weaknesses": [
+        "绝境生存与留人反制博弈：作为己方唯一能威胁敌方后排的高爆发炮台，被敌方切入与点控重点针对阵亡 5 次；在队友缺乏魔晶救人与前排支点的局面下，单靠 BKB 结束后仍容易被敌方框人/留人技能链限制走位。"
+      ],
+      "improvements": [
+        "狙击手 本局输出职责已超额完成（场均每死换 7,993 伤害）；若从团队可能性出发进一步提升残局容错，面对敌方先知发芽框人/帕克梦境缠绕/屠夫钩时，可将一件纯法系输出装替换为【飓风长戟（大推推）】（既能推开自己秒解发芽树圈与缠绕、拉开切入距离，又能白嫖超远射程点人）。"
+      ],
+      "trash_talk": "@匿名玩家 这把狙击手对线压爆中路、全场狂灌 39,967 伤害（每死换 7,993 伤）已经把炮台火力彻底拉满了，唯一遗憾是没早点出把大推推自救解先知发芽，纯纯被前排碎蛋和小鱼人不出魔晶坑惨的悲情炮台！",
+      "praise_talk": "@匿名玩家 擎天一号位真核！狙击手 顶着前中期少人压力参战接团，单人狂拆 15,219 建筑伤害（包揽全队 71% 拆塔量）+ 39,967 伤害，当之无愧本局头号首功！",
+      "blame_share_pct": 3.5,
+      "contrib_share_pct": 36.9,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神"
     },
     {
       "player_slot": 132,
       "side": "dire",
       "pos": 2,
       "pos_label": "2号位 · 中路核心",
-      "account_id": 418046237,
-      "personaname": "i jump, i died.",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
-      "rank": "中军[5星]",
+      "rank": "未知段位",
       "hero_id": 23,
       "hero_name": "昆卡(船长)",
       "hero_short_zh": "昆卡",
@@ -7143,25 +7194,93 @@
       "active_item_uses": {},
       "ability_uses_rich": [],
       "benchmarks": {
-        "GPM同英雄分位": "超越 29% 同英雄",
-        "XPM同英雄分位": "超越 54% 同英雄",
-        "分均伤害分位": "超越 18% 同英雄",
-        "分均击杀分位": "超越 14% 同英雄",
-        "分均补刀分位": "超越 14% 同英雄",
-        "推塔分位": "超越 59% 同英雄"
+        "GPM同英雄分位": "超越 24% 同英雄",
+        "XPM同英雄分位": "超越 49% 同英雄",
+        "分均伤害分位": "超越 19% 同英雄",
+        "分均击杀分位": "超越 15% 同英雄",
+        "分均补刀分位": "超越 16% 同英雄",
+        "推塔分位": "超越 54% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.2906610703043022,
-        "xp_per_min": 0.5351521511017838,
-        "hero_damage_per_min": 0.1825813221406086,
-        "kills_per_min": 0.14480587618048268,
-        "last_hits_per_min": 0.14270724029380902,
-        "tower_damage": 0.5949632738719832
+        "gold_per_min": 0.2447089947089947,
+        "xp_per_min": 0.4947089947089947,
+        "hero_damage_per_min": 0.19444444444444445,
+        "kills_per_min": 0.14682539682539683,
+        "last_hits_per_min": 0.15873015873015872,
+        "tower_damage": 0.5370370370370371
       },
       "tags": [
         "输出占比偏低 (10%)",
         "核心高频阵亡 (9死)"
       ],
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 24.5,
+          "raw": 880.0,
+          "tier": "low"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 49.5,
+          "raw": 1835.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 14.7,
+          "raw": 0.1,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 15.9,
+          "raw": 2.7,
+          "tier": "low"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 19.4,
+          "raw": 511.3,
+          "tier": "low"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 92.2,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 53.7,
+          "raw": 1098.0,
+          "tier": "mid"
+        }
+      ],
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 2,
+        "player_slot": 132,
+        "side": "dire",
+        "hero_id": 23,
+        "hero_short_zh": "昆卡",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      },
       "phase_telemetry": {
         "lane_gold_gain": 0,
         "lane_hdmg_gain": 0,
@@ -7176,26 +7295,30 @@
         "mid_deaths": 0,
         "late_gold_gain": 0,
         "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
         "late_kills": 0,
         "late_deaths": 0,
         "tf_total_count": 0,
         "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
       },
       "is_afk_farmer": false,
       "radar": {
-        "farm": 35,
-        "damage": 22,
+        "farm": 32,
+        "damage": 23,
         "tempo": 58,
-        "push": 40,
+        "push": 37,
         "utility": 30,
         "survival": 38
       },
       "rating_score": 4.3,
       "rating_tier": "B 躺赢福将",
-      "mvp_score": 43.2,
-      "raw_blame_points": 97.3,
-      "raw_contrib_points": 39.4,
+      "mvp_score": 42.6,
+      "raw_blame_points": 97.9,
+      "raw_contrib_points": 37.3,
       "strengths": [
         "基础数据合格：交出 2/9/18（参战率 45.5%，英雄伤害 18,562），完成了该位置基础任务。"
       ],
@@ -7207,88 +7330,20 @@
         "昆卡 做出核心装的第一波强势期必须主动跟雾找节奏，别等队友正面4打5溃败了再去边缘OB蹭两下伤害。",
         "核心位阵亡 9 次严重拖垮发育节奏：当敌方 抓人核心 在小地图消失时，立刻放弃无视野兵线退回安全区。"
       ],
-      "trash_talk": "@i jump, i died. 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@i jump, i died. 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！",
-      "blame_share_pct": 40.7,
-      "contrib_share_pct": 5.1,
+      "trash_talk": "@匿名玩家 一局死 9 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@匿名玩家 稳健上分拼图！昆卡 交出 2/9/18（参战率 46% · 伤害 18,562），关键团战从不掉链子！",
+      "blame_share_pct": 42.9,
+      "contrib_share_pct": 4.8,
       "contrib_rank": 5,
-      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
-      "pings_count": 0,
-      "lane_id": 0,
-      "benchmarks_list": [
-        {
-          "key": "gold_per_min",
-          "label": "GPM 打钱速率",
-          "pct": 29.1,
-          "raw": 880.0,
-          "tier": "low"
-        },
-        {
-          "key": "xp_per_min",
-          "label": "XPM 经验速率",
-          "pct": 53.5,
-          "raw": 1835.0,
-          "tier": "mid"
-        },
-        {
-          "key": "kills_per_min",
-          "label": "分均击杀",
-          "pct": 14.5,
-          "raw": 0.1,
-          "tier": "low"
-        },
-        {
-          "key": "last_hits_per_min",
-          "label": "分均正补",
-          "pct": 14.3,
-          "raw": 2.7,
-          "tier": "low"
-        },
-        {
-          "key": "hero_damage_per_min",
-          "label": "分均英雄伤害",
-          "pct": 18.3,
-          "raw": 511.3,
-          "tier": "low"
-        },
-        {
-          "key": "hero_healing_per_min",
-          "label": "分均治疗",
-          "pct": 91.2,
-          "raw": 0.0,
-          "tier": "top"
-        },
-        {
-          "key": "tower_damage",
-          "label": "建筑推塔伤害",
-          "pct": 59.5,
-          "raw": 1098.0,
-          "tier": "mid"
-        }
-      ],
-      "ability_targets_list": [],
-      "hero_execution_audit": {
-        "pos": 2,
-        "player_slot": 132,
-        "side": "dire",
-        "hero_id": 23,
-        "hero_short_zh": "昆卡",
-        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
-        "personaname": "i jump, i died.",
-        "stuns_sec": 0.0,
-        "ult_audits": [],
-        "skillshot_audits": [],
-        "headline_badges": [],
-        "special_insights": []
-      }
+      "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将"
     },
     {
       "player_slot": 131,
       "side": "dire",
       "pos": 3,
       "pos_label": "3号位 · 劣势路核心",
-      "account_id": 1179136433,
-      "personaname": "抬手就能摸到天",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
       "rank": "未知段位",
@@ -7438,20 +7493,20 @@
       "active_item_uses": {},
       "ability_uses_rich": [],
       "benchmarks": {
-        "GPM同英雄分位": "超越 99% 同英雄",
+        "GPM同英雄分位": "超越 98% 同英雄",
         "XPM同英雄分位": "超越 96% 同英雄",
         "分均伤害分位": "超越 97% 同英雄",
-        "分均击杀分位": "超越 73% 同英雄",
+        "分均击杀分位": "超越 74% 同英雄",
         "分均补刀分位": "超越 99% 同英雄",
         "推塔分位": "超越 87% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.9851742031134173,
-        "xp_per_min": 0.963306152705708,
-        "hero_damage_per_min": 0.9745490486780332,
-        "kills_per_min": 0.7289350135903138,
-        "last_hits_per_min": 0.9902396837163331,
-        "tower_damage": 0.8675562144798616
+        "gold_per_min": 0.9827125790583274,
+        "xp_per_min": 0.9596626844694308,
+        "hero_damage_per_min": 0.971890372452565,
+        "kills_per_min": 0.7368938861560085,
+        "last_hits_per_min": 0.9908643710470836,
+        "tower_damage": 0.8726633872101195
       },
       "tags": [
         "全队输出支柱 (35%)",
@@ -7459,104 +7514,55 @@
         "极少阵亡 (3死)",
         "GPM同英雄前2%"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 0,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 20.0,
-        "lane_kills": 0,
-        "lane_deaths": 0,
-        "mid_gold_gain": 0,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 20.0,
-        "mid_hdmg_share_pct": 20.0,
-        "mid_kills": 0,
-        "mid_deaths": 0,
-        "late_gold_gain": 0,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 0,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 94,
-        "damage": 98,
-        "tempo": 85,
-        "push": 63,
-        "utility": 30,
-        "survival": 79
-      },
-      "rating_score": 8.3,
-      "rating_tier": "S 凯旋真核",
-      "mvp_score": 83.5,
-      "raw_blame_points": 18.5,
-      "raw_contrib_points": 260.4,
-      "strengths": [
-        "极高生存容错：36 分钟高强度对抗仅阵亡 3 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
-      ],
-      "weaknesses": [
-        "整体发挥稳健：全场仅阵亡 3 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
-      ],
-      "improvements": [
-        "保持当前 帕吉 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
-      ],
-      "trash_talk": "@抬手就能摸到天 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@抬手就能摸到天 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！",
-      "blame_share_pct": 7.7,
-      "contrib_share_pct": 33.8,
-      "contrib_rank": 2,
-      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 0,
       "lane_id": 0,
       "benchmarks_list": [
         {
           "key": "gold_per_min",
           "label": "GPM 打钱速率",
-          "pct": 98.5,
+          "pct": 98.3,
           "raw": 1607.0,
           "tier": "top"
         },
         {
           "key": "xp_per_min",
           "label": "XPM 经验速率",
-          "pct": 96.3,
+          "pct": 96.0,
           "raw": 2809.0,
           "tier": "top"
         },
         {
           "key": "kills_per_min",
           "label": "分均击杀",
-          "pct": 72.9,
+          "pct": 73.7,
           "raw": 0.3,
           "tier": "mid"
         },
         {
           "key": "last_hits_per_min",
           "label": "分均正补",
-          "pct": 99.0,
+          "pct": 99.1,
           "raw": 6.5,
           "tier": "top"
         },
         {
           "key": "hero_damage_per_min",
           "label": "分均英雄伤害",
-          "pct": 97.5,
+          "pct": 97.2,
           "raw": 1802.6,
           "tier": "top"
         },
         {
           "key": "hero_healing_per_min",
           "label": "分均治疗",
-          "pct": 86.6,
+          "pct": 86.9,
           "raw": 0.0,
           "tier": "top"
         },
         {
           "key": "tower_damage",
           "label": "建筑推塔伤害",
-          "pct": 86.8,
+          "pct": 87.3,
           "raw": 2164.0,
           "tier": "top"
         }
@@ -7569,7 +7575,7 @@
         "hero_id": 14,
         "hero_short_zh": "帕吉",
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
-        "personaname": "抬手就能摸到天",
+        "personaname": "匿名玩家",
         "stuns_sec": 0.0,
         "ult_audits": [
           {
@@ -7599,15 +7605,68 @@
         "special_insights": [
           "整局比赛 肢解 (屠夫咬) 释放记录为 0！"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 0,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 20.0,
+        "lane_kills": 0,
+        "lane_deaths": 0,
+        "mid_gold_gain": 0,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 20.0,
+        "mid_hdmg_share_pct": 20.0,
+        "mid_kills": 0,
+        "mid_deaths": 0,
+        "late_gold_gain": 0,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 0,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 94,
+        "damage": 98,
+        "tempo": 85,
+        "push": 63,
+        "utility": 30,
+        "survival": 79
+      },
+      "rating_score": 8.3,
+      "rating_tier": "S 凯旋真核",
+      "mvp_score": 83.5,
+      "raw_blame_points": 18.5,
+      "raw_contrib_points": 260.4,
+      "strengths": [
+        "极高生存容错：36 分钟高强度对抗仅阵亡 3 次（读秒总计 0分00秒，仅占全场 0.0%），团战站位拉扯极佳。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 3 次（读秒 0分00秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 帕吉 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@匿名玩家 这把 12/3/21 标准打卡下班，背锅占比 18 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 稳健上分拼图！帕吉 交出 12/3/21（参战率 75% · 伤害 65,436），关键团战从不掉链子！",
+      "blame_share_pct": 8.1,
+      "contrib_share_pct": 33.3,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂"
     },
     {
       "player_slot": 128,
       "side": "dire",
       "pos": 4,
       "pos_label": "4号位 · 游走辅助",
-      "account_id": 1923567377,
-      "personaname": "n4ix5",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
       "rank": "未知段位",
@@ -7738,22 +7797,90 @@
       "active_item_uses": {},
       "ability_uses_rich": [],
       "benchmarks": {
-        "GPM同英雄分位": "超越 74% 同英雄",
-        "XPM同英雄分位": "超越 49% 同英雄",
+        "GPM同英雄分位": "超越 75% 同英雄",
+        "XPM同英雄分位": "超越 50% 同英雄",
         "分均伤害分位": "超越 17% 同英雄",
         "分均击杀分位": "超越 37% 同英雄",
         "分均补刀分位": "超越 95% 同英雄",
-        "推塔分位": "超越 60% 同英雄"
+        "推塔分位": "超越 61% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.741946657429858,
-        "xp_per_min": 0.486664357464496,
-        "hero_damage_per_min": 0.17076550051957048,
-        "kills_per_min": 0.370973328714929,
-        "last_hits_per_min": 0.9535850363699342,
-        "tower_damage": 0.6006234845860755
+        "gold_per_min": 0.7499072356215213,
+        "xp_per_min": 0.4975881261595547,
+        "hero_damage_per_min": 0.17476808905380334,
+        "kills_per_min": 0.3743970315398887,
+        "last_hits_per_min": 0.9506493506493506,
+        "tower_damage": 0.6074211502782931
       },
       "tags": [],
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 75.0,
+          "raw": 1048.0,
+          "tier": "top"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 49.8,
+          "raw": 1835.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 37.4,
+          "raw": 0.2,
+          "tier": "low"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 95.1,
+          "raw": 3.5,
+          "tier": "top"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 17.5,
+          "raw": 586.7,
+          "tier": "low"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 82.4,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 60.7,
+          "raw": 348.0,
+          "tier": "mid"
+        }
+      ],
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 4,
+        "player_slot": 128,
+        "side": "dire",
+        "hero_id": 88,
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      },
       "phase_telemetry": {
         "lane_gold_gain": 0,
         "lane_hdmg_gain": 0,
@@ -7768,15 +7895,19 @@
         "mid_deaths": 0,
         "late_gold_gain": 0,
         "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
         "late_kills": 0,
         "late_deaths": 0,
         "tf_total_count": 0,
         "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
       },
       "is_afk_farmer": false,
       "radar": {
-        "farm": 78,
+        "farm": 79,
         "damage": 23,
         "tempo": 41,
         "push": 66,
@@ -7785,9 +7916,9 @@
       },
       "rating_score": 5.0,
       "rating_tier": "B 躺赢福将",
-      "mvp_score": 49.9,
-      "raw_blame_points": 52.1,
-      "raw_contrib_points": 64.5,
+      "mvp_score": 50.0,
+      "raw_blame_points": 52.0,
+      "raw_contrib_points": 64.9,
       "strengths": [
         "基础数据合格：交出 7/7/10（参战率 38.6%，英雄伤害 21,298），完成了该位置基础任务。"
       ],
@@ -7797,88 +7928,20 @@
       "improvements": [
         "保持当前 司夜刺客 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
-      "trash_talk": "@n4ix5 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@n4ix5 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！",
-      "blame_share_pct": 21.7,
-      "contrib_share_pct": 8.4,
+      "trash_talk": "@匿名玩家 这把 7/7/10 标准打卡下班，背锅占比 52 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@匿名玩家 稳健上分拼图！司夜刺客 交出 7/7/10（参战率 39% · 伤害 21,298），关键团战从不掉链子！",
+      "blame_share_pct": 22.8,
+      "contrib_share_pct": 8.3,
       "contrib_rank": 4,
-      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
-      "pings_count": 0,
-      "lane_id": 0,
-      "benchmarks_list": [
-        {
-          "key": "gold_per_min",
-          "label": "GPM 打钱速率",
-          "pct": 74.2,
-          "raw": 1048.0,
-          "tier": "mid"
-        },
-        {
-          "key": "xp_per_min",
-          "label": "XPM 经验速率",
-          "pct": 48.7,
-          "raw": 1835.0,
-          "tier": "mid"
-        },
-        {
-          "key": "kills_per_min",
-          "label": "分均击杀",
-          "pct": 37.1,
-          "raw": 0.2,
-          "tier": "low"
-        },
-        {
-          "key": "last_hits_per_min",
-          "label": "分均正补",
-          "pct": 95.4,
-          "raw": 3.5,
-          "tier": "top"
-        },
-        {
-          "key": "hero_damage_per_min",
-          "label": "分均英雄伤害",
-          "pct": 17.1,
-          "raw": 586.7,
-          "tier": "low"
-        },
-        {
-          "key": "hero_healing_per_min",
-          "label": "分均治疗",
-          "pct": 81.6,
-          "raw": 0.0,
-          "tier": "top"
-        },
-        {
-          "key": "tower_damage",
-          "label": "建筑推塔伤害",
-          "pct": 60.1,
-          "raw": 348.0,
-          "tier": "mid"
-        }
-      ],
-      "ability_targets_list": [],
-      "hero_execution_audit": {
-        "pos": 4,
-        "player_slot": 128,
-        "side": "dire",
-        "hero_id": 88,
-        "hero_short_zh": "司夜刺客",
-        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
-        "personaname": "n4ix5",
-        "stuns_sec": 0.0,
-        "ult_audits": [],
-        "skillshot_audits": [],
-        "headline_badges": [],
-        "special_insights": []
-      }
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏"
     },
     {
       "player_slot": 129,
       "side": "dire",
       "pos": 5,
       "pos_label": "5号位 · 纯辅助",
-      "account_id": 809509793,
-      "personaname": "Bold ni Carl",
+      "account_id": null,
+      "personaname": "匿名玩家",
       "friend_tag": null,
       "is_me": false,
       "rank": "未知段位",
@@ -8019,21 +8082,89 @@
       "ability_uses_rich": [],
       "benchmarks": {
         "GPM同英雄分位": "超越 73% 同英雄",
-        "XPM同英雄分位": "超越 46% 同英雄",
-        "分均伤害分位": "超越 57% 同英雄",
+        "XPM同英雄分位": "超越 47% 同英雄",
+        "分均伤害分位": "超越 56% 同英雄",
         "分均击杀分位": "超越 82% 同英雄",
-        "分均补刀分位": "超越 43% 同英雄",
-        "推塔分位": "超越 86% 同英雄"
+        "分均补刀分位": "超越 44% 同英雄",
+        "推塔分位": "超越 87% 同英雄"
       },
       "raw_benchmarks": {
-        "gold_per_min": 0.7263547627061595,
-        "xp_per_min": 0.4634803096600471,
-        "hero_damage_per_min": 0.5664759340289465,
-        "kills_per_min": 0.8229552339279704,
-        "last_hits_per_min": 0.43419723998653653,
-        "tower_damage": 0.8559407606866375
+        "gold_per_min": 0.7307839388145315,
+        "xp_per_min": 0.47418738049713194,
+        "hero_damage_per_min": 0.55717017208413,
+        "kills_per_min": 0.8198852772466539,
+        "last_hits_per_min": 0.4363288718929254,
+        "tower_damage": 0.8684512428298279
       },
       "tags": [],
+      "pings_count": 0,
+      "lane_id": 0,
+      "benchmarks_list": [
+        {
+          "key": "gold_per_min",
+          "label": "GPM 打钱速率",
+          "pct": 73.1,
+          "raw": 1120.0,
+          "tier": "mid"
+        },
+        {
+          "key": "xp_per_min",
+          "label": "XPM 经验速率",
+          "pct": 47.4,
+          "raw": 1660.0,
+          "tier": "mid"
+        },
+        {
+          "key": "kills_per_min",
+          "label": "分均击杀",
+          "pct": 82.0,
+          "raw": 0.4,
+          "tier": "top"
+        },
+        {
+          "key": "last_hits_per_min",
+          "label": "分均正补",
+          "pct": 43.6,
+          "raw": 2.3,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_damage_per_min",
+          "label": "分均英雄伤害",
+          "pct": 55.7,
+          "raw": 1169.2,
+          "tier": "mid"
+        },
+        {
+          "key": "hero_healing_per_min",
+          "label": "分均治疗",
+          "pct": 80.8,
+          "raw": 0.0,
+          "tier": "top"
+        },
+        {
+          "key": "tower_damage",
+          "label": "建筑推塔伤害",
+          "pct": 86.8,
+          "raw": 2490.0,
+          "tier": "top"
+        }
+      ],
+      "ability_targets_list": [],
+      "hero_execution_audit": {
+        "pos": 5,
+        "player_slot": 129,
+        "side": "dire",
+        "hero_id": 105,
+        "hero_short_zh": "工程师",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+        "personaname": "匿名玩家",
+        "stuns_sec": 0.0,
+        "ult_audits": [],
+        "skillshot_audits": [],
+        "headline_badges": [],
+        "special_insights": []
+      },
       "phase_telemetry": {
         "lane_gold_gain": 0,
         "lane_hdmg_gain": 0,
@@ -8048,18 +8179,22 @@
         "mid_deaths": 0,
         "late_gold_gain": 0,
         "late_hdmg_gain": 0,
+        "late_gold_share_pct": 20.0,
+        "late_hdmg_share_pct": 20.0,
         "late_kills": 0,
         "late_deaths": 0,
         "tf_total_count": 0,
         "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
       },
       "is_afk_farmer": false,
       "radar": {
-        "farm": 77,
-        "damage": 60,
+        "farm": 78,
+        "damage": 59,
         "tempo": 67,
-        "push": 81,
+        "push": 82,
         "utility": 35,
         "survival": 60
       },
@@ -8077,80 +8212,12 @@
       "improvements": [
         "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 敌方切入 无限提款。"
       ],
-      "trash_talk": "@Bold ni Carl 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@Bold ni Carl 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！",
-      "blame_share_pct": 21.6,
-      "contrib_share_pct": 17.0,
+      "trash_talk": "@匿名玩家 一局死 8 次，看了整整 0分0秒 黑白电视，光死就扣了 0 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@匿名玩家 稳健上分拼图！工程师 交出 15/8/14（参战率 66% · 伤害 42,442），关键团战从不掉链子！",
+      "blame_share_pct": 22.7,
+      "contrib_share_pct": 16.7,
       "contrib_rank": 3,
-      "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
-      "pings_count": 0,
-      "lane_id": 0,
-      "benchmarks_list": [
-        {
-          "key": "gold_per_min",
-          "label": "GPM 打钱速率",
-          "pct": 72.6,
-          "raw": 1120.0,
-          "tier": "mid"
-        },
-        {
-          "key": "xp_per_min",
-          "label": "XPM 经验速率",
-          "pct": 46.3,
-          "raw": 1660.0,
-          "tier": "mid"
-        },
-        {
-          "key": "kills_per_min",
-          "label": "分均击杀",
-          "pct": 82.3,
-          "raw": 0.4,
-          "tier": "top"
-        },
-        {
-          "key": "last_hits_per_min",
-          "label": "分均正补",
-          "pct": 43.4,
-          "raw": 2.3,
-          "tier": "mid"
-        },
-        {
-          "key": "hero_damage_per_min",
-          "label": "分均英雄伤害",
-          "pct": 56.6,
-          "raw": 1169.2,
-          "tier": "mid"
-        },
-        {
-          "key": "hero_healing_per_min",
-          "label": "分均治疗",
-          "pct": 80.2,
-          "raw": 0.0,
-          "tier": "top"
-        },
-        {
-          "key": "tower_damage",
-          "label": "建筑推塔伤害",
-          "pct": 85.6,
-          "raw": 2490.0,
-          "tier": "top"
-        }
-      ],
-      "ability_targets_list": [],
-      "hero_execution_audit": {
-        "pos": 5,
-        "player_slot": 129,
-        "side": "dire",
-        "hero_id": 105,
-        "hero_short_zh": "工程师",
-        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
-        "personaname": "Bold ni Carl",
-        "stuns_sec": 0.0,
-        "ult_audits": [],
-        "skillshot_audits": [],
-        "headline_badges": [],
-        "special_insights": []
-      }
+      "contrib_tier": "👁️ 视野统帅 · 幕后功臣"
     }
   ]
 }

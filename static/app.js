@@ -765,27 +765,44 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
     if (isTopCulprit || Number(bPct) >= 25 || score100 < 52) {
       badge = `🚨 AI 一级战犯处刑词 · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
+      let mechCrimeClause = "";
+      if (p.slark_mechanism_audit) {
+        const sm = p.slark_mechanism_audit;
+        mechCrimeClause = `中后期不仅多次单带无故被抓断节奏，且整局拒出 1400 金核心魔晶《深海劫掠》（既救不了被抓队友也叠不起能量转移属性导致正面根本 A 不过人），后期 25m+ 吃下全队最高 +${fmtNum(
+          sm.late_gold_gain || 0
+        )} 金（${sm.late_gold_share_pct || 26}%）却只打出全队垫底的 ${fmtNum(
+          sm.late_hdmg_gain || 0
+        )} 伤害（${sm.late_hdmg_share_pct || 15.5}%），`;
+      } else if (p.phoenix_egg_audit && p.phoenix_egg_audit.shattered_cnt >= 2) {
+        const pe = p.phoenix_egg_audit;
+        mechCrimeClause = `团战大招《超新星》变蛋 ${pe.tf_egg_casts} 次竟有 ${pe.shattered_cnt} 次被集火打碎（碎蛋率 ${
+          pe.shatter_rate_pct
+        }%：${(pe.shattered_times || []).join("、")}），且全场仅放 ${pe.sun_ray_casts} 次《烈日炙烤》激光，`;
+      } else if (Array.isArray(p.weaknesses) && p.weaknesses[0]) {
+        mechCrimeClause = `${String(p.weaknesses[0]).replace(/\*\*/g, "")}；`;
+      }
       punchline = `本局百人制仅得 ${score100}/100 分，背下全队 ${bPct}% 头号大锅（泉水读秒 ${p.dead_seconds || 0} 秒 / 阵亡掉钱 -${fmtNum(
         p.death_gold_lost || 0
-      )}）！${
-        p.pos <= 3 && (p.tower_damage || 0) < 1200
-          ? `占着 ${fmtNum(p.net_worth)} 净资产却只摸了 ${fmtNum(p.tower_damage || 0)} 点建筑伤害，纯纯的刷钱不拆塔提款机，`
-          : ""
-      }这把输球 ${heroShort} 得在群里主动发红包谢罪！`;
-    } else if (rating >= 7.2 || Number(p.hero_damage_share_pct) >= 28 || score100 >= 72) {
-      badge = `🛡️ AI 悲情院长平反词 · ${score100}/100分 (${scoreTier.label})`;
+      )}）！${mechCrimeClause}这把输球 ${heroShort} 得在群里主动发红包谢罪！`;
+    } else if (p.is_turret_fulfilled || rating >= 7.2 || Number(p.hero_damage_share_pct) >= 28 || score100 >= 72) {
+      badge = p.is_turret_fulfilled
+        ? `🔥 AI 悲情炮台认证 · ${score100}/100分 (${scoreTier.label})`
+        : `🛡️ AI 悲情院长平反词 · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
-      punchline = `本局百人制拿到 ${score100}/100 分（背锅仅 ${bPct}%），堪称虽败犹荣的“悲情孤胆院长”！${heroShort} 一个人扛起全队 ${
-        p.hero_damage_share_pct
-      }% 的英雄输出，${
-        p.pos <= 2 && (p.tower_damage || 0) < 1000
-          ? `美中不足是建筑推塔伤害偏低（仅 ${fmtNum(p.tower_damage || 0)}），团赢后没能转化成实质塔数，`
-          : ""
-      }奈何身边队友倒得比野怪还快，实在带不动！`;
+      const dpd = p.dmg_per_death || Math.round((p.hero_damage || 0) / Math.max(1, p.deaths || 1));
+      punchline = `本局百人制拿到 ${score100}/100 分（背锅仅 ${bPct}%），堪称虽败犹荣的“${
+        p.is_turret_fulfilled ? "悲情高爆炮台" : "悲情孤胆院长"
+      }”！${heroShort} 一个人轰出全队 ${p.hero_damage_share_pct}% 的英雄输出（场均每次阵亡换出 ${fmtNum(
+        dpd
+      )} 点实打实伤害），无状态炮台只要死前把伤害灌满就绝不背大锅，奈何前排控制与救人体系崩塌实在带不动！`;
     } else {
       badge = `⚖️ AI 败局算账点评 · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
-      punchline = `本局百人制得分 ${score100}/100 分，分摊 ${bPct}% 败局责任（泉水读秒 ${p.dead_seconds || 0} 秒），${heroShort} 中后期几波关键团战走位与技能衔接跟着全队一起随波逐流，下把急需找回状态！`;
+      const extraWeak =
+        p.phoenix_egg_audit && p.phoenix_egg_audit.shattered_cnt >= 2
+          ? `团战 ${p.phoenix_egg_audit.tf_egg_casts} 次变蛋被打碎 ${p.phoenix_egg_audit.shattered_cnt} 次（碎蛋率 ${p.phoenix_egg_audit.shatter_rate_pct}%），`
+          : "";
+      punchline = `本局百人制得分 ${score100}/100 分，分摊 ${bPct}% 败局责任（泉水读秒 ${p.dead_seconds || 0} 秒），${extraWeak}${heroShort} 中后期几波关键团战走位与技能机制配合失误明显，下把急需找回状态！`;
     }
   }
 
@@ -7929,17 +7946,52 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       "；"
     )}。${closingAdvice}`;
   } else if (roleType === "svp") {
+    const turretNote = p.is_turret_fulfilled
+      ? `（作为玻璃大炮法核场均每死换出 <b>${fmtNum(
+          p.dmg_per_death || Math.round((p.hero_damage || 0) / Math.max(1, p.deaths || 1))
+        )} 伤害</b>，输出职责完全达标）`
+      : "";
     lateConclusion = `<b>【后期 25m+ & 为什么他是败方孤胆院长】</b>逆风局后期依然死命打出 <b>${lateK}杀/${lateD}死、+${fmtNum(
       lateDmg
     )} 伤害</b>，全场交出 <b>${p.kda}、${fmtNum(p.hero_damage)} 伤害（全队 ${
       p.hero_damage_share_pct || 0
-    }%）</b>，拿下全队最高 <b>${score100}/100 分</b>，虽败犹荣！`;
+    }%）</b>${turretNote}，拿下全队最高 <b>${score100}/100 分</b>，虽败犹荣！`;
   } else {
-    lateConclusion = `<b>【后期 25m+ & 战犯定责】</b>后期再吞 <b>${lateD} 次阵亡</b>，全场泉水读秒 <b>${
-      p.dead_seconds || 0
-    } 秒</b>、阵亡掉钱 <b>-${fmtNum(p.death_gold_lost || 0)}</b>${
-      soloEvents.length > 0 ? `、落单被抓 <b>${soloEvents.length} 次</b>` : ""
-    }，本局评分仅 <b>${score100}/100 分（背锅占比 ${sharePct}%）</b>，是导致局势崩盘的关键出血点！`;
+    const lateGoldGain = lateP?.gold_gain ?? pt.late_gold_gain ?? 0;
+    const lateGoldShare = pt.late_gold_share_pct ?? 0;
+    const lateDmgShare = pt.late_hdmg_share_pct ?? 0;
+    let mechReasonHtml = "";
+    if (p.slark_mechanism_audit) {
+      const sm = p.slark_mechanism_audit;
+      const soloDesc =
+        (pt.solo_pickoffs || [])
+          .slice(0, 2)
+          .map((s) => (typeof s === "string" ? s : `${s.time_str}被${s.killer || "敌方"}单抓`))
+          .join("、") || `落单被抓 ${soloEvents.length} 次`;
+      mechReasonHtml = `核心症结在于三大机制与团队脱节：① <b>单带无故被抓</b>（${soloDesc}）；② <b>45分钟拒出 1400 金核心魔晶《深海劫掠》且针对装缺失导致正面 A 不过人</b>（既救不了被咬/被大队友，自己也少一层雾叠能量转移敏捷，面对蝴蝶撒旦先知+醉拳酒仙无金箍棒/冰眼根本打不动）；③ <b>后期吃最高经济却输出垫底</b>（25m+ 刷了全队第一的 <b>+${fmtNum(
+        sm.late_gold_gain || lateGoldGain
+      )} 金/${sm.late_gold_share_pct || lateGoldShare}%</b>，却仅打出 <b>${fmtNum(
+        sm.late_hdmg_gain || lateDmg
+      )} 伤害/${sm.late_hdmg_share_pct || lateDmgShare}% 全队倒数第一</b>）`;
+    } else if (p.phoenix_egg_audit && p.phoenix_egg_audit.shattered_cnt >= 2) {
+      const pe = p.phoenix_egg_audit;
+      mechReasonHtml = `核心症结在于团战大招机制崩盘：全场 <b>${pe.tf_egg_casts} 波团战开启《超新星》变蛋仅 ${
+        pe.survived_cnt
+      } 次成功、足足 ${pe.shattered_cnt} 次被集火打碎（碎蛋率 ${pe.shatter_rate_pct}%：${(
+        pe.shattered_times || []
+      ).join("、")}）</b>，面对敌方高攻速物理核未提前铺满《烈火精灵》减攻速或卡高台视野变蛋，且整局仅放 <b>${
+        pe.sun_ray_casts
+      } 次《烈日炙烤》激光（治疗仅 ${fmtNum(pe.hero_healing)}）</b>`;
+    } else {
+      mechReasonHtml = `后期再吞 <b>${lateD} 次阵亡</b>（后期进账 +${fmtNum(
+        lateGoldGain
+      )} 金 / 打出 ${fmtNum(lateDmg)} 伤害），全场泉水读秒 <b>${
+        p.dead_seconds || 0
+      } 秒</b>、阵亡掉钱 <b>-${fmtNum(p.death_gold_lost || 0)}</b>${
+        soloEvents.length > 0 ? `、脱离团队落单被抓 <b>${soloEvents.length} 次</b>` : ""
+      }`;
+    }
+    lateConclusion = `<b>【后期 25m+ & 战犯定责】</b>${mechReasonHtml}，本局评分仅 <b>${score100}/100 分（背锅占比 ${sharePct}%）</b>，是导致正面团战崩盘的关键症结！`;
   }
 
   return injectHeroLogosIntoHtml(

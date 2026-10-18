@@ -329,12 +329,12 @@ def evaluate_player_deeply(
                 f"@{pname} 玩个3号位参战率才{kp:.0f}%，你是买票进来看我们四个正面挨揍的吗？",
             ))
 
-    # --- (C) 推进与建筑伤害审计 ---
+    # --- (C) 推进与建筑伤害审计 (败局且全队未破外塔/高地时不机械苛责拆塔量) ---
     if tdmg >= 6500 or (pos in (1, 2) and tdmg_share >= 45.0 and tdmg >= 3500):
         strengths.append(
             f"推进终结能力极强：单人打出 {tdmg:,} 建筑伤害（包揽全队 {tdmg_share:.0f}% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。"
         )
-    elif pos == 1 and tdmg < 1200 and duration_min >= 25:
+    elif pos == 1 and tdmg < 1200 and duration_min >= 25 and (won or team_tdmg >= 2500):
         blame_points += 14.0
         weaknesses.append(
             f"推塔效率极其低下：1号位打了 {duration_min:.0f} 分钟，建筑伤害仅有 {tdmg}（占全队 {tdmg_share:.1f}%），赢团后严重缺乏逼塔拿盾意识。"
@@ -386,8 +386,12 @@ def evaluate_player_deeply(
                 f"BKB 沦为摆设：{bkb_timing_str} 做出黑皇杖后，直到比赛结束居然只按了 {bkb_uses} 次！"
             )
     elif pos in (1, 2, 3):
-        has_innate_spell_immunity = any(k in hero_name for k in ["主宰", "噬魂鬼"])
-        if deaths >= 7 and enemy_total_stuns >= 70 and not has_innate_spell_immunity:
+        hid_cur = int(p.get("hero_id") or 0)
+        has_innate_or_non_bkb_kit = (
+            any(k in hero_name for k in ["主宰", "噬魂鬼", "凤凰", "幽鬼", "钢背兽", "潮汐猎人", "人马", "半人马"])
+            or hid_cur in (8, 54, 110, 67, 99, 29, 96)
+        )
+        if deaths >= 7 and enemy_total_stuns >= 70 and not has_innate_or_non_bkb_kit:
             blame_points += 20.0
             weaknesses.append(
                 f"头铁拒出 BKB：面对敌方 {enemy_total_stuns:.0f} 秒强控，全场阵亡 {deaths} 次直到终局都没出黑皇杖，团战容错率极低。"
@@ -648,11 +652,159 @@ def evaluate_player_deeply(
         if won and rating_score >= 8.3:
             rating_tier = "S+ 擎天战神"
 
+    # --- (I) 英雄专属机制、团队博弈、单带被抓、魔晶/克制装缺失与炮台输出兑现深度审计 ---
+    hid_cur = int(p.get("hero_id") or 0)
+    has_shard = bool(p.get("aghanims_shard"))
+    solo_pickoffs = pt.get("solo_pickoffs") or []
+    low_dmg_tfs = pt.get("low_dmg_tfs") or []
+    late_gold = int(pt.get("late_gold_gain") or 0)
+    late_hdmg = int(pt.get("late_hdmg_gain") or 0)
+    late_gold_share = float(pt.get("late_gold_share_pct") or 0.0)
+    late_hdmg_share = float(pt.get("late_hdmg_share_pct") or 20.0)
+    dmg_per_death = hdmg / max(1, deaths)
+
+    # 1) 脆皮高爆发炮台核心 (莉娜/宙斯/天怒/狙击手) 「虽死犹荣 · 火力倾泻兑现」判定
+    is_glass_cannon_turret = hid_cur in (25, 22, 101, 35)
+    is_turret_fulfilled = (
+        is_glass_cannon_turret
+        and duration_min >= 20
+        and (hdmg_share >= 20.0 or dmg_per_death >= 3000)
+        and hdmg >= 22000
+    )
+
+    if is_turret_fulfilled:
+        radar["damage"] = max(radar["damage"], 85)
+        radar["tempo"] = max(radar["tempo"], 72)
+        radar["survival"] = max(radar["survival"], 60)
+        mvp_score = round(clamp(mvp_score + 22.0, 73.0, 89.0), 1)
+        rating_score = round(clamp(mvp_score / 10.0, 7.3, 8.9), 1)
+        rating_tier = ("A 凯旋炮台" if rating_score >= 8.0 else "B+ 功勋炮台") if won else ("A 尽力真核" if rating_score >= 7.8 else "B+ 悲情炮台")
+        blame_points = max(8.0, blame_points - 36.0)
+        ab_top_str = " + ".join(f"{ab['zh_name']}×{ab['count']}" for ab in ability_list[:3]) if ability_list else "高频技能轰炸"
+        lane_lead_clause = ""
+        if gold10 and opp_same_pos and (opp_same_pos.get("laning_10m") or {}).get("gold10"):
+            g_diff = gold10 - opp_same_pos["laning_10m"]["gold10"]
+            if g_diff >= 400:
+                lane_lead_clause = f"前期对线 10m 交出 {lh10}正/{dn10}反（{gold10:,} 金，压制对位 {opp_same_pos.get('hero_short_zh','')} +{g_diff:,} 金）打出优势；"
+        strengths.insert(
+            0,
+            f"炮台火力彻底兑现（哪怕阵亡也把输出灌满）：{lane_lead_clause}作为无位移脆皮高爆发核心，全场狂甩 {ab_top_str}，"
+            f"轰出 **{hdmg:,} 点英雄伤害（占全队 {hdmg_share:.1f}%，平均每次阵亡前倾泻 {int(dmg_per_death):,} 点高额伤害，25m+ 后期再轰 {late_hdmg:,} 伤害）**外加 {stuns:.1f} 秒硬控！"
+            f"在团队前排与救人匮乏的逆境下，真正做到了倒下前把每一滴输出倾泻干净。",
+        )
+        weaknesses = [w for w in weaknesses if "BKB 严重难产" not in w]
+        weaknesses.insert(
+            0,
+            f"绝境生存与留人反制博弈：作为己方唯一能威胁敌方后排的高爆发炮台，被敌方切入与点控重点针对阵亡 {deaths} 次{nemesis_str}；"
+            f"在队友缺乏魔晶救人与前排支点的局面下，单靠 BKB 结束后仍容易被敌方框人/留人技能链限制走位。",
+        )
+        trash_candidates.append((
+            108,
+            f"@{pname} 这把{hero_name}对线压爆中路、全场狂灌 {hdmg:,} 伤害（每死换 {int(dmg_per_death):,} 伤）已经把炮台火力彻底拉满了，唯一遗憾是没早点出把大推推自救解先知发芽，纯纯被前排碎蛋和小鱼人不出魔晶坑惨的悲情炮台！",
+        ))
+        improvements.insert(
+            0,
+            f"{hero_name} 本局输出职责已超额完成（场均每死换 {int(dmg_per_death):,} 伤害）；若从团队可能性出发进一步提升残局容错，面对敌方先知发芽框人/帕克梦境缠绕/屠夫钩时，"
+            f"可将一件纯法系输出装替换为【飓风长戟（大推推）】（既能推开自己秒解发芽树圈与缠绕、拉开切入距离，又能白嫖超远射程点人）。",
+        )
+
+    # 2) 凤凰 (Phoenix) 「超新星变蛋生灭审计（成功炸出 vs 蛋被打碎）+ 烈日炙烤覆盖」
+    egg_audit = p.get("phoenix_egg_audit") or {}
+    if hid_cur == 110 and egg_audit:
+        egg_casts = int(egg_audit.get("total_casts") or 0)
+        tf_egg_total = int(egg_audit.get("tf_egg_total") or 0)
+        survive_cnt = int(egg_audit.get("survived_cnt") or 0)
+        shatter_cnt = int(egg_audit.get("shattered_cnt") or 0)
+        shatter_rate = float(egg_audit.get("shatter_rate_pct") or 0.0)
+        shattered_waves = egg_audit.get("shattered_waves") or []
+        survived_waves = egg_audit.get("survived_waves") or []
+        ray_casts = int(egg_audit.get("sun_ray_casts") or 0)
+        spirits_casts = int(egg_audit.get("fire_spirits_casts") or 0)
+
+        if shatter_cnt >= 3 or (tf_egg_total >= 2 and shatter_cnt > survive_cnt):
+            radar["utility"] = min(radar["utility"], 42)
+            radar["tempo"] = min(radar["tempo"], 45)
+            mvp_score = round(clamp(mvp_score - 6.5, 35.0, 58.0), 1)
+            rating_score = round(clamp(mvp_score / 10.0, 4.0, 5.8), 1)
+            rating_tier = "C 碎蛋背锅" if won else "D 碎蛋战犯"
+            blame_points += 24.0
+            weaknesses.insert(
+                0,
+                f"超新星(变蛋)团战 {tf_egg_total} 放 {shatter_cnt} 碎 + 烈日炙烤严重闲置：全场施放 {egg_casts} 次大招《超新星》，"
+                f"在 {tf_egg_total} 波正面大团战中**仅 {survive_cnt} 次成功炸出眩晕（{', '.join(survived_waves) or '无'}），"
+                f"高达 {shatter_cnt} 次变蛋被敌方集火当场打碎殒命（{', '.join(shattered_waves)}，团战碎蛋率 {shatter_rate:.0f}%）**！"
+                f"变蛋前未能把《烈火精灵》减攻速精准覆盖在敌方高频平A核心（如先知/酒仙）头上，且变蛋位置过于贴脸缺乏高台/远距离掩护；"
+                f"同时 {duration_min:.0f} 分钟比赛仅开启 **{ray_casts} 次《烈日炙烤(激光)》**（全队治疗仅 {heal:,} 点），彻底浪费了凤凰百分比灼烧融化前排与远程奶队友的核心机制！",
+            )
+            trash_candidates.append((
+                109,
+                f"@{pname} 凤凰正面团战 {tf_egg_total} 次变蛋碎了 {shatter_cnt} 颗（{', '.join(shattered_waves[:3])} 连环碎蛋，碎蛋率 {shatter_rate:.0f}%），45分钟激光只按了 {ray_casts} 次，你这超新星是专门给对面刷番茄炒蛋熟练度的吗？",
+            ))
+            improvements.insert(
+                0,
+                "凤凰团战核心在于「先拉激光消耗 + 烈火精灵糊脸减攻速 + 卡地形边缘变蛋」：开团先站后排拉《烈日炙烤》百分比融化敌方前排并奶住受控队友；准备飞入变蛋前，必须先把 4 颗《烈火精灵》（-140攻速）精准撒在敌方先知/酒仙头上，并等队友先手控制交出或在树林高台边缘变蛋，绝不能贴着满攻速敌核脸裸变蛋。",
+            )
+
+    # 3) 斯拉克 (Slark) 与核心位「单带无故被抓 + 拒出魔晶/克制装导致A不过人 + 后期团战隐身零输出」深度博弈审计
+    if hid_cur == 93 and duration_min >= 22:
+        all_my_item_keys = {it.get("key") for it in (p.get("final_items_rich") or []) + (p.get("backpack_items_rich") or [])}
+        has_counter_evasion_or_heal = bool(all_my_item_keys.intersection({"monkey_king_bar", "skadi", "bloodthorn", "nullifier", "abyssal_blade"}))
+        has_bare_javelin = "javelin" in all_my_item_keys
+        enemy_has_evasion_or_satanic = any(
+            any(k in " ".join(ep.get("final_items") or []) for k in ["蝴蝶", "撒旦", "金箍棒"])
+            or int(ep.get("hero_id") or 0) in (78, 44, 21, 53)
+            for ep in enemy_players
+        )
+        pickoff_str = "、".join(f"{sp['time_str']}(被{sp['killer']}单抓)" for sp in solo_pickoffs[:4])
+        if not has_shard or late_hdmg_share <= 17.5 or len(solo_pickoffs) >= 2:
+            radar["damage"] = min(radar["damage"], 44)
+            radar["tempo"] = min(radar["tempo"], 34)
+            radar["utility"] = min(radar["utility"], 30)
+            mvp_score = round(clamp(mvp_score - 9.5, 35.0, 52.0), 1)
+            rating_score = round(clamp(mvp_score / 10.0, 4.0, 5.2), 1)
+            rating_tier = "C 隐身背锅" if won else "D 头号战犯"
+            blame_points += 34.0
+            weaknesses.insert(
+                0,
+                f"三大致命败因（单带无故被抓 + 拒出魔晶A不过人 + 后期零输出）："
+                f"① 【单带无故被抓断节奏】中后期在 {pickoff_str or '多波危险线'} 脱离团队视野独自带线无故被抓{nemesis_str}，全场泉水读秒长达 {dead_min}分{dead_rem_s:02d}秒；"
+                f"② 【{duration_min:.0f}分钟拒出魔晶 + 出装被克制导致正面A不过人】整局未买仅售 1,400 金的命脉魔晶《深海劫掠》（既少了 3 秒群体黑雾救队友化解帕吉肢解/帕克大招，自己也少了一层黑雾拉扯叠《能量转移》敏捷层数），"
+                + (
+                    f"且面对敌方高闪避/高吸血大哥（蝴蝶+撒旦先知、酒仙醉拳）既不出金箍棒/冰眼克制"
+                    + ("（终局包里还揣着一根散件标枪）" if has_bare_javelin else "")
+                    + "，导致贴脸对A完全打不过任何人；"
+                    if enemy_has_evasion_or_satanic and not has_counter_evasion_or_heal
+                    else "导致正面拉扯根本叠不起属性、A不过敌方核心；"
+                )
+                + f"③ 【后期吃满经济却毫无输出】25m+ 决胜后期吃下全队第一的 +{late_gold:,} 金（占全队后期经济 {late_gold_share:.1f}%），"
+                f"却仅打出 **{late_hdmg:,} 点后期伤害（仅占全队后期伤害 {late_hdmg_share:.1f}%，全队倒数第一，连 4/5 号位辅助都不如）**，"
+                f"在 {', '.join(low_dmg_tfs[:4]) or '多波后期关键团战'} 中近乎零输出蒸发，全场参战率仅 {kp:.1f}%（全队垫底）！",
+            )
+            trash_candidates.append((
+                110,
+                f"@{pname} 玩个1号位小鱼人45分钟不出1400块的魔晶《深海劫掠》救队友叠属性，单带连环被抓，后期狂吃{late_gold:,}金就打了{late_hdmg:,}伤害（全队倒数第一比5号位还低），团战既救不了人又A不过对面先知酒仙，全场参战率38%纯隐身人！",
+            ))
+            improvements.insert(
+                0,
+                "斯拉克在团队局的核心价值是「双黑雾救人拉扯 + 叠满敏捷收割」：① 20分钟必须第一时间补出 1,400 金魔晶《深海劫掠》，队友被屠夫咬或帕克大住时立刻给魔晶黑雾救人，自己依靠【大招暗影之舞 + 魔晶深海劫掠】两团黑雾反复进出战场叠出 20+ 层敏捷；② 面对蝴蝶+撒旦先知与酒仙，中期狂战刷完必须果断转【冰眼 + 金箍棒/血棘】而非散件标枪；③ 敌方帕克/屠夫小地图消失时严禁无视野单带过河道。",
+            )
+    elif pos in (1, 2) and not is_turret_fulfilled and duration_min >= 25:
+        # 通用 1/2 号位：检查「多次单带被抓」与「后期吃高经济却极低输出」
+        if len(solo_pickoffs) >= 2 and late_gold_share >= 22.0 and late_hdmg_share <= 17.0:
+            pickoff_str = "、".join(f"{sp['time_str']}(被{sp['killer']}抓)" for sp in solo_pickoffs[:4])
+            blame_points += 18.0
+            weaknesses.insert(
+                0,
+                f"单带屡屡被抓 + 后期团战输出崩盘：中后期在 {pickoff_str} 等非团战期单带无故被抓断节奏；"
+                f"25m+ 后期吃下全队 {late_gold_share:.1f}% 的经济（+{late_gold:,} 金），却只打出 {late_hdmg:,} 点后期伤害（仅占全队后期伤害 {late_hdmg_share:.1f}%）"
+                + (f"，在 {', '.join(low_dmg_tfs[:3])} 团战中近乎零输出阵亡！" if low_dmg_tfs else "！"),
+            )
+
     if deaths <= 4 and duration_min >= 30 and not is_afk_farmer:
         strengths.append(
             f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次（读秒总计 {dead_min}分{dead_rem_s:02d}秒，仅占全场 {dead_pct:.1f}%），团战站位拉扯极佳。"
         )
-    elif deaths >= 8:
+    elif deaths >= 8 and not is_turret_fulfilled:
         blame_points += (deaths - 6) * 5.5
         gold_lost_txt = f"，光阵亡直接扣掉 **{death_gold_lost:,} 金币**" if death_gold_lost > 0 else ""
         weaknesses.append(
@@ -710,15 +862,15 @@ def evaluate_player_deeply(
             contrib_points += 9.0
         if stacked >= 4:
             contrib_points += 8.0
-    if deaths >= 10:
+    if deaths >= 10 and not is_turret_fulfilled:
         contrib_points = max(6.0, contrib_points * 0.72)
 
     if is_afk_farmer:
         praise_talk = f"@{pname} 这把 {hero_name} 前中期闷头独刷 25 分钟（参战率仅 {kp:.1f}% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！"
     elif pos == 1 and tdmg_share >= 48.0 and tdmg >= 9000:
         praise_talk = f"@{pname} 擎天一号位真核！{hero_name} 顶着前中期少人压力参战接团，单人狂拆 {tdmg:,} 建筑伤害（包揽全队 {tdmg_share:.0f}% 拆塔量）+ {hdmg:,} 伤害，当之无愧本局头号首功！"
-    elif pos in (1, 2) and hdmg_share >= 26.0:
-        praise_talk = f"@{pname} 这把 {hero_name} 火力全开狂轰 {hdmg:,} 伤害（包揽全队 {hdmg_share:.0f}% 输出）+ {tdmg:,} 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
+    elif pos in (1, 2) and (hdmg_share >= 26.0 or is_turret_fulfilled):
+        praise_talk = f"@{pname} 这把 {hero_name} 炮台火力全开狂轰 {hdmg:,} 伤害（占全队 {hdmg_share:.1f}% 输出，场均每死换 {int(dmg_per_death):,} 伤害），真正做到倒下前把所有技能灌满！"
     elif tdmg >= 5500 or (tdmg_share >= 45.0 and tdmg >= 3000):
         praise_talk = f"@{pname} 推塔终结机器！{hero_name} 单人拆出 {tdmg:,} 建筑伤害（占全队 {tdmg_share:.0f}%），赢团推塔一气呵成！"
     elif pos == 3 and (stuns >= 25.0 or dmg_taken_share >= 23.0):
@@ -733,8 +885,8 @@ def evaluate_player_deeply(
     if trash_candidates:
         trash_candidates.sort(key=lambda x: x[0], reverse=True)
         trash_talk = trash_candidates[0][1]
-    elif rating_score >= 8.8:
-        trash_talk = f"@{pname} 这把 {hero_name} 评分 {rating_score} 全队唯一真爹，另外四个兄弟建议自觉排队敬茶！"
+    elif rating_score >= 8.8 or is_turret_fulfilled:
+        trash_talk = f"@{pname} 这把 {hero_name} 中路打出线优+全场狂灌 {hdmg:,} 伤害（每死换 {int(dmg_per_death):,} 血），已经把炮台输出拉满了，奈何带不动不出魔晶的小鱼和连碎5颗蛋的凤凰！"
     else:
         trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 标准打卡下班，背锅占比 {blame_points:.0f} 点，赢了跟着笑，输了怪队友！"
 
@@ -1301,13 +1453,19 @@ def call_llm_coach_review(
                 "death_gold_lost": p.get("death_gold_lost"),
                 "obs_sen": f"{p.get('obs_placed')}/{p.get('sen_placed')}",
                 "key_item_timings": (p.get("key_item_timings") or [])[:5],
+                "final_items": (p.get("final_items") or [])[:7],
+                "aghanims_shard": p.get("aghanims_shard", False),
                 "active_item_uses": {k: v["count"] for k, v in (p.get("active_item_uses") or {}).items()},
                 "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:5]},
                 "is_afk_farmer": p.get("is_afk_farmer", False),
+                "phoenix_egg_audit": p.get("phoenix_egg_audit"),
+                "slark_mechanism_audit": p.get("slark_mechanism_audit"),
                 "phase_telemetry": p.get("phase_telemetry"),
                 "rating_score_100": int(round((p.get("rating_score") or 0) * 10)),
                 "contrib_share_pct": p.get("contrib_share_pct"),
                 "blame_share_pct": p.get("blame_share_pct"),
+                "top_strength": (p.get("strengths") or [""])[0][:140],
+                "top_weakness": (p.get("weaknesses") or [""])[0][:160],
             }
             for p in own_team
         ],
@@ -1321,6 +1479,7 @@ def call_llm_coach_review(
                 "net_worth": p.get("net_worth"),
                 "hero_damage": p.get("hero_damage"),
                 "tower_damage": p.get("tower_damage"),
+                "final_items": (p.get("final_items") or [])[:6],
             }
             for p in opp_team
         ],
@@ -1328,32 +1487,39 @@ def call_llm_coach_review(
 
     afk_heroes = [p.get("hero_short_zh") for p in own_team if p.get("is_afk_farmer")]
     sorted_own_by_contrib = sorted(own_team, key=lambda x: float(x.get("contrib_share_pct") or 0), reverse=True)
+    sorted_own_by_blame = sorted(own_team, key=lambda x: float(x.get("blame_share_pct") or 0), reverse=True)
     top1_hero = sorted_own_by_contrib[0].get("hero_short_zh") if sorted_own_by_contrib else ""
     top2_hero = sorted_own_by_contrib[1].get("hero_short_zh") if len(sorted_own_by_contrib) > 1 else ""
+    culprit1_hero = sorted_own_by_blame[0].get("hero_short_zh") if sorted_own_by_blame else ""
+    culprit2_hero = sorted_own_by_blame[1].get("hero_short_zh") if len(sorted_own_by_blame) > 1 else ""
     afk_rule_str = (
-        f"2) 本局本方存在『前中期刷钱不参战、卖队友4打5、最后几分钟才出山收割面板伤害的毒瘤核心』：{'、'.join(afk_heroes)}（数据中 is_afk_farmer=true，参战率全队垫底、10-25m中期吃大量经济却打出极低英雄伤害、多波团战0伤害钻野区）。哪怕他最后总伤害或总经济好看，也绝对禁止评为MVP或二号功臣，必须在判词和个人点评里狠狠揭穿他前中期闷头独刷、全靠四个队友4打5负重前行才躺赢的真相！\n"
+        f"2) 本局本方存在『前中期刷钱不参战、卖队友4打5、最后几分钟才出山收割面板伤害的毒瘤核心』：{'、'.join(afk_heroes)}。哪怕他最后总伤害或总经济好看，也绝对禁止评为MVP或二号功臣，必须在判词和个人点评里狠狠揭穿他前中期闷头独刷、全靠四个队友4打5负重前行才躺赢的真相！\n"
         if afk_heroes
-        else "2) 本局本方无人闷头独刷，请严格依据真实阵亡次数、中期落单被抓或推塔/参战短板点评本局暴露的问题，切勿凭空捏造独刷罪名。\n"
+        else f"2) 若本局落败，头号背锅战犯必须定为『{culprit1_hero}』，二号背锅位定为『{culprit2_hero}』；请严格依据 top_weakness 与机制证据点名批判。\n"
     )
 
     system_prompt = (
-        "你是懂 Dota 2 高端局细节的开黑老哥，给车队五人做赛后算账复盘。全中文输出（严禁夹杂英文变量名如 is_afk_farmer 或英文道具名），像损友聊天：有数据的问题直接点名说，拒绝空洞套话。\n"
+        "你是懂 Dota 2 高端局机制与团队博弈的开黑老哥，给车队五人做赛后算账复盘。全中文输出（严禁夹杂英文变量名或英文道具名），像损友聊天：拒绝只看伤害/拆塔面板的浅薄分析（尤其是败局全队都没摸到高地时，绝不要怪1号位0建筑伤害），必须从【英雄核心机制、魔晶/克制出装、单带被抓、团战技能兑现与他原本能为团队做什么】深度思考！\n"
         "核心铁律：\n"
-        "1) 结合每个人前期(0-10m补刀与经济)、中期(10-25m刷钱占比vs英雄伤害占比、参战率)、后期(25m+团战与推塔伤害)以及技能/装备按键次数进行从前到后的完整故事复盘。\n"
+        "1) 结合每个人前期(0-10m对线)、中期(10-25m节奏与是否单带无故被抓 solo_pickoffs)、后期(25m+吃经济占比 vs 后期伤害占比 late_hdmg_share_pct)进行复盘。\n"
         + afk_rule_str +
-        f"3) 头号首功 MVP 必须定为『{top1_hero}』，二号功臣必须定为『{top2_hero}』（与胜局贡献度前两名严格一致）。\n"
+        "3) 深度机制铁律：\n"
+        "   - 若 1号位（如斯拉克）单带多次无故被抓、拒不出 1,400 金关键魔晶（如斯拉克不出《深海劫掠》导致既救不了被屠夫咬/帕克大的队友、自己也少黑雾叠敏捷 A 不过人）、面对敌方蝴蝶撒旦先知/酒仙不出金箍棒/冰眼、且后期吃满经济却毫无输出，必须一针见血拆穿这三点！\n"
+        "   - 若 3号位是凤凰，绝不要无脑喷不出BKB或拆塔少，必须重点审判其《超新星(变蛋)》在团战中成功炸出几次 vs 被打碎几次（phoenix_egg_audit 团战碎蛋率）、变蛋前是否挂了《烈火精灵》减攻速、以及《烈日炙烤(激光)》是否严重少按！\n"
+        "   - 若 2号位是脆皮高爆发炮台（如莉娜/宙斯/火枪），只要她对线打出优势且倒下前把伤害灌满（高英雄伤害占比、场均每死换3000+伤害），死了也完全尽责（虽死犹荣），必须肯定其炮台输出兑现度，并从团队博弈角度建议大推推等解先知发芽/帕克大的出装可能性。\n"
+        f"4) 胜局或队内最佳 MVP 定为『{top1_hero}』，二当家定为『{top2_hero}』。\n"
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"
-        '  "title": "一句话点透本局胜负关键与最大槽点（20-36字）",\n'
-        '  "summary": "从前期对线、中期开雾团战节奏到后期高地决战的全局复盘摘要（110-160字）",\n'
-        '  "verdict": "有理有据的头号首功、二号功臣与短板/毒瘤定责判词（110-160字）",\n'
-        '  "team_practice": "下一局开黑最该统一执行的一个具体配合动作（50-80字）",\n'
-        '  "mvp": {"slot": 128, "runner_up_slot": 131, "confidence": "高", "reason": "为何选他当MVP", "comparison": "对比二当家胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
+        '  "title": "一句话点透本局胜负关键与最大机制败因（20-36字）",\n'
+        '  "summary": "从前期对线、中期开雾/单带节奏到后期团战机制博弈的全局复盘摘要（110-160字）",\n'
+        '  "verdict": "有理有据的头号战犯/首功、二号背锅/功臣与炮台兑现判词（110-160字）",\n'
+        '  "team_practice": "下一局开黑最该统一执行的一个具体团队配合与出装博弈动作（50-80字）",\n'
+        '  "mvp": {"slot": 128, "runner_up_slot": 131, "confidence": "高", "reason": "为何选他当MVP/SVP", "comparison": "对比队友胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
         '  "players": [\n'
-        '    {"slot": 128, "headline": "一句毒舌或封神判词", "assessment": "从前期对线、中期打钱/参战到后期团战的80-130字个人结案故事点评，打得好狠狠夸、独刷或犯罪狠狠喷", "good": ["亮点1", "亮点2"], "bad": ["问题或待回看1"], "practice": "下一局改进动作"}\n'
+        '    {"slot": 128, "headline": "一句切中机制要害的判词", "assessment": "结合英雄机制、魔晶/出装选择、单带被抓与前中后期团战作用的80-130字深度点评", "good": ["亮点1", "亮点2"], "bad": ["机制或团队问题1"], "practice": "下一局他在团队里能多做什么的具体改进"}\n'
         "  ],\n"
         '  "windows": [\n'
-        '    {"time_label": "团战时间段", "title": "一句刀塔味十足的团战标题", "detail": "60-100字有画面感的团战故事复盘"}\n'
+        '    {"time_label": "团战时间段", "title": "一句刀塔味十足的团战标题", "detail": "60-100字有画面感的团战机制复盘"}\n'
         "  ]\n"
         "}"
     )

@@ -11955,7 +11955,7 @@
           "deaths": 1,
           "gold_delta": -3,
           "abilities": [
-            "大树专属技能×1"
+            "自然卷握(藤蔓)×1"
           ],
           "items": [
             "魔棒(小魔棒)×1",
@@ -11971,8 +11971,8 @@
           "deaths": 0,
           "gold_delta": 46,
           "abilities": [
-            "猴子专属技能×1",
-            "猴子专属技能×2"
+            "神行百变(W躲技能)×1",
+            "灵魂之矛(T)×2"
           ],
           "items": [
             "树之祭祀(吃树)×1",
@@ -12015,7 +12015,7 @@
           "deaths": 0,
           "gold_delta": 172,
           "abilities": [
-            "死灵法专属技能×2"
+            "死亡脉冲(奶/毒)×2"
           ],
           "items": [
             "树之祭祀(吃树)×1"
@@ -12030,7 +12030,7 @@
           "deaths": 0,
           "gold_delta": 409,
           "abilities": [
-            "小鱼人专属技能×1"
+            "突袭(跳留人)×1"
           ],
           "items": [
             "狂石捆包(中立锻造材料)×1",
@@ -12048,8 +12048,8 @@
           "deaths": 0,
           "gold_delta": 119,
           "abilities": [
-            "小Y专属技能×2",
-            "小Y专属技能×1"
+            "枷锁(拉)×2",
+            "苍穹震击(叉电)×1"
           ],
           "items": [
             "魔棒(小魔棒)×1",
@@ -12065,8 +12065,8 @@
           "deaths": 0,
           "gold_delta": 198,
           "abilities": [
-            "剧毒专属技能×1",
-            "剧毒专属技能×4"
+            "瘴气(一技能喷)×1",
+            "瘟疫守卫(蛇棒)×4"
           ],
           "items": [
             "疗伤莲花×1",
@@ -12135,7 +12135,7 @@
           "deaths": 0,
           "gold_delta": 62,
           "abilities": [
-            "大树专属技能×1"
+            "自然卷握(藤蔓)×1"
           ],
           "items": [
             "回城卷轴(TP)×1"
@@ -12166,7 +12166,7 @@
           "deaths": 1,
           "gold_delta": 381,
           "abilities": [
-            "宙斯专属技能×1"
+            "雷击(G真视劈)×1"
           ],
           "items": [
             "回城卷轴(TP)×1",
@@ -12198,7 +12198,7 @@
           "deaths": 0,
           "gold_delta": 164,
           "abilities": [
-            "死灵法专属技能×2"
+            "死亡脉冲(奶/毒)×2"
           ],
           "items": [
             "树之祭祀(吃树)×1"
@@ -12213,7 +12213,7 @@
           "deaths": 0,
           "gold_delta": 36,
           "abilities": [
-            "小鱼人专属技能×1"
+            "突袭(跳留人)×1"
           ],
           "items": [
             "树之祭祀(吃树)×1",
@@ -12242,7 +12242,7 @@
           "deaths": 0,
           "gold_delta": 100,
           "abilities": [
-            "剧毒专属技能×6"
+            "瘟疫守卫(蛇棒)×6"
           ],
           "items": [
             "魔棒(小魔棒)×1"
@@ -12308,9 +12308,9 @@
           "deaths": 1,
           "gold_delta": 90,
           "abilities": [
+            "活体护甲(修塔奶甲)×1",
             "大树专属技能×1",
-            "大树专属技能×1",
-            "大树专属技能×1"
+            "自然卷握(藤蔓)×1"
           ],
           "items": [
             "魔棒(小魔棒)×2"
@@ -12325,8 +12325,8 @@
           "deaths": 1,
           "gold_delta": 109,
           "abilities": [
-            "猴子专属技能×1",
-            "猴子专属技能×2"
+            "神行百变(W躲技能)×1",
+            "灵魂之矛(T)×2"
           ],
           "items": [
             "动力鞋(假腿)×1",
@@ -12343,9 +12343,9 @@
           "deaths": 0,
           "gold_delta": 310,
           "abilities": [
-            "宙斯专属技能×2",
-            "宙斯专属技能×8",
-            "宙斯专属技能×2"
+            "神圣一跃(跳)×2",
+            "弧形闪电(C)×8",
+            "雷击(G真视劈)×2"
           ],
           "items": [
             "秘法鞋×1",
@@ -12380,9 +12380,9 @@
           "deaths": 0,
           "gold_delta": 753,
           "abilities": [
-            "死灵法专属技能×1",
-            "死灵法专属技能×1",
-            "死灵法专属技能×5"
+            "幽冥护罩(绿杖技能)×1",
+            "死神镰刀(大招斩)×1",
+            "死亡脉冲(奶/毒)×5"
           ],
           "items": [
             "树之祭祀(吃树)×1"
@@ -12397,8 +12397,8 @@
           "deaths": 0,
           "gold_delta": 743,
           "abilities": [
-            "小鱼人专属技能×4",
-            "小鱼人专属技能×5"
+            "突袭(跳留人)×4",
+            "黑暗契约(C解状态)×5"
           ],
           "items": [
             "岗哨守卫(真眼)×1",
@@ -12415,9 +12415,9 @@
           "deaths": 1,
           "gold_delta": 349,
           "abilities": [
-            "小Y专属技能×1",
-            "小Y专属技能×1",
-            "小Y专属技能×1"
+            "枷锁(拉)×1",
+            "群蛇守卫(大招蛇棒)×1",
+            "妖术(变羊)×1"
           ],
           "items": [
             "回城卷轴(TP)×1"
@@ -12432,9 +12432,9 @@
           "deaths": 0,
           "gold_delta": 392,
           "abilities": [
-            "剧毒专属技能×1",
-            "剧毒专属技能×7",
-            "剧毒专属技能×1"
+            "瘴气(一技能喷)×1",
+            "瘟疫守卫(蛇棒)×7",
+            "恶性瘟疫(大招传染剧毒)×1"
           ],
           "items": [
             "侦查守卫(假眼)×1",
@@ -12517,8 +12517,8 @@
           "deaths": 1,
           "gold_delta": -119,
           "abilities": [
-            "猴子专属技能×1",
-            "猴子专属技能×1"
+            "神行百变(W躲技能)×1",
+            "灵魂之矛(T)×1"
           ],
           "items": [
             "魔杖(大魔棒)×1"
@@ -12533,10 +12533,10 @@
           "deaths": 1,
           "gold_delta": -221,
           "abilities": [
-            "宙斯专属技能×1",
-            "宙斯专属技能×3",
-            "宙斯专属技能×5",
-            "宙斯专属技能×1"
+            "神圣一跃(跳)×1",
+            "雷击(G真视劈)×3",
+            "弧形闪电(C)×5",
+            "雷神之怒(大招全图雷)×1"
           ],
           "items": [
             "秘法鞋×1"
@@ -12554,7 +12554,7 @@
             "技能窃取(偷)×2",
             "弱化能流×2",
             "隔空取物(举)×1",
-            "宙斯专属技能×2"
+            "弧形闪电(C)×2"
           ],
           "items": [
             "先知钱袋×1",
@@ -12571,9 +12571,9 @@
           "deaths": 0,
           "gold_delta": 413,
           "abilities": [
-            "死灵法专属技能×1",
-            "死灵法专属技能×1",
-            "死灵法专属技能×6"
+            "幽冥护罩(绿杖技能)×1",
+            "死神镰刀(大招斩)×1",
+            "死亡脉冲(奶/毒)×6"
           ],
           "items": [
             "大疗伤莲花×1",
@@ -12590,9 +12590,9 @@
           "deaths": 0,
           "gold_delta": 415,
           "abilities": [
-            "小鱼人专属技能×1",
-            "小鱼人专属技能×2",
-            "小鱼人专属技能×4"
+            "暗影之舞(大招黑雾)×1",
+            "突袭(跳留人)×2",
+            "黑暗契约(C解状态)×4"
           ],
           "items": [
             "魔杖(大魔棒)×1"
@@ -12607,9 +12607,9 @@
           "deaths": 0,
           "gold_delta": 187,
           "abilities": [
-            "小Y专属技能×2",
-            "小Y专属技能×1",
-            "小Y专属技能×1"
+            "枷锁(拉)×2",
+            "妖术(变羊)×1",
+            "苍穹震击(叉电)×1"
           ],
           "items": [
             "秘法鞋×1"
@@ -12624,9 +12624,9 @@
           "deaths": 0,
           "gold_delta": 294,
           "abilities": [
-            "剧毒专属技能×1",
-            "剧毒专属技能×7",
-            "剧毒专属技能×1"
+            "瘴气(一技能喷)×1",
+            "瘟疫守卫(蛇棒)×7",
+            "恶性瘟疫(大招传染剧毒)×1"
           ],
           "items": [
             "岗哨守卫(真眼)×1",
@@ -12694,9 +12694,9 @@
           "deaths": 1,
           "gold_delta": 232,
           "abilities": [
-            "大树专属技能×1",
-            "大树专属技能×2",
-            "大树专属技能×2"
+            "疯狂生长(大招捆)×1",
+            "活体护甲(修塔奶甲)×2",
+            "自然卷握(藤蔓)×2"
           ],
           "items": [
             "回城卷轴(TP)×1",
@@ -12714,8 +12714,8 @@
           "deaths": 1,
           "gold_delta": -117,
           "abilities": [
-            "猴子专属技能×1",
-            "猴子专属技能×2"
+            "神行百变(W躲技能)×1",
+            "灵魂之矛(T)×2"
           ],
           "items": [
             "魔杖(大魔棒)×1"
@@ -12730,10 +12730,10 @@
           "deaths": 0,
           "gold_delta": 115,
           "abilities": [
-            "宙斯专属技能×2",
-            "宙斯专属技能×4",
-            "宙斯专属技能×5",
-            "宙斯专属技能×1"
+            "神圣一跃(跳)×2",
+            "雷击(G真视劈)×4",
+            "弧形闪电(C)×5",
+            "雷神之怒(大招全图雷)×1"
           ],
           "items": [
             "魔力药饮×1",
@@ -12770,9 +12770,9 @@
           "deaths": 0,
           "gold_delta": 665,
           "abilities": [
-            "死灵法专属技能×2",
-            "死灵法专属技能×2",
-            "死灵法专属技能×6"
+            "魔晶寻死冲刺×2",
+            "幽冥护罩(绿杖技能)×2",
+            "死亡脉冲(奶/毒)×6"
           ],
           "items": [
             "大疗伤莲花×1",
@@ -12789,10 +12789,10 @@
           "deaths": 0,
           "gold_delta": 204,
           "abilities": [
-            "小鱼人专属技能×1",
-            "小鱼人专属技能×1",
-            "小鱼人专属技能×3",
-            "小鱼人专属技能×4"
+            "深海劫掠(魔晶救人黑雾)×1",
+            "暗影之舞(大招黑雾)×1",
+            "突袭(跳留人)×3",
+            "黑暗契约(C解状态)×4"
           ],
           "items": [
             "魔杖(大魔棒)×1"
@@ -12807,8 +12807,8 @@
           "deaths": 0,
           "gold_delta": 171,
           "abilities": [
-            "小Y专属技能×1",
-            "小Y专属技能×1"
+            "群蛇守卫(大招蛇棒)×1",
+            "苍穹震击(叉电)×1"
           ],
           "items": [
             "岗哨守卫(真眼)×1",
@@ -12824,10 +12824,10 @@
           "deaths": 1,
           "gold_delta": 603,
           "abilities": [
+            "瘴气(一技能喷)×2",
             "剧毒专属技能×2",
-            "剧毒专属技能×2",
-            "剧毒专属技能×3",
-            "剧毒专属技能×1"
+            "瘟疫守卫(蛇棒)×3",
+            "恶性瘟疫(大招传染剧毒)×1"
           ],
           "items": [
             "魂之灵瓮(大骨灰)×2",
@@ -13757,7 +13757,7 @@
         "caster_player": "eu só quero paz",
         "caster_side": "dire",
         "caster_pos": 1,
-        "ability_zh": "猴子专属技能",
+        "ability_zh": "灵魂之矛(T)",
         "total_casts": 17,
         "targets": [
           {
@@ -13796,7 +13796,7 @@
         "caster_player": "Zapty",
         "caster_side": "dire",
         "caster_pos": 2,
-        "ability_zh": "宙斯专属技能",
+        "ability_zh": "雷击(G真视劈)",
         "total_casts": 28,
         "targets": [
           {
@@ -13835,7 +13835,7 @@
         "caster_player": "Zapty",
         "caster_side": "dire",
         "caster_pos": 2,
-        "ability_zh": "宙斯专属技能",
+        "ability_zh": "弧形闪电(C)",
         "total_casts": 45,
         "targets": [
           {
@@ -13913,7 +13913,7 @@
         "caster_player": "† FeNix†G",
         "caster_side": "dire",
         "caster_pos": 4,
-        "ability_zh": "大树专属技能",
+        "ability_zh": "活体护甲(修塔奶甲)",
         "total_casts": 10,
         "targets": [
           {
@@ -14101,7 +14101,7 @@
         "caster_player": "inno",
         "caster_side": "dire",
         "caster_pos": 2,
-        "ability_zh": "宙斯专属技能",
+        "ability_zh": "弧形闪电(C)",
         "total_casts": 5,
         "targets": [
           {
@@ -14126,7 +14126,7 @@
         "caster_player": "【X】【O】【X】【O】",
         "caster_side": "dire",
         "caster_pos": 3,
-        "ability_zh": "死灵法专属技能",
+        "ability_zh": "魔晶寻死冲刺",
         "total_casts": 7,
         "targets": [
           {
@@ -14165,7 +14165,7 @@
         "caster_player": "【X】【O】【X】【O】",
         "caster_side": "dire",
         "caster_pos": 3,
-        "ability_zh": "死灵法专属技能",
+        "ability_zh": "死神镰刀(大招斩)",
         "total_casts": 5,
         "targets": [
           {
@@ -14197,7 +14197,7 @@
         "caster_player": "JeaNiToS",
         "caster_side": "dire",
         "caster_pos": 4,
-        "ability_zh": "剧毒专属技能",
+        "ability_zh": "恶性瘟疫(大招传染剧毒)",
         "total_casts": 6,
         "targets": [
           {
@@ -14222,7 +14222,7 @@
         "caster_player": "EL REVOLUCIONARIO →666",
         "caster_side": "dire",
         "caster_pos": 5,
-        "ability_zh": "小Y专属技能",
+        "ability_zh": "枷锁(拉)",
         "total_casts": 19,
         "targets": [
           {
@@ -14261,7 +14261,7 @@
         "caster_player": "EL REVOLUCIONARIO →666",
         "caster_side": "dire",
         "caster_pos": 5,
-        "ability_zh": "小Y专属技能",
+        "ability_zh": "苍穹震击(叉电)",
         "total_casts": 9,
         "targets": [
           {
@@ -14293,7 +14293,7 @@
         "caster_player": "EL REVOLUCIONARIO →666",
         "caster_side": "dire",
         "caster_pos": 5,
-        "ability_zh": "小Y专属技能",
+        "ability_zh": "妖术(变羊)",
         "total_casts": 12,
         "targets": [
           {
@@ -15033,15 +15033,38 @@
           "personaname": "Duuw",
           "stuns_sec": 0.0,
           "ult_audits": [],
-          "skillshot_audits": [],
+          "skillshot_audits": [
+            {
+              "ability_zh": "突袭 (小鱼跳锁人)",
+              "casts": 44,
+              "hits": 0,
+              "hit_pct": 0.0,
+              "damage": 0,
+              "grade": "bad",
+              "detail": "《突袭 (小鱼跳锁人)》全场施放 44 次，命中敌方英雄 0 人次（有效命中比 0.0%，造成 0 伤害），大量技能落空或仅用于清兵逃生。"
+            }
+          ],
           "headline_badges": [
+            {
+              "text": "深海劫掠(魔晶): 2次救人",
+              "tone": "good"
+            },
+            {
+              "text": "暗影之舞(大招): 7次",
+              "tone": "warn"
+            },
+            {
+              "text": "突袭: 44放/0中(0.0%)",
+              "tone": "bad"
+            },
             {
               "text": "🗺️ 顶级带线牵制(塔伤9944)",
               "tone": "good"
             }
           ],
           "special_insights": [
-            "核心技能释放与转化：《小鱼人专属技能》释放 73 次(命中 939 人次 / 3,941 伤害)；《小鱼人专属技能》释放 44 次(命中 0 人次 / 0 伤害)；《小鱼人专属技能》释放 7 次(命中 0 人次 / 0 伤害)。"
+            "🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》7 次、《黑暗契约》73 次、《突袭》44 放 0 中；魔晶《深海劫掠》释放 2 次掩护队友。",
+            "《突袭 (小鱼跳锁人)》全场施放 44 次，命中敌方英雄 0 人次（有效命中比 0.0%，造成 0 伤害），大量技能落空或仅用于清兵逃生。"
           ]
         },
         {
@@ -15066,7 +15089,7 @@
             }
           ],
           "special_insights": [
-            "《技能窃取》实战审计：全场大招偷取 15 次，成功用出的敌方核心技能包括：偷《宙斯专属技能》放 11 次(中7人/744伤)、偷《宙斯专属技能》放 9 次(中6人/1,971伤)、偷《大树专属技能》放 9 次(中119人/2,034伤)、偷《不稳定化合物(摇摇乐)》放 5 次、偷《》放 2 次(中5人/272伤)！",
+            "《技能窃取》实战审计：全场大招偷取 15 次，成功用出的敌方核心技能包括：偷《弧形闪电(C)》放 11 次(中7人/744伤)、偷《雷击(G真视劈)》放 9 次(中6人/1,971伤)、偷《自然卷握(藤蔓)》放 9 次(中119人/2,034伤)、偷《不稳定化合物(摇摇乐)》放 5 次、偷《》放 2 次(中5人/272伤)！",
             "全场累计对敌方英雄造成 40.6 秒硬控眩晕（平均每分钟控制 1.49 秒）。"
           ]
         },
@@ -15088,7 +15111,7 @@
             }
           ],
           "special_insights": [
-            "核心技能释放与转化：《死灵法专属技能》释放 100 次(命中 44 人次 / 6,700 伤害)；《死灵法专属技能》释放 8 次(命中 0 人次 / 0 伤害)；《死灵法专属技能》释放 6 次(命中 0 人次 / 0 伤害)。"
+            "核心技能释放与转化：《死亡脉冲(奶/毒)》释放 100 次(命中 44 人次 / 6,700 伤害)；《魔晶寻死冲刺》释放 8 次(命中 0 人次 / 0 伤害)；《幽冥护罩(绿杖技能)》释放 6 次(命中 0 人次 / 0 伤害)。"
           ]
         },
         {
@@ -15100,11 +15123,42 @@
           "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/venomancer.png",
           "personaname": "JeaNiToS",
           "stuns_sec": 0.0,
-          "ult_audits": [],
+          "ult_audits": [
+            {
+              "ability_key": "venomancer_noxious_plague",
+              "ability_zh": "恶性瘟疫 (剧毒传染大)",
+              "casts": 6,
+              "hits": 170,
+              "avg_hits": 28.33,
+              "unit_label": "人次",
+              "damage": 2420,
+              "tf_casts_count": 3,
+              "tf_casts_waves": [
+                "14:42–15:42(×1)",
+                "19:26–20:09(×1)",
+                "23:07–23:59(×1)"
+              ],
+              "tf_held_death_count": 0,
+              "tf_held_death_waves": [],
+              "victim_breakdown": [
+                "炼金术士(1,208伤)",
+                "宙斯(610伤)",
+                "幻影长矛手(366伤)",
+                "潮汐猎人(236伤)"
+              ],
+              "grade": "good",
+              "verdict_text": "大招质量极高！全场释放 6 次，累计打出 170 人次（场均每大 28.33 人次，造成 2,420 点伤害），在 14:42–15:42(×1), 19:26–20:09(×1), 23:07–23:59(×1) 团战完美兑现；主要灌伤目标：炼金术士(1,208伤)、宙斯(610伤)、幻影长矛手(366伤)。"
+            }
+          ],
           "skillshot_audits": [],
-          "headline_badges": [],
+          "headline_badges": [
+            {
+              "text": "恶性瘟疫 (剧毒传染大): 6放/170人次(均28.33)",
+              "tone": "good"
+            }
+          ],
           "special_insights": [
-            "核心技能释放与转化：《剧毒专属技能》释放 178 次(命中 0 人次 / 0 伤害)；《剧毒专属技能》释放 16 次(命中 50 人次 / 1,235 伤害)；《剧毒专属技能》释放 6 次(命中 170 人次 / 2,420 伤害)。"
+            "大招质量极高！全场释放 6 次，累计打出 170 人次（场均每大 28.33 人次，造成 2,420 点伤害），在 14:42–15:42(×1), 19:26–20:09(×1), 23:07–23:59(×1) 团战完美兑现；主要灌伤目标：炼金术士(1,208伤)、宙斯(610伤)、幻影长矛手(366伤)。"
           ]
         },
         {
@@ -15148,7 +15202,7 @@
             }
           ],
           "special_insights": [
-            "核心技能释放与转化：《猴子专属技能》释放 21 次(命中 17 人次 / 2,162 伤害)；《猴子专属技能》释放 13 次(命中 0 人次 / 0 伤害)；《猴子专属技能》释放 12 次(命中 0 人次 / 0 伤害)。"
+            "核心技能释放与转化：《灵魂之矛(T)》释放 21 次(命中 17 人次 / 2,162 伤害)；《幻影冲锋》释放 13 次(命中 0 人次 / 0 伤害)；《神行百变(W躲技能)》释放 12 次(命中 0 人次 / 0 伤害)。"
           ]
         },
         {
@@ -15162,9 +15216,14 @@
           "stuns_sec": 13.2,
           "ult_audits": [],
           "skillshot_audits": [],
-          "headline_badges": [],
+          "headline_badges": [
+            {
+              "text": "🔥 炮台换伤: 5,161伤/死(46.1%)",
+              "tone": "good"
+            }
+          ],
           "special_insights": [
-            "核心技能释放与转化：《宙斯专属技能》释放 114 次(命中 53 人次 / 5,340 伤害)；《宙斯专属技能》释放 57 次(命中 41 人次 / 8,580 伤害)；《宙斯专属技能》释放 11 次(命中 11 人次 / 562 伤害)。"
+            "🔥《炮台核心死前灌伤兑现》审计：作为无逃生脆皮炮台，虽然全场阵亡 5 次，但每次倒下前均把技能与平A倾泻干净——全场轰出 25,806 点英雄伤害（占全队 46.1%，平均每次阵亡换取 5,161 点高额伤害）！"
           ]
         },
         {
@@ -17334,7 +17393,7 @@
               },
               {
                 "key": "zuus_lightning_bolt",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷击(G真视劈)",
                 "damage": 1390,
                 "share_pct": 8.7
               }
@@ -17358,19 +17417,19 @@
             "top_killers": [
               {
                 "key": "zuus_lightning_bolt",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷击(G真视劈)",
                 "damage": 3485,
                 "share_pct": 31.7
               },
               {
                 "key": "zuus_arc_lightning",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "弧形闪电(C)",
                 "damage": 1509,
                 "share_pct": 13.7
               },
               {
                 "key": "zuus_thundergods_wrath",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷神之怒(大招全图雷)",
                 "damage": 1334,
                 "share_pct": 12.1
               },
@@ -17383,7 +17442,7 @@
             ],
             "def_items_owned": [],
             "grade": "good",
-            "verdict": "✓ 承伤结构：86.3% 技能伤害（9,484） vs 13.7% 物理平A（1,510），最大威胁源为 宙斯专属技能(3,485伤)，站位保持较好。"
+            "verdict": "✓ 承伤结构：86.3% 技能伤害（9,484） vs 13.7% 物理平A（1,510），最大威胁源为 雷击(G真视劈)(3,485伤)，站位保持较好。"
           },
           {
             "pos": 3,
@@ -17398,19 +17457,19 @@
             "top_killers": [
               {
                 "key": "zuus_lightning_bolt",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷击(G真视劈)",
                 "damage": 1830,
                 "share_pct": 15.2
               },
               {
                 "key": "zuus_arc_lightning",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "弧形闪电(C)",
                 "damage": 1517,
                 "share_pct": 12.6
               },
               {
                 "key": "zuus_thundergods_wrath",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷神之怒(大招全图雷)",
                 "damage": 1231,
                 "share_pct": 10.2
               },
@@ -17425,7 +17484,7 @@
               "清莲宝珠(莲花)"
             ],
             "grade": "good",
-            "verdict": "✓ 承伤结构：86.1% 技能伤害（10,376） vs 13.9% 物理平A（1,676），最大威胁源为 宙斯专属技能(1,830伤)，已配防装【清莲宝珠(莲花)】。"
+            "verdict": "✓ 承伤结构：86.1% 技能伤害（10,376） vs 13.9% 物理平A（1,676），最大威胁源为 雷击(G真视劈)(1,830伤)，已配防装【清莲宝珠(莲花)】。"
           },
           {
             "pos": 4,
@@ -17440,13 +17499,13 @@
             "top_killers": [
               {
                 "key": "zuus_thundergods_wrath",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷神之怒(大招全图雷)",
                 "damage": 1271,
                 "share_pct": 14.9
               },
               {
                 "key": "zuus_lightning_bolt",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷击(G真视劈)",
                 "damage": 843,
                 "share_pct": 9.9
               },
@@ -17458,14 +17517,14 @@
               },
               {
                 "key": "treant_natures_grasp",
-                "zh_name": "大树专属技能",
+                "zh_name": "自然卷握(藤蔓)",
                 "damage": 805,
                 "share_pct": 9.4
               }
             ],
             "def_items_owned": [],
             "grade": "good",
-            "verdict": "✓ 承伤结构：76.9% 技能伤害（6,558） vs 23.1% 物理平A（1,973），最大威胁源为 宙斯专属技能(1,271伤)，站位保持较好。"
+            "verdict": "✓ 承伤结构：76.9% 技能伤害（6,558） vs 23.1% 物理平A（1,973），最大威胁源为 雷神之怒(大招全图雷)(1,271伤)，站位保持较好。"
           },
           {
             "pos": 5,
@@ -17486,13 +17545,13 @@
               },
               {
                 "key": "zuus_thundergods_wrath",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷神之怒(大招全图雷)",
                 "damage": 1310,
                 "share_pct": 15.7
               },
               {
                 "key": "zuus_lightning_bolt",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷击(G真视劈)",
                 "damage": 1032,
                 "share_pct": 12.3
               },
@@ -17528,13 +17587,13 @@
             "top_killers": [
               {
                 "key": "necrolyte_death_pulse",
-                "zh_name": "死灵法专属技能",
+                "zh_name": "死亡脉冲(奶/毒)",
                 "damage": 2407,
                 "share_pct": 19.5
               },
               {
                 "key": "necrolyte_heartstopper_aura",
-                "zh_name": "死灵法专属技能",
+                "zh_name": "竭心光环",
                 "damage": 1262,
                 "share_pct": 10.2
               },
@@ -17546,14 +17605,14 @@
               },
               {
                 "key": "venomancer_poison_sting",
-                "zh_name": "剧毒专属技能",
+                "zh_name": "毒刺",
                 "damage": 851,
                 "share_pct": 6.9
               }
             ],
             "def_items_owned": [],
             "grade": "bad",
-            "verdict": "🚨 防装严重缺失：全场高达 73.3% 承伤来自技能/法系爆发（头号凶手：死灵法专属技能(2,407伤)），阵亡 5 次却到终局都没出 BKB / 微光 / 笛子 / 法师克星！"
+            "verdict": "🚨 防装严重缺失：全场高达 73.3% 承伤来自技能/法系爆发（头号凶手：死亡脉冲(奶/毒)(2,407伤)），阵亡 5 次却到终局都没出 BKB / 微光 / 笛子 / 法师克星！"
           },
           {
             "pos": 2,
@@ -17574,19 +17633,19 @@
               },
               {
                 "key": "zuus_arc_lightning",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "弧形闪电(C)",
                 "damage": 667,
                 "share_pct": 4.5
               },
               {
                 "key": "venomancer_poison_sting",
-                "zh_name": "剧毒专属技能",
+                "zh_name": "毒刺",
                 "damage": 619,
                 "share_pct": 4.2
               },
               {
                 "key": "zuus_lightning_bolt",
-                "zh_name": "宙斯专属技能",
+                "zh_name": "雷击(G真视劈)",
                 "damage": 617,
                 "share_pct": 4.2
               }
@@ -17616,13 +17675,13 @@
               },
               {
                 "key": "venomancer_noxious_plague",
-                "zh_name": "剧毒专属技能",
+                "zh_name": "恶性瘟疫(大招传染剧毒)",
                 "damage": 1208,
                 "share_pct": 6.1
               },
               {
                 "key": "necrolyte_death_pulse",
-                "zh_name": "死灵法专属技能",
+                "zh_name": "死亡脉冲(奶/毒)",
                 "damage": 947,
                 "share_pct": 4.8
               },
@@ -17650,32 +17709,32 @@
             "top_killers": [
               {
                 "key": "venomancer_poison_sting",
-                "zh_name": "剧毒专属技能",
+                "zh_name": "毒刺",
                 "damage": 1105,
                 "share_pct": 10.6
               },
               {
                 "key": "necrolyte_death_pulse",
-                "zh_name": "死灵法专属技能",
+                "zh_name": "死亡脉冲(奶/毒)",
                 "damage": 1083,
                 "share_pct": 10.4
               },
               {
                 "key": "slark_dark_pact",
-                "zh_name": "小鱼人专属技能",
+                "zh_name": "黑暗契约(C解状态)",
                 "damage": 898,
                 "share_pct": 8.6
               },
               {
                 "key": "necrolyte_heartstopper_aura",
-                "zh_name": "死灵法专属技能",
+                "zh_name": "竭心光环",
                 "damage": 670,
                 "share_pct": 6.4
               }
             ],
             "def_items_owned": [],
             "grade": "bad",
-            "verdict": "🚨 防装严重缺失：全场高达 67.9% 承伤来自技能/法系爆发（头号凶手：剧毒专属技能(1,105伤)），阵亡 6 次却到终局都没出 BKB / 微光 / 笛子 / 法师克星！"
+            "verdict": "🚨 防装严重缺失：全场高达 67.9% 承伤来自技能/法系爆发（头号凶手：毒刺(1,105伤)），阵亡 6 次却到终局都没出 BKB / 微光 / 笛子 / 法师克星！"
           },
           {
             "pos": 5,
@@ -17702,13 +17761,13 @@
               },
               {
                 "key": "slark_dark_pact",
-                "zh_name": "小鱼人专属技能",
+                "zh_name": "黑暗契约(C解状态)",
                 "damage": 1784,
                 "share_pct": 7.1
               },
               {
                 "key": "necrolyte_death_pulse",
-                "zh_name": "死灵法专属技能",
+                "zh_name": "死亡脉冲(奶/毒)",
                 "damage": 1770,
                 "share_pct": 7.0
               }
@@ -17945,12 +18004,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slark.png",
             "own_player": "Duuw",
             "own_kda": "8/3/14",
-            "own_rating": 8.2,
+            "own_rating": 60.0,
             "opp_hero": "幻影长矛手",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/phantom_lancer.png",
             "opp_player": "eu só quero paz",
             "opp_kda": "0/5/4",
-            "opp_rating": 4.0,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 4210,
@@ -18028,9 +18087,9 @@
                 "raw": 340.0
               }
             ],
-            "own_share_pct": 66.2,
-            "opp_share_pct": 33.8,
-            "verdict_tag": "👑 对位完爆 (大优)",
+            "own_share_pct": 56.3,
+            "opp_share_pct": 43.7,
+            "verdict_tag": "⚔️ 对位压制 (小优)",
             "grade": "good",
             "summary_txt": "10m对线经济 4,210 vs 2,660（+1,550）｜终局经济 16,421 vs 13,048（+3,373）｜英雄输出 13,270 vs 5,752｜正面对位互杀 0 : 0。"
           },
@@ -18040,12 +18099,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
             "own_player": "inno",
             "own_kda": "10/4/12",
-            "own_rating": 8.7,
+            "own_rating": 60.0,
             "opp_hero": "宙斯",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
             "opp_player": "Zapty",
             "opp_kda": "8/5/2",
-            "opp_rating": 6.4,
+            "opp_rating": 60.0,
             "h2h_own_kills": 4,
             "h2h_opp_kills": 3,
             "gold10_own": 3607,
@@ -18123,8 +18182,8 @@
                 "raw": 411.0
               }
             ],
-            "own_share_pct": 54.6,
-            "opp_share_pct": 45.4,
+            "own_share_pct": 52.2,
+            "opp_share_pct": 47.8,
             "verdict_tag": "⚔️ 对位压制 (小优)",
             "grade": "good",
             "summary_txt": "10m对线经济 3,607 vs 4,652（-1,045）｜终局经济 14,904 vs 9,862（+5,042）｜英雄输出 23,916 vs 25,806｜正面对位互杀 4 : 3。"
@@ -18135,12 +18194,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/necrolyte.png",
             "own_player": "【X】【O】【X】【O】",
             "own_kda": "10/1/9",
-            "own_rating": 7.6,
+            "own_rating": 60.0,
             "opp_hero": "炼金术士",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
             "opp_player": "TRADE COMMENDS",
             "opp_kda": "2/9/5",
-            "opp_rating": 4.9,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 3569,
@@ -18218,8 +18277,8 @@
                 "raw": 0.0
               }
             ],
-            "own_share_pct": 68.1,
-            "opp_share_pct": 31.9,
+            "own_share_pct": 57.5,
+            "opp_share_pct": 42.5,
             "verdict_tag": "👑 对位完爆 (大优)",
             "grade": "good",
             "summary_txt": "10m对线经济 3,569 vs 2,802（+767）｜终局经济 16,416 vs 8,001（+8,415）｜英雄输出 20,741 vs 8,765｜正面对位互杀 0 : 0。"
@@ -18230,12 +18289,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/venomancer.png",
             "own_player": "JeaNiToS",
             "own_kda": "5/2/15",
-            "own_rating": 7.2,
+            "own_rating": 60.0,
             "opp_hero": "树精卫士",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/treant.png",
             "opp_player": "† FeNix†G",
             "opp_kda": "1/6/1",
-            "opp_rating": 4.7,
+            "opp_rating": 60.0,
             "h2h_own_kills": 2,
             "h2h_opp_kills": 1,
             "gold10_own": 2233,
@@ -18313,9 +18372,9 @@
                 "raw": 0.0
               }
             ],
-            "own_share_pct": 60.0,
-            "opp_share_pct": 40.0,
-            "verdict_tag": "👑 对位完爆 (大优)",
+            "own_share_pct": 54.4,
+            "opp_share_pct": 45.6,
+            "verdict_tag": "⚔️ 对位压制 (小优)",
             "grade": "good",
             "summary_txt": "参战率 52.6% vs 15.4%｜真假眼 14颗(排0) vs 13颗(排0)｜硬控 0.0s vs 18.5s｜正面对位互杀 2 : 1。"
           },
@@ -18325,12 +18384,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/shadow_shaman.png",
             "own_player": "EL REVOLUCIONARIO →666",
             "own_kda": "5/3/18",
-            "own_rating": 8.4,
+            "own_rating": 60.0,
             "opp_hero": "潮汐猎人",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
             "opp_player": "步步`",
             "opp_kda": "2/13/6",
-            "opp_rating": 4.1,
+            "opp_rating": 60.0,
             "h2h_own_kills": 3,
             "h2h_opp_kills": 1,
             "gold10_own": 2325,
@@ -18408,8 +18467,8 @@
                 "raw": 2.3
               }
             ],
-            "own_share_pct": 68.6,
-            "opp_share_pct": 31.4,
+            "own_share_pct": 59.9,
+            "opp_share_pct": 40.1,
             "verdict_tag": "👑 对位完爆 (大优)",
             "grade": "good",
             "summary_txt": "参战率 60.5% vs 61.5%｜真假眼 11颗(排2) vs 1颗(排0)｜硬控 70.1s vs 10.0s｜正面对位互杀 3 : 1。"
@@ -18428,12 +18487,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/phantom_lancer.png",
             "own_player": "eu só quero paz",
             "own_kda": "0/5/4",
-            "own_rating": 4.0,
+            "own_rating": 60.0,
             "opp_hero": "斯拉克",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slark.png",
             "opp_player": "Duuw",
             "opp_kda": "8/3/14",
-            "opp_rating": 8.2,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 2660,
@@ -18511,10 +18570,10 @@
                 "raw": 0.3
               }
             ],
-            "own_share_pct": 33.8,
-            "opp_share_pct": 66.2,
-            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
-            "grade": "bad",
+            "own_share_pct": 43.7,
+            "opp_share_pct": 56.3,
+            "verdict_tag": "⚠️ 对位小劣 (被压)",
+            "grade": "warn",
             "summary_txt": "10m对线经济 2,660 vs 4,210（-1,550）｜终局经济 13,048 vs 16,421（-3,373）｜英雄输出 5,752 vs 13,270｜正面对位互杀 0 : 0。"
           },
           {
@@ -18523,12 +18582,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
             "own_player": "Zapty",
             "own_kda": "8/5/2",
-            "own_rating": 6.4,
+            "own_rating": 60.0,
             "opp_hero": "拉比克",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
             "opp_player": "inno",
             "opp_kda": "10/4/12",
-            "opp_rating": 8.7,
+            "opp_rating": 60.0,
             "h2h_own_kills": 3,
             "h2h_opp_kills": 4,
             "gold10_own": 4652,
@@ -18606,8 +18665,8 @@
                 "raw": 875.5
               }
             ],
-            "own_share_pct": 45.4,
-            "opp_share_pct": 54.6,
+            "own_share_pct": 47.8,
+            "opp_share_pct": 52.2,
             "verdict_tag": "⚠️ 对位小劣 (被压)",
             "grade": "warn",
             "summary_txt": "10m对线经济 4,652 vs 3,607（+1,045）｜终局经济 9,862 vs 14,904（-5,042）｜英雄输出 25,806 vs 23,916｜正面对位互杀 3 : 4。"
@@ -18618,12 +18677,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/alchemist.png",
             "own_player": "TRADE COMMENDS",
             "own_kda": "2/9/5",
-            "own_rating": 4.9,
+            "own_rating": 60.0,
             "opp_hero": "瘟疫法师",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/necrolyte.png",
             "opp_player": "【X】【O】【X】【O】",
             "opp_kda": "10/1/9",
-            "opp_rating": 7.6,
+            "opp_rating": 60.0,
             "h2h_own_kills": 0,
             "h2h_opp_kills": 0,
             "gold10_own": 2802,
@@ -18701,8 +18760,8 @@
                 "raw": 585.0
               }
             ],
-            "own_share_pct": 31.9,
-            "opp_share_pct": 68.1,
+            "own_share_pct": 42.5,
+            "opp_share_pct": 57.5,
             "verdict_tag": "🚨 对位被打穿 (被爆金币)",
             "grade": "bad",
             "summary_txt": "10m对线经济 2,802 vs 3,569（-767）｜终局经济 8,001 vs 16,416（-8,415）｜英雄输出 8,765 vs 20,741｜正面对位互杀 0 : 0。"
@@ -18713,12 +18772,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/treant.png",
             "own_player": "† FeNix†G",
             "own_kda": "1/6/1",
-            "own_rating": 4.7,
+            "own_rating": 60.0,
             "opp_hero": "剧毒术士",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/venomancer.png",
             "opp_player": "JeaNiToS",
             "opp_kda": "5/2/15",
-            "opp_rating": 7.2,
+            "opp_rating": 60.0,
             "h2h_own_kills": 1,
             "h2h_opp_kills": 2,
             "gold10_own": 1462,
@@ -18796,10 +18855,10 @@
                 "raw": 50.5
               }
             ],
-            "own_share_pct": 40.0,
-            "opp_share_pct": 60.0,
-            "verdict_tag": "🚨 对位被打穿 (被爆金币)",
-            "grade": "bad",
+            "own_share_pct": 45.6,
+            "opp_share_pct": 54.4,
+            "verdict_tag": "⚠️ 对位小劣 (被压)",
+            "grade": "warn",
             "summary_txt": "参战率 15.4% vs 52.6%｜真假眼 13颗(排0) vs 14颗(排0)｜硬控 18.5s vs 0.0s｜正面对位互杀 1 : 2。"
           },
           {
@@ -18808,12 +18867,12 @@
             "own_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
             "own_player": "步步`",
             "own_kda": "2/13/6",
-            "own_rating": 4.1,
+            "own_rating": 60.0,
             "opp_hero": "暗影萨满",
             "opp_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/shadow_shaman.png",
             "opp_player": "EL REVOLUCIONARIO →666",
             "opp_kda": "5/3/18",
-            "opp_rating": 8.4,
+            "opp_rating": 60.0,
             "h2h_own_kills": 1,
             "h2h_opp_kills": 3,
             "gold10_own": 2783,
@@ -18891,8 +18950,8 @@
                 "raw": 350.0
               }
             ],
-            "own_share_pct": 31.4,
-            "opp_share_pct": 68.6,
+            "own_share_pct": 40.1,
+            "opp_share_pct": 59.9,
             "verdict_tag": "🚨 对位被打穿 (被爆金币)",
             "grade": "bad",
             "summary_txt": "参战率 61.5% vs 60.5%｜真假眼 1颗(排0) vs 11颗(排2)｜硬控 10.0s vs 70.1s｜正面对位互杀 1 : 3。"
@@ -31098,11 +31157,11 @@
             "中期稳步过渡，经济增量 +5,212，造成 0 伤害。"
           ],
           "bad": [
+            "中期脱离团队单带无故被抓（17:11(被拉比克单抓)），直接断送关键装强势期与控图节奏！",
             "中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 348（经济 +5,212），核心装备成型过慢。",
-            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。",
-            "中期沦为突破口：15分钟内连续暴毙 4 次（17:11(被拉比克击杀), 15:17(被瘟疫法师击杀), 19:44(被瘟疫法师击杀), 23:24(被剧毒术士击杀)），把前期积攒的节奏全送了出去！"
+            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：第一件关键装（跳刀/狂战/以太）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前落单给机会！"
+          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
         },
         {
           "slot": 4,
@@ -31212,10 +31271,10 @@
             "中期稳步过渡，经济增量 +6,381，造成 0 伤害。"
           ],
           "bad": [
-            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。",
-            "中期阵亡 3 次（10:29(被拉比克击杀), 19:54(被拉比克击杀), 21:17(被拉比克击杀)），多次在团战或带线时被抓断节奏。"
+            "中期脱离团队单带无故被抓（10:29(被拉比克单抓)、21:17(被拉比克单抓)），直接断送关键装强势期与控图节奏！",
+            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：第一件关键装（跳刀/狂战/以太）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前落单给机会！"
+          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
         },
         {
           "slot": 0,
@@ -31369,9 +31428,10 @@
             "中期关键先手/团队装成型：13:17 迈达斯之手(点金手)、15:13 食人魔之斧、17:47 精气之球、19:09 欢欣之刃，阶段打出 0 伤害与 1 次击杀。"
           ],
           "bad": [
+            "中期脱离团队单带无故被抓（18:09(被拉比克单抓)、13:43(被斯拉克单抓)、21:51(被剧毒术士单抓)），直接断送关键装强势期与控图节奏！",
             "中期沦为突破口：15分钟内连续暴毙 5 次（18:09(被拉比克击杀), 13:43(被斯拉克击杀), 15:09(被暗影萨满击杀), 21:51(被剧毒术士击杀)），把前期积攒的节奏全送了出去！"
           ],
-          "focus": "中期改进重点：第一件关键装（跳刀/狂战/以太）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前落单给机会！"
+          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
         },
         {
           "slot": 2,
@@ -31456,9 +31516,10 @@
             "中期视野铺设到位：10~25分钟插下 2 颗假眼与 6 颗真眼，努力支撑团队视野。"
           ],
           "bad": [
+            "中期脱离团队单带无故被抓（10:40(被斯拉克单抓)），直接断送关键装强势期与控图节奏！",
             "中期沦为突破口：15分钟内连续暴毙 4 次（19:41(被拉比克击杀), 23:41(被拉比克击杀), 10:40(被斯拉克击杀), 15:24(被斯拉克击杀)），把前期积攒的节奏全送了出去！"
           ],
-          "focus": "中期改进重点：第一件关键装（跳刀/狂战/以太）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前落单给机会！"
+          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
         },
         {
           "slot": 1,
@@ -31547,9 +31608,10 @@
             "中期稳步过渡，经济增量 +3,357，造成 0 伤害。"
           ],
           "bad": [
+            "中期脱离团队单带无故被抓（13:17(被瘟疫法师单抓)、17:48(被瘟疫法师单抓)、22:20(被瘟疫法师单抓)、10:00(被暗影萨满单抓)），直接断送关键装强势期与控图节奏！",
             "中期沦为突破口：15分钟内连续暴毙 8 次（23:44(被拉比克击杀), 13:17(被瘟疫法师击杀), 15:27(被瘟疫法师击杀), 17:48(被瘟疫法师击杀)），把前期积攒的节奏全送了出去！"
           ],
-          "focus": "中期改进重点：第一件关键装（跳刀/狂战/以太）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前落单给机会！"
+          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
         },
         {
           "slot": 130,
@@ -31676,7 +31738,7 @@
           "bad": [
             "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 128,
@@ -31805,10 +31867,10 @@
             "中期刷钱效率拉满：15分钟内经济狂涨 +9,347（阶段 GPM 623，补刀 +75），顺利掏出 11:24 精气之球、16:36 达贡之神力(红杖)、18:08 显影之尘(粉)、19:59 宝冕。"
           ],
           "bad": [
-            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。",
-            "中期阵亡 2 次（13:01(被宙斯击杀), 17:14(被宙斯击杀)），多次在团战或带线时被抓断节奏。"
+            "中期脱离团队单带无故被抓（13:01(被宙斯单抓)、17:14(被宙斯单抓)），直接断送关键装强势期与控图节奏！",
+            "中期打架参与度偏低：15分钟内仅打出 0 英雄伤害，队友正面接团时输出存在真空。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
         },
         {
           "slot": 129,
@@ -31934,9 +31996,9 @@
             "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！"
           ],
           "bad": [
-            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+            "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 132,
@@ -32042,9 +32104,9 @@
             "中期接团技能释放果断：阶段贡献 3 杀与 0 伤害（出装：11:47 宝冕、14:15 魂之灵瓮(大骨灰)、16:38 静谧之靴(绿鞋)、20:15 韧鼓(战鼓)）。"
           ],
           "bad": [
-            "中期建筑伤害仅 +0，赢下小规模遭遇战后转推外塔不够果断。"
+            "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。"
         },
         {
           "slot": 131,
@@ -32116,9 +32178,9 @@
             "中期接团技能释放果断：阶段贡献 2 杀与 0 伤害（出装：15:29 以太之镜、20:22 魔力法杖）。"
           ],
           "bad": [
-            "中期阵亡 2 次（14:57(被炼金术士击杀), 12:55(被宙斯击杀)），多次在团战或带线时被抓断节奏。"
+            "中期脱离团队单带无故被抓（12:55(被宙斯单抓)），直接断送关键装强势期与控图节奏！"
           ],
-          "focus": "中期改进重点：中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆一塔压野区。"
+          "focus": "中期改进重点：第一件关键装（跳刀/狂战/连击刀）到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！"
         }
       ],
       "team_diagnostics": {
@@ -32188,9 +32250,9 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +1,399 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 4,
@@ -32229,10 +32291,10 @@
             "后期阶段贡献 0 杀、经济 +190、英雄伤害 +0。"
           ],
           "bad": [
-            "后期阵亡 1 次（25:08(被瘟疫法师击杀)），后期高地/肉山团站位需更谨慎。",
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期阵亡 1 次（25:08(被瘟疫法师击杀)），后期高地/肉山团站位与自保装需更到位。",
+            "后期团战输出匮乏：25分钟后吃下 +190 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 0,
@@ -32271,10 +32333,10 @@
             "后期阶段贡献 0 杀、经济 +670、英雄伤害 +0。"
           ],
           "bad": [
-            "后期阵亡 1 次（27:18(被拉比克击杀)），后期高地/肉山团站位需更谨慎。",
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期阵亡 1 次（27:18(被拉比克击杀)），后期高地/肉山团站位与自保装需更到位。",
+            "后期团战输出匮乏：25分钟后吃下 +670 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 2,
@@ -32308,7 +32370,7 @@
           "bad": [
             "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 1,
@@ -32347,9 +32409,9 @@
             "后期阶段贡献 0 杀、经济 +190、英雄伤害 +0。"
           ],
           "bad": [
-            "后期阵亡 1 次（25:45(被瘟疫法师击杀)），后期高地/肉山团站位需更谨慎。"
+            "后期阵亡 1 次（25:45(被瘟疫法师击杀)），后期高地/肉山团站位与自保装需更到位。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 130,
@@ -32381,9 +32443,9 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期机制与输出双重断档：25m+ 吃下全队最高 +2,060 金（占全队 21.7%），却仅打出 0 伤害（占全队 0.0% 全队倒数第一）；"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：小鱼人 20 分钟后必补 1400 金阿哈利姆魔晶《深海劫掠》（救被控制队友+双倍叠敏捷），面对蝴蝶/高闪避核心必补金箍棒/冰眼，后期严禁无视野单带被抓！"
         },
         {
           "slot": 128,
@@ -32450,9 +32512,9 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +1,696 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 129,
@@ -32517,9 +32579,9 @@
             "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！"
           ],
           "bad": [
-            "后期声音偏小：25分钟后英雄伤害仅 +0、拆塔 +0，决胜团战未能打出核心应有统治力。"
+            "后期团战输出匮乏：25分钟后吃下 +2,431 金却仅打出 +0 英雄伤害，未能承担核心收割职责。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 132,
@@ -32562,7 +32624,7 @@
           "bad": [
             "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         },
         {
           "slot": 131,
@@ -32605,7 +32667,7 @@
           "bad": [
             "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。"
           ],
-          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、先拆兵营不冲泉水』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
+          "focus": "后期改进重点：25分钟后严格遵守『带盾上高地、差钱留买活、抱团抓信息差』三大铁律，后排辅助务必站在大哥侧后方树林蹲反手。"
         }
       ],
       "team_diagnostics": {
@@ -32653,7 +32715,7 @@
       "tower_damage": 3696,
       "kill_participation_pct": 57.9,
       "trash_talk": "@inno 这把 10/4/12 标准打卡下班，背锅占比 15 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@inno 这把 拉比克 火力全开狂轰 23,916 伤害（包揽全队 29% 输出）+ 3,696 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
+      "praise_talk": "@inno 这把 拉比克 炮台火力全开狂轰 23,916 伤害（占全队 29.0% 输出，场均每死换 5,979 伤害），真正做到倒下前把所有技能灌满！"
     },
     "runner_up_player": {
       "player_slot": 131,
@@ -32680,7 +32742,7 @@
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "strengths": [
         "保人拉野到位：对线期把同路核心 斯拉克 保出了 10分钟 50 刀 / 4,210 经济的顺畅开局。",
-        "全场核心技能施放统计：小Y专属技能 19次 / 小Y专属技能 12次 / 小Y专属技能 12次 / 小Y专属技能 7次（操作频率 126 APM）。"
+        "全场核心技能施放统计：枷锁(拉) 19次 / 苍穹震击(叉电) 12次 / 妖术(变羊) 12次 / 群蛇守卫(大招蛇棒) 7次（操作频率 126 APM）。"
       ],
       "praise_talk": "@EL REVOLUCIONARIO →666 推塔终结机器！暗影萨满 单人拆出 5,596 建筑伤害（占全队 19%），赢团推塔一气呵成！"
     },
@@ -32699,10 +32761,10 @@
       "hero_damage": 25806,
       "tower_damage": 0,
       "kill_participation_pct": 76.9,
-      "rating_score": 6.4,
-      "rating_tier": "D 头号战犯",
-      "blame_share_pct": 8.2,
-      "contrib_share_pct": 51.1
+      "rating_score": 8.6,
+      "rating_tier": "A 尽力真核",
+      "blame_share_pct": 1.9,
+      "contrib_share_pct": 64.2
     },
     "culprit_player": {
       "player_slot": 130,
@@ -32837,7 +32899,7 @@
         "dead_seconds": 123,
         "death_gold_lost": 399,
         "trash_talk": "@inno 这把 10/4/12 标准打卡下班，背锅占比 15 点，赢了跟着笑，输了怪队友！",
-        "praise_talk": "@inno 这把 拉比克 火力全开狂轰 23,916 伤害（包揽全队 29% 输出）+ 3,696 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
+        "praise_talk": "@inno 这把 拉比克 炮台火力全开狂轰 23,916 伤害（占全队 29.0% 输出，场均每死换 5,979 伤害），真正做到倒下前把所有技能灌满！"
       }
     ],
     "focus_team_contrib_ranking": [
@@ -32857,7 +32919,7 @@
         "kda": "10/4/12",
         "hero_damage": 23916,
         "tower_damage": 3696,
-        "praise_talk": "@inno 这把 拉比克 火力全开狂轰 23,916 伤害（包揽全队 29% 输出）+ 3,696 拆塔，真大腿带飞全场，兄弟们排队敬茶！"
+        "praise_talk": "@inno 这把 拉比克 炮台火力全开狂轰 23,916 伤害（占全队 29.0% 输出，场均每死换 5,979 伤害），真正做到倒下前把所有技能灌满！"
       },
       {
         "pos": 5,
@@ -32937,7 +32999,7 @@
       "核心统治力数据：单人打出 23,916 英雄伤害（占全队 29.0%）+ 3,696 建筑伤害，总经济 14,904（GPM 563 / XPM 609）。",
       "制胜关键：对线基本功扎实：前10分钟交出 51正/2反（10m经济 3,607，效率 72%），撑起了前中期基础节奏。",
       "胜方二当家（胜局贡献 22.5%）：5号位 暗影萨满（EL REVOLUCIONARIO →666，评分 8.4）贡献 5/3/18（参战率 60.5%，伤害 10,936）。",
-      "败方孤胆院长 (SVP)：天辉 2号位 宙斯（Zapty，评分 6.4）交出 8/5/2（伤害 25,806），一神带四坑实在带不动。",
+      "败方孤胆院长 (SVP)：天辉 2号位 宙斯（Zapty，评分 8.6）交出 8/5/2（伤害 25,806），一神带四坑实在带不动。",
       "凯旋庆功总结：夜魇头号首功 拉比克（inno，贡献 24.8%）与二当家 暗影萨满（EL REVOLUCIONARIO →666，贡献 22.5%）携手带飞！ 本局惊险躺赢锦鲤：1号位 斯拉克（Duuw，贡献 19.4%）。"
     ]
   },
@@ -33274,19 +33336,19 @@
       "ability_uses_rich": [
         {
           "key": "phantom_lancer_spirit_lance",
-          "zh_name": "猴子专属技能",
+          "zh_name": "灵魂之矛(T)",
           "count": 21,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/phantom_lancer_spirit_lance.png"
         },
         {
           "key": "phantom_lancer_phantom_edge",
-          "zh_name": "猴子专属技能",
+          "zh_name": "幻影冲锋",
           "count": 13,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/phantom_lancer_phantom_edge.png"
         },
         {
           "key": "phantom_lancer_doppelwalk",
-          "zh_name": "猴子专属技能",
+          "zh_name": "神行百变(W躲技能)",
           "count": 12,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/phantom_lancer_doppelwalk.png"
         }
@@ -33312,61 +33374,6 @@
         "低参战率 (31%)",
         "低建筑伤害"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 2660,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 0,
-        "lane_deaths": 1,
-        "mid_gold_gain": 5212,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 17.4,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 0,
-        "mid_deaths": 4,
-        "late_gold_gain": 1399,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 15,
-        "damage": 15,
-        "tempo": 34,
-        "push": 10,
-        "utility": 30,
-        "survival": 54
-      },
-      "rating_score": 4.0,
-      "rating_tier": "D 头号战犯",
-      "mvp_score": 35.0,
-      "raw_blame_points": 136.0,
-      "raw_contrib_points": 13.8,
-      "strengths": [
-        "全场核心技能施放统计：猴子专属技能 21次 / 猴子专属技能 13次 / 猴子专属技能 12次（操作频率 85 APM）。"
-      ],
-      "weaknesses": [
-        "对线期被对位压制：10分钟经济 2,660，比对位 斯拉克（4,210金）落后 1,550 金，放任对面核心无压力出山。",
-        "核心发育严重滞后：1号位 幻影长矛手 全场 GPM 仅有 340（补刀 163，仅超越 5% 同英雄），中期刷钱路线完全断档。",
-        "典型高占经低产出：拿了全队 29.7% 的总经济（13,048金），全场却只打出 5,752 伤害（仅占全队 10.3%），每1块钱经济只换来 0.44 点伤害。",
-        "推塔效率极其低下：1号位打了 27 分钟，建筑伤害仅有 0（占全队 0.0%），赢团后严重缺乏逼塔拿盾意识。",
-        "假腿焊死细节缺失：整场 27 分钟比赛里，假腿属性总共只切换了 1 次，刷野放技能从不切智力省蓝、挨打也不切力量撑血。"
-      ],
-      "improvements": [
-        "1号位在 12~24 分钟大招冷却或关键装未齐时，少在河道跟辅助抱团干瞪眼，先把危险线推过河道再回头收远古，保证 GPM 稳定在 600+。",
-        "幻影长矛手 做出核心装的第一波强势期必须主动跟雾找节奏，别等队友正面4打5溃败了再去边缘OB蹭两下伤害。",
-        "团战减员敌方核心后，第一优先级永远是推线拆塔或控肉山，切忌全员回头刷自家野区白白浪费赢团窗口。"
-      ],
-      "trash_talk": "@eu só quero paz 独占全队30%的钱就打了10%的伤害，这13,048金币哪怕直接撒在泉水里听个响都比在你身上响！",
-      "praise_talk": "@eu só quero paz 稳健上分拼图！幻影长矛手 交出 0/5/4（参战率 31% · 伤害 5,752），关键团战从不掉链子！",
-      "blame_share_pct": 29.1,
-      "contrib_share_pct": 4.4,
-      "contrib_rank": 5,
-      "contrib_tier": "🥂 凯旋功臣 · 团队拼图",
       "pings_count": 13,
       "lane_id": 1,
       "benchmarks_list": [
@@ -33423,7 +33430,7 @@
       "ability_targets_list": [
         {
           "ability_key": "phantom_lancer_spirit_lance",
-          "ability_zh": "猴子专属技能",
+          "ability_zh": "灵魂之矛(T)",
           "total_casts": 17,
           "targets": [
             {
@@ -33475,9 +33482,75 @@
           }
         ],
         "special_insights": [
-          "核心技能释放与转化：《猴子专属技能》释放 21 次(命中 17 人次 / 2,162 伤害)；《猴子专属技能》释放 13 次(命中 0 人次 / 0 伤害)；《猴子专属技能》释放 12 次(命中 0 人次 / 0 伤害)。"
+          "核心技能释放与转化：《灵魂之矛(T)》释放 21 次(命中 17 人次 / 2,162 伤害)；《幻影冲锋》释放 13 次(命中 0 人次 / 0 伤害)；《神行百变(W躲技能)》释放 12 次(命中 0 人次 / 0 伤害)。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 2660,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 0,
+        "lane_deaths": 1,
+        "mid_gold_gain": 5212,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 17.4,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 0,
+        "mid_deaths": 4,
+        "late_gold_gain": 1399,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 38.8,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [
+          {
+            "time": 1031,
+            "time_str": "17:11",
+            "killer": "拉比克"
+          }
+        ],
+        "low_dmg_tfs": [
+          "19:26–20:09(仅337伤/阵亡)",
+          "23:07–23:59(仅660伤/阵亡)"
+        ]
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 15,
+        "damage": 15,
+        "tempo": 34,
+        "push": 10,
+        "utility": 30,
+        "survival": 54
+      },
+      "rating_score": 4.0,
+      "rating_tier": "D 头号战犯",
+      "mvp_score": 35.0,
+      "raw_blame_points": 122.0,
+      "raw_contrib_points": 13.8,
+      "strengths": [
+        "全场核心技能施放统计：灵魂之矛(T) 21次 / 幻影冲锋 13次 / 神行百变(W躲技能) 12次（操作频率 85 APM）。"
+      ],
+      "weaknesses": [
+        "对线期被对位压制：10分钟经济 2,660，比对位 斯拉克（4,210金）落后 1,550 金，放任对面核心无压力出山。",
+        "核心发育严重滞后：1号位 幻影长矛手 全场 GPM 仅有 340（补刀 163，仅超越 5% 同英雄），中期刷钱路线完全断档。",
+        "典型高占经低产出：拿了全队 29.7% 的总经济（13,048金），全场却只打出 5,752 伤害（仅占全队 10.3%），每1块钱经济只换来 0.44 点伤害。",
+        "假腿焊死细节缺失：整场 27 分钟比赛里，假腿属性总共只切换了 1 次，刷野放技能从不切智力省蓝、挨打也不切力量撑血。"
+      ],
+      "improvements": [
+        "1号位在 12~24 分钟大招冷却或关键装未齐时，少在河道跟辅助抱团干瞪眼，先把危险线推过河道再回头收远古，保证 GPM 稳定在 600+。",
+        "幻影长矛手 做出核心装的第一波强势期必须主动跟雾找节奏，别等队友正面4打5溃败了再去边缘OB蹭两下伤害。"
+      ],
+      "trash_talk": "@eu só quero paz 独占全队30%的钱就打了10%的伤害，这13,048金币哪怕直接撒在泉水里听个响都比在你身上响！",
+      "praise_talk": "@eu só quero paz 稳健上分拼图！幻影长矛手 交出 0/5/4（参战率 31% · 伤害 5,752），关键团战从不掉链子！",
+      "blame_share_pct": 28.9,
+      "contrib_share_pct": 3.2,
+      "contrib_rank": 5,
+      "contrib_tier": "🥂 凯旋功臣 · 团队拼图"
     },
     {
       "player_slot": 4,
@@ -33844,25 +33917,25 @@
       "ability_uses_rich": [
         {
           "key": "zuus_arc_lightning",
-          "zh_name": "宙斯专属技能",
+          "zh_name": "弧形闪电(C)",
           "count": 114,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/zuus_arc_lightning.png"
         },
         {
           "key": "zuus_lightning_bolt",
-          "zh_name": "宙斯专属技能",
+          "zh_name": "雷击(G真视劈)",
           "count": 57,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/zuus_lightning_bolt.png"
         },
         {
           "key": "zuus_heavenly_jump",
-          "zh_name": "宙斯专属技能",
+          "zh_name": "神圣一跃(跳)",
           "count": 11,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/zuus_heavenly_jump.png"
         },
         {
           "key": "zuus_thundergods_wrath",
-          "zh_name": "宙斯专属技能",
+          "zh_name": "雷神之怒(大招全图雷)",
           "count": 5,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/zuus_thundergods_wrath.png"
         }
@@ -33887,56 +33960,6 @@
         "全队输出支柱 (46%)",
         "高参战率 (77%)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 4652,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 4,
-        "lane_deaths": 1,
-        "mid_gold_gain": 6381,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 21.3,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 3,
-        "mid_deaths": 3,
-        "late_gold_gain": 190,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 1,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 1,
-        "tf_zero_dmg_gold_farmed": 188
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 46,
-        "damage": 90,
-        "tempo": 77,
-        "push": 14,
-        "utility": 45,
-        "survival": 54
-      },
-      "rating_score": 6.4,
-      "rating_tier": "D 头号战犯",
-      "mvp_score": 63.9,
-      "raw_blame_points": 38.1,
-      "raw_contrib_points": 159.7,
-      "strengths": [
-        "输出转化率极高：吃下全队 22.5% 经济（9,862金），狂轰 25,806 英雄伤害（占全队 46.1%，超越全网 63% 同英雄）。",
-        "全场核心技能施放统计：宙斯专属技能 114次 / 宙斯专属技能 57次 / 宙斯专属技能 11次 / 宙斯专属技能 5次（操作频率 139 APM）。"
-      ],
-      "weaknesses": [
-        "整体发挥稳健：全场仅阵亡 5 次（读秒 3分22秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
-      ],
-      "improvements": [
-        "保持当前 宙斯 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
-      ],
-      "trash_talk": "@Zapty 这把 8/5/2 标准打卡下班，背锅占比 38 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@Zapty 这把 宙斯 火力全开狂轰 25,806 伤害（包揽全队 46% 输出）+ 0 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
-      "blame_share_pct": 8.2,
-      "contrib_share_pct": 51.1,
-      "contrib_rank": 1,
-      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 2,
       "lane_id": 2,
       "benchmarks_list": [
@@ -33993,7 +34016,7 @@
       "ability_targets_list": [
         {
           "ability_key": "zuus_lightning_bolt",
-          "ability_zh": "宙斯专属技能",
+          "ability_zh": "雷击(G真视劈)",
           "total_casts": 28,
           "targets": [
             {
@@ -34035,7 +34058,7 @@
         },
         {
           "ability_key": "zuus_arc_lightning",
-          "ability_zh": "宙斯专属技能",
+          "ability_zh": "弧形闪电(C)",
           "total_casts": 45,
           "targets": [
             {
@@ -34087,11 +34110,87 @@
         "stuns_sec": 13.2,
         "ult_audits": [],
         "skillshot_audits": [],
-        "headline_badges": [],
+        "headline_badges": [
+          {
+            "text": "🔥 炮台换伤: 5,161伤/死(46.1%)",
+            "tone": "good"
+          }
+        ],
         "special_insights": [
-          "核心技能释放与转化：《宙斯专属技能》释放 114 次(命中 53 人次 / 5,340 伤害)；《宙斯专属技能》释放 57 次(命中 41 人次 / 8,580 伤害)；《宙斯专属技能》释放 11 次(命中 11 人次 / 562 伤害)。"
+          "🔥《炮台核心死前灌伤兑现》审计：作为无逃生脆皮炮台，虽然全场阵亡 5 次，但每次倒下前均把技能与平A倾泻干净——全场轰出 25,806 点英雄伤害（占全队 46.1%，平均每次阵亡换取 5,161 点高额伤害）！"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 4652,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 4,
+        "lane_deaths": 1,
+        "mid_gold_gain": 6381,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 21.3,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 3,
+        "mid_deaths": 3,
+        "late_gold_gain": 190,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 5.3,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 0,
+        "late_deaths": 1,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 1,
+        "tf_zero_dmg_gold_farmed": 188,
+        "solo_pickoffs": [
+          {
+            "time": 629,
+            "time_str": "10:29",
+            "killer": "拉比克"
+          },
+          {
+            "time": 1277,
+            "time_str": "21:17",
+            "killer": "拉比克"
+          },
+          {
+            "time": 1508,
+            "time_str": "25:08",
+            "killer": "瘟疫法师"
+          }
+        ],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 46,
+        "damage": 90,
+        "tempo": 77,
+        "push": 14,
+        "utility": 45,
+        "survival": 60
+      },
+      "rating_score": 8.6,
+      "rating_tier": "A 尽力真核",
+      "mvp_score": 85.9,
+      "raw_blame_points": 8.0,
+      "raw_contrib_points": 273.7,
+      "strengths": [
+        "炮台火力彻底兑现（哪怕阵亡也把输出灌满）：前期对线 10m 交出 48正/7反（4,652 金，压制对位 拉比克 +1,045 金）打出优势；作为无位移脆皮高爆发核心，全场狂甩 弧形闪电(C)×114 + 雷击(G真视劈)×57 + 神圣一跃(跳)×11，轰出 **25,806 点英雄伤害（占全队 46.1%，平均每次阵亡前倾泻 5,161 点高额伤害，25m+ 后期再轰 0 伤害）**外加 13.2 秒硬控！在团队前排与救人匮乏的逆境下，真正做到了倒下前把每一滴输出倾泻干净。",
+        "输出转化率极高：吃下全队 22.5% 经济（9,862金），狂轰 25,806 英雄伤害（占全队 46.1%，超越全网 63% 同英雄）。",
+        "全场核心技能施放统计：弧形闪电(C) 114次 / 雷击(G真视劈) 57次 / 神圣一跃(跳) 11次 / 雷神之怒(大招全图雷) 5次（操作频率 139 APM）。"
+      ],
+      "weaknesses": [
+        "绝境生存与留人反制博弈：作为己方唯一能威胁敌方后排的高爆发炮台，被敌方切入与点控重点针对阵亡 5 次（其中被敌方【拉比克】单人提款 4 次）；在队友缺乏魔晶救人与前排支点的局面下，单靠 BKB 结束后仍容易被敌方框人/留人技能链限制走位。"
+      ],
+      "improvements": [
+        "宙斯 本局输出职责已超额完成（场均每死换 5,161 伤害）；若从团队可能性出发进一步提升残局容错，面对敌方先知发芽框人/帕克梦境缠绕/屠夫钩时，可将一件纯法系输出装替换为【飓风长戟（大推推）】（既能推开自己秒解发芽树圈与缠绕、拉开切入距离，又能白嫖超远射程点人）。"
+      ],
+      "trash_talk": "@Zapty 这把宙斯对线压爆中路、全场狂灌 25,806 伤害（每死换 5,161 伤）已经把炮台火力彻底拉满了，唯一遗憾是没早点出把大推推自救解先知发芽，纯纯被前排碎蛋和小鱼人不出魔晶坑惨的悲情炮台！",
+      "praise_talk": "@Zapty 这把 宙斯 炮台火力全开狂轰 25,806 伤害（占全队 46.1% 输出，场均每死换 5,161 伤害），真正做到倒下前把所有技能灌满！",
+      "blame_share_pct": 1.9,
+      "contrib_share_pct": 64.2,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神"
     },
     {
       "player_slot": 0,
@@ -34504,57 +34603,6 @@
         "tower_damage": 0.2754863813229572
       },
       "tags": [],
-      "phase_telemetry": {
-        "lane_gold_gain": 2802,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 1,
-        "lane_deaths": 3,
-        "mid_gold_gain": 9497,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 31.7,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 1,
-        "mid_deaths": 5,
-        "late_gold_gain": 670,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 1,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 42,
-        "damage": 43,
-        "tempo": 65,
-        "push": 15,
-        "utility": 65,
-        "survival": 32
-      },
-      "rating_score": 4.9,
-      "rating_tier": "D 头号战犯",
-      "mvp_score": 48.7,
-      "raw_blame_points": 99.8,
-      "raw_contrib_points": 59.8,
-      "strengths": [
-        "全场核心技能施放统计：酸性喷雾 47次 / 不稳定化合物(摇摇乐) 29次 / 化学狂暴(大招) 12次（操作频率 335 APM）。"
-      ],
-      "weaknesses": [
-        "对线期被对位压制：10分钟经济 2,802，比对位 瘟疫法师（3,569金）落后 767 金，放任对面核心无压力出山。",
-        "头铁拒出 BKB：面对敌方 118 秒强控，全场阵亡 9 次直到终局都没出黑皇杖，团战容错率极低。",
-        "高频阵亡提款机：全场阵亡 **9 次**（其中被敌方【斯拉克】单人提款 3 次），黑白屏幕读秒长达 **4分05秒（占整局比赛 14.9% 时间）**，光阵亡直接扣掉 **1,048 金币**！"
-      ],
-      "improvements": [
-        "核心位阵亡 9 次严重拖垮发育节奏：当敌方 斯拉克 在小地图消失时，立刻放弃无视野兵线退回安全区。"
-      ],
-      "trash_talk": "@TRADE COMMENDS 一局死 9 次，看了整整 4分5秒 黑白电视（其中被敌方【斯拉克】单人提款 3 次），光死就扣了 1048 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@TRADE COMMENDS 铁血三号位！炼金术士 参战率 54% 肉身扛下 34,365 伤害（全队 31%）外加 30.3 秒硬控，完美团战发动机！",
-      "blame_share_pct": 21.4,
-      "contrib_share_pct": 19.1,
-      "contrib_rank": 2,
-      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 6,
       "lane_id": 3,
       "benchmarks_list": [
@@ -34672,7 +34720,85 @@
         "special_insights": [
           "全场累计对敌方英雄造成 30.3 秒硬控眩晕（平均每分钟控制 1.11 秒）。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 2802,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 1,
+        "lane_deaths": 3,
+        "mid_gold_gain": 9497,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 31.7,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 1,
+        "mid_deaths": 5,
+        "late_gold_gain": 670,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 18.6,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 0,
+        "late_deaths": 1,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [
+          {
+            "time": 1089,
+            "time_str": "18:09",
+            "killer": "拉比克"
+          },
+          {
+            "time": 823,
+            "time_str": "13:43",
+            "killer": "斯拉克"
+          },
+          {
+            "time": 1311,
+            "time_str": "21:51",
+            "killer": "剧毒术士"
+          },
+          {
+            "time": 1638,
+            "time_str": "27:18",
+            "killer": "拉比克"
+          }
+        ],
+        "low_dmg_tfs": [
+          "19:26–20:09(仅410伤)"
+        ]
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 42,
+        "damage": 43,
+        "tempo": 65,
+        "push": 15,
+        "utility": 65,
+        "survival": 32
+      },
+      "rating_score": 4.9,
+      "rating_tier": "D 头号战犯",
+      "mvp_score": 48.7,
+      "raw_blame_points": 99.8,
+      "raw_contrib_points": 59.8,
+      "strengths": [
+        "全场核心技能施放统计：酸性喷雾 47次 / 不稳定化合物(摇摇乐) 29次 / 化学狂暴(大招) 12次（操作频率 335 APM）。"
+      ],
+      "weaknesses": [
+        "对线期被对位压制：10分钟经济 2,802，比对位 瘟疫法师（3,569金）落后 767 金，放任对面核心无压力出山。",
+        "头铁拒出 BKB：面对敌方 118 秒强控，全场阵亡 9 次直到终局都没出黑皇杖，团战容错率极低。",
+        "高频阵亡提款机：全场阵亡 **9 次**（其中被敌方【斯拉克】单人提款 3 次），黑白屏幕读秒长达 **4分05秒（占整局比赛 14.9% 时间）**，光阵亡直接扣掉 **1,048 金币**！"
+      ],
+      "improvements": [
+        "核心位阵亡 9 次严重拖垮发育节奏：当敌方 斯拉克 在小地图消失时，立刻放弃无视野兵线退回安全区。"
+      ],
+      "trash_talk": "@TRADE COMMENDS 一局死 9 次，看了整整 4分5秒 黑白电视（其中被敌方【斯拉克】单人提款 3 次），光死就扣了 1048 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@TRADE COMMENDS 铁血三号位！炼金术士 参战率 54% 肉身扛下 34,365 伤害（全队 31%）外加 30.3 秒硬控，完美团战发动机！",
+      "blame_share_pct": 23.6,
+      "contrib_share_pct": 14.0,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂"
     },
     {
       "player_slot": 2,
@@ -34997,13 +35123,13 @@
       "ability_uses_rich": [
         {
           "key": "treant_natures_grasp",
-          "zh_name": "大树专属技能",
+          "zh_name": "自然卷握(藤蔓)",
           "count": 39,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/treant_natures_grasp.png"
         },
         {
           "key": "treant_living_armor",
-          "zh_name": "大树专属技能",
+          "zh_name": "活体护甲(修塔奶甲)",
           "count": 16,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/treant_living_armor.png"
         },
@@ -35015,7 +35141,7 @@
         },
         {
           "key": "treant_overgrowth",
-          "zh_name": "大树专属技能",
+          "zh_name": "疯狂生长(大招捆)",
           "count": 2,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/treant_overgrowth.png"
         }
@@ -35037,55 +35163,6 @@
         "tower_damage": 0.32299270072992703
       },
       "tags": [],
-      "phase_telemetry": {
-        "lane_gold_gain": 1462,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 0,
-        "lane_deaths": 2,
-        "mid_gold_gain": 5545,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 18.5,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 1,
-        "mid_deaths": 4,
-        "late_gold_gain": 1153,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 60,
-        "damage": 17,
-        "tempo": 29,
-        "push": 49,
-        "utility": 71,
-        "survival": 60
-      },
-      "rating_score": 4.7,
-      "rating_tier": "D 头号战犯",
-      "mvp_score": 46.5,
-      "raw_blame_points": 65.5,
-      "raw_contrib_points": 51.4,
-      "strengths": [
-        "全场核心技能施放统计：大树专属技能 39次 / 大树专属技能 16次 / 大树专属技能 9次 / 大树专属技能 2次（操作频率 127 APM）。"
-      ],
-      "weaknesses": [
-        "线上保人失职：同路 炼金术士 10分钟才补了 30 刀（2,802金），前5分钟封野、拉野消兵和消耗都没打出来。"
-      ],
-      "improvements": [
-        "保持当前 树精卫士 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
-      ],
-      "trash_talk": "@† FeNix†G 这把 1/6/1 标准打卡下班，背锅占比 66 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@† FeNix†G 最佳幕后功臣！树精卫士 全场点亮 4 假 9 真视野 + 参战率 15%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 14.0,
-      "contrib_share_pct": 16.4,
-      "contrib_rank": 3,
-      "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
       "pings_count": 1,
       "lane_id": 1,
       "benchmarks_list": [
@@ -35142,7 +35219,7 @@
       "ability_targets_list": [
         {
           "ability_key": "treant_living_armor",
-          "ability_zh": "大树专属技能",
+          "ability_zh": "活体护甲(修塔奶甲)",
           "total_casts": 10,
           "targets": [
             {
@@ -35200,7 +35277,68 @@
         "special_insights": [
           "全场累计对敌方英雄造成 18.5 秒硬控眩晕（平均每分钟控制 0.68 秒）。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 1462,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 0,
+        "lane_deaths": 2,
+        "mid_gold_gain": 5545,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 18.5,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 1,
+        "mid_deaths": 4,
+        "late_gold_gain": 1153,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 32.0,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [
+          {
+            "time": 640,
+            "time_str": "10:40",
+            "killer": "斯拉克"
+          }
+        ],
+        "low_dmg_tfs": [
+          "19:26–20:09(仅0伤/阵亡)"
+        ]
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 60,
+        "damage": 17,
+        "tempo": 29,
+        "push": 49,
+        "utility": 71,
+        "survival": 60
+      },
+      "rating_score": 4.7,
+      "rating_tier": "D 头号战犯",
+      "mvp_score": 46.5,
+      "raw_blame_points": 65.5,
+      "raw_contrib_points": 51.4,
+      "strengths": [
+        "全场核心技能施放统计：自然卷握(藤蔓) 39次 / 活体护甲(修塔奶甲) 16次 / 大树专属技能 9次 / 疯狂生长(大招捆) 2次（操作频率 127 APM）。"
+      ],
+      "weaknesses": [
+        "线上保人失职：同路 炼金术士 10分钟才补了 30 刀（2,802金），前5分钟封野、拉野消兵和消耗都没打出来。"
+      ],
+      "improvements": [
+        "保持当前 树精卫士 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@† FeNix†G 这把 1/6/1 标准打卡下班，背锅占比 66 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@† FeNix†G 最佳幕后功臣！树精卫士 全场点亮 4 假 9 真视野 + 参战率 15%，吃草挤奶把大哥伺候得明明白白！",
+      "blame_share_pct": 15.5,
+      "contrib_share_pct": 12.0,
+      "contrib_rank": 3,
+      "contrib_tier": "👁️ 视野统帅 · 幕后功臣"
     },
     {
       "player_slot": 1,
@@ -35590,59 +35728,6 @@
         "阵亡偏多 (13死)",
         "视野偏少 (1假/0真)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 2783,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 2,
-        "lane_deaths": 4,
-        "mid_gold_gain": 3357,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 11.2,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 0,
-        "mid_deaths": 8,
-        "late_gold_gain": 190,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 1,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 31,
-        "damage": 35,
-        "tempo": 63,
-        "push": 41,
-        "utility": 40,
-        "survival": 19
-      },
-      "rating_score": 4.1,
-      "rating_tier": "D 头号战犯",
-      "mvp_score": 41.0,
-      "raw_blame_points": 127.5,
-      "raw_contrib_points": 28.0,
-      "strengths": [
-        "全场核心技能施放统计：锚击 54次 / 巨浪 34次 / 海妖外壳 6次 / 死水锚链(魔晶拴人) 4次（操作频率 336 APM）。"
-      ],
-      "weaknesses": [
-        "视野严重断供：身为 5号位 27 分钟仅插了 1 假眼 / 0 真眼，导致全队中后期在野区毫无视野掩护。",
-        "零买雾消极节奏：全场购买诡计之雾次数为 0，缺乏主动拉人开雾抓单意识。",
-        "高频阵亡提款机：全场阵亡 **13 次**（其中被敌方【瘟疫法师】单人提款 6 次），黑白屏幕读秒长达 **6分02秒（占整局比赛 22.1% 时间）**，光阵亡直接扣掉 **1,215 金币**！"
-      ],
-      "improvements": [
-        "辅助位必须保证商店观察者守卫不积压，进攻期将眼位推进至敌方主野区高台与肉山坑口。",
-        "核心摸出跳刀或BKB的第一时间，4/5号位应立刻买雾发信号召集队友抓敌方落单打钱核。",
-        "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 瘟疫法师 无限提款。"
-      ],
-      "trash_talk": "@步步` 一局死 13 次，看了整整 6分2秒 黑白电视（其中被敌方【瘟疫法师】单人提款 6 次），光死就扣了 1215 块钱，对面大哥给你磕一个不过分吧？",
-      "praise_talk": "@步步` 虽然这把 潮汐猎人 阵亡 13 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
-      "blame_share_pct": 27.3,
-      "contrib_share_pct": 9.0,
-      "contrib_rank": 4,
-      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 24,
       "lane_id": 3,
       "benchmarks_list": [
@@ -35815,7 +35900,90 @@
         "special_insights": [
           "大招中规中矩：全场释放 3 次，累计 5 人次（场均每大 1.67 人次，伤害 636）；但在 14:42–15:42, 19:26–20:09 团战中未放出大招即阵亡！"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 2783,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 2,
+        "lane_deaths": 4,
+        "mid_gold_gain": 3357,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 11.2,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 0,
+        "mid_deaths": 8,
+        "late_gold_gain": 190,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 5.3,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 0,
+        "late_deaths": 1,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [
+          {
+            "time": 797,
+            "time_str": "13:17",
+            "killer": "瘟疫法师"
+          },
+          {
+            "time": 1068,
+            "time_str": "17:48",
+            "killer": "瘟疫法师"
+          },
+          {
+            "time": 1340,
+            "time_str": "22:20",
+            "killer": "瘟疫法师"
+          },
+          {
+            "time": 600,
+            "time_str": "10:00",
+            "killer": "暗影萨满"
+          },
+          {
+            "time": 1545,
+            "time_str": "25:45",
+            "killer": "瘟疫法师"
+          }
+        ],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 31,
+        "damage": 35,
+        "tempo": 63,
+        "push": 41,
+        "utility": 40,
+        "survival": 19
+      },
+      "rating_score": 4.1,
+      "rating_tier": "D 头号战犯",
+      "mvp_score": 41.0,
+      "raw_blame_points": 127.5,
+      "raw_contrib_points": 28.0,
+      "strengths": [
+        "全场核心技能施放统计：锚击 54次 / 巨浪 34次 / 海妖外壳 6次 / 死水锚链(魔晶拴人) 4次（操作频率 336 APM）。"
+      ],
+      "weaknesses": [
+        "视野严重断供：身为 5号位 27 分钟仅插了 1 假眼 / 0 真眼，导致全队中后期在野区毫无视野掩护。",
+        "零买雾消极节奏：全场购买诡计之雾次数为 0，缺乏主动拉人开雾抓单意识。",
+        "高频阵亡提款机：全场阵亡 **13 次**（其中被敌方【瘟疫法师】单人提款 6 次），黑白屏幕读秒长达 **6分02秒（占整局比赛 22.1% 时间）**，光阵亡直接扣掉 **1,215 金币**！"
+      ],
+      "improvements": [
+        "辅助位必须保证商店观察者守卫不积压，进攻期将眼位推进至敌方主野区高台与肉山坑口。",
+        "核心摸出跳刀或BKB的第一时间，4/5号位应立刻买雾发信号召集队友抓敌方落单打钱核。",
+        "脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 瘟疫法师 无限提款。"
+      ],
+      "trash_talk": "@步步` 一局死 13 次，看了整整 6分2秒 黑白电视（其中被敌方【瘟疫法师】单人提款 6 次），光死就扣了 1215 块钱，对面大哥给你磕一个不过分吧？",
+      "praise_talk": "@步步` 虽然这把 潮汐猎人 阵亡 13 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！",
+      "blame_share_pct": 30.1,
+      "contrib_share_pct": 6.6,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏"
     }
   ],
   "dire_pos_1_to_5": [
@@ -36177,25 +36345,25 @@
       "ability_uses_rich": [
         {
           "key": "slark_dark_pact",
-          "zh_name": "小鱼人专属技能",
+          "zh_name": "黑暗契约(C解状态)",
           "count": 73,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/slark_dark_pact.png"
         },
         {
           "key": "slark_pounce",
-          "zh_name": "小鱼人专属技能",
+          "zh_name": "突袭(跳留人)",
           "count": 44,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/slark_pounce.png"
         },
         {
           "key": "slark_shadow_dance",
-          "zh_name": "小鱼人专属技能",
+          "zh_name": "暗影之舞(大招黑雾)",
           "count": 7,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/slark_shadow_dance.png"
         },
         {
           "key": "slark_depth_shroud",
-          "zh_name": "小鱼人专属技能",
+          "zh_name": "深海劫掠(魔晶救人黑雾)",
           "count": 2,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/slark_depth_shroud.png"
         }
@@ -36220,58 +36388,6 @@
         "极少阵亡 (3死)",
         "推进核心 (塔伤9,944)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 4210,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 4,
-        "lane_deaths": 3,
-        "mid_gold_gain": 10266,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 24.1,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 4,
-        "mid_deaths": 0,
-        "late_gold_gain": 2060,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 75,
-        "damage": 46,
-        "tempo": 59,
-        "push": 99,
-        "utility": 36,
-        "survival": 72
-      },
-      "rating_score": 8.2,
-      "rating_tier": "A 功勋大腿",
-      "mvp_score": 81.5,
-      "raw_blame_points": 42.5,
-      "raw_contrib_points": 215.4,
-      "strengths": [
-        "对线基本功扎实：前10分钟交出 50正/4反（10m经济 4,210，效率 85%），10分钟净压对位 幻影长矛手 1550 金，撑起了前中期基础节奏。",
-        "推进终结能力极强：单人打出 9,944 建筑伤害（包揽全队 33% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
-        "操作细节拉满：全场高频切假腿 57 次（APM 303），属性转换极其细腻。",
-        "全场核心技能施放统计：小鱼人专属技能 73次 / 小鱼人专属技能 44次 / 小鱼人专属技能 7次 / 小鱼人专属技能 2次（操作频率 303 APM）。"
-      ],
-      "weaknesses": [
-        "典型高占经低产出：拿了全队 23.8% 的总经济（16,421金），全场却只打出 13,270 伤害（仅占全队 16.1%），每1块钱经济只换来 0.81 点伤害。"
-      ],
-      "improvements": [
-        "斯拉克 做出核心装的第一波强势期必须主动跟雾找节奏，别等队友正面4打5溃败了再去边缘OB蹭两下伤害。"
-      ],
-      "trash_talk": "@Duuw 独占全队24%的钱就打了16%的伤害，这16,421金币哪怕直接撒在泉水里听个响都比在你身上响！",
-      "praise_talk": "@Duuw 推塔终结机器！斯拉克 单人拆出 9,944 建筑伤害（占全队 33%），赢团推塔一气呵成！",
-      "blame_share_pct": 27.9,
-      "contrib_share_pct": 19.4,
-      "contrib_rank": 3,
-      "contrib_tier": "🛡️ 定海神针 · 中坚功臣",
       "pings_count": 19,
       "lane_id": 3,
       "benchmarks_list": [
@@ -36326,6 +36442,15 @@
         }
       ],
       "ability_targets_list": [],
+      "slark_mechanism_audit": {
+        "has_shard": true,
+        "shroud_casts": 2,
+        "dance_casts": 7,
+        "pact_casts": 73,
+        "pounce_casts": 44,
+        "pounce_hits": 0,
+        "low_dmg_tfs": []
+      },
       "hero_execution_audit": {
         "pos": 1,
         "player_slot": 130,
@@ -36336,17 +36461,96 @@
         "personaname": "Duuw",
         "stuns_sec": 0.0,
         "ult_audits": [],
-        "skillshot_audits": [],
+        "skillshot_audits": [
+          {
+            "ability_zh": "突袭 (小鱼跳锁人)",
+            "casts": 44,
+            "hits": 0,
+            "hit_pct": 0.0,
+            "damage": 0,
+            "grade": "bad",
+            "detail": "《突袭 (小鱼跳锁人)》全场施放 44 次，命中敌方英雄 0 人次（有效命中比 0.0%，造成 0 伤害），大量技能落空或仅用于清兵逃生。"
+          }
+        ],
         "headline_badges": [
+          {
+            "text": "深海劫掠(魔晶): 2次救人",
+            "tone": "good"
+          },
+          {
+            "text": "暗影之舞(大招): 7次",
+            "tone": "warn"
+          },
+          {
+            "text": "突袭: 44放/0中(0.0%)",
+            "tone": "bad"
+          },
           {
             "text": "🗺️ 顶级带线牵制(塔伤9944)",
             "tone": "good"
           }
         ],
         "special_insights": [
-          "核心技能释放与转化：《小鱼人专属技能》释放 73 次(命中 939 人次 / 3,941 伤害)；《小鱼人专属技能》释放 44 次(命中 0 人次 / 0 伤害)；《小鱼人专属技能》释放 7 次(命中 0 人次 / 0 伤害)。"
+          "🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》7 次、《黑暗契约》73 次、《突袭》44 放 0 中；魔晶《深海劫掠》释放 2 次掩护队友。",
+          "《突袭 (小鱼跳锁人)》全场施放 44 次，命中敌方英雄 0 人次（有效命中比 0.0%，造成 0 伤害），大量技能落空或仅用于清兵逃生。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 4210,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 4,
+        "lane_deaths": 3,
+        "mid_gold_gain": 10266,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 24.1,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 4,
+        "mid_deaths": 0,
+        "late_gold_gain": 2060,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 21.7,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 75,
+        "damage": 46,
+        "tempo": 59,
+        "push": 99,
+        "utility": 36,
+        "survival": 72
+      },
+      "rating_score": 8.2,
+      "rating_tier": "A 功勋大腿",
+      "mvp_score": 81.5,
+      "raw_blame_points": 42.5,
+      "raw_contrib_points": 215.4,
+      "strengths": [
+        "对线基本功扎实：前10分钟交出 50正/4反（10m经济 4,210，效率 85%），10分钟净压对位 幻影长矛手 1550 金，撑起了前中期基础节奏。",
+        "推进终结能力极强：单人打出 9,944 建筑伤害（包揽全队 33% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
+        "操作细节拉满：全场高频切假腿 57 次（APM 303），属性转换极其细腻。",
+        "全场核心技能施放统计：黑暗契约(C解状态) 73次 / 突袭(跳留人) 44次 / 暗影之舞(大招黑雾) 7次 / 深海劫掠(魔晶救人黑雾) 2次（操作频率 303 APM）。"
+      ],
+      "weaknesses": [
+        "典型高占经低产出：拿了全队 23.8% 的总经济（16,421金），全场却只打出 13,270 伤害（仅占全队 16.1%），每1块钱经济只换来 0.81 点伤害。"
+      ],
+      "improvements": [
+        "斯拉克 做出核心装的第一波强势期必须主动跟雾找节奏，别等队友正面4打5溃败了再去边缘OB蹭两下伤害。"
+      ],
+      "trash_talk": "@Duuw 独占全队24%的钱就打了16%的伤害，这16,421金币哪怕直接撒在泉水里听个响都比在你身上响！",
+      "praise_talk": "@Duuw 推塔终结机器！斯拉克 单人拆出 9,944 建筑伤害（占全队 33%），赢团推塔一气呵成！",
+      "blame_share_pct": 27.9,
+      "contrib_share_pct": 19.4,
+      "contrib_rank": 3,
+      "contrib_tier": "🛡️ 定海神针 · 中坚功臣"
     },
     {
       "player_slot": 128,
@@ -36759,19 +36963,19 @@
         },
         {
           "key": "zuus_arc_lightning",
-          "zh_name": "宙斯专属技能",
+          "zh_name": "弧形闪电(C)",
           "count": 11,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/zuus_arc_lightning.png"
         },
         {
           "key": "zuus_lightning_bolt",
-          "zh_name": "宙斯专属技能",
+          "zh_name": "雷击(G真视劈)",
           "count": 9,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/zuus_lightning_bolt.png"
         },
         {
           "key": "treant_natures_grasp",
-          "zh_name": "大树专属技能",
+          "zh_name": "自然卷握(藤蔓)",
           "count": 9,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/treant_natures_grasp.png"
         },
@@ -36789,13 +36993,13 @@
         },
         {
           "key": "phantom_lancer_doppelwalk",
-          "zh_name": "猴子专属技能",
+          "zh_name": "神行百变(W躲技能)",
           "count": 1,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/phantom_lancer_doppelwalk.png"
         },
         {
           "key": "zuus_thundergods_wrath",
-          "zh_name": "宙斯专属技能",
+          "zh_name": "雷神之怒(大招全图雷)",
           "count": 1,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/zuus_thundergods_wrath.png"
         }
@@ -36819,58 +37023,6 @@
       "tags": [
         "GPM同英雄前7%"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 3607,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 1,
-        "lane_deaths": 1,
-        "mid_gold_gain": 9347,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 21.9,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 8,
-        "mid_deaths": 2,
-        "late_gold_gain": 1696,
-        "late_hdmg_gain": 0,
-        "late_kills": 1,
-        "late_deaths": 0,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 93,
-        "damage": 88,
-        "tempo": 59,
-        "push": 87,
-        "utility": 65,
-        "survival": 63
-      },
-      "rating_score": 8.7,
-      "rating_tier": "S 凯旋真核",
-      "mvp_score": 86.6,
-      "raw_blame_points": 15.4,
-      "raw_contrib_points": 275.6,
-      "strengths": [
-        "对线基本功扎实：前10分钟交出 51正/2反（10m经济 3,607，效率 72%），撑起了前中期基础节奏。",
-        "刷钱效率拉满：GPM 563 / XPM 609（全场补刀 136），发育速度超越了全网 94% 的同英雄玩家。",
-        "输出转化率极高：吃下全队 21.6% 经济（14,904金），狂轰 23,916 英雄伤害（占全队 29.0%，超越全网 92% 同英雄）。",
-        "全场核心技能施放统计：弱化能流 68次 / 隔空取物(举) 19次 / 技能窃取(偷) 15次 / 宙斯专属技能 11次（操作频率 303 APM）。"
-      ],
-      "weaknesses": [
-        "整体发挥稳健：全场仅阵亡 4 次（读秒 2分03秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
-      ],
-      "improvements": [
-        "保持当前 拉比克 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
-      ],
-      "trash_talk": "@inno 这把 10/4/12 标准打卡下班，背锅占比 15 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@inno 这把 拉比克 火力全开狂轰 23,916 伤害（包揽全队 29% 输出）+ 3,696 拆塔，真大腿带飞全场，兄弟们排队敬茶！",
-      "blame_share_pct": 10.1,
-      "contrib_share_pct": 24.8,
-      "contrib_rank": 1,
-      "contrib_tier": "👑 头号首功 · 擎天真神",
       "pings_count": 2,
       "lane_id": 2,
       "benchmarks_list": [
@@ -37095,10 +37247,77 @@
           }
         ],
         "special_insights": [
-          "《技能窃取》实战审计：全场大招偷取 15 次，成功用出的敌方核心技能包括：偷《宙斯专属技能》放 11 次(中7人/744伤)、偷《宙斯专属技能》放 9 次(中6人/1,971伤)、偷《大树专属技能》放 9 次(中119人/2,034伤)、偷《不稳定化合物(摇摇乐)》放 5 次、偷《》放 2 次(中5人/272伤)！",
+          "《技能窃取》实战审计：全场大招偷取 15 次，成功用出的敌方核心技能包括：偷《弧形闪电(C)》放 11 次(中7人/744伤)、偷《雷击(G真视劈)》放 9 次(中6人/1,971伤)、偷《自然卷握(藤蔓)》放 9 次(中119人/2,034伤)、偷《不稳定化合物(摇摇乐)》放 5 次、偷《》放 2 次(中5人/272伤)！",
           "全场累计对敌方英雄造成 40.6 秒硬控眩晕（平均每分钟控制 1.49 秒）。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 3607,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 1,
+        "lane_deaths": 1,
+        "mid_gold_gain": 9347,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 21.9,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 8,
+        "mid_deaths": 2,
+        "late_gold_gain": 1696,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 17.9,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 1,
+        "late_deaths": 0,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [
+          {
+            "time": 781,
+            "time_str": "13:01",
+            "killer": "宙斯"
+          },
+          {
+            "time": 1034,
+            "time_str": "17:14",
+            "killer": "宙斯"
+          }
+        ],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 93,
+        "damage": 88,
+        "tempo": 59,
+        "push": 87,
+        "utility": 65,
+        "survival": 63
+      },
+      "rating_score": 8.7,
+      "rating_tier": "S 凯旋真核",
+      "mvp_score": 86.6,
+      "raw_blame_points": 15.4,
+      "raw_contrib_points": 275.6,
+      "strengths": [
+        "对线基本功扎实：前10分钟交出 51正/2反（10m经济 3,607，效率 72%），撑起了前中期基础节奏。",
+        "刷钱效率拉满：GPM 563 / XPM 609（全场补刀 136），发育速度超越了全网 94% 的同英雄玩家。",
+        "输出转化率极高：吃下全队 21.6% 经济（14,904金），狂轰 23,916 英雄伤害（占全队 29.0%，超越全网 92% 同英雄）。",
+        "全场核心技能施放统计：弱化能流 68次 / 隔空取物(举) 19次 / 技能窃取(偷) 15次 / 弧形闪电(C) 11次（操作频率 303 APM）。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 4 次（读秒 2分03秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 拉比克 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@inno 这把 10/4/12 标准打卡下班，背锅占比 15 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@inno 这把 拉比克 炮台火力全开狂轰 23,916 伤害（占全队 29.0% 输出，场均每死换 5,979 伤害），真正做到倒下前把所有技能灌满！",
+      "blame_share_pct": 10.1,
+      "contrib_share_pct": 24.8,
+      "contrib_rank": 1,
+      "contrib_tier": "👑 头号首功 · 擎天真神"
     },
     {
       "player_slot": 129,
@@ -37404,25 +37623,25 @@
       "ability_uses_rich": [
         {
           "key": "necrolyte_death_pulse",
-          "zh_name": "死灵法专属技能",
+          "zh_name": "死亡脉冲(奶/毒)",
           "count": 100,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/necrolyte_death_pulse.png"
         },
         {
           "key": "necrolyte_death_seeker",
-          "zh_name": "死灵法专属技能",
+          "zh_name": "魔晶寻死冲刺",
           "count": 8,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/necrolyte_death_seeker.png"
         },
         {
           "key": "necrolyte_ghost_shroud",
-          "zh_name": "死灵法专属技能",
+          "zh_name": "幽冥护罩(绿杖技能)",
           "count": 6,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/necrolyte_ghost_shroud.png"
         },
         {
           "key": "necrolyte_reapers_scythe",
-          "zh_name": "死灵法专属技能",
+          "zh_name": "死神镰刀(大招斩)",
           "count": 6,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/necrolyte_reapers_scythe.png"
         }
@@ -37446,56 +37665,6 @@
       "tags": [
         "极少阵亡 (1死)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 3569,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 1,
-        "lane_deaths": 1,
-        "mid_gold_gain": 9775,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 22.9,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 7,
-        "mid_deaths": 0,
-        "late_gold_gain": 2431,
-        "late_hdmg_gain": 0,
-        "late_kills": 2,
-        "late_deaths": 0,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 60,
-        "damage": 56,
-        "tempo": 52,
-        "push": 97,
-        "utility": 55,
-        "survival": 88
-      },
-      "rating_score": 7.6,
-      "rating_tier": "A 功勋大腿",
-      "mvp_score": 75.7,
-      "raw_blame_points": 26.3,
-      "raw_contrib_points": 204.5,
-      "strengths": [
-        "对线基本功扎实：前10分钟交出 46正/20反（10m经济 3,569，效率 72%），10分钟净压对位 炼金术士 767 金，撑起了前中期基础节奏。",
-        "全场核心技能施放统计：死灵法专属技能 100次 / 死灵法专属技能 8次 / 死灵法专属技能 6次 / 死灵法专属技能 6次（操作频率 143 APM）。"
-      ],
-      "weaknesses": [
-        "整体发挥稳健：全场仅阵亡 1 次（读秒 0分26秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
-      ],
-      "improvements": [
-        "保持当前 瘟疫法师 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
-      ],
-      "trash_talk": "@【X】【O】【X】【O】 这把 10/1/9 标准打卡下班，背锅占比 26 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@【X】【O】【X】【O】 铁血三号位！瘟疫法师 参战率 50% 肉身扛下 25,904 伤害（全队 25%）外加 7.5 秒硬控，完美团战发动机！",
-      "blame_share_pct": 17.2,
-      "contrib_share_pct": 18.5,
-      "contrib_rank": 4,
-      "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
       "pings_count": 3,
       "lane_id": 1,
       "benchmarks_list": [
@@ -37552,7 +37721,7 @@
       "ability_targets_list": [
         {
           "ability_key": "necrolyte_death_seeker",
-          "ability_zh": "死灵法专属技能",
+          "ability_zh": "魔晶寻死冲刺",
           "total_casts": 7,
           "targets": [
             {
@@ -37594,7 +37763,7 @@
         },
         {
           "ability_key": "necrolyte_reapers_scythe",
-          "ability_zh": "死灵法专属技能",
+          "ability_zh": "死神镰刀(大招斩)",
           "total_casts": 5,
           "targets": [
             {
@@ -37639,9 +37808,63 @@
           }
         ],
         "special_insights": [
-          "核心技能释放与转化：《死灵法专属技能》释放 100 次(命中 44 人次 / 6,700 伤害)；《死灵法专属技能》释放 8 次(命中 0 人次 / 0 伤害)；《死灵法专属技能》释放 6 次(命中 0 人次 / 0 伤害)。"
+          "核心技能释放与转化：《死亡脉冲(奶/毒)》释放 100 次(命中 44 人次 / 6,700 伤害)；《魔晶寻死冲刺》释放 8 次(命中 0 人次 / 0 伤害)；《幽冥护罩(绿杖技能)》释放 6 次(命中 0 人次 / 0 伤害)。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 3569,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 1,
+        "lane_deaths": 1,
+        "mid_gold_gain": 9775,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 22.9,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 7,
+        "mid_deaths": 0,
+        "late_gold_gain": 2431,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 25.6,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 2,
+        "late_deaths": 0,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 60,
+        "damage": 56,
+        "tempo": 52,
+        "push": 97,
+        "utility": 55,
+        "survival": 88
+      },
+      "rating_score": 7.6,
+      "rating_tier": "A 功勋大腿",
+      "mvp_score": 75.7,
+      "raw_blame_points": 26.3,
+      "raw_contrib_points": 204.5,
+      "strengths": [
+        "对线基本功扎实：前10分钟交出 46正/20反（10m经济 3,569，效率 72%），10分钟净压对位 炼金术士 767 金，撑起了前中期基础节奏。",
+        "全场核心技能施放统计：死亡脉冲(奶/毒) 100次 / 魔晶寻死冲刺 8次 / 幽冥护罩(绿杖技能) 6次 / 死神镰刀(大招斩) 6次（操作频率 143 APM）。"
+      ],
+      "weaknesses": [
+        "整体发挥稳健：全场仅阵亡 1 次（读秒 0分26秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+      ],
+      "improvements": [
+        "保持当前 瘟疫法师 的刷钱与参战节奏，继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+      ],
+      "trash_talk": "@【X】【O】【X】【O】 这把 10/1/9 标准打卡下班，背锅占比 26 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@【X】【O】【X】【O】 铁血三号位！瘟疫法师 参战率 50% 肉身扛下 25,904 伤害（全队 25%）外加 7.5 秒硬控，完美团战发动机！",
+      "blame_share_pct": 17.2,
+      "contrib_share_pct": 18.5,
+      "contrib_rank": 4,
+      "contrib_tier": "🔥 黄金拼图 · 稳健节奏"
     },
     {
       "player_slot": 132,
@@ -37997,19 +38220,19 @@
       "ability_uses_rich": [
         {
           "key": "venomancer_plague_ward",
-          "zh_name": "剧毒专属技能",
+          "zh_name": "瘟疫守卫(蛇棒)",
           "count": 178,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/venomancer_plague_ward.png"
         },
         {
           "key": "venomancer_venomous_gale",
-          "zh_name": "剧毒专属技能",
+          "zh_name": "瘴气(一技能喷)",
           "count": 16,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/venomancer_venomous_gale.png"
         },
         {
           "key": "venomancer_noxious_plague",
-          "zh_name": "剧毒专属技能",
+          "zh_name": "恶性瘟疫(大招传染剧毒)",
           "count": 6,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/venomancer_noxious_plague.png"
         },
@@ -38039,55 +38262,6 @@
       "tags": [
         "极少阵亡 (2死)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 2233,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 2,
-        "lane_deaths": 1,
-        "mid_gold_gain": 7883,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 18.5,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 3,
-        "mid_deaths": 1,
-        "late_gold_gain": 1881,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 81,
-        "damage": 33,
-        "tempo": 54,
-        "push": 89,
-        "utility": 61,
-        "survival": 83
-      },
-      "rating_score": 7.2,
-      "rating_tier": "B+ 稳健功臣",
-      "mvp_score": 71.6,
-      "raw_blame_points": 40.4,
-      "raw_contrib_points": 163.4,
-      "strengths": [
-        "全场核心技能施放统计：剧毒专属技能 178次 / 剧毒专属技能 16次 / 剧毒专属技能 6次 / 剧毒专属技能 3次（操作频率 142 APM）。"
-      ],
-      "weaknesses": [
-        "零买雾消极节奏：全场购买诡计之雾次数为 0，缺乏主动拉人开雾抓单意识。"
-      ],
-      "improvements": [
-        "核心摸出跳刀或BKB的第一时间，4/5号位应立刻买雾发信号召集队友抓敌方落单打钱核。"
-      ],
-      "trash_talk": "@JeaNiToS 这把 5/2/15 标准打卡下班，背锅占比 40 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@JeaNiToS 推塔终结机器！剧毒术士 单人拆出 5,878 建筑伤害（占全队 19%），赢团推塔一气呵成！",
-      "blame_share_pct": 26.5,
-      "contrib_share_pct": 14.8,
-      "contrib_rank": 5,
-      "contrib_tier": "🥂 凯旋功臣 · 团队拼图",
       "pings_count": 9,
       "lane_id": 1,
       "benchmarks_list": [
@@ -38165,7 +38339,7 @@
         },
         {
           "ability_key": "venomancer_noxious_plague",
-          "ability_zh": "剧毒专属技能",
+          "ability_zh": "恶性瘟疫(大招传染剧毒)",
           "total_casts": 6,
           "targets": [
             {
@@ -38194,13 +38368,97 @@
         "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/venomancer.png",
         "personaname": "JeaNiToS",
         "stuns_sec": 0.0,
-        "ult_audits": [],
+        "ult_audits": [
+          {
+            "ability_key": "venomancer_noxious_plague",
+            "ability_zh": "恶性瘟疫 (剧毒传染大)",
+            "casts": 6,
+            "hits": 170,
+            "avg_hits": 28.33,
+            "unit_label": "人次",
+            "damage": 2420,
+            "tf_casts_count": 3,
+            "tf_casts_waves": [
+              "14:42–15:42(×1)",
+              "19:26–20:09(×1)",
+              "23:07–23:59(×1)"
+            ],
+            "tf_held_death_count": 0,
+            "tf_held_death_waves": [],
+            "victim_breakdown": [
+              "炼金术士(1,208伤)",
+              "宙斯(610伤)",
+              "幻影长矛手(366伤)",
+              "潮汐猎人(236伤)"
+            ],
+            "grade": "good",
+            "verdict_text": "大招质量极高！全场释放 6 次，累计打出 170 人次（场均每大 28.33 人次，造成 2,420 点伤害），在 14:42–15:42(×1), 19:26–20:09(×1), 23:07–23:59(×1) 团战完美兑现；主要灌伤目标：炼金术士(1,208伤)、宙斯(610伤)、幻影长矛手(366伤)。"
+          }
+        ],
         "skillshot_audits": [],
-        "headline_badges": [],
+        "headline_badges": [
+          {
+            "text": "恶性瘟疫 (剧毒传染大): 6放/170人次(均28.33)",
+            "tone": "good"
+          }
+        ],
         "special_insights": [
-          "核心技能释放与转化：《剧毒专属技能》释放 178 次(命中 0 人次 / 0 伤害)；《剧毒专属技能》释放 16 次(命中 50 人次 / 1,235 伤害)；《剧毒专属技能》释放 6 次(命中 170 人次 / 2,420 伤害)。"
+          "大招质量极高！全场释放 6 次，累计打出 170 人次（场均每大 28.33 人次，造成 2,420 点伤害），在 14:42–15:42(×1), 19:26–20:09(×1), 23:07–23:59(×1) 团战完美兑现；主要灌伤目标：炼金术士(1,208伤)、宙斯(610伤)、幻影长矛手(366伤)。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 2233,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 2,
+        "lane_deaths": 1,
+        "mid_gold_gain": 7883,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 18.5,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 3,
+        "mid_deaths": 1,
+        "late_gold_gain": 1881,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 19.8,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [],
+        "low_dmg_tfs": []
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 81,
+        "damage": 33,
+        "tempo": 54,
+        "push": 89,
+        "utility": 61,
+        "survival": 83
+      },
+      "rating_score": 7.2,
+      "rating_tier": "B+ 稳健功臣",
+      "mvp_score": 71.6,
+      "raw_blame_points": 40.4,
+      "raw_contrib_points": 163.4,
+      "strengths": [
+        "全场核心技能施放统计：瘟疫守卫(蛇棒) 178次 / 瘴气(一技能喷) 16次 / 恶性瘟疫(大招传染剧毒) 6次 / 剧毒专属技能 3次（操作频率 142 APM）。"
+      ],
+      "weaknesses": [
+        "零买雾消极节奏：全场购买诡计之雾次数为 0，缺乏主动拉人开雾抓单意识。"
+      ],
+      "improvements": [
+        "核心摸出跳刀或BKB的第一时间，4/5号位应立刻买雾发信号召集队友抓敌方落单打钱核。"
+      ],
+      "trash_talk": "@JeaNiToS 这把 5/2/15 标准打卡下班，背锅占比 40 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@JeaNiToS 推塔终结机器！剧毒术士 单人拆出 5,878 建筑伤害（占全队 19%），赢团推塔一气呵成！",
+      "blame_share_pct": 26.5,
+      "contrib_share_pct": 14.8,
+      "contrib_rank": 5,
+      "contrib_tier": "🥂 凯旋功臣 · 团队拼图"
     },
     {
       "player_slot": 131,
@@ -38515,25 +38773,25 @@
       "ability_uses_rich": [
         {
           "key": "shadow_shaman_shackles",
-          "zh_name": "小Y专属技能",
+          "zh_name": "枷锁(拉)",
           "count": 19,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/shadow_shaman_shackles.png"
         },
         {
           "key": "shadow_shaman_ether_shock",
-          "zh_name": "小Y专属技能",
+          "zh_name": "苍穹震击(叉电)",
           "count": 12,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/shadow_shaman_ether_shock.png"
         },
         {
           "key": "shadow_shaman_voodoo",
-          "zh_name": "小Y专属技能",
+          "zh_name": "妖术(变羊)",
           "count": 12,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/shadow_shaman_voodoo.png"
         },
         {
           "key": "shadow_shaman_mass_serpent_ward",
-          "zh_name": "小Y专属技能",
+          "zh_name": "群蛇守卫(大招蛇棒)",
           "count": 7,
           "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/shadow_shaman_mass_serpent_ward.png"
         }
@@ -38557,56 +38815,6 @@
       "tags": [
         "极少阵亡 (3死)"
       ],
-      "phase_telemetry": {
-        "lane_gold_gain": 2325,
-        "lane_hdmg_gain": 0,
-        "lane_hdmg_share_pct": 0.0,
-        "lane_kills": 3,
-        "lane_deaths": 1,
-        "mid_gold_gain": 5362,
-        "mid_hdmg_gain": 0,
-        "mid_gold_share_pct": 12.6,
-        "mid_hdmg_share_pct": 0.0,
-        "mid_kills": 2,
-        "mid_deaths": 2,
-        "late_gold_gain": 1427,
-        "late_hdmg_gain": 0,
-        "late_kills": 0,
-        "late_deaths": 0,
-        "tf_total_count": 5,
-        "tf_zero_dmg_afk_count": 0,
-        "tf_zero_dmg_gold_farmed": 0
-      },
-      "is_afk_farmer": false,
-      "radar": {
-        "farm": 62,
-        "damage": 53,
-        "tempo": 72,
-        "push": 77,
-        "utility": 78,
-        "survival": 77
-      },
-      "rating_score": 8.4,
-      "rating_tier": "S 凯旋真核",
-      "mvp_score": 84.1,
-      "raw_blame_points": 27.9,
-      "raw_contrib_points": 248.7,
-      "strengths": [
-        "保人拉野到位：对线期把同路核心 斯拉克 保出了 10分钟 50 刀 / 4,210 经济的顺畅开局。",
-        "全场核心技能施放统计：小Y专属技能 19次 / 小Y专属技能 12次 / 小Y专属技能 12次 / 小Y专属技能 7次（操作频率 126 APM）。"
-      ],
-      "weaknesses": [
-        "零买雾消极节奏：全场购买诡计之雾次数为 0，缺乏主动拉人开雾抓单意识。"
-      ],
-      "improvements": [
-        "核心摸出跳刀或BKB的第一时间，4/5号位应立刻买雾发信号召集队友抓敌方落单打钱核。"
-      ],
-      "trash_talk": "@EL REVOLUCIONARIO →666 这把 5/3/18 标准打卡下班，背锅占比 28 点，赢了跟着笑，输了怪队友！",
-      "praise_talk": "@EL REVOLUCIONARIO →666 推塔终结机器！暗影萨满 单人拆出 5,596 建筑伤害（占全队 19%），赢团推塔一气呵成！",
-      "blame_share_pct": 18.3,
-      "contrib_share_pct": 22.5,
-      "contrib_rank": 2,
-      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "pings_count": 10,
       "lane_id": 3,
       "benchmarks_list": [
@@ -38663,7 +38871,7 @@
       "ability_targets_list": [
         {
           "ability_key": "shadow_shaman_shackles",
-          "ability_zh": "小Y专属技能",
+          "ability_zh": "枷锁(拉)",
           "total_casts": 19,
           "targets": [
             {
@@ -38698,7 +38906,7 @@
         },
         {
           "ability_key": "shadow_shaman_ether_shock",
-          "ability_zh": "小Y专属技能",
+          "ability_zh": "苍穹震击(叉电)",
           "total_casts": 9,
           "targets": [
             {
@@ -38726,7 +38934,7 @@
         },
         {
           "ability_key": "shadow_shaman_voodoo",
-          "ability_zh": "小Y专属技能",
+          "ability_zh": "妖术(变羊)",
           "total_casts": 12,
           "targets": [
             {
@@ -38773,7 +38981,69 @@
         "special_insights": [
           "全场累计对敌方英雄造成 70.1 秒硬控眩晕（平均每分钟控制 2.57 秒）。"
         ]
-      }
+      },
+      "phase_telemetry": {
+        "lane_gold_gain": 2325,
+        "lane_hdmg_gain": 0,
+        "lane_hdmg_share_pct": 0.0,
+        "lane_kills": 3,
+        "lane_deaths": 1,
+        "mid_gold_gain": 5362,
+        "mid_hdmg_gain": 0,
+        "mid_gold_share_pct": 12.6,
+        "mid_hdmg_share_pct": 0.0,
+        "mid_kills": 2,
+        "mid_deaths": 2,
+        "late_gold_gain": 1427,
+        "late_hdmg_gain": 0,
+        "late_gold_share_pct": 15.0,
+        "late_hdmg_share_pct": 0.0,
+        "late_kills": 0,
+        "late_deaths": 0,
+        "tf_total_count": 5,
+        "tf_zero_dmg_afk_count": 0,
+        "tf_zero_dmg_gold_farmed": 0,
+        "solo_pickoffs": [
+          {
+            "time": 775,
+            "time_str": "12:55",
+            "killer": "宙斯"
+          }
+        ],
+        "low_dmg_tfs": [
+          "19:26–20:09(仅282伤)"
+        ]
+      },
+      "is_afk_farmer": false,
+      "radar": {
+        "farm": 62,
+        "damage": 53,
+        "tempo": 72,
+        "push": 77,
+        "utility": 78,
+        "survival": 77
+      },
+      "rating_score": 8.4,
+      "rating_tier": "S 凯旋真核",
+      "mvp_score": 84.1,
+      "raw_blame_points": 27.9,
+      "raw_contrib_points": 248.7,
+      "strengths": [
+        "保人拉野到位：对线期把同路核心 斯拉克 保出了 10分钟 50 刀 / 4,210 经济的顺畅开局。",
+        "全场核心技能施放统计：枷锁(拉) 19次 / 苍穹震击(叉电) 12次 / 妖术(变羊) 12次 / 群蛇守卫(大招蛇棒) 7次（操作频率 126 APM）。"
+      ],
+      "weaknesses": [
+        "零买雾消极节奏：全场购买诡计之雾次数为 0，缺乏主动拉人开雾抓单意识。"
+      ],
+      "improvements": [
+        "核心摸出跳刀或BKB的第一时间，4/5号位应立刻买雾发信号召集队友抓敌方落单打钱核。"
+      ],
+      "trash_talk": "@EL REVOLUCIONARIO →666 这把 5/3/18 标准打卡下班，背锅占比 28 点，赢了跟着笑，输了怪队友！",
+      "praise_talk": "@EL REVOLUCIONARIO →666 推塔终结机器！暗影萨满 单人拆出 5,596 建筑伤害（占全队 19%），赢团推塔一气呵成！",
+      "blame_share_pct": 18.3,
+      "contrib_share_pct": 22.5,
+      "contrib_rank": 2,
+      "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂"
     }
   ]
 }

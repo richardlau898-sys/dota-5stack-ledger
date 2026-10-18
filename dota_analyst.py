@@ -1351,10 +1351,26 @@ def analyze_match_data(
     mid_by_slot = {pp["slot"]: pp for pp in (mid_ph.get("players") or [])}
     late_by_slot = {pp["slot"]: pp for pp in (late_ph.get("players") or [])}
 
+    from draft_and_phase_coach import (
+        build_deep_replay_forensics,
+        build_draft_and_combo_analysis,
+        enrich_phases_with_evaluations,
+    )
+
+    deep_forensics = build_deep_replay_forensics(
+        match=match,
+        radiant_players=radiant_report,
+        dire_players=dire_report,
+        hero_const_by_id=hero_map,
+        npc_to_hid=npc_to_id,
+    )
+
     for side_key, team_list in (("radiant", radiant_report), ("dire", dire_report)):
         team_mid_gold = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("gold_gain") or 0) for tp in team_list) or 1
         team_mid_hdmg = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
         team_lane_hdmg = sum(max(0, lane_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
+        team_late_gold = sum(max(0, late_by_slot.get(tp["player_slot"], {}).get("gold_gain") or 0) for tp in team_list) or 1
+        team_late_hdmg = sum(max(0, late_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
 
         for tp in team_list:
             slot = tp["player_slot"]
@@ -1365,6 +1381,7 @@ def analyze_match_data(
 
             tf_afk_cnt = 0
             tf_afk_gold = 0
+            low_dmg_tfs = []
             for tf in key_teamfights:
                 own_deaths = tf.get("rad_deaths", 0) if side_key == "radiant" else tf.get("dire_deaths", 0)
                 own_parts = [pt for pt in (tf.get("participants") or []) if pt.get("side") == side_key]
@@ -1378,10 +1395,37 @@ def analyze_match_data(
                         tf_afk_cnt += 1
                         if my_gold > 0:
                             tf_afk_gold += my_gold
+                    elif tf.get("start_sec", 0) >= 900 and (my_dmg < 450 or (my_deaths > 0 and my_dmg < 850)):
+                        low_dmg_tfs.append(f"{tf.get('time_range', '')}(仅{my_dmg}伤{'/阵亡' if my_deaths > 0 else ''})")
+
+            # 统计 10:00 之后在非正面团战窗口「单带/收线/落单无故被抓」的时间点与击杀者
+            all_post_lane_deaths = (mp.get("deaths_events") or []) + (ltp.get("deaths_events") or [])
+            solo_pickoffs = []
+            for de in all_post_lane_deaths:
+                dt_sec = int(de.get("time") or 0)
+                if dt_sec < 600:
+                    continue
+                in_big_tf = False
+                for rtf in teamfights_raw:
+                    s_tf = int(rtf.get("start") or 0)
+                    e_tf = int(rtf.get("end") or 0)
+                    tf_pl = rtf.get("players") or []
+                    tot_d = sum(int(x.get("deaths") or 0) for x in tf_pl[:10])
+                    if (s_tf - 10) <= dt_sec <= (e_tf + 10) and tot_d >= 3:
+                        in_big_tf = True
+                        break
+                if not in_big_tf:
+                    solo_pickoffs.append({
+                        "time": dt_sec,
+                        "time_str": de.get("time_str") or format_duration(dt_sec),
+                        "killer": de.get("killer") or "敌方",
+                    })
 
             m_gold = max(0, mp.get("gold_gain") or 0)
             m_hdmg = max(0, mp.get("hero_damage_gain") or 0)
             l_hdmg = max(0, lp.get("hero_damage_gain") or 0)
+            lt_gold = max(0, ltp.get("gold_gain") or 0)
+            lt_hdmg = max(0, ltp.get("hero_damage_gain") or 0)
             tp["phase_telemetry"] = {
                 "lane_gold_gain": lp.get("gold_gain") or 0,
                 "lane_hdmg_gain": l_hdmg,
@@ -1394,13 +1438,17 @@ def analyze_match_data(
                 "mid_hdmg_share_pct": round(m_hdmg / team_mid_hdmg * 100.0, 1) if is_parsed else 20.0,
                 "mid_kills": mp.get("kills_count") or 0,
                 "mid_deaths": mp.get("deaths_count") or 0,
-                "late_gold_gain": ltp.get("gold_gain") or 0,
-                "late_hdmg_gain": ltp.get("hero_damage_gain") or 0,
+                "late_gold_gain": lt_gold,
+                "late_hdmg_gain": lt_hdmg,
+                "late_gold_share_pct": round(lt_gold / team_late_gold * 100.0, 1) if is_parsed else 20.0,
+                "late_hdmg_share_pct": round(lt_hdmg / team_late_hdmg * 100.0, 1) if is_parsed else 20.0,
                 "late_kills": ltp.get("kills_count") or 0,
                 "late_deaths": ltp.get("deaths_count") or 0,
                 "tf_total_count": len(key_teamfights),
                 "tf_zero_dmg_afk_count": tf_afk_cnt,
                 "tf_zero_dmg_gold_farmed": tf_afk_gold,
+                "solo_pickoffs": solo_pickoffs,
+                "low_dmg_tfs": low_dmg_tfs,
             }
 
     is_turbo = (match.get("game_mode") == 23)
@@ -1426,20 +1474,6 @@ def analyze_match_data(
     )
 
     grok_coaching = load_cached_grok_coaching(match_id, focus_side_resolved)
-
-    from draft_and_phase_coach import (
-        build_deep_replay_forensics,
-        build_draft_and_combo_analysis,
-        enrich_phases_with_evaluations,
-    )
-
-    deep_forensics = build_deep_replay_forensics(
-        match=match,
-        radiant_players=radiant_report,
-        dire_players=dire_report,
-        hero_const_by_id=hero_map,
-        npc_to_hid=npc_to_id,
-    )
 
     phases_data = enrich_phases_with_evaluations(
         phases_data=phases_data,
