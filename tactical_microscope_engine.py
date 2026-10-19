@@ -848,11 +848,19 @@ def build_tactical_microscope(
                 p_key = "lane" if ot < 600 else ("mid" if ot < 1500 else "late")
                 phase_posture[p_key][post] += 1
 
-                # 匹配消失事件计算寿命
-                matched_l = [
-                    ol for ol in o_left
-                    if ol.get("key") == okey and int(ol.get("time") or 0) >= ot
-                ]
+                # 匹配消失事件计算寿命（优先使用 ehandle 精确匹配，回退 key 匹配）
+                o_ehandle = o.get("ehandle")
+                matched_l = []
+                if o_ehandle is not None:
+                    matched_l = [
+                        ol for ol in o_left
+                        if ol.get("ehandle") == o_ehandle and int(ol.get("time") or 0) >= ot
+                    ]
+                if not matched_l:
+                    matched_l = [
+                        ol for ol in o_left
+                        if ol.get("key") == okey and int(ol.get("time") or 0) >= ot
+                    ]
                 if matched_l:
                     ol = matched_l[0]
                     lt = int(ol.get("time") or ot)
@@ -886,6 +894,7 @@ def build_tactical_microscope(
 
                 obs_records.append({
                     "time_sec": ot,
+                    "end_sec": ot + lifespan,
                     "time_str": fmt_mmss(ot),
                     "planter_hero": fp["hero_short_zh"],
                     "planter_pos": fp["pos"],
@@ -981,17 +990,83 @@ def build_tactical_microscope(
                     "comment": f"在【{c['zone_zh']} ({c['cx']:.0f},{c['cy']:.0f})】同一个眼位重复插了 {len(c['items'])} 颗眼（{obs_c}假/{sen_c}真，时间：{times_s}），属于典型的固定高台死磕！",
                 })
 
+        # 提取「✨ 满时长封神眼 (god_tier_wards)」与「🌑 全图黑灯瞎火真空期 (blackout_windows)」
+        god_tier_wards: List[Dict[str, Any]] = []
+        for r in obs_records:
+            if (not r.get("was_dewarded")) and r.get("lifespan_sec", 0) >= 330 and r.get("posture") in ("aggressive", "river_roshan"):
+                god_tier_wards.append({
+                    "time_str": r["time_str"],
+                    "planter_hero": r["planter_hero"],
+                    "pos": r["planter_pos"],
+                    "zone_zh": r["zone_zh"],
+                    "posture_zh": r["posture_zh"],
+                    "lifespan_sec": r["lifespan_sec"],
+                })
+
+        blackout_windows: List[Dict[str, Any]] = []
+        own_deaths_all: List[Tuple[int, str]] = []
+        for fp in own_players:
+            rp_d = raw_by_slot.get(int(fp["player_slot"]), {})
+            for de in rp_d.get("deaths_log") or []:
+                own_deaths_all.append((int(de.get("time") or 0), fp["hero_short_zh"]))
+
+        max_min_chk = max(10, int(duration_sec // 60))
+        cur_bo = None
+        for m_idx in range(8, max_min_chk):
+            t_start = m_idx * 60
+            t_end = (m_idx + 1) * 60
+            t_mid = t_start + 30
+            alive_obs = sum(1 for r in obs_records if r["time_sec"] <= t_mid <= r.get("end_sec", r["time_sec"] + 360))
+            victims_in_m = [h for dt, h in own_deaths_all if t_start <= dt < t_end]
+            if alive_obs <= 1:
+                if cur_bo is None:
+                    cur_bo = {
+                        "start_min": m_idx,
+                        "end_min": m_idx + 1,
+                        "min_obs": alive_obs,
+                        "victims": list(victims_in_m),
+                    }
+                else:
+                    cur_bo["end_min"] = m_idx + 1
+                    cur_bo["min_obs"] = min(cur_bo["min_obs"], alive_obs)
+                    cur_bo["victims"].extend(victims_in_m)
+            else:
+                if cur_bo is not None:
+                    if len(cur_bo["victims"]) >= 1 or (cur_bo["end_min"] - cur_bo["start_min"]) >= 2:
+                        v_uniq = list(dict.fromkeys(cur_bo["victims"]))
+                        tr_str = f"{cur_bo['start_min']:02d}:00–{cur_bo['end_min']:02d}:00"
+                        blackout_windows.append({
+                            "time_range": tr_str,
+                            "duration_min": cur_bo["end_min"] - cur_bo["start_min"],
+                            "min_obs": cur_bo["min_obs"],
+                            "deaths_cnt": len(cur_bo["victims"]),
+                            "victims_str": "、".join(v_uniq[:4]) if v_uniq else "幸未死人",
+                            "detail": (
+                                f"🌑 {tr_str}（持续 {cur_bo['end_min'] - cur_bo['start_min']} 分钟全图仅 {cur_bo['min_obs']} 颗假眼黑灯瞎火期）："
+                                + (f"视野断档直接导致本方【{'、'.join(v_uniq[:4])}】累计阵亡 {len(cur_bo['victims'])} 人次！" if v_uniq else "全图黑灯瞎火，所幸未被抓死。")
+                            ),
+                        })
+                    cur_bo = None
+        if cur_bo is not None and (len(cur_bo["victims"]) >= 1 or (cur_bo["end_min"] - cur_bo["start_min"]) >= 2):
+            v_uniq = list(dict.fromkeys(cur_bo["victims"]))
+            tr_str = f"{cur_bo['start_min']:02d}:00–{cur_bo['end_min']:02d}:00"
+            blackout_windows.append({
+                "time_range": tr_str,
+                "duration_min": cur_bo["end_min"] - cur_bo["start_min"],
+                "min_obs": cur_bo["min_obs"],
+                "deaths_cnt": len(cur_bo["victims"]),
+                "victims_str": "、".join(v_uniq[:4]) if v_uniq else "幸未死人",
+                "detail": (
+                    f"🌑 {tr_str}（持续 {cur_bo['end_min'] - cur_bo['start_min']} 分钟全图仅 {cur_bo['min_obs']} 颗假眼黑灯瞎火期）："
+                    + (f"视野断档直接导致本方【{'、'.join(v_uniq[:4])}】累计阵亡 {len(cur_bo['victims'])} 人次！" if v_uniq else "全图黑灯瞎火，所幸未被抓死。")
+                ),
+            })
+
         total_obs = max(1, len(obs_records))
         agg_pct = round(posture_counts["aggressive"] / total_obs * 100, 1)
         riv_pct = round(posture_counts["river_roshan"] / total_obs * 100, 1)
         def_pct = round(posture_counts["defensive"] / total_obs * 100, 1)
         avg_team_life = int(round(sum(r["lifespan_sec"] for r in obs_records) / total_obs, 0)) if obs_records else 0
-
-        # 生成本方眼位姿态毒舌诊断结论
-        mid_agg = phase_posture["mid"]["aggressive"]
-        mid_def = phase_posture["mid"]["defensive"]
-        late_agg = phase_posture["late"]["aggressive"]
-        late_def = phase_posture["late"]["defensive"]
 
         if def_pct >= 52.0:
             posture_verdict = (
@@ -1032,7 +1107,9 @@ def build_tactical_microscope(
             "phase_posture": phase_posture,
             "posture_verdict": posture_verdict,
             "per_support_vision": per_support_vision,
-            "instant_dewards": instant_dewards[:6],
+            "instant_dewards": instant_dewards[:8],
+            "god_tier_wards": god_tier_wards[:6],
+            "blackout_windows": blackout_windows[:6],
             "cliff_spots": cliff_spots[:4],
             "obs_records": obs_records,
         }
@@ -1821,9 +1898,10 @@ def build_tactical_microscope(
 
     def analyze_side_map_space_and_pickoffs(side_key: str) -> Dict[str, Any]:
         own_players = radiant_players if side_key == "radiant" else dire_players
+        opp_players = dire_players if side_key == "radiant" else radiant_players
         is_rad = (side_key == "radiant")
 
-        # 收集我方整局假眼存活区间与坐标，用于判断死的时候是不是黑图盲区
+        # 收集我方整局假眼存活区间与坐标（优先按 ehandle 精确匹配），用于判断死的时候是不是黑图盲区
         own_obs_wards: List[Dict[str, Any]] = []
         for fp in own_players:
             rp = raw_by_slot.get(int(fp["player_slot"]), {})
@@ -1831,7 +1909,17 @@ def build_tactical_microscope(
             left_l = rp.get("obs_left_log") or []
             for idx_w, w in enumerate(obs_l):
                 t_in = int(w.get("time") or 0)
-                t_out = int(left_l[idx_w].get("time") or (t_in + 360)) if idx_w < len(left_l) else (t_in + 360)
+                w_eh = w.get("ehandle")
+                w_key = w.get("key")
+                matched_ol = []
+                if w_eh is not None:
+                    matched_ol = [ol for ol in left_l if ol.get("ehandle") == w_eh and int(ol.get("time") or 0) >= t_in]
+                if not matched_ol:
+                    matched_ol = [ol for ol in left_l if ol.get("key") == w_key and int(ol.get("time") or 0) >= t_in]
+                if matched_ol:
+                    t_out = int(matched_ol[0].get("time") or (t_in + 360))
+                else:
+                    t_out = int(left_l[idx_w].get("time") or (t_in + 360)) if idx_w < len(left_l) else (t_in + 360)
                 own_obs_wards.append({
                     "x": float(w.get("x") or 128),
                     "y": float(w.get("y") or 128),
@@ -1839,9 +1927,24 @@ def build_tactical_microscope(
                     "t_out": t_out,
                 })
 
+        # 收集敌方全队买雾/开雾时间戳，用于区分「被敌方开雾强抓」还是「敌方未开雾·纯不看小地图白给」
+        opp_smoke_times: List[int] = []
+        for op in opp_players:
+            orp = raw_by_slot.get(int(op["player_slot"]), {})
+            for pe in orp.get("purchase_log") or []:
+                if pe.get("key") == "smoke_of_deceit":
+                    opp_smoke_times.append(int(pe.get("time") or 0))
+        for tf in raw_tfs:
+            tf_pl = tf.get("players") or []
+            opp_range = range(5, 10) if is_rad else range(0, 5)
+            for j in opp_range:
+                if j < len(tf_pl) and int((tf_pl[j].get("item_uses") or {}).get("smoke_of_deceit") or 0) > 0:
+                    opp_smoke_times.append(int(tf.get("start") or 0))
+
         solo_pickoff_events: List[Dict[str, Any]] = []
         player_space_rows: List[Dict[str, Any]] = []
         total_solo_pickoffs = 0
+        total_unsmoked_blind_feeds = 0
         total_pointless_deaths = 0
 
         for fp in sorted(own_players, key=lambda x: int(x["pos"])):
@@ -1858,6 +1961,7 @@ def build_tactical_microscope(
             kp_pct = float(fp.get("kill_participation_pct") or 0.0)
 
             p_solo_cnt = 0
+            p_unsmoked_cnt = 0
             p_solo_gold_fed = 0
             p_deep_death_cnt = 0
             p_pickoff_details: List[str] = []
@@ -1935,11 +2039,20 @@ def build_tactical_microscope(
                             ((w["x"] - dx_val) ** 2 + (w["y"] - dy_val) ** 2) ** 0.5 <= 28.0
                             for w in active_wards
                         )
-                    vision_tag = (
-                        "🌑 黑图无眼盲区孤立深带"
-                        if (not has_nearby_ward and len(active_wards) <= 2)
-                        else f"👁️ 场上虽有 {len(active_wards)} 颗眼仍未警觉蹲伏"
-                    )
+                    # 检查死前 95 秒内敌方是否有开雾/买雾动作
+                    is_enemy_smoke_gank = any(-5 <= (t_sec - st) <= 95 for st in opp_smoke_times)
+                    if is_enemy_smoke_gank:
+                        gank_nature_tag = "🌫️ 敌方开雾强抓"
+                        vision_tag = f"🌫️ 敌方诡计之雾包夹（场上 {len(active_wards)} 颗眼）"
+                    else:
+                        p_unsmoked_cnt += 1
+                        total_unsmoked_blind_feeds += 1
+                        if has_nearby_ward or len(active_wards) >= 3:
+                            gank_nature_tag = "🚨 敌方未开雾 · 有眼不看小地图白给"
+                            vision_tag = f"🚨 敌方未开雾！场上明明有 {len(active_wards)} 颗假眼却不看小地图退撤"
+                        else:
+                            gank_nature_tag = "🚨 敌方未开雾 · 黑图盲区孤狼贪线"
+                            vision_tag = f"🌑 敌方未开雾！全图仅 {len(active_wards)} 颗假眼仍孤立过河深带"
 
                     # 检查死后 70 秒内是否连累团队丢塔/丢肉山
                     consequence_list = []
@@ -1979,6 +2092,8 @@ def build_tactical_microscope(
                         "personaname": fp["personaname"],
                         "zone_zh": death_zone_zh,
                         "killer_zh": killer_zh,
+                        "is_enemy_smoke_gank": is_enemy_smoke_gank,
+                        "gank_nature_tag": gank_nature_tag,
                         "vision_tag": vision_tag,
                         "gold_fed": gold_fed,
                         "time_dead": dead_s,
@@ -2068,6 +2183,7 @@ def build_tactical_microscope(
                 "jungle_farm_pct": jungle_farm_pct,
                 "tower_damage": tower_dmg,
                 "solo_pickoff_cnt": p_solo_cnt,
+                "unsmoked_blind_cnt": p_unsmoked_cnt,
                 "solo_gold_fed": p_solo_gold_fed,
                 "deep_death_cnt": p_deep_death_cnt,
                 "space_style_badge": style_badge,
@@ -2078,12 +2194,13 @@ def build_tactical_microscope(
         solo_pickoff_events.sort(key=lambda x: x["time_sec"])
         if total_solo_pickoffs <= 3:
             side_verdict = (
-                f"✓ 团队地图空间纪律严明：9 分钟后全队仅发生 {total_solo_pickoffs} 次落单被抓，"
+                f"✓ 团队地图空间纪律严明：9 分钟后全队仅发生 {total_solo_pickoffs} 次落单被抓（其中 {total_unsmoked_blind_feeds} 次敌方未开雾），"
                 f"大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。"
             )
         else:
             side_verdict = (
-                f"🚨 地图空间警报：9 分钟后全队共发生 {total_solo_pickoffs} 次【脱离团队落单带无聊线 / 盲区乱逛被抓死】！"
+                f"🚨 地图空间警报：9 分钟后全队共发生 {total_solo_pickoffs} 次【脱离团队落单带无聊线 / 盲区乱逛被抓死】"
+                f"（其中高达 {total_unsmoked_blind_feeds} 次敌方根本没开雾，纯属不看小地图贪线白给）！"
                 f"切忌在无假眼保护、无队友蹲后的情况下一个人过河道深带收线。"
             )
 
@@ -2091,7 +2208,8 @@ def build_tactical_microscope(
             "side": side_key,
             "side_verdict": side_verdict,
             "total_solo_pickoffs": total_solo_pickoffs,
-            "solo_pickoff_events": solo_pickoff_events[:10],
+            "total_unsmoked_blind_feeds": total_unsmoked_blind_feeds,
+            "solo_pickoff_events": solo_pickoff_events[:12],
             "player_space_rows": player_space_rows,
         }
 
@@ -2954,10 +3072,404 @@ def build_tactical_microscope(
             "neutral_craft_rows": neutral_craft_rows,
         }
 
+    # =========================================================================
+    # 十三、全员出装路线与「蠢装/漏出克制装/憋大件断档」处刑台 (Itemization & Counter-Build Audit)
+    # =========================================================================
+    HIGH_REGEN_HERO_IDS = {
+        36: "死灵法师(高回血/魔晶护罩)",
+        59: "哈斯卡(狂战士之血回血)",
+        93: "斯拉克(暗影之舞高回血)",
+        73: "炼金术士(化学狂暴回血)",
+        99: "钢背兽(法术吸血/高恢复)",
+        54: "噬魂鬼(盛宴吸血)",
+        58: "魅惑魔女(自然之助加血)",
+        45: "帕格纳(生命汲取)",
+        8: "主宰(治疗守卫)",
+        10: "变体精灵(属性转换/高吸血)",
+        98: "伐木机(活性护甲回血)",
+        104: "军团指挥官(勇气之霎吸血)",
+        42: "冥魂大帝(吸血光环)",
+        102: "亚巴顿(回光返照)",
+        110: "凤凰(烈日炙烤百分比回血)",
+        69: "末日使者(焦土回血)",
+    }
+
+    PASSIVE_MONSTER_HERO_IDS = {
+        99: "钢背兽(刚毛后背减伤)",
+        67: "幽鬼(折射反弹)",
+        93: "斯拉克(能量转移偷属性)",
+        44: "幻影刺客(模糊闪避/暴击)",
+        96: "半人马战行者(反击/高肉度)",
+        29: "潮汐猎人(海妖外壳解控减伤)",
+        58: "魅惑魔女(不可侵犯减攻速)",
+        49: "龙骑士(龙族血统护甲)",
+        6: "卓尔游侠(射手天赋穿透)",
+        98: "伐木机(活性护甲)",
+        47: "冥界亚龙(腐蚀皮肤魔抗)",
+        42: "冥魂大帝(本命一击)",
+        102: "亚巴顿(魔霭诅咒)",
+    }
+
+    PURGEABLE_SAVE_HERO_IDS = {
+        36: "死灵法师(幽魂护罩绿身)",
+        57: "全能骑士(物理免疫/驱散)",
+        58: "魅惑魔女(小精灵加血)",
+        45: "帕格纳(衰老虚无)",
+        21: "风行者(风步100%闪避)",
+        79: "暗影恶魔(崩裂禁锢/驱散)",
+        111: "神谕者(气运之末/救人)",
+        13: "帕克(吹风/相位转移拉扯)",
+    }
+
+    SKIP_MINOR_ITEMS = {
+        "tpscroll", "ward_observer", "ward_sentry", "smoke_of_deceit", "dust",
+        "clarity", "faerie_fire", "enchanted_mango", "tango", "flask", "blood_grenade",
+        "branches", "magic_stick", "sobi_mask", "ring_of_protection", "quelling_blade",
+        "circlet", "mantle", "gauntlets", "slippers", "robe", "belt_of_strength",
+        "band_of_elvenskin", "staff_of_wizardry", "blades_of_attack", "gloves",
+        "chainmail", "helm_of_iron_will", "broadsword", "claymore", "javelin",
+        "mithril_hammer", "ogre_axe", "blade_of_alacrity", "vitality_booster",
+        "energy_booster", "point_booster", "platemail", "talisman_of_evasion",
+        "hyperstone", "ultimate_orb", "demon_edge", "mystic_staff", "reaver", "eagle",
+        "relic", "crown", "wind_lace", "infused_raindrop", "blight_stone", "orb_of_venom",
+        "fluffy_hat", "cloak", "void_stone", "ring_of_health", "morbid_mask",
+        "voodoo_mask", "shadow_amulet", "ghost", "boots", "magic_wand", "bracer",
+        "wraith_band", "null_talisman", "soul_ring", "bottle", "orb_of_corrosion",
+        "falcon_blade", "urn_of_shadows", "buckler", "headdress", "ring_of_basilius",
+    }
+
+    def analyze_side_itemization_and_counters(side_key: str) -> Dict[str, Any]:
+        own_players = sorted(
+            radiant_players if side_key == "radiant" else dire_players,
+            key=lambda x: int(x.get("pos") or 9),
+        )
+        opp_players = sorted(
+            dire_players if side_key == "radiant" else radiant_players,
+            key=lambda x: int(x.get("pos") or 9),
+        )
+
+        # 收集双方所有买过的装备与终局装备
+        own_item_buyers: Dict[str, List[str]] = {}
+        opp_item_buyers: Dict[str, List[str]] = {}
+
+        for fp in own_players:
+            pslot = int(fp["player_slot"])
+            rp = raw_by_slot.get(pslot, {})
+            f_keys = {str(it.get("key") or "") for it in (fp.get("final_items_rich") or [])}
+            for entry in rp.get("purchase_log") or []:
+                ik = str(entry.get("key") or "")
+                if ik:
+                    f_keys.add(ik)
+            if int(rp.get("aghanims_shard") or 0) or fp.get("aghanims_shard"):
+                f_keys.add("aghanims_shard")
+            if int(rp.get("aghanims_scepter") or 0) or fp.get("aghanims_scepter"):
+                f_keys.add("ultimate_scepter")
+            for ik in f_keys:
+                own_item_buyers.setdefault(ik, []).append(f"{fp['pos']}号位{fp['hero_short_zh']}")
+
+        for op in opp_players:
+            pslot = int(op["player_slot"])
+            rp = raw_by_slot.get(pslot, {})
+            f_keys = {str(it.get("key") or "") for it in (op.get("final_items_rich") or [])}
+            for entry in rp.get("purchase_log") or []:
+                ik = str(entry.get("key") or "")
+                if ik:
+                    f_keys.add(ik)
+            for ik in f_keys:
+                opp_item_buyers.setdefault(ik, []).append(op["hero_short_zh"])
+
+        team_counter_checks: List[Dict[str, Any]] = []
+
+        # 1) 🩸 减疗/禁疗审计（克制高回血/吸血怪）
+        regen_threats = []
+        for op in opp_players:
+            ohid = int(op.get("hero_id") or 0)
+            if ohid in HIGH_REGEN_HERO_IDS:
+                regen_threats.append(HIGH_REGEN_HERO_IDS[ohid])
+        for r_item, r_zh in [("satanic", "撒旦之邪力"), ("heart", "恐鳌之心"), ("eternal_shroud", "永世法衣"), ("bloodstone", "血精石")]:
+            if opp_item_buyers.get(r_item):
+                regen_threats.append(f"{'/'.join(opp_item_buyers[r_item])}({r_zh})")
+
+        anti_heal_owners = []
+        for ah_item, ah_zh in [("spirit_vessel", "魂之灵瓮(大骨灰)"), ("skadi", "斯嘉蒂之眼(冰眼)"), ("shivas_guard", "希瓦的守护")]:
+            for buyer in own_item_buyers.get(ah_item, []):
+                anti_heal_owners.append(f"{buyer}【{ah_zh}】")
+        if any(int(fp.get("hero_id") or 0) == 68 for fp in own_players):
+            anti_heal_owners.append("远古冰魄【冰晶爆轰】")
+
+        if regen_threats:
+            if anti_heal_owners:
+                team_counter_checks.append({
+                    "category": "🩸 减疗/禁疗克制装审计",
+                    "enemy_threats": "、".join(regen_threats[:4]),
+                    "our_response": "、".join(anti_heal_owners),
+                    "grade": "good",
+                    "verdict": f"✓ 针对敌方【{'、'.join(regen_threats[:3])}】的高回血/吸血体系，本方由 {'、'.join(anti_heal_owners)} 做出减疗装应对。",
+                })
+            else:
+                team_counter_checks.append({
+                    "category": "🩸 减疗/禁疗克制装审计",
+                    "enemy_threats": "、".join(regen_threats[:4]),
+                    "our_response": "🚨 全队 0 大骨灰 / 0 冰眼 / 0 希瓦",
+                    "grade": "bad",
+                    "verdict": f"🚨 严重漏出克制装：敌方坐拥【{'、'.join(regen_threats[:3])}】强回血/吸血体系，但我方全队竟然 0 把大骨灰(魂之灵瓮)、0 把冰眼、0 把希瓦，团战白打无效伤害！",
+                })
+
+        # 2) 🗡️ 破坏被动审计（克制被动怪）
+        passive_threats = [
+            PASSIVE_MONSTER_HERO_IDS[int(op.get("hero_id") or 0)]
+            for op in opp_players
+            if int(op.get("hero_id") or 0) in PASSIVE_MONSTER_HERO_IDS
+        ]
+        break_owners = [f"{b}【白银之锋(大隐刀)】" for b in own_item_buyers.get("silver_edge", [])]
+        for fp in own_players:
+            hid_own = int(fp.get("hero_id") or 0)
+            if hid_own == 47:
+                break_owners.append(f"{fp['hero_short_zh']}【剧毒攻击/幽冥剧毒】")
+            elif hid_own == 123:
+                break_owners.append(f"{fp['hero_short_zh']}【一箭穿心破被动】")
+            elif hid_own == 79 and ("ultimate_scepter" in own_item_buyers):
+                break_owners.append(f"{fp['hero_short_zh']}【A杖邪恶净化】")
+
+        if passive_threats:
+            if break_owners:
+                team_counter_checks.append({
+                    "category": "🗡️ 破坏被动(Break)审计",
+                    "enemy_threats": "、".join(passive_threats[:4]),
+                    "our_response": "、".join(break_owners),
+                    "grade": "good",
+                    "verdict": f"✓ 针对敌方【{'、'.join(passive_threats[:3])}】的核心被动，本方配置了 {'、'.join(break_owners)} 进行破坏。",
+                })
+            else:
+                team_counter_checks.append({
+                    "category": "🗡️ 破坏被动(Break)审计",
+                    "enemy_threats": "、".join(passive_threats[:4]),
+                    "our_response": "⚠️ 全队 0 把大隐刀(白银之锋)",
+                    "grade": "warn" if len(passive_threats) == 1 else "bad",
+                    "verdict": f"⚠️ 缺乏破被动手段：面对敌方【{'、'.join(passive_threats[:3])}】，本方 1~3 号位无人合成【白银之锋(大隐刀)】，正面硬啃敌方被动极其吃力。",
+                })
+
+        # 3) 🔮 驱散/否决审计（克制绿杖/吹风/护盾救人）
+        purge_threats = [
+            PURGEABLE_SAVE_HERO_IDS[int(op.get("hero_id") or 0)]
+            for op in opp_players
+            if int(op.get("hero_id") or 0) in PURGEABLE_SAVE_HERO_IDS
+        ]
+        for p_item, p_zh in [("ghost", "幽魂权杖(绿杖)"), ("ethereal_blade", "虚灵之刃"), ("cyclone", "Eul的神圣法杖(吹风)"), ("wind_waker", "风之杖(大吹风)"), ("glimmer_cape", "微光披风"), ("aeon_disk", "永恒之盘")]:
+            if opp_item_buyers.get(p_item):
+                purge_threats.append(f"{'/'.join(opp_item_buyers[p_item])}({p_zh})")
+
+        purge_owners = []
+        for pg_item, pg_zh in [("nullifier", "否决坠饰"), ("disperser", "驱散之刃"), ("diffusal_blade", "净魂之刃(散失)"), ("cyclone", "吹风杖"), ("wind_waker", "风之杖")]:
+            for buyer in own_item_buyers.get(pg_item, []):
+                purge_owners.append(f"{buyer}【{pg_zh}】")
+
+        if purge_threats:
+            has_nullifier = bool(own_item_buyers.get("nullifier"))
+            if has_nullifier or len(purge_owners) >= 2:
+                team_counter_checks.append({
+                    "category": "🔮 进攻驱散/否决克制审计",
+                    "enemy_threats": "、".join(purge_threats[:4]),
+                    "our_response": "、".join(purge_owners),
+                    "grade": "good",
+                    "verdict": f"✓ 面对敌方【{'、'.join(purge_threats[:3])}】的保命拉扯装，本方由 {'、'.join(purge_owners)} 做出驱散/否决克制。",
+                })
+            else:
+                team_counter_checks.append({
+                    "category": "🔮 进攻驱散/否决克制审计",
+                    "enemy_threats": "、".join(purge_threats[:4]),
+                    "our_response": "、".join(purge_owners) if purge_owners else "🚨 全队 0 否决坠饰 / 0 驱散装",
+                    "grade": "bad" if len(purge_threats) >= 2 else "warn",
+                    "verdict": f"🚨 抓不死人根源：敌方拥有【{'、'.join(purge_threats[:3])}】多层救人拉扯，但我方物理核心整局 0 把【否决坠饰(Nullifier)】，导致切后排屡屡被绿杖/吹风/微光溜走！",
+                })
+
+        # 4) 🛡️ 团队解控与辅助救人装审计（BKB/分身/微光/推推/莲花）
+        core_bkb_owners = own_item_buyers.get("black_king_bar", [])
+        sup_save_owners = []
+        for sv_item, sv_zh in [("glimmer_cape", "微光披风"), ("force_staff", "原力法杖(推推)"), ("hurricane_pike", "大推推"), ("lotus_orb", "清莲宝珠(莲花)"), ("solar_crest", "炎阳纹章"), ("pipe", "洞察烟斗(笛子)")]:
+            for buyer in own_item_buyers.get(sv_item, []):
+                sup_save_owners.append(f"{buyer}【{sv_zh}】")
+
+        team_counter_checks.append({
+            "category": "🛡️ 核心免控(BKB)与团队救人装审计",
+            "enemy_threats": f"敌方先手控制与爆发体系（共 {sum(int(op.get('kills') or 0) for op in opp_players)} 次击杀）",
+            "our_response": (
+                f"BKB：{len(core_bkb_owners)}把（{'/'.join(core_bkb_owners) if core_bkb_owners else '无'}）｜"
+                f"团队救人装：{'、'.join(sup_save_owners[:4]) if sup_save_owners else '🚨 0微光/0推推/0莲花'}"
+            ),
+            "grade": "good" if (len(core_bkb_owners) >= 2 and len(sup_save_owners) >= 2) else ("bad" if (len(core_bkb_owners) == 0 or len(sup_save_owners) == 0) else "warn"),
+            "verdict": (
+                f"✓ 免控与团队救人装齐备：本方共做出 {len(core_bkb_owners)} 把 BKB 与 {len(sup_save_owners)} 件团队保护装（{'、'.join(sup_save_owners[:3])}）。"
+                if (len(core_bkb_owners) >= 2 and len(sup_save_owners) >= 2)
+                else f"🚨 防守装备断层：全队仅 {len(core_bkb_owners)} 把 BKB、{len(sup_save_owners)} 件团队救人装（微光/推推/莲花/笛子），团战容错率极低！"
+            ),
+        })
+
+        # 个人出装路线、卡壳断档期 & 命脉装审判
+        player_item_rows: List[Dict[str, Any]] = []
+        bad_build_cnt = 0
+
+        for fp in own_players:
+            pslot = int(fp["player_slot"])
+            pos_i = int(fp["pos"])
+            hid = int(fp.get("hero_id") or 0)
+            rp = raw_by_slot.get(pslot, {})
+            plog = rp.get("purchase_log") or []
+            dlog = rp.get("deaths_log") or []
+            prof = get_hero_profile_126(hid, pos_i, fp["hero_short_zh"])
+
+            # 提取主件购买时间线（去重，过滤消耗品与小散件）
+            major_timeline: List[Dict[str, Any]] = []
+            seen_major = set()
+            prev_t = 0
+            max_gap_sec = 0
+            stall_start_sec = 0
+            stall_end_sec = 0
+
+            for entry in plog:
+                ik = str(entry.get("key") or "")
+                t_sec = int(entry.get("time") or 0)
+                if not ik or ik in SKIP_MINOR_ITEMS or ik.startswith("recipe_"):
+                    continue
+                if ik not in ITEMS_ZH or ik in seen_major:
+                    continue
+                seen_major.add(ik)
+                gap_s = max(0, t_sec - prev_t) if prev_t > 0 else max(0, t_sec)
+                if prev_t >= 480 and gap_s > max_gap_sec:
+                    max_gap_sec = gap_s
+                    stall_start_sec = prev_t
+                    stall_end_sec = t_sec
+                if t_sec >= 0:
+                    prev_t = t_sec
+                major_timeline.append({
+                    "key": ik,
+                    "zh": ITEMS_ZH.get(ik, ik),
+                    "time_sec": t_sec,
+                    "time_str": fmt_mmss(t_sec),
+                    "gap_min": round(gap_s / 60.0, 1),
+                    "img": f"https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/{ik}.png",
+                })
+
+            # 检查最后一件成装到比赛结束是否也存在超长断档
+            if prev_t >= 600 and (duration_sec - prev_t) > max_gap_sec:
+                max_gap_sec = duration_sec - prev_t
+                stall_start_sec = prev_t
+                stall_end_sec = duration_sec
+
+            deaths_in_stall = sum(
+                1 for d in dlog
+                if stall_start_sec <= int(d.get("time") or 0) <= stall_end_sec
+            ) if max_gap_sec >= 600 else 0
+
+            max_gap_min = round(max_gap_sec / 60.0, 1)
+            if max_gap_min >= 11.5:
+                stall_window_zh = f"🚨 {fmt_mmss(stall_start_sec)}–{fmt_mmss(stall_end_sec)} 卡壳断档 {max_gap_min} 分钟（期间连死 {deaths_in_stall} 次憋不出大件）"
+            elif max_gap_min >= 8.5:
+                stall_window_zh = f"⚠️ {fmt_mmss(stall_start_sec)}–{fmt_mmss(stall_end_sec)} 发育放缓 {max_gap_min} 分钟（期间死 {deaths_in_stall} 次）"
+            else:
+                stall_window_zh = f"✓ 出装丝滑（最大间隔仅 {max_gap_min} 分钟）"
+
+            # 检查本英雄命脉装与魔晶是否漏出
+            has_shard = bool(int(rp.get("aghanims_shard") or 0) or fp.get("aghanims_shard") or ("aghanims_shard" in seen_major))
+            has_bkb = "black_king_bar" in seen_major
+            bkb_time_str = next((x["time_str"] for x in major_timeline if x["key"] == "black_king_bar"), "")
+
+            issues_list: List[str] = []
+            fix_list: List[str] = []
+
+            shard_desc = prof.get("shard_desc") or ""
+            core_hint_str = prof.get("core_item_hint") or "标准核心装"
+            if ("必出" in shard_desc or hid in (93, 27, 30, 86, 64, 90, 18, 114)) and duration_min >= 24 and not has_shard:
+                issues_list.append(f"🚫 整局漏出命脉魔晶（{shard_desc or '核心机制质变装'}）")
+                fix_list.append("20分钟前必须补出1400金【阿哈利姆魔晶】产生质变")
+
+            if pos_i in (1, 2, 3):
+                needs_bkb_by_prof = ("BKB" in core_hint_str) or ("黑皇杖" in core_hint_str) or (pos_i in (1, 2) and hid not in (94, 67, 61, 110))
+                if needs_bkb_by_prof and (not has_bkb) and int(fp.get("deaths") or 0) >= 5 and duration_min >= 26:
+                    issues_list.append(f"🚫 阵亡 {fp.get('deaths')} 次却整局不出 BKB 黑皇杖")
+                    fix_list.append(f"第二/三件大件必须果断锁下【黑皇杖(BKB)】保证团战输出环境（推荐路线：{core_hint_str}）")
+                elif (not needs_bkb_by_prof) and int(fp.get("deaths") or 0) >= 9 and not any(k in seen_major for k in ("black_king_bar", "lotus_orb", "cyclone", "wind_waker", "aeon_disk", "pipe", "heavens_halberd")):
+                    issues_list.append(f"🚫 阵亡 {fp.get('deaths')} 次却缺乏解控/自救装（无吹风/莲花/BKB/盘子）")
+                    fix_list.append(f"面对敌方高频沉默/打断，应补出【吹风杖 / 清莲宝珠 / BKB】保证变蛋或技能释放（推荐路线：{core_hint_str}）")
+                elif has_bkb:
+                    bkb_sec = next((x["time_sec"] for x in major_timeline if x["key"] == "black_king_bar"), 0)
+                    if bkb_sec >= 2100 and int(fp.get("deaths") or 0) >= 6:
+                        issues_list.append(f"⚠️ BKB 拖到 {bkb_time_str} 才憋出来（此前已死多次）")
+                        fix_list.append("逆风局切忌贪输出装，应把 BKB 顺位提前到 24 分钟前")
+                if regen_threats and not anti_heal_owners and pos_i in (1, 3):
+                    fix_list.append("面对敌方高回血怪应补出【斯嘉蒂之眼(冰眼) / 希瓦的守护】")
+                if passive_threats and not break_owners and pos_i in (1, 2):
+                    fix_list.append("面对敌方被动怪应合成【白银之锋(大隐刀)】破除被动")
+                if purge_threats and not own_item_buyers.get("nullifier") and pos_i == 1:
+                    fix_list.append("后期切后排必补【否决坠饰(Nullifier)】直接废掉敌方绿杖/吹风/护罩")
+            else:
+                has_any_save = any(k in seen_major for k in ("glimmer_cape", "force_staff", "solar_crest", "lotus_orb", "blink", "aeon_disk", "wind_waker"))
+                if not has_any_save and duration_min >= 24:
+                    issues_list.append("🚫 辅助整局 0 救人装（无微光/推推/莲花/跳刀）")
+                    fix_list.append(f"辅助第一件成装优先做【微光披风 / 原力法杖(推推)】（推荐路线：{core_hint_str}）")
+                if regen_threats and not own_item_buyers.get("spirit_vessel") and pos_i == 4:
+                    fix_list.append("面对敌方高回血阵容，4号位第一件应直奔【魂之灵瓮(大骨灰)】")
+
+            if issues_list:
+                bad_build_cnt += 1
+                grade = "bad"
+                verdict_badge = "🚨 出装路线事故"
+            elif max_gap_min >= 11.5:
+                grade = "warn"
+                verdict_badge = "⚠️ 中期憋装断档"
+            else:
+                grade = "good"
+                verdict_badge = "✓ 出装契合局势"
+
+            if not fix_list:
+                fix_list.append(f"本局核心出装契合【{fp['hero_short_zh']}】定位（推荐路线：{core_hint_str}）")
+
+            player_item_rows.append({
+                "pos": pos_i,
+                "hero_short_zh": fp["hero_short_zh"],
+                "hero_img": fp["hero_img"],
+                "personaname": fp["personaname"],
+                "core_reference_zh": core_hint_str,
+                "shard_reference_zh": shard_desc,
+                "has_shard": has_shard,
+                "has_bkb": has_bkb,
+                "bkb_time_str": bkb_time_str,
+                "major_timeline": major_timeline,
+                "max_gap_min": max_gap_min,
+                "deaths_in_stall": deaths_in_stall,
+                "stall_window_zh": stall_window_zh,
+                "issues_list": issues_list,
+                "fix_advice_zh": "；".join(fix_list[:2]) + "。",
+                "verdict_badge": verdict_badge,
+                "grade": grade,
+            })
+
+        bad_counter_cnt = sum(1 for c in team_counter_checks if c["grade"] == "bad")
+        if bad_counter_cnt == 0 and bad_build_cnt == 0:
+            side_verdict = "✓ 全队出装理解在线：针对敌方阵容的克制装备（减疗/破被动/驱散/免控救人）与个人核心命脉装均已到位！"
+        else:
+            side_verdict = (
+                f"🚨 出装审判抓包：全队存在 {bad_counter_cnt} 项【针对敌方阵容的克制装严重缺失】、"
+                f"{bad_build_cnt} 名选手出现【漏出命脉魔晶 / 整局不出BKB / 辅助0救人装】！"
+            )
+
+        return {
+            "side": side_key,
+            "side_verdict": side_verdict,
+            "bad_counter_cnt": bad_counter_cnt,
+            "bad_build_cnt": bad_build_cnt,
+            "team_counter_checks": team_counter_checks,
+            "player_item_rows": player_item_rows,
+        }
+
     return {
         "hero_execution_by_side": {
             "dire": [x for x in all_hero_exec if x["side"] == "dire"],
             "radiant": [x for x in all_hero_exec if x["side"] == "radiant"],
+        },
+        "itemization_audit_by_side": {
+            "dire": analyze_side_itemization_and_counters("dire"),
+            "radiant": analyze_side_itemization_and_counters("radiant"),
         },
         "support_vision_by_side": {
             "dire": analyze_side_vision_quality("dire"),

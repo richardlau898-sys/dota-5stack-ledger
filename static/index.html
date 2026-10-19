@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=5.5" />
+  <link rel="stylesheet" href="/styles.css?v=5.6" />
 </head>
 <body>
   <header class="site-header">
@@ -14,7 +14,7 @@
           <span class="brand-mark" aria-hidden="true">刀</span>
           <div>
             <h1 class="brand-title">战后算账 &amp; 赛前锦囊</h1>
-            <p class="brand-subtitle">五黑车队录像级复盘 · 十一维战术显微镜与赛前作战室</p>
+            <p class="brand-subtitle">五黑车队录像级复盘 · 十二维战术显微镜与赛前作战室</p>
           </div>
         </div>
 
@@ -74,7 +74,7 @@
       <section class="home-hero-banner" aria-labelledby="home-hero-heading">
         <div class="home-hero-left">
           <div class="match-meta">DOTA 2 5-STACK FORENSICS HUB · 录像级赛后算账与赛前作战大厅</div>
-          <h2 id="home-hero-heading" class="home-hero-title" tabindex="-1">选择一局比赛记录，开启十一维录像级算账复盘</h2>
+          <h2 id="home-hero-heading" class="home-hero-title" tabindex="-1">选择一局比赛记录，开启十二维录像级算账复盘</h2>
           <p class="home-hero-desc">
             告别一进页面就被密密麻麻的数据淹没。在这里先浏览近期战绩账本，点击任意一局比赛即可进入该局的
             <b>六大章节深度复盘</b>、<b>Grok 4.7 毒舌/庆功评书</b> 与 <b>原生矢量 PDF 报告导出</b>。
@@ -118,15 +118,15 @@
         </div>
       </section>
 
-      <!-- 跨比赛多局惯犯档案：放在首页大厅底部，按需展开 -->
-      <details id="squad-ledger-details" class="squad-ledger-details">
+      <!-- 跨比赛多局惯犯档案 & 绝活/冥币英雄池 & 边路搭档化学反应：首页默认展开 -->
+      <details id="squad-ledger-details" class="squad-ledger-details" open>
         <summary class="squad-ledger-summary">
           <div class="squad-ledger-summary-left">
             <span class="status-pill connected" id="squad-ledger-badge">跨比赛历史档案</span>
-            <strong>五黑车队多局惯犯档案 · 跨比赛累计分锅总账与绝活红黑榜</strong>
-            <span class="section-caption">（点击展开查看多局累计大腿/战犯排行与车队常驻成员档案）</span>
+            <strong>🏆 五黑车队历史封神榜 · 憋BKB/单带白给吉尼斯 · 个人绝活/冥币英雄池 &amp; 边路双排化学反应</strong>
+            <span class="section-caption">（汇总大厅所有比赛：谁是憋救命装总冠军、谁和谁走一路是天作之合或十把九炸）</span>
           </div>
-          <span class="squad-ledger-summary-arrow">展开历史总账 ▾</span>
+          <span class="squad-ledger-summary-arrow">收起/展开历史总账 ▾</span>
         </summary>
         <section id="squad-ledger-section" class="squad-ledger-section" aria-labelledby="squad-ledger-heading">
           <h2 id="squad-ledger-heading" class="sr-only">五黑车队多局惯犯档案</h2>
@@ -209,7 +209,7 @@
       <div class="gate-inner">
         <div class="gate-badge">🤖 按需 AI 录像级复盘 · 不浪费算力，点哪局算哪局</div>
         <h2 id="gate-title" class="gate-headline">比赛 #-- 尚未生成 AI 深度复盘报告</h2>
-        <p id="gate-summary" class="gate-desc">点击下方按钮后，系统将拉取该局 OpenDota 录像数据并启动九大战术显微镜分析，生成永久可公开分享的复盘链接。</p>
+        <p id="gate-summary" class="gate-desc">点击下方按钮后，系统将拉取该局 OpenDota 录像数据并启动十二维战术显微镜分析，生成永久可公开分享的复盘链接。</p>
         <div class="gate-actions">
           <button type="button" id="btn-confirm-analyze-match" class="button primary gate-primary-btn">
             ⚡ 立即让 AI 深度分析本局并生成公开分享链接
@@ -253,7 +253,7 @@
         <a href="#verdict-and-blame-section" id="jump-chip-verdict" class="jump-chip">② 胜局庆功 / 败局分锅</a>
         <a href="#phase-review-section" class="jump-chip">③ 前·中·后期三阶段</a>
         <a href="#windows-section" class="jump-chip highlight">⚔️ 三大生死团秒级第一现场</a>
-        <a href="#tactical-microscope-section" class="jump-chip">④ 🔬 十一维战术显微镜 (大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/1v1对位/买活死&amp;7.38附魔)</a>
+        <a href="#tactical-microscope-section" class="jump-chip">④ 🔬 十二维战术显微镜 (大招/出装处刑台/憋死BKB/单带侦探社/眼位沙盘/1v1对位等)</a>
         <a href="#charts-hub-section" class="jump-chip">⑤ ⏱️ 逐分钟时间轴沙盘 &amp; 集火矩阵</a>
         <a href="#players-forensics-section" class="jump-chip">⑥ 1~5号位个人卷宗 (0-100评分)</a>
       </nav>
@@ -359,12 +359,12 @@
       <div id="key-windows-grid" class="windows-grid"></div>
     </section>
 
-    <!-- 模块四（十一维核心）：🔬 录像级战术显微镜 -->
+    <!-- 模块四（十二维核心）：🔬 录像级战术显微镜 -->
     <section id="tactical-microscope-section" class="tactical-microscope-section" aria-labelledby="tactical-microscope-heading">
       <div class="section-heading">
         <div>
-          <h2 id="tactical-microscope-heading">④ 🔬 录像级十一维战术显微镜 · 大招审判 / 憋死救命装 / 地图空间 / 承伤防装 / 眼位 / 堆野开雾 / 对线 / TP / 经济 / 1v1宿敌对位 / 买活死&amp;7.38附魔</h2>
-          <p class="section-caption">全量拆解录像底层日志：谁身怀 BKB/推推却 0 按键暴毙？谁带危险线落单被抓？谁在 1v1 同位置对位中被打穿？谁交出致命买活死或掉了对线信使？</p>
+          <h2 id="tactical-microscope-heading">④ 🔬 录像级十二维战术显微镜 · 大招审判 / 出装处刑台 / 憋死救命装 / 单带侦探社 / 承伤防装 / 眼位沙盘 / 堆野开雾 / 对线 / TP / 经济 / 1v1宿敌对位 / 买活死&amp;7.38附魔</h2>
+          <p class="section-caption">全量拆解录像底层日志：谁漏出克制装/憋大件断档？谁身怀 BKB/推推却 0 按键暴毙？谁在对方没开雾的情况下单带白给？谁在全图黑灯瞎火真空期迷路？</p>
         </div>
         <div class="microscope-header-controls">
           <div class="team-tab-group" role="group" aria-label="显微镜阵营切换">
@@ -374,42 +374,45 @@
         </div>
       </div>
 
-      <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜十一大维度">
+      <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜十二大维度">
         <button type="button" class="microscope-tab-btn active" data-micro-tab="hero_ult" role="tab" aria-selected="true">
           🎯 1. 英雄绝活与大招审判
         </button>
+        <button type="button" class="microscope-tab-btn" data-micro-tab="itemization" role="tab" aria-selected="false">
+          🎒 2. 全员出装路线与克制装处刑台
+        </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="unpressed_saves" role="tab" aria-selected="false">
-          💀 2. 憋死BKB/救命装与0技能秒躺
+          💀 3. 憋死BKB/救命装与0技能秒躺
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="map_space" role="tab" aria-selected="false">
-          🗺️ 3. 地图空间理解与落单带线被抓
+          🕵️‍♂️ 4. 单带无故被抓 &amp; 开雾/白给侦探社
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="damage_received" role="tab" aria-selected="false">
-          🛡️ 4. 承伤来源拆解与防装审计
+          🛡️ 5. 承伤来源拆解与防装审计
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="vision" role="tab" aria-selected="false">
-          👁️ 5. 辅助眼位进攻/防守与寿命
+          👁️ 6. 眼位博弈·满时长神眼与黑图真空期
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="stack_smoke" role="tab" aria-selected="false">
-          🌾 6. 辅助堆野 &amp; 开雾找节奏
+          🌾 7. 辅助堆野 &amp; 开雾找节奏
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="laning" role="tab" aria-selected="false">
-          🌱 7. 对线拉野·走门·莲花·经验符
+          🌱 8. 对线拉野·走门·莲花·经验符
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="tp_save" role="tab" aria-selected="false">
-          🆘 8. TP 救人及时性与缺席抓包
+          🆘 9. TP 救人及时性与缺席抓包
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="econ_pings" role="tab" aria-selected="false">
-          💰 9. 经济来源结构 &amp; 信号/暂停互动
+          💰 10. 经济来源结构 &amp; 信号/暂停互动
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="role_mirror" role="tab" aria-selected="false">
-          ⚔️ 10. 同位置1v1宿敌对位 &amp; 全球百分位
+          ⚔️ 11. 同位置1v1宿敌对位 &amp; 全球百分位
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="macro_neutrals" role="tab" aria-selected="false">
-          🐉 11. 买活死尸检·掉鸡·肉山魔晶 &amp; 7.38附魔
+          🐉 12. 买活死尸检·掉鸡·肉山魔晶 &amp; 7.38附魔
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="all" role="tab" aria-selected="false">
-          📑 同屏展开全部 11 项
+          📑 同屏展开全部 12 项
         </button>
       </div>
 
@@ -716,6 +719,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=5.5" defer></script>
+  <script src="/app.js?v=5.6" defer></script>
 </body>
 </html>

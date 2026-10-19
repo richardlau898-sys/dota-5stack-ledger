@@ -1165,6 +1165,283 @@
         }
       ]
     },
+    "itemization_audit_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "🚨 出装审判抓包：全队存在 2 项【针对敌方阵容的克制装严重缺失】、4 名选手出现【漏出命脉魔晶 / 整局不出BKB / 辅助0救人装】！",
+        "bad_counter_cnt": 2,
+        "bad_build_cnt": 4,
+        "team_counter_checks": [
+          {
+            "category": "🩸 减疗/禁疗克制装审计",
+            "enemy_threats": "主宰(治疗守卫)、幽鬼(恐鳌之心)",
+            "our_response": "3号位帕吉【希瓦的守护】",
+            "grade": "good",
+            "verdict": "✓ 针对敌方【主宰(治疗守卫)、幽鬼(恐鳌之心)】的高回血/吸血体系，本方由 3号位帕吉【希瓦的守护】 做出减疗装应对。"
+          },
+          {
+            "category": "🗡️ 破坏被动(Break)审计",
+            "enemy_threats": "幽鬼(折射反弹)",
+            "our_response": "1号位狙击手【白银之锋(大隐刀)】",
+            "grade": "good",
+            "verdict": "✓ 针对敌方【幽鬼(折射反弹)】的核心被动，本方配置了 1号位狙击手【白银之锋(大隐刀)】 进行破坏。"
+          },
+          {
+            "category": "🔮 进攻驱散/否决克制审计",
+            "enemy_threats": "宙斯(风之杖(大吹风))、杰奇洛(微光披风)、寒冬飞龙(永恒之盘)",
+            "our_response": "4号位司夜刺客【风之杖】",
+            "grade": "bad",
+            "verdict": "🚨 抓不死人根源：敌方拥有【宙斯(风之杖(大吹风))、杰奇洛(微光披风)、寒冬飞龙(永恒之盘)】多层救人拉扯，但我方物理核心整局 0 把【否决坠饰(Nullifier)】，导致切后排屡屡被绿杖/吹风/微光溜走！"
+          },
+          {
+            "category": "🛡️ 核心免控(BKB)与团队救人装审计",
+            "enemy_threats": "敌方先手控制与爆发体系（共 31 次击杀）",
+            "our_response": "BKB：0把（无）｜团队救人装：1号位狙击手【大推推】、2号位昆卡【清莲宝珠(莲花)】、3号位帕吉【清莲宝珠(莲花)】、2号位昆卡【洞察烟斗(笛子)】",
+            "grade": "bad",
+            "verdict": "🚨 防守装备断层：全队仅 0 把 BKB、4 件团队救人装（微光/推推/莲花/笛子），团战容错率极低！"
+          }
+        ],
+        "player_item_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "狙击手",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/sniper.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "飓风长戟(大推推) + 雷神之锤 + 黑皇杖/撒旦 + 阿哈利姆魔晶",
+            "shard_reference_zh": "震荡手雷将自己向后推开并缴械面前切入的敌人",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [
+              "🚫 阵亡 5 次却整局不出 BKB 黑皇杖"
+            ],
+            "fix_advice_zh": "第二/三件大件必须果断锁下【黑皇杖(BKB)】保证团战输出环境（推荐路线：飓风长戟(大推推) + 雷神之锤 + 黑皇杖/撒旦 + 阿哈利姆魔晶）；后期切后排必补【否决坠饰(Nullifier)】直接废掉敌方绿杖/吹风/护罩。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "昆卡",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/kunkka.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "阿哈利姆神杖 + 刷新球 + 黑皇杖 + 阿哈利姆魔晶",
+            "shard_reference_zh": "潮汐波浪推开并拖拽敌人打乱阵型",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [
+              "🚫 阵亡 9 次却整局不出 BKB 黑皇杖"
+            ],
+            "fix_advice_zh": "第二/三件大件必须果断锁下【黑皇杖(BKB)】保证团战输出环境（推荐路线：阿哈利姆神杖 + 刷新球 + 黑皇杖 + 阿哈利姆魔晶）。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "闪烁匕首 + 阿哈利姆神杖 + 黑皇杖 + 阿哈利姆魔晶",
+            "shard_reference_zh": "肢解可吞下友方英雄进行无敌救人与回血",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [],
+            "fix_advice_zh": "本局核心出装契合【帕吉】定位（推荐路线：闪烁匕首 + 阿哈利姆神杖 + 黑皇杖 + 阿哈利姆魔晶）。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "达贡之神力(红杖) + 闪烁匕首 + 阿哈利姆魔晶",
+            "shard_reference_zh": "",
+            "has_shard": false,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [
+              "🚫 辅助整局 0 救人装（无微光/推推/莲花/跳刀）"
+            ],
+            "fix_advice_zh": "辅助第一件成装优先做【微光披风 / 原力法杖(推推)】（推荐路线：达贡之神力(红杖) + 闪烁匕首 + 阿哈利姆魔晶）；面对敌方高回血阵容，4号位第一件应直奔【魂之灵瓮(大骨灰)】。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "工程师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/techies.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "原力法杖/微光披风 + 阿哈利姆魔晶 + 以太之镜",
+            "shard_reference_zh": "活性电击可对友军施放并造成位移眩晕",
+            "has_shard": false,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [
+              "🚫 辅助整局 0 救人装（无微光/推推/莲花/跳刀）"
+            ],
+            "fix_advice_zh": "辅助第一件成装优先做【微光披风 / 原力法杖(推推)】（推荐路线：原力法杖/微光披风 + 阿哈利姆魔晶 + 以太之镜）。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "🚨 出装审判抓包：全队存在 1 项【针对敌方阵容的克制装严重缺失】、4 名选手出现【漏出命脉魔晶 / 整局不出BKB / 辅助0救人装】！",
+        "bad_counter_cnt": 1,
+        "bad_build_cnt": 4,
+        "team_counter_checks": [
+          {
+            "category": "🩸 减疗/禁疗克制装审计",
+            "enemy_threats": "狙击手(撒旦之邪力)、帕吉(恐鳌之心)、帕吉(永世法衣)",
+            "our_response": "5号位寒冬飞龙【魂之灵瓮(大骨灰)】、1号位主宰【斯嘉蒂之眼(冰眼)】、5号位寒冬飞龙【希瓦的守护】",
+            "grade": "good",
+            "verdict": "✓ 针对敌方【狙击手(撒旦之邪力)、帕吉(恐鳌之心)、帕吉(永世法衣)】的高回血/吸血体系，本方由 5号位寒冬飞龙【魂之灵瓮(大骨灰)】、1号位主宰【斯嘉蒂之眼(冰眼)】、5号位寒冬飞龙【希瓦的守护】 做出减疗装应对。"
+          },
+          {
+            "category": "🔮 进攻驱散/否决克制审计",
+            "enemy_threats": "司夜刺客/工程师(虚灵之刃)、司夜刺客(风之杖(大吹风))",
+            "our_response": "1号位主宰【否决坠饰】、2号位幽鬼【驱散之刃】、3号位宙斯【风之杖】",
+            "grade": "good",
+            "verdict": "✓ 面对敌方【司夜刺客/工程师(虚灵之刃)、司夜刺客(风之杖(大吹风))】的保命拉扯装，本方由 1号位主宰【否决坠饰】、2号位幽鬼【驱散之刃】、3号位宙斯【风之杖】 做出驱散/否决克制。"
+          },
+          {
+            "category": "🛡️ 核心免控(BKB)与团队救人装审计",
+            "enemy_threats": "敌方先手控制与爆发体系（共 44 次击杀）",
+            "our_response": "BKB：0把（无）｜团队救人装：4号位杰奇洛【微光披风】、4号位杰奇洛【大推推】",
+            "grade": "bad",
+            "verdict": "🚨 防守装备断层：全队仅 0 把 BKB、2 件团队救人装（微光/推推/莲花/笛子），团战容错率极低！"
+          }
+        ],
+        "player_item_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "雷神之锤/狂战斧 + 分身斧 + 阿哈利姆神杖 + 蝴蝶/深渊之刃",
+            "shard_reference_zh": "",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [],
+            "fix_advice_zh": "本局核心出装契合【主宰】定位（推荐路线：雷神之锤/狂战斧 + 分身斧 + 阿哈利姆神杖 + 蝴蝶/深渊之刃）。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "幽鬼",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spectre.png",
+            "personaname": "Tulok",
+            "core_reference_zh": "紫怨/血棘 + 幻影斧 + 刃甲/辉耀 + 斯嘉蒂之眼/恐鳌之心",
+            "shard_reference_zh": "折射主动开启期间反弹100%額外伤害",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [
+              "🚫 阵亡 13 次却缺乏解控/自救装（无吹风/莲花/BKB/盘子）"
+            ],
+            "fix_advice_zh": "面对敌方高频沉默/打断，应补出【吹风杖 / 清莲宝珠 / BKB】保证变蛋或技能释放（推荐路线：紫怨/血棘 + 幻影斧 + 刃甲/辉耀 + 斯嘉蒂之眼/恐鳌之心）。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "宙斯",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/zuus.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "灵匣/绝刃 + 阿哈利姆神杖 + 刷新球/以太之镜",
+            "shard_reference_zh": "",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [
+              "🚫 阵亡 10 次却缺乏解控/自救装（无吹风/莲花/BKB/盘子）"
+            ],
+            "fix_advice_zh": "面对敌方高频沉默/打断，应补出【吹风杖 / 清莲宝珠 / BKB】保证变蛋或技能释放（推荐路线：灵匣/绝刃 + 阿哈利姆神杖 + 刷新球/以太之镜）。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "杰奇洛",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/jakiro.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "原力法杖 + 以太之镜 + 阿哈利姆魔晶 + 阿哈利姆神杖",
+            "shard_reference_zh": "解锁液态冰，造成最大生命值百分比灼烧与眩晕",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [
+              "🚫 辅助整局 0 救人装（无微光/推推/莲花/跳刀）"
+            ],
+            "fix_advice_zh": "辅助第一件成装优先做【微光披风 / 原力法杖(推推)】（推荐路线：原力法杖 + 以太之镜 + 阿哈利姆魔晶 + 阿哈利姆神杖）。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "寒冬飞龙",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/winter_wyvern.png",
+            "personaname": "匿名玩家",
+            "core_reference_zh": "微光披风 + 闪烁匕首/原力法杖 + 阿哈利姆魔晶",
+            "shard_reference_zh": "",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [],
+            "max_gap_min": 0.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 0.0 分钟）",
+            "issues_list": [
+              "🚫 辅助整局 0 救人装（无微光/推推/莲花/跳刀）"
+            ],
+            "fix_advice_zh": "辅助第一件成装优先做【微光披风 / 原力法杖(推推)】（推荐路线：微光披风 + 闪烁匕首/原力法杖 + 阿哈利姆魔晶）。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          }
+        ]
+      }
+    },
     "support_vision_by_side": {
       "dire": {
         "side": "dire",
@@ -1240,6 +1517,17 @@
           }
         ],
         "instant_dewards": [],
+        "god_tier_wards": [],
+        "blackout_windows": [
+          {
+            "time_range": "08:00–36:00",
+            "duration_min": 28,
+            "min_obs": 0,
+            "deaths_cnt": 0,
+            "victims_str": "幸未死人",
+            "detail": "🌑 08:00–36:00（持续 28 分钟全图仅 0 颗假眼黑灯瞎火期）：全图黑灯瞎火，所幸未被抓死。"
+          }
+        ],
         "cliff_spots": [],
         "obs_records": []
       },
@@ -1317,6 +1605,17 @@
           }
         ],
         "instant_dewards": [],
+        "god_tier_wards": [],
+        "blackout_windows": [
+          {
+            "time_range": "08:00–36:00",
+            "duration_min": 28,
+            "min_obs": 0,
+            "deaths_cnt": 0,
+            "victims_str": "幸未死人",
+            "detail": "🌑 08:00–36:00（持续 28 分钟全图仅 0 颗假眼黑灯瞎火期）：全图黑灯瞎火，所幸未被抓死。"
+          }
+        ],
         "cliff_spots": [],
         "obs_records": []
       }
@@ -2084,8 +2383,9 @@
     "map_space_by_side": {
       "dire": {
         "side": "dire",
-        "side_verdict": "✓ 团队地图空间纪律严明：9 分钟后全队仅发生 0 次落单被抓，大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。",
+        "side_verdict": "✓ 团队地图空间纪律严明：9 分钟后全队仅发生 0 次落单被抓（其中 0 次敌方未开雾），大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。",
         "total_solo_pickoffs": 0,
+        "total_unsmoked_blind_feeds": 0,
         "solo_pickoff_events": [],
         "player_space_rows": [
           {
@@ -2099,6 +2399,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 15219,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "👑 顶级带线牵制大师",
@@ -2116,6 +2417,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 1098,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "🛡️ 稳健抱团驻守",
@@ -2133,6 +2435,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 2164,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "⚔️ 侵略控图发动机",
@@ -2150,6 +2453,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 348,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "🛡️ 稳健抱团驻守",
@@ -2167,6 +2471,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 2490,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "⚔️ 侵略控图发动机",
@@ -2177,8 +2482,9 @@
       },
       "radiant": {
         "side": "radiant",
-        "side_verdict": "✓ 团队地图空间纪律严明：9 分钟后全队仅发生 0 次落单被抓，大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。",
+        "side_verdict": "✓ 团队地图空间纪律严明：9 分钟后全队仅发生 0 次落单被抓（其中 0 次敌方未开雾），大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。",
         "total_solo_pickoffs": 0,
+        "total_unsmoked_blind_feeds": 0,
         "solo_pickoff_events": [],
         "player_space_rows": [
           {
@@ -2192,6 +2498,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 5165,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "👑 顶级带线牵制大师",
@@ -2209,6 +2516,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 2019,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "🛡️ 稳健抱团驻守",
@@ -2226,6 +2534,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 2542,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "⚔️ 侵略控图发动机",
@@ -2243,6 +2552,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 644,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "⚔️ 侵略控图发动机",
@@ -2260,6 +2570,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 0,
             "solo_pickoff_cnt": 0,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 0,
             "deep_death_cnt": 0,
             "space_style_badge": "🛡️ 稳健抱团驻守",

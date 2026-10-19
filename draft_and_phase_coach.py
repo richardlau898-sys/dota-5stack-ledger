@@ -2552,11 +2552,20 @@ def build_squad_history_ledger(
                 "culprit_blame_pct": round(float(culprit_p.get("blame_share_pct") or 0), 1),
             })
 
+            df_obj = rep.get("deep_forensics") or {}
+            unpressed_rows = ((df_obj.get("unpressed_saves_by_side") or {}).get(f_side) or {}).get("player_rows") or []
+            unpressed_by_pos = {int(r.get("pos") or 0): r for r in unpressed_rows}
+            space_rows = ((df_obj.get("map_space_by_side") or {}).get(f_side) or {}).get("player_space_rows") or []
+            space_by_pos = {int(r.get("pos") or 0): r for r in space_rows}
+            item_rows = ((df_obj.get("itemization_audit_by_side") or {}).get(f_side) or {}).get("player_item_rows") or []
+            item_by_pos = {int(r.get("pos") or 0): r for r in item_rows}
+
             for p in own_list:
                 aid = p.get("account_id")
                 pname = p.get("personaname") or "匿名玩家"
                 if not aid and pname in ("匿名玩家", "Anonymous"):
                     continue
+                pos_p = int(p.get("pos") or 1)
                 key = str(aid) if aid else pname
                 st = member_stats.setdefault(
                     key,
@@ -2577,6 +2586,10 @@ def build_squad_history_ledger(
                         "total_deaths": 0,
                         "total_assists": 0,
                         "total_dead_sec": 0,
+                        "unpressed_saves_total": 0,
+                        "solo_pickoffs_total": 0,
+                        "unsmoked_blind_total": 0,
+                        "bad_builds_total": 0,
                         "heroes": [],
                     },
                 )
@@ -2594,16 +2607,102 @@ def build_squad_history_ledger(
                 st["total_deaths"] += int(p.get("deaths") or 0)
                 st["total_assists"] += int(p.get("assists") or 0)
                 st["total_dead_sec"] += int(p.get("dead_seconds") or 0)
+
+                up_r = unpressed_by_pos.get(pos_p) or {}
+                st["unpressed_saves_total"] += int(up_r.get("unpressed_core_cnt") or 0)
+                sp_r = space_by_pos.get(pos_p) or {}
+                st["solo_pickoffs_total"] += int(sp_r.get("solo_pickoff_cnt") or 0)
+                st["unsmoked_blind_total"] += int(sp_r.get("unsmoked_blind_cnt") or 0)
+                it_r = item_by_pos.get(pos_p) or {}
+                if it_r.get("grade") == "bad":
+                    st["bad_builds_total"] += 1
+
                 st["heroes"].append({
                     "match_id": mid,
                     "hero_short_zh": p.get("hero_short_zh") or "",
                     "hero_img": p.get("hero_img") or "",
-                    "pos": p.get("pos") or 1,
+                    "pos": pos_p,
                     "kda": p.get("kda") or "",
+                    "rating_score": round(float(p.get("rating_score") or 60.0), 1),
                     "blame_pct": round(float(p.get("blame_share_pct") or 0), 1),
                     "contrib_pct": round(float(p.get("contrib_share_pct") or 20.0), 1),
                     "won": won,
                 })
+
+    # 统计边路双人搭档与中野联动化学反应 (1+5 优势路 / 3+4 劣势路 / 2+4 中游联动)
+    duo_buckets: Dict[str, Dict[str, Any]] = {}
+    if rdir.exists():
+        for mpath in sorted(rdir.glob("match_*.json"), reverse=True):
+            try:
+                rep = json.loads(mpath.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            f_side = rep.get("focus_side") or "dire"
+            own_list = rep.get("radiant_pos_1_to_5") if f_side == "radiant" else rep.get("dire_pos_1_to_5")
+            if not own_list or len(own_list) < 5:
+                continue
+            won = (f_side == "radiant" and bool(rep.get("radiant_win"))) or (
+                f_side == "dire" and not bool(rep.get("radiant_win"))
+            )
+            by_pos = {int(p.get("pos") or 0): p for p in own_list}
+            for p_a, p_b, lane_label in [(1, 5, "优势路 1+5"), (3, 4, "劣势路 3+4"), (2, 4, "中野联动 2+4")]:
+                pa = by_pos.get(p_a)
+                pb = by_pos.get(p_b)
+                if not pa or not pb:
+                    continue
+                na = roster_players.get(str(pa.get("account_id")), {}).get("name") or pa.get("personaname") or ""
+                nb = roster_players.get(str(pb.get("account_id")), {}).get("name") or pb.get("personaname") or ""
+                if na in ("匿名玩家", "Anonymous", "") or nb in ("匿名玩家", "Anonymous", ""):
+                    continue
+                dkey = f"{lane_label}:{na}+{nb}"
+                db = duo_buckets.setdefault(
+                    dkey,
+                    {
+                        "lane_label": lane_label,
+                        "player_a": na,
+                        "player_b": nb,
+                        "games": 0,
+                        "wins": 0,
+                        "total_rating": 0.0,
+                        "hero_pairs": [],
+                    },
+                )
+                db["games"] += 1
+                if won:
+                    db["wins"] += 1
+                avg_r_pair = (float(pa.get("rating_score") or 60.0) + float(pb.get("rating_score") or 60.0)) / 2.0
+                db["total_rating"] += avg_r_pair
+                db["hero_pairs"].append({
+                    "pair_zh": f"{pa.get('hero_short_zh')}+{pb.get('hero_short_zh')}",
+                    "won": won,
+                })
+
+    lane_duo_chemistry = []
+    for db in duo_buckets.values():
+        g = max(1, db["games"])
+        wr = round(db["wins"] * 100.0 / g, 1)
+        avg_r = round(db["total_rating"] / g, 1)
+        if wr >= 60.0 or avg_r >= 72.0:
+            chem_tag = "🔥 黄金搭档 · 默契拉满"
+            chem_tone = "good"
+        elif wr <= 25.0 and avg_r < 64.0:
+            chem_tag = "💣 灾难组合 · 建议拆伙"
+            chem_tone = "bad"
+        else:
+            chem_tag = "⚖️ 常规磨合组合"
+            chem_tone = "warn"
+        lane_duo_chemistry.append({
+            "lane_label": db["lane_label"],
+            "duo_names": f"{db['player_a']} & {db['player_b']}",
+            "games": db["games"],
+            "wins": db["wins"],
+            "win_rate": wr,
+            "avg_rating": avg_r,
+            "hero_pairs": db["hero_pairs"][:4],
+            "chemistry_tag": chem_tag,
+            "chemistry_tone": chem_tone,
+        })
+    lane_duo_chemistry.sort(key=lambda x: (x["games"], x["win_rate"], x["avg_rating"]), reverse=True)
 
     squad_members_rank = []
     for st in member_stats.values():
@@ -2614,6 +2713,30 @@ def build_squad_history_ledger(
         win_rate = round((st["wins"] / g) * 100, 1)
         avg_deaths = round(st["total_deaths"] / g, 1)
         avg_dead_sec = int(round(st["total_dead_sec"] / g))
+
+        # 汇总该队员的个人绝活英雄与冥币英雄
+        h_map: Dict[str, Dict[str, Any]] = {}
+        for h_item in st["heroes"]:
+            hz = h_item["hero_short_zh"]
+            hm = h_map.setdefault(hz, {"hero_short_zh": hz, "hero_img": h_item["hero_img"], "games": 0, "wins": 0, "rating_sum": 0.0})
+            hm["games"] += 1
+            if h_item["won"]:
+                hm["wins"] += 1
+            hm["rating_sum"] += float(h_item.get("rating_score") or 60.0)
+        h_summary = []
+        for hm in h_map.values():
+            hg = max(1, hm["games"])
+            h_summary.append({
+                "hero_short_zh": hm["hero_short_zh"],
+                "hero_img": hm["hero_img"],
+                "games": hm["games"],
+                "wins": hm["wins"],
+                "win_rate": round(hm["wins"] * 100.0 / hg, 1),
+                "avg_rating": round(hm["rating_sum"] / hg, 1),
+            })
+        h_summary.sort(key=lambda x: (x["win_rate"], x["avg_rating"], x["games"]), reverse=True)
+        best_hero = h_summary[0] if h_summary else None
+        worst_hero = h_summary[-1] if len(h_summary) >= 2 and h_summary[-1]["avg_rating"] < 62.0 else None
 
         if st["mvp_count"] >= 1 and avg_contrib >= 22.0:
             role_tag = "👑 车队大腿 · 历史凯瑞王"
@@ -2643,18 +2766,67 @@ def build_squad_history_ledger(
             "culprit_count": st["culprit_count"],
             "avg_kda": f"{st['total_kills']/g:.1f}/{avg_deaths:.1f}/{st['total_assists']/g:.1f}",
             "avg_dead_sec": avg_dead_sec,
+            "unpressed_saves_total": st["unpressed_saves_total"],
+            "solo_pickoffs_total": st["solo_pickoffs_total"],
+            "unsmoked_blind_total": st["unsmoked_blind_total"],
+            "bad_builds_total": st["bad_builds_total"],
+            "best_hero": best_hero,
+            "worst_hero": worst_hero,
             "role_tag": role_tag,
             "tag_cls": tag_cls,
-            "heroes": st["heroes"][:4],
+            "heroes": st["heroes"][:5],
         })
 
-    # 排序：先把主视角、车队好友、多局共同出场的排在前面，再按场均分锅占比降序展示「惯犯度」
+    # 排序：先把主视角、车队好友、多局共同出场的排在前面，再按场均评分降序展示
     squad_members_rank.sort(
-        key=lambda x: (1 if (x["is_me"] or x["is_roster_friend"] or x["games"] > 1) else 0, x["avg_blame_pct"]),
+        key=lambda x: (1 if (x["is_me"] or x["is_roster_friend"] or x["games"] > 1) else 0, x["games"], x["avg_rating"]),
         reverse=True,
     )
 
-    # 2. 近期 12 场英雄池与组排红黑榜
+    # 3. 车队历史吉尼斯之最 (Guinness Records)
+    core_members = [m for m in squad_members_rank if m["games"] >= 2] or squad_members_rank
+    guinness_records = []
+    if core_members:
+        top_carry = max(core_members, key=lambda x: (x["avg_rating"], x["mvp_count"]))
+        guinness_records.append({
+            "title": "👑 车队定海神针 (最高场均分)",
+            "holder": top_carry["personaname"],
+            "value": f"场均 {top_carry['avg_rating']} 分 · {top_carry['mvp_count']} 次首功/MVP",
+            "tone": "good",
+        })
+        top_bkb_holder = max(core_members, key=lambda x: x["unpressed_saves_total"])
+        if top_bkb_holder["unpressed_saves_total"] > 0:
+            guinness_records.append({
+                "title": "💀 憋死 BKB/救命装总冠军",
+                "holder": top_bkb_holder["personaname"],
+                "value": f"累计 {top_bkb_holder['unpressed_saves_total']} 次身怀救命装0按出暴毙",
+                "tone": "bad",
+            })
+        top_pickoff_holder = max(core_members, key=lambda x: x["solo_pickoffs_total"])
+        if top_pickoff_holder["solo_pickoffs_total"] > 0:
+            guinness_records.append({
+                "title": "🗺️ 孤狼单带迷路被抓王",
+                "holder": top_pickoff_holder["personaname"],
+                "value": f"累计 {top_pickoff_holder['solo_pickoffs_total']} 次落单被抓 (含 {top_pickoff_holder['unsmoked_blind_total']} 次未开雾白给)",
+                "tone": "bad",
+            })
+        top_build_holder = max(core_members, key=lambda x: x["bad_builds_total"])
+        if top_build_holder["bad_builds_total"] > 0:
+            guinness_records.append({
+                "title": "🎒 头铁出装事故王",
+                "holder": top_build_holder["personaname"],
+                "value": f"累计 {top_build_holder['bad_builds_total']} 局漏出命脉装/克制装",
+                "tone": "warn",
+            })
+        top_dead_holder = max(core_members, key=lambda x: x["avg_dead_sec"])
+        guinness_records.append({
+            "title": "⏳ 泉水观光读秒王",
+            "holder": top_dead_holder["personaname"],
+            "value": f"场均黑屏读秒 {top_dead_holder['avg_dead_sec']} 秒 ({top_dead_holder['avg_kda']})",
+            "tone": "warn",
+        })
+
+    # 4. 近期 12 场英雄池与组排红黑榜
     party_games = [m for m in recent_matches if int(m.get("party_size") or 1) >= 2]
     solo_games = [m for m in recent_matches if int(m.get("party_size") or 1) < 2]
     party_wins = sum(1 for m in party_games if m.get("won"))
@@ -2705,6 +2877,8 @@ def build_squad_history_ledger(
     return {
         "analyzed_matches": analyzed_matches_summary,
         "squad_members_rank": squad_members_rank,
+        "guinness_records": guinness_records,
+        "lane_duo_chemistry": lane_duo_chemistry[:8],
         "recent_hero_pool": recent_hero_pool,
         "party_summary": {
             "party_games": len(party_games),

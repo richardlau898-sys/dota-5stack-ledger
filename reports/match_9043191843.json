@@ -20809,7 +20809,7 @@
             "badge": "💀 第3滴血",
             "tone": "kill",
             "headline": "夜魇2号位帕克 击杀 天辉1号位齐天大圣(Me and 4 sinh viên)",
-            "detail": "本波打出 1,870 伤害（占全队 20.7%）｜ 送出 +1220 金 / 掉钱 -617 金 / 泉水读秒 100s ｜ 💀 憋大暴毙：招牌【猴子猴孙】0次释放！；💀 包里揣着【幻影斧(分身)/黑皇杖(BKB)】却 0 次按出！；生前技能：护身法咒×1/棒击大地(板)×1；已按装备：魔杖(大魔棒)×1"
+            "detail": "本波打出 1,870 伤害（占全队 20.7%）｜ 送出 +1220 金 / 掉钱 -617 金 / 泉水读秒 100s ｜ 💀 憋大暴毙：招牌【猴子猴孙】0次释放！；💀 包里揣着【黑皇杖(BKB)/幻影斧(分身)】却 0 次按出！；生前技能：护身法咒×1/棒击大地(板)×1；已按装备：魔杖(大魔棒)×1"
           },
           {
             "time_sec": 2295,
@@ -21000,8 +21000,8 @@
               "魔杖(大魔棒)×1"
             ],
             "unused_self_saves_zh": [
-              "幻影斧(分身)",
-              "黑皇杖(BKB)"
+              "黑皇杖(BKB)",
+              "幻影斧(分身)"
             ],
             "unused_team_saves_zh": [],
             "ult_audit_zh": "💀 憋大暴毙：大招【猴子猴孙】0次释放即阵亡",
@@ -21010,7 +21010,7 @@
             "ult_unpressed_name": "猴子猴孙",
             "afk_farm_zh": "",
             "is_afk_in_tf": false,
-            "verdict_tag": "💀 憋幻影斧暴毙",
+            "verdict_tag": "💀 憋黑皇杖暴毙",
             "verdict_tone": "bad"
           },
           {
@@ -21252,7 +21252,7 @@
             "opp_total_dmg": 14291,
             "root_causes": [
               "① 先手掉点成突破口：开团仅 0 秒（37:49），本方 5号位 天怒法师 率先被 帕克 秒杀，导致正面瞬间陷入 4打5 被动！",
-              "② 关键机制与微操失误：1号位齐天大圣招牌《猴子猴孙》0次释放暴毙；1号位齐天大圣包里揣着【幻影斧(分身)/黑皇杖(BKB)】0次按出暴毙；2号位斧王包里揣着【黑皇杖(BKB)】0次按出暴毙！",
+              "② 关键机制与微操失误：1号位齐天大圣招牌《猴子猴孙》0次释放暴毙；1号位齐天大圣包里揣着【黑皇杖(BKB)/幻影斧(分身)】0次按出暴毙；2号位斧王包里揣着【黑皇杖(BKB)】0次按出暴毙！",
               "③ 团战火力悬殊对账：本方五人合计打出 9,028 伤害（最高 斧王 3,440），对手 夜魇 轰出 14,291 伤害（敌方 主宰 单人 5,343 伤害）。"
             ]
           },
@@ -22970,6 +22970,1057 @@
         }
       ]
     },
+    "itemization_audit_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "🚨 出装审判抓包：全队存在 1 项【针对敌方阵容的克制装严重缺失】、1 名选手出现【漏出命脉魔晶 / 整局不出BKB / 辅助0救人装】！",
+        "bad_counter_cnt": 1,
+        "bad_build_cnt": 1,
+        "team_counter_checks": [
+          {
+            "category": "🩸 减疗/禁疗克制装审计",
+            "enemy_threats": "编织者(恐鳌之心)",
+            "our_response": "1号位主宰【斯嘉蒂之眼(冰眼)】、3号位潮汐猎人【希瓦的守护】",
+            "grade": "good",
+            "verdict": "✓ 针对敌方【编织者(恐鳌之心)】的高回血/吸血体系，本方由 1号位主宰【斯嘉蒂之眼(冰眼)】、3号位潮汐猎人【希瓦的守护】 做出减疗装应对。"
+          },
+          {
+            "category": "🔮 进攻驱散/否决克制审计",
+            "enemy_threats": "编织者(Eul的神圣法杖(吹风))、撼地者(微光披风)",
+            "our_response": "1号位主宰【否决坠饰】、2号位帕克【吹风杖】",
+            "grade": "good",
+            "verdict": "✓ 面对敌方【编织者(Eul的神圣法杖(吹风))、撼地者(微光披风)】的保命拉扯装，本方由 1号位主宰【否决坠饰】、2号位帕克【吹风杖】 做出驱散/否决克制。"
+          },
+          {
+            "category": "🛡️ 核心免控(BKB)与团队救人装审计",
+            "enemy_threats": "敌方先手控制与爆发体系（共 37 次击杀）",
+            "our_response": "BKB：0把（无）｜团队救人装：🚨 0微光/0推推/0莲花",
+            "grade": "bad",
+            "verdict": "🚨 防守装备断层：全队仅 0 把 BKB、0 件团队救人装（微光/推推/莲花/笛子），团战容错率极低！"
+          }
+        ],
+        "player_item_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "主宰",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png",
+            "personaname": "Petarung Amoral",
+            "core_reference_zh": "雷神之锤/狂战斧 + 分身斧 + 阿哈利姆神杖 + 蝴蝶/深渊之刃",
+            "shard_reference_zh": "",
+            "has_shard": false,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [
+              {
+                "key": "phase_boots",
+                "zh": "相位鞋",
+                "time_sec": 325,
+                "time_str": "05:25",
+                "gap_min": 5.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/phase_boots.png"
+              },
+              {
+                "key": "radiance",
+                "zh": "辉耀",
+                "time_sec": 917,
+                "time_str": "15:17",
+                "gap_min": 9.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/radiance.png"
+              },
+              {
+                "key": "boots_of_elves",
+                "zh": "精灵布带",
+                "time_sec": 1072,
+                "time_str": "17:52",
+                "gap_min": 2.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/boots_of_elves.png"
+              },
+              {
+                "key": "yasha",
+                "zh": "夜叉",
+                "time_sec": 1164,
+                "time_str": "19:24",
+                "gap_min": 1.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/yasha.png"
+              },
+              {
+                "key": "diadem",
+                "zh": "宝冕",
+                "time_sec": 1232,
+                "time_str": "20:32",
+                "gap_min": 1.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/diadem.png"
+              },
+              {
+                "key": "manta",
+                "zh": "幻影斧(分身斧)",
+                "time_sec": 1341,
+                "time_str": "22:21",
+                "gap_min": 1.8,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/manta.png"
+              },
+              {
+                "key": "blink",
+                "zh": "闪烁匕首(跳刀)",
+                "time_sec": 1584,
+                "time_str": "26:24",
+                "gap_min": 4.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
+              },
+              {
+                "key": "orb_of_frost",
+                "zh": "寒霜之珠",
+                "time_sec": 1888,
+                "time_str": "31:28",
+                "gap_min": 5.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/orb_of_frost.png"
+              },
+              {
+                "key": "skadi",
+                "zh": "斯嘉蒂之眼(冰眼)",
+                "time_sec": 1943,
+                "time_str": "32:23",
+                "gap_min": 0.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/skadi.png"
+              },
+              {
+                "key": "butterfly",
+                "zh": "蝴蝶",
+                "time_sec": 2453,
+                "time_str": "40:53",
+                "gap_min": 8.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/butterfly.png"
+              },
+              {
+                "key": "splintmail",
+                "zh": "护胫甲",
+                "time_sec": 2570,
+                "time_str": "42:50",
+                "gap_min": 1.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/splintmail.png"
+              },
+              {
+                "key": "nullifier",
+                "zh": "否决挂坠",
+                "time_sec": 2582,
+                "time_str": "43:02",
+                "gap_min": 0.2,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/nullifier.png"
+              },
+              {
+                "key": "swift_blink",
+                "zh": "迅疾闪光(敏捷跳)",
+                "time_sec": 2772,
+                "time_str": "46:12",
+                "gap_min": 3.2,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/swift_blink.png"
+              }
+            ],
+            "max_gap_min": 8.5,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "⚠️ 32:23–40:53 发育放缓 8.5 分钟（期间死 0 次）",
+            "issues_list": [],
+            "fix_advice_zh": "本局核心出装契合【主宰】定位（推荐路线：雷神之锤/狂战斧 + 分身斧 + 阿哈利姆神杖 + 蝴蝶/深渊之刃）。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "帕克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/puck.png",
+            "personaname": "loiverever౨ৎ",
+            "core_reference_zh": "闪烁匕首 + 绝刃 + 风杖/阿哈利姆神杖",
+            "shard_reference_zh": "",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [
+              {
+                "key": "power_treads",
+                "zh": "动力鞋(假腿)",
+                "time_sec": 541,
+                "time_str": "09:01",
+                "gap_min": 9.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png"
+              },
+              {
+                "key": "cyclone",
+                "zh": "风杖(吹风)",
+                "time_sec": 765,
+                "time_str": "12:45",
+                "gap_min": 3.7,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/cyclone.png"
+              },
+              {
+                "key": "great_famango",
+                "zh": "大疗伤莲花",
+                "time_sec": 963,
+                "time_str": "16:03",
+                "gap_min": 3.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/great_famango.png"
+              },
+              {
+                "key": "blitz_knuckles",
+                "zh": "闪电指套",
+                "time_sec": 979,
+                "time_str": "16:19",
+                "gap_min": 0.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blitz_knuckles.png"
+              },
+              {
+                "key": "oblivion_staff",
+                "zh": "空明杖",
+                "time_sec": 1119,
+                "time_str": "18:39",
+                "gap_min": 2.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/oblivion_staff.png"
+              },
+              {
+                "key": "witch_blade",
+                "zh": "巫师之刃",
+                "time_sec": 1207,
+                "time_str": "20:07",
+                "gap_min": 1.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/witch_blade.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 1275,
+                "time_str": "21:15",
+                "gap_min": 1.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              },
+              {
+                "key": "blink",
+                "zh": "闪烁匕首(跳刀)",
+                "time_sec": 1513,
+                "time_str": "25:13",
+                "gap_min": 4.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
+              },
+              {
+                "key": "devastator",
+                "zh": "帕拉斯玛(大巫师刃)",
+                "time_sec": 1820,
+                "time_str": "30:20",
+                "gap_min": 5.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/devastator.png"
+              },
+              {
+                "key": "soul_booster",
+                "zh": "镇魂石",
+                "time_sec": 2169,
+                "time_str": "36:09",
+                "gap_min": 5.8,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/soul_booster.png"
+              },
+              {
+                "key": "tiara_of_selemene",
+                "zh": "赛莉蒙妮之冠",
+                "time_sec": 2292,
+                "time_str": "38:12",
+                "gap_min": 2.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/tiara_of_selemene.png"
+              },
+              {
+                "key": "octarine_core",
+                "zh": "玲珑心",
+                "time_sec": 2308,
+                "time_str": "38:28",
+                "gap_min": 0.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/octarine_core.png"
+              },
+              {
+                "key": "ultimate_scepter",
+                "zh": "阿哈利姆神杖(A杖)",
+                "time_sec": 2733,
+                "time_str": "45:33",
+                "gap_min": 7.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png"
+              }
+            ],
+            "max_gap_min": 7.1,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 7.1 分钟）",
+            "issues_list": [
+              "🚫 阵亡 9 次却整局不出 BKB 黑皇杖"
+            ],
+            "fix_advice_zh": "第二/三件大件必须果断锁下【黑皇杖(BKB)】保证团战输出环境（推荐路线：闪烁匕首 + 绝刃 + 风杖/阿哈利姆神杖）。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "潮汐猎人",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/tidehunter.png",
+            "personaname": "Paphets",
+            "core_reference_zh": "闪烁匕首 + 洞察烟斗 + 刷新球 + 阿哈利姆魔晶",
+            "shard_reference_zh": "死水锚链将敌人拴在原地无法位移逃生",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [
+              {
+                "key": "lifesteal",
+                "zh": "吸血面具",
+                "time_sec": 456,
+                "time_str": "07:36",
+                "gap_min": 7.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/lifesteal.png"
+              },
+              {
+                "key": "phase_boots",
+                "zh": "相位鞋",
+                "time_sec": 732,
+                "time_str": "12:12",
+                "gap_min": 4.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/phase_boots.png"
+              },
+              {
+                "key": "vladmir",
+                "zh": "弗拉迪米尔的祭品",
+                "time_sec": 906,
+                "time_str": "15:06",
+                "gap_min": 2.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/vladmir.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 1057,
+                "time_str": "17:37",
+                "gap_min": 2.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              },
+              {
+                "key": "blink",
+                "zh": "闪烁匕首(跳刀)",
+                "time_sec": 1284,
+                "time_str": "21:24",
+                "gap_min": 3.8,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
+              },
+              {
+                "key": "ultimate_scepter",
+                "zh": "阿哈利姆神杖(A杖)",
+                "time_sec": 1729,
+                "time_str": "28:49",
+                "gap_min": 7.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png"
+              },
+              {
+                "key": "great_famango",
+                "zh": "大疗伤莲花",
+                "time_sec": 1994,
+                "time_str": "33:14",
+                "gap_min": 4.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/great_famango.png"
+              },
+              {
+                "key": "splintmail",
+                "zh": "护胫甲",
+                "time_sec": 2141,
+                "time_str": "35:41",
+                "gap_min": 2.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/splintmail.png"
+              },
+              {
+                "key": "chasm_stone",
+                "zh": "裂渊之石",
+                "time_sec": 2141,
+                "time_str": "35:41",
+                "gap_min": 0.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/chasm_stone.png"
+              },
+              {
+                "key": "shivas_guard",
+                "zh": "希瓦的守护(冰甲)",
+                "time_sec": 2186,
+                "time_str": "36:26",
+                "gap_min": 0.8,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/shivas_guard.png"
+              }
+            ],
+            "max_gap_min": 10.1,
+            "deaths_in_stall": 1,
+            "stall_window_zh": "⚠️ 36:26–46:31 发育放缓 10.1 分钟（期间死 1 次）",
+            "issues_list": [],
+            "fix_advice_zh": "本局核心出装契合【潮汐猎人】定位（推荐路线：闪烁匕首 + 洞察烟斗 + 刷新球 + 阿哈利姆魔晶）。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Nanana",
+            "core_reference_zh": "达贡之神力(红杖) + 闪烁匕首 + 阿哈利姆魔晶",
+            "shard_reference_zh": "",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [
+              {
+                "key": "wizard_hat",
+                "zh": "巫师帽",
+                "time_sec": 517,
+                "time_str": "08:37",
+                "gap_min": 8.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wizard_hat.png"
+              },
+              {
+                "key": "arcane_boots",
+                "zh": "秘法鞋",
+                "time_sec": 640,
+                "time_str": "10:40",
+                "gap_min": 2.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/arcane_boots.png"
+              },
+              {
+                "key": "aether_lens",
+                "zh": "以太之镜",
+                "time_sec": 1143,
+                "time_str": "19:03",
+                "gap_min": 8.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aether_lens.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 1317,
+                "time_str": "21:57",
+                "gap_min": 2.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              },
+              {
+                "key": "blink",
+                "zh": "闪烁匕首(跳刀)",
+                "time_sec": 1650,
+                "time_str": "27:30",
+                "gap_min": 5.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
+              },
+              {
+                "key": "great_famango",
+                "zh": "大疗伤莲花",
+                "time_sec": 1968,
+                "time_str": "32:48",
+                "gap_min": 5.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/great_famango.png"
+              },
+              {
+                "key": "ultimate_scepter",
+                "zh": "阿哈利姆神杖(A杖)",
+                "time_sec": 2375,
+                "time_str": "39:35",
+                "gap_min": 6.8,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png"
+              },
+              {
+                "key": "gem",
+                "zh": "真视宝石",
+                "time_sec": 2554,
+                "time_str": "42:34",
+                "gap_min": 3.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/gem.png"
+              }
+            ],
+            "max_gap_min": 8.4,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 8.4 分钟）",
+            "issues_list": [],
+            "fix_advice_zh": "面对敌方高回血阵容，4号位第一件应直奔【魂之灵瓮(大骨灰)】。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "环轨百戏王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ringmaster.png",
+            "personaname": "Flame = ez mute",
+            "core_reference_zh": "以太之镜 + 闪烁匕首 + 微光披风/原力法杖 + 阿哈利姆神杖",
+            "shard_reference_zh": "聚光灯揭示隐身并造成持续激光灼烧与未命中",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [
+              {
+                "key": "wizard_hat",
+                "zh": "巫师帽",
+                "time_sec": 543,
+                "time_str": "09:03",
+                "gap_min": 9.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wizard_hat.png"
+              },
+              {
+                "key": "arcane_boots",
+                "zh": "秘法鞋",
+                "time_sec": 723,
+                "time_str": "12:03",
+                "gap_min": 3.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/arcane_boots.png"
+              },
+              {
+                "key": "rod_of_atos",
+                "zh": "阿托斯之棍",
+                "time_sec": 1401,
+                "time_str": "23:21",
+                "gap_min": 11.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/rod_of_atos.png"
+              },
+              {
+                "key": "aether_lens",
+                "zh": "以太之镜",
+                "time_sec": 1633,
+                "time_str": "27:13",
+                "gap_min": 3.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aether_lens.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 1809,
+                "time_str": "30:09",
+                "gap_min": 2.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              },
+              {
+                "key": "blink",
+                "zh": "闪烁匕首(跳刀)",
+                "time_sec": 2184,
+                "time_str": "36:24",
+                "gap_min": 6.2,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
+              },
+              {
+                "key": "ultimate_scepter",
+                "zh": "阿哈利姆神杖(A杖)",
+                "time_sec": 2767,
+                "time_str": "46:07",
+                "gap_min": 9.7,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png"
+              }
+            ],
+            "max_gap_min": 11.3,
+            "deaths_in_stall": 4,
+            "stall_window_zh": "⚠️ 12:03–23:21 发育放缓 11.3 分钟（期间死 4 次）",
+            "issues_list": [],
+            "fix_advice_zh": "本局核心出装契合【环轨百戏王】定位（推荐路线：以太之镜 + 闪烁匕首 + 微光披风/原力法杖 + 阿哈利姆神杖）。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "🚨 出装审判抓包：全队存在 1 项【针对敌方阵容的克制装严重缺失】、1 名选手出现【漏出命脉魔晶 / 整局不出BKB / 辅助0救人装】！",
+        "bad_counter_cnt": 1,
+        "bad_build_cnt": 1,
+        "team_counter_checks": [
+          {
+            "category": "🩸 减疗/禁疗克制装审计",
+            "enemy_threats": "主宰(治疗守卫)",
+            "our_response": "🚨 全队 0 大骨灰 / 0 冰眼 / 0 希瓦",
+            "grade": "bad",
+            "verdict": "🚨 严重漏出克制装：敌方坐拥【主宰(治疗守卫)】强回血/吸血体系，但我方全队竟然 0 把大骨灰(魂之灵瓮)、0 把冰眼、0 把希瓦，团战白打无效伤害！"
+          },
+          {
+            "category": "🗡️ 破坏被动(Break)审计",
+            "enemy_threats": "潮汐猎人(海妖外壳解控减伤)",
+            "our_response": "⚠️ 全队 0 把大隐刀(白银之锋)",
+            "grade": "warn",
+            "verdict": "⚠️ 缺乏破被动手段：面对敌方【潮汐猎人(海妖外壳解控减伤)】，本方 1~3 号位无人合成【白银之锋(大隐刀)】，正面硬啃敌方被动极其吃力。"
+          },
+          {
+            "category": "🔮 进攻驱散/否决克制审计",
+            "enemy_threats": "帕克(吹风/相位转移拉扯)、帕克(Eul的神圣法杖(吹风))",
+            "our_response": "3号位编织者【净魂之刃(散失)】、3号位编织者【吹风杖】",
+            "grade": "good",
+            "verdict": "✓ 面对敌方【帕克(吹风/相位转移拉扯)、帕克(Eul的神圣法杖(吹风))】的保命拉扯装，本方由 3号位编织者【净魂之刃(散失)】、3号位编织者【吹风杖】 做出驱散/否决克制。"
+          },
+          {
+            "category": "🛡️ 核心免控(BKB)与团队救人装审计",
+            "enemy_threats": "敌方先手控制与爆发体系（共 55 次击杀）",
+            "our_response": "BKB：2把（1号位齐天大圣/2号位斧王）｜团队救人装：4号位撼地者【微光披风】",
+            "grade": "warn",
+            "verdict": "🚨 防守装备断层：全队仅 2 把 BKB、1 件团队救人装（微光/推推/莲花/笛子），团战容错率极低！"
+          }
+        ],
+        "player_item_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "齐天大圣",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/monkey_king.png",
+            "personaname": "Me and 4 sinh viên",
+            "core_reference_zh": "漩涡/雷神之锤 + 黑皇杖(BKB) + 斯嘉蒂之眼 + 深渊之刃",
+            "shard_reference_zh": "",
+            "has_shard": true,
+            "has_bkb": true,
+            "bkb_time_str": "34:38",
+            "major_timeline": [
+              {
+                "key": "orb_of_frost",
+                "zh": "寒霜之珠",
+                "time_sec": 208,
+                "time_str": "03:28",
+                "gap_min": 3.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/orb_of_frost.png"
+              },
+              {
+                "key": "pers",
+                "zh": "坚韧球",
+                "time_sec": 385,
+                "time_str": "06:25",
+                "gap_min": 3.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/pers.png"
+              },
+              {
+                "key": "power_treads",
+                "zh": "动力鞋(假腿)",
+                "time_sec": 528,
+                "time_str": "08:48",
+                "gap_min": 2.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png"
+              },
+              {
+                "key": "bfury",
+                "zh": "狂战斧",
+                "time_sec": 791,
+                "time_str": "13:11",
+                "gap_min": 4.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/bfury.png"
+              },
+              {
+                "key": "boots_of_elves",
+                "zh": "精灵布带",
+                "time_sec": 854,
+                "time_str": "14:14",
+                "gap_min": 1.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/boots_of_elves.png"
+              },
+              {
+                "key": "diadem",
+                "zh": "宝冕",
+                "time_sec": 958,
+                "time_str": "15:58",
+                "gap_min": 1.7,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/diadem.png"
+              },
+              {
+                "key": "yasha",
+                "zh": "夜叉",
+                "time_sec": 967,
+                "time_str": "16:07",
+                "gap_min": 0.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/yasha.png"
+              },
+              {
+                "key": "manta",
+                "zh": "幻影斧(分身斧)",
+                "time_sec": 1193,
+                "time_str": "19:53",
+                "gap_min": 3.8,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/manta.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 1299,
+                "time_str": "21:39",
+                "gap_min": 1.8,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              },
+              {
+                "key": "ultimate_scepter",
+                "zh": "阿哈利姆神杖(A杖)",
+                "time_sec": 1780,
+                "time_str": "29:40",
+                "gap_min": 8.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png"
+              },
+              {
+                "key": "black_king_bar",
+                "zh": "黑皇杖(BKB)",
+                "time_sec": 2078,
+                "time_str": "34:38",
+                "gap_min": 5.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/black_king_bar.png"
+              },
+              {
+                "key": "blitz_knuckles",
+                "zh": "闪电指套",
+                "time_sec": 2406,
+                "time_str": "40:06",
+                "gap_min": 5.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blitz_knuckles.png"
+              },
+              {
+                "key": "monkey_king_bar",
+                "zh": "金箍棒(MKB)",
+                "time_sec": 2447,
+                "time_str": "40:47",
+                "gap_min": 0.7,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/monkey_king_bar.png"
+              }
+            ],
+            "max_gap_min": 8.0,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 8.0 分钟）",
+            "issues_list": [],
+            "fix_advice_zh": "面对敌方高回血怪应补出【斯嘉蒂之眼(冰眼) / 希瓦的守护】；面对敌方被动怪应合成【白银之锋(大隐刀)】破除被动。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM",
+            "core_reference_zh": "跳刀 + 刃甲 + 黑皇杖 + 魔晶",
+            "shard_reference_zh": "反击螺旋降低敌方攻击力并大幅提升转的频率",
+            "has_shard": true,
+            "has_bkb": true,
+            "bkb_time_str": "31:43",
+            "major_timeline": [
+              {
+                "key": "blink",
+                "zh": "闪烁匕首(跳刀)",
+                "time_sec": 843,
+                "time_str": "14:03",
+                "gap_min": 14.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
+              },
+              {
+                "key": "splintmail",
+                "zh": "护胫甲",
+                "time_sec": 1310,
+                "time_str": "21:50",
+                "gap_min": 7.8,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/splintmail.png"
+              },
+              {
+                "key": "blade_mail",
+                "zh": "刃甲",
+                "time_sec": 1326,
+                "time_str": "22:06",
+                "gap_min": 0.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blade_mail.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 1483,
+                "time_str": "24:43",
+                "gap_min": 2.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              },
+              {
+                "key": "power_treads",
+                "zh": "动力鞋(假腿)",
+                "time_sec": 1504,
+                "time_str": "25:04",
+                "gap_min": 0.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png"
+              },
+              {
+                "key": "black_king_bar",
+                "zh": "黑皇杖(BKB)",
+                "time_sec": 1903,
+                "time_str": "31:43",
+                "gap_min": 6.7,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/black_king_bar.png"
+              }
+            ],
+            "max_gap_min": 14.8,
+            "deaths_in_stall": 7,
+            "stall_window_zh": "🚨 31:43–46:31 卡壳断档 14.8 分钟（期间连死 7 次憋不出大件）",
+            "issues_list": [],
+            "fix_advice_zh": "面对敌方被动怪应合成【白银之锋(大隐刀)】破除被动。",
+            "verdict_badge": "⚠️ 中期憋装断档",
+            "grade": "warn"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "编织者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/weaver.png",
+            "personaname": "Đỗ Ngọc Quý",
+            "core_reference_zh": "漩涡/雷神之锤 + 魔龙枪 + 林肯法球/黑皇杖 + 代达罗斯之殇",
+            "shard_reference_zh": "",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [
+              {
+                "key": "diffusal_blade",
+                "zh": "净魂之刃(散失)",
+                "time_sec": 874,
+                "time_str": "14:34",
+                "gap_min": 14.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/diffusal_blade.png"
+              },
+              {
+                "key": "great_famango",
+                "zh": "大疗伤莲花",
+                "time_sec": 926,
+                "time_str": "15:26",
+                "gap_min": 0.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/great_famango.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 989,
+                "time_str": "16:29",
+                "gap_min": 1.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              },
+              {
+                "key": "cyclone",
+                "zh": "风杖(吹风)",
+                "time_sec": 1313,
+                "time_str": "21:53",
+                "gap_min": 5.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/cyclone.png"
+              },
+              {
+                "key": "pers",
+                "zh": "坚韧球",
+                "time_sec": 1502,
+                "time_str": "25:02",
+                "gap_min": 3.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/pers.png"
+              },
+              {
+                "key": "sphere",
+                "zh": "林肯法球",
+                "time_sec": 1975,
+                "time_str": "32:55",
+                "gap_min": 7.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/sphere.png"
+              },
+              {
+                "key": "ring_of_tarrasque",
+                "zh": "恐鳌之戒",
+                "time_sec": 2099,
+                "time_str": "34:59",
+                "gap_min": 2.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ring_of_tarrasque.png"
+              },
+              {
+                "key": "heart",
+                "zh": "恐鳌之心(龙心)",
+                "time_sec": 2487,
+                "time_str": "41:27",
+                "gap_min": 6.5,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png"
+              },
+              {
+                "key": "gem",
+                "zh": "真视宝石",
+                "time_sec": 2505,
+                "time_str": "41:45",
+                "gap_min": 0.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/gem.png"
+              },
+              {
+                "key": "greater_famango",
+                "zh": "特大疗伤莲花",
+                "time_sec": 2646,
+                "time_str": "44:06",
+                "gap_min": 2.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/greater_famango.png"
+              }
+            ],
+            "max_gap_min": 7.9,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 7.9 分钟）",
+            "issues_list": [
+              "🚫 阵亡 8 次却整局不出 BKB 黑皇杖"
+            ],
+            "fix_advice_zh": "第二/三件大件必须果断锁下【黑皇杖(BKB)】保证团战输出环境（推荐路线：漩涡/雷神之锤 + 魔龙枪 + 林肯法球/黑皇杖 + 代达罗斯之殇）；面对敌方高回血怪应补出【斯嘉蒂之眼(冰眼) / 希瓦的守护】。",
+            "verdict_badge": "🚨 出装路线事故",
+            "grade": "bad"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "撼地者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/earthshaker.png",
+            "personaname": "Super Bóp",
+            "core_reference_zh": "闪烁匕首(跳刀) + 阿哈利姆魔晶 + 阿哈利姆神杖/吹风",
+            "shard_reference_zh": "沟壑留下余震图腾，附近施法可沿沟壑再次触发眩晕",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [
+              {
+                "key": "wizard_hat",
+                "zh": "巫师帽",
+                "time_sec": 441,
+                "time_str": "07:21",
+                "gap_min": 7.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wizard_hat.png"
+              },
+              {
+                "key": "arcane_boots",
+                "zh": "秘法鞋",
+                "time_sec": 775,
+                "time_str": "12:55",
+                "gap_min": 5.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/arcane_boots.png"
+              },
+              {
+                "key": "blink",
+                "zh": "闪烁匕首(跳刀)",
+                "time_sec": 1231,
+                "time_str": "20:31",
+                "gap_min": 7.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 1488,
+                "time_str": "24:48",
+                "gap_min": 4.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              },
+              {
+                "key": "shawl",
+                "zh": "披巾",
+                "time_sec": 1929,
+                "time_str": "32:09",
+                "gap_min": 7.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/shawl.png"
+              },
+              {
+                "key": "glimmer_cape",
+                "zh": "微光披风",
+                "time_sec": 1929,
+                "time_str": "32:09",
+                "gap_min": 0.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/glimmer_cape.png"
+              },
+              {
+                "key": "kaya",
+                "zh": "慧光",
+                "time_sec": 2206,
+                "time_str": "36:46",
+                "gap_min": 4.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/kaya.png"
+              },
+              {
+                "key": "boots_of_elves",
+                "zh": "精灵布带",
+                "time_sec": 2351,
+                "time_str": "39:11",
+                "gap_min": 2.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/boots_of_elves.png"
+              },
+              {
+                "key": "yasha",
+                "zh": "夜叉",
+                "time_sec": 2351,
+                "time_str": "39:11",
+                "gap_min": 0.0,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/yasha.png"
+              },
+              {
+                "key": "yasha_and_kaya",
+                "zh": "夜慧对剑",
+                "time_sec": 2369,
+                "time_str": "39:29",
+                "gap_min": 0.3,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/yasha_and_kaya.png"
+              }
+            ],
+            "max_gap_min": 7.6,
+            "deaths_in_stall": 0,
+            "stall_window_zh": "✓ 出装丝滑（最大间隔仅 7.6 分钟）",
+            "issues_list": [],
+            "fix_advice_zh": "面对敌方高回血阵容，4号位第一件应直奔【魂之灵瓮(大骨灰)】。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "core_reference_zh": "阿托斯之棍 + 微光披风/原力法杖 + 阿哈利姆神杖",
+            "shard_reference_zh": "",
+            "has_shard": true,
+            "has_bkb": false,
+            "bkb_time_str": "",
+            "major_timeline": [
+              {
+                "key": "wizard_hat",
+                "zh": "巫师帽",
+                "time_sec": 606,
+                "time_str": "10:06",
+                "gap_min": 10.1,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wizard_hat.png"
+              },
+              {
+                "key": "arcane_boots",
+                "zh": "秘法鞋",
+                "time_sec": 797,
+                "time_str": "13:17",
+                "gap_min": 3.2,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/arcane_boots.png"
+              },
+              {
+                "key": "rod_of_atos",
+                "zh": "阿托斯之棍",
+                "time_sec": 1484,
+                "time_str": "24:44",
+                "gap_min": 11.4,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/rod_of_atos.png"
+              },
+              {
+                "key": "kaya",
+                "zh": "慧光",
+                "time_sec": 2018,
+                "time_str": "33:38",
+                "gap_min": 8.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/kaya.png"
+              },
+              {
+                "key": "blink",
+                "zh": "闪烁匕首(跳刀)",
+                "time_sec": 2354,
+                "time_str": "39:14",
+                "gap_min": 5.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png"
+              },
+              {
+                "key": "greater_famango",
+                "zh": "特大疗伤莲花",
+                "time_sec": 2391,
+                "time_str": "39:51",
+                "gap_min": 0.6,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/greater_famango.png"
+              },
+              {
+                "key": "aghanims_shard",
+                "zh": "阿哈利姆魔晶",
+                "time_sec": 2446,
+                "time_str": "40:46",
+                "gap_min": 0.9,
+                "img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png"
+              }
+            ],
+            "max_gap_min": 11.4,
+            "deaths_in_stall": 3,
+            "stall_window_zh": "⚠️ 13:17–24:44 发育放缓 11.4 分钟（期间死 3 次）",
+            "issues_list": [],
+            "fix_advice_zh": "本局核心出装契合【天怒法师】定位（推荐路线：阿托斯之棍 + 微光披风/原力法杖 + 阿哈利姆神杖）。",
+            "verdict_badge": "✓ 出装契合局势",
+            "grade": "good"
+          }
+        ]
+      }
+    },
     "support_vision_by_side": {
       "dire": {
         "side": "dire",
@@ -23117,6 +24168,74 @@
             "dewarded_by": "撼地者"
           }
         ],
+        "god_tier_wards": [
+          {
+            "time_str": "-00:56",
+            "planter_hero": "帕克",
+            "pos": 2,
+            "zone_zh": "中路河道高坡 / 符点",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "06:36",
+            "planter_hero": "帕克",
+            "pos": 2,
+            "zone_zh": "天辉中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "25:42",
+            "planter_hero": "环轨百戏王",
+            "pos": 5,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "26:51",
+            "planter_hero": "环轨百戏王",
+            "pos": 5,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "29:26",
+            "planter_hero": "环轨百戏王",
+            "pos": 5,
+            "zone_zh": "天辉下路主野区高台 / 一塔林区",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "33:16",
+            "planter_hero": "环轨百戏王",
+            "pos": 5,
+            "zone_zh": "天辉中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          }
+        ],
+        "blackout_windows": [
+          {
+            "time_range": "12:00–17:00",
+            "duration_min": 5,
+            "min_obs": 0,
+            "deaths_cnt": 6,
+            "victims_str": "帕克、环轨百戏王、司夜刺客",
+            "detail": "🌑 12:00–17:00（持续 5 分钟全图仅 0 颗假眼黑灯瞎火期）：视野断档直接导致本方【帕克、环轨百戏王、司夜刺客】累计阵亡 6 人次！"
+          },
+          {
+            "time_range": "23:00–27:00",
+            "duration_min": 4,
+            "min_obs": 1,
+            "deaths_cnt": 6,
+            "victims_str": "帕克、环轨百戏王、主宰、潮汐猎人",
+            "detail": "🌑 23:00–27:00（持续 4 分钟全图仅 1 颗假眼黑灯瞎火期）：视野断档直接导致本方【帕克、环轨百戏王、主宰、潮汐猎人】累计阵亡 6 人次！"
+          }
+        ],
         "cliff_spots": [
           {
             "zone_zh": "夜魇中路野区腹地",
@@ -23162,6 +24281,7 @@
         "obs_records": [
           {
             "time_sec": -56,
+            "end_sec": 304,
             "time_str": "-00:56",
             "planter_hero": "帕克",
             "planter_pos": 2,
@@ -23176,6 +24296,7 @@
           },
           {
             "time_sec": 396,
+            "end_sec": 756,
             "time_str": "06:36",
             "planter_hero": "帕克",
             "planter_pos": 2,
@@ -23190,6 +24311,7 @@
           },
           {
             "time_sec": 20,
+            "end_sec": 151,
             "time_str": "00:20",
             "planter_hero": "司夜刺客",
             "planter_pos": 4,
@@ -23204,6 +24326,7 @@
           },
           {
             "time_sec": 150,
+            "end_sec": 214,
             "time_str": "02:30",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23218,6 +24341,7 @@
           },
           {
             "time_sec": 337,
+            "end_sec": 697,
             "time_str": "05:37",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23232,6 +24356,7 @@
           },
           {
             "time_sec": 555,
+            "end_sec": 650,
             "time_str": "09:15",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23246,6 +24371,7 @@
           },
           {
             "time_sec": 845,
+            "end_sec": 1205,
             "time_str": "14:05",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23260,6 +24386,7 @@
           },
           {
             "time_sec": 993,
+            "end_sec": 1353,
             "time_str": "16:33",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23274,6 +24401,7 @@
           },
           {
             "time_sec": 1002,
+            "end_sec": 1362,
             "time_str": "16:42",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23288,6 +24416,7 @@
           },
           {
             "time_sec": 1246,
+            "end_sec": 1563,
             "time_str": "20:46",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23302,6 +24431,7 @@
           },
           {
             "time_sec": 1542,
+            "end_sec": 1902,
             "time_str": "25:42",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23316,6 +24446,7 @@
           },
           {
             "time_sec": 1611,
+            "end_sec": 1971,
             "time_str": "26:51",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23330,6 +24461,7 @@
           },
           {
             "time_sec": 1623,
+            "end_sec": 1653,
             "time_str": "27:03",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23344,6 +24476,7 @@
           },
           {
             "time_sec": 1665,
+            "end_sec": 2025,
             "time_str": "27:45",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23358,6 +24491,7 @@
           },
           {
             "time_sec": 1766,
+            "end_sec": 2126,
             "time_str": "29:26",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23372,6 +24506,7 @@
           },
           {
             "time_sec": 1996,
+            "end_sec": 2356,
             "time_str": "33:16",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23386,6 +24521,7 @@
           },
           {
             "time_sec": 2154,
+            "end_sec": 2444,
             "time_str": "35:54",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23400,6 +24536,7 @@
           },
           {
             "time_sec": 2193,
+            "end_sec": 2553,
             "time_str": "36:33",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23414,6 +24551,7 @@
           },
           {
             "time_sec": 2466,
+            "end_sec": 2487,
             "time_str": "41:06",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23428,6 +24566,7 @@
           },
           {
             "time_sec": 2478,
+            "end_sec": 2791,
             "time_str": "41:18",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23442,6 +24581,7 @@
           },
           {
             "time_sec": 2608,
+            "end_sec": 2791,
             "time_str": "43:28",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23456,6 +24596,7 @@
           },
           {
             "time_sec": 2738,
+            "end_sec": 2791,
             "time_str": "45:38",
             "planter_hero": "环轨百戏王",
             "planter_pos": 5,
@@ -23583,6 +24724,82 @@
             "dewarded_by": "环轨百戏王"
           }
         ],
+        "god_tier_wards": [
+          {
+            "time_str": "-00:07",
+            "planter_hero": "天怒法师",
+            "pos": 5,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "15:27",
+            "planter_hero": "天怒法师",
+            "pos": 5,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "24:27",
+            "planter_hero": "天怒法师",
+            "pos": 5,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "26:04",
+            "planter_hero": "天怒法师",
+            "pos": 5,
+            "zone_zh": "夜魇中路野区腹地",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "33:08",
+            "planter_hero": "天怒法师",
+            "pos": 5,
+            "zone_zh": "上路河道 / 肉山坑口",
+            "posture_zh": "⚖️ 河道/肉山博弈眼",
+            "lifespan_sec": 360
+          },
+          {
+            "time_str": "40:12",
+            "planter_hero": "天怒法师",
+            "pos": 5,
+            "zone_zh": "夜魇下路三角区 / 二塔高台",
+            "posture_zh": "⚔️ 深入敌后进攻眼",
+            "lifespan_sec": 360
+          }
+        ],
+        "blackout_windows": [
+          {
+            "time_range": "08:00–09:00",
+            "duration_min": 1,
+            "min_obs": 1,
+            "deaths_cnt": 1,
+            "victims_str": "斧王",
+            "detail": "🌑 08:00–09:00（持续 1 分钟全图仅 1 颗假眼黑灯瞎火期）：视野断档直接导致本方【斧王】累计阵亡 1 人次！"
+          },
+          {
+            "time_range": "12:00–16:00",
+            "duration_min": 4,
+            "min_obs": 1,
+            "deaths_cnt": 6,
+            "victims_str": "斧王、编织者、撼地者、天怒法师",
+            "detail": "🌑 12:00–16:00（持续 4 分钟全图仅 1 颗假眼黑灯瞎火期）：视野断档直接导致本方【斧王、编织者、撼地者、天怒法师】累计阵亡 6 人次！"
+          },
+          {
+            "time_range": "21:00–22:00",
+            "duration_min": 1,
+            "min_obs": 1,
+            "deaths_cnt": 1,
+            "victims_str": "天怒法师",
+            "detail": "🌑 21:00–22:00（持续 1 分钟全图仅 1 颗假眼黑灯瞎火期）：视野断档直接导致本方【天怒法师】累计阵亡 1 人次！"
+          }
+        ],
         "cliff_spots": [
           {
             "zone_zh": "天辉中路野区腹地",
@@ -23618,6 +24835,7 @@
         "obs_records": [
           {
             "time_sec": -51,
+            "end_sec": 106,
             "time_str": "-00:51",
             "planter_hero": "斧王",
             "planter_pos": 2,
@@ -23632,6 +24850,7 @@
           },
           {
             "time_sec": 319,
+            "end_sec": 679,
             "time_str": "05:19",
             "planter_hero": "斧王",
             "planter_pos": 2,
@@ -23646,6 +24865,7 @@
           },
           {
             "time_sec": 672,
+            "end_sec": 709,
             "time_str": "11:12",
             "planter_hero": "斧王",
             "planter_pos": 2,
@@ -23660,6 +24880,7 @@
           },
           {
             "time_sec": 944,
+            "end_sec": 1223,
             "time_str": "15:44",
             "planter_hero": "斧王",
             "planter_pos": 2,
@@ -23674,6 +24895,7 @@
           },
           {
             "time_sec": 1314,
+            "end_sec": 1674,
             "time_str": "21:54",
             "planter_hero": "撼地者",
             "planter_pos": 4,
@@ -23688,6 +24910,7 @@
           },
           {
             "time_sec": 1525,
+            "end_sec": 1885,
             "time_str": "25:25",
             "planter_hero": "撼地者",
             "planter_pos": 4,
@@ -23702,6 +24925,7 @@
           },
           {
             "time_sec": 1723,
+            "end_sec": 2083,
             "time_str": "28:43",
             "planter_hero": "撼地者",
             "planter_pos": 4,
@@ -23716,6 +24940,7 @@
           },
           {
             "time_sec": 1749,
+            "end_sec": 2109,
             "time_str": "29:09",
             "planter_hero": "撼地者",
             "planter_pos": 4,
@@ -23730,6 +24955,7 @@
           },
           {
             "time_sec": 2143,
+            "end_sec": 2503,
             "time_str": "35:43",
             "planter_hero": "撼地者",
             "planter_pos": 4,
@@ -23744,6 +24970,7 @@
           },
           {
             "time_sec": 2407,
+            "end_sec": 2767,
             "time_str": "40:07",
             "planter_hero": "撼地者",
             "planter_pos": 4,
@@ -23758,6 +24985,7 @@
           },
           {
             "time_sec": 2498,
+            "end_sec": 2554,
             "time_str": "41:38",
             "planter_hero": "撼地者",
             "planter_pos": 4,
@@ -23772,6 +25000,7 @@
           },
           {
             "time_sec": -7,
+            "end_sec": 353,
             "time_str": "-00:07",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -23786,6 +25015,7 @@
           },
           {
             "time_sec": 533,
+            "end_sec": 893,
             "time_str": "08:53",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -23800,6 +25030,7 @@
           },
           {
             "time_sec": 927,
+            "end_sec": 1287,
             "time_str": "15:27",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -23814,6 +25045,7 @@
           },
           {
             "time_sec": 1106,
+            "end_sec": 1466,
             "time_str": "18:26",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -23828,6 +25060,7 @@
           },
           {
             "time_sec": 1467,
+            "end_sec": 1827,
             "time_str": "24:27",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -23842,6 +25075,7 @@
           },
           {
             "time_sec": 1564,
+            "end_sec": 1924,
             "time_str": "26:04",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -23856,6 +25090,7 @@
           },
           {
             "time_sec": 1988,
+            "end_sec": 2348,
             "time_str": "33:08",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -23870,6 +25105,7 @@
           },
           {
             "time_sec": 2102,
+            "end_sec": 2462,
             "time_str": "35:02",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -23884,6 +25120,7 @@
           },
           {
             "time_sec": 2412,
+            "end_sec": 2772,
             "time_str": "40:12",
             "planter_hero": "天怒法师",
             "planter_pos": 5,
@@ -25913,8 +27150,9 @@
     "map_space_by_side": {
       "dire": {
         "side": "dire",
-        "side_verdict": "🚨 地图空间警报：9 分钟后全队共发生 6 次【脱离团队落单带无聊线 / 盲区乱逛被抓死】！切忌在无假眼保护、无队友蹲后的情况下一个人过河道深带收线。",
+        "side_verdict": "🚨 地图空间警报：9 分钟后全队共发生 6 次【脱离团队落单带无聊线 / 盲区乱逛被抓死】（其中高达 3 次敌方根本没开雾，纯属不看小地图贪线白给）！切忌在无假眼保护、无队友蹲后的情况下一个人过河道深带收线。",
         "total_solo_pickoffs": 6,
+        "total_unsmoked_blind_feeds": 3,
         "solo_pickoff_events": [
           {
             "time_str": "10:57",
@@ -25925,11 +27163,13 @@
             "personaname": "Paphets",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": true,
+            "gank_nature_tag": "🌫️ 敌方开雾强抓",
+            "vision_tag": "🌫️ 敌方诡计之雾包夹（场上 2 颗眼）",
             "gold_fed": 85,
             "time_dead": 26,
             "consequence": "无战略收益白给",
-            "detail": "[10:57] 3号位 潮汐猎人 在【野区/兵线交界处】落单被  等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 26s · 送出 85 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[10:57] 3号位 潮汐猎人 在【野区/兵线交界处】落单被  等人抓死（🌫️ 敌方诡计之雾包夹（场上 2 颗眼） · 读秒 26s · 送出 85 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "14:01",
@@ -25940,11 +27180,13 @@
             "personaname": "Nanana",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "天怒法师",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 0 颗假眼仍孤立过河深带",
             "gold_fed": 495,
             "time_dead": 30,
             "consequence": "无战略收益白给",
-            "detail": "[14:01] 4号位 司夜刺客 在【野区/兵线交界处】落单被 天怒法师 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 30s · 送出 495 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[14:01] 4号位 司夜刺客 在【野区/兵线交界处】落单被 天怒法师 等人抓死（🌑 敌方未开雾！全图仅 0 颗假眼仍孤立过河深带 · 读秒 30s · 送出 495 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "27:11",
@@ -25955,11 +27197,13 @@
             "personaname": "Petarung Amoral",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "斧王",
-            "vision_tag": "👁️ 场上虽有 3 颗眼仍未警觉蹲伏",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 有眼不看小地图白给",
+            "vision_tag": "🚨 敌方未开雾！场上明明有 3 颗假眼却不看小地图退撤",
             "gold_fed": 1321,
             "time_dead": 54,
             "consequence": "无战略收益白给",
-            "detail": "[27:11] 1号位 主宰 在【野区/兵线交界处】落单被 斧王 等人抓死（👁️ 场上虽有 3 颗眼仍未警觉蹲伏 · 读秒 54s · 送出 1321 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[27:11] 1号位 主宰 在【野区/兵线交界处】落单被 斧王 等人抓死（🚨 敌方未开雾！场上明明有 3 颗假眼却不看小地图退撤 · 读秒 54s · 送出 1321 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "39:13",
@@ -25970,11 +27214,13 @@
             "personaname": "Nanana",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "天怒法师",
-            "vision_tag": "👁️ 场上虽有 3 颗眼仍未警觉蹲伏",
+            "is_enemy_smoke_gank": true,
+            "gank_nature_tag": "🌫️ 敌方开雾强抓",
+            "vision_tag": "🌫️ 敌方诡计之雾包夹（场上 3 颗眼）",
             "gold_fed": 1250,
             "time_dead": 80,
             "consequence": "无战略收益白给",
-            "detail": "[39:13] 4号位 司夜刺客 在【野区/兵线交界处】落单被 天怒法师 等人抓死（👁️ 场上虽有 3 颗眼仍未警觉蹲伏 · 读秒 80s · 送出 1250 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[39:13] 4号位 司夜刺客 在【野区/兵线交界处】落单被 天怒法师 等人抓死（🌫️ 敌方诡计之雾包夹（场上 3 颗眼） · 读秒 80s · 送出 1250 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "39:26",
@@ -25985,11 +27231,13 @@
             "personaname": "Flame = ez mute",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "撼地者",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": true,
+            "gank_nature_tag": "🌫️ 敌方开雾强抓",
+            "vision_tag": "🌫️ 敌方诡计之雾包夹（场上 2 颗眼）",
             "gold_fed": 1160,
             "time_dead": 80,
             "consequence": "无战略收益白给",
-            "detail": "[39:26] 5号位 环轨百戏王 在【野区/兵线交界处】落单被 撼地者 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 80s · 送出 1160 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[39:26] 5号位 环轨百戏王 在【野区/兵线交界处】落单被 撼地者 等人抓死（🌫️ 敌方诡计之雾包夹（场上 2 颗眼） · 读秒 80s · 送出 1160 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "41:02",
@@ -26000,11 +27248,13 @@
             "personaname": "loiverever౨ৎ",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "天怒法师",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 1 颗假眼仍孤立过河深带",
             "gold_fed": 1970,
             "time_dead": 100,
             "consequence": "41:33 连累本方丢掉外塔",
-            "detail": "[41:02] 2号位 帕克 在【野区/兵线交界处】落单被 天怒法师 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 100s · 送出 1970 金） → 💥 连锁掉点：41:33 连累本方丢掉外塔！"
+            "detail": "[41:02] 2号位 帕克 在【野区/兵线交界处】落单被 天怒法师 等人抓死（🌑 敌方未开雾！全图仅 1 颗假眼仍孤立过河深带 · 读秒 100s · 送出 1970 金） → 💥 连锁掉点：41:33 连累本方丢掉外塔！"
           }
         ],
         "player_space_rows": [
@@ -26019,6 +27269,7 @@
             "jungle_farm_pct": 47.3,
             "tower_damage": 14541,
             "solo_pickoff_cnt": 1,
+            "unsmoked_blind_cnt": 1,
             "solo_gold_fed": 1321,
             "deep_death_cnt": 0,
             "space_style_badge": "👑 顶级带线牵制大师",
@@ -26036,6 +27287,7 @@
             "jungle_farm_pct": 40.2,
             "tower_damage": 3647,
             "solo_pickoff_cnt": 1,
+            "unsmoked_blind_cnt": 1,
             "solo_gold_fed": 1970,
             "deep_death_cnt": 1,
             "space_style_badge": "🛡️ 稳健抱团驻守",
@@ -26053,6 +27305,7 @@
             "jungle_farm_pct": 49.2,
             "tower_damage": 4052,
             "solo_pickoff_cnt": 1,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 85,
             "deep_death_cnt": 1,
             "space_style_badge": "👑 顶级带线牵制大师",
@@ -26070,6 +27323,7 @@
             "jungle_farm_pct": 0.0,
             "tower_damage": 386,
             "solo_pickoff_cnt": 2,
+            "unsmoked_blind_cnt": 1,
             "solo_gold_fed": 1745,
             "deep_death_cnt": 2,
             "space_style_badge": "⚠️ 偶有盲区深带掉点",
@@ -26087,6 +27341,7 @@
             "jungle_farm_pct": 55.2,
             "tower_damage": 282,
             "solo_pickoff_cnt": 1,
+            "unsmoked_blind_cnt": 0,
             "solo_gold_fed": 1160,
             "deep_death_cnt": 1,
             "space_style_badge": "🛡️ 稳健抱团驻守",
@@ -26097,8 +27352,9 @@
       },
       "radiant": {
         "side": "radiant",
-        "side_verdict": "🚨 地图空间警报：9 分钟后全队共发生 13 次【脱离团队落单带无聊线 / 盲区乱逛被抓死】！切忌在无假眼保护、无队友蹲后的情况下一个人过河道深带收线。",
+        "side_verdict": "🚨 地图空间警报：9 分钟后全队共发生 13 次【脱离团队落单带无聊线 / 盲区乱逛被抓死】（其中高达 13 次敌方根本没开雾，纯属不看小地图贪线白给）！切忌在无假眼保护、无队友蹲后的情况下一个人过河道深带收线。",
         "total_solo_pickoffs": 13,
+        "total_unsmoked_blind_feeds": 13,
         "solo_pickoff_events": [
           {
             "time_str": "10:00",
@@ -26109,11 +27365,13 @@
             "personaname": "Super Bóp",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "主宰",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带",
             "gold_fed": 352,
             "time_dead": 24,
             "consequence": "无战略收益白给",
-            "detail": "[10:00] 4号位 撼地者 在【野区/兵线交界处】落单被 主宰 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 24s · 送出 352 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[10:00] 4号位 撼地者 在【野区/兵线交界处】落单被 主宰 等人抓死（🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带 · 读秒 24s · 送出 352 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "10:32",
@@ -26124,11 +27382,13 @@
             "personaname": "BOOM",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "帕克",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带",
             "gold_fed": 514,
             "time_dead": 30,
             "consequence": "无战略收益白给",
-            "detail": "[10:32] 2号位 斧王 在【野区/兵线交界处】落单被 帕克 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 30s · 送出 514 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[10:32] 2号位 斧王 在【野区/兵线交界处】落单被 帕克 等人抓死（🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带 · 读秒 30s · 送出 514 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "11:44",
@@ -26139,11 +27399,13 @@
             "personaname": "BOOM",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "司夜刺客",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带",
             "gold_fed": 534,
             "time_dead": 32,
             "consequence": "无战略收益白给",
-            "detail": "[11:44] 2号位 斧王 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 32s · 送出 534 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[11:44] 2号位 斧王 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带 · 读秒 32s · 送出 534 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "16:13",
@@ -26154,11 +27416,13 @@
             "personaname": "BOOM",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "司夜刺客",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带",
             "gold_fed": 602,
             "time_dead": 34,
             "consequence": "无战略收益白给",
-            "detail": "[16:13] 2号位 斧王 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 34s · 送出 602 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[16:13] 2号位 斧王 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带 · 读秒 34s · 送出 602 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "18:04",
@@ -26169,11 +27433,13 @@
             "personaname": "Me and 4 sinh viên",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "主宰",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带",
             "gold_fed": 1333,
             "time_dead": 48,
             "consequence": "无战略收益白给",
-            "detail": "[18:04] 1号位 齐天大圣 在【野区/兵线交界处】落单被 主宰 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 48s · 送出 1333 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[18:04] 1号位 齐天大圣 在【野区/兵线交界处】落单被 主宰 等人抓死（🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带 · 读秒 48s · 送出 1333 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "21:55",
@@ -26184,11 +27450,13 @@
             "personaname": "Roti Jala Mak Limah Biadab",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "司夜刺客",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带",
             "gold_fed": 567,
             "time_dead": 36,
             "consequence": "23:03 连累本方丢掉外塔",
-            "detail": "[21:55] 5号位 天怒法师 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 36s · 送出 567 金） → 💥 连锁掉点：23:03 连累本方丢掉外塔！"
+            "detail": "[21:55] 5号位 天怒法师 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带 · 读秒 36s · 送出 567 金） → 💥 连锁掉点：23:03 连累本方丢掉外塔！"
           },
           {
             "time_str": "22:08",
@@ -26199,11 +27467,13 @@
             "personaname": "Đỗ Ngọc Quý",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "潮汐猎人",
-            "vision_tag": "🌑 黑图无眼盲区孤立深带",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带",
             "gold_fed": 832,
             "time_dead": 48,
             "consequence": "23:03 连累本方丢掉外塔",
-            "detail": "[22:08] 3号位 编织者 在【野区/兵线交界处】落单被 潮汐猎人 等人抓死（🌑 黑图无眼盲区孤立深带 · 读秒 48s · 送出 832 金） → 💥 连锁掉点：23:03 连累本方丢掉外塔！"
+            "detail": "[22:08] 3号位 编织者 在【野区/兵线交界处】落单被 潮汐猎人 等人抓死（🌑 敌方未开雾！全图仅 2 颗假眼仍孤立过河深带 · 读秒 48s · 送出 832 金） → 💥 连锁掉点：23:03 连累本方丢掉外塔！"
           },
           {
             "time_str": "28:31",
@@ -26214,11 +27484,13 @@
             "personaname": "BOOM",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "司夜刺客",
-            "vision_tag": "👁️ 场上虽有 3 颗眼仍未警觉蹲伏",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 有眼不看小地图白给",
+            "vision_tag": "🚨 敌方未开雾！场上明明有 3 颗假眼却不看小地图退撤",
             "gold_fed": 1047,
             "time_dead": 54,
             "consequence": "无战略收益白给",
-            "detail": "[28:31] 2号位 斧王 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（👁️ 场上虽有 3 颗眼仍未警觉蹲伏 · 读秒 54s · 送出 1047 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[28:31] 2号位 斧王 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（🚨 敌方未开雾！场上明明有 3 颗假眼却不看小地图退撤 · 读秒 54s · 送出 1047 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "28:34",
@@ -26229,11 +27501,13 @@
             "personaname": "Roti Jala Mak Limah Biadab",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "司夜刺客",
-            "vision_tag": "👁️ 场上虽有 3 颗眼仍未警觉蹲伏",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 有眼不看小地图白给",
+            "vision_tag": "🚨 敌方未开雾！场上明明有 3 颗假眼却不看小地图退撤",
             "gold_fed": 678,
             "time_dead": 50,
             "consequence": "无战略收益白给",
-            "detail": "[28:34] 5号位 天怒法师 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（👁️ 场上虽有 3 颗眼仍未警觉蹲伏 · 读秒 50s · 送出 678 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
+            "detail": "[28:34] 5号位 天怒法师 在【野区/兵线交界处】落单被 司夜刺客 等人抓死（🚨 敌方未开雾！场上明明有 3 颗假眼却不看小地图退撤 · 读秒 50s · 送出 678 金） → 🚫 零战略收益的无聊带线/乱逛白给！"
           },
           {
             "time_str": "29:39",
@@ -26244,11 +27518,47 @@
             "personaname": "Super Bóp",
             "zone_zh": "野区/兵线交界处",
             "killer_zh": "",
-            "vision_tag": "👁️ 场上虽有 5 颗眼仍未警觉蹲伏",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 有眼不看小地图白给",
+            "vision_tag": "🚨 敌方未开雾！场上明明有 5 颗假眼却不看小地图退撤",
             "gold_fed": 170,
             "time_dead": 48,
             "consequence": "30:04 连累本方丢掉外塔",
-            "detail": "[29:39] 4号位 撼地者 在【野区/兵线交界处】落单被  等人抓死（👁️ 场上虽有 5 颗眼仍未警觉蹲伏 · 读秒 48s · 送出 170 金） → 💥 连锁掉点：30:04 连累本方丢掉外塔！"
+            "detail": "[29:39] 4号位 撼地者 在【野区/兵线交界处】落单被  等人抓死（🚨 敌方未开雾！场上明明有 5 颗假眼却不看小地图退撤 · 读秒 48s · 送出 170 金） → 💥 连锁掉点：30:04 连累本方丢掉外塔！"
+          },
+          {
+            "time_str": "46:15",
+            "time_sec": 2775,
+            "pos": 2,
+            "hero_short_zh": "斧王",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/axe.png",
+            "personaname": "BOOM",
+            "zone_zh": "野区/兵线交界处",
+            "killer_zh": "帕克",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 0 颗假眼仍孤立过河深带",
+            "gold_fed": 1245,
+            "time_dead": 0,
+            "consequence": "46:32 连累本方丢掉外塔",
+            "detail": "[46:15] 2号位 斧王 在【野区/兵线交界处】落单被 帕克 等人抓死（🌑 敌方未开雾！全图仅 0 颗假眼仍孤立过河深带 · 读秒 0s · 送出 1245 金） → 💥 连锁掉点：46:32 连累本方丢掉外塔！"
+          },
+          {
+            "time_str": "46:25",
+            "time_sec": 2785,
+            "pos": 5,
+            "hero_short_zh": "天怒法师",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skywrath_mage.png",
+            "personaname": "Roti Jala Mak Limah Biadab",
+            "zone_zh": "野区/兵线交界处",
+            "killer_zh": "主宰",
+            "is_enemy_smoke_gank": false,
+            "gank_nature_tag": "🚨 敌方未开雾 · 黑图盲区孤狼贪线",
+            "vision_tag": "🌑 敌方未开雾！全图仅 0 颗假眼仍孤立过河深带",
+            "gold_fed": 1004,
+            "time_dead": 0,
+            "consequence": "46:32 连累本方丢掉外塔",
+            "detail": "[46:25] 5号位 天怒法师 在【野区/兵线交界处】落单被 主宰 等人抓死（🌑 敌方未开雾！全图仅 0 颗假眼仍孤立过河深带 · 读秒 0s · 送出 1004 金） → 💥 连锁掉点：46:32 连累本方丢掉外塔！"
           }
         ],
         "player_space_rows": [
@@ -26263,6 +27573,7 @@
             "jungle_farm_pct": 36.8,
             "tower_damage": 3287,
             "solo_pickoff_cnt": 2,
+            "unsmoked_blind_cnt": 2,
             "solo_gold_fed": 3138,
             "deep_death_cnt": 0,
             "space_style_badge": "⚠️ 偶有盲区深带掉点",
@@ -26280,6 +27591,7 @@
             "jungle_farm_pct": 25.8,
             "tower_damage": 141,
             "solo_pickoff_cnt": 5,
+            "unsmoked_blind_cnt": 5,
             "solo_gold_fed": 3942,
             "deep_death_cnt": 3,
             "space_style_badge": "🚨 危险呆刷 · 无聊带线提款机",
@@ -26297,6 +27609,7 @@
             "jungle_farm_pct": 33.5,
             "tower_damage": 1044,
             "solo_pickoff_cnt": 1,
+            "unsmoked_blind_cnt": 1,
             "solo_gold_fed": 832,
             "deep_death_cnt": 0,
             "space_style_badge": "🛡️ 稳健抱团驻守",
@@ -26314,6 +27627,7 @@
             "jungle_farm_pct": 32.4,
             "tower_damage": 0,
             "solo_pickoff_cnt": 2,
+            "unsmoked_blind_cnt": 2,
             "solo_gold_fed": 522,
             "deep_death_cnt": 1,
             "space_style_badge": "⚠️ 偶有盲区深带掉点",
@@ -26331,6 +27645,7 @@
             "jungle_farm_pct": 12.9,
             "tower_damage": 16,
             "solo_pickoff_cnt": 3,
+            "unsmoked_blind_cnt": 3,
             "solo_gold_fed": 2249,
             "deep_death_cnt": 2,
             "space_style_badge": "🚨 迷雾乱逛提款机",

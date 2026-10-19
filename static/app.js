@@ -5581,6 +5581,9 @@ function renderTacticalMicroscopeSection(report) {
   if (tab === "hero_ult" || tab === "all") {
     blocks.push(renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, otherSide, otherSideZh));
   }
+  if (tab === "itemization" || tab === "all") {
+    blocks.push(renderMicroItemizationPane(report, df, targetSide, targetSideZh));
+  }
   if (tab === "unpressed_saves" || tab === "all") {
     blocks.push(renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh));
   }
@@ -5613,6 +5616,153 @@ function renderTacticalMicroscopeSection(report) {
   }
 
   bodyEl.innerHTML = blocks.join("");
+}
+
+/**
+ * Tab 2: 🎒 全员出装路线与「蠢装/漏出克制装/憋大件断档」处刑台
+ */
+function renderMicroItemizationPane(report, df, targetSide, targetSideZh) {
+  const ia = df.itemization_audit_by_side?.[targetSide];
+  if (!ia) {
+    return `<div class="empty-state compact">当前比赛暂无全员出装路线与克制装审计数据</div>`;
+  }
+
+  const counterChecks = ia.team_counter_checks || [];
+  const pRows = ia.player_item_rows || ia.player_item_audits || [];
+  const missingCnt = Number(ia.bad_counter_cnt ?? ia.missing_counter_count ?? 0);
+  const badBuildCnt = Number(ia.bad_build_cnt ?? ia.bad_build_players_count ?? 0);
+
+  const counterCardsHtml = counterChecks
+    .map((chk) => {
+      const ok = chk.grade === "good" || Boolean(chk.passed);
+      return `
+        <div class="micro-ult-box" style="border-left: 3px solid ${ok ? "var(--green)" : "var(--red)"};">
+          <div class="micro-ult-top">
+            <span class="micro-ult-name">${escapeHtml(chk.category || "团队针对装审计")}</span>
+            <span class="status-pill ${ok ? "connected" : ""}" style="${
+        ok ? "" : "border-color:rgba(239,68,68,0.45);color:var(--red-light);"
+      }">${ok ? "✅ 针对到位" : "🚨 严重漏出"}</span>
+          </div>
+          <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+            <b>敌方威胁：</b>${injectHeroLogosIntoHtml(escapeHtml(chk.enemy_threats || chk.enemy_threat || ""), report)} ｜ <b>本方应对：</b>${injectHeroLogosIntoHtml(
+        escapeHtml(chk.our_response || chk.required_items_zh || ""),
+        report
+      )}
+          </div>
+          <div style="font-size:12px; color:${ok ? "var(--green-light)" : "var(--red-light)"}; font-weight:600; margin-top:4px;">
+            ${injectHeroLogosIntoHtml(escapeHtml(chk.verdict || chk.status_zh || ""), report)}
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const pRowsHtml = pRows
+    .map((r) => {
+      const isBad = r.grade === "bad";
+      const isWarn = r.grade === "warn";
+      const isGood = r.grade === "good";
+      const tItems = r.major_timeline || r.timeline_items || [];
+      const timelineStr =
+        tItems
+          .map(
+            (it) =>
+              `<span class="micro-tf-pill" style="display:inline-flex;align-items:center;gap:4px;">${
+                it.img ? `<img src="${escapeHtml(it.img)}" width="20" height="14" alt="" style="border-radius:2px;" loading="lazy" />` : ""
+              }${escapeHtml(it.zh || it.item_zh || "")} (${escapeHtml(it.time_str || "")})</span>`
+          )
+          .join(" ") || `<span style="color:var(--muted);">无核心大件合成记录</span>`;
+      const issuesList = r.issues_list || r.issues || [];
+      const issuesHtml = issuesList
+        .map((iss) => {
+          const isPositive = String(iss).startsWith("✓");
+          return `<li style="color:${isPositive ? "var(--green-light)" : "var(--red-light)"};">${injectHeroLogosIntoHtml(
+            escapeHtml(iss),
+            report
+          )}</li>`;
+        })
+        .join("");
+      const refBuild = r.core_reference_zh || r.recommended_build_zh || "";
+      return `
+        <tr>
+          <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
+          <td class="micro-badge-cell">
+            <span class="micro-exec-badge ${isBad || isWarn ? "warn" : isGood ? "good" : ""}">
+              ${escapeHtml(r.verdict_badge || "常规出装")}
+            </span>
+          </td>
+          <td>
+            <div class="micro-tf-pills" style="margin-bottom:4px;">${timelineStr}</div>
+            <div style="font-size:11px; color:var(--muted);">
+              ⏱️ 憋装最长断档：<b>${escapeHtml(r.stall_window_zh || "平滑过渡")}</b>
+              ${refBuild ? `<br/>📖 126英雄库标准出装参考：<span>${escapeHtml(refBuild)}</span>` : ""}
+            </div>
+          </td>
+          <td>
+            <ul class="micro-insights-list" style="margin:0;">
+              ${issuesHtml || `<li style="color:var(--green-light);">✓ 核心装备与节奏衔接正常</li>`}
+            </ul>
+          </td>
+          <td style="color:${isBad ? "var(--red-light)" : isWarn ? "var(--gold-light)" : "var(--green-light)"}; font-weight:600;">
+            ${injectHeroLogosIntoHtml(escapeHtml(r.fix_advice_zh || ""), report)}
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>🎒 2. 全员出装路线与「蠢装 / 漏出克制装 / 憋大件断档」处刑台 (${escapeHtml(targetSideZh)})</h3>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(ia.side_verdict || ""), report)}</p>
+        </div>
+      </div>
+
+      <div class="micro-kpi-row">
+        <div class="micro-kpi-cell">
+          <span>团队针对装必考项</span>
+          <strong>共 ${counterChecks.length} 项刚需核查</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>漏出关键克制装项数</span>
+          <strong style="color:${missingCnt > 0 ? "var(--red-light)" : "var(--green-light)"};">${missingCnt} 项漏出</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>出装毒瘤 / 憋大件断档人数</span>
+          <strong style="color:${badBuildCnt > 0 ? "var(--red-light)" : "var(--green-light)"};">${badBuildCnt} 人被抓包</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>审计覆盖范围</span>
+          <strong>减疗 / 大隐刀破被动 / 否决破保命 / BKB / 魔晶 / 救人装</strong>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🛡️ 团队刚需克制装核查清单（根据敌方 5 人英雄池自动判定本局必出针对装）</h4>
+        <div class="micro-grid-2col">${counterCardsHtml}</div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🔪 1~5 号位个人出装时间轴、憋大件真空期与换装纠错处刑台</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄</th>
+                <th>出装评级</th>
+                <th>核心装备合成时间轴 &amp; 最长憋装断档</th>
+                <th>出装毒点 / 亮点审计</th>
+                <th>立刻换装纠错处方</th>
+              </tr>
+            </thead>
+            <tbody>${pRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, otherSide, otherSideZh) {
@@ -5838,6 +5988,8 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
   const avgLife = vis.avg_lifespan_sec ?? 0;
   const dewardedTotal = vis.dewarded_total ?? vis.obs_dewarded_count ?? 0;
   const dewardedPct = vis.dewarded_pct ?? vis.obs_dewarded_pct ?? 0;
+  const godWards = vis.god_tier_wards || [];
+  const blackoutWindows = vis.blackout_windows || [];
 
   const supList = vis.per_support_vision || vis.support_breakdown || [];
   const supRowsHtml = supList
@@ -5911,6 +6063,31 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
           .join("")
       : `<li>✓ 本局未出现同一高台头铁连插 3 颗以上眼位的情况</li>`;
 
+  const godHtml =
+    godWards.length > 0
+      ? godWards
+          .map(
+            (gw) =>
+              `<li>✨ <b>${escapeHtml(gw.time_str || "")}</b> · ${injectHeroLogosIntoHtml(
+                escapeHtml(gw.planter_hero || ""),
+                report
+              )} 在 <b>${escapeHtml(gw.zone_zh || "")} (${escapeHtml(gw.coords || "")})</b> 点亮的【${escapeHtml(
+                gw.posture_zh || ""
+              )}】足足存活 <b>${gw.lifespan_sec ?? 360} 秒</b>！</li>`
+          )
+          .join("")
+      : `<li>本局暂无点亮满 330 秒以上的深入进攻/河道封神眼</li>`;
+
+  const blackoutHtml =
+    blackoutWindows.length > 0
+      ? blackoutWindows
+          .map(
+            (bw) =>
+              `<li style="color:var(--red-light);">${injectHeroLogosIntoHtml(escapeHtml(bw.summary || ""), report)}</li>`
+          )
+          .join("")
+      : `<li style="color:var(--green-light);">✓ 本局未出现全图假眼 ≤1 颗且导致队友接连阵亡的黑图真空期！</li>`;
+
   const obsRecords = vis.obs_records || [];
   const obsTableRows = obsRecords
     .map((w, idx) => {
@@ -5940,7 +6117,7 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
     <div class="micro-pane-block">
       <div class="micro-pane-banner">
         <div>
-          <h3>👁️ 2. 辅助眼位进攻/防守倾向与存活寿命审计 (${escapeHtml(targetSideZh)})</h3>
+          <h3>👁️ 6. 辅助眼位进攻/防守倾向、满时长封神眼与黑图真空期审计 (${escapeHtml(targetSideZh)})</h3>
           <p>${injectHeroLogosIntoHtml(escapeHtml(vis.posture_verdict || ""), report)}</p>
         </div>
       </div>
@@ -5973,12 +6150,12 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
           <strong>${avgLife} 秒 / 360 秒</strong>
         </div>
         <div class="micro-kpi-cell">
-          <span>假眼被敌方排掉比例</span>
-          <strong>被排 ${dewardedTotal} 颗 (${dewardedPct}%)</strong>
+          <span>假眼被排 / 秒排白给(&le;90s)</span>
+          <strong>被排 ${dewardedTotal} 颗 (${dewardedPct}%) / 秒排 ${instantList.length} 颗</strong>
         </div>
         <div class="micro-kpi-cell">
-          <span>秒排白给眼 (&le;90s) / 同高台死磕</span>
-          <strong>${instantList.length} 颗秒排 / ${cliffList.length} 处高台</strong>
+          <span>满时长封神眼 / 黑灯瞎火真空期</span>
+          <strong>✨ ${godWards.length} 颗封神眼 / 🌑 ${blackoutWindows.length} 段黑图死人期</strong>
         </div>
       </div>
 
@@ -6016,14 +6193,22 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
         </div>
 
         <div class="micro-card">
-          <h4>🚨 秒排白给眼 (&le;90s) &amp; 同高台头铁连插抓包台</h4>
+          <h4>🚨 秒排白给眼 (&le;90s)、黑图真空期与满时长封神眼</h4>
           <div>
+            <strong style="font-size:12px; color:var(--red-light);">🌑 全图黑灯瞎火视野真空期（全图假眼 &le;1 颗且队友阵亡）：</strong>
+            <ul class="micro-insights-list" style="margin-top:5px;">${blackoutHtml}</ul>
+          </div>
+          <div style="margin-top:6px;">
             <strong style="font-size:12px; color:var(--gold-light);">⚡ 插下不到 90 秒即被排掉的秒排眼：</strong>
             <ul class="micro-insights-list" style="margin-top:5px;">${instantHtml}</ul>
           </div>
           <div style="margin-top:6px;">
             <strong style="font-size:12px; color:var(--gold-light);">📍 同一高台/眼位重复插眼习惯审计：</strong>
             <ul class="micro-insights-list" style="margin-top:5px;">${cliffHtml}</ul>
+          </div>
+          <div style="margin-top:6px;">
+            <strong style="font-size:12px; color:var(--green-light);">✨ 点亮满时长(&ge;330s)的进攻/河道封神眼：</strong>
+            <ul class="micro-insights-list" style="margin-top:5px;">${godHtml}</ul>
           </div>
         </div>
       </div>
@@ -6658,7 +6843,7 @@ function renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh) {
 }
 
 /**
- * Tab 3: 🗺️ 地图空间理解与「大哥带无聊危险线 / 落单乱逛被抓死」空间取证
+ * Tab 4: 🕵️‍♂️ 单带无故被抓 & 敌方开雾强抓 vs 未开雾纯白给侦探社
  */
 function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
   const ms = df.map_space_by_side?.[targetSide];
@@ -6667,12 +6852,15 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
   }
 
   const totalSolo = Number(ms.total_solo_pickoffs ?? 0);
+  const totalUnsmoked = Number(ms.total_unsmoked_blind_feeds ?? 0);
   const events = ms.solo_pickoff_events || [];
   const pRows = ms.player_space_rows || [];
 
   const pRowsHtml = pRows
     .map((r) => {
       const soloCnt = Number(r.solo_pickoff_cnt ?? 0);
+      const unsmokedCnt = Number(r.unsmoked_blind_cnt ?? 0);
+      const smokeGankCnt = Number(r.smoke_ganked_cnt ?? 0);
       const isBad = r.grade === "bad" || soloCnt >= 2;
       const isGood = r.grade === "good";
       return `
@@ -6685,9 +6873,19 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
           <td><b style="color:${(r.tower_damage ?? 0) >= 3500 ? "var(--gold-light)" : "var(--text)"}">${fmtNum(
         r.tower_damage || 0
       )}</b></td>
-          <td><b style="color:${soloCnt >= 2 ? "var(--red-light)" : soloCnt === 0 ? "var(--green-light)" : "var(--gold-light)"}">${soloCnt} 次</b> (送 ${fmtNum(
+          <td>
+            <b style="color:${soloCnt >= 2 ? "var(--red-light)" : soloCnt === 0 ? "var(--green-light)" : "var(--gold-light)"}">${soloCnt} 次</b> (送 ${fmtNum(
         r.solo_gold_fed || 0
-      )} 金)</td>
+      )} 金)
+            ${
+              soloCnt > 0
+                ? `<div style="font-size:11px; margin-top:2px;">
+                    ${unsmokedCnt > 0 ? `<span style="color:var(--red-light);font-weight:700;">🚨 未开雾白给 ${unsmokedCnt}次</span>` : ""}
+                    ${smokeGankCnt > 0 ? `<span style="color:var(--muted);">🌫️ 被开雾抓 ${smokeGankCnt}次</span>` : ""}
+                  </div>`
+                : ""
+            }
+          </td>
           <td>${injectHeroLogosIntoHtml(escapeHtml(r.verdict || ""), report)}</td>
         </tr>
       `;
@@ -6700,12 +6898,17 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
       const killerHtml = killerImg
         ? `<span class="inline-hero-chip"><img class="inline-hero-logo" src="${escapeHtml(killerImg)}" alt="" /><b>${escapeHtml(ev.killer_zh || "敌方")}</b></span>`
         : `<b>${escapeHtml(ev.killer_zh || "敌方")}</b>`;
+      const isSmoke = Boolean(ev.is_enemy_smoke_gank);
+      const natureTag = ev.gank_nature_tag || (isSmoke ? "🌫️ 敌方开雾强抓" : ev.vision_tag || "");
       return `
       <tr>
         <td><b>${escapeHtml(ev.time_str || "")}</b></td>
         <td>${renderHeroCellWithLogo(ev.pos, ev.hero_short_zh, ev.personaname, report, ev.hero_img)}</td>
         <td><b>${escapeHtml(ev.zone_zh || "")}</b> (被 ${killerHtml} 抓死)</td>
-        <td>${escapeHtml(ev.vision_tag || "")}</td>
+        <td>
+          <div style="font-weight:700; color:${isSmoke ? "var(--gold-light)" : "var(--red-light)"};">${escapeHtml(natureTag)}</div>
+          <div style="font-size:11px; color:var(--muted);">${escapeHtml(ev.vision_tag || "")}</div>
+        </td>
         <td>读秒 <b>${ev.time_dead ?? 0}s</b> · 送 <b>${fmtNum(ev.gold_fed || 0)} 金</b></td>
         <td><b style="color:${
           (ev.consequence || "").includes("无战略收益") ? "var(--gold-light)" : "var(--red-light)"
@@ -6719,8 +6922,27 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
     <div class="micro-pane-block">
       <div class="micro-pane-banner">
         <div>
-          <h3>🗺️ 3. 地图空间理解与「大哥带无聊危险线 / 落单乱逛被抓死」空间取证 (${escapeHtml(targetSideZh)})</h3>
+          <h3>🕵️‍♂️ 4. 单带无故被抓 &amp; 敌方开雾强抓 vs 未开雾纯白给侦探社 (${escapeHtml(targetSideZh)})</h3>
           <p>${injectHeroLogosIntoHtml(escapeHtml(ms.side_verdict || ""), report)}</p>
+        </div>
+      </div>
+
+      <div class="micro-kpi-row">
+        <div class="micro-kpi-cell">
+          <span>9m后落单被抓总次数</span>
+          <strong style="color:${totalSolo >= 4 ? "var(--red-light)" : "var(--gold-light)"};">${totalSolo} 次落单被抓</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🚨 敌方未开雾 · 纯白给次数</span>
+          <strong style="color:${totalUnsmoked > 0 ? "var(--red-light)" : "var(--green-light)"};">${totalUnsmoked} 次未开雾白给</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🌫️ 敌方开雾强抓次数</span>
+          <strong>${Math.max(0, totalSolo - totalUnsmoked)} 次被诡计之雾突袭</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>判定依据</span>
+          <strong>敌方65秒内开雾日志 + 假眼ehandle实时坐标 + 70s掉塔丢盾</strong>
         </div>
       </div>
 
@@ -6734,7 +6956,7 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
                 <th>地图空间理解画像</th>
                 <th>收线补刀 vs 刷野占比</th>
                 <th>建筑推塔转化</th>
-                <th>9m后落单被抓</th>
+                <th>9m后落单被抓 (开雾 vs 白给)</th>
                 <th>空间利用与带线纪律判词</th>
               </tr>
             </thead>
@@ -6744,7 +6966,7 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
       </div>
 
       <div class="micro-card">
-        <h4>🚨 9 分钟后脱离团队「无聊带危险线 / 黑图盲区乱逛被抓死」全记录 (共 ${totalSolo} 次)</h4>
+        <h4>🚨 9 分钟后脱离团队「单带无故被抓 / 黑图盲区乱逛被抓死」逐次铁证笔录 (共 ${totalSolo} 次，其中未开雾白给 ${totalUnsmoked} 次)</h4>
         <div class="micro-table-wrap">
           <table class="micro-data-table">
             <thead>
@@ -6752,7 +6974,7 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
                 <th>被抓时间</th>
                 <th>落单当事人</th>
                 <th>暴毙地点 &amp; 凶手</th>
-                <th>当时场上假眼视野</th>
+                <th>被抓定性 (敌方开雾 vs 未开雾白给)</th>
                 <th>读秒与经济出血</th>
                 <th>70秒内连锁后果 / 战略收益审计</th>
               </tr>
@@ -10871,6 +11093,8 @@ function renderSquadLedgerSection(squadLedger) {
   const analyzed = squadLedger?.analyzed_matches || [];
   const heroPool = squadLedger?.recent_hero_pool || [];
   const partySum = squadLedger?.party_summary || {};
+  const guinness = squadLedger?.guinness_records || [];
+  const duoChem = squadLedger?.lane_duo_chemistry || [];
 
   if (!squadLedger || (members.length === 0 && analyzed.length === 0)) {
     sec.hidden = true;
@@ -10894,6 +11118,63 @@ function renderSquadLedgerSection(squadLedger) {
   const topCarryMember = [...members].sort(
     (a, b) => (b.mvp_count || 0) - (a.mvp_count || 0) || (b.avg_rating || 0) - (a.avg_rating || 0)
   )[0];
+
+  const guinnessCardsHtml =
+    guinness.length > 0
+      ? `
+      <div class="micro-kpi-row" style="margin-bottom: 12px;">
+        ${guinness
+          .map((g) => {
+            const toneColor =
+              g.tone === "good"
+                ? "var(--green-light)"
+                : g.tone === "bad"
+                ? "var(--red-light)"
+                : "var(--gold-light)";
+            return `
+              <div class="micro-kpi-cell" style="border-left: 3px solid ${toneColor};">
+                <span>${escapeHtml(g.title || "")}</span>
+                <strong style="color:${toneColor}; font-size:15px;">${escapeHtml(g.holder || "—")} · ${escapeHtml(
+              g.value || ""
+            )}</strong>
+                <div style="font-size:11px; color:var(--muted); margin-top:3px;">${escapeHtml(g.detail || "")}</div>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    `
+      : "";
+
+  const duoChemRowsHtml =
+    duoChem.length > 0
+      ? duoChem
+          .map((d) => {
+            const isGood = d.chemistry_tone === "good" || d.tone === "good";
+            const isBad = d.chemistry_tone === "bad" || d.tone === "bad";
+            const pairNames = d.duo_names || d.pair_names || "";
+            const pairRating = d.avg_rating ?? d.avg_pair_rating ?? 0;
+            const verdictTag = d.chemistry_tag || d.verdict || "";
+            const heroPairsStr = (d.hero_pairs || [])
+              .slice(0, 3)
+              .map((hp) => `${hp.pair_zh}(${hp.won ? "胜" : "负"})`)
+              .join(" / ");
+            return `
+              <div class="hero-pool-item">
+                <div class="hero-pool-left">
+                  <div>
+                    <strong>${escapeHtml(d.lane_label)} · ${escapeHtml(pairNames)}</strong>
+                    <span>搭档 ${d.games} 局 (${d.wins}胜) · 胜率 <b>${d.win_rate}%</b> · 双人均分 <b>${pairRating}</b>${
+              heroPairsStr ? ` · <i>${escapeHtml(heroPairsStr)}</i>` : ""
+            }</span>
+                  </div>
+                </div>
+                <span class="hero-pool-tag ${isGood ? "ace" : isBad ? "ban" : ""}">${escapeHtml(verdictTag)}</span>
+              </div>
+            `;
+          })
+          .join("")
+      : `<div style="font-size:12px; color:var(--muted);">暂无足够多局双排搭档样本</div>`;
 
   const matchChipsHtml = analyzed
     .map(
@@ -10945,11 +11226,13 @@ function renderSquadLedgerSection(squadLedger) {
       </div>
     </div>
 
+    ${guinnessCardsHtml}
+
     <div class="squad-grid-2col">
       <article class="squad-card">
         <div class="squad-card-head">
-          <h3>⚖️ 五黑车队成员跨局贡献与分锅总榜</h3>
-          <span>胜局记首功 · 败局抓战犯 · 谁是大腿谁是惯犯一目了然</span>
+          <h3>⚖️ 五黑车队成员跨局贡献、惯犯吉尼斯与绝活/冥币英雄榜</h3>
+          <span>胜局记首功 · 败局抓战犯 · 跨局汇总憋BKB/单带白给/蠢装累计次数</span>
         </div>
         <div class="squad-table-wrap">
           <table class="squad-rank-table">
@@ -10959,9 +11242,9 @@ function renderSquadLedgerSection(squadLedger) {
                 <th>历史定位</th>
                 <th>出勤/胜率</th>
                 <th>场均贡献/分锅</th>
-                <th>场均评分</th>
-                <th>MVP / 败局锅王</th>
-                <th>场均KDA / 读秒</th>
+                <th>场均评分 / MVP</th>
+                <th>跨局显微镜铁证 (憋救命装/单带被抓)</th>
+                <th>个人绝活 vs 冥币英雄</th>
                 <th>近期代表英雄</th>
               </tr>
             </thead>
@@ -10983,6 +11266,12 @@ function renderSquadLedgerSection(squadLedger) {
                           : ""
                     )
                     .join("");
+                  const unp = Number(m.unpressed_saves_total ?? 0);
+                  const solo = Number(m.solo_pickoffs_total ?? 0);
+                  const blind = Number(m.unsmoked_blind_total ?? 0);
+                  const badBuild = Number(m.bad_builds_total ?? 0);
+                  const bestH = m.best_hero;
+                  const worstH = m.worst_hero;
                   return `
                     <tr class="${m.is_me ? "is-me" : ""}">
                       <td>
@@ -10995,11 +11284,30 @@ function renderSquadLedgerSection(squadLedger) {
                       <td style="color:${
                         m.avg_blame_pct >= 22 ? "var(--red-light)" : "var(--gold-light)"
                       };font-weight:700;">贡献${m.avg_contrib_pct ?? 20}% / 锅${m.avg_blame_pct}%</td>
-                      <td>${m.avg_rating}</td>
-                      <td>${m.mvp_count}次 / <b style="color:${
+                      <td><b>${m.avg_rating}</b> (${m.mvp_count}MVP / <b style="color:${
                         m.culprit_count > 0 ? "var(--red-light)" : "inherit"
-                      }">${m.culprit_count}次</b></td>
-                      <td>${escapeHtml(m.avg_kda)} (${m.avg_dead_sec}s)</td>
+                      }">${m.culprit_count}锅</b>)</td>
+                      <td>
+                        <div style="font-size:11px; line-height:1.45;">
+                          <span style="color:${unp >= 3 ? "var(--red-light)" : "var(--text)"};">💀 憋装秒躺 <b>${unp}次</b></span><br/>
+                          <span style="color:${solo >= 4 ? "var(--red-light)" : "var(--text)"};">🕵️‍♂️ 单带被抓 <b>${solo}次</b> (白给${blind}次)</span>
+                          ${badBuild > 0 ? `<br/><span style="color:var(--gold-light);">🎒 出装抓包 <b>${badBuild}局</b></span>` : ""}
+                        </div>
+                      </td>
+                      <td>
+                        <div style="font-size:11px; line-height:1.45;">
+                          ${
+                            bestH
+                              ? `<span style="color:var(--green-light);">🌟 绝活:${escapeHtml(bestH.hero_short_zh)}(${bestH.avg_rating}分)</span>`
+                              : ""
+                          }
+                          ${
+                            worstH && (!bestH || worstH.hero_short_zh !== bestH.hero_short_zh)
+                              ? `<br/><span style="color:var(--red-light);">💸 慎选:${escapeHtml(worstH.hero_short_zh)}(${worstH.avg_rating}分)</span>`
+                              : ""
+                          }
+                        </div>
+                      </td>
                       <td><div class="squad-heroes-mini">${heroesImgs}</div></td>
                     </tr>
                   `;
@@ -11012,34 +11320,41 @@ function renderSquadLedgerSection(squadLedger) {
 
       <article class="squad-card">
         <div class="squad-card-head">
-          <h3>🎭 近期英雄池红黑榜 &amp; 已审理录像档案库</h3>
-          <span>点击下方任意已归档比赛可秒切换复盘</span>
+          <h3>🤝 边路双排 &amp; 中野联动化学反应榜 · 近期英雄池红黑榜</h3>
+          <span>谁和谁走一路是天作之合？谁和谁搭档十把九炸？</span>
         </div>
-        <div class="hero-pool-list">
-          ${heroPool
-            .slice(0, 6)
-            .map((hp) => {
-              const cls = hp.verdict === "上分绝活" ? "ace" : hp.verdict === "掉分慎选" ? "ban" : "";
-              return `
-                <div class="hero-pool-item">
-                  <div class="hero-pool-left">
-                    ${
-                      hp.hero_img
-                        ? `<img src="${escapeHtml(hp.hero_img)}" width="30" height="17" alt="${escapeHtml(
-                            hp.hero_short_zh
-                          )}" loading="lazy" />`
-                        : ""
-                    }
-                    <div>
-                      <strong>${escapeHtml(hp.hero_short_zh)}</strong>
-                      <span>${hp.games}局 ${hp.win_rate}%胜 · KDA ${escapeHtml(hp.avg_kda)}</span>
+        <div style="margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:5px;">⚡ 车队双人路 &amp; 中野联动搭档胜率榜：</div>
+          <div class="hero-pool-list">${duoChemRowsHtml}</div>
+        </div>
+        <div style="margin-top:6px;">
+          <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:5px;">🎭 主视角近期英雄池红黑榜：</div>
+          <div class="hero-pool-list">
+            ${heroPool
+              .slice(0, 4)
+              .map((hp) => {
+                const cls = hp.verdict === "上分绝活" ? "ace" : hp.verdict === "掉分慎选" ? "ban" : "";
+                return `
+                  <div class="hero-pool-item">
+                    <div class="hero-pool-left">
+                      ${
+                        hp.hero_img
+                          ? `<img src="${escapeHtml(hp.hero_img)}" width="30" height="17" alt="${escapeHtml(
+                              hp.hero_short_zh
+                            )}" loading="lazy" />`
+                          : ""
+                      }
+                      <div>
+                        <strong>${escapeHtml(hp.hero_short_zh)}</strong>
+                        <span>${hp.games}局 ${hp.win_rate}%胜 · KDA ${escapeHtml(hp.avg_kda)}</span>
+                      </div>
                     </div>
+                    <span class="hero-pool-tag ${cls}">${escapeHtml(hp.verdict)}</span>
                   </div>
-                  <span class="hero-pool-tag ${cls}">${escapeHtml(hp.verdict)}</span>
-                </div>
-              `;
-            })
-            .join("")}
+                `;
+              })
+              .join("")}
+          </div>
         </div>
         <div style="margin-top:6px;">
           <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:5px;">📚 已完成录像级审理的五黑比赛（点击直接调阅）：</div>
