@@ -9982,7 +9982,7 @@ function renderPhaseSection(report) {
 }
 
 /**
- * 8. Module 4: Key Teamfights & Turning Windows
+ * 8. Module 4: Key Teamfights Second-by-Second Replay & Breakdown Forensics
  */
 function renderKeyWindowsSection(report) {
   const grid = document.getElementById("key-windows-grid");
@@ -9998,9 +9998,258 @@ function renderKeyWindowsSection(report) {
       : [];
   const tfs = report.key_teamfights || [];
   const tfForensics = report.deep_forensics?.teamfight_forensics || [];
+  const filterMode = state.tfSceneFilter || "top3";
+
+  // Bind filter tab buttons once or sync active state
+  document.querySelectorAll("[data-tf-filter]").forEach((btn) => {
+    const mode = btn.getAttribute("data-tf-filter");
+    if (mode === "all") {
+      btn.textContent = `📋 全部关键团战 (${tfForensics.length || tfs.length}波)`;
+    }
+    btn.classList.toggle("active", mode === filterMode);
+    if (!btn.dataset.boundTfFilter) {
+      btn.dataset.boundTfFilter = "1";
+      btn.addEventListener("click", () => {
+        state.tfSceneFilter = btn.getAttribute("data-tf-filter") || "top3";
+        if (state.currentReport) renderKeyWindowsSection(state.currentReport);
+      });
+    }
+  });
 
   const cardsHtml = [];
 
+  // Select teamfights to display
+  let selectedForensics = [];
+  if (tfForensics.length > 0) {
+    if (filterMode === "top3") {
+      const topRanked = tfForensics
+        .filter((f) => Number(f.decisive_rank) >= 1 && Number(f.decisive_rank) <= 3)
+        .sort((a, b) => Number(a.decisive_rank) - Number(b.decisive_rank));
+      selectedForensics = topRanked.length > 0 ? topRanked : tfForensics.slice(0, 3);
+    } else {
+      selectedForensics = [...tfForensics].sort((a, b) => (a.start_sec || 0) - (b.start_sec || 0));
+    }
+  }
+
+  if (selectedForensics.length > 0) {
+    selectedForensics.forEach((fObj, cardIdx) => {
+      const origTfIdx = tfForensics.findIndex((f) => f.tf_index === fObj.tf_index);
+      const tfIdxToUse = origTfIdx >= 0 ? origTfIdx : cardIdx;
+      const sideVerdict = fObj.by_side?.[side] || {};
+      const outcomeBadge =
+        sideVerdict.outcome_badge ||
+        `${side === "radiant" ? fObj.rad_kills : fObj.dire_kills}换${
+          side === "radiant" ? fObj.dire_kills : fObj.rad_kills
+        }`;
+      const outcomeTone = sideVerdict.outcome_tone || "mixed";
+      const rootCauses = sideVerdict.root_causes || [];
+      const ownTotalDmg = sideVerdict.own_total_dmg ?? (side === "radiant" ? fObj.rad_total_dmg : fObj.dire_total_dmg) ?? 0;
+      const oppTotalDmg = sideVerdict.opp_total_dmg ?? (side === "radiant" ? fObj.dire_total_dmg : fObj.rad_total_dmg) ?? 0;
+      const grandDmg = Math.max(1, ownTotalDmg + oppTotalDmg);
+      const ownDmgPct = Math.round((ownTotalDmg / grandDmg) * 100);
+      const oppDmgPct = 100 - ownDmgPct;
+      const deathCount = (fObj.deaths_coords || []).length;
+      const rankLabel = fObj.decisive_rank
+        ? `🚨 胜负手第一现场 #${fObj.decisive_rank}`
+        : `⚔️ 团战现场 #${fObj.tf_index || cardIdx + 1}`;
+
+      // Part A: Root Causes & Damage Tug-of-War
+      const causesHtml = rootCauses
+        .map(
+          (rc) =>
+            `<li class="tf-cause-item">${injectHeroLogosIntoHtml(escapeHtml(rc), report)}</li>`
+        )
+        .join("");
+
+      // Part B: Second-by-Second Script Timeline
+      const scriptEvents = fObj.second_by_second_script || [];
+      const scriptHtml = scriptEvents
+        .map((ev) => {
+          const evType = ev.event_type || "info";
+          let rowClass = "tf-script-row";
+          if (evType === "kill") {
+            rowClass += ev.victim_side === side ? " is-own-death" : " is-enemy-death";
+            if (ev.is_first_kill) rowClass += " is-first-blood";
+          } else if (evType === "consequence") {
+            rowClass += " is-consequence";
+          } else if (evType === "buyback") {
+            rowClass += " is-buyback";
+          } else {
+            rowClass += " is-ignition";
+          }
+
+          // Highlight forensic alerts inside detail string
+          let detailFormatted = injectHeroLogosIntoHtml(escapeHtml(ev.detail || ""), report);
+          detailFormatted = detailFormatted
+            .replace(/(💔[^；｜]+)/g, '<span class="tf-alert-pill bad">$1</span>')
+            .replace(/(💀[^；｜]+)/g, '<span class="tf-alert-pill bad">$1</span>')
+            .replace(/(🌫️[^；｜]+)/g, '<span class="tf-alert-pill warn">$1</span>');
+
+          return `
+            <div class="${rowClass}">
+              <div class="tf-script-time-col">
+                <span class="tf-script-rel">${escapeHtml(ev.rel_str || "")}</span>
+                <span class="tf-script-abs">${escapeHtml(ev.time_str || "")}</span>
+              </div>
+              <div class="tf-script-body-col">
+                <div class="tf-script-headline-row">
+                  <span class="tf-script-badge ${escapeHtml(evType)}">${escapeHtml(ev.badge || "")}</span>
+                  <span class="tf-script-headline">${injectHeroLogosIntoHtml(escapeHtml(ev.headline || ""), report)}</span>
+                </div>
+                <div class="tf-script-detail">${detailFormatted}</div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+
+      // Part C: Our 5 Players Execution Matrix in this Fight
+      const allExec = fObj.players_execution_matrix || [];
+      const ownExec = allExec
+        .filter((pe) => pe.side === side)
+        .sort((a, b) => Number(a.pos || 0) - Number(b.pos || 0));
+
+      const ownExecHtml = ownExec
+        .map((pe) => {
+          const toneClass = pe.verdict_tone || "neutral";
+          const alerts = [];
+          if (pe.ult_audit_zh) {
+            const isBadUlt = pe.egg_shattered || pe.egg_unpressed || Boolean(pe.ult_unpressed_name);
+            alerts.push(
+              `<span class="tf-p-alert ${isBadUlt ? "bad" : "good"}">${escapeHtml(pe.ult_audit_zh)}</span>`
+            );
+          }
+          if ((pe.unused_self_saves_zh || []).length > 0) {
+            alerts.push(
+              `<span class="tf-p-alert bad">💀 包里有【${escapeHtml(
+                pe.unused_self_saves_zh.join("/")
+              )}】却 0 次按出！</span>`
+            );
+          }
+          if ((pe.unused_team_saves_zh || []).length > 0) {
+            alerts.push(
+              `<span class="tf-p-alert warn">⚠️ 未按救人装【${escapeHtml(
+                pe.unused_team_saves_zh.join("/")
+              )}】</span>`
+            );
+          }
+          if (pe.afk_farm_zh) {
+            alerts.push(`<span class="tf-p-alert bad">${escapeHtml(pe.afk_farm_zh)}</span>`);
+          }
+
+          const abilStr =
+            (pe.abilities_used_zh || []).length > 0
+              ? pe.abilities_used_zh.join(" / ")
+              : "0 技能释放";
+          const itemStr =
+            (pe.items_used_zh || []).length > 0
+              ? pe.items_used_zh.join(" / ")
+              : "未按主动装";
+          const targetStr =
+            (pe.ability_targets_zh || []).length > 0
+              ? ` ｜ 目标：${pe.ability_targets_zh.slice(0, 2).join("、")}`
+              : "";
+
+          return `
+            <div class="tf-player-audit-card ${escapeHtml(toneClass)}">
+              <div class="tf-p-top">
+                <div class="tf-p-ident">
+                  ${pe.hero_img ? `<img src="${escapeHtml(pe.hero_img)}" alt="" class="tf-p-avatar" />` : ""}
+                  <div>
+                    <div class="tf-p-name"><b>${pe.pos}号位 ${escapeHtml(pe.hero_short_zh)}</b> <span class="tf-p-user">(${escapeHtml(pe.personaname)})</span></div>
+                    <div class="tf-p-kda-line">
+                      伤害 <b>${fmtNum(pe.damage)}</b> (${pe.damage_share_pct}%)
+                      ${pe.healing > 0 ? ` · 治疗 <b>${fmtNum(pe.healing)}</b>` : ""}
+                      · 战果 <b>${pe.kills_in_tf}杀/${pe.deaths}死</b>
+                      · 经济 <b class="${pe.gold_delta >= 0 ? "pos" : "neg"}">${pe.gold_delta >= 0 ? `+${pe.gold_delta}` : pe.gold_delta}</b>
+                    </div>
+                  </div>
+                </div>
+                <span class="tf-p-verdict-stamp ${escapeHtml(toneClass)}">${escapeHtml(pe.verdict_tag)}</span>
+              </div>
+              <div class="tf-p-dmg-bar-track">
+                <div class="tf-p-dmg-bar-fill ${escapeHtml(toneClass)}" style="width:${Math.min(100, Math.max(3, pe.damage_share_pct || 0))}%"></div>
+              </div>
+              <div class="tf-p-cast-meta">
+                <span>⚡ 技能：<b>${escapeHtml(abilStr)}</b></span>
+                <span>🎒 装备：<b>${escapeHtml(itemStr)}</b>${injectHeroLogosIntoHtml(escapeHtml(targetStr), report)}</span>
+              </div>
+              ${alerts.length > 0 ? `<div class="tf-p-alerts-row">${alerts.join("")}</div>` : ""}
+            </div>
+          `;
+        })
+        .join("");
+
+      cardsHtml.push(`
+        <article class="window-card tf-scene-card ${escapeHtml(outcomeTone)}">
+          <div class="window-head tf-scene-head">
+            <span class="tf-rank-pill ${fObj.decisive_rank ? "is-top3" : ""}">${escapeHtml(rankLabel)}</span>
+            <span class="window-time-badge">${escapeHtml(fObj.time_range)} (${fObj.duration_sec || 30}s)</span>
+            <span class="tf-loc-badge">📍 ${escapeHtml(fObj.location_zh || "河道交火区")}</span>
+            <span class="window-tone-badge ${escapeHtml(outcomeTone)}">${escapeHtml(outcomeBadge)}</span>
+            ${
+              deathCount > 0
+                ? `<button type="button" class="button secondary tf-map-btn" data-locate-tf="${tfIdxToUse}">📍 在地图定位墓碑 (${deathCount})</button>`
+                : ""
+            }
+          </div>
+
+          <!-- Part A: 四维定案与双方团战火力对抗条 -->
+          <div class="tf-forensic-summary-box ${escapeHtml(outcomeTone)}">
+            <div class="tf-summary-header-row">
+              <span class="tf-section-subtag">🔍 为什么这波团${outcomeTone === "praise" ? "能打赢" : "会崩盘"}？（四维取证定案）</span>
+              <div class="tf-dmg-tug">
+                <span class="own-side">${escapeHtml(sideZh)}本方总输出 <b>${fmtNum(ownTotalDmg)}</b> (${ownDmgPct}%)</span>
+                <div class="tf-dmg-tug-bar">
+                  <div class="tf-dmg-tug-own" style="width:${ownDmgPct}%"></div>
+                </div>
+                <span class="opp-side">${escapeHtml(oppZh)}对手总输出 <b>${fmtNum(oppTotalDmg)}</b> (${oppDmgPct}%)</span>
+              </div>
+            </div>
+            <ul class="tf-causes-list">${causesHtml}</ul>
+          </div>
+
+          <!-- Part B & C 双栏/上下布局：左侧秒级时间轴剧本，右侧本方五人微操审判 -->
+          <div class="tf-scene-split-grid">
+            <div class="tf-script-panel">
+              <div class="tf-panel-title">⏱️ 秒级交火时间轴剧本 &amp; 战后90秒连锁反应</div>
+              <div class="tf-script-timeline">${scriptHtml}</div>
+            </div>
+            <div class="tf-players-panel">
+              <div class="tf-panel-title">🛡️ 本方 1~5 号位这波团干了什么？（微操与手牌审计）</div>
+              <div class="tf-players-audit-list">${ownExecHtml}</div>
+            </div>
+          </div>
+        </article>
+      `);
+    });
+  } else {
+    // Fallback for unparsed matches without teamfights array
+    tfs.slice(0, 6).forEach((tf, idx) => {
+      const storyObj = buildTeamfightDotaStory(tf, null, idx, {
+        side,
+        sideZh,
+        oppZh,
+        own,
+        opp,
+      });
+      cardsHtml.push(`
+        <article class="window-card">
+          <div class="window-head">
+            <span class="window-time-badge">${escapeHtml(tf.time_range)}</span>
+            <span class="window-tone-badge ${escapeHtml(storyObj.tone)}">${escapeHtml(storyObj.badge)}</span>
+            <h3 class="window-title">高强度团战 #${idx + 1} · ${escapeHtml(tf.kills_trade)} (${escapeHtml(tf.gold_swing)})</h3>
+          </div>
+          <div class="window-story-box ${escapeHtml(storyObj.tone)}">
+            <span class="window-story-tag">🎙️ AI 刀塔老炮团战故事回放</span>
+            <div class="window-story-text">${storyObj.storyHtml}</div>
+          </div>
+        </article>
+      `);
+    });
+  }
+
+  // Append Grok 4.7 turning point windows if present
   grokWindows.forEach((w) => {
     cardsHtml.push(`
       <article class="window-card">
@@ -10012,61 +10261,6 @@ function renderKeyWindowsSection(report) {
         <div class="window-story-box praise">
           <span class="window-story-tag">🎙️ AI 刀塔老炮复盘评书</span>
           <div class="window-story-text">${injectHeroLogosIntoHtml(escapeHtml(w.detail || ""), report)}</div>
-        </div>
-      </article>
-    `);
-  });
-
-  tfs.slice(0, grokWindows.length > 0 ? 4 : 6).forEach((tf, idx) => {
-    const pRows = (tf.participants || [])
-      .sort((a, b) => (b.damage || 0) - (a.damage || 0))
-      .slice(0, 6)
-      .map(
-        (p) =>
-          `${p.hero_short_zh}: ${fmtNum(p.damage)}伤${p.deaths ? " (阵亡)" : ""}${
-            p.buybacks ? " [买活]" : ""
-          }${
-            (p.abilities || []).length > 0 ? ` [${p.abilities.slice(0, 2).join("/")}]` : ""
-          }`
-      )
-      .join(" ｜ ");
-    const matchedTfIdx = tfForensics.findIndex((f) => f.time_range === tf.time_range);
-    const tfIdxToUse = matchedTfIdx >= 0 ? matchedTfIdx : idx;
-    const fObj = tfForensics[tfIdxToUse];
-    const deathCount = (fObj?.deaths_coords || []).length;
-    const buybacksList = fObj?.buybacks || [];
-    const storyObj = buildTeamfightDotaStory(tf, fObj, idx, {
-      side,
-      sideZh,
-      oppZh,
-      own,
-      opp,
-    });
-
-    cardsHtml.push(`
-      <article class="window-card">
-        <div class="window-head">
-          <span class="window-time-badge">${escapeHtml(tf.time_range)}</span>
-          <span class="window-tone-badge ${escapeHtml(storyObj.tone)}">${escapeHtml(storyObj.badge)}</span>
-          <h3 class="window-title">高强度团战 #${idx + 1} · ${escapeHtml(tf.kills_trade)} (${escapeHtml(tf.gold_swing)})</h3>
-          ${
-            deathCount > 0
-              ? `<button type="button" class="button secondary" style="margin-left:auto;padding:3px 8px;font-size:11px;" data-locate-tf="${tfIdxToUse}">📍 在地图定位墓碑 (${deathCount})</button>`
-              : ""
-          }
-        </div>
-        <div class="window-story-box ${escapeHtml(storyObj.tone)}">
-          <span class="window-story-tag">🎙️ AI 刀塔老炮团战故事回放</span>
-          <div class="window-story-text">${storyObj.storyHtml}</div>
-        </div>
-        <div class="window-stat-strip">
-          <span>💥 最高输出：<b>${injectHeroLogosIntoHtml(escapeHtml(tf.top_damage_hero || "-"), report)}</b></span>
-          ${
-            buybacksList.length > 0
-              ? `<span>💰 交出买活：<b>${injectHeroLogosIntoHtml(escapeHtml(buybacksList.join("、")), report)}</b></span>`
-              : ""
-          }
-          <span class="window-participants-inline">${injectHeroLogosIntoHtml(escapeHtml(pRows), report)}</span>
         </div>
       </article>
     `);

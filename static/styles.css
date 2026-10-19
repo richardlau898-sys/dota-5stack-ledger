@@ -6530,5 +6530,504 @@ dialog::backdrop {
   }
 }
 
+/* =========================================================================
+   章节 ⑤ 生死团战秒级剧本还原 & 崩盘/决胜第一现场 (Teamfight Forensics v5.5)
+   ========================================================================= */
+.windows-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tf-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tf-filter-btn {
+  padding: 6px 13px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.tf-filter-btn.is-active {
+  background: linear-gradient(135deg, #2d3e28, #1e2a1b);
+  border-color: #6bc47d;
+  color: #e4f7e7;
+  box-shadow: 0 0 10px rgba(107, 196, 125, 0.2);
+}
+
+.windows-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tf-scene-card {
+  background: linear-gradient(180deg, #161814 0%, #121411 100%);
+  border: 1px solid #2e3129;
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.tf-scene-card.roast {
+  border-left: 4px solid #e05d5d;
+}
+
+.tf-scene-card.praise {
+  border-left: 4px solid #5ac878;
+}
+
+.tf-scene-card.warn {
+  border-left: 4px solid #e2a94b;
+}
+
+.tf-scene-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #262922;
+}
+
+.tf-rank-pill {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 5px;
+  background: #23261f;
+  color: #b8bca8;
+  border: 1px solid #383c31;
+}
+
+.tf-rank-pill.is-top3 {
+  background: linear-gradient(135deg, #4b1d1d 0%, #2d1414 100%);
+  color: #ff9c9c;
+  border-color: #8f3939;
+  box-shadow: 0 0 10px rgba(224, 93, 93, 0.25);
+}
+
+.tf-loc-badge {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 5px;
+  background: #1c2226;
+  color: #8fd1f5;
+  border: 1px solid #2e404d;
+}
+
+.tf-map-btn {
+  margin-left: auto;
+  font-size: 12px;
+  padding: 5px 11px;
+}
+
+/* Part A: 四维取证定案与团战总伤害对抗条 */
+.tf-forensic-summary-box {
+  background: #191c17;
+  border: 1px solid #2c3027;
+  border-radius: 8px;
+  padding: 13px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tf-forensic-summary-box.roast {
+  background: linear-gradient(180deg, rgba(65, 24, 24, 0.32) 0%, rgba(25, 28, 23, 0.95) 100%);
+  border-color: rgba(224, 93, 93, 0.35);
+}
+
+.tf-forensic-summary-box.praise {
+  background: linear-gradient(180deg, rgba(24, 58, 34, 0.32) 0%, rgba(25, 28, 23, 0.95) 100%);
+  border-color: rgba(90, 200, 120, 0.35);
+}
+
+.tf-summary-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tf-section-subtag {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ebeedf;
+  letter-spacing: 0.02em;
+}
+
+.tf-dmg-tug {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #b7bba8;
+  flex: 1;
+  max-width: 520px;
+  justify-content: flex-end;
+}
+
+.tf-dmg-tug .own-side b {
+  color: #79db92;
+}
+
+.tf-dmg-tug .opp-side b {
+  color: #f08282;
+}
+
+.tf-dmg-tug-bar {
+  flex: 1;
+  min-width: 90px;
+  max-width: 160px;
+  height: 8px;
+  background: #5c2626;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #3a2323;
+}
+
+.tf-dmg-tug-own {
+  height: 100%;
+  background: linear-gradient(90deg, #42a85f, #6fe08d);
+  border-radius: 999px;
+}
+
+.tf-causes-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+}
+
+.tf-causes-list li {
+  font-size: 13px;
+  line-height: 1.58;
+  color: #d7dbca;
+}
+
+/* Part B & C 双栏拆分：左侧秒级时间轴，右侧本方1-5号位微操审计 */
+.tf-scene-split-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.tf-script-panel,
+.tf-players-panel {
+  background: #141713;
+  border: 1px solid #272b22;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tf-panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #d8dec8;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #23271f;
+}
+
+.tf-script-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tf-script-row {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #191c17;
+  border-left: 3px solid #3c4235;
+  align-items: start;
+}
+
+.tf-script-row.ignition {
+  border-left-color: #5ea9e6;
+  background: rgba(34, 52, 68, 0.28);
+}
+
+.tf-script-row.good-kill {
+  border-left-color: #5ac878;
+  background: rgba(27, 58, 36, 0.25);
+}
+
+.tf-script-row.bad-death {
+  border-left-color: #e05d5d;
+  background: rgba(68, 25, 25, 0.28);
+}
+
+.tf-script-row.buyback {
+  border-left-color: #e2b94b;
+  background: rgba(66, 52, 20, 0.28);
+}
+
+.tf-script-row.consequence {
+  border-left-color: #c278f0;
+  background: rgba(54, 28, 70, 0.3);
+}
+
+.tf-script-time {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tf-rel-sec {
+  font-size: 12px;
+  font-weight: 800;
+  color: #f0c36d;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.tf-clock-sec {
+  font-size: 11px;
+  color: #8c9180;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.tf-script-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tf-script-text {
+  font-size: 12.5px;
+  line-height: 1.52;
+  color: #e2e6d5;
+}
+
+.tf-script-alerts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tf-alert-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.tf-alert-pill.smoke {
+  background: #2b2240;
+  color: #cbb2ff;
+  border: 1px solid #4d3b75;
+}
+
+.tf-alert-pill.first {
+  background: #3d2c19;
+  color: #ffca85;
+  border: 1px solid #6e4e2a;
+}
+
+.tf-alert-pill.bkb {
+  background: #471c1c;
+  color: #ff9e9e;
+  border: 1px solid #823333;
+}
+
+.tf-alert-pill.ult {
+  background: #421f2c;
+  color: #ff9ec4;
+  border: 1px solid #7a3750;
+}
+
+/* Part C: 本方1-5号位微操与手牌审计卡片 */
+.tf-players-audit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tf-player-audit-card {
+  background: #191c17;
+  border: 1px solid #2a2e24;
+  border-radius: 7px;
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tf-player-audit-card.roast {
+  border-left: 3px solid #e05d5d;
+  background: linear-gradient(90deg, rgba(64, 22, 22, 0.26) 0%, #191c17 100%);
+}
+
+.tf-player-audit-card.praise {
+  border-left: 3px solid #5ac878;
+  background: linear-gradient(90deg, rgba(22, 58, 32, 0.24) 0%, #191c17 100%);
+}
+
+.tf-player-audit-card.warn {
+  border-left: 3px solid #e2a94b;
+}
+
+.tf-p-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tf-p-ident {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tf-p-pos {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #252920;
+  color: #b5baa6;
+}
+
+.tf-p-hero {
+  font-size: 13px;
+  font-weight: 700;
+  color: #eef2e3;
+}
+
+.tf-p-verdict {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.tf-p-verdict.roast {
+  background: rgba(224, 93, 93, 0.18);
+  color: #ff9c9c;
+  border: 1px solid rgba(224, 93, 93, 0.4);
+}
+
+.tf-p-verdict.praise {
+  background: rgba(90, 200, 120, 0.18);
+  color: #84eb9f;
+  border: 1px solid rgba(90, 200, 120, 0.4);
+}
+
+.tf-p-verdict.warn {
+  background: rgba(226, 169, 75, 0.16);
+  color: #f5c978;
+  border: 1px solid rgba(226, 169, 75, 0.35);
+}
+
+.tf-p-stats-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  font-size: 12px;
+  color: #b4b9a6;
+}
+
+.tf-p-stats-strip b {
+  color: #e6ead8;
+}
+
+.tf-p-dmg-bar-track {
+  width: 100%;
+  height: 5px;
+  background: #242820;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.tf-p-dmg-bar-fill {
+  height: 100%;
+  background: #6ea8d6;
+  border-radius: 999px;
+}
+
+.tf-p-dmg-bar-fill.praise {
+  background: linear-gradient(90deg, #43a65f, #74e392);
+}
+
+.tf-p-dmg-bar-fill.roast {
+  background: #d95b5b;
+}
+
+.tf-p-cast-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11.5px;
+  color: #9fa591;
+  line-height: 1.45;
+}
+
+.tf-p-cast-meta b {
+  color: #d2d7c5;
+  font-weight: 600;
+}
+
+.tf-p-alerts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+@media (max-width: 960px) {
+  .tf-causes-list {
+    grid-template-columns: 1fr;
+  }
+
+  .tf-scene-split-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tf-dmg-tug {
+    max-width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .tf-scene-card {
+    padding: 13px 12px;
+  }
+
+  .tf-map-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .tf-script-row {
+    grid-template-columns: 62px 1fr;
+    gap: 8px;
+    padding: 7px 8px;
+  }
+}
+
+
 
 

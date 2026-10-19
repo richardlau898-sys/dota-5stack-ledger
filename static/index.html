@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=5.4" />
+  <link rel="stylesheet" href="/styles.css?v=5.5" />
 </head>
 <body>
   <header class="site-header">
@@ -251,7 +251,8 @@
         <span class="jump-nav-label">复盘目录 (已全面去重)：</span>
         <a href="#draft-combo-section" class="jump-chip">① 阵容BP与配合</a>
         <a href="#verdict-and-blame-section" id="jump-chip-verdict" class="jump-chip">② 胜局庆功 / 败局分锅</a>
-        <a href="#phase-review-section" class="jump-chip highlight">③ 前·中·后期三阶段 &amp; 关键团战故事</a>
+        <a href="#phase-review-section" class="jump-chip">③ 前·中·后期三阶段</a>
+        <a href="#windows-section" class="jump-chip highlight">⚔️ 三大生死团秒级第一现场</a>
         <a href="#tactical-microscope-section" class="jump-chip">④ 🔬 十一维战术显微镜 (大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/1v1对位/买活死&amp;7.38附魔)</a>
         <a href="#charts-hub-section" class="jump-chip">⑤ ⏱️ 逐分钟时间轴沙盘 &amp; 集火矩阵</a>
         <a href="#players-forensics-section" class="jump-chip">⑥ 1~5号位个人卷宗 (0-100评分)</a>
@@ -341,12 +342,18 @@
       <div id="phase-active-panel" class="phase-panel-box"></div>
     </section>
 
-    <!-- 模块三点五：该回看的几波关键团战与转折窗口（AI 毒舌/夸奖故事复盘） -->
+    <!-- 模块三点五：生死团战秒级剧本还原 & 崩盘/决胜第一现场 -->
     <section id="windows-section" class="windows-section" aria-labelledby="windows-heading">
       <div class="section-heading">
         <div>
-          <h2 id="windows-heading">⚔️ 关键胜负手团战与经济拐点故事回放（AI 毒舌/夸奖实录）</h2>
-          <p class="section-caption">用纯正 Dota 2 老玩家视角还原每波关键团战的来龙去脉：谁在化身战神力挽狂澜、谁在走位脱节排队白给，点击「在地图定位墓碑」可直达阵亡坐标</p>
+          <h2 id="windows-heading">⚔️ 生死团战秒级剧本还原 &amp; 崩盘/决胜第一现场</h2>
+          <p class="section-caption">自动锁定本局胜负转折权重最大的 3 波生死团，按秒还原谁先手破雾、谁变蛋被打碎/憋死BKB、谁在野区0伤害独刷，以及团战后 90 秒连锁破塔/丢盾铁证</p>
+        </div>
+        <div class="microscope-header-controls">
+          <div class="team-tab-group" role="group" aria-label="生死团战筛选">
+            <button type="button" class="team-tab active" data-tf-filter="top3">🚨 三大生死团第一现场 (Top 3)</button>
+            <button type="button" class="team-tab" data-tf-filter="all">📋 全部关键团战</button>
+          </div>
         </div>
       </div>
       <div id="key-windows-grid" class="windows-grid"></div>
@@ -709,6 +716,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=5.4" defer></script>
+  <script src="/app.js?v=5.5" defer></script>
 </body>
 </html>
