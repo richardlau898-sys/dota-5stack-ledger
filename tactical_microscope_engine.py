@@ -3462,6 +3462,470 @@ def build_tactical_microscope(
             "player_item_rows": player_item_rows,
         }
 
+    # =========================================================================
+    # 14. 伤害含金量拆解（真切核 vs 刮肉盾假伤害）· 1~18级加点天赋审判 · 永久Buff叠层审计
+    # =========================================================================
+    import json as _json
+    from pathlib import Path as _Path
+
+    _catalog_path = _Path(__file__).resolve().parent / "ability_id_catalog.json"
+    try:
+        _ABILITY_CATALOG = _json.loads(_catalog_path.read_text(encoding="utf-8"))
+    except Exception:
+        _ABILITY_CATALOG = {"by_id": {}, "hero_basic_skills": {}}
+    _AID_BY_ID: Dict[str, Dict[str, Any]] = _ABILITY_CATALOG.get("by_id") or {}
+    _HERO_BASIC_SKILLS: Dict[str, List[str]] = _ABILITY_CATALOG.get("hero_basic_skills") or {}
+
+    TANK_SPONGE_HERO_KEYS = {
+        "pudge", "brewmaster", "bristleback", "centaur", "tidehunter",
+        "axe", "abyssal_underlord", "undying", "skeleton_king", "dragon_knight",
+        "primal_beast", "shredder", "abaddon", "ogre_magi", "treant",
+        "kunkka", "alchemist", "necrolyte", "huskar", "mars", "earth_spirit",
+        "elder_titan", "sand_king", "spirit_breaker", "night_stalker", "clockwerk",
+    }
+
+    PERMANENT_BUFF_CATALOG: Dict[int, Dict[str, Any]] = {
+        1: {"zh": "🌙 银月之晶吞噬", "unit": "层(+60攻速)"},
+        2: {"zh": "👑 阿哈利姆神杖赐福(融A杖)", "unit": ""},
+        3: {"zh": "🧠 沉默术士·智力窃取", "unit": "点永久智力", "good_per_min": 0.6, "warn_per_min": 0.3},
+        4: {"zh": "🥩 帕吉·腐肉堆积", "unit": "层永久力量", "good_per_min": 0.55, "warn_per_min": 0.3},
+        5: {"zh": "⚔️ 军团指挥官·决斗加攻", "unit": "点永久攻击力", "good_per_min": 3.5, "warn_per_min": 1.2},
+        6: {"zh": "📖 知识之书", "unit": "本"},
+        7: {"zh": "⚡ 莱恩·死亡一指叠层", "unit": "层(+40伤害/层)", "good_per_min": 0.22, "warn_per_min": 0.08},
+        8: {"zh": "🐟 斯拉克·能量转移永久敏捷", "unit": "层永久敏捷", "good_per_min": 0.5, "warn_per_min": 0.32},
+        9: {"zh": "🛡️ 孽主·衰退光环永久加攻", "unit": "点攻击力"},
+        10: {"zh": "💰 赏金猎人·忍术/追踪劫掠金", "unit": "金", "good_per_min": 25.0, "warn_per_min": 12.0},
+        12: {"zh": "💎 阿哈利姆魔晶激活", "unit": ""},
+        13: {"zh": "🪓 斧王·淘汰之刃永久护甲", "unit": "层护甲", "good_per_min": 0.18, "warn_per_min": 0.08},
+        14: {"zh": "💀 瘟疫法师·死神镰刀叠层", "unit": "层永久恢复", "good_per_min": 0.18, "warn_per_min": 0.08},
+        19: {"zh": "✨ 英雄先天/命石成长累计值", "unit": "点"},
+        22: {"zh": "❄️ 寒冬飞龙·极寒赐福", "unit": ""},
+        23: {"zh": "🪄 拉比克·奥术至尊/窃取叠层", "unit": "层", "good_per_min": 0.4, "warn_per_min": 0.2},
+        24: {"zh": "🌊 潮汐猎人·海妖外壳永久格挡", "unit": "层格挡", "good_per_min": 0.45, "warn_per_min": 0.22},
+        25: {"zh": "🔥 先天被动觉醒", "unit": "阶"},
+    }
+
+    HERO_EXPECTED_STACK_BUFF: Dict[str, Tuple[int, str, float]] = {
+        "slark": (8, "能量转移永久敏捷", 0.35),
+        "pudge": (4, "腐肉堆积力量层数", 0.32),
+        "lion": (7, "死亡一指叠层", 0.10),
+        "legion_commander": (5, "决斗永久攻击力", 1.5),
+        "silencer": (3, "永久智力窃取", 0.35),
+        "axe": (13, "淘汰之刃永久护甲", 0.08),
+        "necrolyte": (14, "死神镰刀永久恢复层数", 0.08),
+        "bounty_hunter": (10, "忍术/追踪劫掠金钱", 12.0),
+        "tidehunter": (24, "海妖外壳永久格挡", 0.25),
+        "rubick": (23, "奥术至尊窃取叠层", 0.20),
+    }
+
+    SUB_SKILL_REMAP: Dict[str, str] = {
+        "phoenix_launch_fire_spirit": "phoenix_fire_spirits",
+        "kunkka_return": "kunkka_x_marks_the_spot",
+        "puck_ethereal_jaunt": "puck_illusory_orb",
+        "Tiny_toss_tree": "tiny_avalanche",
+        "monkey_king_primal_spring_early": "monkey_king_tree_dance",
+        "pangolier_gyroshell_stop": "pangolier_gyroshell",
+        "ancient_apparition_ice_blast_release": "ancient_apparition_ice_blast",
+        "bane_nightmare_end": "bane_nightmare",
+        "shadow_demon_shadow_poison_release": "shadow_demon_shadow_poison",
+    }
+
+    _hid_to_npc: Dict[int, str] = {int(v): str(k) for k, v in (npc_to_hid or {}).items()}
+
+    def _hero_npc_from_player(p_obj: Dict[str, Any], raw_obj: Dict[str, Any]) -> str:
+        hid = int(p_obj.get("hero_id") or raw_obj.get("hero_id") or 0)
+        if hid in _hid_to_npc:
+            return _hid_to_npc[hid]
+        hc = hero_const_by_id.get(hid) or {}
+        if hc.get("name"):
+            return str(hc["name"])
+        return str(p_obj.get("hero_npc") or "")
+
+    def analyze_side_damage_quality_and_skill_builds(side_key: str) -> Dict[str, Any]:
+        own_list = dire_players if side_key == "dire" else radiant_players
+        opp_list = radiant_players if side_key == "dire" else dire_players
+        own_ordered = sorted(own_list, key=lambda x: int(x.get("pos") or 9))
+        opp_ordered = sorted(opp_list, key=lambda x: int(x.get("pos") or 9))
+
+        opp_by_npc: Dict[str, Dict[str, Any]] = {}
+        for op in opp_ordered:
+            raw_op = raw_by_slot.get(int(op.get("player_slot", -1)), {})
+            h_npc = _hero_npc_from_player(op, raw_op)
+            if h_npc:
+                opp_by_npc[h_npc] = op
+
+        # 识别敌方「前排肉盾海绵」：3号位 或 处于坦克池中的3/4/5号位（排除1/2号位脆皮/远敏核心，确保打1/2号位算切核）
+        opp_tank_npcs = set()
+        for h_npc, op in opp_by_npc.items():
+            short_k = h_npc.replace("npc_dota_hero_", "")
+            op_pos = int(op.get("pos") or 3)
+            if op_pos == 3 or (op_pos in (3, 4, 5) and short_k in TANK_SPONGE_HERO_KEYS):
+                opp_tank_npcs.add(h_npc)
+
+        player_rows = []
+        fake_dmg_suspects_cnt = 0
+        true_core_slayers_cnt = 0
+        skill_build_issues_cnt = 0
+
+        for p in own_ordered:
+            slot = int(p.get("player_slot", -1))
+            raw_p = raw_by_slot.get(slot, {})
+            pos = int(p.get("pos") or 1)
+            h_short = p.get("hero_short_zh") or ""
+            h_npc = _hero_npc_from_player(p, raw_p)
+            h_key = h_npc.replace("npc_dota_hero_", "")
+            total_hero_dmg = int(p.get("hero_damage") or raw_p.get("hero_damage") or 0)
+            total_kills = int(p.get("kills") or raw_p.get("kills") or 0)
+
+            # 1) 拆解对敌方 5 人的伤害与击杀分布
+            raw_dmg_dict = raw_p.get("damage") or {}
+            raw_killed_dict = raw_p.get("killed") or {}
+            target_breakdown = []
+            sum_enemy_dmg = 0
+            core_12_dmg = 0
+            core_12_kills = 0
+            tank_sponge_dmg = 0
+            tank_sponge_kills = 0
+            backline_sup_dmg = 0
+            backline_sup_kills = 0
+            tank_victim_names = []
+
+            for op_npc, op_obj in opp_by_npc.items():
+                d_val = int(raw_dmg_dict.get(op_npc) or 0)
+                k_val = int(raw_killed_dict.get(op_npc) or 0)
+                op_pos = int(op_obj.get("pos") or 3)
+                op_zh = op_obj.get("hero_short_zh") or op_npc.replace("npc_dota_hero_", "")
+                is_tank = op_npc in opp_tank_npcs
+                is_core_12 = op_pos in (1, 2)
+                sum_enemy_dmg += d_val
+                if is_core_12:
+                    core_12_dmg += d_val
+                    core_12_kills += k_val
+                if is_tank:
+                    tank_sponge_dmg += d_val
+                    tank_sponge_kills += k_val
+                    if d_val >= 3500:
+                        tank_victim_names.append(f"{op_pos}号位{op_zh}")
+                elif not is_core_12:
+                    backline_sup_dmg += d_val
+                    backline_sup_kills += k_val
+
+                target_breakdown.append({
+                    "hero_short_zh": op_zh,
+                    "hero_img": op_obj.get("hero_img") or "",
+                    "pos": op_pos,
+                    "is_tank_sponge": is_tank,
+                    "is_core_12": is_core_12,
+                    "role_tag_zh": "🥩 前排肉盾" if is_tank else ("🎯 核心双C" if is_core_12 else "🪶 脆皮后排"),
+                    "dmg": d_val,
+                    "kills": k_val,
+                })
+
+            denom_dmg = max(1, sum_enemy_dmg)
+            for tb in target_breakdown:
+                tb["dmg_pct"] = round(tb["dmg"] * 100.0 / denom_dmg, 1)
+            target_breakdown.sort(key=lambda x: x["dmg"], reverse=True)
+
+            core_12_pct = round(core_12_dmg * 100.0 / denom_dmg, 1)
+            tank_sponge_pct = round(tank_sponge_dmg * 100.0 / denom_dmg, 1)
+            backline_sup_pct = round(backline_sup_dmg * 100.0 / denom_dmg, 1)
+            effective_non_tank_pct = round(max(0.0, 100.0 - tank_sponge_pct), 1)
+            dmg_per_kill = int(round(total_hero_dmg / max(1, total_kills))) if total_kills > 0 else total_hero_dmg
+
+            # 单发最高爆发峰值 (max_hero_hit)
+            mhh = raw_p.get("max_hero_hit") or {}
+            max_hit_val = int(mhh.get("value") or 0)
+            max_hit_time = fmt_mmss(mhh.get("time") or 0) if mhh.get("time") is not None else "--:--"
+            max_hit_target_npc = str(mhh.get("key") or "")
+            max_hit_target_zh = (opp_by_npc.get(max_hit_target_npc) or {}).get("hero_short_zh") or max_hit_target_npc.replace("npc_dota_hero_", "")
+            max_hit_inflictor = str(mhh.get("inflictor") or "")
+            if max_hit_inflictor in ("", "null", "None"):
+                max_hit_source_zh = "普攻暴击/平A"
+            elif max_hit_inflictor in ITEMS_ZH:
+                max_hit_source_zh = ITEMS_ZH[max_hit_inflictor]
+            else:
+                max_hit_source_zh = get_ability_zh(max_hit_inflictor)
+            max_hit_summary_zh = (
+                f"{max_hit_time} 用【{max_hit_source_zh}】对 {max_hit_target_zh} 单发打出 {max_hit_val} 点伤害"
+                if max_hit_val > 0
+                else "无单发高爆发记录"
+            )
+
+            # 判定伤害含金量等级
+            dmg_audit_notes = []
+            top_target = target_breakdown[0] if target_breakdown else None
+            if pos in (1, 2, 3) and (tank_sponge_pct >= 50.0 or (tank_sponge_pct >= 45.0 and core_12_kills <= 2)):
+                fake_dmg_suspects_cnt += 1
+                dmg_quality_badge = "🚨 刮肉刷伤 · 切核乏力"
+                dmg_quality_grade = "bad"
+                dmg_audit_notes.append(
+                    f"🚨 伤害虚胖警告：全场高达 {tank_sponge_pct}% 的伤害（{tank_sponge_dmg:,} 点）全灌在敌方前排肉盾【{'/'.join(tank_victim_names[:2]) or '肉盾'}】身上，而打在敌方 1/2 号位双核身上的伤害仅占 {core_12_pct}%（{core_12_dmg:,} 点，杀 {core_12_kills} 次）！"
+                )
+            elif pos in (1, 2) and total_kills >= 8 and tank_sponge_kills >= max(4, int(total_kills * 0.45)) and core_12_kills <= 2:
+                fake_dmg_suspects_cnt += 1
+                dmg_quality_badge = "⚠️ 技能灌肉 · 秒C偏少"
+                dmg_quality_grade = "warn"
+                dmg_audit_notes.append(
+                    f"⚠️ 集火目标偏移：全场 {total_kills} 个人头中有 {tank_sponge_kills} 个是杀敌方前排肉盾拿的，而对敌方 1/2 号位双核仅完成 {core_12_kills} 次终结（打双核伤害占 {core_12_pct}%）。"
+                )
+            elif core_12_pct >= 42.0 and core_12_kills >= 3:
+                true_core_slayers_cnt += 1
+                dmg_quality_badge = "🔥 刀刀见血 · 精准切核"
+                dmg_quality_grade = "good"
+                dmg_audit_notes.append(
+                    f"✓ 高含金量切核：对敌方 1/2 号位双核倾泻了 {core_12_dmg:,} 点真伤害（占 {core_12_pct}%），并亲手终结敌方双核 {core_12_kills} 次！"
+                )
+            elif effective_non_tank_pct >= 58.0:
+                dmg_quality_badge = "⚡ 有效压制后排/核心"
+                dmg_quality_grade = "good"
+                dmg_audit_notes.append(
+                    f"✓ 伤害分布健康：{effective_non_tank_pct}% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 {core_12_pct}%，打后排辅助占 {backline_sup_pct}%）。"
+                )
+            else:
+                dmg_quality_badge = "⚖️ 常规前排拉扯输出"
+                dmg_quality_grade = "normal"
+                dmg_audit_notes.append(
+                    f"对敌方 1/2 号位双核伤害占 {core_12_pct}%（杀 {core_12_kills} 次），对前排肉盾伤害占 {tank_sponge_pct}%（杀 {tank_sponge_kills} 次）。"
+                )
+
+            if top_target:
+                dmg_audit_notes.append(
+                    f"🎯 头号集火沙包：全场打【{top_target['pos']}号位·{top_target['hero_short_zh']}】最多，共造成 {top_target['dmg']:,} 点伤害（占个人总伤 {top_target['dmg_pct']}%，击杀 {top_target['kills']} 次）。"
+                )
+
+            # 2) 1~18级加点路线与 10/15/20/25级天赋审计
+            upgrades_arr = raw_p.get("ability_upgrades_arr") or []
+            basic_skills_order = _HERO_BASIC_SKILLS.get(h_npc) or []
+            skill_slot_map: Dict[str, str] = {}
+            for idx_sk, sk_key in enumerate(basic_skills_order[:3]):
+                skill_slot_map[sk_key] = f"{idx_sk + 1}技能"
+            if len(basic_skills_order) >= 4:
+                skill_slot_map[basic_skills_order[3]] = "大招"
+
+            level_sequence = []
+            talents_chosen = []
+            skill_counts_by_lvl8: Dict[str, int] = {}
+            skill_counts_by_lvl9: Dict[str, int] = {}
+            first_learned_lvl: Dict[str, int] = {}
+            maxed_4_lvl: Dict[str, int] = {}
+            running_skill_pts: Dict[str, int] = {}
+            early_attr_pts = 0
+
+            talent_tiers = ["10级天赋", "15级天赋", "20级天赋", "25级天赋"]
+            talent_idx = 0
+
+            for lv_idx, raw_aid in enumerate(upgrades_arr, 1):
+                cat_entry = _AID_BY_ID.get(str(raw_aid)) or {}
+                akey = cat_entry.get("key") or f"ability_{raw_aid}"
+                akey_norm = SUB_SKILL_REMAP.get(akey, akey)
+                azh = cat_entry.get("zh") or get_ability_zh(akey_norm)
+                is_tal = bool(cat_entry.get("is_talent"))
+                is_attr = bool(cat_entry.get("is_attr"))
+                slot_lbl = skill_slot_map.get(akey_norm, "大招" if "ult" in akey_norm else "技能")
+
+                if is_tal:
+                    t_label = talent_tiers[min(talent_idx, len(talent_tiers) - 1)]
+                    talent_idx += 1
+                    talents_chosen.append({
+                        "tier": t_label,
+                        "level_taken": lv_idx,
+                        "zh": azh,
+                    })
+                    level_sequence.append({
+                        "level": lv_idx,
+                        "zh": azh,
+                        "short_tag": f"L{lv_idx}:🌟{azh}",
+                        "type": "talent",
+                    })
+                elif is_attr:
+                    if lv_idx <= 9:
+                        early_attr_pts += 1
+                    level_sequence.append({
+                        "level": lv_idx,
+                        "zh": "全属性黄点",
+                        "short_tag": f"L{lv_idx}:➕黄点",
+                        "type": "attr",
+                    })
+                else:
+                    running_skill_pts[akey_norm] = running_skill_pts.get(akey_norm, 0) + 1
+                    cur_pt = running_skill_pts[akey_norm]
+                    if akey_norm not in first_learned_lvl:
+                        first_learned_lvl[akey_norm] = lv_idx
+                    if cur_pt == 4 and akey_norm not in maxed_4_lvl:
+                        maxed_4_lvl[akey_norm] = lv_idx
+                    if lv_idx <= 8:
+                        skill_counts_by_lvl8[akey_norm] = cur_pt
+                    if lv_idx <= 9:
+                        skill_counts_by_lvl9[akey_norm] = cur_pt
+                    short_zh = azh.split("(")[0].strip()
+                    level_sequence.append({
+                        "level": lv_idx,
+                        "zh": azh,
+                        "short_tag": f"L{lv_idx}:{short_zh}({cur_pt}级)",
+                        "type": "ult" if slot_lbl == "大招" else "skill",
+                    })
+
+            # 提炼主副技能路线描述
+            maxed_sorted = sorted(maxed_4_lvl.items(), key=lambda x: x[1])
+            if len(maxed_sorted) >= 2:
+                m1_zh = (_AID_BY_ID.get(str(next((k for k, v in _AID_BY_ID.items() if v.get("key") == maxed_sorted[0][0]), "")), {}).get("zh") or get_ability_zh(maxed_sorted[0][0])).split("(")[0]
+                m2_zh = (_AID_BY_ID.get(str(next((k for k, v in _AID_BY_ID.items() if v.get("key") == maxed_sorted[1][0]), "")), {}).get("zh") or get_ability_zh(maxed_sorted[1][0])).split("(")[0]
+                skill_route_summary_zh = f"主【{m1_zh}】(L{maxed_sorted[0][1]}满) 副【{m2_zh}】(L{maxed_sorted[1][1]}满)"
+            elif len(maxed_sorted) == 1:
+                m1_zh = get_ability_zh(maxed_sorted[0][0]).split("(")[0]
+                skill_route_summary_zh = f"主【{m1_zh}】(L{maxed_sorted[0][1]}满)"
+            else:
+                skill_route_summary_zh = "均衡对点路线"
+
+            # 自动抓包奇葩/偏科加点
+            skill_build_flags = []
+            skill_build_grade = "good"
+
+            # 检查基础三技能是否有前8~9级完全不学的情况
+            for idx_b, b_skill in enumerate(basic_skills_order[:3]):
+                b_norm = SUB_SKILL_REMAP.get(b_skill, b_skill)
+                learned_lv = first_learned_lvl.get(b_norm, 99)
+                b_zh = get_ability_zh(b_norm)
+                if learned_lv >= 9:
+                    skill_build_issues_cnt += 1
+                    if b_norm == "lina_light_strike_array":
+                        skill_build_grade = "bad"
+                        skill_build_flags.append(
+                            f"🚨 奇葩加点抓包：前 {learned_lv - 1} 级完全不学二技能【{b_zh}】（0级眩晕，主龙破斩副炽魂），直到 L{learned_lv} 才点出 1 级眩晕，导致前中期支援与小规模团战 0 控制留人！"
+                        )
+                    elif b_norm == "phoenix_sun_ray":
+                        skill_build_grade = "warn"
+                        skill_build_flags.append(
+                            f"⚠️ 偏科加点抓包：前 {learned_lv - 1} 级完全不学三技能【{b_zh}】（把小鸟和F飞全点满），直到 L{learned_lv} 才点出 1 级激光，前中期打对面帕吉+酒仙双肉盾缺失百分比灼烧与远距离救人奶量！"
+                        )
+                    else:
+                        if skill_build_grade == "good":
+                            skill_build_grade = "warn"
+                        skill_build_flags.append(
+                            f"⚠️ 偏科加点：前 {learned_lv - 1} 级完全没学【{b_zh}】（{ '直到 L' + str(learned_lv) + ' 才点 1 级' if learned_lv < 99 else '整局 0 级' }），前中期少一个技能维度。"
+                        )
+
+            # 检查关键救人/叠层技能是否只点1级拖到12级后才补
+            if h_key == "ringmaster" and first_learned_lvl.get("ringmaster_the_box", 99) <= 5:
+                pts_by_9 = skill_counts_by_lvl9.get("ringmaster_the_box", 0)
+                if pts_by_9 == 1:
+                    skill_build_flags.append(
+                        "💡 技能取舍：前 11 级仅保留 1 级【逃生暗箱(救人箱)】（主皮鞭副飞刀打消耗），中期救人箱冷却偏长、施法距离较短。"
+                    )
+            if h_key == "slark" and skill_counts_by_lvl9.get("slark_saltwater_shiv", 0) <= 1:
+                skill_build_flags.append(
+                    "💡 加点路线：L7 点满【黑暗契约】、L10 点满【突袭】，前 11 级仅留 1 级【能量转移】（刷钱快但前中期每次平A偷属性持续时间短）。"
+                )
+            if early_attr_pts >= 2:
+                skill_build_issues_cnt += 1
+                skill_build_grade = "warn"
+                skill_build_flags.append(
+                    f"⚠️ 复古黄点流：前 9 级不学技能反而点了 {early_attr_pts} 级【+2全属性黄点】，技能等级严重滞后。"
+                )
+
+            if not skill_build_flags:
+                skill_build_flags.append(f"✓ 加点路线合理（{skill_route_summary_zh}，三技能衔接顺畅）。")
+
+            # 3) 永久 Buff 与英雄成长叠层审计 (permanent_buffs)
+            raw_pbuffs = raw_p.get("permanent_buffs") or []
+            perm_buff_badges = []
+            perm_buff_notes = []
+            found_buff_ids = {}
+
+            for pb in raw_pbuffs:
+                bid = int(pb.get("permanent_buff") or 0)
+                stacks = int(pb.get("stack_count") or 0)
+                gtime = int(pb.get("grant_time") or 0)
+                found_buff_ids[bid] = stacks
+                meta = PERMANENT_BUFF_CATALOG.get(bid)
+                if not meta:
+                    continue
+                if bid == 12:
+                    perm_buff_badges.append(f"💎 魔晶激活 ({fmt_mmss(gtime)})")
+                elif bid == 2:
+                    perm_buff_badges.append(f"👑 融A杖赐福 ({fmt_mmss(gtime)})")
+                elif bid == 1:
+                    perm_buff_badges.append("🌙 吞噬银月之晶")
+                elif stacks > 0:
+                    perm_buff_badges.append(f"{meta['zh']}：{stacks} {meta['unit']}")
+
+            # 检查是否是必须叠层的成长型英雄
+            if h_key in HERO_EXPECTED_STACK_BUFF:
+                exp_bid, exp_name, exp_per_min = HERO_EXPECTED_STACK_BUFF[h_key]
+                actual_stacks = int(found_buff_ids.get(exp_bid, 0))
+                target_stacks = max(4, int(round(duration_min * exp_per_min)))
+                if actual_stacks == 0:
+                    perm_buff_notes.append(
+                        f"🚨 成长机制荒废：身为【{h_short}】整局 {duration_min:.0f} 分钟竟然 0 层【{exp_name}】（合格线 ≥{target_stacks}）！"
+                    )
+                    if dmg_quality_grade == "good":
+                        dmg_quality_grade = "warn"
+                elif actual_stacks < target_stacks:
+                    perm_buff_notes.append(
+                        f"⚠️ 叠层偏少：{duration_min:.0f} 分钟仅叠出 {actual_stacks} 层【{exp_name}】（同局时长合格线 ≥{target_stacks} 层），团战存活拉扯或终结收割频次不足。"
+                    )
+                else:
+                    perm_buff_notes.append(
+                        f"🔥 叠层丰厚：全场累计叠出 {actual_stacks} 层【{exp_name}】（远超合格线 {target_stacks} 层），后期成长统治力拉满！"
+                    )
+
+            overall_grade = "bad" if (dmg_quality_grade == "bad" or skill_build_grade == "bad") else (
+                "warn" if (dmg_quality_grade == "warn" or skill_build_grade == "warn") else dmg_quality_grade
+            )
+
+            player_rows.append({
+                "pos": pos,
+                "hero_short_zh": h_short,
+                "hero_img": p.get("hero_img") or "",
+                "personaname": p.get("personaname") or "匿名玩家",
+                "total_hero_dmg": total_hero_dmg,
+                "total_kills": total_kills,
+                "dmg_per_kill": dmg_per_kill,
+                "core_12_dmg": core_12_dmg,
+                "core_12_pct": core_12_pct,
+                "core_12_kills": core_12_kills,
+                "tank_sponge_dmg": tank_sponge_dmg,
+                "tank_sponge_pct": tank_sponge_pct,
+                "tank_sponge_kills": tank_sponge_kills,
+                "backline_sup_dmg": backline_sup_dmg,
+                "backline_sup_pct": backline_sup_pct,
+                "backline_sup_kills": backline_sup_kills,
+                "effective_non_tank_pct": effective_non_tank_pct,
+                "max_hit_val": max_hit_val,
+                "max_hit_summary_zh": max_hit_summary_zh,
+                "target_breakdown": target_breakdown,
+                "dmg_quality_badge": dmg_quality_badge,
+                "dmg_audit_notes": dmg_audit_notes,
+                "skill_route_summary_zh": skill_route_summary_zh,
+                "level_sequence": level_sequence,
+                "talents_chosen": talents_chosen,
+                "skill_build_flags": skill_build_flags,
+                "skill_build_grade": skill_build_grade,
+                "perm_buff_badges": perm_buff_badges,
+                "perm_buff_notes": perm_buff_notes,
+                "grade": overall_grade,
+            })
+
+        side_zh = "夜魇" if side_key == "dire" else "天辉"
+        if fake_dmg_suspects_cnt > 0 or skill_build_issues_cnt > 0:
+            side_verdict = (
+                f"🚨 {side_zh}伤害含金量与加点审判：抓出 {fake_dmg_suspects_cnt} 名队员存在「大量伤害灌在敌方前排肉盾身上、切敌方1/2号位双核乏力」的假伤害现象，"
+                f"且有 {skill_build_issues_cnt} 处前中期关键控制/核心技能 0 级不学的偏科加点！"
+            )
+        else:
+            side_verdict = (
+                f"✅ {side_zh}伤害含金量与加点审判：全队集火目标明确（共 {true_core_slayers_cnt} 人打出高比例切核真伤害），且 1~5 号位前中期技能加点与天赋抉择均无明显毒点。"
+            )
+
+        return {
+            "side": side_key,
+            "side_verdict": side_verdict,
+            "fake_dmg_suspects_cnt": fake_dmg_suspects_cnt,
+            "true_core_slayers_cnt": true_core_slayers_cnt,
+            "skill_build_issues_cnt": skill_build_issues_cnt,
+            "player_rows": player_rows,
+        }
+
     return {
         "hero_execution_by_side": {
             "dire": [x for x in all_hero_exec if x["side"] == "dire"],
@@ -3470,6 +3934,10 @@ def build_tactical_microscope(
         "itemization_audit_by_side": {
             "dire": analyze_side_itemization_and_counters("dire"),
             "radiant": analyze_side_itemization_and_counters("radiant"),
+        },
+        "damage_quality_and_build_by_side": {
+            "dire": analyze_side_damage_quality_and_skill_builds("dire"),
+            "radiant": analyze_side_damage_quality_and_skill_builds("radiant"),
         },
         "support_vision_by_side": {
             "dire": analyze_side_vision_quality("dire"),

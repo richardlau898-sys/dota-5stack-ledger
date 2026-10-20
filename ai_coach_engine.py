@@ -833,6 +833,33 @@ def evaluate_player_deeply(
             f"核心命脉魔晶缺失：比赛打到 {duration_min:.0f} 分钟仍未购买 {hero_name} 仅售 1,400 金的质变魔晶【{hmp['shard_desc']}】，导致英雄核心团战机制残缺！",
         )
 
+    # 6) 伤害含金量（刮肉盾假伤害 vs 真切核）、1~18级奇葩加点与永久Buff叠层证据挂载
+    dq_audit = p.get("damage_and_build_audit") or {}
+    if dq_audit:
+        dq_badge = str(dq_audit.get("dmg_quality_badge") or "")
+        dq_notes = dq_audit.get("dmg_audit_notes") or []
+        if dq_badge.startswith("🚨") and dq_notes:
+            blame_points += 10.0
+            weaknesses.append(dq_notes[0])
+        elif dq_badge.startswith("⚠️") and dq_notes:
+            weaknesses.append(dq_notes[0])
+        elif dq_badge.startswith("🔥") and dq_notes:
+            strengths.append(dq_notes[0])
+
+        for sflag in (dq_audit.get("skill_build_flags") or []):
+            if str(sflag).startswith("🚨"):
+                blame_points += 9.0
+                weaknesses.append(sflag)
+            elif str(sflag).startswith("⚠️"):
+                blame_points += 5.0
+                weaknesses.append(sflag)
+
+        for pb_note in (dq_audit.get("perm_buff_notes") or []):
+            if str(pb_note).startswith("🚨") or str(pb_note).startswith("⚠️"):
+                weaknesses.append(pb_note)
+            elif str(pb_note).startswith("🔥"):
+                strengths.append(pb_note)
+
     if deaths <= 4 and duration_min >= 30 and not is_afk_farmer:
         strengths.append(
             f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次（读秒总计 {dead_min}分{dead_rem_s:02d}秒，仅占全场 {dead_pct:.1f}%），团战站位拉扯极佳。"

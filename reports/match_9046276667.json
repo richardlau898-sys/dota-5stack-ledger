@@ -21645,6 +21645,2234 @@
         ]
       }
     },
+    "damage_quality_and_build_by_side": {
+      "dire": {
+        "side": "dire",
+        "side_verdict": "🚨 夜魇伤害含金量与加点审判：抓出 1 名队员存在「大量伤害灌在敌方前排肉盾身上、切敌方1/2号位双核乏力」的假伤害现象，且有 0 处前中期关键控制/核心技能 0 级不学的偏科加点！",
+        "fake_dmg_suspects_cnt": 1,
+        "true_core_slayers_cnt": 0,
+        "skill_build_issues_cnt": 0,
+        "player_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+            "personaname": "Flame = ez mute",
+            "total_hero_dmg": 30060,
+            "total_kills": 9,
+            "dmg_per_kill": 3340,
+            "core_12_dmg": 12255,
+            "core_12_pct": 40.8,
+            "core_12_kills": 2,
+            "tank_sponge_dmg": 13932,
+            "tank_sponge_pct": 46.3,
+            "tank_sponge_kills": 5,
+            "backline_sup_dmg": 3873,
+            "backline_sup_pct": 12.9,
+            "backline_sup_kills": 2,
+            "effective_non_tank_pct": 53.7,
+            "max_hit_val": 529,
+            "max_hit_summary_zh": "30:41 用【自然之怒(大招)】对 斯拉达 单发打出 529 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "斯拉达",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 7469,
+                "kills": 3,
+                "dmg_pct": 24.8
+              },
+              {
+                "hero_short_zh": "玛西",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 6717,
+                "kills": 2,
+                "dmg_pct": 22.3
+              },
+              {
+                "hero_short_zh": "帕吉",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+                "pos": 4,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 6463,
+                "kills": 2,
+                "dmg_pct": 21.5
+              },
+              {
+                "hero_short_zh": "虚空假面",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 5538,
+                "kills": 0,
+                "dmg_pct": 18.4
+              },
+              {
+                "hero_short_zh": "森海飞霞",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 3873,
+                "kills": 2,
+                "dmg_pct": 12.9
+              }
+            ],
+            "dmg_quality_badge": "🚨 刮肉刷伤 · 切核乏力",
+            "dmg_audit_notes": [
+              "🚨 伤害虚胖警告：全场高达 46.3% 的伤害（13,932 点）全灌在敌方前排肉盾【3号位斯拉达/4号位帕吉】身上，而打在敌方 1/2 号位双核身上的伤害仅占 40.8%（12,255 点，杀 2 次）！",
+              "🎯 头号集火沙包：全场打【3号位·斯拉达】最多，共造成 7,469 点伤害（占个人总伤 24.8%，击杀 3 次）。"
+            ],
+            "skill_route_summary_zh": "主【自然之力】(L7满) 副【传送】(L10满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "自然之力(招树人)",
+                "short_tag": "L1:自然之力(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "发芽(框)",
+                "short_tag": "L2:发芽(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "自然之力(招树人)",
+                "short_tag": "L3:自然之力(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "传送(飞)",
+                "short_tag": "L4:传送(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "自然之力(招树人)",
+                "short_tag": "L5:自然之力(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "自然之怒(大招)",
+                "short_tag": "L6:自然之怒(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "自然之力(招树人)",
+                "short_tag": "L7:自然之力(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "传送(飞)",
+                "short_tag": "L8:传送(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "传送(飞)",
+                "short_tag": "L9:传送(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "传送(飞)",
+                "short_tag": "L10:传送(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 11,
+                "zh": "-10s 【自然之力】 冷却",
+                "short_tag": "L11:🌟-10s 【自然之力】 冷却",
+                "type": "talent"
+              },
+              {
+                "level": 12,
+                "zh": "发芽(框)",
+                "short_tag": "L12:发芽(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "自然之怒(大招)",
+                "short_tag": "L13:自然之怒(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "发芽(框)",
+                "short_tag": "L14:发芽(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "发芽(框)",
+                "short_tag": "L15:发芽(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "+50 Treant 移动速度",
+                "short_tag": "L16:🌟+50 Treant 移动速度",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "自然之怒(大招)",
+                "short_tag": "L17:自然之怒(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "-20s 【自然之怒】 冷却",
+                "short_tag": "L18:🌟-20s 【自然之怒】 冷却",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 11,
+                "zh": "-10s 【自然之力】 冷却"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "+50 Treant 移动速度"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "-20s 【自然之怒】 冷却"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【自然之力】(L7满) 副【传送】(L10满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [],
+            "perm_buff_notes": [],
+            "grade": "bad"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "personaname": "Paphets",
+            "total_hero_dmg": 19202,
+            "total_kills": 2,
+            "dmg_per_kill": 9601,
+            "core_12_dmg": 10772,
+            "core_12_pct": 56.1,
+            "core_12_kills": 0,
+            "tank_sponge_dmg": 7360,
+            "tank_sponge_pct": 38.3,
+            "tank_sponge_kills": 2,
+            "backline_sup_dmg": 1070,
+            "backline_sup_pct": 5.6,
+            "backline_sup_kills": 0,
+            "effective_non_tank_pct": 61.7,
+            "max_hit_val": 233,
+            "max_hit_summary_zh": "08:53 用【火焰气息(喷火)】对 斯拉达 单发打出 233 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "玛西",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 7032,
+                "kills": 0,
+                "dmg_pct": 36.6
+              },
+              {
+                "hero_short_zh": "帕吉",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+                "pos": 4,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 4743,
+                "kills": 2,
+                "dmg_pct": 24.7
+              },
+              {
+                "hero_short_zh": "虚空假面",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 3740,
+                "kills": 0,
+                "dmg_pct": 19.5
+              },
+              {
+                "hero_short_zh": "斯拉达",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 2617,
+                "kills": 0,
+                "dmg_pct": 13.6
+              },
+              {
+                "hero_short_zh": "森海飞霞",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 1070,
+                "kills": 0,
+                "dmg_pct": 5.6
+              }
+            ],
+            "dmg_quality_badge": "⚡ 有效压制后排/核心",
+            "dmg_audit_notes": [
+              "✓ 伤害分布健康：61.7% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 56.1%，打后排辅助占 5.6%）。",
+              "🎯 头号集火沙包：全场打【2号位·玛西】最多，共造成 7,032 点伤害（占个人总伤 36.6%，击杀 0 次）。"
+            ],
+            "skill_route_summary_zh": "主【火焰气息】(L7满) 副【龙骑专属技能】(L10满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "火焰气息(喷火)",
+                "short_tag": "L1:火焰气息(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "龙骑专属技能",
+                "short_tag": "L2:龙骑专属技能(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "火焰气息(喷火)",
+                "short_tag": "L3:火焰气息(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "神龙摆尾(拍晕)",
+                "short_tag": "L4:神龙摆尾(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "火焰气息(喷火)",
+                "short_tag": "L5:火焰气息(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "古龙形态(变龙)",
+                "short_tag": "L6:古龙形态(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "火焰气息(喷火)",
+                "short_tag": "L7:火焰气息(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "龙骑专属技能",
+                "short_tag": "L8:龙骑专属技能(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "龙骑专属技能",
+                "short_tag": "L9:龙骑专属技能(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "龙骑专属技能",
+                "short_tag": "L10:龙骑专属技能(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 11,
+                "zh": "-2s 【火焰气息】 冷却",
+                "short_tag": "L11:🌟-2s 【火焰气息】 冷却",
+                "type": "talent"
+              },
+              {
+                "level": 12,
+                "zh": "神龙摆尾(拍晕)",
+                "short_tag": "L12:神龙摆尾(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "古龙形态(变龙)",
+                "short_tag": "L13:古龙形态(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "神龙摆尾(拍晕)",
+                "short_tag": "L14:神龙摆尾(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "神龙摆尾(拍晕)",
+                "short_tag": "L15:神龙摆尾(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "+300 生命值",
+                "short_tag": "L16:🌟+300 生命值",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "古龙形态(变龙)",
+                "short_tag": "L17:古龙形态(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "+220 【火焰气息】 伤害",
+                "short_tag": "L18:🌟+220 【火焰气息】 伤害",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 11,
+                "zh": "-2s 【火焰气息】 冷却"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "+300 生命值"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "+220 【火焰气息】 伤害"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【火焰气息】(L7满) 副【龙骑专属技能】(L10满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [
+              "💎 魔晶激活 (19:30)"
+            ],
+            "perm_buff_notes": [],
+            "grade": "good"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "黑暗贤者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+            "personaname": "Mr. Brightside",
+            "total_hero_dmg": 30255,
+            "total_kills": 4,
+            "dmg_per_kill": 7564,
+            "core_12_dmg": 15186,
+            "core_12_pct": 50.2,
+            "core_12_kills": 1,
+            "tank_sponge_dmg": 11909,
+            "tank_sponge_pct": 39.4,
+            "tank_sponge_kills": 1,
+            "backline_sup_dmg": 3160,
+            "backline_sup_pct": 10.4,
+            "backline_sup_kills": 2,
+            "effective_non_tank_pct": 60.6,
+            "max_hit_val": 183,
+            "max_hit_summary_zh": "38:43 用【真空(拉)】对 斯拉达 单发打出 183 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "虚空假面",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 9547,
+                "kills": 0,
+                "dmg_pct": 31.6
+              },
+              {
+                "hero_short_zh": "斯拉达",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 8499,
+                "kills": 1,
+                "dmg_pct": 28.1
+              },
+              {
+                "hero_short_zh": "玛西",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 5639,
+                "kills": 1,
+                "dmg_pct": 18.6
+              },
+              {
+                "hero_short_zh": "帕吉",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+                "pos": 4,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 3410,
+                "kills": 0,
+                "dmg_pct": 11.3
+              },
+              {
+                "hero_short_zh": "森海飞霞",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 3160,
+                "kills": 2,
+                "dmg_pct": 10.4
+              }
+            ],
+            "dmg_quality_badge": "⚡ 有效压制后排/核心",
+            "dmg_audit_notes": [
+              "✓ 伤害分布健康：60.6% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 50.2%，打后排辅助占 10.4%）。",
+              "🎯 头号集火沙包：全场打【1号位·虚空假面】最多，共造成 9,547 点伤害（占个人总伤 31.6%，击杀 0 次）。"
+            ],
+            "skill_route_summary_zh": "主【离子外壳】(L7满) 副【奔腾】(L11满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "离子外壳(套子)",
+                "short_tag": "L1:离子外壳(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "奔腾(加速)",
+                "short_tag": "L2:奔腾(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "离子外壳(套子)",
+                "short_tag": "L3:离子外壳(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "真空(拉)",
+                "short_tag": "L4:真空(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "离子外壳(套子)",
+                "short_tag": "L5:离子外壳(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "奔腾(加速)",
+                "short_tag": "L6:奔腾(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "离子外壳(套子)",
+                "short_tag": "L7:离子外壳(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "复制之墙(大招墙)",
+                "short_tag": "L8:复制之墙(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "奔腾(加速)",
+                "short_tag": "L9:奔腾(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "+65 【离子外壳】 作用范围",
+                "short_tag": "L10:🌟+65 【离子外壳】 作用范围",
+                "type": "talent"
+              },
+              {
+                "level": 11,
+                "zh": "奔腾(加速)",
+                "short_tag": "L11:奔腾(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 12,
+                "zh": "真空(拉)",
+                "short_tag": "L12:真空(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "复制之墙(大招墙)",
+                "short_tag": "L13:复制之墙(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "真空(拉)",
+                "short_tag": "L14:真空(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "真空(拉)",
+                "short_tag": "L15:真空(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "+75 【真空】 AoE",
+                "short_tag": "L16:🌟+75 【真空】 AoE",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "复制之墙(大招墙)",
+                "short_tag": "L17:复制之墙(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "+50 【离子外壳】 伤害",
+                "short_tag": "L18:🌟+50 【离子外壳】 伤害",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 10,
+                "zh": "+65 【离子外壳】 作用范围"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "+75 【真空】 AoE"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "+50 【离子外壳】 伤害"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【离子外壳】(L7满) 副【奔腾】(L11满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [
+              "💎 魔晶激活 (19:27)"
+            ],
+            "perm_buff_notes": [],
+            "grade": "good"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "personaname": "Replica",
+            "total_hero_dmg": 15465,
+            "total_kills": 3,
+            "dmg_per_kill": 5155,
+            "core_12_dmg": 5634,
+            "core_12_pct": 36.4,
+            "core_12_kills": 1,
+            "tank_sponge_dmg": 5214,
+            "tank_sponge_pct": 33.7,
+            "tank_sponge_kills": 2,
+            "backline_sup_dmg": 4617,
+            "backline_sup_pct": 29.9,
+            "backline_sup_kills": 0,
+            "effective_non_tank_pct": 66.3,
+            "max_hit_val": 500,
+            "max_hit_summary_zh": "33:57 用【复仇(大招隐身)】对 森海飞霞 单发打出 500 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "森海飞霞",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 4617,
+                "kills": 0,
+                "dmg_pct": 29.9
+              },
+              {
+                "hero_short_zh": "玛西",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 3588,
+                "kills": 0,
+                "dmg_pct": 23.2
+              },
+              {
+                "hero_short_zh": "帕吉",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+                "pos": 4,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 3478,
+                "kills": 1,
+                "dmg_pct": 22.5
+              },
+              {
+                "hero_short_zh": "虚空假面",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 2046,
+                "kills": 1,
+                "dmg_pct": 13.2
+              },
+              {
+                "hero_short_zh": "斯拉达",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 1736,
+                "kills": 1,
+                "dmg_pct": 11.2
+              }
+            ],
+            "dmg_quality_badge": "⚡ 有效压制后排/核心",
+            "dmg_audit_notes": [
+              "✓ 伤害分布健康：66.3% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 36.4%，打后排辅助占 29.9%）。",
+              "🎯 头号集火沙包：全场打【5号位·森海飞霞】最多，共造成 4,617 点伤害（占个人总伤 29.9%，击杀 0 次）。"
+            ],
+            "skill_route_summary_zh": "主【穿刺】(L7满) 副【尖刺外壳】(L10满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "穿刺(戳)",
+                "short_tag": "L1:穿刺(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "神智爆裂",
+                "short_tag": "L2:神智爆裂(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "尖刺外壳(壳)",
+                "short_tag": "L3:尖刺外壳(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "穿刺(戳)",
+                "short_tag": "L4:穿刺(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "穿刺(戳)",
+                "short_tag": "L5:穿刺(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "复仇(大招隐身)",
+                "short_tag": "L6:复仇(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "穿刺(戳)",
+                "short_tag": "L7:穿刺(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "尖刺外壳(壳)",
+                "short_tag": "L8:尖刺外壳(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "尖刺外壳(壳)",
+                "short_tag": "L9:尖刺外壳(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "尖刺外壳(壳)",
+                "short_tag": "L10:尖刺外壳(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 11,
+                "zh": "+0.2s 【穿刺】 眩晕 持续时间",
+                "short_tag": "L11:🌟+0.2s 【穿刺】 眩晕 持续时间",
+                "type": "talent"
+              },
+              {
+                "level": 12,
+                "zh": "神智爆裂",
+                "short_tag": "L12:神智爆裂(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "复仇(大招隐身)",
+                "short_tag": "L13:复仇(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "神智爆裂",
+                "short_tag": "L14:神智爆裂(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "神智爆裂",
+                "short_tag": "L15:神智爆裂(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "-3s 【神智爆裂】 冷却",
+                "short_tag": "L16:🌟-3s 【神智爆裂】 冷却",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "复仇(大招隐身)",
+                "short_tag": "L17:复仇(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "+0.6s 【尖刺外壳】 眩晕 持续时间",
+                "short_tag": "L18:🌟+0.6s 【尖刺外壳】 眩晕 持续时间",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 11,
+                "zh": "+0.2s 【穿刺】 眩晕 持续时间"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "-3s 【神智爆裂】 冷却"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "+0.6s 【尖刺外壳】 眩晕 持续时间"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【穿刺】(L7满) 副【尖刺外壳】(L10满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [
+              "💎 魔晶激活 (44:40)"
+            ],
+            "perm_buff_notes": [],
+            "grade": "good"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "personaname": "Make Your Choice",
+            "total_hero_dmg": 11236,
+            "total_kills": 4,
+            "dmg_per_kill": 2809,
+            "core_12_dmg": 4431,
+            "core_12_pct": 39.4,
+            "core_12_kills": 2,
+            "tank_sponge_dmg": 5806,
+            "tank_sponge_pct": 51.7,
+            "tank_sponge_kills": 1,
+            "backline_sup_dmg": 999,
+            "backline_sup_pct": 8.9,
+            "backline_sup_kills": 1,
+            "effective_non_tank_pct": 48.3,
+            "max_hit_val": 278,
+            "max_hit_summary_zh": "35:11 用【弱化能流】对 虚空假面 单发打出 278 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "帕吉",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+                "pos": 4,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 3372,
+                "kills": 1,
+                "dmg_pct": 30.0
+              },
+              {
+                "hero_short_zh": "斯拉达",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 2434,
+                "kills": 0,
+                "dmg_pct": 21.7
+              },
+              {
+                "hero_short_zh": "玛西",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 2265,
+                "kills": 1,
+                "dmg_pct": 20.2
+              },
+              {
+                "hero_short_zh": "虚空假面",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 2166,
+                "kills": 1,
+                "dmg_pct": 19.3
+              },
+              {
+                "hero_short_zh": "森海飞霞",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 999,
+                "kills": 1,
+                "dmg_pct": 8.9
+              }
+            ],
+            "dmg_quality_badge": "⚖️ 常规前排拉扯输出",
+            "dmg_audit_notes": [
+              "对敌方 1/2 号位双核伤害占 39.4%（杀 2 次），对前排肉盾伤害占 51.7%（杀 1 次）。",
+              "🎯 头号集火沙包：全场打【4号位·帕吉】最多，共造成 3,372 点伤害（占个人总伤 30.0%，击杀 1 次）。"
+            ],
+            "skill_route_summary_zh": "主【弱化能流】(L7满) 副【隔空取物】(L11满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "弱化能流",
+                "short_tag": "L1:弱化能流(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "隔空取物(举)",
+                "short_tag": "L2:隔空取物(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "弱化能流",
+                "short_tag": "L3:弱化能流(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "拉比克专属技能",
+                "short_tag": "L4:拉比克专属技能(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "弱化能流",
+                "short_tag": "L5:弱化能流(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "技能窃取(偷)",
+                "short_tag": "L6:技能窃取(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "弱化能流",
+                "short_tag": "L7:弱化能流(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "隔空取物(举)",
+                "short_tag": "L8:隔空取物(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "隔空取物(举)",
+                "short_tag": "L9:隔空取物(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "+200 生命值",
+                "short_tag": "L10:🌟+200 生命值",
+                "type": "talent"
+              },
+              {
+                "level": 11,
+                "zh": "隔空取物(举)",
+                "short_tag": "L11:隔空取物(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 12,
+                "zh": "拉比克专属技能",
+                "short_tag": "L12:拉比克专属技能(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "技能窃取(偷)",
+                "short_tag": "L13:技能窃取(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "拉比克专属技能",
+                "short_tag": "L14:拉比克专属技能(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "拉比克专属技能",
+                "short_tag": "L15:拉比克专属技能(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "-4s 【弱化能流】 冷却",
+                "short_tag": "L16:🌟-4s 【弱化能流】 冷却",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 10,
+                "zh": "+200 生命值"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "-4s 【弱化能流】 冷却"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【弱化能流】(L7满) 副【隔空取物】(L11满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [
+              "💎 魔晶激活 (40:15)",
+              "🪄 拉比克·奥术至尊/窃取叠层：10 层",
+              "🔥 先天被动觉醒：1 阶"
+            ],
+            "perm_buff_notes": [
+              "🔥 叠层丰厚：全场累计叠出 10 层【奥术至尊窃取叠层】（远超合格线 8 层），后期成长统治力拉满！"
+            ],
+            "grade": "normal"
+          }
+        ]
+      },
+      "radiant": {
+        "side": "radiant",
+        "side_verdict": "🚨 天辉伤害含金量与加点审判：抓出 0 名队员存在「大量伤害灌在敌方前排肉盾身上、切敌方1/2号位双核乏力」的假伤害现象，且有 1 处前中期关键控制/核心技能 0 级不学的偏科加点！",
+        "fake_dmg_suspects_cnt": 0,
+        "true_core_slayers_cnt": 1,
+        "skill_build_issues_cnt": 1,
+        "player_rows": [
+          {
+            "pos": 1,
+            "hero_short_zh": "虚空假面",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+            "personaname": "What the dog doing？",
+            "total_hero_dmg": 21351,
+            "total_kills": 7,
+            "dmg_per_kill": 3050,
+            "core_12_dmg": 8496,
+            "core_12_pct": 39.8,
+            "core_12_kills": 1,
+            "tank_sponge_dmg": 9555,
+            "tank_sponge_pct": 44.8,
+            "tank_sponge_kills": 5,
+            "backline_sup_dmg": 3300,
+            "backline_sup_pct": 15.5,
+            "backline_sup_kills": 1,
+            "effective_non_tank_pct": 55.2,
+            "max_hit_val": 319,
+            "max_hit_summary_zh": "34:13 用【普攻暴击/平A】对 先知 单发打出 319 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "黑暗贤者",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 9555,
+                "kills": 5,
+                "dmg_pct": 44.8
+              },
+              {
+                "hero_short_zh": "先知",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 6136,
+                "kills": 1,
+                "dmg_pct": 28.7
+              },
+              {
+                "hero_short_zh": "拉比克",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 2627,
+                "kills": 1,
+                "dmg_pct": 12.3
+              },
+              {
+                "hero_short_zh": "龙骑士",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 2360,
+                "kills": 0,
+                "dmg_pct": 11.1
+              },
+              {
+                "hero_short_zh": "司夜刺客",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+                "pos": 4,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 673,
+                "kills": 0,
+                "dmg_pct": 3.2
+              }
+            ],
+            "dmg_quality_badge": "⚖️ 常规前排拉扯输出",
+            "dmg_audit_notes": [
+              "对敌方 1/2 号位双核伤害占 39.8%（杀 1 次），对前排肉盾伤害占 44.8%（杀 5 次）。",
+              "🎯 头号集火沙包：全场打【3号位·黑暗贤者】最多，共造成 9,555 点伤害（占个人总伤 44.8%，击杀 5 次）。"
+            ],
+            "skill_route_summary_zh": "主【时间漫游】(L7满) 副【虚空专属技能】(L10满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "时间漫游(跳)",
+                "short_tag": "L1:时间漫游(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "时间膨胀(锁CD)",
+                "short_tag": "L2:时间膨胀(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "时间漫游(跳)",
+                "short_tag": "L3:时间漫游(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "虚空专属技能",
+                "short_tag": "L4:虚空专属技能(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "时间漫游(跳)",
+                "short_tag": "L5:时间漫游(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "时间结界(大招罩子)",
+                "short_tag": "L6:时间结界(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "时间漫游(跳)",
+                "short_tag": "L7:时间漫游(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "虚空专属技能",
+                "short_tag": "L8:虚空专属技能(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "虚空专属技能",
+                "short_tag": "L9:虚空专属技能(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "虚空专属技能",
+                "short_tag": "L10:虚空专属技能(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 11,
+                "zh": "+0.5s 【时间漫游】 回到过去 持续时间",
+                "short_tag": "L11:🌟+0.5s 【时间漫游】 回到过去 持续时间",
+                "type": "talent"
+              },
+              {
+                "level": 12,
+                "zh": "时间膨胀(锁CD)",
+                "short_tag": "L12:时间膨胀(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "时间结界(大招罩子)",
+                "short_tag": "L13:时间结界(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "时间膨胀(锁CD)",
+                "short_tag": "L14:时间膨胀(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "时间膨胀(锁CD)",
+                "short_tag": "L15:时间膨胀(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "+125 【时间漫游】 距离",
+                "short_tag": "L16:🌟+125 【时间漫游】 距离",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "时间结界(大招罩子)",
+                "short_tag": "L17:时间结界(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "-1.0s 【时间漫游】 冷却",
+                "short_tag": "L18:🌟-1.0s 【时间漫游】 冷却",
+                "type": "talent"
+              },
+              {
+                "level": 19,
+                "zh": "+140 【时间结界】 AoE",
+                "short_tag": "L19:🌟+140 【时间结界】 AoE",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 11,
+                "zh": "+0.5s 【时间漫游】 回到过去 持续时间"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "+125 【时间漫游】 距离"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "-1.0s 【时间漫游】 冷却"
+              },
+              {
+                "tier": "25级天赋",
+                "level_taken": 19,
+                "zh": "+140 【时间结界】 AoE"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【时间漫游】(L7满) 副【虚空专属技能】(L10满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [
+              "💎 魔晶激活 (27:32)"
+            ],
+            "perm_buff_notes": [],
+            "grade": "normal"
+          },
+          {
+            "pos": 2,
+            "hero_short_zh": "玛西",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+            "personaname": "99",
+            "total_hero_dmg": 32013,
+            "total_kills": 18,
+            "dmg_per_kill": 1778,
+            "core_12_dmg": 18825,
+            "core_12_pct": 58.8,
+            "core_12_kills": 11,
+            "tank_sponge_dmg": 5616,
+            "tank_sponge_pct": 17.5,
+            "tank_sponge_kills": 1,
+            "backline_sup_dmg": 7572,
+            "backline_sup_pct": 23.7,
+            "backline_sup_kills": 6,
+            "effective_non_tank_pct": 82.5,
+            "max_hit_val": 536,
+            "max_hit_summary_zh": "36:04 用【普攻暴击/平A】对 先知 单发打出 536 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "龙骑士",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 10565,
+                "kills": 5,
+                "dmg_pct": 33.0
+              },
+              {
+                "hero_short_zh": "先知",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 8260,
+                "kills": 6,
+                "dmg_pct": 25.8
+              },
+              {
+                "hero_short_zh": "黑暗贤者",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 5616,
+                "kills": 1,
+                "dmg_pct": 17.5
+              },
+              {
+                "hero_short_zh": "拉比克",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 4852,
+                "kills": 4,
+                "dmg_pct": 15.2
+              },
+              {
+                "hero_short_zh": "司夜刺客",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+                "pos": 4,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 2720,
+                "kills": 2,
+                "dmg_pct": 8.5
+              }
+            ],
+            "dmg_quality_badge": "🔥 刀刀见血 · 精准切核",
+            "dmg_audit_notes": [
+              "✓ 高含金量切核：对敌方 1/2 号位双核倾泻了 18,825 点真伤害（占 58.8%），并亲手终结敌方双核 11 次！",
+              "🎯 头号集火沙包：全场打【2号位·龙骑士】最多，共造成 10,565 点伤害（占个人总伤 33.0%，击杀 5 次）。"
+            ],
+            "skill_route_summary_zh": "主【回身踢】(L7满) 副【过肩摔】(L10满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "过肩摔",
+                "short_tag": "L1:过肩摔(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "回身踢(跳)",
+                "short_tag": "L2:回身踢(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "回身踢(跳)",
+                "short_tag": "L3:回身踢(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "过肩摔",
+                "short_tag": "L4:过肩摔(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "回身踢(跳)",
+                "short_tag": "L5:回身踢(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "怒拳破(大招)",
+                "short_tag": "L6:怒拳破(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "回身踢(跳)",
+                "short_tag": "L7:回身踢(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "过肩摔",
+                "short_tag": "L8:过肩摔(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "护卫",
+                "short_tag": "L9:护卫(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "过肩摔",
+                "short_tag": "L10:过肩摔(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 11,
+                "zh": "+50 【回身踢】 Landing 作用范围",
+                "short_tag": "L11:🌟+50 【回身踢】 Landing 作用范围",
+                "type": "talent"
+              },
+              {
+                "level": 12,
+                "zh": "护卫",
+                "short_tag": "L12:护卫(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "怒拳破(大招)",
+                "short_tag": "L13:怒拳破(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "护卫",
+                "short_tag": "L14:护卫(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "护卫",
+                "short_tag": "L15:护卫(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "+12% 【护卫】 伤害",
+                "short_tag": "L16:🌟+12% 【护卫】 伤害",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "怒拳破(大招)",
+                "short_tag": "L17:怒拳破(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "+15% 【怒拳破】 移动速度",
+                "short_tag": "L18:🌟+15% 【怒拳破】 移动速度",
+                "type": "talent"
+              },
+              {
+                "level": 19,
+                "zh": "【怒拳破】 持续时间 延长 6s 击杀时",
+                "short_tag": "L19:🌟【怒拳破】 持续时间 延长 6s 击杀时",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 11,
+                "zh": "+50 【回身踢】 Landing 作用范围"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "+12% 【护卫】 伤害"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "+15% 【怒拳破】 移动速度"
+              },
+              {
+                "tier": "25级天赋",
+                "level_taken": 19,
+                "zh": "【怒拳破】 持续时间 延长 6s 击杀时"
+              }
+            ],
+            "skill_build_flags": [
+              "⚠️ 偏科加点：前 8 级完全没学【护卫】（直到 L9 才点 1 级），前中期少一个技能维度。"
+            ],
+            "skill_build_grade": "warn",
+            "perm_buff_badges": [
+              "💎 魔晶激活 (28:16)"
+            ],
+            "perm_buff_notes": [],
+            "grade": "warn"
+          },
+          {
+            "pos": 3,
+            "hero_short_zh": "斯拉达",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+            "personaname": "东方树叶",
+            "total_hero_dmg": 8836,
+            "total_kills": 5,
+            "dmg_per_kill": 1767,
+            "core_12_dmg": 3014,
+            "core_12_pct": 34.1,
+            "core_12_kills": 2,
+            "tank_sponge_dmg": 2763,
+            "tank_sponge_pct": 31.3,
+            "tank_sponge_kills": 0,
+            "backline_sup_dmg": 3059,
+            "backline_sup_pct": 34.6,
+            "backline_sup_kills": 3,
+            "effective_non_tank_pct": 68.7,
+            "max_hit_val": 364,
+            "max_hit_summary_zh": "34:13 用【鱼人碎击(踩)】对 先知 单发打出 364 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "黑暗贤者",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 2763,
+                "kills": 0,
+                "dmg_pct": 31.3
+              },
+              {
+                "hero_short_zh": "拉比克",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 2197,
+                "kills": 3,
+                "dmg_pct": 24.9
+              },
+              {
+                "hero_short_zh": "龙骑士",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 1789,
+                "kills": 1,
+                "dmg_pct": 20.2
+              },
+              {
+                "hero_short_zh": "先知",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 1225,
+                "kills": 1,
+                "dmg_pct": 13.9
+              },
+              {
+                "hero_short_zh": "司夜刺客",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+                "pos": 4,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 862,
+                "kills": 0,
+                "dmg_pct": 9.8
+              }
+            ],
+            "dmg_quality_badge": "⚡ 有效压制后排/核心",
+            "dmg_audit_notes": [
+              "✓ 伤害分布健康：68.7% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 34.1%，打后排辅助占 34.6%）。",
+              "🎯 头号集火沙包：全场打【3号位·黑暗贤者】最多，共造成 2,763 点伤害（占个人总伤 31.3%，击杀 0 次）。"
+            ],
+            "skill_route_summary_zh": "主【鱼人碎击】(L7满) 副【大鱼人专属技能】(L11满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "鱼人碎击(踩)",
+                "short_tag": "L1:鱼人碎击(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "大鱼人专属技能",
+                "short_tag": "L2:大鱼人专属技能(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "鱼人碎击(踩)",
+                "short_tag": "L3:鱼人碎击(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "守卫冲刺(加速)",
+                "short_tag": "L4:守卫冲刺(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "鱼人碎击(踩)",
+                "short_tag": "L5:鱼人碎击(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "侵蚀雾霭(大招点灯)",
+                "short_tag": "L6:侵蚀雾霭(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "鱼人碎击(踩)",
+                "short_tag": "L7:鱼人碎击(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "大鱼人专属技能",
+                "short_tag": "L8:大鱼人专属技能(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "大鱼人专属技能",
+                "short_tag": "L9:大鱼人专属技能(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "+30 Bash of the Deep 伤害",
+                "short_tag": "L10:🌟+30 Bash of the Deep 伤害",
+                "type": "talent"
+              },
+              {
+                "level": 11,
+                "zh": "大鱼人专属技能",
+                "short_tag": "L11:大鱼人专属技能(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 12,
+                "zh": "守卫冲刺(加速)",
+                "short_tag": "L12:守卫冲刺(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "侵蚀雾霭(大招点灯)",
+                "short_tag": "L13:侵蚀雾霭(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "守卫冲刺(加速)",
+                "short_tag": "L14:守卫冲刺(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "守卫冲刺(加速)",
+                "short_tag": "L15:守卫冲刺(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "-3 【侵蚀雾霭】 护甲",
+                "short_tag": "L16:🌟-3 【侵蚀雾霭】 护甲",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "侵蚀雾霭(大招点灯)",
+                "short_tag": "L17:侵蚀雾霭(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "+125 【鱼人碎击】 伤害",
+                "short_tag": "L18:🌟+125 【鱼人碎击】 伤害",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 10,
+                "zh": "+30 Bash of the Deep 伤害"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "-3 【侵蚀雾霭】 护甲"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "+125 【鱼人碎击】 伤害"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【鱼人碎击】(L7满) 副【大鱼人专属技能】(L11满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [
+              "💎 魔晶激活 (28:33)",
+              "🔥 先天被动觉醒：1 阶"
+            ],
+            "perm_buff_notes": [],
+            "grade": "good"
+          },
+          {
+            "pos": 4,
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "personaname": "Mind's Desire",
+            "total_hero_dmg": 11416,
+            "total_kills": 2,
+            "dmg_per_kill": 5708,
+            "core_12_dmg": 6223,
+            "core_12_pct": 54.5,
+            "core_12_kills": 1,
+            "tank_sponge_dmg": 1556,
+            "tank_sponge_pct": 13.6,
+            "tank_sponge_kills": 0,
+            "backline_sup_dmg": 3637,
+            "backline_sup_pct": 31.9,
+            "backline_sup_kills": 1,
+            "effective_non_tank_pct": 86.4,
+            "max_hit_val": 360,
+            "max_hit_summary_zh": "33:59 用【肉钩】对 司夜刺客 单发打出 360 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "龙骑士",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 4587,
+                "kills": 1,
+                "dmg_pct": 40.2
+              },
+              {
+                "hero_short_zh": "拉比克",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 2320,
+                "kills": 1,
+                "dmg_pct": 20.3
+              },
+              {
+                "hero_short_zh": "先知",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 1636,
+                "kills": 0,
+                "dmg_pct": 14.3
+              },
+              {
+                "hero_short_zh": "黑暗贤者",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 1556,
+                "kills": 0,
+                "dmg_pct": 13.6
+              },
+              {
+                "hero_short_zh": "司夜刺客",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+                "pos": 4,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 1317,
+                "kills": 0,
+                "dmg_pct": 11.5
+              }
+            ],
+            "dmg_quality_badge": "⚡ 有效压制后排/核心",
+            "dmg_audit_notes": [
+              "✓ 伤害分布健康：86.4% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 54.5%，打后排辅助占 31.9%）。",
+              "🎯 头号集火沙包：全场打【2号位·龙骑士】最多，共造成 4,587 点伤害（占个人总伤 40.2%，击杀 1 次）。"
+            ],
+            "skill_route_summary_zh": "主【腐烂】(L7满) 副【腐肉堆积】(L10满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "肉钩",
+                "short_tag": "L1:肉钩(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "腐烂",
+                "short_tag": "L2:腐烂(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "腐烂",
+                "short_tag": "L3:腐烂(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "腐肉堆积(护盾)",
+                "short_tag": "L4:腐肉堆积(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "腐烂",
+                "short_tag": "L5:腐烂(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "肢解(大招咬)",
+                "short_tag": "L6:肢解(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "腐烂",
+                "short_tag": "L7:腐烂(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "腐肉堆积(护盾)",
+                "short_tag": "L8:腐肉堆积(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "腐肉堆积(护盾)",
+                "short_tag": "L9:腐肉堆积(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "腐肉堆积(护盾)",
+                "short_tag": "L10:腐肉堆积(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 11,
+                "zh": "+10% 【腐烂】 减速",
+                "short_tag": "L11:🌟+10% 【腐烂】 减速",
+                "type": "talent"
+              },
+              {
+                "level": 12,
+                "zh": "肉钩",
+                "short_tag": "L12:肉钩(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "肢解(大招咬)",
+                "short_tag": "L13:肢解(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "肉钩",
+                "short_tag": "L14:肉钩(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "肉钩",
+                "short_tag": "L15:肉钩(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "+8% Spell 吸血",
+                "short_tag": "L16:🌟+8% Spell 吸血",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "肢解(大招咬)",
+                "short_tag": "L17:肢解(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "+0.75s 【肢解】 持续时间",
+                "short_tag": "L18:🌟+0.75s 【肢解】 持续时间",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 11,
+                "zh": "+10% 【腐烂】 减速"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "+8% Spell 吸血"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "+0.75s 【肢解】 持续时间"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【腐烂】(L7满) 副【腐肉堆积】(L10满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [
+              "🥩 帕吉·腐肉堆积：11 层永久力量"
+            ],
+            "perm_buff_notes": [
+              "⚠️ 叠层偏少：41 分钟仅叠出 11 层【腐肉堆积力量层数】（同局时长合格线 ≥13 层），团战存活拉扯或终结收割频次不足。"
+            ],
+            "grade": "good"
+          },
+          {
+            "pos": 5,
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "personaname": "莓啤汽",
+            "total_hero_dmg": 15315,
+            "total_kills": 5,
+            "dmg_per_kill": 3063,
+            "core_12_dmg": 4315,
+            "core_12_pct": 28.2,
+            "core_12_kills": 2,
+            "tank_sponge_dmg": 4277,
+            "tank_sponge_pct": 27.9,
+            "tank_sponge_kills": 1,
+            "backline_sup_dmg": 6723,
+            "backline_sup_pct": 43.9,
+            "backline_sup_kills": 2,
+            "effective_non_tank_pct": 72.1,
+            "max_hit_val": 430,
+            "max_hit_summary_zh": "12:31 用【一箭穿心(大招狙)】对 龙骑士 单发打出 430 点伤害",
+            "target_breakdown": [
+              {
+                "hero_short_zh": "黑暗贤者",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+                "pos": 3,
+                "is_tank_sponge": true,
+                "is_core_12": false,
+                "role_tag_zh": "🥩 前排肉盾",
+                "dmg": 4277,
+                "kills": 1,
+                "dmg_pct": 27.9
+              },
+              {
+                "hero_short_zh": "司夜刺客",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+                "pos": 4,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 4259,
+                "kills": 1,
+                "dmg_pct": 27.8
+              },
+              {
+                "hero_short_zh": "拉比克",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+                "pos": 5,
+                "is_tank_sponge": false,
+                "is_core_12": false,
+                "role_tag_zh": "🪶 脆皮后排",
+                "dmg": 2464,
+                "kills": 1,
+                "dmg_pct": 16.1
+              },
+              {
+                "hero_short_zh": "龙骑士",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+                "pos": 2,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 2268,
+                "kills": 1,
+                "dmg_pct": 14.8
+              },
+              {
+                "hero_short_zh": "先知",
+                "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+                "pos": 1,
+                "is_tank_sponge": false,
+                "is_core_12": true,
+                "role_tag_zh": "🎯 核心双C",
+                "dmg": 2047,
+                "kills": 1,
+                "dmg_pct": 13.4
+              }
+            ],
+            "dmg_quality_badge": "⚡ 有效压制后排/核心",
+            "dmg_audit_notes": [
+              "✓ 伤害分布健康：72.1% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 28.2%，打后排辅助占 43.9%）。",
+              "🎯 头号集火沙包：全场打【3号位·黑暗贤者】最多，共造成 4,277 点伤害（占个人总伤 27.9%，击杀 1 次）。"
+            ],
+            "skill_route_summary_zh": "主【野地奇袭】(L8满) 副【橡果射击】(L10满)",
+            "level_sequence": [
+              {
+                "level": 1,
+                "zh": "野地奇袭(捆树)",
+                "short_tag": "L1:野地奇袭(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 2,
+                "zh": "橡果射击",
+                "short_tag": "L2:橡果射击(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 3,
+                "zh": "野地奇袭(捆树)",
+                "short_tag": "L3:野地奇袭(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 4,
+                "zh": "橡果射击",
+                "short_tag": "L4:橡果射击(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 5,
+                "zh": "野地奇袭(捆树)",
+                "short_tag": "L5:野地奇袭(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 6,
+                "zh": "一箭穿心(大招狙)",
+                "short_tag": "L6:一箭穿心(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 7,
+                "zh": "密林奔走",
+                "short_tag": "L7:密林奔走(1级)",
+                "type": "skill"
+              },
+              {
+                "level": 8,
+                "zh": "野地奇袭(捆树)",
+                "short_tag": "L8:野地奇袭(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 9,
+                "zh": "橡果射击",
+                "short_tag": "L9:橡果射击(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 10,
+                "zh": "橡果射击",
+                "short_tag": "L10:橡果射击(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 11,
+                "zh": "+175 生命值",
+                "short_tag": "L11:🌟+175 生命值",
+                "type": "talent"
+              },
+              {
+                "level": 12,
+                "zh": "密林奔走",
+                "short_tag": "L12:密林奔走(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 13,
+                "zh": "一箭穿心(大招狙)",
+                "short_tag": "L13:一箭穿心(2级)",
+                "type": "skill"
+              },
+              {
+                "level": 14,
+                "zh": "密林奔走",
+                "short_tag": "L14:密林奔走(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 15,
+                "zh": "密林奔走",
+                "short_tag": "L15:密林奔走(4级)",
+                "type": "skill"
+              },
+              {
+                "level": 16,
+                "zh": "+1 【密林奔走】 Ability Charge",
+                "short_tag": "L16:🌟+1 【密林奔走】 Ability Charge",
+                "type": "talent"
+              },
+              {
+                "level": 17,
+                "zh": "一箭穿心(大招狙)",
+                "short_tag": "L17:一箭穿心(3级)",
+                "type": "skill"
+              },
+              {
+                "level": 18,
+                "zh": "【一箭穿心】 提供 Vision While Charging",
+                "short_tag": "L18:🌟【一箭穿心】 提供 Vision While Charging",
+                "type": "talent"
+              }
+            ],
+            "talents_chosen": [
+              {
+                "tier": "10级天赋",
+                "level_taken": 11,
+                "zh": "+175 生命值"
+              },
+              {
+                "tier": "15级天赋",
+                "level_taken": 16,
+                "zh": "+1 【密林奔走】 Ability Charge"
+              },
+              {
+                "tier": "20级天赋",
+                "level_taken": 18,
+                "zh": "【一箭穿心】 提供 Vision While Charging"
+              }
+            ],
+            "skill_build_flags": [
+              "✓ 加点路线合理（主【野地奇袭】(L8满) 副【橡果射击】(L10满)，三技能衔接顺畅）。"
+            ],
+            "skill_build_grade": "good",
+            "perm_buff_badges": [],
+            "perm_buff_notes": [],
+            "grade": "good"
+          }
+        ]
+      }
+    },
     "support_vision_by_side": {
       "dire": {
         "side": "dire",
@@ -47128,7 +49356,7 @@
       "rating_score": 9.9,
       "rating_tier": "S+ 擎天战神",
       "mvp_score": 99.0,
-      "blame_share_pct": 2.6,
+      "blame_share_pct": 5.6,
       "contrib_share_pct": 29.1,
       "contrib_tier": "👑 头号首功 · 擎天真神",
       "gpm": 707,
@@ -47160,7 +49388,7 @@
       "kill_participation_pct": 62.2,
       "rating_score": 9.2,
       "rating_tier": "S+ 擎天战神",
-      "blame_share_pct": 6.1,
+      "blame_share_pct": 5.9,
       "contrib_share_pct": 24.8,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
       "strengths": [
@@ -47188,7 +49416,7 @@
       "kill_participation_pct": 54.5,
       "rating_score": 7.2,
       "rating_tier": "B 随波逐流",
-      "blame_share_pct": 14.2,
+      "blame_share_pct": 13.8,
       "contrib_share_pct": 22.3
     },
     "culprit_player": {
@@ -47205,7 +49433,7 @@
       "kda": "2/8/10",
       "rating_score": 4.2,
       "rating_tier": "D 头号战犯",
-      "blame_share_pct": 30.2,
+      "blame_share_pct": 29.4,
       "contrib_share_pct": 8.9,
       "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
       "dead_seconds": 365,
@@ -47213,7 +49441,7 @@
       "main_crime": "核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。",
       "trash_talk": "@Paphets 一局死 8 次，看了整整 6分5秒 黑白电视（其中被敌方【玛西】单人提款 5 次），光死就扣了 1870 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Paphets 稳健上分拼图！龙骑士 交出 2/8/10（参战率 54% · 伤害 19,202），关键团战从不掉链子！",
-      "verdict": "车队头号大锅认证（分锅占比 30.2%）：夜魇 2号位 龙骑士（Paphets，评分 4.2）——本局失利首锅毫无疑问扣在他头上：核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。"
+      "verdict": "车队头号大锅认证（分锅占比 29.4%）：夜魇 2号位 龙骑士（Paphets，评分 4.2）——本局失利首锅毫无疑问扣在他头上：核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。"
     },
     "second_culprit_player": {
       "player_slot": 129,
@@ -47226,7 +49454,7 @@
       "personaname": "Mr. Brightside",
       "kda": "4/8/10",
       "rating_score": 5.5,
-      "blame_share_pct": 23.0,
+      "blame_share_pct": 22.4,
       "contrib_share_pct": 19.2,
       "main_crime": "头铁拒出 BKB：面对敌方 234 秒强控，全场阵亡 8 次直到终局都没出黑皇杖，团战容错率极低。"
     },
@@ -47239,7 +49467,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dragon_knight.png",
         "personaname": "Paphets",
         "friend_tag": "车队好友 · Paphets",
-        "blame_share_pct": 30.2,
+        "blame_share_pct": 29.4,
         "contrib_share_pct": 8.9,
         "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
         "rating_score": 4.2,
@@ -47258,7 +49486,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/dark_seer.png",
         "personaname": "Mr. Brightside",
         "friend_tag": "车队好友 · Mr. Brightside",
-        "blame_share_pct": 23.0,
+        "blame_share_pct": 22.4,
         "contrib_share_pct": 19.2,
         "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
         "rating_score": 5.5,
@@ -47277,7 +49505,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/furion.png",
         "personaname": "Flame = ez mute",
         "friend_tag": "我 · Flame = ez mute",
-        "blame_share_pct": 19.0,
+        "blame_share_pct": 21.1,
         "contrib_share_pct": 28.9,
         "contrib_tier": "👑 头号首功 · 擎天真神",
         "rating_score": 6.5,
@@ -47296,7 +49524,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/rubick.png",
         "personaname": "Make Your Choice",
         "friend_tag": "车队好友 · Make Your Choice",
-        "blame_share_pct": 14.2,
+        "blame_share_pct": 13.8,
         "contrib_share_pct": 22.3,
         "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
         "rating_score": 7.2,
@@ -47315,7 +49543,7 @@
         "hero_icon": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/icons/nyx_assassin.png",
         "personaname": "Replica",
         "friend_tag": "车队好友 · Replica",
-        "blame_share_pct": 13.6,
+        "blame_share_pct": 13.3,
         "contrib_share_pct": 20.7,
         "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
         "rating_score": 6.2,
@@ -47338,7 +49566,7 @@
         "friend_tag": "我 · Flame = ez mute",
         "contrib_share_pct": 28.9,
         "contrib_tier": "👑 头号首功 · 擎天真神",
-        "blame_share_pct": 19.0,
+        "blame_share_pct": 21.1,
         "rating_score": 6.5,
         "rating_tier": "D 头号战犯",
         "kda": "9/9/8",
@@ -47356,7 +49584,7 @@
         "friend_tag": "车队好友 · Make Your Choice",
         "contrib_share_pct": 22.3,
         "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂",
-        "blame_share_pct": 14.2,
+        "blame_share_pct": 13.8,
         "rating_score": 7.2,
         "rating_tier": "B 随波逐流",
         "kda": "4/10/8",
@@ -47374,7 +49602,7 @@
         "friend_tag": "车队好友 · Replica",
         "contrib_share_pct": 20.7,
         "contrib_tier": "👁️ 视野统帅 · 幕后功臣",
-        "blame_share_pct": 13.6,
+        "blame_share_pct": 13.3,
         "rating_score": 6.2,
         "rating_tier": "D 头号战犯",
         "kda": "3/3/9",
@@ -47392,7 +49620,7 @@
         "friend_tag": "车队好友 · Mr. Brightside",
         "contrib_share_pct": 19.2,
         "contrib_tier": "🔥 黄金拼图 · 稳健节奏",
-        "blame_share_pct": 23.0,
+        "blame_share_pct": 22.4,
         "rating_score": 5.5,
         "rating_tier": "D 头号战犯",
         "kda": "4/8/10",
@@ -47410,7 +49638,7 @@
         "friend_tag": "车队好友 · Paphets",
         "contrib_share_pct": 8.9,
         "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将",
-        "blame_share_pct": 30.2,
+        "blame_share_pct": 29.4,
         "rating_score": 4.2,
         "rating_tier": "D 头号战犯",
         "kda": "2/8/10",
@@ -47425,7 +49653,7 @@
       "制胜关键：刷钱效率拉满：GPM 707 / XPM 1020（全场补刀 305），发育速度超越了全网 97% 的同英雄玩家。",
       "胜方二当家（胜局贡献 24.8%）：5号位 森海飞霞（莓啤汽，评分 9.2）贡献 5/5/18（参战率 62.2%，伤害 15,315）。",
       "败方孤胆院长 (SVP)：夜魇 5号位 拉比克（Make Your Choice，评分 7.2）交出 4/10/8（伤害 11,236），一神带四坑实在带不动。",
-      "车队头号大锅认证（分锅占比 30.2%）：夜魇 2号位 龙骑士（Paphets，评分 4.2）——本局失利首锅毫无疑问扣在他头上：核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。"
+      "车队头号大锅认证（分锅占比 29.4%）：夜魇 2号位 龙骑士（Paphets，评分 4.2）——本局失利首锅毫无疑问扣在他头上：核心发育严重滞后：2号位 龙骑士 全场 GPM 仅有 454（补刀 303，仅超越 25% 同英雄），中期刷钱路线完全断档。"
     ]
   },
   "match_narrative": {
@@ -48018,6 +50246,237 @@
           "【英雄定位：时间结界无视BKB毁天灭地大招】技能释放：《时间漫游(跳)》×147、《时间膨胀(锁CD)》×15(中132人/2,596伤)、《时间结界(大招罩子)》×6。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 1,
+        "hero_short_zh": "虚空假面",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+        "personaname": "What the dog doing？",
+        "total_hero_dmg": 21351,
+        "total_kills": 7,
+        "dmg_per_kill": 3050,
+        "core_12_dmg": 8496,
+        "core_12_pct": 39.8,
+        "core_12_kills": 1,
+        "tank_sponge_dmg": 9555,
+        "tank_sponge_pct": 44.8,
+        "tank_sponge_kills": 5,
+        "backline_sup_dmg": 3300,
+        "backline_sup_pct": 15.5,
+        "backline_sup_kills": 1,
+        "effective_non_tank_pct": 55.2,
+        "max_hit_val": 319,
+        "max_hit_summary_zh": "34:13 用【普攻暴击/平A】对 先知 单发打出 319 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "黑暗贤者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 9555,
+            "kills": 5,
+            "dmg_pct": 44.8
+          },
+          {
+            "hero_short_zh": "先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 6136,
+            "kills": 1,
+            "dmg_pct": 28.7
+          },
+          {
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 2627,
+            "kills": 1,
+            "dmg_pct": 12.3
+          },
+          {
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 2360,
+            "kills": 0,
+            "dmg_pct": 11.1
+          },
+          {
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "pos": 4,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 673,
+            "kills": 0,
+            "dmg_pct": 3.2
+          }
+        ],
+        "dmg_quality_badge": "⚖️ 常规前排拉扯输出",
+        "dmg_audit_notes": [
+          "对敌方 1/2 号位双核伤害占 39.8%（杀 1 次），对前排肉盾伤害占 44.8%（杀 5 次）。",
+          "🎯 头号集火沙包：全场打【3号位·黑暗贤者】最多，共造成 9,555 点伤害（占个人总伤 44.8%，击杀 5 次）。"
+        ],
+        "skill_route_summary_zh": "主【时间漫游】(L7满) 副【虚空专属技能】(L10满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "时间漫游(跳)",
+            "short_tag": "L1:时间漫游(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "时间膨胀(锁CD)",
+            "short_tag": "L2:时间膨胀(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "时间漫游(跳)",
+            "short_tag": "L3:时间漫游(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "虚空专属技能",
+            "short_tag": "L4:虚空专属技能(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "时间漫游(跳)",
+            "short_tag": "L5:时间漫游(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "时间结界(大招罩子)",
+            "short_tag": "L6:时间结界(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "时间漫游(跳)",
+            "short_tag": "L7:时间漫游(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "虚空专属技能",
+            "short_tag": "L8:虚空专属技能(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "虚空专属技能",
+            "short_tag": "L9:虚空专属技能(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "虚空专属技能",
+            "short_tag": "L10:虚空专属技能(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 11,
+            "zh": "+0.5s 【时间漫游】 回到过去 持续时间",
+            "short_tag": "L11:🌟+0.5s 【时间漫游】 回到过去 持续时间",
+            "type": "talent"
+          },
+          {
+            "level": 12,
+            "zh": "时间膨胀(锁CD)",
+            "short_tag": "L12:时间膨胀(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "时间结界(大招罩子)",
+            "short_tag": "L13:时间结界(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "时间膨胀(锁CD)",
+            "short_tag": "L14:时间膨胀(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "时间膨胀(锁CD)",
+            "short_tag": "L15:时间膨胀(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "+125 【时间漫游】 距离",
+            "short_tag": "L16:🌟+125 【时间漫游】 距离",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "时间结界(大招罩子)",
+            "short_tag": "L17:时间结界(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "-1.0s 【时间漫游】 冷却",
+            "short_tag": "L18:🌟-1.0s 【时间漫游】 冷却",
+            "type": "talent"
+          },
+          {
+            "level": 19,
+            "zh": "+140 【时间结界】 AoE",
+            "short_tag": "L19:🌟+140 【时间结界】 AoE",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 11,
+            "zh": "+0.5s 【时间漫游】 回到过去 持续时间"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "+125 【时间漫游】 距离"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "-1.0s 【时间漫游】 冷却"
+          },
+          {
+            "tier": "25级天赋",
+            "level_taken": 19,
+            "zh": "+140 【时间结界】 AoE"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【时间漫游】(L7满) 副【虚空专属技能】(L10满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [
+          "💎 魔晶激活 (27:32)"
+        ],
+        "perm_buff_notes": [],
+        "grade": "normal"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 3959,
         "lane_hdmg_gain": 1602,
@@ -48109,7 +50568,7 @@
       ],
       "trash_talk": "@What the dog doing？ 这把 虚空假面 中路打出线优+全场狂灌 21,351 伤害（每死换 10,675 血），已经把炮台输出拉满了，奈何带不动不出魔晶的小鱼和连碎5颗蛋的凤凰！",
       "praise_talk": "@What the dog doing？ 教科书式大核节奏！虚空假面 前中期隐忍刷钱成型，25m+ 决胜期出山狂轰 17,690 后期伤害（占全队后期伤害 39.0%）完成终极收割！",
-      "blame_share_pct": 9.9,
+      "blame_share_pct": 9.6,
       "contrib_share_pct": 23.1,
       "contrib_rank": 3,
       "contrib_tier": "🛡️ 定海神针 · 中坚功臣"
@@ -48821,6 +51280,237 @@
           "【英雄定位：健步+回身踢超远跨地形先手背摔留人】技能释放：《回身踢(跳)》×57(中22人/3,948伤)、《过肩摔》×47(中22人/3,370伤)、《怒拳破(大招)》×16(中32人/2,065伤)。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 2,
+        "hero_short_zh": "玛西",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+        "personaname": "99",
+        "total_hero_dmg": 32013,
+        "total_kills": 18,
+        "dmg_per_kill": 1778,
+        "core_12_dmg": 18825,
+        "core_12_pct": 58.8,
+        "core_12_kills": 11,
+        "tank_sponge_dmg": 5616,
+        "tank_sponge_pct": 17.5,
+        "tank_sponge_kills": 1,
+        "backline_sup_dmg": 7572,
+        "backline_sup_pct": 23.7,
+        "backline_sup_kills": 6,
+        "effective_non_tank_pct": 82.5,
+        "max_hit_val": 536,
+        "max_hit_summary_zh": "36:04 用【普攻暴击/平A】对 先知 单发打出 536 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 10565,
+            "kills": 5,
+            "dmg_pct": 33.0
+          },
+          {
+            "hero_short_zh": "先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 8260,
+            "kills": 6,
+            "dmg_pct": 25.8
+          },
+          {
+            "hero_short_zh": "黑暗贤者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 5616,
+            "kills": 1,
+            "dmg_pct": 17.5
+          },
+          {
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 4852,
+            "kills": 4,
+            "dmg_pct": 15.2
+          },
+          {
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "pos": 4,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 2720,
+            "kills": 2,
+            "dmg_pct": 8.5
+          }
+        ],
+        "dmg_quality_badge": "🔥 刀刀见血 · 精准切核",
+        "dmg_audit_notes": [
+          "✓ 高含金量切核：对敌方 1/2 号位双核倾泻了 18,825 点真伤害（占 58.8%），并亲手终结敌方双核 11 次！",
+          "🎯 头号集火沙包：全场打【2号位·龙骑士】最多，共造成 10,565 点伤害（占个人总伤 33.0%，击杀 5 次）。"
+        ],
+        "skill_route_summary_zh": "主【回身踢】(L7满) 副【过肩摔】(L10满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "过肩摔",
+            "short_tag": "L1:过肩摔(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "回身踢(跳)",
+            "short_tag": "L2:回身踢(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "回身踢(跳)",
+            "short_tag": "L3:回身踢(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "过肩摔",
+            "short_tag": "L4:过肩摔(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "回身踢(跳)",
+            "short_tag": "L5:回身踢(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "怒拳破(大招)",
+            "short_tag": "L6:怒拳破(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "回身踢(跳)",
+            "short_tag": "L7:回身踢(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "过肩摔",
+            "short_tag": "L8:过肩摔(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "护卫",
+            "short_tag": "L9:护卫(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "过肩摔",
+            "short_tag": "L10:过肩摔(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 11,
+            "zh": "+50 【回身踢】 Landing 作用范围",
+            "short_tag": "L11:🌟+50 【回身踢】 Landing 作用范围",
+            "type": "talent"
+          },
+          {
+            "level": 12,
+            "zh": "护卫",
+            "short_tag": "L12:护卫(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "怒拳破(大招)",
+            "short_tag": "L13:怒拳破(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "护卫",
+            "short_tag": "L14:护卫(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "护卫",
+            "short_tag": "L15:护卫(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "+12% 【护卫】 伤害",
+            "short_tag": "L16:🌟+12% 【护卫】 伤害",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "怒拳破(大招)",
+            "short_tag": "L17:怒拳破(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "+15% 【怒拳破】 移动速度",
+            "short_tag": "L18:🌟+15% 【怒拳破】 移动速度",
+            "type": "talent"
+          },
+          {
+            "level": 19,
+            "zh": "【怒拳破】 持续时间 延长 6s 击杀时",
+            "short_tag": "L19:🌟【怒拳破】 持续时间 延长 6s 击杀时",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 11,
+            "zh": "+50 【回身踢】 Landing 作用范围"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "+12% 【护卫】 伤害"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "+15% 【怒拳破】 移动速度"
+          },
+          {
+            "tier": "25级天赋",
+            "level_taken": 19,
+            "zh": "【怒拳破】 持续时间 延长 6s 击杀时"
+          }
+        ],
+        "skill_build_flags": [
+          "⚠️ 偏科加点：前 8 级完全没学【护卫】（直到 L9 才点 1 级），前中期少一个技能维度。"
+        ],
+        "skill_build_grade": "warn",
+        "perm_buff_badges": [
+          "💎 魔晶激活 (28:16)"
+        ],
+        "perm_buff_notes": [],
+        "grade": "warn"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 4060,
         "lane_hdmg_gain": 5643,
@@ -48886,7 +51576,7 @@
       "rating_score": 9.9,
       "rating_tier": "S+ 擎天战神",
       "mvp_score": 99.0,
-      "raw_blame_points": 4.0,
+      "raw_blame_points": 9.0,
       "raw_contrib_points": 376.6,
       "strengths": [
         "刷钱效率拉满：GPM 707 / XPM 1020（全场补刀 305），发育速度超越了全网 97% 的同英雄玩家。",
@@ -48894,17 +51584,18 @@
         "推进终结能力极强：单人打出 15,878 建筑伤害（包揽全队 48% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
         "BKB 节点与使用果断：18:46 准时做出黑皇杖，全场有效开启 6 次顶住敌方第一波控制链。",
         "全场核心技能施放统计：回身踢(跳) 57次 / 过肩摔 47次 / 怒拳破(大招) 16次 / 护卫 10次（操作频率 113 APM）。",
+        "✓ 高含金量切核：对敌方 1/2 号位双核倾泻了 18,825 点真伤害（占 58.8%），并亲手终结敌方双核 11 次！",
         "极高生存容错：41 分钟高强度对抗仅阵亡 4 次（读秒总计 3分08秒，仅占全场 7.6%），团战站位拉扯极佳。"
       ],
       "weaknesses": [
-        "整体发挥稳健：全场仅阵亡 4 次（读秒 3分08秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+        "⚠️ 偏科加点：前 8 级完全没学【护卫】（直到 L9 才点 1 级），前中期少一个技能维度。"
       ],
       "improvements": [
         "保持当前 玛西 的刷钱与参战节奏（推荐核心出装：黑皇杖(BKB) + 碎颅锤/深渊之刃 + 闪烁匕首 + 否决挂坠），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@99 这把 玛西 中路打出线优+全场狂灌 32,013 伤害（每死换 8,003 血），已经把炮台输出拉满了，奈何带不动不出魔晶的小鱼和连碎5颗蛋的凤凰！",
       "praise_talk": "@99 这把 玛西 炮台火力全开狂轰 32,013 伤害（占全队 36.0% 输出，场均每死换 8,003 伤害），真正做到倒下前把所有技能灌满！",
-      "blame_share_pct": 2.6,
+      "blame_share_pct": 5.6,
       "contrib_share_pct": 29.1,
       "contrib_rank": 1,
       "contrib_tier": "👑 头号首功 · 擎天真神"
@@ -49503,6 +52194,227 @@
           "【英雄定位：跳刀鱼人碎击瞬发群晕】技能释放：《鱼人碎击(踩)》×58(中23人/3,908伤)、《侵蚀雾霭(大招点灯)》×27、《守卫冲刺(加速)》×24。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 3,
+        "hero_short_zh": "斯拉达",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+        "personaname": "东方树叶",
+        "total_hero_dmg": 8836,
+        "total_kills": 5,
+        "dmg_per_kill": 1767,
+        "core_12_dmg": 3014,
+        "core_12_pct": 34.1,
+        "core_12_kills": 2,
+        "tank_sponge_dmg": 2763,
+        "tank_sponge_pct": 31.3,
+        "tank_sponge_kills": 0,
+        "backline_sup_dmg": 3059,
+        "backline_sup_pct": 34.6,
+        "backline_sup_kills": 3,
+        "effective_non_tank_pct": 68.7,
+        "max_hit_val": 364,
+        "max_hit_summary_zh": "34:13 用【鱼人碎击(踩)】对 先知 单发打出 364 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "黑暗贤者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 2763,
+            "kills": 0,
+            "dmg_pct": 31.3
+          },
+          {
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 2197,
+            "kills": 3,
+            "dmg_pct": 24.9
+          },
+          {
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 1789,
+            "kills": 1,
+            "dmg_pct": 20.2
+          },
+          {
+            "hero_short_zh": "先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 1225,
+            "kills": 1,
+            "dmg_pct": 13.9
+          },
+          {
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "pos": 4,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 862,
+            "kills": 0,
+            "dmg_pct": 9.8
+          }
+        ],
+        "dmg_quality_badge": "⚡ 有效压制后排/核心",
+        "dmg_audit_notes": [
+          "✓ 伤害分布健康：68.7% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 34.1%，打后排辅助占 34.6%）。",
+          "🎯 头号集火沙包：全场打【3号位·黑暗贤者】最多，共造成 2,763 点伤害（占个人总伤 31.3%，击杀 0 次）。"
+        ],
+        "skill_route_summary_zh": "主【鱼人碎击】(L7满) 副【大鱼人专属技能】(L11满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "鱼人碎击(踩)",
+            "short_tag": "L1:鱼人碎击(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "大鱼人专属技能",
+            "short_tag": "L2:大鱼人专属技能(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "鱼人碎击(踩)",
+            "short_tag": "L3:鱼人碎击(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "守卫冲刺(加速)",
+            "short_tag": "L4:守卫冲刺(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "鱼人碎击(踩)",
+            "short_tag": "L5:鱼人碎击(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "侵蚀雾霭(大招点灯)",
+            "short_tag": "L6:侵蚀雾霭(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "鱼人碎击(踩)",
+            "short_tag": "L7:鱼人碎击(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "大鱼人专属技能",
+            "short_tag": "L8:大鱼人专属技能(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "大鱼人专属技能",
+            "short_tag": "L9:大鱼人专属技能(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "+30 Bash of the Deep 伤害",
+            "short_tag": "L10:🌟+30 Bash of the Deep 伤害",
+            "type": "talent"
+          },
+          {
+            "level": 11,
+            "zh": "大鱼人专属技能",
+            "short_tag": "L11:大鱼人专属技能(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 12,
+            "zh": "守卫冲刺(加速)",
+            "short_tag": "L12:守卫冲刺(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "侵蚀雾霭(大招点灯)",
+            "short_tag": "L13:侵蚀雾霭(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "守卫冲刺(加速)",
+            "short_tag": "L14:守卫冲刺(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "守卫冲刺(加速)",
+            "short_tag": "L15:守卫冲刺(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "-3 【侵蚀雾霭】 护甲",
+            "short_tag": "L16:🌟-3 【侵蚀雾霭】 护甲",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "侵蚀雾霭(大招点灯)",
+            "short_tag": "L17:侵蚀雾霭(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "+125 【鱼人碎击】 伤害",
+            "short_tag": "L18:🌟+125 【鱼人碎击】 伤害",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 10,
+            "zh": "+30 Bash of the Deep 伤害"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "-3 【侵蚀雾霭】 护甲"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "+125 【鱼人碎击】 伤害"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【鱼人碎击】(L7满) 副【大鱼人专属技能】(L11满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [
+          "💎 魔晶激活 (28:33)",
+          "🔥 先天被动觉醒：1 阶"
+        ],
+        "perm_buff_notes": [],
+        "grade": "good"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 2551,
         "lane_hdmg_gain": 668,
@@ -49586,7 +52498,7 @@
       ],
       "trash_talk": "@东方树叶 对面一身硬控你拖到 31:51 才出 BKB，整局就按了 2 次，买个黄棍放包里当传家宝辟邪是吧？",
       "praise_talk": "@东方树叶 铁血三号位！斯拉达 参战率 54% 肉身扛下 30,844 伤害（全队 20%）外加 35.5 秒硬控，完美团战发动机！",
-      "blame_share_pct": 54.8,
+      "blame_share_pct": 53.1,
       "contrib_share_pct": 8.7,
       "contrib_rank": 5,
       "contrib_tier": "🥂 凯旋功臣 · 团队拼图"
@@ -50237,6 +53149,228 @@
           "全场累计对敌方英雄造成 47.9 秒硬控眩晕（平均每分钟控制 1.16 秒）。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 4,
+        "hero_short_zh": "帕吉",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+        "personaname": "Mind's Desire",
+        "total_hero_dmg": 11416,
+        "total_kills": 2,
+        "dmg_per_kill": 5708,
+        "core_12_dmg": 6223,
+        "core_12_pct": 54.5,
+        "core_12_kills": 1,
+        "tank_sponge_dmg": 1556,
+        "tank_sponge_pct": 13.6,
+        "tank_sponge_kills": 0,
+        "backline_sup_dmg": 3637,
+        "backline_sup_pct": 31.9,
+        "backline_sup_kills": 1,
+        "effective_non_tank_pct": 86.4,
+        "max_hit_val": 360,
+        "max_hit_summary_zh": "33:59 用【肉钩】对 司夜刺客 单发打出 360 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 4587,
+            "kills": 1,
+            "dmg_pct": 40.2
+          },
+          {
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 2320,
+            "kills": 1,
+            "dmg_pct": 20.3
+          },
+          {
+            "hero_short_zh": "先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 1636,
+            "kills": 0,
+            "dmg_pct": 14.3
+          },
+          {
+            "hero_short_zh": "黑暗贤者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 1556,
+            "kills": 0,
+            "dmg_pct": 13.6
+          },
+          {
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "pos": 4,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 1317,
+            "kills": 0,
+            "dmg_pct": 11.5
+          }
+        ],
+        "dmg_quality_badge": "⚡ 有效压制后排/核心",
+        "dmg_audit_notes": [
+          "✓ 伤害分布健康：86.4% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 54.5%，打后排辅助占 31.9%）。",
+          "🎯 头号集火沙包：全场打【2号位·龙骑士】最多，共造成 4,587 点伤害（占个人总伤 40.2%，击杀 1 次）。"
+        ],
+        "skill_route_summary_zh": "主【腐烂】(L7满) 副【腐肉堆积】(L10满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "肉钩",
+            "short_tag": "L1:肉钩(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "腐烂",
+            "short_tag": "L2:腐烂(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "腐烂",
+            "short_tag": "L3:腐烂(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "腐肉堆积(护盾)",
+            "short_tag": "L4:腐肉堆积(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "腐烂",
+            "short_tag": "L5:腐烂(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "肢解(大招咬)",
+            "short_tag": "L6:肢解(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "腐烂",
+            "short_tag": "L7:腐烂(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "腐肉堆积(护盾)",
+            "short_tag": "L8:腐肉堆积(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "腐肉堆积(护盾)",
+            "short_tag": "L9:腐肉堆积(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "腐肉堆积(护盾)",
+            "short_tag": "L10:腐肉堆积(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 11,
+            "zh": "+10% 【腐烂】 减速",
+            "short_tag": "L11:🌟+10% 【腐烂】 减速",
+            "type": "talent"
+          },
+          {
+            "level": 12,
+            "zh": "肉钩",
+            "short_tag": "L12:肉钩(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "肢解(大招咬)",
+            "short_tag": "L13:肢解(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "肉钩",
+            "short_tag": "L14:肉钩(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "肉钩",
+            "short_tag": "L15:肉钩(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "+8% Spell 吸血",
+            "short_tag": "L16:🌟+8% Spell 吸血",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "肢解(大招咬)",
+            "short_tag": "L17:肢解(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "+0.75s 【肢解】 持续时间",
+            "short_tag": "L18:🌟+0.75s 【肢解】 持续时间",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 11,
+            "zh": "+10% 【腐烂】 减速"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "+8% Spell 吸血"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "+0.75s 【肢解】 持续时间"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【腐烂】(L7满) 副【腐肉堆积】(L10满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [
+          "🥩 帕吉·腐肉堆积：11 层永久力量"
+        ],
+        "perm_buff_notes": [
+          "⚠️ 叠层偏少：41 分钟仅叠出 11 层【腐肉堆积力量层数】（同局时长合格线 ≥13 层），团战存活拉扯或终结收割频次不足。"
+        ],
+        "grade": "good"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 2089,
         "lane_hdmg_gain": 2373,
@@ -50325,14 +53459,15 @@
         "视野铺设尽职：全场插下 5 假眼 + 15 真眼（共 20 颗），并成功排掉敌方 2 颗假眼 / 4 颗真眼。"
       ],
       "weaknesses": [
-        "线上保人失职：同路 斯拉达 10分钟才补了 32 刀（2,577金），前5分钟封野、拉野消兵和消耗都没打出来。"
+        "线上保人失职：同路 斯拉达 10分钟才补了 32 刀（2,577金），前5分钟封野、拉野消兵和消耗都没打出来。",
+        "⚠️ 叠层偏少：41 分钟仅叠出 11 层【腐肉堆积力量层数】（同局时长合格线 ≥13 层），团战存活拉扯或终结收割频次不足。"
       ],
       "improvements": [
         "保持当前 帕吉 的刷钱与参战节奏（推荐核心出装：闪烁匕首 + 阿哈利姆神杖 + 黑皇杖 + 阿哈利姆魔晶），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
       ],
       "trash_talk": "@Mind's Desire 这把 2/6/16 标准打卡下班，背锅占比 42 点，赢了跟着笑，输了怪队友！",
       "praise_talk": "@Mind's Desire 最佳幕后功臣！帕吉 全场点亮 5 假 15 真视野 + 参战率 49%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 26.6,
+      "blame_share_pct": 25.8,
       "contrib_share_pct": 14.3,
       "contrib_rank": 4,
       "contrib_tier": "🔥 黄金拼图 · 稳健节奏"
@@ -50951,6 +54086,224 @@
           "全场累计对敌方英雄造成 45.0 秒硬控眩晕（平均每分钟控制 1.09 秒）。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 5,
+        "hero_short_zh": "森海飞霞",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+        "personaname": "莓啤汽",
+        "total_hero_dmg": 15315,
+        "total_kills": 5,
+        "dmg_per_kill": 3063,
+        "core_12_dmg": 4315,
+        "core_12_pct": 28.2,
+        "core_12_kills": 2,
+        "tank_sponge_dmg": 4277,
+        "tank_sponge_pct": 27.9,
+        "tank_sponge_kills": 1,
+        "backline_sup_dmg": 6723,
+        "backline_sup_pct": 43.9,
+        "backline_sup_kills": 2,
+        "effective_non_tank_pct": 72.1,
+        "max_hit_val": 430,
+        "max_hit_summary_zh": "12:31 用【一箭穿心(大招狙)】对 龙骑士 单发打出 430 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "黑暗贤者",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 4277,
+            "kills": 1,
+            "dmg_pct": 27.9
+          },
+          {
+            "hero_short_zh": "司夜刺客",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+            "pos": 4,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 4259,
+            "kills": 1,
+            "dmg_pct": 27.8
+          },
+          {
+            "hero_short_zh": "拉比克",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 2464,
+            "kills": 1,
+            "dmg_pct": 16.1
+          },
+          {
+            "hero_short_zh": "龙骑士",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 2268,
+            "kills": 1,
+            "dmg_pct": 14.8
+          },
+          {
+            "hero_short_zh": "先知",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 2047,
+            "kills": 1,
+            "dmg_pct": 13.4
+          }
+        ],
+        "dmg_quality_badge": "⚡ 有效压制后排/核心",
+        "dmg_audit_notes": [
+          "✓ 伤害分布健康：72.1% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 28.2%，打后排辅助占 43.9%）。",
+          "🎯 头号集火沙包：全场打【3号位·黑暗贤者】最多，共造成 4,277 点伤害（占个人总伤 27.9%，击杀 1 次）。"
+        ],
+        "skill_route_summary_zh": "主【野地奇袭】(L8满) 副【橡果射击】(L10满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "野地奇袭(捆树)",
+            "short_tag": "L1:野地奇袭(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "橡果射击",
+            "short_tag": "L2:橡果射击(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "野地奇袭(捆树)",
+            "short_tag": "L3:野地奇袭(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "橡果射击",
+            "short_tag": "L4:橡果射击(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "野地奇袭(捆树)",
+            "short_tag": "L5:野地奇袭(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "一箭穿心(大招狙)",
+            "short_tag": "L6:一箭穿心(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "密林奔走",
+            "short_tag": "L7:密林奔走(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "野地奇袭(捆树)",
+            "short_tag": "L8:野地奇袭(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "橡果射击",
+            "short_tag": "L9:橡果射击(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "橡果射击",
+            "short_tag": "L10:橡果射击(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 11,
+            "zh": "+175 生命值",
+            "short_tag": "L11:🌟+175 生命值",
+            "type": "talent"
+          },
+          {
+            "level": 12,
+            "zh": "密林奔走",
+            "short_tag": "L12:密林奔走(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "一箭穿心(大招狙)",
+            "short_tag": "L13:一箭穿心(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "密林奔走",
+            "short_tag": "L14:密林奔走(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "密林奔走",
+            "short_tag": "L15:密林奔走(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "+1 【密林奔走】 Ability Charge",
+            "short_tag": "L16:🌟+1 【密林奔走】 Ability Charge",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "一箭穿心(大招狙)",
+            "short_tag": "L17:一箭穿心(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "【一箭穿心】 提供 Vision While Charging",
+            "short_tag": "L18:🌟【一箭穿心】 提供 Vision While Charging",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 11,
+            "zh": "+175 生命值"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "+1 【密林奔走】 Ability Charge"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "【一箭穿心】 提供 Vision While Charging"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【野地奇袭】(L8满) 副【橡果射击】(L10满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [],
+        "perm_buff_notes": [],
+        "grade": "good"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 1676,
         "lane_hdmg_gain": 4459,
@@ -51038,7 +54391,7 @@
       ],
       "trash_talk": "@莓啤汽 这把 森海飞霞 中路打出线优+全场狂灌 15,315 伤害（每死换 3,063 血），已经把炮台输出拉满了，奈何带不动不出魔晶的小鱼和连碎5颗蛋的凤凰！",
       "praise_talk": "@莓啤汽 最佳幕后功臣！森海飞霞 全场点亮 12 假 22 真视野 + 参战率 62%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 6.1,
+      "blame_share_pct": 5.9,
       "contrib_share_pct": 24.8,
       "contrib_rank": 2,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂"
@@ -51688,6 +55041,224 @@
           "【英雄定位：全图传送支援收割与带球牵制】技能释放：《自然之力(招树人)》×55、《传送(飞)》×34、《发芽(框)》×28(中23人/1,742伤)。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 1,
+        "hero_short_zh": "先知",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/furion.png",
+        "personaname": "Flame = ez mute",
+        "total_hero_dmg": 30060,
+        "total_kills": 9,
+        "dmg_per_kill": 3340,
+        "core_12_dmg": 12255,
+        "core_12_pct": 40.8,
+        "core_12_kills": 2,
+        "tank_sponge_dmg": 13932,
+        "tank_sponge_pct": 46.3,
+        "tank_sponge_kills": 5,
+        "backline_sup_dmg": 3873,
+        "backline_sup_pct": 12.9,
+        "backline_sup_kills": 2,
+        "effective_non_tank_pct": 53.7,
+        "max_hit_val": 529,
+        "max_hit_summary_zh": "30:41 用【自然之怒(大招)】对 斯拉达 单发打出 529 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "斯拉达",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 7469,
+            "kills": 3,
+            "dmg_pct": 24.8
+          },
+          {
+            "hero_short_zh": "玛西",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 6717,
+            "kills": 2,
+            "dmg_pct": 22.3
+          },
+          {
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "pos": 4,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 6463,
+            "kills": 2,
+            "dmg_pct": 21.5
+          },
+          {
+            "hero_short_zh": "虚空假面",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 5538,
+            "kills": 0,
+            "dmg_pct": 18.4
+          },
+          {
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 3873,
+            "kills": 2,
+            "dmg_pct": 12.9
+          }
+        ],
+        "dmg_quality_badge": "🚨 刮肉刷伤 · 切核乏力",
+        "dmg_audit_notes": [
+          "🚨 伤害虚胖警告：全场高达 46.3% 的伤害（13,932 点）全灌在敌方前排肉盾【3号位斯拉达/4号位帕吉】身上，而打在敌方 1/2 号位双核身上的伤害仅占 40.8%（12,255 点，杀 2 次）！",
+          "🎯 头号集火沙包：全场打【3号位·斯拉达】最多，共造成 7,469 点伤害（占个人总伤 24.8%，击杀 3 次）。"
+        ],
+        "skill_route_summary_zh": "主【自然之力】(L7满) 副【传送】(L10满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "自然之力(招树人)",
+            "short_tag": "L1:自然之力(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "发芽(框)",
+            "short_tag": "L2:发芽(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "自然之力(招树人)",
+            "short_tag": "L3:自然之力(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "传送(飞)",
+            "short_tag": "L4:传送(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "自然之力(招树人)",
+            "short_tag": "L5:自然之力(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "自然之怒(大招)",
+            "short_tag": "L6:自然之怒(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "自然之力(招树人)",
+            "short_tag": "L7:自然之力(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "传送(飞)",
+            "short_tag": "L8:传送(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "传送(飞)",
+            "short_tag": "L9:传送(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "传送(飞)",
+            "short_tag": "L10:传送(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 11,
+            "zh": "-10s 【自然之力】 冷却",
+            "short_tag": "L11:🌟-10s 【自然之力】 冷却",
+            "type": "talent"
+          },
+          {
+            "level": 12,
+            "zh": "发芽(框)",
+            "short_tag": "L12:发芽(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "自然之怒(大招)",
+            "short_tag": "L13:自然之怒(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "发芽(框)",
+            "short_tag": "L14:发芽(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "发芽(框)",
+            "short_tag": "L15:发芽(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "+50 Treant 移动速度",
+            "short_tag": "L16:🌟+50 Treant 移动速度",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "自然之怒(大招)",
+            "short_tag": "L17:自然之怒(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "-20s 【自然之怒】 冷却",
+            "short_tag": "L18:🌟-20s 【自然之怒】 冷却",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 11,
+            "zh": "-10s 【自然之力】 冷却"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "+50 Treant 移动速度"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "-20s 【自然之怒】 冷却"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【自然之力】(L7满) 副【传送】(L10满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [],
+        "perm_buff_notes": [],
+        "grade": "bad"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 4066,
         "lane_hdmg_gain": 6223,
@@ -51774,7 +55345,7 @@
       "rating_score": 6.5,
       "rating_tier": "D 头号战犯",
       "mvp_score": 64.7,
-      "raw_blame_points": 69.8,
+      "raw_blame_points": 79.8,
       "raw_contrib_points": 178.5,
       "strengths": [
         "对线基本功扎实：前10分钟交出 54正/2反（10m经济 4,066，效率 82%），撑起了前中期基础节奏。",
@@ -51786,6 +55357,7 @@
       "weaknesses": [
         "假腿焊死细节缺失：整场 41 分钟比赛里，假腿属性总共只切换了 2 次，刷野放技能从不切智力省蓝、挨打也不切力量撑血。",
         "主动救人装严重漏按：22:06 做出 推推棒，拿在手里 19 分钟总共只按了 0 次，团战队友被集火时反应慢半拍。",
+        "🚨 伤害虚胖警告：全场高达 46.3% 的伤害（13,932 点）全灌在敌方前排肉盾【3号位斯拉达/4号位帕吉】身上，而打在敌方 1/2 号位双核身上的伤害仅占 40.8%（12,255 点，杀 2 次）！",
         "高频阵亡提款机：全场阵亡 **9 次**（其中被敌方【玛西】单人提款 6 次），黑白屏幕读秒长达 **7分54秒（占整局比赛 19.1% 时间）**，光阵亡直接扣掉 **2,925 金币**！"
       ],
       "improvements": [
@@ -51793,7 +55365,7 @@
       ],
       "trash_talk": "@Flame = ez mute 一局死 9 次，看了整整 7分54秒 黑白电视（其中被敌方【玛西】单人提款 6 次），光死就扣了 2925 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Flame = ez mute 这把 先知 炮台火力全开狂轰 30,060 伤害（占全队 28.3% 输出，场均每死换 3,340 伤害），真正做到倒下前把所有技能灌满！",
-      "blame_share_pct": 19.0,
+      "blame_share_pct": 21.1,
       "contrib_share_pct": 28.9,
       "contrib_rank": 1,
       "contrib_tier": "👑 头号首功 · 擎天真神"
@@ -52422,6 +55994,226 @@
           "全场累计对敌方英雄造成 35.6 秒硬控眩晕（平均每分钟控制 0.86 秒）。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 2,
+        "hero_short_zh": "龙骑士",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dragon_knight.png",
+        "personaname": "Paphets",
+        "total_hero_dmg": 19202,
+        "total_kills": 2,
+        "dmg_per_kill": 9601,
+        "core_12_dmg": 10772,
+        "core_12_pct": 56.1,
+        "core_12_kills": 0,
+        "tank_sponge_dmg": 7360,
+        "tank_sponge_pct": 38.3,
+        "tank_sponge_kills": 2,
+        "backline_sup_dmg": 1070,
+        "backline_sup_pct": 5.6,
+        "backline_sup_kills": 0,
+        "effective_non_tank_pct": 61.7,
+        "max_hit_val": 233,
+        "max_hit_summary_zh": "08:53 用【火焰气息(喷火)】对 斯拉达 单发打出 233 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "玛西",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 7032,
+            "kills": 0,
+            "dmg_pct": 36.6
+          },
+          {
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "pos": 4,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 4743,
+            "kills": 2,
+            "dmg_pct": 24.7
+          },
+          {
+            "hero_short_zh": "虚空假面",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 3740,
+            "kills": 0,
+            "dmg_pct": 19.5
+          },
+          {
+            "hero_short_zh": "斯拉达",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 2617,
+            "kills": 0,
+            "dmg_pct": 13.6
+          },
+          {
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 1070,
+            "kills": 0,
+            "dmg_pct": 5.6
+          }
+        ],
+        "dmg_quality_badge": "⚡ 有效压制后排/核心",
+        "dmg_audit_notes": [
+          "✓ 伤害分布健康：61.7% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 56.1%，打后排辅助占 5.6%）。",
+          "🎯 头号集火沙包：全场打【2号位·玛西】最多，共造成 7,032 点伤害（占个人总伤 36.6%，击杀 0 次）。"
+        ],
+        "skill_route_summary_zh": "主【火焰气息】(L7满) 副【龙骑专属技能】(L10满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "火焰气息(喷火)",
+            "short_tag": "L1:火焰气息(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "龙骑专属技能",
+            "short_tag": "L2:龙骑专属技能(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "火焰气息(喷火)",
+            "short_tag": "L3:火焰气息(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "神龙摆尾(拍晕)",
+            "short_tag": "L4:神龙摆尾(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "火焰气息(喷火)",
+            "short_tag": "L5:火焰气息(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "古龙形态(变龙)",
+            "short_tag": "L6:古龙形态(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "火焰气息(喷火)",
+            "short_tag": "L7:火焰气息(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "龙骑专属技能",
+            "short_tag": "L8:龙骑专属技能(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "龙骑专属技能",
+            "short_tag": "L9:龙骑专属技能(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "龙骑专属技能",
+            "short_tag": "L10:龙骑专属技能(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 11,
+            "zh": "-2s 【火焰气息】 冷却",
+            "short_tag": "L11:🌟-2s 【火焰气息】 冷却",
+            "type": "talent"
+          },
+          {
+            "level": 12,
+            "zh": "神龙摆尾(拍晕)",
+            "short_tag": "L12:神龙摆尾(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "古龙形态(变龙)",
+            "short_tag": "L13:古龙形态(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "神龙摆尾(拍晕)",
+            "short_tag": "L14:神龙摆尾(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "神龙摆尾(拍晕)",
+            "short_tag": "L15:神龙摆尾(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "+300 生命值",
+            "short_tag": "L16:🌟+300 生命值",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "古龙形态(变龙)",
+            "short_tag": "L17:古龙形态(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "+220 【火焰气息】 伤害",
+            "short_tag": "L18:🌟+220 【火焰气息】 伤害",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 11,
+            "zh": "-2s 【火焰气息】 冷却"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "+300 生命值"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "+220 【火焰气息】 伤害"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【火焰气息】(L7满) 副【龙骑专属技能】(L10满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [
+          "💎 魔晶激活 (19:30)"
+        ],
+        "perm_buff_notes": [],
+        "grade": "good"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 3824,
         "lane_hdmg_gain": 3476,
@@ -52509,7 +56301,7 @@
       ],
       "trash_talk": "@Paphets 一局死 8 次，看了整整 6分5秒 黑白电视（其中被敌方【玛西】单人提款 5 次），光死就扣了 1870 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Paphets 稳健上分拼图！龙骑士 交出 2/8/10（参战率 54% · 伤害 19,202），关键团战从不掉链子！",
-      "blame_share_pct": 30.2,
+      "blame_share_pct": 29.4,
       "contrib_share_pct": 8.9,
       "contrib_rank": 5,
       "contrib_tier": "🎉 躺赢锦鲤 · 吸火福将"
@@ -53117,6 +56909,226 @@
           "【英雄定位：真空+复制之墙团战完美聚怪】技能释放：《离子外壳(套子)》×96(中1091人/14,279伤)、《奔腾(加速)》×95(中302人/3,941伤)、《真空(拉)》×8(中13人/1,707伤)。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 3,
+        "hero_short_zh": "黑暗贤者",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/dark_seer.png",
+        "personaname": "Mr. Brightside",
+        "total_hero_dmg": 30255,
+        "total_kills": 4,
+        "dmg_per_kill": 7564,
+        "core_12_dmg": 15186,
+        "core_12_pct": 50.2,
+        "core_12_kills": 1,
+        "tank_sponge_dmg": 11909,
+        "tank_sponge_pct": 39.4,
+        "tank_sponge_kills": 1,
+        "backline_sup_dmg": 3160,
+        "backline_sup_pct": 10.4,
+        "backline_sup_kills": 2,
+        "effective_non_tank_pct": 60.6,
+        "max_hit_val": 183,
+        "max_hit_summary_zh": "38:43 用【真空(拉)】对 斯拉达 单发打出 183 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "虚空假面",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 9547,
+            "kills": 0,
+            "dmg_pct": 31.6
+          },
+          {
+            "hero_short_zh": "斯拉达",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 8499,
+            "kills": 1,
+            "dmg_pct": 28.1
+          },
+          {
+            "hero_short_zh": "玛西",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 5639,
+            "kills": 1,
+            "dmg_pct": 18.6
+          },
+          {
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "pos": 4,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 3410,
+            "kills": 0,
+            "dmg_pct": 11.3
+          },
+          {
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 3160,
+            "kills": 2,
+            "dmg_pct": 10.4
+          }
+        ],
+        "dmg_quality_badge": "⚡ 有效压制后排/核心",
+        "dmg_audit_notes": [
+          "✓ 伤害分布健康：60.6% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 50.2%，打后排辅助占 10.4%）。",
+          "🎯 头号集火沙包：全场打【1号位·虚空假面】最多，共造成 9,547 点伤害（占个人总伤 31.6%，击杀 0 次）。"
+        ],
+        "skill_route_summary_zh": "主【离子外壳】(L7满) 副【奔腾】(L11满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "离子外壳(套子)",
+            "short_tag": "L1:离子外壳(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "奔腾(加速)",
+            "short_tag": "L2:奔腾(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "离子外壳(套子)",
+            "short_tag": "L3:离子外壳(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "真空(拉)",
+            "short_tag": "L4:真空(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "离子外壳(套子)",
+            "short_tag": "L5:离子外壳(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "奔腾(加速)",
+            "short_tag": "L6:奔腾(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "离子外壳(套子)",
+            "short_tag": "L7:离子外壳(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "复制之墙(大招墙)",
+            "short_tag": "L8:复制之墙(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "奔腾(加速)",
+            "short_tag": "L9:奔腾(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "+65 【离子外壳】 作用范围",
+            "short_tag": "L10:🌟+65 【离子外壳】 作用范围",
+            "type": "talent"
+          },
+          {
+            "level": 11,
+            "zh": "奔腾(加速)",
+            "short_tag": "L11:奔腾(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 12,
+            "zh": "真空(拉)",
+            "short_tag": "L12:真空(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "复制之墙(大招墙)",
+            "short_tag": "L13:复制之墙(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "真空(拉)",
+            "short_tag": "L14:真空(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "真空(拉)",
+            "short_tag": "L15:真空(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "+75 【真空】 AoE",
+            "short_tag": "L16:🌟+75 【真空】 AoE",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "复制之墙(大招墙)",
+            "short_tag": "L17:复制之墙(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "+50 【离子外壳】 伤害",
+            "short_tag": "L18:🌟+50 【离子外壳】 伤害",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 10,
+            "zh": "+65 【离子外壳】 作用范围"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "+75 【真空】 AoE"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "+50 【离子外壳】 伤害"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【离子外壳】(L7满) 副【奔腾】(L11满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [
+          "💎 魔晶激活 (19:27)"
+        ],
+        "perm_buff_notes": [],
+        "grade": "good"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 2576,
         "lane_hdmg_gain": 2062,
@@ -53202,7 +57214,7 @@
       ],
       "trash_talk": "@Mr. Brightside 一局死 8 次，看了整整 5分24秒 黑白电视（其中被敌方【虚空假面】单人提款 5 次），光死就扣了 1805 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Mr. Brightside 铁血三号位！黑暗贤者 参战率 64% 肉身扛下 31,495 伤害（全队 27%）外加 8.1 秒硬控，完美团战发动机！",
-      "blame_share_pct": 23.0,
+      "blame_share_pct": 22.4,
       "contrib_share_pct": 19.2,
       "contrib_rank": 4,
       "contrib_tier": "🔥 黄金拼图 · 稳健节奏"
@@ -53796,6 +57808,226 @@
           "全场累计对敌方英雄造成 73.1 秒硬控眩晕（平均每分钟控制 1.76 秒）。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 4,
+        "hero_short_zh": "司夜刺客",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/nyx_assassin.png",
+        "personaname": "Replica",
+        "total_hero_dmg": 15465,
+        "total_kills": 3,
+        "dmg_per_kill": 5155,
+        "core_12_dmg": 5634,
+        "core_12_pct": 36.4,
+        "core_12_kills": 1,
+        "tank_sponge_dmg": 5214,
+        "tank_sponge_pct": 33.7,
+        "tank_sponge_kills": 2,
+        "backline_sup_dmg": 4617,
+        "backline_sup_pct": 29.9,
+        "backline_sup_kills": 0,
+        "effective_non_tank_pct": 66.3,
+        "max_hit_val": 500,
+        "max_hit_summary_zh": "33:57 用【复仇(大招隐身)】对 森海飞霞 单发打出 500 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 4617,
+            "kills": 0,
+            "dmg_pct": 29.9
+          },
+          {
+            "hero_short_zh": "玛西",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 3588,
+            "kills": 0,
+            "dmg_pct": 23.2
+          },
+          {
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "pos": 4,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 3478,
+            "kills": 1,
+            "dmg_pct": 22.5
+          },
+          {
+            "hero_short_zh": "虚空假面",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 2046,
+            "kills": 1,
+            "dmg_pct": 13.2
+          },
+          {
+            "hero_short_zh": "斯拉达",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 1736,
+            "kills": 1,
+            "dmg_pct": 11.2
+          }
+        ],
+        "dmg_quality_badge": "⚡ 有效压制后排/核心",
+        "dmg_audit_notes": [
+          "✓ 伤害分布健康：66.3% 的伤害精准打在敌方双核与脆皮后排身上（打 1/2 号位占 36.4%，打后排辅助占 29.9%）。",
+          "🎯 头号集火沙包：全场打【5号位·森海飞霞】最多，共造成 4,617 点伤害（占个人总伤 29.9%，击杀 0 次）。"
+        ],
+        "skill_route_summary_zh": "主【穿刺】(L7满) 副【尖刺外壳】(L10满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "穿刺(戳)",
+            "short_tag": "L1:穿刺(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "神智爆裂",
+            "short_tag": "L2:神智爆裂(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "尖刺外壳(壳)",
+            "short_tag": "L3:尖刺外壳(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "穿刺(戳)",
+            "short_tag": "L4:穿刺(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "穿刺(戳)",
+            "short_tag": "L5:穿刺(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "复仇(大招隐身)",
+            "short_tag": "L6:复仇(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "穿刺(戳)",
+            "short_tag": "L7:穿刺(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "尖刺外壳(壳)",
+            "short_tag": "L8:尖刺外壳(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "尖刺外壳(壳)",
+            "short_tag": "L9:尖刺外壳(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "尖刺外壳(壳)",
+            "short_tag": "L10:尖刺外壳(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 11,
+            "zh": "+0.2s 【穿刺】 眩晕 持续时间",
+            "short_tag": "L11:🌟+0.2s 【穿刺】 眩晕 持续时间",
+            "type": "talent"
+          },
+          {
+            "level": 12,
+            "zh": "神智爆裂",
+            "short_tag": "L12:神智爆裂(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "复仇(大招隐身)",
+            "short_tag": "L13:复仇(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "神智爆裂",
+            "short_tag": "L14:神智爆裂(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "神智爆裂",
+            "short_tag": "L15:神智爆裂(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "-3s 【神智爆裂】 冷却",
+            "short_tag": "L16:🌟-3s 【神智爆裂】 冷却",
+            "type": "talent"
+          },
+          {
+            "level": 17,
+            "zh": "复仇(大招隐身)",
+            "short_tag": "L17:复仇(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 18,
+            "zh": "+0.6s 【尖刺外壳】 眩晕 持续时间",
+            "short_tag": "L18:🌟+0.6s 【尖刺外壳】 眩晕 持续时间",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 11,
+            "zh": "+0.2s 【穿刺】 眩晕 持续时间"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "-3s 【神智爆裂】 冷却"
+          },
+          {
+            "tier": "20级天赋",
+            "level_taken": 18,
+            "zh": "+0.6s 【尖刺外壳】 眩晕 持续时间"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【穿刺】(L7满) 副【尖刺外壳】(L10满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [
+          "💎 魔晶激活 (44:40)"
+        ],
+        "perm_buff_notes": [],
+        "grade": "good"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 2109,
         "lane_hdmg_gain": 2614,
@@ -53884,7 +58116,7 @@
       ],
       "trash_talk": "@Replica 这把 3/3/9 标准打卡下班，背锅占比 50 点，赢了跟着笑，输了怪队友！",
       "praise_talk": "@Replica 稳健上分拼图！司夜刺客 交出 3/3/9（参战率 54% · 伤害 15,465），关键团战从不掉链子！",
-      "blame_share_pct": 13.6,
+      "blame_share_pct": 13.3,
       "contrib_share_pct": 20.7,
       "contrib_rank": 3,
       "contrib_tier": "👁️ 视野统帅 · 幕后功臣"
@@ -54689,6 +58921,213 @@
           "《过肩摔 (玛西背人)》全场施放 2 次，命中敌方英雄 1 人次（有效命中比 50.0%，造成 189 伤害）。"
         ]
       },
+      "damage_and_build_audit": {
+        "pos": 5,
+        "hero_short_zh": "拉比克",
+        "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png",
+        "personaname": "Make Your Choice",
+        "total_hero_dmg": 11236,
+        "total_kills": 4,
+        "dmg_per_kill": 2809,
+        "core_12_dmg": 4431,
+        "core_12_pct": 39.4,
+        "core_12_kills": 2,
+        "tank_sponge_dmg": 5806,
+        "tank_sponge_pct": 51.7,
+        "tank_sponge_kills": 1,
+        "backline_sup_dmg": 999,
+        "backline_sup_pct": 8.9,
+        "backline_sup_kills": 1,
+        "effective_non_tank_pct": 48.3,
+        "max_hit_val": 278,
+        "max_hit_summary_zh": "35:11 用【弱化能流】对 虚空假面 单发打出 278 点伤害",
+        "target_breakdown": [
+          {
+            "hero_short_zh": "帕吉",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png",
+            "pos": 4,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 3372,
+            "kills": 1,
+            "dmg_pct": 30.0
+          },
+          {
+            "hero_short_zh": "斯拉达",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png",
+            "pos": 3,
+            "is_tank_sponge": true,
+            "is_core_12": false,
+            "role_tag_zh": "🥩 前排肉盾",
+            "dmg": 2434,
+            "kills": 0,
+            "dmg_pct": 21.7
+          },
+          {
+            "hero_short_zh": "玛西",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/marci.png",
+            "pos": 2,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 2265,
+            "kills": 1,
+            "dmg_pct": 20.2
+          },
+          {
+            "hero_short_zh": "虚空假面",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png",
+            "pos": 1,
+            "is_tank_sponge": false,
+            "is_core_12": true,
+            "role_tag_zh": "🎯 核心双C",
+            "dmg": 2166,
+            "kills": 1,
+            "dmg_pct": 19.3
+          },
+          {
+            "hero_short_zh": "森海飞霞",
+            "hero_img": "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/hoodwink.png",
+            "pos": 5,
+            "is_tank_sponge": false,
+            "is_core_12": false,
+            "role_tag_zh": "🪶 脆皮后排",
+            "dmg": 999,
+            "kills": 1,
+            "dmg_pct": 8.9
+          }
+        ],
+        "dmg_quality_badge": "⚖️ 常规前排拉扯输出",
+        "dmg_audit_notes": [
+          "对敌方 1/2 号位双核伤害占 39.4%（杀 2 次），对前排肉盾伤害占 51.7%（杀 1 次）。",
+          "🎯 头号集火沙包：全场打【4号位·帕吉】最多，共造成 3,372 点伤害（占个人总伤 30.0%，击杀 1 次）。"
+        ],
+        "skill_route_summary_zh": "主【弱化能流】(L7满) 副【隔空取物】(L11满)",
+        "level_sequence": [
+          {
+            "level": 1,
+            "zh": "弱化能流",
+            "short_tag": "L1:弱化能流(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 2,
+            "zh": "隔空取物(举)",
+            "short_tag": "L2:隔空取物(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 3,
+            "zh": "弱化能流",
+            "short_tag": "L3:弱化能流(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 4,
+            "zh": "拉比克专属技能",
+            "short_tag": "L4:拉比克专属技能(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 5,
+            "zh": "弱化能流",
+            "short_tag": "L5:弱化能流(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 6,
+            "zh": "技能窃取(偷)",
+            "short_tag": "L6:技能窃取(1级)",
+            "type": "skill"
+          },
+          {
+            "level": 7,
+            "zh": "弱化能流",
+            "short_tag": "L7:弱化能流(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 8,
+            "zh": "隔空取物(举)",
+            "short_tag": "L8:隔空取物(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 9,
+            "zh": "隔空取物(举)",
+            "short_tag": "L9:隔空取物(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 10,
+            "zh": "+200 生命值",
+            "short_tag": "L10:🌟+200 生命值",
+            "type": "talent"
+          },
+          {
+            "level": 11,
+            "zh": "隔空取物(举)",
+            "short_tag": "L11:隔空取物(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 12,
+            "zh": "拉比克专属技能",
+            "short_tag": "L12:拉比克专属技能(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 13,
+            "zh": "技能窃取(偷)",
+            "short_tag": "L13:技能窃取(2级)",
+            "type": "skill"
+          },
+          {
+            "level": 14,
+            "zh": "拉比克专属技能",
+            "short_tag": "L14:拉比克专属技能(3级)",
+            "type": "skill"
+          },
+          {
+            "level": 15,
+            "zh": "拉比克专属技能",
+            "short_tag": "L15:拉比克专属技能(4级)",
+            "type": "skill"
+          },
+          {
+            "level": 16,
+            "zh": "-4s 【弱化能流】 冷却",
+            "short_tag": "L16:🌟-4s 【弱化能流】 冷却",
+            "type": "talent"
+          }
+        ],
+        "talents_chosen": [
+          {
+            "tier": "10级天赋",
+            "level_taken": 10,
+            "zh": "+200 生命值"
+          },
+          {
+            "tier": "15级天赋",
+            "level_taken": 16,
+            "zh": "-4s 【弱化能流】 冷却"
+          }
+        ],
+        "skill_build_flags": [
+          "✓ 加点路线合理（主【弱化能流】(L7满) 副【隔空取物】(L11满)，三技能衔接顺畅）。"
+        ],
+        "skill_build_grade": "good",
+        "perm_buff_badges": [
+          "💎 魔晶激活 (40:15)",
+          "🪄 拉比克·奥术至尊/窃取叠层：10 层",
+          "🔥 先天被动觉醒：1 阶"
+        ],
+        "perm_buff_notes": [
+          "🔥 叠层丰厚：全场累计叠出 10 层【奥术至尊窃取叠层】（远超合格线 8 层），后期成长统治力拉满！"
+        ],
+        "grade": "normal"
+      },
       "phase_telemetry": {
         "lane_gold_gain": 2080,
         "lane_hdmg_gain": 3580,
@@ -54783,7 +59222,8 @@
         "保人拉野到位：对线期把同路核心 先知 保出了 10分钟 54 刀 / 4,066 经济的顺畅开局。",
         "全场核心技能施放统计：弱化能流 44次 / 隔空取物(举) 23次 / 时间漫游(跳) 21次 / 技能窃取(偷) 18次（操作频率 257 APM）。",
         "视野铺设尽职：全场插下 14 假眼 + 24 真眼（共 38 颗），并成功排掉敌方 3 颗假眼 / 7 颗真眼，顺手囤野 2 波。",
-        "进攻节奏组织者：全场主动购买 4 颗诡计之雾带动抓人节奏。"
+        "进攻节奏组织者：全场主动购买 4 颗诡计之雾带动抓人节奏。",
+        "🔥 叠层丰厚：全场累计叠出 10 层【奥术至尊窃取叠层】（远超合格线 8 层），后期成长统治力拉满！"
       ],
       "weaknesses": [
         "高频阵亡提款机：全场阵亡 **10 次**（其中被敌方【玛西】单人提款 4 次），黑白屏幕读秒长达 **5分47秒（占整局比赛 14.0% 时间）**，光阵亡直接扣掉 **1,094 金币**！"
@@ -54793,7 +59233,7 @@
       ],
       "trash_talk": "@Make Your Choice 一局死 10 次，看了整整 5分47秒 黑白电视（其中被敌方【玛西】单人提款 4 次），光死就扣了 1094 块钱，对面大哥给你磕一个不过分吧？",
       "praise_talk": "@Make Your Choice 最佳幕后功臣！拉比克 全场点亮 14 假 24 真视野 + 参战率 54%，吃草挤奶把大哥伺候得明明白白！",
-      "blame_share_pct": 14.2,
+      "blame_share_pct": 13.8,
       "contrib_share_pct": 22.3,
       "contrib_rank": 2,
       "contrib_tier": "⚔️ 破阵二当家 · 左膀右臂"

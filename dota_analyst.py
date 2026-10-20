@@ -1366,6 +1366,8 @@ def analyze_match_data(
     )
 
     for side_key, team_list in (("radiant", radiant_report), ("dire", dire_report)):
+        dq_side_rows = ((deep_forensics.get("damage_quality_and_build_by_side") or {}).get(side_key) or {}).get("player_rows") or []
+        dq_by_pos = {int(r.get("pos") or 0): r for r in dq_side_rows}
         team_mid_gold = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("gold_gain") or 0) for tp in team_list) or 1
         team_mid_hdmg = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
         team_lane_hdmg = sum(max(0, lane_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
@@ -1373,6 +1375,7 @@ def analyze_match_data(
         team_late_hdmg = sum(max(0, late_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
 
         for tp in team_list:
+            tp["damage_and_build_audit"] = dq_by_pos.get(int(tp.get("pos") or 0)) or {}
             slot = tp["player_slot"]
             lp = lane_by_slot.get(slot, {})
             mp = mid_by_slot.get(slot, {})

@@ -5584,6 +5584,9 @@ function renderTacticalMicroscopeSection(report) {
   if (tab === "itemization" || tab === "all") {
     blocks.push(renderMicroItemizationPane(report, df, targetSide, targetSideZh));
   }
+  if (tab === "damage_quality" || tab === "all") {
+    blocks.push(renderMicroDamageQualityAndBuildPane(report, df, targetSide, targetSideZh));
+  }
   if (tab === "unpressed_saves" || tab === "all") {
     blocks.push(renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh));
   }
@@ -5616,6 +5619,245 @@ function renderTacticalMicroscopeSection(report) {
   }
 
   bodyEl.innerHTML = blocks.join("");
+}
+
+/**
+ * Tab 3: 🔥 伤害含金量（切敌方1/2号位双核 vs 刮前排肉盾假伤害）· 1~18级加点天赋路线与永久 Buff 叠层审判
+ */
+function renderMicroDamageQualityAndBuildPane(report, df, targetSide, targetSideZh) {
+  const dq = df.damage_quality_and_build_by_side?.[targetSide];
+  if (!dq) {
+    return `<div class="empty-state compact">当前比赛暂无伤害含金量与加点路线审计数据</div>`;
+  }
+
+  const pRows = dq.player_rows || [];
+  const fakeCnt = Number(dq.fake_dmg_suspects_cnt ?? 0);
+  const trueCnt = Number(dq.true_core_slayers_cnt ?? 0);
+  const buildIssCnt = Number(dq.skill_build_issues_cnt ?? 0);
+
+  const dmgRowsHtml = pRows
+    .map((r) => {
+      const isBad = String(r.dmg_quality_badge || "").startsWith("🚨") || String(r.dmg_quality_badge || "").startsWith("⚠️");
+      const isGood = String(r.dmg_quality_badge || "").startsWith("🔥") || String(r.dmg_quality_badge || "").startsWith("⚡");
+      const corePct = Number(r.core_12_pct ?? 0);
+      const supPct = Number(r.backline_sup_pct ?? 0);
+      const tankPct = Number(r.tank_sponge_pct ?? 0);
+
+      const targetPillsHtml = (r.target_breakdown || [])
+        .map((tb) => {
+          const isTank = Boolean(tb.is_tank_sponge);
+          const isCore = Boolean(tb.is_core_12);
+          const borderCol = isCore
+            ? "rgba(34, 197, 94, 0.45)"
+            : isTank
+            ? "rgba(239, 68, 68, 0.45)"
+            : "rgba(234, 179, 8, 0.4)";
+          return `
+            <span class="micro-tf-pill" style="display:inline-flex;align-items:center;gap:4px;border-color:${borderCol};">
+              ${
+                tb.hero_img
+                  ? `<img src="${escapeHtml(tb.hero_img)}" width="20" height="12" alt="" style="border-radius:2px;" loading="lazy" />`
+                  : ""
+              }
+              <b>${tb.pos}号位${escapeHtml(tb.hero_short_zh)}</b>(${escapeHtml(tb.role_tag_zh)}):
+              <b>${fmtNum(tb.dmg || 0)}</b> (${tb.dmg_pct}% · <b>${tb.kills}杀</b>)
+            </span>
+          `;
+        })
+        .join(" ");
+
+      const notesHtml = (r.dmg_audit_notes || [])
+        .map((n) => {
+          const isAlert = String(n).startsWith("🚨") || String(n).startsWith("⚠️");
+          const isOk = String(n).startsWith("✓");
+          return `<li style="color:${
+            isAlert ? "var(--red-light)" : isOk ? "var(--green-light)" : "var(--text)"
+          };">${injectHeroLogosIntoHtml(escapeHtml(n), report)}</li>`;
+        })
+        .join("");
+
+      return `
+        <tr>
+          <td>
+            ${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}
+            <div style="font-size:11px; color:var(--muted); margin-top:3px;">
+              总对人伤害 <b>${fmtNum(r.total_hero_dmg || 0)}</b> · 总击杀 <b>${r.total_kills ?? 0}</b>
+            </div>
+          </td>
+          <td class="micro-badge-cell">
+            <span class="micro-exec-badge ${isBad ? "warn" : isGood ? "good" : ""}">
+              ${escapeHtml(r.dmg_quality_badge || "常规输出")}
+            </span>
+          </td>
+          <td>
+            <div class="posture-bar-stack" style="height:20px; margin-bottom:6px;" title="切敌方1/2号位双核 vs 打脆皮后排 vs 刮前排肉盾">
+              ${
+                corePct > 0
+                  ? `<div class="posture-seg agg" style="width:${Math.max(corePct, 12)}%;font-size:10px;">🎯 切1/2号位 ${corePct}% (${r.core_12_kills}杀)</div>`
+                  : ""
+              }
+              ${
+                supPct > 0
+                  ? `<div class="posture-seg mid" style="width:${Math.max(supPct, 10)}%;font-size:10px;">🪶 杀后排 ${supPct}% (${r.backline_sup_kills}杀)</div>`
+                  : ""
+              }
+              ${
+                tankPct > 0
+                  ? `<div class="posture-seg def" style="width:${Math.max(tankPct, 12)}%;font-size:10px;background:rgba(239,68,68,0.28);color:#fca5a5;">🥩 刮肉盾 ${tankPct}% (${r.tank_sponge_kills}杀)</div>`
+                  : ""
+              }
+            </div>
+            <div class="micro-tf-pills">${targetPillsHtml}</div>
+          </td>
+          <td>
+            <div style="font-size:12px; color:var(--gold-light); font-weight:600; margin-bottom:4px;">
+              💥 单发最高峰值：${injectHeroLogosIntoHtml(escapeHtml(r.max_hit_summary_zh || ""), report)}
+            </div>
+            <ul class="micro-insights-list" style="margin:0;">${notesHtml}</ul>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const buildRowsHtml = pRows
+    .map((r) => {
+      const sbBad = r.skill_build_grade === "bad" || r.skill_build_grade === "warn";
+      const seqPills = (r.level_sequence || [])
+        .slice(0, 12)
+        .map((st) => {
+          const isTal = st.type === "talent";
+          const isUlt = st.type === "ult";
+          const styleStr = isTal
+            ? "border-color:rgba(234,179,8,0.55);color:var(--gold-light);"
+            : isUlt
+            ? "border-color:rgba(59,130,246,0.55);color:#93c5fd;"
+            : "";
+          return `<span class="micro-tf-pill" style="${styleStr}">${escapeHtml(st.short_tag || "")}</span>`;
+        })
+        .join(" ");
+
+      const talentsHtml =
+        (r.talents_chosen || [])
+          .map(
+            (t) =>
+              `<span class="micro-tf-pill" style="border-color:rgba(234,179,8,0.5);color:var(--gold-light);">🌟 ${escapeHtml(
+                t.tier
+              )}(L${t.level_taken}): <b>${escapeHtml(t.zh)}</b></span>`
+          )
+          .join(" ") || `<span style="color:var(--muted);">未达到天赋等级</span>`;
+
+      const permBuffPills =
+        (r.perm_buff_badges || [])
+          .map(
+            (pb) =>
+              `<span class="micro-tf-pill" style="border-color:rgba(34,197,94,0.5);color:var(--green-light);font-weight:700;">${escapeHtml(
+                pb
+              )}</span>`
+          )
+          .join(" ") || `<span style="color:var(--muted);font-size:11px;">本局无永久叠层/魔晶Buff记录</span>`;
+
+      const allFlags = [...(r.skill_build_flags || []), ...(r.perm_buff_notes || [])];
+      const flagsHtml = allFlags
+        .map((fl) => {
+          const isErr = String(fl).startsWith("🚨") || String(fl).startsWith("⚠️");
+          const isGood = String(fl).startsWith("✓") || String(fl).startsWith("🔥");
+          return `<li style="color:${
+            isErr ? "var(--red-light)" : isGood ? "var(--green-light)" : "var(--gold-light)"
+          };">${injectHeroLogosIntoHtml(escapeHtml(fl), report)}</li>`;
+        })
+        .join("");
+
+      return `
+        <tr>
+          <td>
+            ${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}
+            <div style="margin-top:4px;">
+              <span class="micro-exec-badge ${sbBad ? "warn" : "good"}">${escapeHtml(
+        r.skill_route_summary_zh || "常规加点"
+      )}</span>
+            </div>
+          </td>
+          <td>
+            <div style="font-size:11px; color:var(--muted); margin-bottom:3px;">前 12 级逐级加点顺序：</div>
+            <div class="micro-tf-pills" style="margin-bottom:6px;">${seqPills}</div>
+            <div style="font-size:11px; color:var(--muted); margin-bottom:3px;">🌟 10 / 15 / 20 / 25 级天赋抉择：</div>
+            <div class="micro-tf-pills">${talentsHtml}</div>
+          </td>
+          <td>
+            <div class="micro-tf-pills">${permBuffPills}</div>
+          </td>
+          <td>
+            <ul class="micro-insights-list" style="margin:0;">${flagsHtml}</ul>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="micro-pane-block">
+      <div class="micro-pane-banner">
+        <div>
+          <h3>🔥 3. 伤害含金量（切双核真伤 vs 刮肉盾假伤害）· 1~18级加点天赋路线与永久 Buff 叠层审判 (${escapeHtml(targetSideZh)})</h3>
+          <p>${injectHeroLogosIntoHtml(escapeHtml(dq.side_verdict || ""), report)}</p>
+        </div>
+      </div>
+
+      <div class="micro-kpi-row">
+        <div class="micro-kpi-cell">
+          <span>🚨 刮肉盾假伤害 / 集火偏移人数</span>
+          <strong style="color:${fakeCnt > 0 ? "var(--red-light)" : "var(--green-light)"};">${fakeCnt} 人被抓包</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🔥 刀刀见血 · 精准切核人数</span>
+          <strong style="color:var(--green-light);">${trueCnt} 人高含金量切C</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>📚 前9级不学控制/核心技能抓包</span>
+          <strong style="color:${buildIssCnt > 0 ? "var(--red-light)" : "var(--green-light)"};">${buildIssCnt} 处奇葩/偏科加点</strong>
+        </div>
+        <div class="micro-kpi-cell">
+          <span>🧬 永久 Buff 与叠层追踪</span>
+          <strong>能量转移 / 死亡一指 / 腐肉堆积 / 决斗 / 魔晶激活点</strong>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>🎯 1~5 号位伤害含金量拆解台（谁在刀刀见血切对面 1/2 号位双核？谁在对着帕吉/酒仙/前排肉盾狂刷无效假伤害？）</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄</th>
+                <th>伤害含金量定性</th>
+                <th>对敌方 5 人伤害构成比例 &amp; 终结击杀明细</th>
+                <th>单发最高爆发峰值 &amp; 集火审计判词</th>
+              </tr>
+            </thead>
+            <tbody>${dmgRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="micro-card">
+        <h4>📚 1~5 号位逐级加点路线、10/15/20/25 级天赋抉择与永久 Buff 叠层审判台</h4>
+        <div class="micro-table-wrap">
+          <table class="micro-data-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄 &amp; 主副路线</th>
+                <th>前 12 级加点流水 &amp; 10/15/20/25 级天赋抉择</th>
+                <th>🧬 永久 Buff 叠层与魔晶/A杖赐福</th>
+                <th>加点毒点 / 成长叠层审判</th>
+              </tr>
+            </thead>
+            <tbody>${buildRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 /**
