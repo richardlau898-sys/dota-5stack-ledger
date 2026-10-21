@@ -45,6 +45,8 @@ const state = {
   microSide: "own", // "own" | "opp"
   activePhaseKey: "lane", // "lane" | "mid" | "late"
   activeTeamTab: "own", // "own" | "opp" | "both"
+  tfSelectedPosMap: {}, // per-teamfight selected player pos ("focus" | 1..5 | "all")
+  forensicSelectedSlot: "focus", // Section 6 selected player slot ("focus" | slot | "all")
   llmStatus: null,
   isGeneratingGrok: false,
 };
@@ -5254,6 +5256,11 @@ async function triggerGrokReview({ force = true } = {}) {
  */
 function renderFullMatchReport(report) {
   if (!report) return;
+  if (state._lastRenderedMatchId !== report.match_id) {
+    state._lastRenderedMatchId = report.match_id;
+    state.tfSelectedPosMap = {};
+    state.forensicSelectedSlot = "focus";
+  }
   renderMatchOverview(report);
   renderDraftAndComboSection(report);
   renderVerdictAndBlameSection(report);
@@ -10567,14 +10574,147 @@ function renderKeyWindowsSection(report) {
         })
         .join("");
 
-      // Part C: Our 5 Players Execution Matrix in this Fight
+      // Part C: Our 5 Players Execution Matrix in this Fight (Spotlight #1 Most Important Player + 1~5 Selector)
       const allExec = fObj.players_execution_matrix || [];
       const ownExec = allExec
         .filter((pe) => pe.side === side)
         .sort((a, b) => Number(a.pos || 0) - Number(b.pos || 0));
 
-      const ownExecHtml = ownExec
-        .map((pe) => {
+      const tfCardKey = String(fObj.tf_index ?? cardIdx);
+      const scoredExec = ownExec.map((pe) => {
+        let impScore = 0;
+        const reasons = [];
+        const isBadUlt = Boolean(pe.egg_shattered || pe.egg_unpressed || pe.ult_unpressed_name);
+        const hasUnusedSelfSave = (pe.unused_self_saves_zh || []).length > 0;
+        const hasUnusedTeamSave = (pe.unused_team_saves_zh || []).length > 0;
+        const isAfk = Boolean(pe.afk_farm_zh);
+
+        if (outcomeTone !== "praise") {
+          if (isBadUlt) {
+            impScore += 150;
+            reasons.push(pe.ult_audit_zh || "关键大招未按即阵亡");
+          }
+          if (hasUnusedSelfSave) {
+            impScore += 110;
+            reasons.push(`包握【${pe.unused_self_saves_zh.join("/")}】0次按出`);
+          }
+          if (isAfk) {
+            impScore += 95;
+            reasons.push(pe.afk_farm_zh);
+          }
+          if (hasUnusedTeamSave) {
+            impScore += 65;
+            reasons.push(`未按救人装【${pe.unused_team_saves_zh.join("/")}】`);
+          }
+          if (pe.verdict_tone === "bad" || pe.verdict_tone === "roast") {
+            impScore += 45;
+          }
+          if (Number(pe.deaths) > 0) {
+            impScore += 25 + (6 - Number(pe.pos || 5)) * 4;
+          }
+          impScore += (Number(pe.damage_share_pct) || 0) * 0.4;
+          if (reasons.length === 0) {
+            reasons.push(
+              Number(pe.deaths) > 0
+                ? `本波核心阵亡关键节点 (${pe.verdict_tag || "团战阵亡"} · 输出占 ${pe.damage_share_pct || 0}%)`
+                : `本波本方最高输出核心 (轰出全队 ${pe.damage_share_pct || 0}% 伤害)`
+            );
+          }
+        } else {
+          impScore =
+            (Number(pe.damage_share_pct) || 0) * 1.6 +
+            (Number(pe.kills_in_tf) || 0) * 30 +
+            (pe.verdict_tone === "good" || pe.verdict_tone === "praise" ? 40 : 0) -
+            (Number(pe.deaths) || 0) * 12;
+          reasons.push(
+            `本波团战头号功臣 · 轰出全队 ${pe.damage_share_pct || 0}% 伤害 (${pe.kills_in_tf || 0}杀/${pe.deaths || 0}死)`
+          );
+        }
+        return {
+          pe,
+          impScore,
+          reasonZh: reasons.slice(0, 2).join("；"),
+          hasCriticalBlunder: isBadUlt || hasUnusedSelfSave || isAfk,
+        };
+      });
+
+      const spotlightEntry =
+        [...scoredExec].sort((a, b) => b.impScore - a.impScore)[0] || scoredExec[0] || null;
+      const spotlightPos = Number(spotlightEntry?.pe?.pos || ownExec[0]?.pos || 1);
+      const selectedMode = state.tfSelectedPosMap?.[tfCardKey] || "focus";
+      const activePos =
+        selectedMode === "focus"
+          ? spotlightPos
+          : selectedMode === "all"
+          ? "all"
+          : Number(selectedMode);
+
+      const selectorBarHtml =
+        ownExec.length > 0
+          ? `
+            <div class="tf-p-selector-bar" role="tablist" aria-label="切换本波团战1至5号位详情">
+              ${scoredExec
+                .map(({ pe, hasCriticalBlunder }) => {
+                  const pPos = Number(pe.pos || 1);
+                  const isSpot = pPos === spotlightPos;
+                  const isAct = activePos !== "all" && Number(activePos) === pPos;
+                  let chipHtml = `<span class="tf-pill-chip">${pe.damage_share_pct || 0}%伤</span>`;
+                  if (isSpot) {
+                    chipHtml = `<span class="tf-pill-chip focus">${
+                      outcomeTone === "praise" ? "👑MVP" : "🎯焦点"
+                    }</span>`;
+                  } else if (hasCriticalBlunder) {
+                    chipHtml = `<span class="tf-pill-chip bad">🚨失误</span>`;
+                  } else if (Number(pe.deaths) > 0) {
+                    chipHtml = `<span class="tf-pill-chip dead">💀阵亡</span>`;
+                  }
+                  return `
+                    <button
+                      type="button"
+                      class="tf-p-select-btn ${isAct ? "is-active" : ""} ${isSpot ? "is-spotlight" : ""} ${
+                    hasCriticalBlunder ? "has-blunder" : ""
+                  }"
+                      data-tf-card-key="${escapeHtml(tfCardKey)}"
+                      data-tf-select-pos="${pPos}"
+                      title="点击查看 ${pPos}号位 ${escapeHtml(pe.hero_short_zh)} (${escapeHtml(
+                    pe.personaname
+                  )}) 本波微操与手牌详情"
+                    >
+                      ${
+                        pe.hero_img
+                          ? `<img src="${escapeHtml(pe.hero_img)}" width="22" height="13" alt="" class="tf-p-pill-avatar" />`
+                          : ""
+                      }
+                      <span class="tf-pill-label">${pPos}号 ${escapeHtml(pe.hero_short_zh)}</span>
+                      ${chipHtml}
+                    </button>
+                  `;
+                })
+                .join("")}
+              <button
+                type="button"
+                class="tf-p-select-btn mode-all ${activePos === "all" ? "is-active" : ""}"
+                data-tf-card-key="${escapeHtml(tfCardKey)}"
+                data-tf-select-pos="all"
+                title="同屏展开本波全部 5 名队员"
+              >
+                📋 全部(5)
+              </button>
+            </div>
+          `
+          : "";
+
+      const visibleEntries =
+        activePos === "all"
+          ? scoredExec
+          : scoredExec.filter(({ pe }) => Number(pe.pos || 1) === Number(activePos));
+      const finalVisibleEntries =
+        visibleEntries.length > 0 ? visibleEntries : scoredExec.slice(0, 1);
+
+      const ownExecHtml = finalVisibleEntries
+        .map(({ pe, reasonZh }) => {
+          const pPos = Number(pe.pos || 1);
+          const isSpot = pPos === spotlightPos;
           const toneClass = pe.verdict_tone || "neutral";
           const alerts = [];
           if (pe.ult_audit_zh) {
@@ -10614,11 +10754,27 @@ function renderKeyWindowsSection(report) {
               ? ` ｜ 目标：${pe.ability_targets_zh.slice(0, 2).join("、")}`
               : "";
 
+          const spotlightBannerHtml = isSpot
+            ? `
+              <div class="tf-p-spotlight-banner ${outcomeTone === "praise" ? "praise" : "roast"}">
+                <span class="tf-spot-tag">${
+                  outcomeTone === "praise" ? "👑 本波默认焦点 · 团战头号功臣" : "🎯 本波默认焦点 · 胜负关键人物"
+                }</span>
+                <span class="tf-spot-reason">${escapeHtml(reasonZh)}</span>
+              </div>
+            `
+            : "";
+
           return `
-            <div class="tf-player-audit-card ${escapeHtml(toneClass)}">
+            <div class="tf-player-audit-card ${escapeHtml(toneClass)} ${isSpot ? "is-spotlight-card" : ""}">
+              ${spotlightBannerHtml}
               <div class="tf-p-top">
                 <div class="tf-p-ident">
-                  ${pe.hero_img ? `<img src="${escapeHtml(pe.hero_img)}" alt="" class="tf-p-avatar" />` : ""}
+                  ${
+                    pe.hero_img
+                      ? `<img src="${escapeHtml(pe.hero_img)}" width="38" height="22" alt="" class="tf-p-avatar" />`
+                      : ""
+                  }
                   <div>
                     <div class="tf-p-name"><b>${pe.pos}号位 ${escapeHtml(pe.hero_short_zh)}</b> <span class="tf-p-user">(${escapeHtml(pe.personaname)})</span></div>
                     <div class="tf-p-kda-line">
@@ -10643,6 +10799,61 @@ function renderKeyWindowsSection(report) {
           `;
         })
         .join("");
+
+      const otherEntries =
+        activePos === "all"
+          ? []
+          : scoredExec.filter(({ pe }) => Number(pe.pos || 1) !== Number(finalVisibleEntries[0]?.pe?.pos || 0));
+
+      const otherTeammatesMiniStripHtml =
+        otherEntries.length > 0
+          ? `
+            <div class="tf-other-teammates-strip">
+              <div class="tf-other-strip-head">📊 其余队友本波速览（点击任意行切换详情）：</div>
+              <div class="tf-other-strip-rows">
+                ${otherEntries
+                  .map(({ pe, hasCriticalBlunder }) => {
+                    const pPos = Number(pe.pos || 1);
+                    const isSpot = pPos === spotlightPos;
+                    const quickIssue =
+                      pe.egg_unpressed || pe.ult_unpressed_name
+                        ? "🚨大招未按"
+                        : (pe.unused_self_saves_zh || []).length > 0
+                        ? `💀未按${pe.unused_self_saves_zh[0]}`
+                        : pe.afk_farm_zh
+                        ? "🌾缺席刷钱"
+                        : pe.verdict_tag || "";
+                    return `
+                      <button
+                        type="button"
+                        class="tf-other-mini-row ${hasCriticalBlunder ? "is-warn" : ""}"
+                        data-tf-card-key="${escapeHtml(tfCardKey)}"
+                        data-tf-select-pos="${pPos}"
+                      >
+                        <span class="tf-mini-who">
+                          ${
+                            pe.hero_img
+                              ? `<img src="${escapeHtml(pe.hero_img)}" width="20" height="12" alt="" class="tf-mini-avatar" />`
+                              : ""
+                          }
+                          <b>${pPos}号 ${escapeHtml(pe.hero_short_zh)}</b>
+                          <small>(${escapeHtml(pe.personaname)})</small>
+                          ${isSpot ? `<em class="tf-mini-spot-badge">🎯焦点</em>` : ""}
+                        </span>
+                        <span class="tf-mini-stats">
+                          伤害 <b>${fmtNum(pe.damage)}</b> (${pe.damage_share_pct}%) · <b>${pe.kills_in_tf}杀/${pe.deaths}死</b>
+                        </span>
+                        <span class="tf-mini-verdict ${escapeHtml(pe.verdict_tone || "neutral")}">${escapeHtml(
+                      quickIssue
+                    )} →</span>
+                      </button>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `
+          : "";
 
       cardsHtml.push(`
         <article class="window-card tf-scene-card ${escapeHtml(outcomeTone)}">
@@ -10673,15 +10884,20 @@ function renderKeyWindowsSection(report) {
             <ul class="tf-causes-list">${causesHtml}</ul>
           </div>
 
-          <!-- Part B & C 双栏/上下布局：左侧秒级时间轴剧本，右侧本方五人微操审判 -->
+          <!-- Part B & C 双栏/上下布局：左侧秒级时间轴剧本，右侧本方焦点人物微操审判 + 1~5号位切换 -->
           <div class="tf-scene-split-grid">
             <div class="tf-script-panel">
               <div class="tf-panel-title">⏱️ 秒级交火时间轴剧本 &amp; 战后90秒连锁反应</div>
               <div class="tf-script-timeline">${scriptHtml}</div>
             </div>
             <div class="tf-players-panel">
-              <div class="tf-panel-title">🛡️ 本方 1~5 号位这波团干了什么？（微操与手牌审计）</div>
+              <div class="tf-panel-head-flex">
+                <div class="tf-panel-title">🛡️ 本方这波团微操与手牌审计</div>
+                <span class="tf-panel-subhint">默认展示最关键 1 人 · 点击切换队友</span>
+              </div>
+              ${selectorBarHtml}
               <div class="tf-players-audit-list">${ownExecHtml}</div>
+              ${otherTeammatesMiniStripHtml}
             </div>
           </div>
         </article>
@@ -10735,6 +10951,17 @@ function renderKeyWindowsSection(report) {
       ? cardsHtml.join("")
       : `<div class="empty-state">暂无团战明细记录</div>`;
 
+  grid.querySelectorAll("[data-tf-select-pos]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const cardKey = btn.getAttribute("data-tf-card-key");
+      const selPos = btn.getAttribute("data-tf-select-pos");
+      if (!cardKey || !selPos) return;
+      if (!state.tfSelectedPosMap) state.tfSelectedPosMap = {};
+      state.tfSelectedPosMap[cardKey] = selPos === "all" ? "all" : Number(selPos);
+      if (state.currentReport) renderKeyWindowsSection(state.currentReport);
+    });
+  });
+
   grid.querySelectorAll("[data-locate-tf]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const tfIdx = Number(btn.getAttribute("data-locate-tf"));
@@ -10755,7 +10982,7 @@ function renderKeyWindowsSection(report) {
 }
 
 /**
- * 9. Module 5: 1~5 Position Deep Forensics Cards
+ * 9. Module 5: 1~5 Position Deep Forensics Cards (Default Spotlight #1 Hero + Selector Bar)
  */
 function renderPlayersForensicsList(report) {
   const container = document.getElementById("players-forensics-container");
@@ -10780,15 +11007,102 @@ function renderPlayersForensicsList(report) {
     : null;
   const mvpSlot = report.mvp?.mvp_player?.player_slot;
 
-  container.innerHTML = listToRender
-    .map((p) =>
-      renderSingleForensicCard(p, {
-        grokPlayer: grokPlayersMap.get(Number(p.player_slot)),
-        isTopCulprit: !p.won && Number(p.player_slot) === Number(maxCulpritSlot),
-        isMvp: Number(p.player_slot) === Number(mvpSlot),
-      })
-    )
-    .join("");
+  // Determine the #1 Most Important Player in listToRender for default spotlight
+  const defaultFocusPlayer =
+    [...listToRender].sort((a, b) => {
+      if (!a.won && !b.won) return (b.blame_share_pct || 0) - (a.blame_share_pct || 0);
+      if (a.won && b.won) return (b.contrib_share_pct || 0) - (a.contrib_share_pct || 0);
+      return (b.blame_share_pct || 0) - (a.blame_share_pct || 0);
+    })[0] || listToRender[0];
+
+  const defaultFocusSlot = Number(defaultFocusPlayer?.player_slot ?? 0);
+  const selectedSlotMode = state.forensicSelectedSlot ?? "focus";
+  const effectiveSlot =
+    selectedSlotMode === "focus"
+      ? defaultFocusSlot
+      : selectedSlotMode === "all"
+      ? "all"
+      : Number(selectedSlotMode);
+
+  // Ensure effectiveSlot exists in listToRender (e.g. if user switched team tab)
+  const slotExists =
+    effectiveSlot === "all" ||
+    listToRender.some((p) => Number(p.player_slot) === Number(effectiveSlot));
+  const finalActiveSlot = slotExists ? effectiveSlot : defaultFocusSlot;
+
+  const heroPickerHtml = `
+    <div class="forensic-hero-picker-bar" role="tablist" aria-label="选择要查看的英雄个人深度卷宗">
+      <span class="forensic-picker-hint">🎯 默认展示最关键 1 人（点击切换其他队友）：</span>
+      <div class="forensic-picker-buttons">
+        ${listToRender
+          .map((p) => {
+            const pSlot = Number(p.player_slot);
+            const isFocus = pSlot === defaultFocusSlot;
+            const isAct = finalActiveSlot !== "all" && Number(finalActiveSlot) === pSlot;
+            const heroShort = p.hero_short_zh || p.hero_name;
+            const badgeText = isFocus
+              ? p.won
+                ? `👑头号功臣 ${Number(p.contrib_share_pct || 0).toFixed(0)}%`
+                : `🚨头号焦点 ${Number(p.blame_share_pct || 0).toFixed(0)}%锅`
+              : p.won
+              ? `${Number(p.contrib_share_pct || 0).toFixed(0)}%贡献`
+              : `${Number(p.blame_share_pct || 0).toFixed(0)}%锅`;
+            return `
+              <button
+                type="button"
+                class="forensic-pick-btn ${isAct ? "is-active" : ""} ${isFocus ? "is-focus" : ""}"
+                data-forensic-pick-slot="${pSlot}"
+              >
+                ${
+                  p.hero_img
+                    ? `<img src="${escapeHtml(p.hero_img)}" width="26" height="15" alt="" class="forensic-pick-avatar" />`
+                    : ""
+                }
+                <span><b>${p.pos}号位 ${escapeHtml(heroShort)}</b> <small>(${escapeHtml(
+              p.personaname
+            )})</small></span>
+                <em class="forensic-pick-chip ${isFocus ? (p.won ? "good" : "bad") : ""}">${escapeHtml(
+              badgeText
+            )}</em>
+              </button>
+            `;
+          })
+          .join("")}
+        <button
+          type="button"
+          class="forensic-pick-btn mode-all ${finalActiveSlot === "all" ? "is-active" : ""}"
+          data-forensic-pick-slot="all"
+        >
+          📋 展开全部 (${listToRender.length}人)
+        </button>
+      </div>
+    </div>
+  `;
+
+  const cardsToShow =
+    finalActiveSlot === "all"
+      ? listToRender
+      : listToRender.filter((p) => Number(p.player_slot) === Number(finalActiveSlot));
+
+  container.innerHTML =
+    heroPickerHtml +
+    cardsToShow
+      .map((p) =>
+        renderSingleForensicCard(p, {
+          grokPlayer: grokPlayersMap.get(Number(p.player_slot)),
+          isTopCulprit: !p.won && Number(p.player_slot) === Number(maxCulpritSlot),
+          isMvp: Number(p.player_slot) === Number(mvpSlot),
+        })
+      )
+      .join("");
+
+  container.querySelectorAll("[data-forensic-pick-slot]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const rawSlot = btn.getAttribute("data-forensic-pick-slot");
+      state.forensicSelectedSlot = rawSlot === "all" ? "all" : Number(rawSlot);
+      if (state.currentReport) renderPlayersForensicsList(state.currentReport);
+    });
+  });
 
   container.querySelectorAll("[data-copy-quote]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -10963,7 +11277,7 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
           <div class="forensic-pos-num">${posNum}</div>
           ${
             p.hero_img
-              ? `<img class="forensic-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
+              ? `<img class="forensic-portrait" src="${escapeHtml(p.hero_img)}" width="52" height="30" alt="${escapeHtml(heroShort)}" loading="lazy" />`
               : ""
           }
           <div class="forensic-title-block">

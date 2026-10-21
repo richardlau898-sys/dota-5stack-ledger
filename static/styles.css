@@ -1706,9 +1706,10 @@ select:hover {
 }
 
 .forensic-portrait {
-  width: 74px;
-  height: 42px;
+  width: 52px;
+  height: 30px;
   object-fit: cover;
+  border-radius: 4px;
   border: 1px solid #59523e;
   background: #141515;
   flex-shrink: 0;
@@ -6856,7 +6857,91 @@ dialog::backdrop {
   border: 1px solid #7a3750;
 }
 
-/* Part C: 本方1-5号位微操与手牌审计卡片 */
+/* Part C: 本方1-5号位微操与手牌审计卡片（默认聚焦1名最关键英雄 + 1~5号位切换栏） */
+.tf-panel-head-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tf-panel-subhint {
+  font-size: 11px;
+  color: #9da48e;
+}
+
+.tf-p-selector-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.tf-p-select-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: #191c16;
+  border: 1px solid #2e3328;
+  border-radius: 6px;
+  color: #c7ccb8;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.tf-p-select-btn:hover {
+  background: #23281f;
+  border-color: #5b634f;
+  color: #f2f5e8;
+}
+
+.tf-p-select-btn.is-active {
+  background: #2b2719;
+  border-color: #d6a94e;
+  color: #fff3d1;
+  box-shadow: 0 0 0 1px rgba(214, 169, 78, 0.28);
+}
+
+.tf-p-select-btn.has-blunder:not(.is-active) {
+  border-color: rgba(224, 93, 93, 0.45);
+}
+
+.tf-p-pill-avatar {
+  width: 22px !important;
+  height: 13px !important;
+  object-fit: cover;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.tf-pill-chip {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #242820;
+  color: #9fa690;
+  font-weight: 700;
+}
+
+.tf-pill-chip.focus {
+  background: rgba(214, 169, 78, 0.22);
+  color: #ffd678;
+}
+
+.tf-pill-chip.bad {
+  background: rgba(224, 93, 93, 0.24);
+  color: #ff9c9c;
+}
+
+.tf-pill-chip.dead {
+  background: rgba(148, 163, 184, 0.16);
+  color: #cbd5e1;
+}
+
 .tf-players-audit-list {
   display: flex;
   flex-direction: column;
@@ -6867,18 +6952,20 @@ dialog::backdrop {
   background: #191c17;
   border: 1px solid #2a2e24;
   border-radius: 7px;
-  padding: 9px 11px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
-.tf-player-audit-card.roast {
+.tf-player-audit-card.roast,
+.tf-player-audit-card.bad {
   border-left: 3px solid #e05d5d;
   background: linear-gradient(90deg, rgba(64, 22, 22, 0.26) 0%, #191c17 100%);
 }
 
-.tf-player-audit-card.praise {
+.tf-player-audit-card.praise,
+.tf-player-audit-card.good {
   border-left: 3px solid #5ac878;
   background: linear-gradient(90deg, rgba(22, 58, 32, 0.24) 0%, #191c17 100%);
 }
@@ -6887,6 +6974,37 @@ dialog::backdrop {
   border-left: 3px solid #e2a94b;
 }
 
+.tf-p-spotlight-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  background: rgba(224, 93, 93, 0.14);
+  border: 1px solid rgba(224, 93, 93, 0.32);
+}
+
+.tf-p-spotlight-banner.praise {
+  background: rgba(90, 200, 120, 0.14);
+  border-color: rgba(90, 200, 120, 0.34);
+}
+
+.tf-spot-tag {
+  font-weight: 800;
+  color: #ffca85;
+}
+
+.tf-p-spotlight-banner.praise .tf-spot-tag {
+  color: #84eb9f;
+}
+
+.tf-spot-reason {
+  color: #e6ead8;
+}
+
+.tf-p-top,
 .tf-p-head {
   display: flex;
   align-items: center;
@@ -6898,7 +7016,49 @@ dialog::backdrop {
 .tf-p-ident {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tf-p-avatar {
+  width: 38px !important;
+  height: 22px !important;
+  max-width: 38px !important;
+  max-height: 22px !important;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #524b3a;
+  flex-shrink: 0;
+  display: block;
+}
+
+.tf-p-name {
+  font-size: 13px;
+  color: #eef2e3;
+  line-height: 1.3;
+}
+
+.tf-p-user {
+  font-size: 11.5px;
+  color: #9fa591;
+}
+
+.tf-p-kda-line {
+  font-size: 11.5px;
+  color: #b4b9a6;
+  margin-top: 2px;
+}
+
+.tf-p-kda-line b {
+  color: #e6ead8;
+}
+
+.tf-p-kda-line b.pos {
+  color: #74e392;
+}
+
+.tf-p-kda-line b.neg {
+  color: #ff9c9c;
 }
 
 .tf-p-pos {
@@ -6916,29 +7076,246 @@ dialog::backdrop {
   color: #eef2e3;
 }
 
-.tf-p-verdict {
+.tf-p-verdict,
+.tf-p-verdict-stamp {
   font-size: 11.5px;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 4px;
+  background: #252920;
+  color: #d2d7c5;
 }
 
-.tf-p-verdict.roast {
+.tf-p-verdict.roast,
+.tf-p-verdict-stamp.roast,
+.tf-p-verdict-stamp.bad {
   background: rgba(224, 93, 93, 0.18);
   color: #ff9c9c;
   border: 1px solid rgba(224, 93, 93, 0.4);
 }
 
-.tf-p-verdict.praise {
+.tf-p-verdict.praise,
+.tf-p-verdict-stamp.praise,
+.tf-p-verdict-stamp.good {
   background: rgba(90, 200, 120, 0.18);
   color: #84eb9f;
   border: 1px solid rgba(90, 200, 120, 0.4);
 }
 
-.tf-p-verdict.warn {
+.tf-p-verdict.warn,
+.tf-p-verdict-stamp.warn {
   background: rgba(226, 169, 75, 0.16);
   color: #f5c978;
   border: 1px solid rgba(226, 169, 75, 0.35);
+}
+
+.tf-p-alert {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.tf-p-alert.bad {
+  background: rgba(224, 93, 93, 0.18);
+  color: #ff9e9e;
+  border: 1px solid rgba(224, 93, 93, 0.38);
+}
+
+.tf-p-alert.warn {
+  background: rgba(226, 169, 75, 0.16);
+  color: #f5c978;
+  border: 1px solid rgba(226, 169, 75, 0.35);
+}
+
+.tf-p-alert.good {
+  background: rgba(90, 200, 120, 0.16);
+  color: #84eb9f;
+  border: 1px solid rgba(90, 200, 120, 0.35);
+}
+
+.tf-other-teammates-strip {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px dashed #2c3126;
+}
+
+.tf-other-strip-head {
+  font-size: 11px;
+  color: #8f9681;
+  margin-bottom: 5px;
+}
+
+.tf-other-strip-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tf-other-mini-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 4px 8px;
+  background: #151813;
+  border: 1px solid #24291f;
+  border-radius: 5px;
+  color: #b7bda8;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.tf-other-mini-row:hover {
+  background: #1e231b;
+  border-color: #5b634f;
+  color: #eef2e3;
+}
+
+.tf-other-mini-row.is-warn {
+  border-left: 2px solid #e05d5d;
+}
+
+.tf-mini-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.tf-mini-who small {
+  color: #848a76;
+}
+
+.tf-mini-avatar {
+  width: 20px !important;
+  height: 12px !important;
+  object-fit: cover;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.tf-mini-spot-badge {
+  font-style: normal;
+  font-size: 10px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(214, 169, 78, 0.22);
+  color: #ffd678;
+}
+
+.tf-mini-stats {
+  color: #9ea490;
+  font-size: 11px;
+}
+
+.tf-mini-stats b {
+  color: #d6dcc8;
+}
+
+.tf-mini-verdict {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c89f52;
+  white-space: nowrap;
+}
+
+.tf-mini-verdict.bad,
+.tf-mini-verdict.roast {
+  color: #ff9c9c;
+}
+
+.tf-mini-verdict.good,
+.tf-mini-verdict.praise {
+  color: #84eb9f;
+}
+
+/* Section 6: 个人深度复盘卷宗 1~5 号位切换栏 */
+.forensic-hero-picker-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: #171a15;
+  border: 1px solid #2d3227;
+  border-radius: 8px;
+}
+
+.forensic-picker-hint {
+  font-size: 12px;
+  font-weight: 700;
+  color: #d8b265;
+}
+
+.forensic-picker-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.forensic-pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #1d211a;
+  border: 1px solid #32382c;
+  border-radius: 6px;
+  color: #cbd0be;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.forensic-pick-btn:hover {
+  background: #262b22;
+  border-color: #636b56;
+  color: #f3f6ea;
+}
+
+.forensic-pick-btn.is-active {
+  background: #2b2618;
+  border-color: #d6a94e;
+  color: #fff4d4;
+  box-shadow: 0 0 0 1px rgba(214, 169, 78, 0.3);
+}
+
+.forensic-pick-btn small {
+  color: #939985;
+  font-weight: 400;
+}
+
+.forensic-pick-avatar {
+  width: 26px !important;
+  height: 15px !important;
+  object-fit: cover;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.forensic-pick-chip {
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #272b22;
+  color: #aab09c;
+}
+
+.forensic-pick-chip.bad {
+  background: rgba(224, 93, 93, 0.22);
+  color: #ff9c9c;
+}
+
+.forensic-pick-chip.good {
+  background: rgba(90, 200, 120, 0.22);
+  color: #84eb9f;
 }
 
 .tf-p-stats-strip {
