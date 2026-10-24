@@ -4777,6 +4777,55 @@ function renderHeaderStatus() {
   }
 }
 
+const LOCAL_ANALYZED_STORAGE_KEY = "dota_analyzed_matches_v1";
+
+function getLocalAnalyzedMatchesMap() {
+  const map = new Map();
+  try {
+    const raw = localStorage.getItem(LOCAL_ANALYZED_STORAGE_KEY);
+    if (!raw) return map;
+    const obj = JSON.parse(raw);
+    if (obj && typeof obj === "object") {
+      Object.entries(obj).forEach(([k, v]) => {
+        const mid = Number(k);
+        if (mid && v) map.set(mid, v);
+      });
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return map;
+}
+
+function saveLocalAnalyzedMatch(report) {
+  if (!report || !report.match_id) return;
+  try {
+    const mid = Number(report.match_id);
+    const raw = localStorage.getItem(LOCAL_ANALYZED_STORAGE_KEY);
+    const obj = raw ? JSON.parse(raw) : {};
+    const side = report.focus_side || "dire";
+    const sideZh = side === "radiant" ? "天辉" : "夜魇";
+    const won = Boolean(report.user_won ?? (side === "radiant" ? report.radiant_win : !report.radiant_win));
+    const score = `${report.radiant_score ?? 0}:${report.dire_score ?? 0}`;
+    const mvpHero = report.mvp?.hero_short_zh || report.mvp?.hero_name || "";
+    const culpritHero = report.culprit?.hero_short_zh || report.culprit?.hero_name || "";
+    obj[String(mid)] = {
+      match_id: mid,
+      won,
+      score,
+      side_zh: sideZh,
+      mvp_hero: mvpHero,
+      mvp_contrib_pct: report.mvp?.contrib_share_pct ?? 25,
+      culprit_hero: culpritHero,
+      culprit_blame_pct: report.culprit?.blame_share_pct ?? 28,
+      saved_at: Date.now(),
+    };
+    localStorage.setItem(LOCAL_ANALYZED_STORAGE_KEY, JSON.stringify(obj));
+  } catch {
+    // ignore storage errors
+  }
+}
+
 function renderRecentMatchesStrip(matches) {
   const strip = document.getElementById("recent-matches-strip");
   if (!strip) return;
@@ -4785,6 +4834,7 @@ function renderRecentMatchesStrip(matches) {
     return;
   }
 
+  const localMap = getLocalAnalyzedMatchesMap();
   const activeMid = state.pendingMatchId || state.currentMatchId;
   strip.innerHTML = matches
     .slice(0, 12)
@@ -4795,7 +4845,7 @@ function renderRecentMatchesStrip(matches) {
       const heroShort = m.hero_short_zh || m.hero_name || "未知英雄";
       const partyLabel = m.party_label || (m.party_size >= 2 ? `${m.party_size}人黑` : "单排");
       const durText = m.duration_str || m.duration || "";
-      const isAnalyzed = Boolean(m.is_analyzed);
+      const isAnalyzed = Boolean(m.is_analyzed || localMap.has(Number(m.match_id)));
       const aiBadgeHtml = isAnalyzed
         ? `<span class="analyzed-badge-group">
             <span class="analyzed-badge ready" title="已生成AI复盘报告，点击直接秒开并可复制分享链接">✅ 已复盘</span>
@@ -4854,6 +4904,10 @@ function renderHomeWorkspace() {
   const analyzedMap = new Map(
     ((state.squadLedger && state.squadLedger.analyzed_matches) || []).map((am) => [Number(am.match_id), am])
   );
+  const localAnalyzedMap = getLocalAnalyzedMatchesMap();
+  localAnalyzedMap.forEach((val, key) => {
+    if (!analyzedMap.has(key)) analyzedMap.set(key, val);
+  });
 
   // Render Home Hero KPI Strip
   if (kpiWrap) {
@@ -5154,6 +5208,14 @@ async function loadMatchReport(
     if (!data.ok) throw new Error(data.error || "读取比赛失败");
 
     if (data.not_analyzed) {
+      const localMap = getLocalAnalyzedMatchesMap();
+      if (!analyzeNow && localMap.has(Number(matchId))) {
+        return await loadMatchReport(matchId, {
+          forceRefresh,
+          analyzeNow: true,
+          switchToPostgame,
+        });
+      }
       highlightSelectedMatchCard(matchId);
       toggleOnDemandGate(true, matchId);
       showToast(`比赛 #${matchId} 尚未分析，点击页面中央按钮即可启动 AI 深度复盘`, 3000);
@@ -5165,6 +5227,7 @@ async function loadMatchReport(
     state.currentReport = data.report;
     state.selectedTeamfightIndex = null;
     state.scrubSyncMapMinute = null;
+    saveLocalAnalyzedMatch(data.report);
 
     // Mark match as analyzed in recent_matches strip & home grid so its badge turns green immediately
     const recentList = state.profileData?.recent_matches || [];

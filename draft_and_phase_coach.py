@@ -2502,8 +2502,15 @@ def build_squad_history_ledger(
     analyzed_matches_summary = []
     member_stats: Dict[str, Dict[str, Any]] = {}
 
-    if rdir.exists():
-        for mpath in sorted(rdir.glob("match_*.json"), reverse=True):
+    candidate_paths: Dict[str, Path] = {}
+    tmp_rdir = Path("/tmp/dota_reports")
+    for scan_dir in (rdir, tmp_rdir):
+        if scan_dir.exists():
+            for mp in scan_dir.glob("match_*.json"):
+                candidate_paths[mp.name] = mp
+
+    for mpath in sorted(candidate_paths.values(), key=lambda p: p.name, reverse=True):
+        if True:
             try:
                 rep = json.loads(mpath.read_text(encoding="utf-8"))
             except Exception:
