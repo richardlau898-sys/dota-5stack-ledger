@@ -26,6 +26,13 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from ai_coach_engine import call_llm_coach_review, call_llm_pregame_coach, get_llm_status_safe
+from cloud_store import (
+    cloud_fetch_match_report,
+    cloud_save_coaching,
+    cloud_save_match_report,
+    get_cloud_analyzed_match_ids,
+    get_cloud_db_status_safe,
+)
 from dota_analyst import (
     REPORTS_DIR,
     STEAM64_OFFSET,
@@ -78,10 +85,13 @@ TMP_REPORTS_DIR = Path("/tmp/dota_reports")
 def is_match_already_analyzed(match_id: Any) -> bool:
     if not match_id:
         return False
-    return (
-        (REPORTS_DIR / f"match_{match_id}.json").exists()
-        or (TMP_REPORTS_DIR / f"match_{match_id}.json").exists()
-    )
+    mid = int(match_id)
+    if (
+        (REPORTS_DIR / f"match_{mid}.json").exists()
+        or (TMP_REPORTS_DIR / f"match_{mid}.json").exists()
+    ):
+        return True
+    return mid in get_cloud_analyzed_match_ids()
 
 
 _RECENT_MATCHES_CACHE: Dict[int, Dict[str, Any]] = {}
@@ -237,6 +247,13 @@ def get_or_build_match_report(
                 except Exception:
                     pass
 
+        # Read-through from Cloud DB (Supabase / GitHub Cloud) when container /tmp was wiped
+        cloud_rep = cloud_fetch_match_report(match_id)
+        if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
+            if cloud_rep.get("is_parsed") or not allow_build:
+                return sanitize_report_mixed_english(cloud_rep)
+            fallback_unparsed_rep = cloud_rep
+
     if not allow_build and not json_cache.exists() and not tmp_json_cache.exists():
         return None
 
@@ -295,6 +312,12 @@ def get_or_build_match_report(
         TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
         tmp_json_cache.write_text(rep_txt, encoding="utf-8")
         tmp_md_cache.write_text(md_text, encoding="utf-8")
+
+    # Write-through to Cloud DB (Supabase / GitHub Cloud) so serverless redeployments never lose reports
+    try:
+        cloud_save_match_report(match_id, report)
+    except Exception:
+        pass
     return report
 
 
@@ -446,6 +469,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     "roster": roster,
                     "profile": profile_obj,
                     "llm_status": get_llm_status_safe(),
+                    "cloud_db": get_cloud_db_status_safe(),
                     "recent_matches": recent,
                     "squad_ledger": squad_ledger,
                     "heroes_catalog": heroes_catalog,
@@ -656,6 +680,11 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     except OSError:
                         TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                         (TMP_REPORTS_DIR / f"match_{mid}.json").write_text(rep_txt, encoding="utf-8")
+                    try:
+                        cloud_save_match_report(mid, report)
+                        cloud_save_coaching(mid, side, res["structured"])
+                    except Exception:
+                        pass
                 res["report"] = sanitize_report_mixed_english(report)
                 self._send_json(res)
                 return
