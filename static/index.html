@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=5.8" />
+  <link rel="stylesheet" href="/styles.css?v=5.9" />
 </head>
 <body>
   <header class="site-header">
@@ -292,10 +292,11 @@
         <div id="grok-team-practice-box" class="grok-practice-strip"></div>
       </article>
 
-      <!-- 三张前·中·后期全链路点评核心焦点卡：
+      <!-- 三张前·中·后期全链路点评核心焦点卡（支持单卡焦点切换或展开全部）：
            胜局：1. 头号首功(MVP) + 2. 二号功臣(破阵二当家) + 3. 惊险躺赢锦鲤(为什么这把拉胯算账)
            败局：1. 败方孤胆院长(尽力大腿) + 2. 本方头号大锅(一级战犯) + 3. 二号背锅位(次锅共犯) -->
-      <div class="verdict-grid verdict-grid-3col">
+      <div id="verdict-cards-switcher" class="verdict-cards-switcher" role="tablist" aria-label="切换本局核心焦点人物卡"></div>
+      <div id="verdict-grid-3col" class="verdict-grid verdict-grid-3col">
         <article id="mvp-card" class="verdict-card mvp-theme" aria-labelledby="mvp-card-title">
           <div id="mvp-card-label" class="verdict-card-label">👑 全场头号功臣 · MVP</div>
           <h3 id="mvp-card-title" class="sr-only">全场 MVP</h3>
@@ -372,6 +373,26 @@
             <button type="button" class="team-tab" data-micro-side="opp">看对手阵营</button>
           </div>
         </div>
+      </div>
+
+      <div class="micro-mobile-picker-row">
+        <label for="micro-mobile-select">🔬 快速切换 13 项法医维度：</label>
+        <select id="micro-mobile-select" class="micro-mobile-select" aria-label="手机端快速切换战术显微镜维度">
+          <option value="hero_ult">🎯 1. 英雄绝活与大招审判</option>
+          <option value="itemization">🎒 2. 全员出装路线与克制装处刑台</option>
+          <option value="damage_quality">🔥 3. 伤害含金量·加点路线与叠层审判</option>
+          <option value="unpressed_saves">💀 4. 憋死BKB/救命装与0技能秒躺</option>
+          <option value="map_space">🕵️‍♂️ 5. 单带无故被抓 &amp; 开雾/白给侦探社</option>
+          <option value="damage_received">🛡️ 6. 承伤来源拆解与防装审计</option>
+          <option value="vision">👁️ 7. 眼位博弈·满时长神眼与黑图真空期</option>
+          <option value="stack_smoke">🌾 8. 辅助堆野 &amp; 开雾找节奏</option>
+          <option value="laning">🌱 9. 对线拉野·走门·莲花·经验符</option>
+          <option value="tp_save">🆘 10. TP 救人及时性与缺席抓包</option>
+          <option value="econ_pings">💰 11. 经济来源结构 &amp; 信号/暂停互动</option>
+          <option value="role_mirror">⚔️ 12. 同位置1v1宿敌对位 &amp; 全球百分位</option>
+          <option value="macro_neutrals">🐉 13. 买活死尸检·掉鸡·肉山魔晶 &amp; 7.38附魔</option>
+          <option value="all">📑 同屏展开全部 13 项</option>
+        </select>
       </div>
 
       <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜十三大维度">
@@ -719,9 +740,37 @@
     <span>有据才喷，数据来自 OpenDota 录像解析与 xAI Grok 4.7</span>
   </footer>
 
+  <!-- 手机端底部拇指快捷导航栏（仅 <= 768px 显示） -->
+  <nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="手机端底部快捷章节导航">
+    <button type="button" class="m-bnav-btn" data-mnav-target="home">
+      <span class="m-bnav-icon">🏠</span>
+      <span class="m-bnav-txt">大厅</span>
+    </button>
+    <button type="button" class="m-bnav-btn active" data-mnav-target="verdict-and-blame-section">
+      <span class="m-bnav-icon">⚖️</span>
+      <span class="m-bnav-txt">分锅</span>
+    </button>
+    <button type="button" class="m-bnav-btn" data-mnav-target="windows-section">
+      <span class="m-bnav-icon">⚔️</span>
+      <span class="m-bnav-txt">团战</span>
+    </button>
+    <button type="button" class="m-bnav-btn" data-mnav-target="tactical-microscope-section">
+      <span class="m-bnav-icon">🔬</span>
+      <span class="m-bnav-txt">显微镜</span>
+    </button>
+    <button type="button" class="m-bnav-btn" data-mnav-target="charts-hub-section">
+      <span class="m-bnav-icon">📈</span>
+      <span class="m-bnav-txt">沙盘</span>
+    </button>
+    <button type="button" class="m-bnav-btn" data-mnav-target="players-forensics-section">
+      <span class="m-bnav-icon">👤</span>
+      <span class="m-bnav-txt">卷宗</span>
+    </button>
+  </nav>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=5.8" defer></script>
+  <script src="/app.js?v=5.9" defer></script>
 </body>
 </html>

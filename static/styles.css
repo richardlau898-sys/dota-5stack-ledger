@@ -3773,14 +3773,12 @@ select:hover {
    V4.0 赛后复盘全面去重 & 录像级战术显微镜 (Tactical Microscope) 专属样式
    ========================================================================= */
 
-/* Modern Web Guidance: defer-rendering-heavy-content
-   Must pair content-visibility: auto with contain-intrinsic-size */
+/* Section rendering: avoid content-visibility intrinsic-size jumps on mobile anchor navigation */
 .charts-hub-section,
 .phase-review-section,
 .windows-section,
 .players-forensics-section {
-  content-visibility: auto;
-  contain-intrinsic-size: auto none auto 520px;
+  content-visibility: visible;
 }
 
 /* 1. 跨比赛多局惯犯档案 <details> 默认折叠，支持页内搜索自动展开 */
@@ -7402,6 +7400,494 @@ dialog::backdrop {
     grid-template-columns: 62px 1fr;
     gap: 8px;
     padding: 7px 8px;
+  }
+}
+
+/* =========================================================================
+   V5.9 全站移动端 UI/UX 深度重构 (Mobile-First Ergonomics, Spotlight & Zero Overflow)
+   ========================================================================= */
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+/* 1. 单卡焦点模式 (Spotlight Single-Card Layout for Verdict / Phase / Microscope) */
+.verdict-grid.is-single-card,
+.phase-players-grid.is-single-card,
+.micro-hero-exec-grid.is-single-card {
+  grid-template-columns: 1fr !important;
+}
+
+.verdict-cards-switcher {
+  margin: 10px 0 12px;
+}
+
+.tf-wave-switcher-bar {
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, rgba(214, 169, 78, 0.1), rgba(22, 25, 20, 0.96));
+  border-color: #463f2d;
+}
+
+.phase-p-selector-bar,
+.micro-exec-selector-bar {
+  margin-bottom: 12px;
+}
+
+/* 2. 移动端长文可折叠抽屉 (<details class="mobile-summary-fold">) */
+.mobile-summary-fold {
+  margin: 8px 0;
+  border: 1px solid #33382d;
+  border-radius: 6px;
+  background: rgba(20, 23, 18, 0.85);
+  overflow: hidden;
+}
+
+.mobile-summary-trigger {
+  padding: 9px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #e2be78;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(205, 164, 94, 0.09);
+  user-select: none;
+}
+
+.mobile-summary-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-summary-trigger::after {
+  content: "展开详情 ▼";
+  font-size: 11px;
+  color: #a9b09b;
+  font-weight: 600;
+}
+
+.mobile-summary-fold[open] .mobile-summary-trigger {
+  border-bottom: 1px solid #2e3328;
+}
+
+.mobile-summary-fold[open] .mobile-summary-trigger::after {
+  content: "收起 ▲";
+}
+
+.mobile-summary-fold > :not(summary) {
+  padding: 10px 12px;
+}
+
+/* 3. 战术显微镜手机端下拉速选器 + 手机底部固定拇指导航栏 (Desktop 默认隐藏) */
+.micro-mobile-picker-row {
+  display: none;
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* 4. 全局防横向溢出加固 (Squad Ledger / Forensic Badge / Microscope Cards) */
+.squad-ledger-details,
+.squad-ledger-section,
+.squad-grid-2col,
+.squad-card,
+.hero-pool-list,
+.hero-pool-item,
+.tactical-microscope-section,
+.tactical-microscope-body,
+.micro-pane-block,
+.micro-grid-2col,
+.micro-card,
+.micro-kpi-row,
+.micro-kpi-cell,
+.lane-matchup-grid,
+.lane-matchup-card,
+.lm-hero-row,
+.mirror-vs-row,
+.mirror-side-box,
+.players-forensics-list,
+.player-forensic-card {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.forensic-ai-badge {
+  white-space: normal !important;
+  word-break: break-word;
+  max-width: 100%;
+  line-height: 1.45;
+}
+
+.tf-mini-who b {
+  white-space: nowrap;
+}
+
+/* 5. 手机端 (<= 768px) 全方位 UI/UX 精修与排版重构 */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .app-shell {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  /* 5.1 手机端底部固定拇指导航栏 */
+  .mobile-bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    background: rgba(16, 18, 15, 0.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid #594b2d;
+    padding: 5px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.55);
+  }
+
+  .m-bnav-btn {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: #a9b09c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 2px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .m-bnav-btn:active,
+  .m-bnav-btn.is-active {
+    color: #ffd984;
+    background: rgba(214, 169, 78, 0.15);
+  }
+
+  .m-bnav-icon {
+    font-size: 15px;
+    line-height: 1.1;
+  }
+
+  .m-bnav-txt {
+    font-size: 10.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* 5.2 首页车队黑账本防溢出 */
+  .squad-ledger-summary {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .squad-ledger-summary-arrow {
+    width: 100%;
+    text-align: right;
+    font-size: 11.5px;
+  }
+
+  .squad-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+
+  .hero-pool-item {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* 5.3 章节 ① BP 阵容评级卡防挤压 */
+  .draft-verdict-box {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 12px !important;
+  }
+
+  /* 5.4 章节 ② 核心审判席 3 卡手机端重排 (头像居左 + 评分居右 + 属性胶囊全宽铺开) */
+  .verdict-hero-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+  }
+
+  .verdict-portrait {
+    width: 68px !important;
+    height: 38px !important;
+    order: 1;
+  }
+
+  .verdict-score-box {
+    order: 2;
+    margin-left: auto;
+    min-width: 92px !important;
+    padding: 6px 10px !important;
+  }
+
+  .verdict-identity {
+    order: 3;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .verdict-stat-pills-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+  }
+
+  /* 5.5 章节 ② 100% 分锅/首功排行榜行重叠修复 (彻底解决 .blame-badge 与按钮重叠) */
+  .blame-row {
+    display: grid !important;
+    grid-template-columns: 24px 38px minmax(0, 1fr) auto !important;
+    column-gap: 8px !important;
+    row-gap: 8px !important;
+    padding: 10px 10px !important;
+    align-items: center !important;
+  }
+
+  .blame-row > .blame-rank {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  .blame-row > .blame-avatar {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 38px !important;
+    height: 22px !important;
+  }
+
+  .blame-row > .blame-info {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .blame-row > .blame-badge {
+    grid-column: 4 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    font-size: 11.5px !important;
+    padding: 3px 7px !important;
+    white-space: nowrap !important;
+  }
+
+  .blame-row > .blame-row-bar-wrap {
+    grid-column: 1 / 4 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+  }
+
+  .blame-row > button {
+    grid-column: 4 !important;
+    grid-row: 2 !important;
+    justify-self: end !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+
+  /* 5.6 所有 1~5 号位切换栏 & 波次切换栏在手机端采用双列整齐网格 */
+  .tf-p-selector-bar,
+  .forensic-picker-buttons {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .tf-p-select-btn,
+  .forensic-pick-btn {
+    width: 100% !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+    padding: 6px 8px !important;
+  }
+
+  .tf-p-select-btn.mode-all,
+  .forensic-pick-btn.mode-all {
+    grid-column: 1 / -1;
+    justify-content: center !important;
+  }
+
+  /* 5.7 章节 ④ 团战其余队友速览条防竖排折行 */
+  .tf-other-mini-row {
+    flex-wrap: wrap !important;
+    gap: 5px 8px !important;
+    padding: 6px 8px !important;
+  }
+
+  .tf-mini-who {
+    flex: 1 1 auto;
+    white-space: nowrap;
+  }
+
+  .tf-mini-stats {
+    width: 100%;
+    order: 3;
+    font-size: 11px;
+    padding-left: 25px;
+  }
+
+  .tf-mini-verdict {
+    order: 2;
+    margin-left: auto;
+  }
+
+  /* 5.8 章节 ⑤ 战术显微镜 13 维手机端下拉速选 + 横向胶囊滑动 + 子面板防溢出 */
+  .section-header h2,
+  .tactical-microscope-section h2 {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+  }
+
+  .tactical-microscope-section {
+    padding: 14px 12px !important;
+  }
+
+  .micro-mobile-picker-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin: 10px 0 8px;
+    padding: 8px 10px;
+    background: #171a14;
+    border: 1px solid #47402d;
+    border-radius: 6px;
+  }
+
+  .micro-mobile-picker-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #e5c178;
+  }
+
+  .micro-mobile-select {
+    width: 100%;
+    min-width: 0;
+    background: #0f110d;
+    color: #f3f6ea;
+    border: 1px solid #5a5038;
+    border-radius: 5px;
+    padding: 7px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+  }
+
+  .microscope-tabs-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    margin: 6px 0 12px !important;
+    padding-bottom: 8px !important;
+    gap: 6px !important;
+  }
+
+  .microscope-tab-btn {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 6px 11px !important;
+    font-size: 12px !important;
+  }
+
+  .micro-card {
+    padding: 11px 10px !important;
+  }
+
+  .micro-kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .lane-matchup-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .lm-hero-row,
+  .mirror-vs-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .mirror-side-box {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* 5.9 章节 ⑤ 逐分钟时空回放器手机端紧凑适配 */
+  .scrubber-content-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .scrub-player-row {
+    grid-template-columns: 22px 112px minmax(0, 1fr) 74px !important;
+    gap: 5px !important;
+    padding: 4px 6px !important;
+  }
+
+  .scrub-items-strip {
+    display: none !important;
+  }
+
+  /* 5.10 章节 ⑥ 个人深度复盘卷宗头像与顶部栏对齐修复 */
+  .forensic-top-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .forensic-identity {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 10px !important;
+  }
+
+  .forensic-identity > img {
+    width: 56px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .forensic-title-block,
+  .forensic-title-wrap {
+    min-width: 0 !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+  }
+
+  .forensic-badges-right {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    width: 100% !important;
   }
 }
 

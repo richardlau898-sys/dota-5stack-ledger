@@ -45,7 +45,11 @@ const state = {
   microSide: "own", // "own" | "opp"
   activePhaseKey: "lane", // "lane" | "mid" | "late"
   activeTeamTab: "own", // "own" | "opp" | "both"
+  verdictActiveCard: "focus", // "focus" | "mvp" | "culprit" | "third" | "all"
+  phaseSelectedPos: "focus", // "focus" | 1..5 | "all"
+  tfActiveWaveIdx: 0, // 0..N | "all"
   tfSelectedPosMap: {}, // per-teamfight selected player pos ("focus" | 1..5 | "all")
+  microExecSelectedPos: "focus", // "focus" | 1..5 | "all"
   forensicSelectedSlot: "focus", // Section 6 selected player slot ("focus" | slot | "all")
   llmStatus: null,
   isGeneratingGrok: false,
@@ -4424,6 +4428,8 @@ function bindEvents() {
   document.querySelectorAll("[data-micro-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
       state.microTab = btn.getAttribute("data-micro-tab") || "hero_ult";
+      const mSel = document.getElementById("micro-mobile-select");
+      if (mSel) mSel.value = state.microTab;
       document.querySelectorAll("[data-micro-tab]").forEach((b) => {
         const active = b === btn;
         b.classList.toggle("active", active);
@@ -4432,6 +4438,45 @@ function bindEvents() {
       if (state.currentReport) {
         renderTacticalMicroscopeSection(state.currentReport);
       }
+    });
+  });
+
+  const microMobileSelect = document.getElementById("micro-mobile-select");
+  if (microMobileSelect) {
+    microMobileSelect.addEventListener("change", () => {
+      state.microTab = microMobileSelect.value || "hero_ult";
+      document.querySelectorAll("[data-micro-tab]").forEach((b) => {
+        const active = b.getAttribute("data-micro-tab") === state.microTab;
+        b.classList.toggle("active", active);
+        b.setAttribute("aria-selected", active ? "true" : "false");
+        if (active) b.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      });
+      if (state.currentReport) {
+        renderTacticalMicroscopeSection(state.currentReport);
+      }
+    });
+  }
+
+  document.querySelectorAll("[data-mnav-target]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = btn.getAttribute("data-mnav-target");
+      document.querySelectorAll("[data-mnav-target]").forEach((b) =>
+        b.classList.toggle("active", b === btn)
+      );
+      if (target === "home") {
+        switchWorkspaceMode("home");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      if (state.workspaceMode !== "postgame") {
+        switchWorkspaceMode("postgame");
+      }
+      setTimeout(() => {
+        const sec = document.getElementById(target);
+        if (sec) {
+          sec.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 60);
     });
   });
 
@@ -5258,7 +5303,11 @@ function renderFullMatchReport(report) {
   if (!report) return;
   if (state._lastRenderedMatchId !== report.match_id) {
     state._lastRenderedMatchId = report.match_id;
+    state.verdictActiveCard = "focus";
+    state.phaseSelectedPos = "focus";
+    state.tfActiveWaveIdx = 0;
     state.tfSelectedPosMap = {};
+    state.microExecSelectedPos = "focus";
     state.forensicSelectedSlot = "focus";
   }
   renderMatchOverview(report);
@@ -5626,6 +5675,14 @@ function renderTacticalMicroscopeSection(report) {
   }
 
   bodyEl.innerHTML = blocks.join("");
+
+  bodyEl.querySelectorAll("[data-micro-exec-pos]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sel = btn.getAttribute("data-micro-exec-pos");
+      state.microExecSelectedPos = sel === "all" ? "all" : Number(sel);
+      if (state.currentReport) renderTacticalMicroscopeSection(state.currentReport);
+    });
+  });
 }
 
 /**
@@ -6039,7 +6096,92 @@ function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, othe
   const ownSummaryText = execData?.summary || buildSideSummary(players);
   const oppSummaryText = oppExecData?.summary || buildSideSummary(oppPlayers);
 
-  const cardsHtml = players
+  // Score players to find the #1 Most Important Execution Audit Hero for default spotlight
+  const scoredExecPlayers = players.map((p) => {
+    const ultAudits = p.ult_audits || p.signature_spells || [];
+    const heldCnt = ultAudits.reduce(
+      (acc, sp) => acc + Number(sp.tf_held_death_count ?? (sp.held_ult_deaths || []).length ?? 0),
+      0
+    );
+    const hasBadUlt = ultAudits.some((sp) => sp.grade === "bad" || sp.grade === "D" || sp.grade === "C");
+    const warnBadgesCnt = (p.headline_badges || []).filter((b) => {
+      const txt = typeof b === "string" ? b : b?.text || "";
+      const tone = typeof b === "object" && b !== null ? b.tone : "";
+      return tone === "bad" || tone === "warn" || txt.includes("🚫") || txt.includes("⚠️") || txt.includes("💀");
+    }).length;
+    const impScore = heldCnt * 60 + (hasBadUlt ? 45 : 0) + warnBadgesCnt * 30 + (6 - Number(p.pos || 5)) * 3;
+    return { p, impScore, heldCnt, hasBadUlt, warnBadgesCnt };
+  });
+
+  const focusExecEntry =
+    [...scoredExecPlayers].sort((a, b) => b.impScore - a.impScore)[0] || scoredExecPlayers[0];
+  const defaultExecPos = Number(focusExecEntry?.p?.pos || players[0]?.pos || 1);
+  const selExecMode = state.microExecSelectedPos ?? "focus";
+  const activeExecPos =
+    selExecMode === "focus"
+      ? defaultExecPos
+      : selExecMode === "all"
+      ? "all"
+      : Number(selExecMode);
+
+  const execPickerBarHtml = `
+    <div class="forensic-hero-picker-bar micro-exec-picker-bar" role="tablist" aria-label="切换查看1至5号位绝活与大招审判">
+      <span class="forensic-picker-hint">🎯 默认聚焦大招/机制问题最突出的 1 人（点击切换其他队友）：</span>
+      <div class="forensic-picker-buttons">
+        ${scoredExecPlayers
+          .map(({ p, heldCnt, hasBadUlt, warnBadgesCnt }) => {
+            const pPos = Number(p.pos || 1);
+            const isFocus = pPos === defaultExecPos;
+            const isAct = activeExecPos !== "all" && Number(activeExecPos) === pPos;
+            const firstUlt = (p.ult_audits || [])[0];
+            let chipText = firstUlt ? `大招${firstUlt.casts ?? 0}放` : "机制审计";
+            let chipCls = "";
+            if (isFocus) {
+              chipText = heldCnt > 0 ? `🚨憋大${heldCnt}次` : hasBadUlt ? "🚨大招拉胯" : "🎯头号焦点";
+              chipCls = "bad";
+            } else if (heldCnt > 0 || warnBadgesCnt > 0) {
+              chipText = heldCnt > 0 ? `🚨憋大${heldCnt}次` : `⚠️${warnBadgesCnt}项预警`;
+              chipCls = "bad";
+            } else if (firstUlt && (firstUlt.grade === "good" || firstUlt.grade === "S" || firstUlt.grade === "A")) {
+              chipCls = "good";
+            }
+            return `
+              <button
+                type="button"
+                class="forensic-pick-btn ${isAct ? "is-active" : ""} ${isFocus ? "is-focus" : ""}"
+                data-micro-exec-pos="${pPos}"
+              >
+                ${
+                  p.hero_img
+                    ? `<img src="${escapeHtml(p.hero_img)}" width="26" height="15" alt="" class="forensic-pick-avatar" />`
+                    : ""
+                }
+                <span><b>${pPos}号 ${escapeHtml(p.hero_short_zh || "")}</b> <small>(${escapeHtml(
+              p.personaname || ""
+            )})</small></span>
+                <em class="forensic-pick-chip ${chipCls}">${escapeHtml(chipText)}</em>
+              </button>
+            `;
+          })
+          .join("")}
+        <button
+          type="button"
+          class="forensic-pick-btn mode-all ${activeExecPos === "all" ? "is-active" : ""}"
+          data-micro-exec-pos="all"
+        >
+          📋 全部 (${players.length}人)
+        </button>
+      </div>
+    </div>
+  `;
+
+  const visibleExecPlayers =
+    activeExecPos === "all"
+      ? players
+      : players.filter((p) => Number(p.pos || 1) === Number(activeExecPos));
+  const finalExecPlayers = visibleExecPlayers.length > 0 ? visibleExecPlayers : players.slice(0, 1);
+
+  const cardsHtml = finalExecPlayers
     .map((p) => {
       const badges = (p.headline_badges || [])
         .map((b) => {
@@ -6203,16 +6345,20 @@ function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, othe
       <div class="micro-pane-banner">
         <div>
           <h3>🎯 1. 英雄绝活与大招释放质量审判 (${escapeHtml(targetSideZh)} 1~5 号位)</h3>
-          <p><strong>${escapeHtml(targetSideZh)}大招与关键技能兑现：</strong>${injectHeroLogosIntoHtml(escapeHtml(ownSummaryText), report)}${
+          <details class="mobile-summary-fold" ${typeof window !== "undefined" && window.innerWidth > 768 ? "open" : ""}>
+            <summary class="mobile-summary-trigger">📖 展开/收起五人大招与关键技能兑现总览对比</summary>
+            <p style="margin-top:6px;"><strong>${escapeHtml(targetSideZh)}大招与关键技能兑现：</strong>${injectHeroLogosIntoHtml(escapeHtml(ownSummaryText), report)}${
     oppSummaryText
       ? `<br/><span style="color:var(--muted);">对照${escapeHtml(otherSideZh)}表现：${injectHeroLogosIntoHtml(escapeHtml(
           oppSummaryText
         ), report)}</span>`
       : ""
   }</p>
+          </details>
         </div>
       </div>
-      <div class="micro-hero-exec-grid">${cardsHtml}</div>
+      ${execPickerBarHtml}
+      <div class="micro-hero-exec-grid ${activeExecPos !== "all" ? "single-spotlight-mode" : ""}">${cardsHtml}</div>
     </div>
   `;
 }
@@ -8768,6 +8914,12 @@ function renderVerdictAndBlameSection(report) {
     `;
   };
 
+  const foldedStagesGridHtml = stagesGridHtml
+    ? `<details class="mobile-summary-fold" ${
+        typeof window !== "undefined" && window.innerWidth > 768 ? "open" : ""
+      }><summary class="mobile-summary-trigger">📖 展开/收起「BP·对线·中期·后期」四阶段全细节对账长文</summary>${stagesGridHtml}</details>`
+    : "";
+
   if (grok && (!grok.side || grok.side === side)) {
     const modelTag = grok._meta?.model
       ? `${String(grok._meta.provider || "XAI").toUpperCase()} / ${grok._meta.model} ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`
@@ -8778,7 +8930,7 @@ function renderVerdictAndBlameSection(report) {
       const leadSummary = grok.summary
         ? `<div class="verdict-lead-callout">${injectHeroLogosIntoHtml(escapeHtml(grok.summary), report)}</div>`
         : "";
-      summaryEl.innerHTML = `${leadSummary}${stagesGridHtml}`;
+      summaryEl.innerHTML = `${leadSummary}${foldedStagesGridHtml}`;
     }
     if (verdictEl) {
       verdictEl.innerHTML = buildStructuredVerdictHtml(grok.verdict || "");
@@ -8801,7 +8953,7 @@ function renderVerdictAndBlameSection(report) {
         : `⚖️ ${sideZh}败局算账：终局比分 ${report.radiant_score} : ${report.dire_score} (${report.duration_str})`;
     }
     if (summaryEl) {
-      summaryEl.innerHTML = stagesGridHtml;
+      summaryEl.innerHTML = foldedStagesGridHtml;
     }
     if (verdictEl) {
       verdictEl.innerHTML = buildStructuredVerdictHtml("");
@@ -9161,6 +9313,128 @@ function renderVerdictAndBlameSection(report) {
         </div>
       `;
     }
+  }
+
+  // 2.3c Verdict 3-Card Spotlight Switcher (Default to #1 Most Important Card + 1-Tap Switcher)
+  const verdictSwitcherEl = document.getElementById("verdict-cards-switcher");
+  const verdictGridEl = document.getElementById("verdict-grid-3col");
+  const vMvpCardEl = document.getElementById("mvp-card");
+  const vCulpritCardEl = document.getElementById("culprit-card");
+  const vThirdCardEl = document.getElementById("third-verdict-card");
+  if (verdictSwitcherEl && verdictGridEl && vMvpCardEl && vCulpritCardEl && vThirdCardEl) {
+    const defaultKey = won ? "mvp" : "culprit";
+    const activeVerdictKey =
+      !state.verdictActiveCard || state.verdictActiveCard === "focus"
+        ? defaultKey
+        : state.verdictActiveCard;
+
+    const mvpHeroShort = mvpPlayer?.hero_short_zh || mvpPlayer?.hero_name || "MVP";
+    const c1Player = won
+      ? (sortedByContrib[1] || sortedByContrib[0])?.player || own[0]
+      : sortedByBlame[0]?.player || own[0];
+    const c1HeroShort = c1Player?.hero_short_zh || c1Player?.hero_name || "";
+    const c3Player = won ? strugglePlayer || own[own.length - 1] : topBlame2 || own[1] || own[0];
+    const c3HeroShort = c3Player?.hero_short_zh || c3Player?.hero_name || "";
+
+    const switcherTabs = won
+      ? [
+          {
+            key: "mvp",
+            tag: "👑 头号首功",
+            hero: mvpHeroShort,
+            img: mvpPlayer?.hero_img || "",
+            pos: mvpPlayer?.pos || 1,
+            isSpot: true,
+          },
+          {
+            key: "culprit",
+            tag: "⚔️ 二号功臣",
+            hero: c1HeroShort,
+            img: c1Player?.hero_img || "",
+            pos: c1Player?.pos || 2,
+            isSpot: false,
+          },
+          {
+            key: "third",
+            tag: "🐟 短板提醒",
+            hero: c3HeroShort,
+            img: c3Player?.hero_img || "",
+            pos: c3Player?.pos || 5,
+            isSpot: false,
+          },
+        ]
+      : [
+          {
+            key: "culprit",
+            tag: "🚨 头号大锅",
+            hero: c1HeroShort,
+            img: c1Player?.hero_img || "",
+            pos: c1Player?.pos || 1,
+            isSpot: true,
+          },
+          {
+            key: "third",
+            tag: "⚠️ 二号次锅",
+            hero: c3HeroShort,
+            img: c3Player?.hero_img || "",
+            pos: c3Player?.pos || 2,
+            isSpot: false,
+          },
+          {
+            key: "mvp",
+            tag: "👑 孤胆院长",
+            hero: mvpHeroShort,
+            img: mvpPlayer?.hero_img || "",
+            pos: mvpPlayer?.pos || 1,
+            isSpot: false,
+          },
+        ];
+
+    verdictSwitcherEl.innerHTML = `
+      <div class="tf-p-selector-bar verdict-selector-bar" role="tablist" aria-label="切换本局核心审判席卡片">
+        ${switcherTabs
+          .map(
+            (tab) => `
+            <button
+              type="button"
+              class="tf-p-select-btn ${activeVerdictKey === tab.key ? "is-active" : ""} ${
+              tab.isSpot ? "is-spotlight" : ""
+            }"
+              data-verdict-card-tab="${escapeHtml(tab.key)}"
+            >
+              ${
+                tab.img
+                  ? `<img src="${escapeHtml(tab.img)}" width="22" height="13" alt="" class="tf-p-pill-avatar" />`
+                  : ""
+              }
+              <span class="tf-pill-label">${tab.pos}号 ${escapeHtml(tab.hero)}</span>
+              <span class="tf-pill-chip ${tab.isSpot ? "focus" : ""}">${escapeHtml(tab.tag)}</span>
+            </button>
+          `
+          )
+          .join("")}
+        <button
+          type="button"
+          class="tf-p-select-btn mode-all ${activeVerdictKey === "all" ? "is-active" : ""}"
+          data-verdict-card-tab="all"
+        >
+          📋 全部(3)
+        </button>
+      </div>
+    `;
+
+    const isAllVerdict = activeVerdictKey === "all";
+    verdictGridEl.classList.toggle("is-single-card", !isAllVerdict);
+    vMvpCardEl.hidden = !isAllVerdict && activeVerdictKey !== "mvp";
+    vCulpritCardEl.hidden = !isAllVerdict && activeVerdictKey !== "culprit";
+    vThirdCardEl.hidden = !isAllVerdict && activeVerdictKey !== "third";
+
+    verdictSwitcherEl.querySelectorAll("[data-verdict-card-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.verdictActiveCard = btn.getAttribute("data-verdict-card-tab") || "focus";
+        if (state.currentReport) renderVerdictAndBlameSection(state.currentReport);
+      });
+    });
   }
 
   // 2.4 5-Stack 100% Stacked Bar & Ranking Rows:
@@ -10252,6 +10526,7 @@ function renderPhaseSection(report) {
   tabsBar.querySelectorAll("[data-phase-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
       state.activePhaseKey = btn.getAttribute("data-phase-tab") || "lane";
+      state.phaseSelectedPos = "focus";
       renderPhaseSection(report);
     });
   });
@@ -10353,103 +10628,208 @@ function renderPhaseSection(report) {
       </div>
     </div>
 
-    <div class="phase-players-grid">
-      ${phasePlayers
-        .map((pp) => {
-          const goodItems = Array.isArray(pp.good) && pp.good.length > 0 ? pp.good : ["维持了本阶段基础任务"];
-          const badItems = Array.isArray(pp.bad) && pp.bad.length > 0 ? pp.bad : ["需要进一步提升该阶段技能与跑图效率"];
-          const focusText = pp.focus || "下一把在该阶段优先盯紧核心装时间点与队友第一波开雾信号。";
-          const assessmentText =
-            pp.assessment ||
-            `${activePd.time_label} 期间 ${pp.kills_count} 杀 ${pp.deaths_count} 死，经济 +${fmtNum(
-              pp.gold_gain
-            )}，英雄伤害 +${fmtNum(pp.hero_damage_gain)}。`;
+    ${(() => {
+      const scoredPhasePlayers = phasePlayers.map((pp) => {
+        const pScore =
+          (pp.kills_count || 0) * 35 +
+          (pp.deaths_count || 0) * 32 +
+          (pp.gold_gain || 0) * 0.012 +
+          (pp.hero_damage_gain || 0) * 0.008;
+        return { pp, pScore };
+      });
+      const spotlightPhaseEntry =
+        [...scoredPhasePlayers].sort((a, b) => b.pScore - a.pScore)[0] || scoredPhasePlayers[0];
+      const spotlightPhasePos = Number(spotlightPhaseEntry?.pp?.pos || phasePlayers[0]?.pos || 1);
+      const selMode = state.phaseSelectedPos || "focus";
+      const activePhasePos =
+        selMode === "focus" ? spotlightPhasePos : selMode === "all" ? "all" : Number(selMode);
+      const visiblePhasePlayers =
+        activePhasePos === "all"
+          ? phasePlayers
+          : phasePlayers.filter((pp) => Number(pp.pos || 1) === Number(activePhasePos));
+      const finalPhasePlayers =
+        visiblePhasePlayers.length > 0 ? visiblePhasePlayers : phasePlayers.slice(0, 1);
 
-          return `
-            <article class="phase-p-card ${Number(pp.account_id) === Number(state.accountId) ? "is-me" : ""}">
-              <div class="phase-p-head">
-                ${
-                  pp.hero_img
-                    ? `<img src="${escapeHtml(pp.hero_img)}" alt="${escapeHtml(pp.hero_short_zh)}" loading="lazy" />`
-                    : ""
-                }
-                <div style="min-width: 0;">
-                  <div style="font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${pp.pos}号位 · ${escapeHtml(pp.hero_short_zh)}
-                  </div>
-                  <div style="font-size: 11px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${escapeHtml(pp.personaname)}
-                  </div>
-                </div>
-              </div>
+      const phaseSelectorHtml =
+        phasePlayers.length > 1
+          ? `
+        <div class="tf-p-selector-bar phase-p-selector-bar" role="tablist" aria-label="切换本阶段1至5号位详情">
+          ${phasePlayers
+            .map((pp) => {
+              const pPos = Number(pp.pos || 1);
+              const isSpot = pPos === spotlightPhasePos;
+              const isAct = activePhasePos !== "all" && Number(activePhasePos) === pPos;
+              const chipText = isSpot
+                ? "🎯阶段焦点"
+                : `${pp.kills_count || 0}杀/${pp.deaths_count || 0}死`;
+              return `
+                <button
+                  type="button"
+                  class="tf-p-select-btn ${isAct ? "is-active" : ""} ${isSpot ? "is-spotlight" : ""}"
+                  data-phase-select-pos="${pPos}"
+                >
+                  ${
+                    pp.hero_img
+                      ? `<img src="${escapeHtml(pp.hero_img)}" width="22" height="13" alt="" class="tf-p-pill-avatar" />`
+                      : ""
+                  }
+                  <span class="tf-pill-label">${pPos}号 ${escapeHtml(pp.hero_short_zh)}</span>
+                  <span class="tf-pill-chip ${isSpot ? "focus" : ""}">${escapeHtml(chipText)}</span>
+                </button>
+              `;
+            })
+            .join("")}
+          <button
+            type="button"
+            class="tf-p-select-btn mode-all ${activePhasePos === "all" ? "is-active" : ""}"
+            data-phase-select-pos="all"
+          >
+            📋 全部(5)
+          </button>
+        </div>
+      `
+          : "";
 
-              <div class="phase-p-metrics">
-                <div>
-                  <span>阶段 K / D</span>
-                  <b>${pp.kills_count} 杀 / ${pp.deaths_count} 死</b>
-                </div>
-                <div>
-                  <span>阶段经济增量</span>
-                  <b>+${fmtNum(pp.gold_gain)}</b>
-                </div>
-                <div>
-                  <span>阶段英雄伤害</span>
-                  <b>+${fmtNum(pp.hero_damage_gain)}</b>
-                </div>
-                <div>
-                  <span>${state.activePhaseKey === "lane" ? "10分钟正补/反补" : "阶段补刀增量"}</span>
-                  <b>${
-                    state.activePhaseKey === "lane"
-                      ? `${pp.lh_gain} / ${pp.dn_gain || 0}`
-                      : `+${pp.lh_gain} 刀`
-                  }</b>
-                </div>
-              </div>
+      return `
+        ${phaseSelectorHtml}
+        <div class="phase-players-grid ${activePhasePos !== "all" ? "is-single-card" : ""}">
+          ${finalPhasePlayers
+            .map((pp) => {
+              const goodItems =
+                Array.isArray(pp.good) && pp.good.length > 0 ? pp.good : ["维持了本阶段基础任务"];
+              const badItems =
+                Array.isArray(pp.bad) && pp.bad.length > 0
+                  ? pp.bad
+                  : ["需要进一步提升该阶段技能与跑图效率"];
+              const focusText =
+                pp.focus || "下一把在该阶段优先盯紧核心装时间点与队友第一波开雾信号。";
+              const assessmentText =
+                pp.assessment ||
+                `${activePd.time_label} 期间 ${pp.kills_count} 杀 ${pp.deaths_count} 死，经济 +${fmtNum(
+                  pp.gold_gain
+                )}，英雄伤害 +${fmtNum(pp.hero_damage_gain)}。`;
 
-              ${
-                (pp.items_bought || []).length > 0
-                  ? `
-                <div class="phase-items-row">
-                  ${pp.items_bought
-                    .map(
-                      (it) => `
-                      <div class="mini-item-chip" title="${escapeHtml(it.zh_name || it.key)} (${escapeHtml(it.time_str)})">
-                        ${it.img ? `<img src="${escapeHtml(it.img)}" alt="${escapeHtml(it.zh_name || it.key)}" loading="lazy" />` : ""}
-                        <span>${escapeHtml(it.time_str)}</span>
+              return `
+                <article class="phase-p-card ${
+                  Number(pp.account_id) === Number(state.accountId) ? "is-me" : ""
+                }">
+                  <div class="phase-p-head">
+                    ${
+                      pp.hero_img
+                        ? `<img src="${escapeHtml(pp.hero_img)}" alt="${escapeHtml(
+                            pp.hero_short_zh
+                          )}" loading="lazy" />`
+                        : ""
+                    }
+                    <div style="min-width: 0;">
+                      <div style="font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${pp.pos}号位 · ${escapeHtml(pp.hero_short_zh)}
                       </div>
-                    `
-                    )
-                    .join("")}
-                </div>
-              `
-                  : `<div style="font-size: 10px; color: var(--dim);">本阶段无核心成装更新</div>`
-              }
+                      <div style="font-size: 11px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${escapeHtml(pp.personaname)}
+                      </div>
+                    </div>
+                  </div>
 
-              <div class="phase-p-prose">${injectHeroLogosIntoHtml(escapeHtml(assessmentText), report)}</div>
+                  <div class="phase-p-metrics">
+                    <div>
+                      <span>阶段 K / D</span>
+                      <b>${pp.kills_count} 杀 / ${pp.deaths_count} 死</b>
+                    </div>
+                    <div>
+                      <span>阶段经济增量</span>
+                      <b>+${fmtNum(pp.gold_gain)}</b>
+                    </div>
+                    <div>
+                      <span>阶段英雄伤害</span>
+                      <b>+${fmtNum(pp.hero_damage_gain)}</b>
+                    </div>
+                    <div>
+                      <span>${
+                        state.activePhaseKey === "lane" ? "10分钟正补/反补" : "阶段补刀增量"
+                      }</span>
+                      <b>${
+                        state.activePhaseKey === "lane"
+                          ? `${pp.lh_gain} / ${pp.dn_gain || 0}`
+                          : `+${pp.lh_gain} 刀`
+                      }</b>
+                    </div>
+                  </div>
 
-              <div class="phase-p-eval-block">
-                <div class="phase-eval-group good">
-                  <b>✓ 哪里做得好</b>
-                  <ul>
-                    ${goodItems.slice(0, 2).map((g) => `<li>${injectHeroLogosIntoHtml(escapeHtml(g), report)}</li>`).join("")}
-                  </ul>
-                </div>
-                <div class="phase-eval-group bad">
-                  <b>✕ 哪里做得不好</b>
-                  <ul>
-                    ${badItems.slice(0, 2).map((b) => `<li>${injectHeroLogosIntoHtml(escapeHtml(b), report)}</li>`).join("")}
-                  </ul>
-                </div>
-                <div class="phase-eval-focus">
-                  <strong>阶段改进：</strong>${injectHeroLogosIntoHtml(escapeHtml(focusText), report)}
-                </div>
-              </div>
-            </article>
-          `;
-        })
-        .join("")}
-    </div>
+                  ${
+                    (pp.items_bought || []).length > 0
+                      ? `
+                    <div class="phase-items-row">
+                      ${pp.items_bought
+                        .map(
+                          (it) => `
+                          <div class="mini-item-chip" title="${escapeHtml(
+                            it.zh_name || it.key
+                          )} (${escapeHtml(it.time_str)})">
+                            ${
+                              it.img
+                                ? `<img src="${escapeHtml(it.img)}" alt="${escapeHtml(
+                                    it.zh_name || it.key
+                                  )}" loading="lazy" />`
+                                : ""
+                            }
+                            <span>${escapeHtml(it.time_str)}</span>
+                          </div>
+                        `
+                        )
+                        .join("")}
+                    </div>
+                  `
+                      : `<div style="font-size: 10px; color: var(--dim);">本阶段无核心成装更新</div>`
+                  }
+
+                  <div class="phase-p-prose">${injectHeroLogosIntoHtml(
+                    escapeHtml(assessmentText),
+                    report
+                  )}</div>
+
+                  <div class="phase-p-eval-block">
+                    <div class="phase-eval-group good">
+                      <b>✓ 哪里做得好</b>
+                      <ul>
+                        ${goodItems
+                          .slice(0, 2)
+                          .map((g) => `<li>${injectHeroLogosIntoHtml(escapeHtml(g), report)}</li>`)
+                          .join("")}
+                      </ul>
+                    </div>
+                    <div class="phase-eval-group bad">
+                      <b>✕ 哪里做得不好</b>
+                      <ul>
+                        ${badItems
+                          .slice(0, 2)
+                          .map((b) => `<li>${injectHeroLogosIntoHtml(escapeHtml(b), report)}</li>`)
+                          .join("")}
+                      </ul>
+                    </div>
+                    <div class="phase-eval-focus">
+                      <strong>阶段改进：</strong>${injectHeroLogosIntoHtml(
+                        escapeHtml(focusText),
+                        report
+                      )}
+                    </div>
+                  </div>
+                </article>
+              `;
+            })
+            .join("")}
+        </div>
+      `;
+    })()}
   `;
+
+  panelBox.querySelectorAll("[data-phase-select-pos]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const sel = btn.getAttribute("data-phase-select-pos") || "focus";
+      state.phaseSelectedPos = sel === "all" ? "all" : Number(sel);
+      if (state.currentReport) renderPhaseSection(state.currentReport);
+    });
+  });
 }
 
 /**
@@ -10482,12 +10862,14 @@ function renderKeyWindowsSection(report) {
       btn.dataset.boundTfFilter = "1";
       btn.addEventListener("click", () => {
         state.tfSceneFilter = btn.getAttribute("data-tf-filter") || "top3";
+        state.tfActiveWaveIdx = 0;
         if (state.currentReport) renderKeyWindowsSection(state.currentReport);
       });
     }
   });
 
   const cardsHtml = [];
+  const waveTabsMeta = [];
 
   // Select teamfights to display
   let selectedForensics = [];
@@ -10754,13 +11136,20 @@ function renderKeyWindowsSection(report) {
               ? ` ｜ 目标：${pe.ability_targets_zh.slice(0, 2).join("、")}`
               : "";
 
+          const spotReasonCompact =
+            alerts.length > 0
+              ? `本波核心胜负焦点 · 输出占全队 ${pe.damage_share_pct || 0}% (${pe.kills_in_tf || 0}杀/${
+                  pe.deaths || 0
+                }死)`
+              : reasonZh;
+
           const spotlightBannerHtml = isSpot
             ? `
               <div class="tf-p-spotlight-banner ${outcomeTone === "praise" ? "praise" : "roast"}">
                 <span class="tf-spot-tag">${
                   outcomeTone === "praise" ? "👑 本波默认焦点 · 团战头号功臣" : "🎯 本波默认焦点 · 胜负关键人物"
                 }</span>
-                <span class="tf-spot-reason">${escapeHtml(reasonZh)}</span>
+                <span class="tf-spot-reason">${escapeHtml(spotReasonCompact)}</span>
               </div>
             `
             : "";
@@ -10855,6 +11244,17 @@ function renderKeyWindowsSection(report) {
           `
           : "";
 
+      const shortTrade = `${side === "radiant" ? fObj.rad_kills : fObj.dire_kills}换${
+        side === "radiant" ? fObj.dire_kills : fObj.rad_kills
+      }`;
+      waveTabsMeta.push({
+        label: fObj.decisive_rank
+          ? `🚨 胜负手 #${fObj.decisive_rank}`
+          : `⚔️ 团战 #${fObj.tf_index || cardIdx + 1}`,
+        sub: `${fObj.time_range || ""} (${shortTrade})`,
+        isSpot: cardIdx === 0,
+      });
+
       cardsHtml.push(`
         <article class="window-card tf-scene-card ${escapeHtml(outcomeTone)}">
           <div class="window-head tf-scene-head">
@@ -10913,6 +11313,11 @@ function renderKeyWindowsSection(report) {
         own,
         opp,
       });
+      waveTabsMeta.push({
+        label: `⚔️ 团战 #${idx + 1}`,
+        sub: `${tf.time_range || ""} · ${storyObj.badge || ""}`,
+        isSpot: idx === 0,
+      });
       cardsHtml.push(`
         <article class="window-card">
           <div class="window-head">
@@ -10930,7 +11335,12 @@ function renderKeyWindowsSection(report) {
   }
 
   // Append Grok 4.7 turning point windows if present
-  grokWindows.forEach((w) => {
+  grokWindows.forEach((w, gIdx) => {
+    waveTabsMeta.push({
+      label: `🧠 Grok拐点 #${gIdx + 1}`,
+      sub: w.time_label || "关键节点",
+      isSpot: false,
+    });
     cardsHtml.push(`
       <article class="window-card">
         <div class="window-head">
@@ -10946,10 +11356,57 @@ function renderKeyWindowsSection(report) {
     `);
   });
 
+  const activeWaveMode =
+    state.tfActiveWaveIdx === "all"
+      ? "all"
+      : Math.min(Math.max(0, Number(state.tfActiveWaveIdx || 0)), Math.max(0, cardsHtml.length - 1));
+
+  const waveSwitcherHtml =
+    cardsHtml.length > 1
+      ? `
+      <div class="tf-p-selector-bar tf-wave-switcher-bar" role="tablist" aria-label="切换关键团战波次">
+        ${waveTabsMeta
+          .map(
+            (wm, wIdx) => `
+            <button
+              type="button"
+              class="tf-p-select-btn ${activeWaveMode !== "all" && activeWaveMode === wIdx ? "is-active" : ""} ${
+              wm.isSpot ? "is-spotlight" : ""
+            }"
+              data-tf-wave-idx="${wIdx}"
+            >
+              <span class="tf-pill-label">${escapeHtml(wm.label)}</span>
+              <span class="tf-pill-chip ${wm.isSpot ? "focus" : ""}">${escapeHtml(wm.sub)}</span>
+            </button>
+          `
+          )
+          .join("")}
+        <button
+          type="button"
+          class="tf-p-select-btn mode-all ${activeWaveMode === "all" ? "is-active" : ""}"
+          data-tf-wave-idx="all"
+        >
+          📋 全部波次(${cardsHtml.length})
+        </button>
+      </div>
+    `
+      : "";
+
+  const visibleWaveCards =
+    activeWaveMode === "all" ? cardsHtml : cardsHtml.filter((_, wIdx) => wIdx === activeWaveMode);
+
   grid.innerHTML =
     cardsHtml.length > 0
-      ? cardsHtml.join("")
+      ? `${waveSwitcherHtml}${visibleWaveCards.join("")}`
       : `<div class="empty-state">暂无团战明细记录</div>`;
+
+  grid.querySelectorAll("[data-tf-wave-idx]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const wVal = btn.getAttribute("data-tf-wave-idx");
+      state.tfActiveWaveIdx = wVal === "all" ? "all" : Number(wVal || 0);
+      if (state.currentReport) renderKeyWindowsSection(state.currentReport);
+    });
+  });
 
   grid.querySelectorAll("[data-tf-select-pos]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -11284,7 +11741,7 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
             <div class="forensic-name-row">
               <span class="forensic-hero-zh">${escapeHtml(heroShort)}</span>
               <span class="forensic-player-id">${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
-              <span class="status-pill">${escapeHtml(p.side)} · ${escapeHtml(p.pos_label)}</span>
+              <span class="status-pill">${p.side === "radiant" ? "天辉" : "夜魇"} · ${escapeHtml(p.pos_label)}</span>
               ${isMvp ? `<span class="status-pill connected">👑 全场 MVP</span>` : ""}
               ${(p.tags || [])
                 .slice(0, 4)
