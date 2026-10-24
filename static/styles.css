@@ -7891,6 +7891,390 @@ body {
   }
 }
 
+/* =========================================================================
+   v6.1 四阶段红黑榜 + 三幕式小说复盘 + 功过得失双栏 + 十三维显微镜红牌短板高亮雷达
+   ========================================================================= */
+
+/* 1. 阶段红黑榜 (Stage Top 2 Best & Top 2 Scapegoats) */
+.stage-rank-box {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #35382e;
+}
+
+.stage-rank-header {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--gold-light);
+  margin-bottom: 6px;
+}
+
+.stage-rank-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.stage-rank-item {
+  background: #131511;
+  border: 1px solid #2e3229;
+  padding: 6px 8px;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stage-rank-item.best1 {
+  border-left: 3px solid var(--gold);
+  background: rgba(198, 164, 104, 0.06);
+}
+
+.stage-rank-item.best2 {
+  border-left: 3px solid var(--green-light);
+  background: rgba(94, 194, 118, 0.05);
+}
+
+.stage-rank-item.worst1 {
+  border-left: 3px solid var(--red-light);
+  background: rgba(217, 94, 83, 0.07);
+}
+
+.stage-rank-item.worst2 {
+  border-left: 3px solid #e09f45;
+  background: rgba(224, 159, 69, 0.05);
+}
+
+.stage-rank-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.stage-rank-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.stage-rank-badge.best1 {
+  background: rgba(198, 164, 104, 0.25);
+  color: #f8dfa1;
+  border: 1px solid rgba(198, 164, 104, 0.55);
+}
+
+.stage-rank-badge.best2 {
+  background: rgba(94, 194, 118, 0.2);
+  color: #93e8a7;
+  border: 1px solid rgba(94, 194, 118, 0.45);
+}
+
+.stage-rank-badge.worst1 {
+  background: rgba(217, 94, 83, 0.25);
+  color: #ffb0a8;
+  border: 1px solid rgba(217, 94, 83, 0.55);
+}
+
+.stage-rank-badge.worst2 {
+  background: rgba(224, 159, 69, 0.22);
+  color: #ffd089;
+  border: 1px solid rgba(224, 159, 69, 0.5);
+}
+
+.stage-rank-hero {
+  font-size: 12px;
+  color: #f0ece1;
+}
+
+.stage-rank-player {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.stage-rank-desc {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #d6d1c4;
+}
+
+.roadmap-mini-rank-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 6px;
+}
+
+.rm-chip {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.rm-chip.best {
+  background: rgba(198, 164, 104, 0.18);
+  color: #f5db9c;
+  border: 1px solid rgba(198, 164, 104, 0.4);
+}
+
+.rm-chip.best2 {
+  background: rgba(94, 194, 118, 0.15);
+  color: #92e5a5;
+  border: 1px solid rgba(94, 194, 118, 0.35);
+}
+
+.rm-chip.worst1 {
+  background: rgba(217, 94, 83, 0.2);
+  color: #ffafa8;
+  border: 1px solid rgba(217, 94, 83, 0.45);
+}
+
+.rm-chip.worst2 {
+  background: rgba(224, 159, 69, 0.18);
+  color: #ffcf87;
+  border: 1px solid rgba(224, 159, 69, 0.4);
+}
+
+/* 2. 三幕式实战小说复盘 + 功过得失双栏 (Verdict Chronology Story v2) */
+.verdict-chronology-story-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.story-act-row {
+  background: #141612;
+  border: 1px solid #2b2e25;
+  border-left: 3px solid var(--gold);
+  padding: 8px 11px;
+  border-radius: 3px;
+}
+
+.story-act-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  margin-bottom: 4px;
+  border-radius: 2px;
+}
+
+.story-act-badge.early {
+  background: rgba(94, 194, 118, 0.16);
+  color: #9beaa9;
+  border: 1px solid rgba(94, 194, 118, 0.4);
+}
+
+.story-act-badge.mid {
+  background: rgba(198, 164, 104, 0.2);
+  color: #f6dd9e;
+  border: 1px solid rgba(198, 164, 104, 0.45);
+}
+
+.story-act-badge.late {
+  background: rgba(224, 122, 75, 0.2);
+  color: #ffbfa0;
+  border: 1px solid rgba(224, 122, 75, 0.45);
+}
+
+.story-act-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: #e4dfd3;
+}
+
+.story-good-bad-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.story-gb-box {
+  padding: 8px 10px;
+  border-radius: 3px;
+  border: 1px solid #2e3229;
+}
+
+.story-gb-box.good {
+  background: rgba(45, 92, 56, 0.14);
+  border-color: rgba(94, 194, 118, 0.35);
+}
+
+.story-gb-box.bad {
+  background: rgba(112, 42, 38, 0.15);
+  border-color: rgba(217, 94, 83, 0.38);
+}
+
+.story-gb-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.story-gb-box.good .story-gb-title {
+  color: #8ce49f;
+}
+
+.story-gb-box.bad .story-gb-title {
+  color: #ffa89e;
+}
+
+.story-gb-list {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #ddd8cb;
+}
+
+/* 3. 十三维战术显微镜：急需加强的红牌短板高亮雷达 & Tab 按钮高亮 */
+.micro-weakness-radar-banner {
+  background: linear-gradient(135deg, rgba(64, 22, 20, 0.52) 0%, rgba(26, 24, 19, 0.92) 100%);
+  border: 1.5px solid #9e3d34;
+  box-shadow: 0 0 18px rgba(217, 74, 61, 0.18);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+}
+
+.micro-radar-head {
+  margin-bottom: 8px;
+}
+
+.micro-radar-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffb8b0;
+}
+
+.micro-radar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.micro-radar-card {
+  background: #171513;
+  border: 1px solid #4a2d28;
+  padding: 8px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.micro-radar-card:hover {
+  transform: translateY(-1px);
+  background: #211b18;
+  border-color: #e05c4d;
+}
+
+.micro-radar-card.critical {
+  border-left: 3.5px solid #ef5343;
+  background: rgba(140, 35, 28, 0.18);
+}
+
+.micro-radar-card.warn {
+  border-left: 3.5px solid #e5a244;
+  background: rgba(140, 95, 28, 0.14);
+}
+
+.micro-radar-card.is-active-tab {
+  outline: 1.5px solid var(--gold);
+}
+
+.micro-radar-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: #f4efe4;
+}
+
+.micro-radar-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.micro-radar-pill.critical {
+  background: #c93b2b;
+  color: #fff;
+}
+
+.micro-radar-pill.warn {
+  background: #9c681c;
+  color: #ffe3b3;
+}
+
+.micro-radar-jump-hint {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: var(--gold-light);
+}
+
+.micro-radar-desc {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #dcd6c8;
+}
+
+.microscope-tab-btn.micro-tab-critical {
+  border-color: #c94638 !important;
+  background: rgba(156, 43, 35, 0.22) !important;
+  color: #ffd3cc !important;
+}
+
+.microscope-tab-btn.micro-tab-warn {
+  border-color: #9e7129 !important;
+  background: rgba(145, 100, 30, 0.16) !important;
+}
+
+.micro-tab-status-pill {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 2px;
+}
+
+.micro-tab-status-pill.critical {
+  background: #d13d2e;
+  color: #ffffff;
+}
+
+.micro-tab-status-pill.warn {
+  background: rgba(224, 159, 69, 0.28);
+  color: #ffd48a;
+}
+
+.micro-tab-status-pill.good {
+  background: rgba(94, 194, 118, 0.16);
+  color: #90e0a3;
+}
+
+@media (max-width: 860px) {
+  .stage-rank-grid,
+  .story-good-bad-grid,
+  .micro-radar-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
 
 
 
