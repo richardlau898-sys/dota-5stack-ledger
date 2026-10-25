@@ -8940,8 +8940,31 @@ function analyzePlayerItemizationIntelligence(p, report) {
       }
     }
   } else if (isSup) {
-    // Support Greed vs Save Item Audit (Pos 4 / Pos 5)
+    // Support Greed vs Save Item & Role-Duty Audit (Pos 4 / Pos 5)
     const kiteThreats = oppKiteAndCatchHeroes.map((o) => o.hero_short_zh).join(" / ") || "敌方冲脸";
+    const selfishCarryItemOnSup = hasItemMatch(
+      /净魂之刃|散失|diffusal_blade|散魂剑|disperser|漩涡|雷神之锤|maelstrom|mjollnir|狂战斧|bfury|辉耀|radiance|水晶剑|代达罗斯|大炮|暗灭|desolator|影刃|隐刀|白银之锋/i
+    );
+    const eulOrLotus = hasItemMatch(/神圣法杖|风杖|cyclone|风之杖|清莲宝珠|莲花|lotus_orb/i);
+    const shardItem = hasItemMatch(/阿哈利姆魔晶|aghanims_shard/i) || p.aghanims_shard;
+    const hasAnySupportUtility = Boolean(
+      forceItem || glimmerItem || atosItem || vesselItem || blinkItem || eulOrLotus || shardItem
+    );
+
+    if (selfishCarryItemOnSup && !hasAnySupportUtility) {
+      const post10Lh = Math.max(0, Number(p.last_hits || 0) - Number(p.laning_10m?.lh10 || 0));
+      badges.push(`🚨 ${pos}号位毒瘤出装(裸${selfishCarryItemOnSup.zh}·0团队救人装)`);
+      warnings.push(
+        `🚨 <b>${pos}号位严重失职（假辅助·真毒瘤抢钱出大哥装）：</b>身为 <b>${pos}号位游走/保核辅助</b>，本职工作是服务3号位/1号位带节奏并出 <b>跳刀/推推棒/微光披风/阿托斯/风杖/魔晶</b> 等团队先手与救人装；但本局在劣势下竟于 <b>${selfishCarryItemOnSup.time_str} 裸憋大哥输出装【${selfishCarryItemOnSup.zh}】${
+          bkbItem ? ` + ${bkbItem.time_str} 黑皇杖(BKB)` : ""
+        }</b>，全场 <b>0推推、0微光、0阿托斯、0跳刀、0魔晶</b>！且10分钟后自己占线钻野刷了 <b>${post10Lh} 刀（总 ${
+          p.last_hits || 0
+        } 刀）</b> 抢大哥经济，全场仅打出 <b>${p.hero_damage_share_pct || 0}% 伤害与 ${
+          p.tower_damage || 0
+        } 塔伤</b>，属于典型的毒瘤辅助玩法！`
+      );
+    }
+
     if (midasItem) {
       badges.push(`🚨 辅助裸点金(${midasItem.time_str})`);
       warnings.push(
@@ -8949,7 +8972,7 @@ function analyzePlayerItemizationIntelligence(p, report) {
           glimmerItem
             ? `，导致第一件团队救人装 <b>微光披风(${glimmerItem.time_str})</b> 拖到将近30分钟才成型`
             : "，整局 0 微光 0 推推"
-        }，且面對敌方 <b>${kiteThreats} + 敌法师</b> 全场 <b>0 原力法杖(推推棒)</b>，属于典型的五号位贪发育出装（所幸后期36:22憋出羊刀将功补过）。`
+        }，且面对敌方 <b>${kiteThreats} + 敌法师</b> 全场 <b>0 原力法杖(推推棒)</b>，属于典型的五号位贪发育出装（所幸后期36:22憋出羊刀将功补过）。`
       );
     }
 
@@ -8962,7 +8985,7 @@ function analyzePlayerItemizationIntelligence(p, report) {
           p.deaths
         } 次（读秒 ${p.dead_seconds}s）</b>；若把绝刃卷轴换成推推棒，存活率与救队友能力会再上一层楼。`
       );
-    } else if (!midasItem && !forceItem && oppKiteAndCatchHeroes.length >= 2) {
+    } else if (!midasItem && !selfishCarryItemOnSup && !forceItem && oppKiteAndCatchHeroes.length >= 2) {
       warnings.push(
         `⚠️ <b>团队救人装短板（全队缺推推棒）：</b>面对敌方 <b>${kiteThreats}</b> 的减速/钩咬留人，未补出 <b>原力法杖(推推棒)</b> 帮队友拉开身位。`
       );
@@ -10497,20 +10520,30 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
 
   const grokBadgeHtml = `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 研判</span> `;
 
+  const baseAct1Story = act1Story;
+  const baseAct2Story = act2Story;
+  const baseAct3Story = act3Story;
+
   if (grokP?.early_story) {
+    const gEarly = String(grokP.early_story).trim();
+    const extraEarly = gEarly.length < 85 && baseAct1Story ? ` ${baseAct1Story}` : "";
     act1Story = `${grokBadgeHtml}<b>【10m: ${lh10}/${dn10}刀 · ${fmtNum(gold10)}金 · ${laneK}杀/${laneD}死】</b>${escapeHtml(
-      grokP.early_story
-    )}`;
+      gEarly
+    )}${extraEarly}`;
   }
   if (grokP?.mid_story) {
-    act2Story = `${grokBadgeHtml}<b>【10–25m: +${fmtNum(midGold)}金 · ${midK}杀/${midD}死 · 伤${fmtNum(midDmg)}】</b>${escapeHtml(
-      grokP.mid_story
-    )}`;
+    const gMid = String(grokP.mid_story).trim();
+    const extraMid = gMid.length < 85 && baseAct2Story ? ` ${baseAct2Story}` : "";
+    act2Story = `${grokBadgeHtml}<b>【10–25m: +${fmtNum(midGold)}金 · +${midP?.lh_gain || 0}刀 · ${midK}杀/${midD}死 · 伤${fmtNum(
+      midDmg
+    )}】</b>${escapeHtml(gMid)}${extraMid}`;
   }
   if (grokP?.late_story) {
+    const gLate = String(grokP.late_story).trim();
+    const extraLate = gLate.length < 85 && baseAct3Story ? ` ${baseAct3Story}` : "";
     act3Story = `${grokBadgeHtml}<b>【25m+: +${fmtNum(lateGold)}金 · ${lateK}杀/${lateD}死 · 伤${fmtNum(
       lateDmg
-    )} · 总塔伤${fmtNum(p.tower_damage || 0)}】</b>${escapeHtml(grokP.late_story)}`;
+    )} · 总塔伤${fmtNum(p.tower_damage || 0)}】</b>${escapeHtml(gLate)}${extraLate}`;
   }
 
   // =========================================================================
