@@ -8438,6 +8438,16 @@ const RECIPE_COMPONENT_NAMES = new Set([
   "鹰歌弓",
   "暗影护符",
   "魔力法杖",
+  "食人魔之斧",
+  "欢欣之刃",
+  "阔剑",
+  "大剑",
+  "秘银锤",
+  "标枪",
+  "闪电指套",
+  "坚韧球",
+  "宝冕",
+  "镇魂石",
   "虚无宝石",
   "回复戒指",
   "治疗指环",
@@ -8458,25 +8468,482 @@ const RECIPE_COMPONENT_NAMES = new Set([
 function filterMajorItems(itemsBought, maxCnt = 3) {
   const raw = Array.isArray(itemsBought) ? itemsBought : [];
   if (raw.length === 0) return [];
-  // Deduplicate same-second component if a completed item was bought at the exact same timestamp
-  const byTime = new Map();
-  raw.forEach((it) => {
-    const t = it.time_str || "";
-    if (!byTime.has(t)) byTime.set(t, []);
-    byTime.get(t).push(it);
-  });
   const major = raw.filter((it) => {
     const name = String(it.zh_name || it.key || "").trim();
     if (!name) return false;
     if (RECIPE_COMPONENT_NAMES.has(name)) return false;
-    if (name === "镇魂石" && (byTime.get(it.time_str || "") || []).length > 1) return false;
     if (name.includes("速度之靴") && raw.some((x) => x !== it && String(x.zh_name || "").includes("鞋"))) {
       return false;
     }
     return true;
   });
   const chosen = major.length > 0 ? major : raw.filter((it) => !RECIPE_COMPONENT_NAMES.has(String(it.zh_name || "")));
-  return (chosen.length > 0 ? chosen : raw).slice(0, maxCnt);
+  const list = chosen.length > 0 ? chosen : raw;
+  return list.length > maxCnt ? list.slice(-maxCnt) : list;
+}
+
+/**
+ * AI Roshan / Aegis & Resource Advantage Conversion Analyzer:
+ * Evaluates whether taking Roshan (Aegis) was effectively converted into outer tower sweeps,
+ * high-ground T3 tower / barracks breaches, kills, and game-ending tempo within the 5-minute Aegis window.
+ */
+function analyzeRoshanAndResourceConversion(report) {
+  const { side, sideZh } = getOwnAndOppPlayers(report);
+  const oppZh = side === "radiant" ? "夜魇" : "天辉";
+  const df = report.deep_forensics || {};
+  const mo = df.macro_objectives_by_side?.[side] || {};
+  const roshStrings = mo.roshan_events || [];
+  const markers = report.objective_markers || [];
+  const rawPhases = report.phases_data || [];
+  const phasesList = Array.isArray(rawPhases) ? rawPhases : Object.values(rawPhases);
+  const latePd = phasesList.find((x) => x.key === "late");
+  const lateTowersTaken = Number(latePd?.team_summary?.towers_taken || 0);
+  const ownWon =
+    (side === "radiant" && Boolean(report.radiant_win)) ||
+    (side === "dire" && !Boolean(report.radiant_win));
+
+  const ownRoshMarkers = markers.filter((m) => m.type === "roshan" && m.side === side);
+  const oppRoshMarkers = markers.filter((m) => m.type === "roshan" && m.side !== side);
+
+  if (ownRoshMarkers.length === 0 && oppRoshMarkers.length === 0 && roshStrings.length === 0) {
+    return {
+      hasRoshan: false,
+      grade: "none",
+      badgeText: "⚪ 本局无肉山击杀记录",
+      holderHero: "",
+      roshTimeStr: "",
+      shortHtml: "本局双方均未击杀肉山，后期胜负完全取决于正面团战与买活推进转换。",
+      detailHtml: "本局双方未爆发肉山盾争夺，直接通过野外团战抓人与兵线推进决出胜负。",
+    };
+  }
+
+  if (ownRoshMarkers.length > 0 || roshStrings.some((s) => String(s).includes(sideZh))) {
+    const lastOwnRosh = ownRoshMarkers[ownRoshMarkers.length - 1] || {
+      time_sec: 1800,
+      time_str: "后期",
+    };
+    const rSec = Number(lastOwnRosh.time_sec || 1800);
+    const rTimeStr = lastOwnRosh.time_str || "后期";
+    const holderEventStr =
+      roshStrings.find((s) => String(s).includes(sideZh)) ||
+      roshStrings[0] ||
+      `🛡️ ${rTimeStr} ${sideZh}控下肉山不朽盾`;
+    const cleanedHolderStr = String(holderEventStr).replace(/^🛡️\s*/, "");
+
+    // Check highground T3 towers & barracks taken within [rSec - 15, rSec + 315] (5-minute Aegis window)
+    const hgTakenInWindow = markers.filter(
+      (m) =>
+        m.side === side &&
+        m.type !== "roshan" &&
+        Number(m.time_sec || 0) >= rSec - 15 &&
+        Number(m.time_sec || 0) <= rSec + 315
+    );
+    const t3Count = hgTakenInWindow.filter((m) => String(m.label || "").includes("三塔")).length;
+    const raxCount = hgTakenInWindow.filter((m) => String(m.label || "").includes("兵营")).length;
+    const firstHgTime = hgTakenInWindow[0]?.time_str || "";
+    const lastHgTime = hgTakenInWindow[hgTakenInWindow.length - 1]?.time_str || "";
+
+    // Count kills and deaths during the 5-minute Aegis window
+    let aegisKills = 0;
+    let aegisDeaths = 0;
+    phasesList.forEach((pd) => {
+      (pd.players || []).forEach((pp) => {
+        if (pp.side === side) {
+          (pp.kills_events || []).forEach((ke) => {
+            if (Number(ke.time || 0) >= rSec && Number(ke.time || 0) <= rSec + 315) aegisKills++;
+          });
+          (pp.deaths_events || []).forEach((de) => {
+            if (Number(de.time || 0) >= rSec && Number(de.time || 0) <= rSec + 315) aegisDeaths++;
+          });
+        }
+      });
+    });
+
+    if (hgTakenInWindow.length >= 2 || lateTowersTaken >= 6) {
+      const hgDesc =
+        t3Count > 0 || raxCount > 0
+          ? `在 <b>${firstHgTime}–${lastHgTime}</b> 顺势扫清外塔并连破 <b>${t3Count} 座高地三塔 + ${raxCount} 座高地兵营</b>（后期累计推毁 <b>${lateTowersTaken} 座建筑</b>）`
+          : `顺势连拔 <b>${lateTowersTaken} 座外塔与高地建筑</b>`;
+      return {
+        hasRoshan: true,
+        grade: "perfect",
+        badgeText: "🌟 教科书级控盾转化（带盾拔外塔+平推高地）",
+        holderHero: cleanedHolderStr,
+        roshTimeStr: rTimeStr,
+        shortHtml: `🛡️ <b>${escapeHtml(
+          cleanedHolderStr
+        )} → 🌟 满分控盾转化：</b>打盾后绝不回野区空刷，利用不朽盾 5 分钟强势期${hgDesc}，带盾窗口打出 <b>${aegisKills}杀/${aegisDeaths}死</b> 直接将盾权与经济优势转化为胜势！`,
+        detailHtml: `<b>🛡️ ${escapeHtml(
+          cleanedHolderStr
+        )}：</b>打盾后全队执行力拉满，顺势把残余外塔拔光并直接压上高地，${hgDesc}，带盾期间打出 <b>${aegisKills}杀/${aegisDeaths}死</b>，堪称「控盾即终结」的教科书级资源转化代表！`,
+      };
+    }
+
+    if (lateTowersTaken >= 2 || aegisKills > aegisDeaths || ownWon) {
+      return {
+        hasRoshan: true,
+        grade: "good",
+        badgeText: "🟢 有效控盾压制转化",
+        holderHero: cleanedHolderStr,
+        roshTimeStr: rTimeStr,
+        shortHtml: `🛡️ <b>${escapeHtml(
+          cleanedHolderStr
+        )} → 🟢 有效资源转化：</b>带盾期间打出 <b>${aegisKills}杀/${aegisDeaths}死</b>、推掉 <b>${lateTowersTaken} 座建筑</b>，稳步将不朽盾转化为外塔与地图压制优势。`,
+        detailHtml: `<b>🛡️ ${escapeHtml(
+          cleanedHolderStr
+        )}：</b>拿盾后抱团压制敌方野区与外塔（带盾窗口 <b>${aegisKills}杀/${aegisDeaths}死</b>，后期拔塔 <b>${lateTowersTaken} 座</b>），有效兑现了肉山资源。`,
+      };
+    }
+
+    return {
+      hasRoshan: true,
+      grade: "wasted",
+      badgeText: "🔴 带盾空转/推进受阻（盾权未转化）",
+      holderHero: cleanedHolderStr,
+      roshTimeStr: rTimeStr,
+      shortHtml: `🛡️ <b>${escapeHtml(
+        cleanedHolderStr
+      )} → 🔴 控盾未有效转化：</b>虽控下肉山不朽盾，但带盾 5 分钟窗口内仅推掉 <b>${lateTowersTaken} 座建筑</b>（人头 <b>${aegisKills}杀/${aegisDeaths}死</b>），未能趁盾权拔光外塔或攻破高地。`,
+      detailHtml: `<b>🛡️ ${escapeHtml(
+        cleanedHolderStr
+      )}：</b>控盾后团队未能抱团推进拔外塔上高地（带盾窗口人头 <b>${aegisKills}杀/${aegisDeaths}死</b>），宝贵的 5 分钟不朽盾强势期被白白消耗。`,
+    };
+  }
+
+  // Enemy took Roshan
+  const oppEventStr = roshStrings[0] || `${oppZh}控下肉山不朽盾`;
+  return {
+    hasRoshan: true,
+    grade: "enemy_rosh",
+    badgeText: `⚠️ ${oppZh}控盾施压`,
+    holderHero: oppEventStr,
+    roshTimeStr: oppRoshMarkers[0]?.time_str || "",
+    shortHtml: `⚠️ <b>肉山盾旁落：</b>${escapeHtml(
+      String(oppEventStr)
+    )}，本方未能控住肉山盾权，后期被迫承担带盾防高地压力。`,
+    detailHtml: `⚠️ <b>肉山控图失守：</b>${escapeHtml(
+      String(oppEventStr)
+    )}，导致敌方拿到不朽盾容错率强推外塔与高地。`,
+  };
+}
+
+/**
+ * AI Itemization Intelligence Audit for each player (Pos 1~5):
+ * 1. Counter-Itemization & Hero Situational Synergy (e.g., MKB vs Evasion/Butterfly/Brewmaster; Juggernaut Aghs Swiftslash when right-clicking is hard vs Omnislash value; Spirit Vessel vs Wraith King/Pudge; Ghost Scepter vs Anti-Mage)
+ * 2. BKB Audit for Cores (Smart BKB skip due to built-in spell immunity/invulnerability vs Fatal no-BKB deaths)
+ * 3. Support Greed vs Team Save Audit (Pos 4/5 rushing Midas / pure damage Aghs/Khanda without Force Staff / Glimmer Cape)
+ * 4. Blink Dagger Conversion Audit (Exact Blink timing -> post-Blink kills, hero damage, and deaths to judge if Blink carried or was wasted)
+ */
+function analyzePlayerItemizationIntelligence(p, report) {
+  const { side, opp } = getOwnAndOppPlayers(report);
+  const rawPhases = report.phases_data || [];
+  const phasesList = Array.isArray(rawPhases) ? rawPhases : Object.values(rawPhases);
+  const byPhase = new Map(phasesList.map((pd) => [pd.key, pd]));
+  const lanePd = byPhase.get("lane");
+  const midPd = byPhase.get("mid");
+  const latePd = byPhase.get("late");
+
+  const findInPhase = (pd) =>
+    (pd?.players || []).find(
+      (x) =>
+        x.side === side &&
+        (Number(x.player_slot) === Number(p.player_slot) || x.hero_short_zh === p.hero_short_zh)
+    );
+  const laneP = findInPhase(lanePd) || {};
+  const midP = findInPhase(midPd) || {};
+  const lateP = findInPhase(latePd) || {};
+
+  const parseSec = (tStr) => {
+    const parts = String(tStr || "0:00").split(":");
+    if (parts.length !== 2) return 0;
+    const m = parseInt(parts[0], 10) || 0;
+    const s = parseInt(parts[1], 10) || 0;
+    return m * 60 + s;
+  };
+
+  // Merge all phase items_bought with timestamps + final inventory
+  const phaseItems = [
+    ...(laneP.items_bought || []),
+    ...(midP.items_bought || []),
+    ...(lateP.items_bought || []),
+  ].map((it) => ({
+    key: String(it.key || ""),
+    zh: String(it.zh_name || it.name_zh || it.key || ""),
+    time_str: String(it.time_str || ""),
+    sec: parseSec(it.time_str),
+  }));
+
+  const finalItems = (p.items || []).map((it) => ({
+    key: String(it.key || ""),
+    zh: String(it.name_zh || it.zh_name || it.key || ""),
+  }));
+
+  const hasItemMatch = (regex) => {
+    const inPhase = phaseItems.find((it) => regex.test(it.zh) || regex.test(it.key));
+    if (inPhase) return inPhase;
+    const inFinal = finalItems.find((it) => regex.test(it.zh) || regex.test(it.key));
+    if (inFinal) return { ...inFinal, time_str: "终局", sec: 1500 };
+    return null;
+  };
+
+  // Collect all player kill events & death events across phases
+  const allKillEvents = [
+    ...(laneP.kills_events || []),
+    ...(midP.kills_events || []),
+    ...(lateP.kills_events || []),
+  ].map((ev) => ({ ...ev, sec: parseSec(ev.time_str) }));
+
+  const allDeathEvents = [
+    ...(laneP.deaths_events || []),
+    ...(midP.deaths_events || []),
+    ...(lateP.deaths_events || []),
+  ].map((ev) => ({ ...ev, sec: parseSec(ev.time_str) }));
+
+  const pos = Number(p.pos || 1);
+  const isSup = pos >= 4;
+  const isCore = pos <= 3;
+  const heroShort = p.hero_short_zh || p.hero_name || "";
+  const oppNames = opp.map((o) => o.hero_short_zh || o.hero_name || "");
+  const oppAllItemsZh = opp
+    .flatMap((o) => (o.items || []).map((it) => it.name_zh || it.zh_name || it.key || ""))
+    .join(" ");
+
+  const oppEvasionHeroes = opp.filter(
+    (o) =>
+      /酒仙|幻影刺客|风行者|天穹守望者|蝴蝶|光法/.test(o.hero_short_zh || "") ||
+      (o.items || []).some((it) => /蝴蝶|光辉|天堂/.test(it.name_zh || it.zh_name || ""))
+  );
+  const oppHighRegenHeroes = opp.filter((o) =>
+    /帕吉|冥魂大帝|胡斯卡|炼金术士|死灵法师|孽主|伐木机|噬魂鬼|变体精灵/.test(o.hero_short_zh || "")
+  );
+  const oppJumpBurstHeroes = opp.filter((o) =>
+    /敌法师|幻影刺客|斯温|圣堂刺客|斯拉克|力丸|军团指挥官|虚空假面/.test(o.hero_short_zh || "")
+  );
+  const oppKiteAndCatchHeroes = opp.filter((o) =>
+    /剧毒术士|帕吉|酒仙|发条技师|水晶室女|巫妖|孽主/.test(o.hero_short_zh || "")
+  );
+
+  const highlights = [];
+  const warnings = [];
+  const badges = [];
+
+  // -------------------------------------------------------------------------
+  // 1. Counter-Items & Situational Aghs / Synergy Audit
+  // -------------------------------------------------------------------------
+  const mkbItem = hasItemMatch(/金箍棒|monkey_king_bar/i);
+  if (mkbItem) {
+    const targetDesc =
+      oppEvasionHeroes.length > 0
+        ? `敌方 <b>${oppEvasionHeroes.map((o) => o.hero_short_zh).join(" / ")}</b> 的先天闪避/蝴蝶与高护甲体系`
+        : /敌法师|恐怖利刃|变体精灵/.test(oppNames.join(" "))
+        ? `敌方高护甲敏捷核心（${oppNames.filter((n) => /敌法师|恐怖利刃|变体精灵/.test(n)).join("/")}）`
+        : "敌方前排护甲与闪避";
+    badges.push("🎯 金箍棒精准克制");
+    highlights.push(
+      `🎯 <b>针对性克制出装（金箍棒 ${mkbItem.time_str}）：</b>精准识别到${targetDesc}，果断在 ${mkbItem.time_str} 掏出 <b>金箍棒(MKB)</b>，必中克制闪避+魔法附伤直接打穿敌方前排！`
+    );
+  }
+
+  const aghsItem = hasItemMatch(/阿哈利姆神杖|ultimate_scepter/i);
+  if (aghsItem && heroShort === "主宰") {
+    const kiteNames = oppKiteAndCatchHeroes.map((o) => o.hero_short_zh).join("+") || "减速拉扯体系";
+    const enemyHasLotusOrGhost = /莲花|幽魂|绿杖|虚灵/.test(oppAllItemsZh);
+    badges.push("🧠 灵性A杖迅风斩");
+    highlights.push(
+      `🧠 <b>局势理解满分（${aghsItem.time_str} 阿哈利姆神杖·迅风斩）：</b>敌方 <b>${kiteNames}</b> 满地减速/控制且无视魔免钩咬，常规站桩对A环境极差，但敌方全员缺乏莲花/绿杖防无敌斩（${
+        enemyHasLotusOrGhost ? "防斩手段有限" : "0莲花0绿杖"
+      }）！果断选择 <b>跳刀 + A杖(迅风斩)</b> 双无敌斩体系，不跟对手拼站桩对A，直接用两套无敌斩秒后排接管团战！`
+    );
+  } else if (aghsItem && isCore) {
+    if (heroShort === "帕格纳") {
+      badges.push("🟢 魔晶+A杖抽血炮台");
+      highlights.push(
+        `🟢 <b>英雄特性出装（以太 + 魔晶 + ${aghsItem.time_str} A杖）：</b>利用帕格纳无CD生命汲取与幽冥守卫插棒子抽血机制，配合爆塔轰出 <b>${fmtNum(
+          p.hero_damage
+        )} 英雄伤害</b> 与 <b>${fmtNum(p.tower_damage)} 建筑伤害</b>。`
+      );
+    } else {
+      highlights.push(
+        `🟢 <b>核心质变神杖（${aghsItem.time_str} 阿哈利姆神杖）：</b>强化大招与团战上限，全场打出 <b>${fmtNum(
+          p.hero_damage
+        )} 伤害</b>。`
+      );
+    }
+  }
+
+  const vesselItem = hasItemMatch(/魂之灵瓮|spirit_vessel/i);
+  if (vesselItem) {
+    const regenTargets = oppHighRegenHeroes.map((o) => o.hero_short_zh).join(" / ") || "敌方力量前排";
+    badges.push("🏺 大骨灰克制回血");
+    highlights.push(
+      `🏺 <b>灵性克制针对装（${vesselItem.time_str} 魂之灵瓮·大骨灰）：</b>针对敌方 <b>${regenTargets}</b> 的高血量高恢复特性，18分钟准时合成大骨灰削减回血并附带百分比灼烧，克制思路非常清晰！`
+    );
+  }
+
+  const ghostItem = hasItemMatch(/幽魂权杖|ghost|虚灵之刃/i);
+  if (ghostItem && oppJumpBurstHeroes.length > 0) {
+    const jumpers = oppJumpBurstHeroes.map((o) => o.hero_short_zh).join("/");
+    badges.push("👻 绿杖防切入");
+    highlights.push(
+      `👻 <b>防物理切入针对装（${ghostItem.time_str} ${ghostItem.zh}）：</b>针对敌方 <b>${jumpers}</b> 跳脸切后排，补出幽魂权杖规避物理爆发。`
+    );
+  }
+
+  const atosItem = hasItemMatch(/阿托斯之棍|rod_of_atos|缚灵索/i);
+  if (atosItem && heroShort === "天怒法师") {
+    highlights.push(
+      `🎯 <b>节奏捕猎核心装（${atosItem.time_str} 阿托斯之棍）：</b>11分钟极速裸出阿托斯配合上古封印+神秘之耀，前中期连续单抓敌法师与帕吉打开局面。`
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // 2. Blink Dagger (跳刀) Conversion Audit
+  // -------------------------------------------------------------------------
+  const blinkItem = phaseItems.find((it) => /闪烁匕首|跳刀|blink/i.test(it.zh) || /blink/i.test(it.key));
+  const upgradeBlink = hasItemMatch(/迅疾闪光|盛势闪光|秘奥闪光|swift_blink|overwhelming_blink|arcane_blink/i);
+  let blinkVerdict = null;
+
+  if (blinkItem) {
+    const bSec = blinkItem.sec || 1200;
+    const postBlinkKills = allKillEvents.filter((ev) => ev.sec >= bSec - 10);
+    const postBlinkDeaths = allDeathEvents.filter((ev) => ev.sec >= bSec + 10);
+    const postKillCnt = postBlinkKills.length;
+    const postDeathCnt = postBlinkDeaths.length;
+    const postDmgApprox =
+      bSec <= 1350
+        ? Math.round(Number(midP.hero_damage_gain || 0) * 0.45 + Number(lateP.hero_damage_gain || 0))
+        : Number(lateP.hero_damage_gain || 0);
+
+    if (postKillCnt >= 6 && postDeathCnt <= 2) {
+      badges.push(`⚡ 跳刀封神(${postKillCnt}杀/${postDeathCnt}死)`);
+      blinkVerdict = {
+        grade: "godlike",
+        html: `⚡ <b>跳刀转化率封神（${blinkItem.time_str} 闪烁匕首${
+          upgradeBlink ? ` → ${upgradeBlink.time_str} ${upgradeBlink.zh}` : ""
+        }）：</b>出跳刀后彻底化身后排收割机，狂砍 <b>${postKillCnt} 杀仅 ${postDeathCnt} 死</b>（切入轰出约 <b>${fmtNum(
+          postDmgApprox
+        )} 伤害</b>），每一波跳斩都精准收割敌方核心，把跳刀机动性发挥到极致！`,
+      };
+      highlights.push(blinkVerdict.html);
+    } else if (postKillCnt >= 1 && postDeathCnt === 0) {
+      badges.push(`🟢 跳刀机动收割(${postKillCnt}杀/0死)`);
+      blinkVerdict = {
+        grade: "good",
+        html: `⚡ <b>跳刀高地机动兑现（${blinkItem.time_str} 闪烁匕首）：</b>後期补出跳刀切入调整站位，出跳后斩获 <b>${postKillCnt} 杀 0 死</b>（${postBlinkKills
+          .map((k) => `${k.time_str}秒${k.victim_hero}`)
+          .join("、")}），零失误收官。`,
+      };
+      highlights.push(blinkVerdict.html);
+    } else if (postKillCnt <= 2 && (postDeathCnt >= 1 || Number(lateP.hero_damage_gain || 0) < 6000)) {
+      badges.push(`⚠️ 跳刀转化偏低(${postKillCnt}杀/${postDeathCnt}死)`);
+      blinkVerdict = {
+        grade: "mediocre",
+        html: `⚠️ <b>跳刀转化率偏低（${blinkItem.time_str} 闪烁匕首）：</b>斥资 2250 金做出跳刀后仅斩获 <b>${postKillCnt} 杀 / ${postDeathCnt} 死</b>（后期伤害仅 <b>${fmtNum(
+          lateP.hero_damage_gain || 0
+        )}</b>）${
+          postDeathCnt > 0
+            ? `，且在 <b>${postBlinkDeaths.map((d) => `${d.time_str}被${d.killer}`).join("、")}</b> 带着跳刀被抓死`
+            : ""
+        }，出跳后的先手抓人与输出转化未能完全打出来。`,
+      };
+      warnings.push(blinkVerdict.html);
+    } else {
+      badges.push(`⚡ 跳刀先手(${postKillCnt}杀/${postDeathCnt}死)`);
+      blinkVerdict = {
+        grade: "ok",
+        html: `⚡ <b>跳刀节奏审计（${blinkItem.time_str} 闪烁匕首）：</b>出跳后打出 <b>${postKillCnt} 杀 / ${postDeathCnt} 死</b>。`,
+      };
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // 3. Core BKB Audit vs Support Greed (Midas / Damage vs Force Staff / Glimmer)
+  // -------------------------------------------------------------------------
+  const bkbItem = hasItemMatch(/黑皇杖|black_king_bar/i);
+  const mantaItem = hasItemMatch(/分身斧|manta/i);
+  const forceItem = hasItemMatch(/原力法杖|推推|force_staff|飓风长戟/i);
+  const glimmerItem = hasItemMatch(/微光披风|glimmer_cape/i);
+  const midasItem = hasItemMatch(/迈达斯之手|点金手|hand_of_midas/i);
+  const khandaOrPhylactery = hasItemMatch(/绝刃|灵匣|phylactery|khanda/i);
+
+  if (isCore) {
+    if (bkbItem) {
+      badges.push(`🛡️ BKB稳健(${bkbItem.time_str})`);
+      highlights.push(`🛡️ <b>核心BKB纪律性（${bkbItem.time_str} 黑皇杖）：</b>按时做出BKB保障团战输出环境。`);
+    } else {
+      // Did not buy BKB: judge whether it was a smart skip or a throw
+      const hasBuiltInImmunity = /主宰|噬魂鬼|全能骑士|帕克/.test(heroShort);
+      const totalDeaths = Number(p.deaths || 0);
+      if (hasBuiltInImmunity && totalDeaths <= 3) {
+        badges.push("🧠 剑舞分身免BKB满输出");
+        highlights.push(
+          `🧠 <b>不出BKB合理性审计（免喷认证）：</b>虽然整局未出黑皇杖(BKB)，但依靠 <b>剑刃风暴魔免 + ${
+            mantaItem ? `分身斧(${mantaItem.time_str})解状态` : "技能机制"
+          } + 双无敌斩无敌帧</b> 全场仅阵亡 <b>${totalDeaths} 次</b>，省下BKB格子直接合成 <b>金箍棒+A杖</b> 将输出拉到极致！`
+        );
+      } else if (totalDeaths >= 6 && !forceItem) {
+        badges.push("🚨 缺BKB/推推自保");
+        warnings.push(
+          `🚨 <b>保命装缺失吐槽点（0 BKB / 0 推推棒）：</b>身为 ${pos}号位核心全场阵亡 <b>${totalDeaths} 次（泉水读秒 ${
+            p.dead_seconds || 0
+          }s）</b>，面对敌方切入与减速控制既未出 <b>黑皇杖(BKB)</b> 也未补 <b>原力法杖(推推棒)</b>，后期一旦被贴脸极为脆弱。`
+        );
+      }
+    }
+  } else if (isSup) {
+    // Support Greed vs Save Item Audit (Pos 4 / Pos 5)
+    const kiteThreats = oppKiteAndCatchHeroes.map((o) => o.hero_short_zh).join(" / ") || "敌方冲脸";
+    if (midasItem) {
+      badges.push(`🚨 辅助裸点金(${midasItem.time_str})`);
+      warnings.push(
+        `🚨 <b>辅助贪心毒瘤点金预警（${midasItem.time_str} 迈达斯之手）：</b>身为 <b>${pos}号位${heroShort}</b> 在中期花 2200 金裸出 <b>点金手(${midasItem.time_str})</b>${
+          glimmerItem
+            ? `，导致第一件团队救人装 <b>微光披风(${glimmerItem.time_str})</b> 拖到将近30分钟才成型`
+            : "，整局 0 微光 0 推推"
+        }，且面對敌方 <b>${kiteThreats} + 敌法师</b> 全场 <b>0 原力法杖(推推棒)</b>，属于典型的五号位贪发育出装（所幸后期36:22憋出羊刀将功补过）。`
+      );
+    }
+
+    if (khandaOrPhylactery && !forceItem && !glimmerItem) {
+      badges.push("⚠️ 纯堆伤害0推推/微光");
+      warnings.push(
+        `⚠️ <b>辅助重输出轻保命（${khandaOrPhylactery.time_str} ${khandaOrPhylactery.zh} · 0推推/0微光）：</b>虽然前中期做出大骨灰并靠 <b>灵匣→绝刃</b> 轰出 <b>${fmtNum(
+          p.hero_damage
+        )} 伤害</b>，但作为 ${pos}号位整局 <b>0 原力法杖(推推棒) / 0 微光披风</b>，无位移自保导致被敌方冲脸提款阵亡 <b>${
+          p.deaths
+        } 次（读秒 ${p.dead_seconds}s）</b>；若把绝刃卷轴换成推推棒，存活率与救队友能力会再上一层楼。`
+      );
+    } else if (!midasItem && !forceItem && oppKiteAndCatchHeroes.length >= 2) {
+      warnings.push(
+        `⚠️ <b>团队救人装短板（全队缺推推棒）：</b>面对敌方 <b>${kiteThreats}</b> 的减速/钩咬留人，未补出 <b>原力法杖(推推棒)</b> 帮队友拉开身位。`
+      );
+    }
+
+    if (glimmerItem && !midasItem) {
+      badges.push(`🛡️ 微光救人(${glimmerItem.time_str})`);
+      highlights.push(`🛡️ <b>团队保人出装（${glimmerItem.time_str} 微光披风）：</b>主动做出微光披风掩护队友拉扯。`);
+    }
+    const hexItem = hasItemMatch(/邪恶镰刀|羊刀|sheepstick/i);
+    if (hexItem) {
+      badges.push(`🐑 后期羊刀(${hexItem.time_str})`);
+      highlights.push(
+        `🐑 <b>决胜硬控终极装（${hexItem.time_str} 邪恶镰刀·羊刀）：</b>高地决战补出羊刀配合多重施法提供瞬发先手羊！`
+      );
+    }
+  }
+
+  const timelinePills = filterMajorItems(phaseItems.map((it) => ({ zh_name: it.zh, key: it.key, time_str: it.time_str })), 6)
+    .map((it) => `<span class="item-intel-step">${escapeHtml(it.zh_name)} <b>${escapeHtml(it.time_str)}</b></span>`)
+    .join('<span class="item-intel-arrow">→</span>');
+
+  return {
+    badges,
+    highlights,
+    warnings,
+    blinkVerdict,
+    timelinePills,
+    hasGreedySupportWarning: warnings.some((w) => /点金手|0推推/.test(w)),
+  };
 }
 
 /**
@@ -9054,25 +9521,34 @@ function computeStageRankings(stageKey, report) {
         return m > 26;
       });
       const aegisTaken = (mo.roshan_events || []).some((r) => String(r).includes(p.hero_short_zh));
+      const roshConv = analyzeRoshanAndResourceConversion(report);
 
       score +=
         k * 18 +
         dmg / 320 +
         (Number(p.tower_damage || 0) / 450) +
-        (aegisTaken ? 18 : 0) +
-        ctx.lateDeathsCtx.sacList.length * 8 -
+        (aegisTaken ? (roshConv.grade === "godlike" ? 26 : 18) : 0) +
+        ctx.lateDeathsCtx.sacList.length * 6 -
         ctx.lateDeathsCtx.effectiveBadDeaths * 22 -
         lateSolos.length * 30;
 
-      // Penalize core who ate late gold but dealt very low late damage
-      if (isCore && gold >= 5500 && dmg < 6500) {
-        score -= 24;
+      // Penalize core who ate late gold, dealt low late damage AND had < 2 kills
+      if (isCore && gold >= 5500 && dmg < 6500 && k < 2) {
+        score -= 20;
+      } else if (isCore && gold >= 5500 && dmg < 6500) {
+        score -= 8;
       }
 
       const goodParts = [
         `决胜期 <b>${k}杀/${d}死</b>，轰出 <b>${fmtNum(dmg)} 英雄伤害</b>（+${fmtNum(gold)}金）`,
       ];
-      if (aegisTaken) goodParts.push(`控下肉山不朽盾带队平推高地`);
+      if (aegisTaken) {
+        goodParts.push(
+          roshConv.grade === "godlike"
+            ? `控下肉山不朽盾并顺势拔光外塔连破高地塔与兵营（完美资源转化）`
+            : `控下肉山不朽盾带队推进高地`
+        );
+      }
       if (Number(p.tower_damage || 0) >= 4000) goodParts.push(`全场狂拆 <b>${fmtNum(p.tower_damage)} 建筑伤害</b>`);
       if (items) goodParts.push(`成型 <b>${items}</b>`);
       if (isSup && ctx.lateDeathsCtx.sacList.length > 0) {
@@ -9098,7 +9574,7 @@ function computeStageRankings(stageKey, report) {
         );
       }
       if (isCore && gold >= 5500 && dmg < 6500) {
-        badParts.push(`身为 ${pos}号位后期吃下 <b>+${fmtNum(gold)}金</b> 却仅打出 <b>${fmtNum(dmg)} 伤害</b>，输出转化严重不足`);
+        badParts.push(`身为 ${pos}号位后期吃下 <b>+${fmtNum(gold)}金</b> 仅打出 <b>${fmtNum(dmg)} 伤害</b>（虽收割 ${k} 杀，但跳刀切入与持续输出偏保守）`);
       }
       if (ctx.lateDeathsCtx.badDeaths > 0 && lateSolos.length === 0) {
         badParts.push(
@@ -9113,17 +9589,21 @@ function computeStageRankings(stageKey, report) {
       }
       badReason = badParts.join("；") || (d > 0 ? `后期阵亡 ${d} 次，注意高地团拉扯` : "决胜期完美收官 0 失误");
     } else {
-      // Stage 4: Overall 1~5 Role Duty & Full-Game Hard Power
+      // Overall Full-Game Summary: 1~5 Role Duty, Itemization Intelligence & Death Reasonableness
       const score100 = getHeroScore100(p);
+      const itemIntel = analyzePlayerItemizationIntelligence(p, report);
       const totalSac =
         ctx.laneDeathsCtx.sacList.length +
         ctx.midDeathsCtx.sacList.length +
         ctx.lateDeathsCtx.sacList.length;
+      const unexcusedDeaths = Math.max(0, Number(p.deaths || 0) - totalSac);
       score =
         score100 +
-        (Number(p.contrib_share_pct || 20) - Number(p.blame_share_pct || 20)) * 0.8 +
-        totalSac * 3.5 -
-        ctx.soloEvents.length * 8;
+        (Number(p.contrib_share_pct || 20) - Number(p.blame_share_pct || 20)) * 0.85 +
+        itemIntel.highlights.length * 2.5 -
+        itemIntel.warnings.length * 4.5 -
+        unexcusedDeaths * 1.6 -
+        ctx.soloEvents.length * 7;
 
       const goodParts = [
         `全场 <b>${p.kda}（${p.kill_participation_pct}%参战）</b>，伤害 <b>${fmtNum(p.hero_damage)}</b>`,
@@ -9133,12 +9613,26 @@ function computeStageRankings(stageKey, report) {
       if (isSup && (Number(p.obs_placed || 0) + Number(p.sen_placed || 0)) >= 12) {
         goodParts.push(`视野劳模 <b>${p.obs_placed}假/${p.sen_placed}真</b>`);
       }
-      if (ctx.counterItemsBuilt.length > 0) goodParts.push(`针对装 ${ctx.counterItemsBuilt[0]}`);
+      if (itemIntel.badges.filter((b) => !/⚠️|🚨/.test(b)).length > 0) {
+        goodParts.push(
+          `灵性出装：<b>${itemIntel.badges
+            .filter((b) => !/⚠️|🚨/.test(b))
+            .slice(0, 2)
+            .join(" · ")}</b>`
+        );
+      } else if (ctx.counterItemsBuilt.length > 0) {
+        goodParts.push(`针对装 ${ctx.counterItemsBuilt[0]}`);
+      }
       goodReason = goodParts.join(" · ");
 
       const badParts = [];
       if (p.is_afk_farmer) {
         badParts.push(`身为${pos}号位前中期闷头钻野拒绝参战，纯靠队友4打5撑局势`);
+      }
+      if (itemIntel.warnings.length > 0) {
+        const cleanWarn = itemIntel.warnings[0].replace(/<[^>]+>/g, "");
+        const shortWarn = cleanWarn.includes("：") ? cleanWarn.split("：").slice(1).join("：") : cleanWarn;
+        badParts.push(`<b>出装审计：</b>${escapeHtml(shortWarn)}`);
       }
       if (ctx.soloEvents.length > 0) {
         badParts.push(
@@ -9152,12 +9646,12 @@ function computeStageRankings(stageKey, report) {
       }
       if (totalSac >= 2 && Number(p.deaths || 0) >= 8) {
         badParts.push(
-          `全场 ${p.deaths} 死中含 <b>${totalSac} 波团战合理换命牺牲</b>，但对线与落单走位仍需收紧（读秒 ${p.dead_seconds}s）`
+          `全场 ${p.deaths} 死中虽含 <b>${totalSac} 波团战合理换命牺牲</b>，但其余 ${unexcusedDeaths} 次对线/落单阵亡仍偏多（读秒 ${p.dead_seconds}s）`
         );
       } else if (Number(p.deaths || 0) >= 8) {
         badParts.push(`全场阵亡 <b>${p.deaths} 次</b>（泉水读秒 ${p.dead_seconds}s）`);
       }
-      badReason = badParts.join("；") || `全场仅 ${p.deaths} 死，整体履职稳定`;
+      badReason = badParts.join("；") || `全场仅 ${p.deaths} 死，出装与履职稳定`;
     }
 
     return {
@@ -9205,9 +9699,14 @@ function renderStageRankingsBlockHtml(stageKey, report) {
     `;
   };
 
+  const rankHeaderTitle =
+    stageKey === "overall"
+      ? "⚖️ 全场综合五人红黑榜（整局 1~5 号位职责兑现 · 灵性出装 &amp; 阵亡合理性总评）"
+      : "⚖️ 本阶段五人红黑榜（结合 1~5 号位职责履行 &amp; 团战换命合理性审计）";
+
   return `
     <div class="stage-rank-box">
-      <div class="stage-rank-header">⚖️ 本阶段五人红黑榜（结合 1~5 号位职责履行 &amp; 团战换命合理性审计）</div>
+      <div class="stage-rank-header">${rankHeaderTitle}</div>
       <div class="stage-rank-grid">
         ${renderEntry(rk.best1, "🥇 头号做得好", "best1", true)}
         ${renderEntry(rk.best2, "🥈 第二做得好", "best2", true)}
@@ -9453,7 +9952,14 @@ function buildRichFourStageCardsHtml(report) {
   )[0];
   const mo = df.macro_objectives_by_side?.[side] || {};
   const us = df.unpressed_saves_by_side?.[side] || {};
-  const peakTf = (report.key_teamfights || [])[0];
+  const lateTeamfights = (report.key_teamfights || []).filter((tf) => {
+    const startSec = Number(tf.start_sec || 0);
+    if (startSec >= 1400) return true;
+    const m = parseInt(String(tf.time_range || "0").split(":")[0], 10);
+    return m >= 24;
+  });
+  const peakTf = lateTeamfights[0] || (report.key_teamfights || [])[0];
+  const roshAudit = analyzeRoshanAndResourceConversion(report);
 
   const lateOverviewBullet = `<span class="stage-key-pill">后期决战走势</span> 25m–终局人头交换 <b>${sideZh} ${lateOwnKills} : ${lateOppKills} ${oppZh}</b>，经济差再拉开 <b style="color:${
     lateGoldDelta >= 0 ? "var(--green-light)" : "var(--red-light)"
@@ -9481,21 +9987,17 @@ function buildRichFourStageCardsHtml(report) {
     const m = parseInt(String(ev.time_str || "0").split(":")[0], 10);
     return m > 26;
   });
-  const roshStr =
-    (mo.roshan_events || []).length > 0
-      ? mo.roshan_events.slice(0, 2).join("；")
-      : "本局无肉山盾记录";
-  const roshAndPickoffBullet = `<span class="stage-key-pill">肉山盾奶与后期掉点</span> ${escapeHtml(
-    roshStr
-  )}；${
+  const roshAndPickoffBullet = `<span class="stage-key-pill">控盾资源转化与掉点</span> ${
+    roshAudit.shortHtml
+  } ${
     lateSoloEvents.length > 0
-      ? `🚨 26m后关键期落单被抓：${escapeHtml(
+      ? `｜ 🚨 26m后关键期落单被抓：<b>${escapeHtml(
           lateSoloEvents
             .map((ev) => `${ev.time_str} ${ev.pos}号位${ev.hero_short_zh}在${ev.zone_zh}被${ev.killer_zh || "敌方"}击杀`)
             .join("、")
-        )}`
-      : "✓ 26m后决胜期 0 次无脑落单白给"
-  }。`;
+        )}</b>`
+      : "｜ ✓ 26m后决胜期 0 次无脑落单白给"
+  }`;
 
   const bbSummary =
     (mo.buyback_events || []).length > 0
@@ -9512,7 +10014,7 @@ function buildRichFourStageCardsHtml(report) {
     report.radiant_score
   } : ${report.dire_score}</b> (${escapeHtml(report.duration_str)})。`;
 
-  // --- STAGE 4: 全局五人硬实力 · 团队执行力与同位置 1v1 对位总账 ---
+  // --- OVERALL SUMMARY CARD (Not "Stage 4"! Full-Game Hard Power & 1~5 Role Mirror Summary) ---
   const ownStuns = own.reduce((s, p) => s + Number(p.stuns_sec || 0), 0).toFixed(1);
   const oppStuns = opp.reduce((s, p) => s + Number(p.stuns_sec || 0), 0).toFixed(1);
   const topStunner = [...own].sort((a, b) => Number(b.stuns_sec || 0) - Number(a.stuns_sec || 0))[0];
@@ -9565,29 +10067,29 @@ function buildRichFourStageCardsHtml(report) {
     {
       stageKey: "lane",
       icon: "🌅",
-      badge: "阶段 1",
+      badge: "阶段 1 · 前期",
       title: "00:00 - 10:00 对线期三路表现 · 游走Gank与抢符拉野",
       bullets: [laneOverviewBullet, ...laneMatchupBullets, roamAndGankBullet, resourcesBullet],
     },
     {
       stageKey: "mid",
       icon: "⚔️",
-      badge: "阶段 2",
+      badge: "阶段 2 · 中期",
       title: "10:00 - 25:00 中期资源转化 · 主动抓人 · 英雄特性推塔与开雾齐整度",
       bullets: [midOverviewBullet, midPushAndGankBullet, farmingBullet, smokeBullet, attendanceBullet],
     },
     {
       stageKey: "late",
       icon: "🔥",
-      badge: "阶段 3",
-      title: "25:00 - 终局 决胜团战 · 肉山高地 · 买活博弈与后期刷钱转化",
+      badge: "阶段 3 · 后期",
+      title: "25:00 - 终局 决胜团战 · 控盾推高地转化 · 买活博弈与刷钱兑现",
       bullets: [lateOverviewBullet, peakTfBullet, roshAndPickoffBullet, buybackAndSaveBullet],
     },
     {
       stageKey: "overall",
-      icon: "📊",
-      badge: "阶段 4",
-      title: "全局五人硬实力 · 团队执行力与同位置 1v1 对位总账",
+      icon: "🏆",
+      badge: "全场总账",
+      title: "整局五人硬实力 · 团队资源转化与 1~5 号位对位总评",
       bullets: stage4Bullets,
     },
   ];
@@ -9895,6 +10397,11 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   }
 
   // =========================================================================
+  // AI 灵性出装 · 克制关系 · 跳刀转化率 · BKB/辅助贪心专项审计
+  // =========================================================================
+  const itemIntel = analyzePlayerItemizationIntelligence(p, report);
+
+  // =========================================================================
   // 功过得失清单（👍 哪里做得好 vs 👎 哪里做得不好）
   // =========================================================================
   const goodPoints = [];
@@ -9923,7 +10430,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       goodPoints.push(
         `<b>决胜收割与拆迁兑现：</b>后期轰出 <b>${fmtNum(lateDmg)} 伤害</b>，全场建筑推塔高达 <b>${fmtNum(
           p.tower_damage || 0
-        )}</b>${aegisTaken ? "，带盾终结比赛" : ""}。`
+        )}</b>${aegisTaken ? "，带盾顺势拔光外塔平推三路高地终结比赛" : ""}。`
       );
     }
   } else {
@@ -9955,6 +10462,10 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       );
     }
   }
+  // Inject top itemization intelligence highlights into goodPoints
+  itemIntel.highlights.slice(0, 2).forEach((hl) => {
+    goodPoints.push(hl);
+  });
   if (goodPoints.length === 0 && Array.isArray(p.strengths)) {
     p.strengths.slice(0, 2).forEach((s) => goodPoints.push(escapeHtml(s)));
   }
@@ -9965,6 +10476,10 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       `<b>核心失职（万年刷野躺平）：</b>中期吃下 ${midGoldShare}% 经济却仅打 ${midDmgShare}% 伤害，${tfAfkCnt} 波团战缺席卖队友独刷。`
     );
   }
+  // Inject itemization warnings (greedy support Midas, no Force Staff/BKB, low Blink conversion) into badPoints
+  itemIntel.warnings.forEach((w) => {
+    badPoints.push(w);
+  });
   if (soloEvents.length > 0) {
     badPoints.push(
       `<b>脱离团队落单被抓（${soloEvents.length}次）：</b>${soloEvents
@@ -10001,7 +10516,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
         .join("、")}），残血需更果断后撤补给。`
     );
   }
-  if (isCore && lateGold >= 5500 && lateDmg < 6500) {
+  if (isCore && lateGold >= 5500 && lateDmg < 6500 && !itemIntel.warnings.some((w) => w.includes("跳刀"))) {
     badPoints.push(
       `<b>后期输出转化偏低：</b>25m+ 吃下 +${fmtNum(lateGold)} 金却仅打出 ${fmtNum(lateDmg)} 英雄伤害，团战切入与自保需加强。`
     );
@@ -10020,6 +10535,36 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     }
   }
 
+  const allItemBullets = [...itemIntel.highlights, ...itemIntel.warnings];
+  const itemIntelBoxHtml =
+    allItemBullets.length > 0 || itemIntel.timelinePills
+      ? `
+      <div class="verdict-item-intel-box">
+        <div class="verdict-item-intel-head">
+          <span class="verdict-item-intel-title">🧠 AI 灵性出装 · 敌我克制 · 跳刀转化率 &amp; BKB/救人装审计</span>
+          <div class="verdict-item-intel-badges">
+            ${itemIntel.badges
+              .map(
+                (b) =>
+                  `<span class="item-intel-badge ${
+                    /🚨/.test(b) ? "bad" : /⚠️/.test(b) ? "warn" : "good"
+                  }">${escapeHtml(b)}</span>`
+              )
+              .join("")}
+          </div>
+        </div>
+        ${
+          itemIntel.timelinePills
+            ? `<div class="verdict-item-timeline-row"><span class="timeline-label">关键成装轴：</span>${itemIntel.timelinePills}</div>`
+            : ""
+        }
+        <ul class="verdict-item-intel-list">
+          ${allItemBullets.map((line) => `<li>${line}</li>`).join("")}
+        </ul>
+      </div>
+    `
+      : "";
+
   const html = `
     <div class="verdict-chronology-story-v2">
       <div class="story-act-row">
@@ -10034,6 +10579,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
         <span class="story-act-badge late">🔥 第三幕 · 终局决战 (25:00–终局)</span>
         <p class="story-act-text">${act3Story}</p>
       </div>
+      ${itemIntelBoxHtml}
       <div class="story-good-bad-grid">
         <div class="story-gb-box good">
           <div class="story-gb-title">👍 哪里做得好（高光与细活）</div>
@@ -10376,425 +10922,313 @@ function renderVerdictAndBlameSection(report) {
     return `<div class="verdict-stat-pills-row">${pills.join("")}</div>`;
   };
 
-  // 2.2 Card 1 (#mvp-card): Our #1 Top Contributor (MVP in Win / SVP in Loss)
-  const mvpBody = document.getElementById("mvp-card-body");
-  let mvpPlayer = sortedByContrib[0]?.player || own[0];
-  const mvpContribPct =
-    sortedByContrib.find((x) => Number(x.player.player_slot) === Number(mvpPlayer?.player_slot))
-      ?.contribShare ??
-    mvpPlayer?.contrib_share_pct ??
-    26.0;
+  // 2.2 Render ALL 5 Players' Verdict Cards & 5-Player Switcher (`1~5号位全员可看评价 + 📋 全部(5)`)
+  const verdictSwitcherEl = document.getElementById("verdict-cards-switcher");
+  const verdictGridEl = document.getElementById("verdict-grid-3col");
 
-  if (mvpBody && mvpPlayer) {
-    const heroShort = mvpPlayer.hero_short_zh || mvpPlayer.hero_name;
-    const mvpScore100 = getHeroScore100(mvpPlayer);
-    const grokMvpPlayer = (grok?.players || []).find(
-      (gp) => Number(gp.slot) === Number(mvpPlayer.player_slot)
-    );
-    const evidences = [];
-    if (Array.isArray(mvpPlayer.strengths)) {
-      mvpPlayer.strengths.slice(0, 2).forEach((r) => evidences.push(r));
-    }
-    if (Array.isArray(grokMvpPlayer?.good)) {
-      grokMvpPlayer.good.slice(0, 2).forEach((g) => {
-        if (!evidences.includes(g)) evidences.push(g);
+  if (verdictSwitcherEl && verdictGridEl) {
+    // Build the ordered 5-player evaluation list
+    let fiveVerdictEntries = [];
+    if (won) {
+      const mvpP = sortedByContrib[0]?.player || own[0];
+      const runnerP = (sortedByContrib[1] || sortedByContrib[0])?.player || own[1] || own[0];
+      const stP = strugglePlayer || sortedByContrib[sortedByContrib.length - 1]?.player;
+      const usedSlots = new Set(
+        [mvpP?.player_slot, runnerP?.player_slot, stP?.player_slot].filter((x) => x !== undefined)
+      );
+      const middleContributors = sortedByContrib
+        .filter((x) => !usedSlots.has(x.player.player_slot))
+        .map((x) => x.player);
+
+      const orderedWinPlayers = [mvpP, runnerP, ...middleContributors, stP].filter(Boolean);
+      // Deduplicate by player_slot just in case
+      const seenSlots = new Set();
+      orderedWinPlayers.forEach((p) => {
+        if (!p || seenSlots.has(Number(p.player_slot))) return;
+        seenSlots.add(Number(p.player_slot));
+        const share =
+          sortedByContrib.find((x) => Number(x.player.player_slot) === Number(p.player_slot))
+            ?.contribShare ??
+          p.contrib_share_pct ??
+          20.0;
+        let roleType = "runnerup";
+        let tabTag = "🎖️ 凯旋功臣";
+        let cardHeader = "🎖️ 凯旋功臣 · 节奏联动与团战支柱";
+        let themeClass = "runnerup-theme";
+        let statusTag = p.contrib_tier || "🎖️ 凯旋功臣";
+        let copyBtnLabel = "复制庆功词";
+        let isTrouble = false;
+        let isSpot = false;
+
+        if (Number(p.player_slot) === Number(mvpP?.player_slot)) {
+          roleType = "mvp";
+          tabTag = "👑 头号首功";
+          cardHeader = "👑 头号首功 · 本局擎天真大腿 (MVP)";
+          themeClass = "mvp-theme";
+          statusTag = p.contrib_tier || "👑 头号首功";
+          copyBtnLabel = "复制首功贺电";
+          isSpot = true;
+        } else if (Number(p.player_slot) === Number(runnerP?.player_slot)) {
+          roleType = "runnerup";
+          tabTag = "⚔️ 二号功臣";
+          cardHeader = "⚔️ 二号功臣 · 破阵二当家 & 定海神针";
+          themeClass = "runnerup-theme";
+          statusTag = p.contrib_tier || "⚔️ 破阵二当家";
+          copyBtnLabel = "复制庆功词";
+        } else if (Number(p.player_slot) === Number(stP?.player_slot)) {
+          roleType = "struggle";
+          tabTag = "🐟 短板提醒";
+          cardHeader = "🐟 惊险躺赢/短板算账 · 为什么这把表现有瑕疵";
+          themeClass = "struggle-theme";
+          statusTag = "⚠️ 胜局短板复盘";
+          copyBtnLabel = "复制短板提醒";
+          isTrouble = true;
+        } else {
+          const midRank = fiveVerdictEntries.length + 1;
+          roleType = "runnerup";
+          tabTag = midRank === 3 ? "🎖️ 三号功臣" : "🛡️ 四号功臣";
+          cardHeader =
+            midRank === 3
+              ? "🎖️ 三号功臣 · 关键节奏与火力兑现"
+              : "🛡️ 四号功臣 · 团队视野与控制保障";
+          themeClass = "runnerup-theme";
+          statusTag = p.contrib_tier || tabTag;
+          copyBtnLabel = "复制庆功词";
+        }
+
+        fiveVerdictEntries.push({
+          key: `slot_${p.player_slot}`,
+          player: p,
+          share,
+          roleType,
+          tabTag,
+          cardHeader,
+          themeClass,
+          statusTag,
+          copyBtnLabel,
+          isTrouble,
+          isSpot,
+        });
+      });
+    } else {
+      // LOSS mode: #1 Blame, #2 Blame, #1 SVP, and remaining 2 teammates
+      const c1P = sortedByBlame[0]?.player || own[0];
+      const c2P = (sortedByBlame[1] || sortedByBlame[0])?.player || own[1] || own[0];
+      const svpP = sortedByContrib[0]?.player || own[own.length - 1];
+      const orderedLossPlayers = [
+        c1P,
+        c2P,
+        svpP,
+        ...sortedByBlame.map((x) => x.player),
+      ].filter(Boolean);
+      const seenSlots = new Set();
+      orderedLossPlayers.forEach((p) => {
+        if (!p || seenSlots.has(Number(p.player_slot))) return;
+        seenSlots.add(Number(p.player_slot));
+        const bShare =
+          sortedByBlame.find((x) => Number(x.player.player_slot) === Number(p.player_slot))
+            ?.blameShare ??
+          p.blame_share_pct ??
+          20.0;
+        const cShare =
+          sortedByContrib.find((x) => Number(x.player.player_slot) === Number(p.player_slot))
+            ?.contribShare ??
+          p.contrib_share_pct ??
+          20.0;
+        let roleType = "culprit2";
+        let tabTag = "⚖️ 背锅复盘";
+        let cardHeader = "⚖️ 败局全员审讯 · 功过得失与出装复盘";
+        let themeClass = "culprit-theme";
+        let statusTag = p.rating_tier || "败局审讯";
+        let copyBtnLabel = "复制复盘词";
+        let isTrouble = true;
+        let isSpot = false;
+        let displayShare = bShare;
+
+        if (Number(p.player_slot) === Number(c1P?.player_slot)) {
+          roleType = "culprit1";
+          tabTag = "🚨 头号大锅";
+          cardHeader = "🚨 本方头号大锅 · 一级战犯逮捕令";
+          themeClass = "culprit-theme";
+          statusTag = p.rating_tier || "头号大锅";
+          copyBtnLabel = "复制处刑词";
+          isSpot = true;
+        } else if (Number(p.player_slot) === Number(c2P?.player_slot)) {
+          roleType = "culprit2";
+          tabTag = "⚠️ 二号次锅";
+          cardHeader = "⚠️ 二号背锅位 · 次锅共犯审讯室";
+          themeClass = "culprit-theme";
+          statusTag = "⚠️ 二号背锅位";
+          copyBtnLabel = "复制次锅算账";
+        } else if (Number(p.player_slot) === Number(svpP?.player_slot)) {
+          roleType = "svp";
+          tabTag = "👑 孤胆院长";
+          cardHeader = "👑 败方孤胆院长 · 全场尽力大腿 (SVP)";
+          themeClass = "mvp-theme";
+          statusTag = "👑 孤胆院长";
+          copyBtnLabel = "复制表彰词";
+          isTrouble = false;
+          displayShare = cShare;
+        } else {
+          roleType = "culprit2";
+          tabTag = "📋 战局审讯";
+          cardHeader = `📋 ${p.pos}号位${p.hero_short_zh} · 全周期功过与灵性出装审讯`;
+          themeClass = "struggle-theme";
+          statusTag = `${p.pos}号位复盘`;
+          copyBtnLabel = "复制复盘词";
+        }
+
+        fiveVerdictEntries.push({
+          key: `slot_${p.player_slot}`,
+          player: p,
+          share: displayShare,
+          roleType,
+          tabTag,
+          cardHeader,
+          themeClass,
+          statusTag,
+          copyBtnLabel,
+          isTrouble,
+          isSpot,
+        });
       });
     }
 
-    const mvpChronologyHtml = buildPlayerChronologyStoryHtml(
-      mvpPlayer,
-      report,
-      won ? "mvp" : "svp",
-      Number(mvpContribPct).toFixed(1)
-    );
-
-    const mvpCopyText = won
-      ? `🏆【凯旋头号首功 MVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：本局打分 ${mvpScore100}/100 分，独占全队 ${mvpContribPct}% 胜局贡献！KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}，推塔 ${fmtNum(mvpPlayer.tower_damage)}。${mvpPlayer.praise_talk || evidences[0] || ""}`
-      : `👑【败方孤胆院长 SVP】${mvpPlayer.personaname} (${heroShort} · ${mvpPlayer.pos_label})：本局打分 ${mvpScore100}/100 分！KDA ${mvpPlayer.kda}，GPM ${mvpPlayer.gpm}，英雄伤害 ${fmtNum(mvpPlayer.hero_damage)}。${evidences[0] || ""}`;
-
-    mvpBody.innerHTML = `
-      <div class="verdict-hero-row">
-        ${
-          mvpPlayer.hero_img
-            ? `<img class="verdict-portrait" src="${escapeHtml(mvpPlayer.hero_img)}" alt="${escapeHtml(heroShort)}" />`
-            : ""
-        }
-        <div class="verdict-identity">
-          <div class="verdict-title-line">
-            <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
-            <span class="verdict-player-name">${escapeHtml(mvpPlayer.personaname)}${mvpPlayer.is_me ? " [我]" : ""}</span>
-            <span class="status-pill connected">${escapeHtml(mvpPlayer.pos_label)} · ${escapeHtml(
-      won ? mvpPlayer.contrib_tier || "👑 头号首功" : "👑 孤胆院长"
-    )}</span>
-          </div>
-          ${renderCardStatPills(mvpPlayer, false)}
-        </div>
-        <div class="verdict-score-box">
-          <div class="verdict-score-num">${mvpScore100}<small>/100</small></div>
-          <div class="verdict-score-sub">${
-            won ? `本局评分 · 贡献 ${Number(mvpContribPct).toFixed(1)}%` : `本局评分 · 贡献 ${Number(mvpContribPct).toFixed(1)}%`
-          }</div>
-        </div>
-      </div>
-      ${mvpChronologyHtml}
-      <div class="verdict-quote-bar">
-        <span>${escapeHtml(
-          won
-            ? mvpPlayer.praise_talk ||
-                `「${heroShort} 这把真神降临砍下 ${mvpScore100}/100 分包揽 ${mvpContribPct}% 胜局贡献，今晚车队全员排队敬茶！」`
-            : `「这把要不是 ${heroShort} (${mvpScore100}/100分) 死命顶着局势，早就提前十五分钟敲 GG 了。」`
-        )}</span>
-        <button type="button" class="button secondary" data-copy-quote="${escapeHtml(mvpCopyText)}">${
-      won ? "复制首功贺电" : "复制表彰词"
-    }</button>
-      </div>
-    `;
-  }
-
-  // 2.3 Card 2 (#culprit-card):
-  // - When WON: #2 Contributor ("⚔️ 二号功臣 · 破阵二当家 & 定海神针") with early->mid->late chronology!
-  // - When LOST: #1 Blame Culprit ("🚨 本方头号大锅 · 一级战犯逮捕令") with early->mid->late chronology!
-  const culpritBody = document.getElementById("culprit-card-body");
-  if (culpritBody) {
-    if (won) {
-      const runnerEntry = sortedByContrib[1] || sortedByContrib[0];
-      const runner = runnerEntry?.player || own[0];
-      const runnerShare = runnerEntry?.contribShare ?? runner?.contrib_share_pct ?? 22.0;
-      const runnerScore100 = getHeroScore100(runner);
-      const grokRunner = (grok?.players || []).find(
-        (gp) => Number(gp.slot) === Number(runner?.player_slot)
-      );
-
-      const heroShort = runner.hero_short_zh || runner.hero_name;
-      const highlights = [];
-      if (Array.isArray(runner.strengths)) {
-        runner.strengths.slice(0, 2).forEach((s) => highlights.push(s));
-      }
-      if (Array.isArray(grokRunner?.good)) {
-        grokRunner.good.slice(0, 2).forEach((g) => {
-          if (!highlights.includes(g)) highlights.push(g);
-        });
-      }
-
-      const runnerChronologyHtml = buildPlayerChronologyStoryHtml(
-        runner,
-        report,
-        "runnerup",
-        Number(runnerShare).toFixed(1)
-      );
-
-      const runnerCopyText = `⚔️【凯旋二号功臣】${runner.personaname} (${heroShort} · ${runner.pos_label}) 本局打分 ${runnerScore100}/100 分，胜局贡献 ${runnerShare}%！KDA ${runner.kda}，参战率 ${runner.kill_participation_pct}%，英雄伤害 ${fmtNum(runner.hero_damage)}。${
-        runner.praise_talk || highlights[0] || ""
-      }`;
-
-      culpritBody.innerHTML = `
-        <div class="verdict-hero-row">
-          ${
-            runner.hero_img
-              ? `<img class="verdict-portrait" src="${escapeHtml(runner.hero_img)}" alt="${escapeHtml(heroShort)}" />`
-              : ""
-          }
-          <div class="verdict-identity">
-            <div class="verdict-title-line">
-              <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
-              <span class="verdict-player-name">${escapeHtml(runner.personaname)}${runner.is_me ? " [我]" : ""}</span>
-              <span class="status-pill connected">${escapeHtml(runner.pos_label)} · ${escapeHtml(
-        runner.contrib_tier || "⚔️ 破阵二当家"
-      )}</span>
-            </div>
-            ${renderCardStatPills(runner, false)}
-          </div>
-          <div class="verdict-score-box">
-            <div class="verdict-score-num">${runnerScore100}<small>/100</small></div>
-            <div class="verdict-score-sub">本局评分 · 贡献 ${Number(runnerShare).toFixed(1)}%</div>
-          </div>
-        </div>
-        ${runnerChronologyHtml}
-        <div class="verdict-quote-bar">
-          <span>${escapeHtml(
-            runner.praise_talk || `「左膀右臂定海神针！这把赢下来必须记 ${heroShort} (${runnerScore100}/100分) 半座军功章！」`
-          )}</span>
-          <button type="button" class="button secondary" data-copy-quote="${escapeHtml(runnerCopyText)}">复制庆功词</button>
-        </div>
-      `;
-    } else {
-      const culpritEntry = sortedByBlame[0];
-      const culprit = culpritEntry?.player || own[0];
-      const culpritShare = culpritEntry?.blameShare ?? culprit?.blame_share_pct ?? 25.0;
-      const culpritScore100 = getHeroScore100(culprit);
-      const grokCulprit = (grok?.players || []).find(
-        (gp) => Number(gp.slot) === Number(culprit?.player_slot)
-      );
-      const heroShort = culprit.hero_short_zh || culprit.hero_name;
-      const crimes = [];
-      if (grokCulprit?.assessment) crimes.push(grokCulprit.assessment);
-      if (Array.isArray(grokCulprit?.bad)) {
-        grokCulprit.bad.forEach((b) => crimes.push(b));
-      }
-      if (crimes.length === 0 && Array.isArray(culprit.weaknesses)) {
-        culprit.weaknesses.forEach((b) => crimes.push(b));
-      }
-
-      const culpritChronologyHtml = buildPlayerChronologyStoryHtml(
-        culprit,
-        report,
-        "culprit1",
-        Number(culpritShare).toFixed(1)
-      );
-
-      const culpritCopyText = `【头号战犯逮捕令】${culprit.personaname} (${heroShort} · ${culprit.pos_label}) 本局打分 ${culpritScore100}/100 分，分锅占比 ${culpritShare}%！KDA ${culprit.kda}，泉水读秒 ${culprit.dead_seconds || 0} 秒。${
-        culprit.trash_talk || crimes[0] || ""
-      }`;
-
-      culpritBody.innerHTML = `
-        <div class="verdict-hero-row">
-          ${
-            culprit.hero_img
-              ? `<img class="verdict-portrait" src="${escapeHtml(culprit.hero_img)}" alt="${escapeHtml(heroShort)}" />`
-              : ""
-          }
-          <div class="verdict-identity">
-            <div class="verdict-title-line">
-              <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
-              <span class="verdict-player-name">${escapeHtml(culprit.personaname)}${culprit.is_me ? " [我]" : ""}</span>
-              <span class="status-pill">${escapeHtml(culprit.pos_label)} · ${escapeHtml(culprit.rating_tier || "头号大锅")}</span>
-            </div>
-            ${renderCardStatPills(culprit, true)}
-          </div>
-          <div class="verdict-score-box">
-            <div class="verdict-score-num">${culpritScore100}<small>/100</small></div>
-            <div class="verdict-score-sub">本局评分 · 背锅 ${Number(culpritShare).toFixed(1)}%</div>
-          </div>
-        </div>
-        ${culpritChronologyHtml}
-        <div class="verdict-quote-bar">
-          <span>${escapeHtml(grokCulprit?.headline || culprit.trash_talk || "这把大锅请稳稳背好，群里发个红包不过分吧？")}</span>
-          <button type="button" class="button primary" data-copy-quote="${escapeHtml(culpritCopyText)}">复制处刑词</button>
-        </div>
-      `;
+    const defaultKey = fiveVerdictEntries[0]?.key || "all";
+    let activeVerdictKey = state.verdictActiveCard || defaultKey;
+    if (
+      activeVerdictKey !== "all" &&
+      !fiveVerdictEntries.some((e) => e.key === activeVerdictKey)
+    ) {
+      activeVerdictKey = defaultKey;
     }
-  }
+    const isAllVerdict = activeVerdictKey === "all";
 
-  // 2.3b Card 3 (#third-verdict-card):
-  // - When WON: Show the struggling / lucky-ride player (e.g., Lina in 8774383260) and explain from early->mid->late why they struggled!
-  // - When LOST: Show #2 Blame Culprit ("⚠️ 二号背锅位 · 次锅共犯审讯室")!
-  const thirdBody = document.getElementById("third-verdict-card-body");
-  if (thirdBody) {
-    if (won && strugglePlayer) {
-      const heroShort = strugglePlayer.hero_short_zh || strugglePlayer.hero_name;
-      const stScore100 = getHeroScore100(strugglePlayer);
-      const stContribShare =
-        sortedByContrib.find((x) => Number(x.player.player_slot) === Number(strugglePlayer.player_slot))
-          ?.contribShare ?? 16.0;
-      const badPoints = [];
-      if (Array.isArray(strugglePlayer.weaknesses)) {
-        strugglePlayer.weaknesses.slice(0, 2).forEach((w) => badPoints.push(w));
-      }
-      if (Array.isArray(strugglePlayer.improvements) && badPoints.length < 2) {
-        strugglePlayer.improvements.slice(0, 1).forEach((imp) => badPoints.push(`下把改进：${imp}`));
-      }
-
-      const struggleChronologyHtml = buildPlayerChronologyStoryHtml(
-        strugglePlayer,
-        report,
-        "struggle",
-        Number(stContribShare).toFixed(1)
-      );
-
-      const struggleCopyText = `🐟【胜局短板复盘 · 惊险躺赢提醒】${strugglePlayer.personaname} (${heroShort} · ${strugglePlayer.pos_label}) 本局打分 ${stScore100}/100 分（KDA ${strugglePlayer.kda}，泉水读秒 ${strugglePlayer.dead_seconds || 0} 秒）：${
-        badPoints[0] || strugglePlayer.trash_talk || "赢球免锅，但中后期走位与落单问题必须复盘！"
-      }`;
-
-      thirdBody.innerHTML = `
-        <div class="verdict-hero-row">
-          ${
-            strugglePlayer.hero_img
-              ? `<img class="verdict-portrait" src="${escapeHtml(strugglePlayer.hero_img)}" alt="${escapeHtml(heroShort)}" />`
-              : ""
-          }
-          <div class="verdict-identity">
-            <div class="verdict-title-line">
-              <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
-              <span class="verdict-player-name">${escapeHtml(strugglePlayer.personaname)}${strugglePlayer.is_me ? " [我]" : ""}</span>
-              <span class="status-pill">${escapeHtml(strugglePlayer.pos_label)} · ⚠️ 胜局短板复盘</span>
-            </div>
-            ${renderCardStatPills(strugglePlayer, true)}
-          </div>
-          <div class="verdict-score-box">
-            <div class="verdict-score-num">${stScore100}<small>/100</small></div>
-            <div class="verdict-score-sub">本局评分 · 贡献 ${Number(stContribShare).toFixed(1)}%</div>
-          </div>
-        </div>
-        ${struggleChronologyHtml}
-        <div class="verdict-quote-bar">
-          <span>${escapeHtml(
-            strugglePlayer.trash_talk ||
-              `「赢球虽然免大锅，但这把 ${heroShort} (${stScore100}/100分) 中后期连续迷路掉点，全靠大哥和辅助硬抬过关！」`
-          )}</span>
-          <button type="button" class="button secondary" data-copy-quote="${escapeHtml(struggleCopyText)}">复制短板提醒</button>
-        </div>
-      `;
-    } else if (!won && topBlame2) {
-      const heroShort = topBlame2.hero_short_zh || topBlame2.hero_name;
-      const c2Score100 = getHeroScore100(topBlame2);
-      const c2Share = sortedByBlame[1]?.blameShare ?? topBlame2.blame_share_pct ?? 22.0;
-      const crimes2 = (topBlame2.weaknesses || []).slice(0, 2);
-      const c2ChronologyHtml = buildPlayerChronologyStoryHtml(
-        topBlame2,
-        report,
-        "culprit2",
-        Number(c2Share).toFixed(1)
-      );
-      const c2CopyText = `⚠️【二号背锅位逮捕令】${topBlame2.personaname} (${heroShort} · ${topBlame2.pos_label}) 本局打分 ${c2Score100}/100 分，分锅占比 ${c2Share}%！KDA ${topBlame2.kda}，${
-        crimes2[0] || topBlame2.trash_talk || ""
-      }`;
-
-      thirdBody.innerHTML = `
-        <div class="verdict-hero-row">
-          ${
-            topBlame2.hero_img
-              ? `<img class="verdict-portrait" src="${escapeHtml(topBlame2.hero_img)}" alt="${escapeHtml(heroShort)}" />`
-              : ""
-          }
-          <div class="verdict-identity">
-            <div class="verdict-title-line">
-              <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
-              <span class="verdict-player-name">${escapeHtml(topBlame2.personaname)}${topBlame2.is_me ? " [我]" : ""}</span>
-              <span class="status-pill">${escapeHtml(topBlame2.pos_label)} · ⚠️ 二号背锅位</span>
-            </div>
-            ${renderCardStatPills(topBlame2, true)}
-          </div>
-          <div class="verdict-score-box">
-            <div class="verdict-score-num">${c2Score100}<small>/100</small></div>
-            <div class="verdict-score-sub">本局评分 · 背锅 ${Number(c2Share).toFixed(1)}%</div>
-          </div>
-        </div>
-        ${c2ChronologyHtml}
-        <div class="verdict-quote-bar">
-          <span>${escapeHtml(topBlame2.trash_talk || `「头锅吃肉，次锅喝汤，这把 ${heroShort} 的失误也难辞其咎！」`)}</span>
-          <button type="button" class="button secondary" data-copy-quote="${escapeHtml(c2CopyText)}">复制次锅算账</button>
-        </div>
-      `;
-    }
-  }
-
-  // 2.3c Verdict 3-Card Spotlight Switcher (Default to #1 Most Important Card + 1-Tap Switcher)
-  const verdictSwitcherEl = document.getElementById("verdict-cards-switcher");
-  const verdictGridEl = document.getElementById("verdict-grid-3col");
-  const vMvpCardEl = document.getElementById("mvp-card");
-  const vCulpritCardEl = document.getElementById("culprit-card");
-  const vThirdCardEl = document.getElementById("third-verdict-card");
-  if (verdictSwitcherEl && verdictGridEl && vMvpCardEl && vCulpritCardEl && vThirdCardEl) {
-    const defaultKey = won ? "mvp" : "culprit";
-    const activeVerdictKey =
-      !state.verdictActiveCard || state.verdictActiveCard === "focus"
-        ? defaultKey
-        : state.verdictActiveCard;
-
-    const mvpHeroShort = mvpPlayer?.hero_short_zh || mvpPlayer?.hero_name || "MVP";
-    const c1Player = won
-      ? (sortedByContrib[1] || sortedByContrib[0])?.player || own[0]
-      : sortedByBlame[0]?.player || own[0];
-    const c1HeroShort = c1Player?.hero_short_zh || c1Player?.hero_name || "";
-    const c3Player = won ? strugglePlayer || own[own.length - 1] : topBlame2 || own[1] || own[0];
-    const c3HeroShort = c3Player?.hero_short_zh || c3Player?.hero_name || "";
-
-    const switcherTabs = won
-      ? [
-          {
-            key: "mvp",
-            tag: "👑 头号首功",
-            hero: mvpHeroShort,
-            img: mvpPlayer?.hero_img || "",
-            pos: mvpPlayer?.pos || 1,
-            isSpot: true,
-          },
-          {
-            key: "culprit",
-            tag: "⚔️ 二号功臣",
-            hero: c1HeroShort,
-            img: c1Player?.hero_img || "",
-            pos: c1Player?.pos || 2,
-            isSpot: false,
-          },
-          {
-            key: "third",
-            tag: "🐟 短板提醒",
-            hero: c3HeroShort,
-            img: c3Player?.hero_img || "",
-            pos: c3Player?.pos || 5,
-            isSpot: false,
-          },
-        ]
-      : [
-          {
-            key: "culprit",
-            tag: "🚨 头号大锅",
-            hero: c1HeroShort,
-            img: c1Player?.hero_img || "",
-            pos: c1Player?.pos || 1,
-            isSpot: true,
-          },
-          {
-            key: "third",
-            tag: "⚠️ 二号次锅",
-            hero: c3HeroShort,
-            img: c3Player?.hero_img || "",
-            pos: c3Player?.pos || 2,
-            isSpot: false,
-          },
-          {
-            key: "mvp",
-            tag: "👑 孤胆院长",
-            hero: mvpHeroShort,
-            img: mvpPlayer?.hero_img || "",
-            pos: mvpPlayer?.pos || 1,
-            isSpot: false,
-          },
-        ];
-
+    // Render 5-Player Switcher Bar + 📋 全部(5)
     verdictSwitcherEl.innerHTML = `
-      <div class="tf-p-selector-bar verdict-selector-bar" role="tablist" aria-label="切换本局核心审判席卡片">
-        ${switcherTabs
-          .map(
-            (tab) => `
-            <button
-              type="button"
-              class="tf-p-select-btn ${activeVerdictKey === tab.key ? "is-active" : ""} ${
-              tab.isSpot ? "is-spotlight" : ""
+      <div class="tf-p-selector-bar verdict-selector-bar" role="tablist" aria-label="切换五人全周期评价与出装审计卡片">
+        ${fiveVerdictEntries
+          .map((entry) => {
+            const p = entry.player;
+            const heroShort = p.hero_short_zh || p.hero_name || "";
+            return `
+              <button
+                type="button"
+                class="tf-p-select-btn ${activeVerdictKey === entry.key ? "is-active" : ""} ${
+              entry.isSpot ? "is-spotlight" : ""
             }"
-              data-verdict-card-tab="${escapeHtml(tab.key)}"
-            >
-              ${
-                tab.img
-                  ? `<img src="${escapeHtml(tab.img)}" width="22" height="13" alt="" class="tf-p-pill-avatar" />`
-                  : ""
-              }
-              <span class="tf-pill-label">${tab.pos}号 ${escapeHtml(tab.hero)}</span>
-              <span class="tf-pill-chip ${tab.isSpot ? "focus" : ""}">${escapeHtml(tab.tag)}</span>
-            </button>
-          `
-          )
+                data-verdict-card-tab="${escapeHtml(entry.key)}"
+              >
+                ${
+                  p.hero_img
+                    ? `<img src="${escapeHtml(p.hero_img)}" width="22" height="13" alt="" class="tf-p-pill-avatar" />`
+                    : ""
+                }
+                <span class="tf-pill-label">${p.pos}号 ${escapeHtml(heroShort)}</span>
+                <span class="tf-pill-chip ${entry.isSpot ? "focus" : ""}">${escapeHtml(entry.tabTag)}</span>
+              </button>
+            `;
+          })
           .join("")}
         <button
           type="button"
-          class="tf-p-select-btn mode-all ${activeVerdictKey === "all" ? "is-active" : ""}"
+          class="tf-p-select-btn mode-all ${isAllVerdict ? "is-active" : ""}"
           data-verdict-card-tab="all"
         >
-          📋 全部(3)
+          📋 全部(${fiveVerdictEntries.length})
         </button>
       </div>
     `;
 
-    const isAllVerdict = activeVerdictKey === "all";
+    // Render all 5 player cards inside #verdict-grid-3col
     verdictGridEl.classList.toggle("is-single-card", !isAllVerdict);
-    vMvpCardEl.hidden = !isAllVerdict && activeVerdictKey !== "mvp";
-    vCulpritCardEl.hidden = !isAllVerdict && activeVerdictKey !== "culprit";
-    vThirdCardEl.hidden = !isAllVerdict && activeVerdictKey !== "third";
+    verdictGridEl.innerHTML = fiveVerdictEntries
+      .map((entry) => {
+        const p = entry.player;
+        const heroShort = p.hero_short_zh || p.hero_name || "";
+        const sc100 = getHeroScore100(p);
+        const grokP = (grok?.players || []).find((gp) => Number(gp.slot) === Number(p.player_slot));
+        const chronologyHtml = buildPlayerChronologyStoryHtml(
+          p,
+          report,
+          entry.roleType,
+          Number(entry.share).toFixed(1)
+        );
+        const isHidden = !isAllVerdict && activeVerdictKey !== entry.key;
+        const shareLabel =
+          won || entry.roleType === "svp"
+            ? `本局评分 · 贡献 ${Number(entry.share).toFixed(1)}%`
+            : `本局评分 · 背锅 ${Number(entry.share).toFixed(1)}%`;
+
+        const quoteText =
+          entry.roleType === "mvp"
+            ? p.praise_talk ||
+              `「${heroShort} 这把真神降临砍下 ${sc100}/100 分包揽 ${entry.share}% 胜局贡献，今晚车队全员排队敬茶！」`
+            : entry.roleType === "svp"
+            ? `「这把要不是 ${heroShort} (${sc100}/100分) 死命顶着局势，早就提前十五分钟敲 GG 了。」`
+            : entry.roleType === "runnerup"
+            ? p.praise_talk ||
+              `「${p.pos}号位 ${heroShort} 砍下 ${sc100}/100 分（贡献 ${entry.share}%），前中后期节奏与出装稳健扎实！」`
+            : entry.roleType === "struggle"
+            ? p.trash_talk ||
+              `「赢球虽然免大锅，但这把 ${heroShort} (${sc100}/100分) 暴露的出装与走位短板必须重点复盘！」`
+            : grokP?.headline ||
+              p.trash_talk ||
+              `「${heroShort} 本局评分 ${sc100}/100 分（分锅 ${entry.share}%），复盘细节见上方红黑清单。」`;
+
+        const copyText = `【${entry.tabTag} · ${p.pos}号位${heroShort}】${p.personaname} 本局打分 ${sc100}/100 分（${
+          won || entry.roleType === "svp" ? `贡献 ${entry.share}%` : `分锅 ${entry.share}%`
+        }），KDA ${p.kda}，GPM ${p.gpm}，英雄伤害 ${fmtNum(p.hero_damage)}，推塔 ${fmtNum(
+          p.tower_damage
+        )}。${quoteText}`;
+
+        return `
+          <article class="verdict-card ${entry.themeClass}" data-verdict-card-key="${escapeHtml(
+          entry.key
+        )}" ${isHidden ? "hidden" : ""}>
+            <div class="verdict-card-label">${escapeHtml(entry.cardHeader)}</div>
+            <div class="verdict-card-body">
+              <div class="verdict-hero-row">
+                ${
+                  p.hero_img
+                    ? `<img class="verdict-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(
+                        heroShort
+                      )}" />`
+                    : ""
+                }
+                <div class="verdict-identity">
+                  <div class="verdict-title-line">
+                    <span class="verdict-hero-name">${escapeHtml(heroShort)}</span>
+                    <span class="verdict-player-name">${escapeHtml(p.personaname)}${
+          p.is_me ? " [我]" : ""
+        }</span>
+                    <span class="status-pill ${entry.isTrouble ? "" : "connected"}">${escapeHtml(
+          p.pos_label
+        )} · ${escapeHtml(entry.statusTag)}</span>
+                  </div>
+                  ${renderCardStatPills(p, entry.isTrouble)}
+                </div>
+                <div class="verdict-score-box">
+                  <div class="verdict-score-num">${sc100}<small>/100</small></div>
+                  <div class="verdict-score-sub">${escapeHtml(shareLabel)}</div>
+                </div>
+              </div>
+              ${chronologyHtml}
+              <div class="verdict-quote-bar">
+                <span>${escapeHtml(quoteText)}</span>
+                <button type="button" class="button ${
+                  entry.roleType === "culprit1" ? "primary" : "secondary"
+                }" data-copy-quote="${escapeHtml(copyText)}">${escapeHtml(entry.copyBtnLabel)}</button>
+              </div>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
 
     verdictSwitcherEl.querySelectorAll("[data-verdict-card-tab]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        state.verdictActiveCard = btn.getAttribute("data-verdict-card-tab") || "focus";
+        state.verdictActiveCard = btn.getAttribute("data-verdict-card-tab") || defaultKey;
         if (state.currentReport) renderVerdictAndBlameSection(state.currentReport);
       });
     });
@@ -12250,11 +12684,25 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
   const teamLateGold = Math.max(1, lateOwnP.reduce((s, p) => s + Number(p.gold_gain || 0), 0));
   const teamLateDmg = Math.max(1, lateOwnP.reduce((s, p) => s + Number(p.hero_damage_gain || 0), 0));
   const teamLateTdmg = Math.max(1, lateOwnP.reduce((s, p) => s + Number(p.tower_damage_gain || 0), 0));
+  const roshAudit = analyzeRoshanAndResourceConversion(report);
+  const topLateCarry = [...lateOwnP].sort(
+    (a, b) => (b.hero_damage_gain || 0) + (b.tower_damage_gain || 0) - ((a.hero_damage_gain || 0) + (a.tower_damage_gain || 0))
+  )[0];
+  const topLateCarryDmgShare = topLateCarry
+    ? Number(((Number(topLateCarry.hero_damage_gain || 0) / teamLateDmg) * 100).toFixed(1))
+    : 0;
+  const topLateCarryTdShare = topLateCarry
+    ? Number(((Number(topLateCarry.tower_damage_gain || 0) / teamLateTdmg) * 100).toFixed(1))
+    : 0;
+
+  let totalLateSac = 0;
+  let totalLateSolos = 0;
 
   const lateCardsHtml = lateOwnP
     .map((ltp) => {
       const fullP = own.find((x) => x.hero_short_zh === ltp.hero_short_zh) || ltp;
       const ctx = analyzePlayerPhaseAndRoleContext(fullP, report);
+      const itemIntel = analyzePlayerItemizationIntelligence(fullP, report);
       const pos = Number(ltp.pos || 3);
       const k = Number(ltp.kills_count || 0);
       const d = Number(ltp.deaths_count || 0);
@@ -12270,7 +12718,26 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
           .join(" → ") || "六神成型";
       const killsStr =
         (ltp.kills_events || []).map((ke) => `${ke.time_str}斩${ke.victim_hero}`).join("、") || "团战控制拉扯";
-      const tone = dShare >= 25 || k >= 5 || ctx.lateDeathsCtx.sacList.length > 0 ? "good" : "even";
+      const lateSolos = ctx.soloEvents.filter((ev) => {
+        const m = parseInt(String(ev.time_str || "0").split(":")[0], 10);
+        return m > 26;
+      });
+      totalLateSac += ctx.lateDeathsCtx.sacList.length;
+      totalLateSolos += lateSolos.length;
+
+      const tone =
+        lateSolos.length >= 2
+          ? "warn"
+          : dShare >= 25 || k >= 5 || ctx.lateDeathsCtx.sacList.length > 0
+          ? "good"
+          : "even";
+
+      const itemAuditSnippet =
+        itemIntel.highlights[0] || itemIntel.warnings[0]
+          ? `<div style="margin-top:5px;padding-top:5px;border-top:1px dashed rgba(148,163,184,0.18);">${
+              itemIntel.highlights[0] || itemIntel.warnings[0]
+            }</div>`
+          : "";
 
       return `
         <div class="phase-deep-lane-card ${tone}">
@@ -12294,11 +12761,13 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
             ${injectHeroLogosIntoHtml(
               `<b>后期决战兑现：</b>成装 <b>${itemsStr}</b>，决胜期收割（${killsStr}）。${
                 pos === 1 && dShare >= 40
-                  ? `🌟 前中期刷出的无解肥经济在后期100%转化为毁天灭地的团战收割（占全队后期总伤害 ${dShare}%）与高地平推（占全队拆塔 ${tShare}%），满分大核终结比赛！`
+                  ? `🌟 前中期刷出的无解肥经济在后期100%转化为毁天灭地的团战收割（占全队后期总伤害 ${dShare}%）与带盾高地平推（占全队拆塔 ${tShare}%），满分大核终结比赛！`
                   : ctx.lateDeathsCtx.sacList.length > 0
                   ? `🟢 后期 ${d} 次阵亡均属决胜团第一波顶前排吃满敌方技能、掩护1号位收割团灭对手的功勋战术牺牲！`
+                  : lateSolos.length > 0
+                  ? `🚨 存在决胜期落单被抓（${lateSolos.map((s) => `${s.time_str}被${s.killer_zh}抓`).join("、")}），高地前夕严禁盲区孤走！`
                   : ""
-              }`,
+              }${itemAuditSnippet}`,
               report
             )}
           </div>
@@ -12310,8 +12779,48 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
   return `
     <div class="phase-deep-audit-section">
       <div class="phase-deep-audit-header">
-        <h4>👑 后期决战深度拆解：大核神装出山接管 · 控盾破三路高地 · 决胜团前排牺牲审计 (25:00–终局)</h4>
-        <span>检验前中期刷钱的核心是否在后期真正接管比赛，以及辅助在决胜团中的换命价值</span>
+        <h4>👑 后期决战深度拆解：肉山盾资源转化 · 大核神装出山接管 · 灵性出装与换命审计 (25:00–终局)</h4>
+        <span>重点考核：打完肉山盾有没有顺势推外塔破高地？大哥前中期刷的钱有没有接管比赛？出装与跳刀是否真正发挥作用？</span>
+      </div>
+      <div class="phase-mid-pillars-strip">
+        <div class="phase-mid-pillar">
+          <span class="pillar-tag">🛡️ 控盾 → 外塔/高地资源转化审计</span>
+          <strong>${escapeHtml(roshAudit.badgeText)}</strong>
+          <p>${injectHeroLogosIntoHtml(roshAudit.detailHtml, report)}</p>
+        </div>
+        <div class="phase-mid-pillar">
+          <span class="pillar-tag">👑 大核刷钱 → 终局收割兑现</span>
+          <strong>${
+            topLateCarry
+              ? `${topLateCarry.pos}号位${escapeHtml(topLateCarry.hero_short_zh)} 独揽 ${topLateCarryDmgShare}% 伤害 · ${topLateCarryTdShare}% 拆塔`
+              : "后期核心收割"
+          }</strong>
+          <p>${
+            topLateCarry
+              ? injectHeroLogosIntoHtml(
+                  `${topLateCarry.pos}号位${topLateCarry.hero_short_zh}决胜期轰出 <b>${fmtNum(
+                    topLateCarry.hero_damage_gain
+                  )} 英雄伤害</b> 与 <b>${fmtNum(
+                    topLateCarry.tower_damage_gain
+                  )} 建筑伤害</b>（砍下 ${topLateCarry.kills_count}杀/${topLateCarry.deaths_count}死），将前中期资源完美转化为胜势。`,
+                  report
+                )
+              : "围绕核心六神强势期抱团终结比赛。"
+          }</p>
+        </div>
+        <div class="phase-mid-pillar">
+          <span class="pillar-tag">⚖️ 决胜团前排换命 vs 落单掉点</span>
+          <strong>团战功勋换命 ${totalLateSac} 人次 · 落单掉点 ${totalLateSolos} 次</strong>
+          <p>${
+            totalLateSac > 0
+              ? `决胜期辅助/前排共有 <b>${totalLateSac} 人次</b> 在高地团第一波吃满敌方技能换取团战大胜；${
+                  totalLateSolos > 0
+                    ? `但需警惕 <b>${totalLateSolos} 次</b> 26m后落单被抓。`
+                    : "且无致命买活死。"
+                }`
+              : "后期抱团推进纪律性良好。"
+          }</p>
+        </div>
       </div>
       <div class="phase-deep-lanes-grid">
         ${lateCardsHtml}

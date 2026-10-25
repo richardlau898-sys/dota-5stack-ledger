@@ -8483,8 +8483,117 @@ body {
   margin: 2px 0 0;
 }
 
+@media (max-width: 960px) {
+  .phase-mid-pillars-strip {
+    grid-template-columns: 1fr;
+  }
+}
 
+/* =========================================================================
+   v6.3 AI 灵性出装·克制关系·跳刀转化率·BKB/辅助贪心专项审计面板 (.verdict-item-intel-box)
+   ========================================================================= */
+.verdict-item-intel-box {
+  background: linear-gradient(135deg, rgba(28, 34, 26, 0.94), rgba(18, 21, 16, 0.96));
+  border: 1px solid #454d3b;
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  padding: 9px 11px;
+  margin: 2px 0;
+}
 
+.verdict-item-intel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
 
+.verdict-item-intel-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold-light);
+}
 
+.verdict-item-intel-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.item-intel-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.item-intel-badge.good {
+  background: rgba(94, 194, 118, 0.18);
+  color: #9beaa9;
+  border: 1px solid rgba(94, 194, 118, 0.42);
+}
+
+.item-intel-badge.warn {
+  background: rgba(224, 159, 69, 0.2);
+  color: #ffd188;
+  border: 1px solid rgba(224, 159, 69, 0.45);
+}
+
+.item-intel-badge.bad {
+  background: rgba(217, 94, 83, 0.22);
+  color: #ffb1a9;
+  border: 1px solid rgba(217, 94, 83, 0.5);
+}
+
+.verdict-item-timeline-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 5px 8px;
+  margin-bottom: 6px;
+  background: rgba(14, 16, 12, 0.72);
+  border: 1px dashed #33382c;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #cfc9b8;
+}
+
+.verdict-item-timeline-row .timeline-label {
+  color: var(--muted);
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.item-intel-step {
+  background: #1c2018;
+  border: 1px solid #353b2e;
+  padding: 1px 6px;
+  border-radius: 2px;
+  color: #eae4d6;
+}
+
+.item-intel-step b {
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+.item-intel-arrow {
+  color: #7c8370;
+  font-size: 10px;
+}
+
+.verdict-item-intel-list {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.62;
+  color: #e2ddd0;
+}
 
