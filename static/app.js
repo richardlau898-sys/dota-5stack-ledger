@@ -178,10 +178,43 @@ function fmtSigned(n) {
 }
 
 /**
- * Compute 0..100 integer score for any player (100 highest, 0 lowest)
+ * Look up Grok 4.7 player entry by player_slot, pos+hero, or pos
  */
-function getHeroScore100(p) {
+function findGrokPlayerEntry(p, report = state.currentReport) {
+  if (!p || !report?.grok_coaching?.players) return null;
+  const grokPlayers = Array.isArray(report.grok_coaching.players) ? report.grok_coaching.players : [];
+  const grokSide = report.grok_coaching.side;
+  if (grokSide && p.side && p.side !== grokSide && p.side !== (grokSide === "radiant" ? "天辉" : "夜魇")) {
+    return null;
+  }
+  const heroShort = String(p.hero_short_zh || p.hero_name || "");
+  return (
+    grokPlayers.find((gp) => gp && gp.slot !== undefined && Number(gp.slot) === Number(p.player_slot)) ||
+    grokPlayers.find(
+      (gp) =>
+        gp &&
+        Number(gp.pos) === Number(p.pos) &&
+        gp.hero &&
+        (heroShort.includes(String(gp.hero)) || String(gp.hero).includes(heroShort))
+    ) ||
+    grokPlayers.find((gp) => gp && Number(gp.pos) === Number(p.pos)) ||
+    null
+  );
+}
+
+/**
+ * Compute 0..100 integer score for any player (100 highest, 0 lowest).
+ * Prioritizes Grok 4.7 AI re-evaluated score (`grok_score`) when available!
+ */
+function getHeroScore100(p, report = state.currentReport) {
   if (!p) return 60;
+  const grokP = findGrokPlayerEntry(p, report);
+  if (grokP && grokP.grok_score !== undefined && grokP.grok_score !== null) {
+    const gs = Number(grokP.grok_score);
+    if (Number.isFinite(gs) && gs > 0) {
+      return Math.max(1, Math.min(100, Math.round(gs)));
+    }
+  }
   if (p.score_100 !== undefined && p.score_100 !== null) {
     return Math.max(0, Math.min(100, Math.round(Number(p.score_100))));
   }
@@ -10460,175 +10493,183 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   // AI 灵性出装 · 克制关系 · 跳刀转化率 · BKB/辅助贪心专项审计
   // =========================================================================
   const itemIntel = analyzePlayerItemizationIntelligence(p, report);
-  const grokPlayers = Array.isArray(report.grok_coaching?.players) ? report.grok_coaching.players : [];
-  const grokP =
-    grokPlayers.find((gp) => Number(gp.slot) === Number(p.player_slot)) ||
-    grokPlayers.find(
-      (gp) =>
-        Number(gp.pos) === Number(p.pos) &&
-        gp.hero &&
-        String(p.hero_short_zh || "").includes(String(gp.hero))
-    ) ||
-    grokPlayers.find((gp) => Number(gp.pos) === Number(p.pos));
+  const grokP = findGrokPlayerEntry(p, report);
+
+  const grokBadgeHtml = `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 研判</span> `;
 
   if (grokP?.early_story) {
-    act1Story = `<b>【10m: ${lh10}/${dn10}刀 · ${fmtNum(gold10)}金 · ${laneK}杀/${laneD}死】</b>${escapeHtml(
+    act1Story = `${grokBadgeHtml}<b>【10m: ${lh10}/${dn10}刀 · ${fmtNum(gold10)}金 · ${laneK}杀/${laneD}死】</b>${escapeHtml(
       grokP.early_story
     )}`;
   }
   if (grokP?.mid_story) {
-    act2Story = `<b>【10–25m: +${fmtNum(midGold)}金 · ${midK}杀/${midD}死 · 伤${fmtNum(midDmg)}】</b>${escapeHtml(
+    act2Story = `${grokBadgeHtml}<b>【10–25m: +${fmtNum(midGold)}金 · ${midK}杀/${midD}死 · 伤${fmtNum(midDmg)}】</b>${escapeHtml(
       grokP.mid_story
     )}`;
   }
   if (grokP?.late_story) {
-    act3Story = `<b>【25m+: +${fmtNum(lateGold)}金 · ${lateK}杀/${lateD}死 · 伤${fmtNum(
+    act3Story = `${grokBadgeHtml}<b>【25m+: +${fmtNum(lateGold)}金 · ${lateK}杀/${lateD}死 · 伤${fmtNum(
       lateDmg
     )} · 总塔伤${fmtNum(p.tower_damage || 0)}】</b>${escapeHtml(grokP.late_story)}`;
   }
 
   // =========================================================================
-  // 功过得失清单（👍 哪里做得好 vs 👎 哪里做得不好，与出装框去重合并）
+  // 功过得失清单（当 Grok 4.7 AI 研判存在时，完全采用 AI 深度研判，去除弱规则模板！）
   // =========================================================================
   const goodPoints = [];
   const badPoints = [];
-  if (grokP?.good) {
-    const gText = Array.isArray(grokP.good) ? grokP.good.join("；") : String(grokP.good);
-    if (gText) goodPoints.push(`<b>🧠 Grok 4.7 AI 肯定：</b>${escapeHtml(gText)}`);
-  }
-  if (grokP?.bad) {
-    const bText = Array.isArray(grokP.bad) ? grokP.bad.join("；") : String(grokP.bad);
-    if (bText) badPoints.push(`<b>🧠 Grok 4.7 AI 锐评：</b>${escapeHtml(bText)}`);
+  const splitGrokPoints = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val.map((x) => String(x || "").trim()).filter(Boolean);
+    return String(val)
+      .split(/[；;]/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+  };
+
+  const grokGoodItems = splitGrokPoints(grokP?.good);
+  const grokBadItems = splitGrokPoints(grokP?.bad);
+
+  if (grokGoodItems.length > 0) {
+    grokGoodItems.forEach((g) => {
+      goodPoints.push(`<b>🧠 Grok 4.7 肯定：</b>${escapeHtml(g)}`);
+    });
+  } else {
+    if (isCore) {
+      if (lh10 >= 48) {
+        goodPoints.push(
+          `<b>对线基本功扎实：</b>前10分钟交出 <b>${lh10}正/${dn10}反（${fmtNum(gold10)}金·效率${
+            p.lane_efficiency_pct || 0
+          }%）</b>${laneWon ? `，联手辅助打穿${laneNameShort}` : ""}。`
+        );
+      } else if (laneDmg >= 3800) {
+        goodPoints.push(`<b>对线压制凶悍：</b>前10分钟灌出 <b>${fmtNum(laneDmg)} 英雄伤害</b>，积极消耗对手血量。`);
+      }
+      if (midGold >= 9000 && !p.is_afk_farmer) {
+        goodPoints.push(
+          `<b>中期刷钱提速极快：</b>10–25m 进账 <b>+${fmtNum(midGold)} 金（+${midP?.lh_gain || 0}刀）</b>${
+            midMajorItems ? `，准时做出 <b>${midMajorItems}</b>` : ""
+          }。`
+        );
+      } else if (midDmg >= 8500) {
+        goodPoints.push(`<b>中期团战输出支柱：</b>10–25m 轰出 <b>${fmtNum(midDmg)} 英雄伤害</b>，扛起中期正面团战。`);
+      }
+      if (lateDmg >= 14000 || Number(p.tower_damage || 0) >= 5000) {
+        goodPoints.push(
+          `<b>决胜收割与拆迁兑现：</b>后期轰出 <b>${fmtNum(lateDmg)} 伤害</b>，全场建筑推塔高达 <b>${fmtNum(
+            p.tower_damage || 0
+          )}</b>${aegisTaken ? "，带盾顺势拔光外塔平推三路高地终结比赛" : ""}。`
+        );
+      }
+    } else {
+      if (pullPct >= 20) {
+        goodPoints.push(
+          `<b>对线拉野与保核细活：</b>前10m拉野封野驻留 <b>${pullPct}%</b>（封野真眼 ${earlySen} 颗${
+            pos === 5 && lh10 <= 10 ? `·仅${lh10}刀正补全让大哥` : ""
+          }），上线换血打出 <b>${fmtNum(laneDmg)} 伤害</b>。`
+        );
+      }
+      if (lotusCnt > 0 || wisdomCnt > 0 || gateCnt > 0 || lampCnt > 0) {
+        const mList = [];
+        if (lotusCnt > 0) mList.push(`抢莲花×${lotusCnt}`);
+        if (wisdomCnt > 0) mList.push(`抢智慧符×${wisdomCnt}`);
+        if (gateCnt > 0) mList.push(`钻双生门游走×${gateCnt}`);
+        if (lampCnt > 0) mList.push(`点亮视野灯×${lampCnt}`);
+        goodPoints.push(`<b>地图资源与游走联动：</b>${mList.join("、")}，对线期参战斩获 <b>${laneK} 杀</b>。`);
+      }
+      const totalSac =
+        laneDeathsCtx.sacList.length + midDeathsCtx.sacList.length + lateDeathsCtx.sacList.length;
+      if (totalSac > 0 || Number(p.stuns_sec || 0) >= 25 || counterItemsBuilt.length > 0) {
+        goodPoints.push(
+          `<b>团战控制与战术换命：</b>全场贡献 <b>${p.stuns_sec || 0} 秒硬控</b>、铺设 <b>${
+            p.obs_placed || 0
+          }假/${p.sen_placed || 0}真眼</b>${
+            counterItemsBuilt.length > 0 ? `，做出针对装 <b>${counterItemsBuilt.join("/")}</b>` : ""
+          }${totalSac > 0 ? `，且有 <b>${totalSac} 波阵亡属前排吃技能换赢团战的合理牺牲</b>` : ""}。`
+        );
+      }
+    }
+    if (goodPoints.length === 0 && Array.isArray(p.strengths)) {
+      p.strengths.slice(0, 2).forEach((s) => goodPoints.push(escapeHtml(s)));
+    }
   }
 
-  if (isCore) {
-    if (lh10 >= 48) {
-      goodPoints.push(
-        `<b>对线基本功扎实：</b>前10分钟交出 <b>${lh10}正/${dn10}反（${fmtNum(gold10)}金·效率${
-          p.lane_efficiency_pct || 0
-        }%）</b>${laneWon ? `，联手辅助打穿${laneNameShort}` : ""}。`
-      );
-    } else if (laneDmg >= 3800) {
-      goodPoints.push(`<b>对线压制凶悍：</b>前10分钟灌出 <b>${fmtNum(laneDmg)} 英雄伤害</b>，积极消耗对手血量。`);
-    }
-    if (midGold >= 9000 && !p.is_afk_farmer) {
-      goodPoints.push(
-        `<b>中期刷钱提速极快：</b>10–25m 进账 <b>+${fmtNum(midGold)} 金（+${midP?.lh_gain || 0}刀）</b>${
-          midMajorItems ? `，准时做出 <b>${midMajorItems}</b>` : ""
-        }。`
-      );
-    } else if (midDmg >= 8500) {
-      goodPoints.push(`<b>中期团战输出支柱：</b>10–25m 轰出 <b>${fmtNum(midDmg)} 英雄伤害</b>，扛起中期正面团战。`);
-    }
-    if (lateDmg >= 14000 || Number(p.tower_damage || 0) >= 5000) {
-      goodPoints.push(
-        `<b>决胜收割与拆迁兑现：</b>后期轰出 <b>${fmtNum(lateDmg)} 伤害</b>，全场建筑推塔高达 <b>${fmtNum(
-          p.tower_damage || 0
-        )}</b>${aegisTaken ? "，带盾顺势拔光外塔平推三路高地终结比赛" : ""}。`
-      );
+  if (grokBadItems.length > 0) {
+    grokBadItems.forEach((b) => {
+      badPoints.push(`<b>🧠 Grok 4.7 锐评：</b>${escapeHtml(b)}`);
+    });
+    if (grokP?.practice) {
+      badPoints.push(`<b>🎯 下把改进处方：</b>${escapeHtml(grokP.practice)}`);
     }
   } else {
-    // Support Good Points
-    if (pullPct >= 20) {
-      goodPoints.push(
-        `<b>对线拉野与保核细活：</b>前10m拉野封野驻留 <b>${pullPct}%</b>（封野真眼 ${earlySen} 颗${
-          pos === 5 && lh10 <= 10 ? `·仅${lh10}刀正补全让大哥` : ""
-        }），上线换血打出 <b>${fmtNum(laneDmg)} 伤害</b>。`
-      );
-    }
-    if (lotusCnt > 0 || wisdomCnt > 0 || gateCnt > 0 || lampCnt > 0) {
-      const mList = [];
-      if (lotusCnt > 0) mList.push(`抢莲花×${lotusCnt}`);
-      if (wisdomCnt > 0) mList.push(`抢智慧符×${wisdomCnt}`);
-      if (gateCnt > 0) mList.push(`钻双生门游走×${gateCnt}`);
-      if (lampCnt > 0) mList.push(`点亮视野灯×${lampCnt}`);
-      goodPoints.push(`<b>地图资源与游走联动：</b>${mList.join("、")}，对线期参战斩获 <b>${laneK} 杀</b>。`);
-    }
-    const totalSac =
-      laneDeathsCtx.sacList.length + midDeathsCtx.sacList.length + lateDeathsCtx.sacList.length;
-    if (totalSac > 0 || Number(p.stuns_sec || 0) >= 25 || counterItemsBuilt.length > 0) {
-      goodPoints.push(
-        `<b>团战控制与战术换命：</b>全场贡献 <b>${p.stuns_sec || 0} 秒硬控</b>、铺设 <b>${
-          p.obs_placed || 0
-        }假/${p.sen_placed || 0}真眼</b>${
-          counterItemsBuilt.length > 0 ? `，做出针对装 <b>${counterItemsBuilt.join("/")}</b>` : ""
-        }${totalSac > 0 ? `，且有 <b>${totalSac} 波阵亡属前排吃技能换赢团战的合理牺牲</b>` : ""}。`
-      );
-    }
-  }
-  if (goodPoints.length === 0 && Array.isArray(p.strengths)) {
-    p.strengths.slice(0, 2).forEach((s) => goodPoints.push(escapeHtml(s)));
-  }
-
-  // Bad Points (every player gets honest, constructive critique; item warnings stay in itemIntelBox to avoid duplication)
-  if (p.is_afk_farmer) {
-    badPoints.push(
-      `<b>核心失职（万年刷野躺平）：</b>中期吃下 ${midGoldShare}% 经济却仅打 ${midDmgShare}% 伤害，${tfAfkCnt} 波团战缺席卖队友独刷。`
-    );
-  }
-  if (soloEvents.length > 0) {
-    badPoints.push(
-      `<b>脱离团队落单被抓（${soloEvents.length}次）：</b>${soloEvents
-        .map(
-          (s) =>
-            `<b>${s.time_str}</b>在${s.zone_zh}被${s.killer_zh}抓死${
-              s.consequence && s.consequence !== "无战略收益白给"
-                ? `（${s.consequence}）`
-                : s.vision_tag?.includes("5 颗假眼")
-                ? "（场上5颗假眼不看小地图）"
-                : ""
-            }`
-        )
-        .join("；")}。`
-    );
-  }
-  if (Number(tpRow?.tp_bought ?? 1) === 0) {
-    badPoints.push(`<b>支援物资隐患：</b>整局主动花钱购买回城卷轴（TP）为 <b>0 张</b>，边路防抓与支援响应受限。`);
-  }
-  if ((tpRow?.tf_absent_cnt ?? 0) > 0 && !p.is_afk_farmer) {
-    badPoints.push(
-      `<b>团战到场率瑕疵：</b>本局有 <b>${tpRow.tf_absent_cnt} 波</b>正面团战未能及时赶到战场（${(
-        tpRow.tf_absent_times || []
-      ).join("/")}）${
-        pos === 1 && midGold >= 9000 ? "（虽为刷狂战斧核心装避战，但仍需留意队友守塔信号）" : ""
-      }。`
-    );
-  }
-  if (laneD >= 3) {
-    badPoints.push(
-      `<b>对线期防Gank与换血尺度：</b>前10分钟阵亡 <b>${laneD} 次</b>（${(laneP?.deaths_events || [])
-        .slice(0, 3)
-        .map((d) => `${d.time_str}被${d.killer}杀`)
-        .join("、")}），残血需更果断后撤补给。`
-    );
-  }
-  if (isCore && lateGold >= 5500 && lateDmg < 6500 && !itemIntel.warnings.some((w) => w.includes("跳刀"))) {
-    badPoints.push(
-      `<b>后期输出转化偏低：</b>25m+ 吃下 +${fmtNum(lateGold)} 金却仅打出 ${fmtNum(lateDmg)} 英雄伤害，团战切入与自保需加强。`
-    );
-  }
-  if (badPoints.length === 0) {
-    if (Number(p.deaths || 0) > 0) {
-      const anyDeath =
-        (lateP?.deaths_events || [])[0] || (midP?.deaths_events || [])[0] || (laneP?.deaths_events || [])[0];
+    if (p.is_afk_farmer) {
       badPoints.push(
-        `<b>白璧微瑕：</b>全场仅阵亡 ${p.deaths} 次${
-          anyDeath ? `（如 ${anyDeath.time_str} 被 ${anyDeath.killer} 击杀读秒 ${anyDeath.time_dead}s）` : ""
-        }，几乎无可挑剔。`
+        `<b>核心失职（万年刷野躺平）：</b>中期吃下 ${midGoldShare}% 经济却仅打 ${midDmgShare}% 伤害，${tfAfkCnt} 波团战缺席卖队友独刷。`
       );
-    } else {
-      badPoints.push(`<b>完美零死答卷：</b>整局 0 阵亡无明显失误，继续保持当前统治力！`);
+    }
+    if (soloEvents.length > 0) {
+      badPoints.push(
+        `<b>脱离团队落单被抓（${soloEvents.length}次）：</b>${soloEvents
+          .map(
+            (s) =>
+              `<b>${s.time_str}</b>在${s.zone_zh}被${s.killer_zh}抓死${
+                s.consequence && s.consequence !== "无战略收益白给"
+                  ? `（${s.consequence}）`
+                  : s.vision_tag?.includes("5 颗假眼")
+                  ? "（场上5颗假眼不看小地图）"
+                  : ""
+              }`
+          )
+          .join("；")}。`
+      );
+    }
+    if (Number(tpRow?.tp_bought ?? 1) === 0) {
+      badPoints.push(`<b>支援物资隐患：</b>整局主动花钱购买回城卷轴（TP）为 <b>0 张</b>，边路防抓与支援响应受限。`);
+    }
+    if ((tpRow?.tf_absent_cnt ?? 0) > 0 && !p.is_afk_farmer) {
+      badPoints.push(
+        `<b>团战到场率瑕疵：</b>本局有 <b>${tpRow.tf_absent_cnt} 波</b>正面团战未能及时赶到战场（${(
+          tpRow.tf_absent_times || []
+        ).join("/")}）${
+          pos === 1 && midGold >= 9000 ? "（虽为刷狂战斧核心装避战，但仍需留意队友守塔信号）" : ""
+        }。`
+      );
+    }
+    if (laneD >= 3) {
+      badPoints.push(
+        `<b>对线期防Gank与换血尺度：</b>前10分钟阵亡 <b>${laneD} 次</b>（${(laneP?.deaths_events || [])
+          .slice(0, 3)
+          .map((d) => `${d.time_str}被${d.killer}杀`)
+          .join("、")}），残血需更果断后撤补给。`
+      );
+    }
+    if (isCore && lateGold >= 5500 && lateDmg < 6500 && !itemIntel.warnings.some((w) => w.includes("跳刀"))) {
+      badPoints.push(
+        `<b>后期输出转化偏低：</b>25m+ 吃下 +${fmtNum(lateGold)} 金却仅打出 ${fmtNum(lateDmg)} 英雄伤害，团战切入与自保需加强。`
+      );
+    }
+    if (badPoints.length === 0) {
+      if (Number(p.deaths || 0) > 0) {
+        const anyDeath =
+          (lateP?.deaths_events || [])[0] || (midP?.deaths_events || [])[0] || (laneP?.deaths_events || [])[0];
+        badPoints.push(
+          `<b>白璧微瑕：</b>全场仅阵亡 ${p.deaths} 次${
+            anyDeath ? `（如 ${anyDeath.time_str} 被 ${anyDeath.killer} 击杀读秒 ${anyDeath.time_dead}s）` : ""
+          }，几乎无可挑剔。`
+        );
+      } else {
+        badPoints.push(`<b>完美零死答卷：</b>整局 0 阵亡无明显失误，继续保持当前统治力！`);
+      }
     }
   }
 
-  const grokItemAuditLine = grokP?.item_and_blink_audit || grokP?.assessment || "";
+  // When Grok 4.7 item audit is present, ONLY show Grok's superior item audit (no weak rule-based item warnings)
+  const grokItemAuditLine = grokP?.item_and_blink_audit || "";
   const allItemBullets = grokItemAuditLine
     ? [
         `<span style="color:#ddd6fe;"><b>🤖 XAI / GROK-4.7 深度 AI 出装·克制·跳刀锐评：</b>${escapeHtml(
           grokItemAuditLine
         )}</span>`,
-        ...itemIntel.highlights.slice(0, 1),
-        ...itemIntel.warnings.slice(0, 1),
       ]
     : [...itemIntel.highlights, ...itemIntel.warnings];
   const itemIntelBoxHtml =
@@ -10660,8 +10701,49 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     `
       : "";
 
+  // Prominent Grok 4.7 Deep 1-Paragraph Personal Judgment Report Box (`deep_verdict`)
+  const deepVerdictText = grokP?.deep_verdict || grokP?.assessment || "";
+  const isRoleBad = roleType === "culprit1" || roleType === "culprit2" || roleType === "struggle";
+  const roleVerdictTag =
+    roleType === "culprit1"
+      ? "🚨 头号大锅 · 一级战犯深度研判报告"
+      : roleType === "culprit2"
+      ? "⚠️ 二号次锅 · 关键失误深度研判报告"
+      : roleType === "mvp"
+      ? "👑 头号首功 · 全场真神深度研判报告"
+      : roleType === "svp"
+      ? "👑 孤胆院长 · 败方尽力深度研判报告"
+      : roleType === "struggle"
+      ? "🐟 胜局短板 · 隐患复盘深度研判报告"
+      : "🎖️ 战局个人深度研判报告";
+
+  const grokDeepVerdictBoxHtml = deepVerdictText
+    ? `
+      <div class="grok-deep-verdict-box" style="margin-bottom:10px;padding:12px 14px;background:linear-gradient(135deg,${
+        isRoleBad
+          ? "rgba(185,28,28,0.18),rgba(109,40,217,0.14)"
+          : "rgba(109,40,217,0.20),rgba(15,118,110,0.14)"
+      });border:1px solid ${
+        isRoleBad ? "rgba(248,113,113,0.45)" : "rgba(167,139,250,0.48)"
+      };border-radius:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+          <span style="font-size:12.5px;font-weight:800;color:${
+            isRoleBad ? "#fca5a5" : "#ddd6fe"
+          };letter-spacing:0.3px;">🧠 XAI / GROK-4.7 · ${escapeHtml(roleVerdictTag)}</span>
+          <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(15,23,42,0.65);border:1px solid rgba(167,139,250,0.4);color:#e9d5ff;">🎯 Grok 重新打分：<b>${score100}/100分</b> · ${
+            roleType === "mvp" || roleType === "runnerup" || roleType === "svp" ? "功勋占比" : "定责占比"
+          } <b>${sharePct}%</b></span>
+        </div>
+        <div style="font-size:13px;line-height:1.72;color:#f8fafc;text-align:justify;">
+          ${escapeHtml(deepVerdictText)}
+        </div>
+      </div>
+    `
+    : "";
+
   const html = `
     <div class="verdict-chronology-story-v2">
+      ${grokDeepVerdictBoxHtml}
       <div class="story-act-row">
         <span class="story-act-badge early">🌅 第一幕 · 序章对线 (00:00–10:00)</span>
         <p class="story-act-text">${act1Story}</p>
@@ -10780,40 +10862,68 @@ function renderVerdictAndBlameSection(report) {
   }
 
   // Sort own team by Contribution Share (descending) and by Blame Share (descending)
-  const rawContribSum =
-    own.reduce((s, p) => s + Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)), 0) || 100;
+  // When Grok 4.7 has evaluated `grok_share_pct` / `grok_score`, use Grok's AI judgment to re-score and re-rank all 5 players!
+  const hasGrokShares =
+    grok &&
+    (!grok.side || grok.side === side) &&
+    Array.isArray(grok.players) &&
+    grok.players.some((gp) => gp && Number(gp.grok_share_pct) > 0);
+
+  const rawContribVal = (p) => {
+    const gp = findGrokPlayerEntry(p, report);
+    if (won && hasGrokShares && gp && Number(gp.grok_share_pct) > 0) {
+      return Number(gp.grok_share_pct);
+    }
+    if (!won && gp && Number(gp.grok_score) > 0) {
+      return Math.max(1, Number(gp.grok_score));
+    }
+    return Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20));
+  };
+  const rawContribSum = own.reduce((s, p) => s + rawContribVal(p), 0) || 100;
   const sortedByContrib = [...own]
     .map((p) => ({
       player: p,
-      contribShare: Number(
-        (
-          (Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)) / rawContribSum) *
-          100
-        ).toFixed(1)
-      ),
+      contribShare: Number(((rawContribVal(p) / rawContribSum) * 100).toFixed(1)),
     }))
     .sort(
       (a, b) =>
         b.contribShare - a.contribShare ||
-        (b.player.rating_score || 0) - (a.player.rating_score || 0)
+        getHeroScore100(b.player, report) - getHeroScore100(a.player, report)
     );
 
-  const rawBlameSum =
-    own.reduce((s, p) => s + Math.max(1, Number(p.blame_share_pct || 20)), 0) || 100;
+  const rawBlameVal = (p) => {
+    const gp = findGrokPlayerEntry(p, report);
+    if (!won && hasGrokShares && gp && Number(gp.grok_share_pct) > 0) {
+      return Number(gp.grok_share_pct);
+    }
+    if (!won && gp && Number(gp.grok_score) > 0) {
+      return Math.max(1, 105 - Number(gp.grok_score));
+    }
+    return Math.max(1, Number(p.blame_share_pct || 20));
+  };
+  const rawBlameSum = own.reduce((s, p) => s + rawBlameVal(p), 0) || 100;
   const sortedByBlame = [...own]
     .map((p) => ({
       player: p,
-      blameShare: Number(((Math.max(1, Number(p.blame_share_pct || 20)) / rawBlameSum) * 100).toFixed(1)),
+      blameShare: Number(((rawBlameVal(p) / rawBlameSum) * 100).toFixed(1)),
     }))
-    .sort((a, b) => b.blameShare - a.blameShare);
+    .sort(
+      (a, b) =>
+        b.blameShare - a.blameShare ||
+        getHeroScore100(a.player, report) - getHeroScore100(b.player, report)
+    );
 
-  // Pick the 3rd card player in a WIN: among the remaining 3 players (excluding #1 MVP and #2 Runner-Up),
-  // pick the player with the highest struggle index (AFK farming core, solo pickoffs, fountain dead time, low rating, core with 0 tower dmg)
+  // Pick the 3rd card player in a WIN: if Grok scored players, pick the player with the lowest Grok score / contribution;
+  // otherwise fall back to struggle index.
   const top1 = sortedByContrib[0]?.player;
   const top2 = sortedByContrib[1]?.player;
   const msSide = df.map_space_by_side?.[side] || {};
   const computeStruggleIndex = (p) => {
     if (!p) return 0;
+    const gp = findGrokPlayerEntry(p, report);
+    if (gp && Number(gp.grok_score) > 0) {
+      return 200 - Number(gp.grok_score) * 2 + (100 - Number(gp.grok_share_pct || 20));
+    }
     const spRow = (msSide.player_space_rows || []).find(
       (r) => r.hero_short_zh === p.hero_short_zh || Number(r.pos) === Number(p.pos)
     );
@@ -10842,14 +10952,12 @@ function renderVerdictAndBlameSection(report) {
   const topBlame1 = sortedByBlame[0]?.player;
   const topBlame2 = sortedByBlame[1]?.player;
 
-  // 2.1 Grok Verdict Banner (Rich 2x2 Stage Cards with Hero Mini-Logos + Scannable Verdict Highlights)
+  // 2.1 Grok Verdict Banner (When Grok 4.7 is active, show Grok's superior summary & verdict without redundant rule-based stage grid)
   const authorEl = document.getElementById("grok-author-label");
   const titleEl = document.getElementById("grok-title-text");
   const summaryEl = document.getElementById("grok-summary-text");
   const verdictEl = document.getElementById("grok-verdict-text");
   const practiceEl = document.getElementById("grok-team-practice-box");
-
-  const stagesGridHtml = buildRichFourStageCardsHtml(report);
 
   const buildStructuredVerdictHtml = (extraText = "") => {
     const extraClean = sanitizeMixedEnglishClient(String(extraText || "")).trim();
@@ -10870,21 +10978,17 @@ function renderVerdictAndBlameSection(report) {
       : "";
   };
 
-  const foldedStagesGridHtml = stagesGridHtml
-    ? `<details class="mobile-summary-fold"><summary class="mobile-summary-trigger">📖 展开/收起「前期·中期·后期·总账」四维全景速览卡（下方第 ③ 章含完整分阶段拆解）</summary>${stagesGridHtml}</details>`
-    : "";
-
   if (grok && (!grok.side || grok.side === side)) {
     const modelTag = grok._meta?.model
-      ? `${String(grok._meta.provider || "XAI").toUpperCase()} / ${grok._meta.model} ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`
-      : `XAI / GROK-4.7 ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`;
+      ? `🧠 ${String(grok._meta.provider || "XAI").toUpperCase()} / ${grok._meta.model} ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`
+      : `🧠 XAI / GROK-4.7 ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`;
     if (authorEl) authorEl.textContent = modelTag;
     if (titleEl) titleEl.textContent = sanitizeMixedEnglishClient(grok.title || (won ? "凯旋庆功与战术复盘" : "本局赛后复盘总账"));
     if (summaryEl) {
       const leadSummary = grok.summary
         ? `<div class="verdict-lead-callout">${injectHeroLogosIntoHtml(escapeHtml(grok.summary), report)}</div>`
         : "";
-      summaryEl.innerHTML = `${leadSummary}${foldedStagesGridHtml}`;
+      summaryEl.innerHTML = leadSummary;
     }
     if (verdictEl) {
       verdictEl.innerHTML = buildStructuredVerdictHtml(grok.verdict || "");
@@ -10896,6 +11000,10 @@ function renderVerdictAndBlameSection(report) {
       practiceEl.hidden = !grok.team_practice;
     }
   } else {
+    const stagesGridHtml = buildRichFourStageCardsHtml(report);
+    const foldedStagesGridHtml = stagesGridHtml
+      ? `<details class="mobile-summary-fold"><summary class="mobile-summary-trigger">📖 展开/收起「前期·中期·后期·总账」四维全景速览卡（下方第 ③ 章含完整分阶段拆解）</summary>${stagesGridHtml}</details>`
+      : "";
     if (authorEl) {
       authorEl.textContent = won
         ? "录像级庆功引擎 · 四阶段全细节对账与论功行赏 (含英雄小图标 · 可点右上角用 Grok 4.7 深度重算)"
@@ -11027,10 +11135,20 @@ function renderVerdictAndBlameSection(report) {
         });
       });
     } else {
-      // LOSS mode: #1 Blame, #2 Blame, #1 SVP, and remaining 2 teammates
+      // LOSS mode: #1 Blame, #2 Blame, #1 SVP (highest Grok score / lowest blame), and remaining 2 teammates
       const c1P = sortedByBlame[0]?.player || own[0];
       const c2P = (sortedByBlame[1] || sortedByBlame[0])?.player || own[1] || own[0];
-      const svpP = sortedByContrib[0]?.player || own[own.length - 1];
+      const svpCandidate =
+        [...own]
+          .filter(
+            (x) =>
+              Number(x.player_slot) !== Number(c1P?.player_slot) &&
+              Number(x.player_slot) !== Number(c2P?.player_slot)
+          )
+          .sort((a, b) => getHeroScore100(b, report) - getHeroScore100(a, report))[0] ||
+        sortedByContrib[0]?.player ||
+        own[own.length - 1];
+      const svpP = svpCandidate;
       const orderedLossPlayers = [
         c1P,
         c2P,
@@ -11045,11 +11163,6 @@ function renderVerdictAndBlameSection(report) {
           sortedByBlame.find((x) => Number(x.player.player_slot) === Number(p.player_slot))
             ?.blameShare ??
           p.blame_share_pct ??
-          20.0;
-        const cShare =
-          sortedByContrib.find((x) => Number(x.player.player_slot) === Number(p.player_slot))
-            ?.contribShare ??
-          p.contrib_share_pct ??
           20.0;
         let roleType = "culprit2";
         let tabTag = "⚖️ 背锅复盘";
@@ -11066,7 +11179,7 @@ function renderVerdictAndBlameSection(report) {
           tabTag = "🚨 头号大锅";
           cardHeader = "🚨 本方头号大锅 · 一级战犯逮捕令";
           themeClass = "culprit-theme";
-          statusTag = p.rating_tier || "头号大锅";
+          statusTag = "🚨 头号大锅";
           copyBtnLabel = "复制处刑词";
           isSpot = true;
         } else if (Number(p.player_slot) === Number(c2P?.player_slot)) {
@@ -11084,7 +11197,7 @@ function renderVerdictAndBlameSection(report) {
           statusTag = "👑 孤胆院长";
           copyBtnLabel = "复制表彰词";
           isTrouble = false;
-          displayShare = cShare;
+          displayShare = bShare;
         } else {
           roleType = "culprit2";
           tabTag = "📋 战局审讯";
@@ -11162,8 +11275,8 @@ function renderVerdictAndBlameSection(report) {
       .map((entry) => {
         const p = entry.player;
         const heroShort = p.hero_short_zh || p.hero_name || "";
-        const sc100 = getHeroScore100(p);
-        const grokP = (grok?.players || []).find((gp) => Number(gp.slot) === Number(p.player_slot));
+        const sc100 = getHeroScore100(p, report);
+        const grokP = findGrokPlayerEntry(p, report);
         const chronologyHtml = buildPlayerChronologyStoryHtml(
           p,
           report,
@@ -11171,13 +11284,14 @@ function renderVerdictAndBlameSection(report) {
           Number(entry.share).toFixed(1)
         );
         const isHidden = !isAllVerdict && activeVerdictKey !== entry.key;
-        const shareLabel =
-          won || entry.roleType === "svp"
-            ? `本局评分 · 贡献 ${Number(entry.share).toFixed(1)}%`
-            : `本局评分 · 背锅 ${Number(entry.share).toFixed(1)}%`;
+        const hasGrokScore = grokP && Number(grokP.grok_score) > 0;
+        const shareLabel = won
+          ? `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 贡献 ${Number(entry.share).toFixed(1)}%`
+          : `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 背锅 ${Number(entry.share).toFixed(1)}%`;
 
         const quoteText =
-          entry.roleType === "mvp"
+          grokP?.headline ||
+          (entry.roleType === "mvp"
             ? p.praise_talk ||
               `「${heroShort} 这把真神降临砍下 ${sc100}/100 分包揽 ${entry.share}% 胜局贡献，今晚车队全员排队敬茶！」`
             : entry.roleType === "svp"
@@ -11188,12 +11302,11 @@ function renderVerdictAndBlameSection(report) {
             : entry.roleType === "struggle"
             ? p.trash_talk ||
               `「赢球虽然免大锅，但这把 ${heroShort} (${sc100}/100分) 暴露的出装与走位短板必须重点复盘！」`
-            : grokP?.headline ||
-              p.trash_talk ||
-              `「${heroShort} 本局评分 ${sc100}/100 分（分锅 ${entry.share}%），复盘细节见上方红黑清单。」`;
+            : p.trash_talk ||
+              `「${heroShort} 本局评分 ${sc100}/100 分（分锅 ${entry.share}%），复盘细节见上方红黑清单。」`);
 
         const copyText = `【${entry.tabTag} · ${p.pos}号位${heroShort}】${p.personaname} 本局打分 ${sc100}/100 分（${
-          won || entry.roleType === "svp" ? `贡献 ${entry.share}%` : `分锅 ${entry.share}%`
+          won ? `贡献 ${entry.share}%` : `分锅 ${entry.share}%`
         }），KDA ${p.kda}，GPM ${p.gpm}，英雄伤害 ${fmtNum(p.hero_damage)}，推塔 ${fmtNum(
           p.tower_damage
         )}。${quoteText}`;
@@ -11265,7 +11378,7 @@ function renderVerdictAndBlameSection(report) {
     stackedBar.innerHTML = listToDisplay
       .map(({ player: p, share }, idx) => {
         const heroShort = p.hero_short_zh || p.hero_name;
-        const sc100 = getHeroScore100(p);
+        const sc100 = getHeroScore100(p, report);
         let innerLabel = "";
         if (share >= 15) {
           innerLabel = `${escapeHtml(heroShort)} ${share}% (${sc100}分)`;
@@ -11297,12 +11410,13 @@ function renderVerdictAndBlameSection(report) {
     const rowsHtml = listToDisplay
       .map(({ player: p, share }, idx) => {
         const heroShort = p.hero_short_zh || p.hero_name;
-        const sc100 = getHeroScore100(p);
-        const grokP = (grok?.players || []).find((gp) => Number(gp.slot) === Number(p.player_slot));
+        const sc100 = getHeroScore100(p, report);
+        const grokP = findGrokPlayerEntry(p, report);
 
         if (won) {
           const oneLinePraise =
-            (grokP?.good && grokP.good[0]) ||
+            grokP?.headline ||
+            (Array.isArray(grokP?.good) ? grokP.good[0] : grokP?.good) ||
             (p.strengths && p.strengths[0]) ||
             p.praise_talk ||
             "稳健发挥助力团队拿下一城";
@@ -12478,6 +12592,8 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
           )
           .join(" + ");
 
+        const hasGrokPlayers = Array.isArray(report.grok_coaching?.players) && report.grok_coaching.players.length > 0;
+
         return `
           <div class="phase-deep-lane-card ${statusTheme}">
             <div class="phase-deep-lane-top">
@@ -12494,9 +12610,11 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
             <div class="phase-deep-lane-matchup-box">
               🧬 ${injectHeroLogosIntoHtml(matchupContextHtml, report)}
             </div>
-            <div class="phase-deep-lane-players">
-              ${playerRowsHtml}
-            </div>
+            ${
+              !hasGrokPlayers
+                ? `<div class="phase-deep-lane-players">${playerRowsHtml}</div>`
+                : ""
+            }
           </div>
         `;
       })
@@ -13291,26 +13409,57 @@ function renderPhaseSection(report) {
                       : `<div style="font-size: 10px; color: var(--dim);">本阶段以基础装/消耗品过渡</div>`
                   }
 
-                  <div class="phase-p-eval-block">
-                    <div class="phase-eval-group good">
-                      <b>✓ 本阶段高光与履职细活</b>
-                      <ul>
-                        ${smartGoodList
-                          .slice(0, 3)
-                          .map((g) => `<li>${injectHeroLogosIntoHtml(g, report)}</li>`)
-                          .join("")}
-                      </ul>
-                    </div>
-                    <div class="phase-eval-group bad">
-                      <b>✕ 本阶段瑕疵 &amp; 阵亡合理性审计</b>
-                      <ul>
-                        ${smartBadList
-                          .slice(0, 2)
-                          .map((b) => `<li>${injectHeroLogosIntoHtml(b, report)}</li>`)
-                          .join("")}
-                      </ul>
-                    </div>
-                  </div>
+                  ${(() => {
+                    const grokP = findGrokPlayerEntry(pp, report);
+                    const grokPhaseStory =
+                      activePd.key === "lane"
+                        ? grokP?.early_story
+                        : activePd.key === "mid"
+                        ? grokP?.mid_story
+                        : grokP?.late_story;
+                    if (grokPhaseStory) {
+                      return `
+                        <div class="phase-p-eval-block" style="grid-template-columns:1fr;">
+                          <div class="phase-eval-group" style="background:rgba(109,40,217,0.14);border-color:rgba(167,139,250,0.4);">
+                            <b style="color:#ddd6fe;">🧠 XAI / GROK-4.7 本阶段深度个人研判</b>
+                            <div style="font-size:12.5px;line-height:1.68;color:#f1f5f9;">
+                              ${injectHeroLogosIntoHtml(escapeHtml(grokPhaseStory), report)}
+                            </div>
+                            ${
+                              dAudit && dAudit.total > 0
+                                ? `<div style="margin-top:6px;padding-top:6px;border-top:1px dashed rgba(167,139,250,0.28);font-size:11.5px;color:#cbd5e1;"><b>⚖️ 阵亡合理性审计：</b>${injectHeroLogosIntoHtml(
+                                    escapeHtml(dAudit.auditText),
+                                    report
+                                  )}</div>`
+                                : ""
+                            }
+                          </div>
+                        </div>
+                      `;
+                    }
+                    return `
+                      <div class="phase-p-eval-block">
+                        <div class="phase-eval-group good">
+                          <b>✓ 本阶段高光与履职细活</b>
+                          <ul>
+                            ${smartGoodList
+                              .slice(0, 3)
+                              .map((g) => `<li>${injectHeroLogosIntoHtml(g, report)}</li>`)
+                              .join("")}
+                          </ul>
+                        </div>
+                        <div class="phase-eval-group bad">
+                          <b>✕ 本阶段瑕疵 &amp; 阵亡合理性审计</b>
+                          <ul>
+                            ${smartBadList
+                              .slice(0, 2)
+                              .map((b) => `<li>${injectHeroLogosIntoHtml(b, report)}</li>`)
+                              .join("")}
+                          </ul>
+                        </div>
+                      </div>
+                    `;
+                  })()}
                 </article>
               `;
             })
@@ -13956,17 +14105,23 @@ function renderPlayersForensicsList(report) {
     listToRender = [...own, ...opp];
   }
 
+  const getPlayerEffectiveShare = (p) => {
+    const gp = findGrokPlayerEntry(p, report);
+    if (gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
+    return p.won ? Number(p.contrib_share_pct || 20) : Number(p.blame_share_pct || 20);
+  };
+
   const maxCulpritSlot = !ownWon
-    ? [...own].sort((a, b) => (b.blame_share_pct || 0) - (a.blame_share_pct || 0))[0]?.player_slot
+    ? [...own].sort((a, b) => getPlayerEffectiveShare(b) - getPlayerEffectiveShare(a))[0]?.player_slot
     : null;
-  const mvpSlot = report.mvp?.mvp_player?.player_slot;
+  const mvpSlot = ownWon
+    ? [...own].sort((a, b) => getPlayerEffectiveShare(b) - getPlayerEffectiveShare(a))[0]?.player_slot
+    : report.mvp?.mvp_player?.player_slot;
 
   // Determine the #1 Most Important Player in listToRender for default spotlight
   const defaultFocusPlayer =
     [...listToRender].sort((a, b) => {
-      if (!a.won && !b.won) return (b.blame_share_pct || 0) - (a.blame_share_pct || 0);
-      if (a.won && b.won) return (b.contrib_share_pct || 0) - (a.contrib_share_pct || 0);
-      return (b.blame_share_pct || 0) - (a.blame_share_pct || 0);
+      return getPlayerEffectiveShare(b) - getPlayerEffectiveShare(a);
     })[0] || listToRender[0];
 
   const defaultFocusSlot = Number(defaultFocusPlayer?.player_slot ?? 0);
@@ -13994,13 +14149,14 @@ function renderPlayersForensicsList(report) {
             const isFocus = pSlot === defaultFocusSlot;
             const isAct = finalActiveSlot !== "all" && Number(finalActiveSlot) === pSlot;
             const heroShort = p.hero_short_zh || p.hero_name;
+            const effShare = getPlayerEffectiveShare(p).toFixed(0);
             const badgeText = isFocus
               ? p.won
-                ? `👑头号功臣 ${Number(p.contrib_share_pct || 0).toFixed(0)}%`
-                : `🚨头号焦点 ${Number(p.blame_share_pct || 0).toFixed(0)}%锅`
+                ? `👑头号功臣 ${effShare}%`
+                : `🚨头号焦点 ${effShare}%锅`
               : p.won
-              ? `${Number(p.contrib_share_pct || 0).toFixed(0)}%贡献`
-              : `${Number(p.blame_share_pct || 0).toFixed(0)}%锅`;
+              ? `${effShare}%贡献`
+              : `${effShare}%锅`;
             return `
               <button
                 type="button"
@@ -14070,9 +14226,10 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const heroShort = p.hero_short_zh || p.hero_name;
   const posNum = p.pos || 1;
   const pWon = Boolean(p.won);
-  const contribPct = Number(p.contrib_share_pct ?? p.blame_share_pct ?? 20).toFixed(1);
-  const blamePct = Number(p.blame_share_pct || 0).toFixed(1);
-  const score100 = getHeroScore100(p);
+  const gp = grokPlayer || findGrokPlayerEntry(p, state.currentReport);
+  const contribPct = Number(gp?.grok_share_pct ?? p.contrib_share_pct ?? p.blame_share_pct ?? 20).toFixed(1);
+  const blamePct = Number(gp?.grok_share_pct ?? p.blame_share_pct ?? 0).toFixed(1);
+  const score100 = getHeroScore100(p, state.currentReport);
   const scoreTier = getScore100Tier(score100, pWon);
 
   // Final 6-slot items + neutral item

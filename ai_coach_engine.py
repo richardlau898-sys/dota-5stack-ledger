@@ -1574,11 +1574,6 @@ def call_llm_coach_review(
                 "phoenix_egg_audit": p.get("phoenix_egg_audit"),
                 "slark_mechanism_audit": p.get("slark_mechanism_audit"),
                 "phase_telemetry": p.get("phase_telemetry"),
-                "rating_score_100": int(round((p.get("rating_score") or 0) * 10)),
-                "contrib_share_pct": p.get("contrib_share_pct"),
-                "blame_share_pct": p.get("blame_share_pct"),
-                "top_strength": (p.get("strengths") or [""])[0][:140],
-                "top_weakness": (p.get("weaknesses") or [""])[0][:160],
             }
             for p in own_team
         ],
@@ -1598,18 +1593,25 @@ def call_llm_coach_review(
         ],
     }
 
-    afk_heroes = [p.get("hero_short_zh") for p in own_team if p.get("is_afk_farmer")]
-    sorted_own_by_contrib = sorted(own_team, key=lambda x: float(x.get("contrib_share_pct") or 0), reverse=True)
-    sorted_own_by_blame = sorted(own_team, key=lambda x: float(x.get("blame_share_pct") or 0), reverse=True)
-    top1_hero = sorted_own_by_contrib[0].get("hero_short_zh") if sorted_own_by_contrib else ""
-    top2_hero = sorted_own_by_contrib[1].get("hero_short_zh") if len(sorted_own_by_contrib) > 1 else ""
-    culprit1_hero = sorted_own_by_blame[0].get("hero_short_zh") if sorted_own_by_blame else ""
-    culprit2_hero = sorted_own_by_blame[1].get("hero_short_zh") if len(sorted_own_by_blame) > 1 else ""
-    afk_rule_str = (
-        f"2) 本局本方存在『前中期刷钱不参战、卖队友4打5、最后几分钟才出山收割面板伤害的毒瘤核心』：{'、'.join(afk_heroes)}。哪怕他最后总伤害或总经济好看，也绝对禁止评为MVP或二号功臣，必须在判词和个人点评里狠狠揭穿他前中期闷头独刷、全靠四个队友4打5负重前行才躺赢的真相！\n"
-        if afk_heroes
-        else f"2) 若本局落败，头号背锅战犯必须定为『{culprit1_hero}』，二号背锅位定为『{culprit2_hero}』；请严格依据 top_weakness 与机制证据点名批判。\n"
+    own_won = bool(
+        (focus_side == "radiant" and report.get("radiant_win"))
+        or (focus_side == "dire" and not report.get("radiant_win"))
     )
+    afk_heroes = [p.get("hero_short_zh") for p in own_team if p.get("is_afk_farmer")]
+    if own_won:
+        afk_rule_str = (
+            "5) 【本局结果：本方获胜（凯旋庆功局）—— AI 独立打分与功勋重排铁律】：\n"
+            "   - 本局本方最终获胜！请由你（Grok 4.7）基于录像全周期证据独立给 5 人打分（`grok_score` 0-100）并分配 100% 胜局功勋贡献占比（`grok_share_pct`，5人之和=100.0%）。\n"
+            "   - 在胜局中，`grok_share_pct` 代表【胜局功勋贡献度%】！必须满足：功劳最大、评分最高（`grok_score` 最高）的头号首功 MVP 拥有全队最高的 `grok_share_pct`（如 26%~35%）；二号功臣次之；而本局表现相对有短板/瑕疵的选手拥有全队最低的 `grok_share_pct`（如 10%~15%）与相对最低的 `grok_score`。\n"
+            "   - 严禁把胜局里的功臣误写成『败方战犯』！例如中单如果是全单体爆发缺AOE清线的英雄（如天怒法师）对阵肉核帕吉，虽然10分钟补刀少但靠消耗单杀打出对线经济优势、中期出阿托斯主动带队抓人，或者5号位蓝胖保大哥无解肥、3号位骨法魔晶推塔，都属于胜局重大功臣，必须给予 80~92+ 的高分与匹配的胜局贡献占比！\n"
+            + (f"   - 注意：本局存在前中期刷钱不参战的毒瘤核心（{'、'.join(afk_heroes)}），不可评为头号MVP。\n" if afk_heroes else "")
+        )
+    else:
+        afk_rule_str = (
+            "5) 【本局结果：本方落败（败局分锅审讯局）—— AI 独立打分与背锅定责重排铁律】：\n"
+            "   - 本局本方最终落败！请由你（Grok 4.7）基于录像全周期证据，彻底抛开简单的 KDA 表象，独立审讯谁是真正的【头号大锅·一级战犯】、【二号次锅】以及【败方孤胆院长 SVP】！\n"
+            "   - 在败局中，`grok_share_pct` 代表【败局背锅定责占比%】（5人之和=100.0%）！必须严格满足反向联动：头号大锅（一级战犯）的 `grok_share_pct` 必须全队最高（如 27%~40%），且其 `grok_score` 必须全队最低（如 25~48 分）；二号次锅的 `grok_share_pct` 全队第二高、`grok_score` 倒数第二；而败方最尽力的孤胆院长（SVP）的 `grok_share_pct` 必须全队最低（如 8%~14%），且其 `grok_score` 必须全队最高（如 65~85 分）！\n"
+        )
 
     system_prompt = (
         "你是懂 Dota 2 全 126 英雄核心机制、克制出装与团队运营的顶分局教练兼损友老哥，给车队五人做赛后深度算账复盘。全中文输出（严禁夹杂任何英文变量名），语气犀利接地气、刀塔味十足，且必须严格基于录像证据深度推理以下核心维度：\n"
@@ -1619,14 +1621,11 @@ def call_llm_coach_review(
         "   - 10~25分钟重点考核资源转化率：谁做出了第一件节奏装（如阿托斯/跳刀/大骨灰）主动带队抓人？谁利用了英雄自身的推塔特性（如帕格纳幽冥爆轰磨塔、德鲁伊/兽王/龙骑/小Y等）拔掉外塔？1号位在刷核心装的同时有没有关键团切入收割？\n"
         "3) 【后期肉山盾转化率与决胜接管 (stage_reviews.late_and_roshan)】：\n"
         "   - 结合 macro_objectives 与 roshan_and_tower_timeline，重点判断打了肉山盾之后有没有真正转化为胜势！比如拿到不朽之守护后，有没有顺势把外塔拔光、直接攻破敌方高地塔与兵营完成终结（教科书级控盾资源转化）？还是拿了盾却钻野空转白白浪费？同时考核1号位刷完钱是否在后期真正接管比赛。\n"
-        "4) 【每个人(1~5号位全员5人)的出装灵性、敌我克制、BKB、辅助贪心点金与跳刀转化率审计 (players 数组必须包含本方全部5人)】：\n"
-        "   - 针对克制与局势出装：判断出装是否克制敌方（例如：对方有酒仙醉拳闪避或蝴蝶/高甲，出金箍棒MKB就是精准克制；主宰判断本局对面减速控制多、站桩对A环境极差，但对面没莲花/绿杖导致无敌斩极好发挥，于是果断选择出A杖迅风斩+跳刀打双无敌斩秒人，这是顶级局势理解；面对骷髅王+屠夫出大骨灰削回血；面对敌法切入出绿杖等）。\n"
-        "   - BKB与保命装开喷/免喷审计：核心如果不出しBKB但自带魔免/分身/无敌斩且全场仅死1~2次，要夸他省下BKB格子拉满输出；反之如果核心死6次以上还不出BKB或推推棒，必须狠批！\n"
-        "   - 辅助贪心毒瘤审计（4/5号位）：严查辅助是否贪心裸点金手（如5号位蓝胖21分钟裸点金手拖慢微光披风）或只顾出灵匣/绝刃/A杖堆伤害，却全队0原力法杖(推推棒)救人！\n"
-        "   - 跳刀转化率审计：出跳刀非常关键，必须看他买出跳刀（phases_breakdown中的items_bought时间点）之后到底杀了多少人、打了多少伤害、有没有带跳刀迷路被抓，判断这把跳刀是『封神质变』还是『出了跳刀啥都没干白出』！\n"
-        "   - 团战换命合理性：辅助或前排如果在赢下的团战里冲第一波吃满技能阵亡换来团战大胜，属于功勋战术牺牲，绝不扣锅；只批评脱离团队的无脑落单被抓（solo_pickoffs）。\n"
+        "4) 【每个人(1~5号位全员5人)的深度个人研判总报告 (deep_verdict)、AI重新打分 (grok_score 0-100) 与定责/贡献占比重排 (grok_share_pct)】：\n"
+        "   - 必须为本方全部 5 名选手每人撰写一段 130~190 字的【深度个人研判报告 (deep_verdict)】：不能只是简单罗列数据，必须像顶尖职业教练一样，把该选手本局为什么是『头号大锅·一级战犯』、『二号次锅』、『败方尽力院长』或『头号首功MVP』的因果链条讲透（串联起他的对线期英雄克制与换血、中期刷钱/抓人/推塔资源转化、后期打盾与决胜团站位、出装是否克制对手、是否拒出BKB/推推棒、辅助是否贪点金、跳刀买出后是否白出，以及每次阵亡到底是前排战术牺牲还是无脑落单白给）。\n"
+        "   - 【AI 重新打分 (grok_score) 与分锅/贡献重排 (grok_share_pct)】：请根据你的深度研判，重新给全部 5 名选手打出最公正的 0~100 整数评分 (`grok_score`)，并重新分配 5 个人的 100% 权重占比 (`grok_share_pct`，5人之和必须等于100：若本方获胜则代表『胜局贡献占比%』，若本方落败则代表『败局分锅占比%』）。例如：如果某核心吃了全队最多资源却在关键团零输出或连续落单送掉好局，哪怕他KDA/补刀好看，也必须大幅扣减其 `grok_score` 并上调其败局 `grok_share_pct` 定为头号大锅；反之如果辅助/前排死得多但全是在赢团里第一波肉身开团换命且拉野视野拉满，必须上调其 `grok_score` 并减轻分锅！\n"
+        "   - 针对克制与局势出装 (item_and_blink_audit)：判断出装是否克制敌方（如对方有酒仙闪避或蝴蝶出金箍棒MKB；主宰判断对面控制多对A环境差但没绿杖莲花果断出A杖+跳刀打双无敌斩；面对高回血出大骨灰；面对物理切入出绿杖等）、BKB与救人装（推推/微光）是否缺失、辅助是否贪点金手、以及跳刀买出后到底有没有打出转化效果。\n"
         + afk_rule_str +
-        f"5) 胜局或队内最佳 MVP 定为『{top1_hero}』，二当家定为『{top2_hero}』。\n"
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"
         '  "title": "一句话点透本局胜负关键、控盾转化与核心出装博弈（22-40字）",\n'
@@ -1645,19 +1644,21 @@ def call_llm_coach_review(
         '      "slot": 0,\n'
         '      "pos": 1,\n'
         '      "hero": "主宰",\n'
+        '      "grok_score": 96,\n'
+        '      "grok_share_pct": 34.0,\n'
         '      "headline": "一句切中该选手本局灵魂与出装/节奏要害的判词（20-35字）",\n'
-        '      "early_story": "0-10m对线期表现、同路配合与英雄对位强弱点评（60-100字）",\n'
-        '      "mid_story": "10-25m中期资源转化、抓人/推塔或刷钱参团点评（60-100字）",\n'
-        '      "late_story": "25m-终局带盾推高地、决胜团收割或前排换命/落单点评（60-100字）",\n'
-        '      "item_and_blink_audit": "AI对该选手出装灵性、是否克制敌方(如金箍棒/A杖无敌斩/大骨灰/绿杖)、BKB合理性、辅助是否贪点金/缺推推、以及跳刀买出后是否打出效果的深度专项锐评（80-140字）",\n'
-        '      "assessment": "综合结案陈词（70-110字）",\n'
+        '      "deep_verdict": "一整段深度个人研判总报告（120-165字）：全面剖析该选手为何是本局头号大锅一级战犯/次锅或头号首功MVP，串联其前中后期关键抉择、资源转化率、出装克制/BKB/跳刀得失与阵亡性质，并解释为何给出该 grok_score 评分与定责占比",\n'
+        '      "early_story": "0-10m对线期表现、同路配合与英雄对位强弱点评（50-80字）",\n'
+        '      "mid_story": "10-25m中期资源转化、抓人/推塔或刷钱参团点评（50-80字）",\n'
+        '      "late_story": "25m-终局带盾推高地、决胜团收割或前排换命/落单点评（50-80字）",\n'
+        '      "item_and_blink_audit": "AI对该选手出装灵性、是否克制敌方(如金箍棒/A杖无敌斩/大骨灰/绿杖)、BKB合理性、辅助是否贪点金/缺推推、以及跳刀买出后是否打出效果的深度专项锐评（65-110字）",\n'
         '      "good": ["具体做得好的地方1（含时间/装备/数据）", "具体做得好的地方2"],\n'
         '      "bad": ["具体做得不好或开喷点1（含出装贪心/跳刀转化/落单时间点）", "具体改进点2"],\n'
         '      "practice": "下一局给该位置的具体进阶建议"\n'
         '    }\n'
         "  ],\n"
         '  "windows": [\n'
-        '    {"time_label": "团战时间段", "title": "一句刀塔味十足的团战标题", "detail": "60-100字有画面感的团战机制复盘"}\n'
+        '    {"time_label": "团战时间段", "title": "一句刀塔味十足的团战标题", "detail": "55-85字有画面感的团战机制复盘"}\n'
         "  ]\n"
         "}"
     )
@@ -1692,7 +1693,7 @@ def call_llm_coach_review(
         else:
             url = f"{b_url.rstrip('/')}/chat/completions"
             # On xAI, grok-4.7 is a deep reasoning model that takes 50-120s (exceeding Vercel's 60s timeout).
-            # Use grok-4.20-0309-non-reasoning for fast (~14s), deterministic JSON generation under grok-4.7 display label.
+            # Use grok-4.20-0309-non-reasoning for fast (~18s), deterministic JSON generation under grok-4.7 display label.
             api_model = "grok-4.20-0309-non-reasoning" if (prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4")) else model
             payload = {
                 "model": api_model,
@@ -1702,21 +1703,30 @@ def call_llm_coach_review(
                 ],
                 "response_format": {"type": "json_object"},
                 "stream": False,
-                "max_tokens": 6000,
+                "max_tokens": 5500,
             }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-                method="POST",
-                headers={
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Authorization": f"Bearer {key}",
-                    "User-Agent": "DotaAiAnalyst/2.0",
-                },
-            )
-            with urllib.request.urlopen(req, timeout=50) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
+            last_err = None
+            data = None
+            for _attempt in range(2):
+                try:
+                    req = urllib.request.Request(
+                        url,
+                        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                        method="POST",
+                        headers={
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "Authorization": f"Bearer {key}",
+                            "User-Agent": "DotaAiAnalyst/2.0",
+                        },
+                    )
+                    with urllib.request.urlopen(req, timeout=55) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                    break
+                except Exception as e_req:
+                    last_err = e_req
+            if data is None and last_err is not None:
+                raise last_err
             out_txt = data["choices"][0]["message"]["content"]
 
         # 尝试解析为结构化 JSON 并持久化
@@ -1732,6 +1742,18 @@ def call_llm_coach_review(
                 structured["author"] = f"{prov} / {model}"
                 structured["model"] = model
                 structured["provider"] = prov
+                structured["side"] = focus_side
+                # Normalize players' grok_score & grok_share_pct and backfill assessment from deep_verdict
+                pls = structured.get("players")
+                if isinstance(pls, list) and len(pls) > 0:
+                    total_sh = sum(max(1.0, float(gp.get("grok_share_pct") or 20.0)) for gp in pls if isinstance(gp, dict))
+                    for gp in pls:
+                        if not isinstance(gp, dict):
+                            continue
+                        if gp.get("deep_verdict") and not gp.get("assessment"):
+                            gp["assessment"] = gp["deep_verdict"]
+                        raw_sh = max(1.0, float(gp.get("grok_share_pct") or 20.0))
+                        gp["grok_share_pct"] = round((raw_sh / (total_sh or 100.0)) * 100.0, 1)
                 mid = report.get("match_id")
                 if mid:
                     try:

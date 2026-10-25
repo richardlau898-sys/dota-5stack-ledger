@@ -213,6 +213,49 @@ def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
     return out
 
 
+def _has_complete_grok_coaching(gc: Any) -> bool:
+    if not isinstance(gc, dict):
+        return False
+    players = gc.get("players")
+    if not isinstance(players, list) or len(players) < 5:
+        return False
+    has_stages = isinstance(gc.get("stage_reviews"), dict) and bool(gc["stage_reviews"].get("early_lanes"))
+    has_deep = any(isinstance(p, dict) and p.get("deep_verdict") and p.get("grok_score") is not None for p in players)
+    return has_stages and has_deep
+
+
+def _hydrate_grok_from_caches(report: Dict[str, Any], match_id: int) -> Dict[str, Any]:
+    """Attach the newest grok_coaching from /tmp, reports/coaching-*.json, or Supabase Cloud DB if report lacks it."""
+    if not isinstance(report, dict):
+        return report
+    if _has_complete_grok_coaching(report.get("grok_coaching")):
+        return report
+
+    side = report.get("focus_side") or "dire"
+    for cdir in (TMP_REPORTS_DIR, REPORTS_DIR):
+        for s_candidate in (side, "radiant", "dire"):
+            cf = cdir / f"coaching-{match_id}-{s_candidate}.json"
+            if cf.exists():
+                try:
+                    c_data = json.loads(cf.read_text(encoding="utf-8"))
+                    if isinstance(c_data, dict) and isinstance(c_data.get("players"), list) and len(c_data["players"]) >= 5:
+                        report["grok_coaching"] = c_data
+                        if _has_complete_grok_coaching(c_data):
+                            return report
+                except Exception:
+                    pass
+
+    try:
+        cloud_rep = cloud_fetch_match_report(match_id)
+        if isinstance(cloud_rep, dict) and isinstance(cloud_rep.get("grok_coaching"), dict):
+            c_gc = cloud_rep["grok_coaching"]
+            if _has_complete_grok_coaching(c_gc) or not report.get("grok_coaching"):
+                report["grok_coaching"] = c_gc
+    except Exception:
+        pass
+    return report
+
+
 def _ensure_grok_coaching(
     report: Dict[str, Any],
     match_id: int,
@@ -220,19 +263,13 @@ def _ensure_grok_coaching(
     tmp_json_cache: Path,
     force: bool = False,
 ) -> Dict[str, Any]:
-    """Ensure every match report has deep xAI Grok 4.7 LLM coaching (stage_reviews + 5 players item/blink audit)."""
+    """Ensure every match report has deep xAI Grok 4.7 LLM coaching (stage_reviews + 5 players deep_verdict & grok_score)."""
     if not isinstance(report, dict):
         return report
-    gc = report.get("grok_coaching")
-    has_deep_grok = (
-        isinstance(gc, dict)
-        and isinstance(gc.get("stage_reviews"), dict)
-        and bool(gc["stage_reviews"].get("early_lanes"))
-        and isinstance(gc.get("players"), list)
-        and len(gc.get("players") or []) >= 5
-    )
-    if has_deep_grok and not force:
-        return report
+    if not force:
+        report = _hydrate_grok_from_caches(report, match_id)
+        if _has_complete_grok_coaching(report.get("grok_coaching")):
+            return report
 
     try:
         llm_res = call_llm_coach_review(report)
@@ -276,7 +313,8 @@ def get_or_build_match_report(
 
     fallback_unparsed_rep = None
     if not force_refresh:
-        for jc in (json_cache, tmp_json_cache):
+        # Check tmp_json_cache FIRST (writable on Vercel runtime), then json_cache
+        for jc in (tmp_json_cache, json_cache):
             if jc.exists():
                 try:
                     cached_rep = json.loads(jc.read_text(encoding="utf-8"))
@@ -285,6 +323,7 @@ def get_or_build_match_report(
                         and cached_rep.get("_zh_schema_v") == 2
                         and cached_rep.get("deep_forensics", {}).get("unpressed_saves_by_side") is not None
                     ):
+                        cached_rep = _hydrate_grok_from_caches(cached_rep, match_id)
                         # Only serve immediately if replay is parsed OR allow_build is False
                         if cached_rep.get("is_parsed") or not allow_build:
                             if allow_build or require_ai:
@@ -297,6 +336,7 @@ def get_or_build_match_report(
         # Read-through from Cloud DB (Supabase / GitHub Cloud) when container /tmp was wiped
         cloud_rep = cloud_fetch_match_report(match_id)
         if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
+            cloud_rep = _hydrate_grok_from_caches(cloud_rep, match_id)
             if cloud_rep.get("is_parsed") or not allow_build:
                 if allow_build or require_ai:
                     cloud_rep = _ensure_grok_coaching(cloud_rep, match_id, json_cache, tmp_json_cache, force=False)
@@ -359,7 +399,7 @@ def get_or_build_match_report(
             if jc.exists():
                 try:
                     old_d = json.loads(jc.read_text(encoding="utf-8"))
-                    if isinstance(old_d, dict) and isinstance(old_d.get("grok_coaching"), dict) and old_d["grok_coaching"].get("stage_reviews"):
+                    if isinstance(old_d, dict) and _has_complete_grok_coaching(old_d.get("grok_coaching")):
                         existing_grok = old_d["grok_coaching"]
                         break
                 except Exception:
@@ -608,6 +648,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     focus_account_id=aid,
                     force_refresh=force,
                     allow_build=(force or analyze_now),
+                    require_ai=True,
                 )
                 roster = load_roster()
                 squad_ledger = build_squad_history_ledger(REPORTS_DIR, roster, [])
