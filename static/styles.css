@@ -1456,34 +1456,39 @@ select:hover {
 .phase-items-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
 }
 
 .mini-item-chip {
-  position: relative;
-  width: 34px;
-  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 3px;
   border: 1px solid #484436;
-  background: #121312;
+  border-radius: 3px;
+  background: #141613;
 }
 
 .mini-item-chip img {
-  width: 100%;
-  height: 100%;
+  width: 30px;
+  height: 22px;
   object-fit: cover;
   display: block;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .mini-item-chip span {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.82);
-  color: var(--gold-light);
-  font-size: 8px;
-  padding: 0 2px;
-  line-height: 1.2;
+  color: #eae4d4;
+  font-size: 11px;
+  line-height: 1.25;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.mini-item-chip span b {
+  color: var(--gold-light);
+  font-weight: 600;
 }
 
 .phase-p-prose {
@@ -2615,14 +2620,20 @@ select:hover {
   border-left-color: var(--red-light);
 }
 
-.phase-eval-group b {
+.phase-eval-group > b {
   display: block;
   font-size: 10.5px;
   margin-bottom: 3px;
 }
 
-.phase-eval-group.good b { color: var(--green-light); }
-.phase-eval-group.bad b { color: var(--red-light); }
+.phase-eval-group.good > b { color: var(--green-light); }
+.phase-eval-group.bad > b { color: var(--red-light); }
+
+.phase-eval-group ul li b {
+  display: inline;
+  font-weight: 700;
+  color: #f6e7c1;
+}
 
 .phase-eval-group ul {
   margin: 0;

@@ -1475,6 +1475,47 @@ def call_llm_coach_review(
     focus_side = "radiant" if raw_side in ("radiant", "天辉") else "dire"
     own_team = report.get("radiant_pos_1_to_5", []) if focus_side == "radiant" else report.get("dire_pos_1_to_5", [])
     opp_team = report.get("dire_pos_1_to_5", []) if focus_side == "radiant" else report.get("radiant_pos_1_to_5", [])
+    df = report.get("deep_forensics") or {}
+    raw_phases = report.get("phases_data") or []
+    phases_list = raw_phases if isinstance(raw_phases, list) else list(raw_phases.values())
+    phases_compact = []
+    for pd in phases_list:
+        if not isinstance(pd, dict):
+            continue
+        p_own = [
+            {
+                "pos": x.get("pos"),
+                "hero": x.get("hero_short_zh"),
+                "k": x.get("kills_count"),
+                "d": x.get("deaths_count"),
+                "gold_gain": x.get("gold_gain"),
+                "lh_gain": x.get("lh_gain"),
+                "dn_gain": x.get("dn_gain"),
+                "hero_dmg_gain": x.get("hero_damage_gain"),
+                "tower_dmg_gain": x.get("tower_damage_gain"),
+                "items_bought": [
+                    f"{it.get('zh_name') or it.get('key')}({it.get('time_str')})"
+                    for it in (x.get("items_bought") or [])
+                ],
+                "kills_events": [
+                    f"{ke.get('time_str')}杀{ke.get('victim_hero')}"
+                    for ke in (x.get("kills_events") or [])[:6]
+                ],
+                "deaths_events": [
+                    f"{de.get('time_str')}被{de.get('killer')}杀(读秒{de.get('time_dead')}s)"
+                    for de in (x.get("deaths_events") or [])[:6]
+                ],
+            }
+            for x in (pd.get("players") or [])
+            if x.get("side") == focus_side
+        ]
+        phases_compact.append({
+            "key": pd.get("key"),
+            "label": pd.get("label"),
+            "window": pd.get("window"),
+            "team_summary": pd.get("team_summary"),
+            "own_players": p_own,
+        })
 
     compact_payload = {
         "match_id": report.get("match_id"),
@@ -1482,17 +1523,23 @@ def call_llm_coach_review(
         "duration": report.get("duration_str"),
         "focus_side": focus_side,
         "user_won": report.get("user_won"),
-        "score": report.get("score"),
+        "score": f"天辉 {report.get('radiant_score', 0)} : {report.get('dire_score', 0)} 夜魇",
         "economy_timeline": report.get("economy_timeline"),
-        "lane_matchups": (report.get("deep_forensics") or {}).get("lane_matchups"),
-        "laning_mechanics": ((report.get("deep_forensics") or {}).get("laning_mechanics_by_side") or {}).get(focus_side),
+        "lane_matchups": df.get("lane_matchups"),
+        "laning_mechanics": (df.get("laning_mechanics_by_side") or {}).get(focus_side),
+        "macro_objectives": (df.get("macro_objectives_by_side") or {}).get(focus_side),
+        "solo_pickoffs": ((df.get("map_space_by_side") or {}).get(focus_side) or {}).get("solo_pickoff_events"),
+        "roshan_and_tower_timeline": (report.get("economy_timeline") or {}).get("key_events"),
+        "phases_breakdown": phases_compact,
         "key_teamfights": [
             {
                 "index": tf.get("index"),
-                "time": f"{tf.get('start_str', '')}-{tf.get('end_str', '')}",
-                "winner": tf.get("winner_zh"),
-                "deaths": f"{tf.get('radiant_deaths', 0)}:{tf.get('dire_deaths', 0)}",
-                "net_gold_swing": tf.get("net_gold_swing"),
+                "time": tf.get("time_range") or f"{tf.get('start_str', '')}-{tf.get('end_str', '')}",
+                "winner": tf.get("winner_zh") or tf.get("winner_side"),
+                "kills_trade": tf.get("kills_trade") or f"{tf.get('radiant_deaths', 0)}:{tf.get('dire_deaths', 0)}",
+                "gold_swing": tf.get("gold_swing") or tf.get("net_gold_swing"),
+                "top_damage_hero": tf.get("top_damage_hero"),
+                "deaths_detail": tf.get("deaths_detail"),
             }
             for tf in (report.get("key_teamfights") or [])[:6]
         ],
@@ -1517,8 +1564,8 @@ def call_llm_coach_review(
                 "dead_seconds": p.get("dead_seconds"),
                 "death_gold_lost": p.get("death_gold_lost"),
                 "obs_sen": f"{p.get('obs_placed')}/{p.get('sen_placed')}",
-                "key_item_timings": (p.get("key_item_timings") or [])[:5],
-                "final_items": (p.get("final_items") or [])[:7],
+                "key_item_timings": (p.get("key_item_timings") or [])[:6],
+                "final_items": [it.get("name_zh") or it.get("key") for it in (p.get("items") or [])] or (p.get("final_items") or [])[:7],
                 "aghanims_shard": p.get("aghanims_shard", False),
                 "active_item_uses": {k: v["count"] for k, v in (p.get("active_item_uses") or {}).items()},
                 "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:5]},
@@ -1545,7 +1592,7 @@ def call_llm_coach_review(
                 "net_worth": p.get("net_worth"),
                 "hero_damage": p.get("hero_damage"),
                 "tower_damage": p.get("tower_damage"),
-                "final_items": (p.get("final_items") or [])[:6],
+                "final_items": [it.get("name_zh") or it.get("key") for it in (p.get("items") or [])] or (p.get("final_items") or [])[:6],
             }
             for p in opp_team
         ],
@@ -1565,36 +1612,56 @@ def call_llm_coach_review(
     )
 
     system_prompt = (
-        "你是懂 Dota 2 全 126 英雄核心机制与团队博弈的开黑老哥，给车队五人做赛后算账复盘。全中文输出（严禁夹杂任何英文变量名如 solo_pickoffs/rating_score_100/contrib_share_pct），像损友聊天：拒绝只看伤害/拆塔面板的浅薄分析（尤其是败局全队都没摸到高地时，绝不要怪1号位0建筑伤害），必须严格按照每个英雄的【内置强势期曲线 hero_mechanism_profile.timing_curve_zh 与专属核心机制】深度思考！\n"
-        "核心铁律：\n"
-        "1) 区分英雄强势期曲线（hero_mechanism_profile）：\n"
-        "   - 大后期刷钱收割核（late_hyper_carry，如敌法/美杜莎/幽鬼/TB/猴子/水人/露娜/虚空等）：前期弱势、10-22m避战刷关键装完全合理，绝不要因为中期刷钱少参团而乱骂；但必须重点考核其【25m+ 成型后是否出山接管比赛完成收割（late_harvest_fulfilled vs late_harvest_failed）】！\n"
-        "   - 前中期干架节奏核（mid_tempo_brawler，如斯拉克/拍拍熊/帕克/蓝猫/火猫/女王/影魔/哈斯卡等）：10-25m是黄金强势期，严禁闷头当刷子！\n"
-        "   - 先手开团肉盾（frontline_initiator）与救人保核辅助（save_healer_support）：考核先手控制承伤转化与救人技能（薄葬/暗箱/禁锢/雪球/无光之盾）兑现度，为团队开团或救人牺牲绝不背死得多的黑锅！\n"
+        "你是懂 Dota 2 全 126 英雄核心机制、克制出装与团队运营的顶分局教练兼损友老哥，给车队五人做赛后深度算账复盘。全中文输出（严禁夹杂任何英文变量名），语气犀利接地气、刀塔味十足，且必须严格基于录像证据深度推理以下核心维度：\n"
+        "1) 【前期三路对线与英雄先天强弱评估 (stage_reviews.early_lanes)】：\n"
+        "   - 必须逐一分析上、中、下三条线！客观结合双方英雄先天对线机制（例如：若敌方是剧毒术士+冥魂大帝等强减速消耗线霸，本方无位移英雄抗压死几次是情有可原的，重点看有没有把总经济咬住；若中单是天怒法师这种全单体爆发、缺乏AOE推线清兵的英雄对阵高攻击力帕吉，拼补刀数吃亏但靠消耗单杀打出经济优势就是大功；1号位打钱是否顺畅、5号位有没有顶前排给压力与拉野封野）。\n"
+        "2) 【中期资源转化：抓人节奏与英雄特性推塔 (stage_reviews.mid_tempo)】：\n"
+        "   - 10~25分钟重点考核资源转化率：谁做出了第一件节奏装（如阿托斯/跳刀/大骨灰）主动带队抓人？谁利用了英雄自身的推塔特性（如帕格纳幽冥爆轰磨塔、德鲁伊/兽王/龙骑/小Y等）拔掉外塔？1号位在刷核心装的同时有没有关键团切入收割？\n"
+        "3) 【后期肉山盾转化率与决胜接管 (stage_reviews.late_and_roshan)】：\n"
+        "   - 结合 macro_objectives 与 roshan_and_tower_timeline，重点判断打了肉山盾之后有没有真正转化为胜势！比如拿到不朽之守护后，有没有顺势把外塔拔光、直接攻破敌方高地塔与兵营完成终结（教科书级控盾资源转化）？还是拿了盾却钻野空转白白浪费？同时考核1号位刷完钱是否在后期真正接管比赛。\n"
+        "4) 【每个人(1~5号位全员5人)的出装灵性、敌我克制、BKB、辅助贪心点金与跳刀转化率审计 (players 数组必须包含本方全部5人)】：\n"
+        "   - 针对克制与局势出装：判断出装是否克制敌方（例如：对方有酒仙醉拳闪避或蝴蝶/高甲，出金箍棒MKB就是精准克制；主宰判断本局对面减速控制多、站桩对A环境极差，但对面没莲花/绿杖导致无敌斩极好发挥，于是果断选择出A杖迅风斩+跳刀打双无敌斩秒人，这是顶级局势理解；面对骷髅王+屠夫出大骨灰削回血；面对敌法切入出绿杖等）。\n"
+        "   - BKB与保命装开喷/免喷审计：核心如果不出しBKB但自带魔免/分身/无敌斩且全场仅死1~2次，要夸他省下BKB格子拉满输出；反之如果核心死6次以上还不出BKB或推推棒，必须狠批！\n"
+        "   - 辅助贪心毒瘤审计（4/5号位）：严查辅助是否贪心裸点金手（如5号位蓝胖21分钟裸点金手拖慢微光披风）或只顾出灵匣/绝刃/A杖堆伤害，却全队0原力法杖(推推棒)救人！\n"
+        "   - 跳刀转化率审计：出跳刀非常关键，必须看他买出跳刀（phases_breakdown中的items_bought时间点）之后到底杀了多少人、打了多少伤害、有没有带跳刀迷路被抓，判断这把跳刀是『封神质变』还是『出了跳刀啥都没干白出』！\n"
+        "   - 团战换命合理性：辅助或前排如果在赢下的团战里冲第一波吃满技能阵亡换来团战大胜，属于功勋战术牺牲，绝不扣锅；只批评脱离团队的无脑落单被抓（solo_pickoffs）。\n"
         + afk_rule_str +
-        "3) 深度机制铁律：\n"
-        "   - 若 1号位（如斯拉克）单带多次无故被抓、拒不出 1,400 金关键魔晶（如斯拉克不出《深海劫掠》导致既救不了被屠夫咬/帕克大的队友、自己也少黑雾叠敏捷 A 不过人）、面对敌方蝴蝶撒旦先知/酒仙不出金箍棒/冰眼、且后期吃满经济却毫无输出，必须一针见血拆穿这三点！\n"
-        "   - 若 3号位是凤凰，绝不要无脑喷不出BKB或拆塔少，必须重点审判其《超新星(变蛋)》在团战中成功炸出几次 vs 被打碎几次（团战碎蛋率）、变蛋前是否挂了《烈火精灵》减攻速、以及《烈日炙烤(激光)》是否严重少按！\n"
-        "   - 若 2号位是脆皮高爆发炮台（如莉娜/宙斯/火枪/天怒），只要她对线打出优势且倒下前把伤害灌满（高英雄伤害占比、场均每死换3000+伤害），死了也完全尽责（虽死犹荣），必须肯定其炮台输出兑现度，并从团队博弈角度建议大推推等解先知发芽/帕克大的出装可能性。\n"
-        "   - 【阵亡合理性审计】：对3/4/5号位（尤其是短手肉搏或无逃生4号位如矮人直升机、发条、白牛、蓝胖等），必须结合 key_teamfights 看他阵亡那波团战是不是赢了！如果他冲前面吃满第一波技能阵亡、换来己方大哥无压力收割团战大胜，这是高价值战术牺牲（虽死犹荣），绝不能单看阵亡数就喷他送人头；只批判脱离大部队的无意义落单白给！\n"
-        "   - 【辅助细活与1~5号位本职审计】：结合 laning_mechanics 与 lane_matchups，主动表扬辅助在线上拉野消兵、买真眼反封野、控疗伤莲花/智慧神符、上线拼命换血给压力配合大哥击杀、坐双生门支援等细活；同时严查1~5号位是否干了对的事（如大哥前期刷完是否出山接管比赛而非万年刷野躺平，辅助是否让刀做视野带节奏而非毒瘤打钱）。\n"
-        f"4) 胜局或队内最佳 MVP 定为『{top1_hero}』，二当家定为『{top2_hero}』。\n"
+        f"5) 胜局或队内最佳 MVP 定为『{top1_hero}』，二当家定为『{top2_hero}』。\n"
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"
-        '  "title": "一句话点透本局胜负关键与最大机制败因（20-36字）",\n'
-        '  "summary": "从前期对线、中期开雾/单带节奏到后期团战机制博弈的全局复盘摘要（110-160字）",\n'
-        '  "verdict": "有理有据的头号战犯/首功、二号背锅/功臣与炮台兑现判词（110-160字）",\n'
-        '  "team_practice": "下一局开黑最该统一执行的一个具体团队配合与出装博弈动作（50-80字）",\n'
-        '  "mvp": {"slot": 128, "runner_up_slot": 131, "confidence": "高", "reason": "为何选他当MVP/SVP", "comparison": "对比队友胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
+        '  "title": "一句话点透本局胜负关键、控盾转化与核心出装博弈（22-40字）",\n'
+        '  "summary": "从前期三路对线、中期抓人推塔转化到后期控盾平推高地的全局复盘摘要（130-190字）",\n'
+        '  "verdict": "有理有据的1~5号位全员功过、出装灵性与节奏判词（130-190字）",\n'
+        '  "team_practice": "下一局开黑最该统一执行的一个具体团队配合与救人装/针对装改进动作（60-100字）",\n'
+        '  "stage_reviews": {\n'
+        '    "early_lanes": "前期(0-10m)上中下三路对位强弱、1号位打钱顺畅度、5号位给压力拉野与中路/劣势路表现的AI深度点评（120-180字）",\n'
+        '    "mid_tempo": "中期(10-25m)资源转化、主动抓人节奏、利用英雄特性推塔与大哥刷钱参团平衡的AI深度点评（120-180字）",\n'
+        '    "late_and_roshan": "后期(25m-终局)打盾后是否顺势推外塔破高地完成资源优势转化、大核收割与决胜团换命的AI深度点评（120-180字）",\n'
+        '    "overall_verdict": "全场总账：整局1~5号位履职兑现度与出装灵性总评（100-150字）"\n'
+        '  },\n'
+        '  "mvp": {"slot": 0, "runner_up_slot": 2, "confidence": "高", "reason": "为何选他当MVP/SVP", "comparison": "对比队友胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
         '  "players": [\n'
-        '    {"slot": 128, "headline": "一句切中机制要害的判词", "assessment": "结合英雄机制、魔晶/出装选择、单带被抓与前中后期团战作用的80-130字深度点评", "good": ["亮点1", "亮点2"], "bad": ["机制或团队问题1"], "practice": "下一局他在团队里能多做什么的具体改进"}\n'
+        '    {\n'
+        '      "slot": 0,\n'
+        '      "pos": 1,\n'
+        '      "hero": "主宰",\n'
+        '      "headline": "一句切中该选手本局灵魂与出装/节奏要害的判词（20-35字）",\n'
+        '      "early_story": "0-10m对线期表现、同路配合与英雄对位强弱点评（60-100字）",\n'
+        '      "mid_story": "10-25m中期资源转化、抓人/推塔或刷钱参团点评（60-100字）",\n'
+        '      "late_story": "25m-终局带盾推高地、决胜团收割或前排换命/落单点评（60-100字）",\n'
+        '      "item_and_blink_audit": "AI对该选手出装灵性、是否克制敌方(如金箍棒/A杖无敌斩/大骨灰/绿杖)、BKB合理性、辅助是否贪点金/缺推推、以及跳刀买出后是否打出效果的深度专项锐评（80-140字）",\n'
+        '      "assessment": "综合结案陈词（70-110字）",\n'
+        '      "good": ["具体做得好的地方1（含时间/装备/数据）", "具体做得好的地方2"],\n'
+        '      "bad": ["具体做得不好或开喷点1（含出装贪心/跳刀转化/落单时间点）", "具体改进点2"],\n'
+        '      "practice": "下一局给该位置的具体进阶建议"\n'
+        '    }\n'
         "  ],\n"
         '  "windows": [\n'
         '    {"time_label": "团战时间段", "title": "一句刀塔味十足的团战标题", "detail": "60-100字有画面感的团战机制复盘"}\n'
         "  ]\n"
         "}"
     )
-    user_prompt = "请为以下比赛证据生成 JSON 复盘：\n" + json.dumps(compact_payload, ensure_ascii=False)
+    user_prompt = "请为以下比赛完整录像遥测证据生成深度 JSON 复盘（players 数组必须完整包含 own_team 全部 5 名选手）：\n" + json.dumps(compact_payload, ensure_ascii=False)
 
     try:
         if prov == "gemini":
@@ -1635,7 +1702,7 @@ def call_llm_coach_review(
                 ],
                 "response_format": {"type": "json_object"},
                 "stream": False,
-                "max_tokens": 2800,
+                "max_tokens": 6000,
             }
             req = urllib.request.Request(
                 url,

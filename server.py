@@ -302,6 +302,36 @@ def get_or_build_match_report(
             raise
 
     report = analyze_match_data(raw_match, roster, focus_account_id=aid)
+
+    # Preserve existing deep Grok coaching if not force-refreshing, otherwise auto-invoke xAI Grok 4.7 LLM review
+    existing_grok = None
+    if not force_refresh:
+        for jc in (json_cache, tmp_json_cache):
+            if jc.exists():
+                try:
+                    old_d = json.loads(jc.read_text(encoding="utf-8"))
+                    if isinstance(old_d, dict) and isinstance(old_d.get("grok_coaching"), dict) and old_d["grok_coaching"].get("stage_reviews"):
+                        existing_grok = old_d["grok_coaching"]
+                        break
+                except Exception:
+                    pass
+    if existing_grok:
+        report["grok_coaching"] = existing_grok
+    else:
+        try:
+            llm_res = call_llm_coach_review(report)
+            if isinstance(llm_res, dict) and llm_res.get("ok") and isinstance(llm_res.get("structured"), dict):
+                structured = llm_res["structured"]
+                structured["model"] = llm_res.get("model", "grok-4.7")
+                report["grok_coaching"] = structured
+                focus_side = report.get("focus_side", "radiant")
+                try:
+                    cloud_save_coaching(match_id, focus_side, structured)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
     md_text = render_markdown_report(report)
     rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
     try:

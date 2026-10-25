@@ -8463,6 +8463,14 @@ const RECIPE_COMPONENT_NAMES = new Set([
   "怨灵系带",
   "护腕",
   "空灵挂件",
+  "精气之球",
+  "活力之球",
+  "能量之球",
+  "极限法球",
+  "神秘法杖",
+  "王权",
+  "玲珑心卷轴",
+  "图纸",
 ]);
 
 function filterMajorItems(itemsBought, maxCnt = 3) {
@@ -9054,10 +9062,13 @@ function analyzePlayerPhaseAndRoleContext(p, report) {
         (ownKillsNear.length >= oppKillsNear.length || coreMultiKill || Number(p.pos || 5) >= 3)
       ) {
         const victims = [...new Set(ownKillsNear.map((k) => k.victim_hero))].slice(0, 3).join("/");
+        const isPos12 = Number(p.pos || 5) <= 2;
         sacList.push({
           ...d,
-          reason_type: "won_tf_sacrifice",
-          desc: `${d.time_str} 团战前排吃满${d.killer || "敌方"}火力牺牲，掩护队友反杀 ${victims}（${ownKillsNear.length}杀团战大捷）`,
+          reason_type: isPos12 ? "won_tf_core_trade" : "won_tf_sacrifice",
+          desc: isPos12
+            ? `${d.time_str} 团战交火被${d.killer || "敌方"}集火切入阵亡，但倒下前打足输出，队友顺势收割 ${victims}（${ownKillsNear.length}杀团战获胜）`
+            : `${d.time_str} 团战前排吃满${d.killer || "敌方"}火力牺牲，掩护大哥反杀 ${victims}（${ownKillsNear.length}杀团战大捷）`,
         });
       } else if (Number(p.pos || 5) >= 3 && ownKillsNear.length >= 1) {
         const victims = [...new Set(ownKillsNear.map((k) => k.victim_hero))].slice(0, 2).join("/");
@@ -9099,20 +9110,27 @@ function analyzePlayerPhaseAndRoleContext(p, report) {
     const effectiveBadDeaths = badDeaths + sacList.length * posWeight + contestList.length * (posWeight + 0.15);
 
     let auditText = "";
+    const isPos12 = Number(p.pos || 5) <= 2;
     if (total === 0) {
       auditText = "本阶段 0 阵亡，走位滴水不漏。";
     } else if (sacList.length > 0 && badDeaths === 0) {
-      auditText = `本阶段 ${total} 次阵亡全属【🟢 团战换赢/掩护大哥收割的合理战术牺牲】（${sacList
-        .map((s) => s.desc)
-        .join("；")}），身为 ${p.pos}号位死得极具价值，完全不背锅！`;
+      auditText = isPos12
+        ? `本阶段仅有的 ${total} 次阵亡发生在正面团战交火中（${sacList
+            .map((s) => s.desc)
+            .join("；")}），虽被敌方重点切入集火但团队最终打赢残局，无孤狼落单白给。`
+        : `本阶段 ${total} 次阵亡全属【🟢 团战换赢/掩护大哥收割的合理战术牺牲】（${sacList
+            .map((s) => s.desc)
+            .join("；")}），身为 ${p.pos}号位死得极具价值，完全不背锅！`;
     } else if (goodDeaths > 0 && badDeaths > 0) {
-      auditText = `本阶段阵亡 ${total} 次需一分为二看：其中 ${goodDeaths} 次属【🟢 ${p.pos}号位前排换命/抗压牵制】（${[
+      auditText = `本阶段阵亡 ${total} 次需一分为二看：其中 ${goodDeaths} 次属【🟢 ${
+        isPos12 ? "正面团战被集火互换" : `${p.pos}号位前排换命/抗压牵制`
+      }】（${[
         ...sacList,
         ...contestList,
       ]
         .slice(0, 2)
         .map((s) => s.desc)
-        .join("；")}），死有所值；但有 ${badDeaths} 次属【🔴 不该送的断节奏/落单白给】（${throwList
+        .join("；")}）；但有 ${badDeaths} 次属【🔴 不该送的断节奏/落单白给】（${throwList
         .slice(0, 2)
         .map((t) => t.desc)
         .join("；")}）。`;
@@ -9584,7 +9602,11 @@ function computeStageRankings(stageKey, report) {
         );
       } else if (ctx.lateDeathsCtx.sacList.length > 0 && badParts.length === 0) {
         badParts.push(
-          `后期阵亡 ${d} 次均属团战前排掩护大哥收割的合理牺牲（无白给掉点）`
+          isCore
+            ? `后期仅阵亡 ${d} 次（${ctx.lateDeathsCtx.sacList
+                .map((s) => s.time_str)
+                .join("/")}正面决战被敌方切入集火，倒下前打足输出由队友顺势收割，0次落单白给）`
+            : `后期阵亡 ${d} 次均属团战前排掩护大哥收割的合理牺牲（无白给掉点）`
         );
       }
       badReason = badParts.join("；") || (d > 0 ? `后期阵亡 ${d} 次，注意高地团拉扯` : "决胜期完美收官 0 失误");
@@ -10063,34 +10085,75 @@ function buildRichFourStageCardsHtml(report) {
     } / 5 胜出</b>。`,
   ];
 
+  const grokStages = report.grok_coaching?.stage_reviews || {};
+  const grokEarlyBullet = grokStages.early_lanes
+    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 AI 复盘</span> ${escapeHtml(
+        grokStages.early_lanes
+      )}`
+    : null;
+  const grokMidBullet = grokStages.mid_tempo
+    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 AI 复盘</span> ${escapeHtml(
+        grokStages.mid_tempo
+      )}`
+    : null;
+  const grokLateBullet = grokStages.late_and_roshan
+    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 AI 复盘</span> ${escapeHtml(
+        grokStages.late_and_roshan
+      )}`
+    : null;
+  const grokOverallBullet = grokStages.overall_verdict
+    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 AI 总评</span> ${escapeHtml(
+        grokStages.overall_verdict
+      )}`
+    : null;
+
   const richStages = [
     {
       stageKey: "lane",
       icon: "🌅",
       badge: "阶段 1 · 前期",
       title: "00:00 - 10:00 对线期三路表现 · 游走Gank与抢符拉野",
-      bullets: [laneOverviewBullet, ...laneMatchupBullets, roamAndGankBullet, resourcesBullet],
+      bullets: [
+        ...(grokEarlyBullet ? [grokEarlyBullet] : []),
+        laneOverviewBullet,
+        ...laneMatchupBullets,
+        roamAndGankBullet,
+        resourcesBullet,
+      ],
     },
     {
       stageKey: "mid",
       icon: "⚔️",
       badge: "阶段 2 · 中期",
       title: "10:00 - 25:00 中期资源转化 · 主动抓人 · 英雄特性推塔与开雾齐整度",
-      bullets: [midOverviewBullet, midPushAndGankBullet, farmingBullet, smokeBullet, attendanceBullet],
+      bullets: [
+        ...(grokMidBullet ? [grokMidBullet] : []),
+        midOverviewBullet,
+        midPushAndGankBullet,
+        farmingBullet,
+        smokeBullet,
+        attendanceBullet,
+      ],
     },
     {
       stageKey: "late",
       icon: "🔥",
       badge: "阶段 3 · 后期",
       title: "25:00 - 终局 决胜团战 · 控盾推高地转化 · 买活博弈与刷钱兑现",
-      bullets: [lateOverviewBullet, peakTfBullet, roshAndPickoffBullet, buybackAndSaveBullet],
+      bullets: [
+        ...(grokLateBullet ? [grokLateBullet] : []),
+        lateOverviewBullet,
+        peakTfBullet,
+        roshAndPickoffBullet,
+        buybackAndSaveBullet,
+      ],
     },
     {
       stageKey: "overall",
       icon: "🏆",
       badge: "全场总账",
       title: "整局五人硬实力 · 团队资源转化与 1~5 号位对位总评",
-      bullets: stage4Bullets,
+      bullets: [...(grokOverallBullet ? [grokOverallBullet] : []), ...stage4Bullets],
     },
   ];
 
@@ -10400,12 +10463,46 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   // AI 灵性出装 · 克制关系 · 跳刀转化率 · BKB/辅助贪心专项审计
   // =========================================================================
   const itemIntel = analyzePlayerItemizationIntelligence(p, report);
+  const grokPlayers = Array.isArray(report.grok_coaching?.players) ? report.grok_coaching.players : [];
+  const grokP =
+    grokPlayers.find((gp) => Number(gp.slot) === Number(p.player_slot)) ||
+    grokPlayers.find(
+      (gp) =>
+        Number(gp.pos) === Number(p.pos) &&
+        gp.hero &&
+        String(p.hero_short_zh || "").includes(String(gp.hero))
+    ) ||
+    grokPlayers.find((gp) => Number(gp.pos) === Number(p.pos));
+
+  if (grokP?.early_story) {
+    act1Story += `<div style="margin-top:6px;padding:6px 10px;background:rgba(139,92,246,0.12);border-left:3px solid #a78bfa;border-radius:6px;font-size:12px;color:#ede9fe;"><b>🧠 Grok 4.7 大模型前期洞察：</b>${escapeHtml(
+      grokP.early_story
+    )}</div>`;
+  }
+  if (grokP?.mid_story) {
+    act2Story += `<div style="margin-top:6px;padding:6px 10px;background:rgba(139,92,246,0.12);border-left:3px solid #a78bfa;border-radius:6px;font-size:12px;color:#ede9fe;"><b>🧠 Grok 4.7 大模型中盘洞察：</b>${escapeHtml(
+      grokP.mid_story
+    )}</div>`;
+  }
+  if (grokP?.late_story) {
+    act3Story += `<div style="margin-top:6px;padding:6px 10px;background:rgba(139,92,246,0.12);border-left:3px solid #a78bfa;border-radius:6px;font-size:12px;color:#ede9fe;"><b>🧠 Grok 4.7 大模型决胜洞察：</b>${escapeHtml(
+      grokP.late_story
+    )}</div>`;
+  }
 
   // =========================================================================
   // 功过得失清单（👍 哪里做得好 vs 👎 哪里做得不好）
   // =========================================================================
   const goodPoints = [];
   const badPoints = [];
+  if (grokP?.good) {
+    const gText = Array.isArray(grokP.good) ? grokP.good.join("；") : String(grokP.good);
+    if (gText) goodPoints.push(`<b>🧠 Grok 4.7 AI 肯定：</b>${escapeHtml(gText)}`);
+  }
+  if (grokP?.bad) {
+    const bText = Array.isArray(grokP.bad) ? grokP.bad.join("；") : String(grokP.bad);
+    if (bText) badPoints.push(`<b>🧠 Grok 4.7 AI 锐评：</b>${escapeHtml(bText)}`);
+  }
 
   if (isCore) {
     if (lh10 >= 48) {
@@ -10535,7 +10632,18 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     }
   }
 
-  const allItemBullets = [...itemIntel.highlights, ...itemIntel.warnings];
+  const grokItemAuditLine = grokP?.item_and_blink_audit || grokP?.assessment || "";
+  const allItemBullets = [
+    ...(grokItemAuditLine
+      ? [
+          `<span style="color:#ddd6fe;"><b>🤖 XAI / GROK-4.7 深度 AI 出装·克制·跳刀锐评：</b>${escapeHtml(
+            grokItemAuditLine
+          )}</span>`,
+        ]
+      : []),
+    ...itemIntel.highlights,
+    ...itemIntel.warnings,
+  ];
   const itemIntelBoxHtml =
     allItemBullets.length > 0 || itemIntel.timelinePills
       ? `
@@ -12477,12 +12585,23 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
       })
       .join("");
 
+    const grokEarlyText = report.grok_coaching?.stage_reviews?.early_lanes || "";
+    const grokEarlyBanner = grokEarlyText
+      ? `<div style="margin-bottom:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(139,92,246,0.16),rgba(59,130,246,0.10));border:1px solid rgba(167,139,250,0.4);border-radius:10px;font-size:12.5px;line-height:1.65;color:#ede9fe;">
+          <b style="color:#c4b5fd;">🧠 XAI / GROK-4.7 大模型对线期深度复盘：</b>${injectHeroLogosIntoHtml(
+            escapeHtml(grokEarlyText),
+            report
+          )}
+        </div>`
+      : "";
+
     return `
       <div class="phase-deep-audit-section">
         <div class="phase-deep-audit-header">
           <h4>🗺️ 前期三路对线全景拆解（每条线胜负 · 英雄对位强弱客观评估 · 1~5号位履职细活）</h4>
           <span>结合英雄先天清线/消耗机制，逐路审视1号位打钱顺畅度、5号位给压力与拉野、中路单杀及劣势路抗压</span>
         </div>
+        ${grokEarlyBanner}
         <div class="phase-deep-lanes-grid">
           ${laneCardsHtml}
         </div>
@@ -12612,12 +12731,23 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
       })
       .join("");
 
+    const grokMidText = report.grok_coaching?.stage_reviews?.mid_tempo || "";
+    const grokMidBanner = grokMidText
+      ? `<div style="margin-bottom:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(139,92,246,0.16),rgba(59,130,246,0.10));border:1px solid rgba(167,139,250,0.4);border-radius:10px;font-size:12.5px;line-height:1.65;color:#ede9fe;">
+          <b style="color:#c4b5fd;">🧠 XAI / GROK-4.7 大模型中期节奏深度复盘：</b>${injectHeroLogosIntoHtml(
+            escapeHtml(grokMidText),
+            report
+          )}
+        </div>`
+      : "";
+
     return `
       <div class="phase-deep-audit-section">
         <div class="phase-deep-audit-header">
           <h4>⚙️ 中期运营深度拆解：资源转化效率 · 主动抓人节奏 · 英雄特性推塔审计 (10:00–25:00)</h4>
           <span>重点考核：吃下的经济有没有转化为抓人节奏与外塔压制？有没有利用英雄机制推塔？大哥刷钱与参团是否平衡？</span>
         </div>
+        ${grokMidBanner}
         <div class="phase-mid-pillars-strip">
           <div class="phase-mid-pillar">
             <span class="pillar-tag">🏰 英雄特性推塔兑现</span>
@@ -12763,7 +12893,9 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
                 pos === 1 && dShare >= 40
                   ? `🌟 前中期刷出的无解肥经济在后期100%转化为毁天灭地的团战收割（占全队后期总伤害 ${dShare}%）与带盾高地平推（占全队拆塔 ${tShare}%），满分大核终结比赛！`
                   : ctx.lateDeathsCtx.sacList.length > 0
-                  ? `🟢 后期 ${d} 次阵亡均属决胜团第一波顶前排吃满敌方技能、掩护1号位收割团灭对手的功勋战术牺牲！`
+                  ? pos <= 2
+                    ? `🟢 后期仅阵亡 ${d} 次，系正面决胜团被敌方集火切入，倒下前打足输出由队友顺势完成收割（0次落单白给）！`
+                    : `🟢 后期 ${d} 次阵亡均属决胜团第一波顶前排吃满敌方技能、掩护1号位收割团灭对手的功勋战术牺牲！`
                   : lateSolos.length > 0
                   ? `🚨 存在决胜期落单被抓（${lateSolos.map((s) => `${s.time_str}被${s.killer_zh}抓`).join("、")}），高地前夕严禁盲区孤走！`
                   : ""
@@ -12776,12 +12908,23 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
     })
     .join("");
 
+  const grokLateText = report.grok_coaching?.stage_reviews?.late_and_roshan || "";
+  const grokLateBanner = grokLateText
+    ? `<div style="margin-bottom:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(139,92,246,0.16),rgba(59,130,246,0.10));border:1px solid rgba(167,139,250,0.4);border-radius:10px;font-size:12.5px;line-height:1.65;color:#ede9fe;">
+        <b style="color:#c4b5fd;">🧠 XAI / GROK-4.7 大模型决胜与控盾转化复盘：</b>${injectHeroLogosIntoHtml(
+          escapeHtml(grokLateText),
+          report
+        )}
+      </div>`
+    : "";
+
   return `
     <div class="phase-deep-audit-section">
       <div class="phase-deep-audit-header">
         <h4>👑 后期决战深度拆解：肉山盾资源转化 · 大核神装出山接管 · 灵性出装与换命审计 (25:00–终局)</h4>
         <span>重点考核：打完肉山盾有没有顺势推外塔破高地？大哥前中期刷的钱有没有接管比赛？出装与跳刀是否真正发挥作用？</span>
       </div>
+      ${grokLateBanner}
       <div class="phase-mid-pillars-strip">
         <div class="phase-mid-pillar">
           <span class="pillar-tag">🛡️ 控盾 → 外塔/高地资源转化审计</span>
@@ -13287,7 +13430,7 @@ function renderPhaseSection(report) {
                                   )}" loading="lazy" />`
                                 : ""
                             }
-                            <span>${escapeHtml(it.zh_name || "")} ${escapeHtml(it.time_str)}</span>
+                            <span>${escapeHtml(it.zh_name || "")} <b>${escapeHtml(it.time_str)}</b></span>
                           </div>
                         `
                         )
