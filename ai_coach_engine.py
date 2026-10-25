@@ -1932,12 +1932,52 @@ def call_llm_coach_review(
                     if target_pos in (4, 5)
                     else "必须重点结合 `role_duty_audit` 深度审讯该核心位的本职执行（1号位经济转化率与BKB容错、2号位中路游走辐射与节奏带动、3号位前排先手开团与吃伤害护阵型）！"
                 )
+                pos_payload = {
+                    "match_id": compact_payload.get("match_id"),
+                    "duration": compact_payload.get("duration"),
+                    "focus_side": compact_payload.get("focus_side"),
+                    "user_won": compact_payload.get("user_won"),
+                    "score": compact_payload.get("score"),
+                    "lane_matchups": compact_payload.get("lane_matchups"),
+                    "key_teamfights": compact_payload.get("key_teamfights"),
+                    "target_player_phases": [
+                        {
+                            "key": pd.get("key"),
+                            "label": pd.get("label"),
+                            "window": pd.get("window"),
+                            "team_summary": pd.get("team_summary"),
+                            "player_phase": [x for x in (pd.get("own_players") or []) if int(x.get("pos") or 0) == target_pos],
+                        }
+                        for pd in (compact_payload.get("phases_breakdown") or [])
+                    ],
+                    "target_player_full_forensics": [
+                        p for p in (compact_payload.get("own_team") or []) if int(p.get("pos") or 0) == target_pos
+                    ],
+                    "teammates_scoreboard": [
+                        {
+                            "slot": p.get("slot"),
+                            "pos": p.get("pos"),
+                            "hero": p.get("hero"),
+                            "kda": p.get("kda"),
+                            "kp_pct": p.get("kp_pct"),
+                            "gpm": p.get("gpm"),
+                            "net_worth": p.get("net_worth"),
+                            "hero_damage_share_pct": p.get("hero_damage_share_pct"),
+                            "tower_damage": p.get("tower_damage"),
+                            "dead_seconds": p.get("dead_seconds"),
+                            "final_items": p.get("final_items"),
+                            "role_duty_verdict": (p.get("role_duty_audit") or {}).get("role_duty_verdict"),
+                        }
+                        for p in (compact_payload.get("own_team") or [])
+                    ],
+                    "opp_team": compact_payload.get("opp_team"),
+                }
                 return (
                     f"【并发分片 Pos {target_pos}：{target_pos}号位选手个人深度审讯】\n"
-                    f"请基于以下全队 5 人录像证据，只返回一个 JSON 对象 `{{\"players\": [ ... ]}}`，其中 `players` 数组**只包含本方 {target_pos}号位（`pos` 为 {target_pos}）这一名选手**的完整复盘对象！\n"
+                    f"请基于以下全队 5 人比分面板与 {target_pos}号位选手完整录像证据，只返回一个 JSON 对象 `{{\"players\": [ ... ]}}`，其中 `players` 数组**只包含本方 {target_pos}号位（`pos` 为 {target_pos}）这一名选手**的完整复盘对象！\n"
                     f"{role_hint}\n"
                     f"注意：该选手的 `grok_score`（0-100）与 `grok_share_pct` 必须放在全队 5 人整体表现坐标系下客观评定；且该选手的 `deep_verdict`（160~220字）、`early_story`（120~170字）、`mid_story`（120~170字）、`late_story`（120~170字）、`item_and_blink_audit`（100~140字）必须全部写满一整段详实复盘（严禁写一句话敷衍，严禁夹杂英文术语）：\n"
-                    + payload_json_str
+                    + json.dumps(pos_payload, ensure_ascii=False)
                 )
 
             def _call_xai_chunk(u_prompt: str, max_tok: int) -> Optional[Dict[str, Any]]:
@@ -2017,19 +2057,38 @@ def call_llm_coach_review(
                 # Normalize players' grok_score & grok_share_pct and enforce strict rank-order monotonicity:
                 # - In a WIN (own_won=True): higher grok_score MUST have higher grok_share_pct (victory contribution %)
                 # - In a LOSS (own_won=False): lower grok_score MUST have higher grok_share_pct (defeat blame %)
+                own_pos_map = {int(p.get("pos") or 0): p for p in own_team if isinstance(p, dict)}
                 pls = [gp for gp in (structured.get("players") or []) if isinstance(gp, dict)]
+                for gp in pls:
+                    p_orig = own_pos_map.get(int(gp.get("pos") or 0))
+                    if p_orig:
+                        gp["slot"] = p_orig.get("player_slot")
+                        gp["hero"] = p_orig.get("hero_short_zh") or p_orig.get("hero_name") or gp.get("hero")
                 if len(pls) > 0:
                     total_sh = sum(max(1.0, float(gp.get("grok_share_pct") or 20.0)) for gp in pls) or 100.0
                     norm_shares = sorted(
                         [round((max(1.0, float(gp.get("grok_share_pct") or 20.0)) / total_sh) * 100.0, 1) for gp in pls],
                         reverse=True,
                     )
-                    # Fix rounding drift on largest share so sum is 100.0
+                    # Enforce strict non-tied descending shares before fixing rounding drift
+                    for idx_ns in range(1, len(norm_shares)):
+                        if norm_shares[idx_ns] >= norm_shares[idx_ns - 1]:
+                            norm_shares[idx_ns] = max(1.0, round(norm_shares[idx_ns - 1] - 0.3, 1))
+                    # Fix rounding drift on largest share (if positive) or smallest share (if negative) so sum is 100.0
                     if norm_shares:
-                        norm_shares[0] = round(norm_shares[0] + (100.0 - sum(norm_shares)), 1)
+                        drift = round(100.0 - sum(norm_shares), 1)
+                        if drift >= 0:
+                            norm_shares[0] = round(norm_shares[0] + drift, 1)
+                        else:
+                            norm_shares[-1] = max(1.0, round(norm_shares[-1] + drift, 1))
                     if own_won:
                         # Highest score gets largest contribution share
                         pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), float(x.get("grok_share_pct") or 20)), reverse=True)
+                        for idx_s in range(1, len(pls_by_rank)):
+                            prev_sc = int(pls_by_rank[idx_s - 1].get("grok_score") or 75)
+                            cur_sc = int(pls_by_rank[idx_s].get("grok_score") or 70)
+                            if cur_sc >= prev_sc:
+                                pls_by_rank[idx_s]["grok_score"] = max(40, prev_sc - 1)
                     else:
                         # If Grok explicitly named someone 孤胆院长/SVP in headline/deep_verdict, ensure their score is top of team
                         max_sc = max(int(x.get("grok_score") or 60) for x in pls)
@@ -2039,6 +2098,11 @@ def call_llm_coach_review(
                                 x["grok_score"] = min(88, max_sc + 3)
                         # Lowest score is #1 Culprit and gets largest blame share
                         pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), -float(x.get("grok_share_pct") or 20)))
+                        for idx_s in range(1, len(pls_by_rank)):
+                            prev_sc = int(pls_by_rank[idx_s - 1].get("grok_score") or 45)
+                            cur_sc = int(pls_by_rank[idx_s].get("grok_score") or 50)
+                            if cur_sc <= prev_sc:
+                                pls_by_rank[idx_s]["grok_score"] = min(95, prev_sc + 1)
                     for idx_r, gp in enumerate(pls_by_rank):
                         gp["grok_share_pct"] = norm_shares[idx_r]
                         dv = str(gp.get("deep_verdict") or "")

@@ -189,7 +189,6 @@ function findGrokPlayerEntry(p, report = state.currentReport) {
   }
   const heroShort = String(p.hero_short_zh || p.hero_name || "");
   return (
-    grokPlayers.find((gp) => gp && gp.slot !== undefined && Number(gp.slot) === Number(p.player_slot)) ||
     grokPlayers.find(
       (gp) =>
         gp &&
@@ -198,6 +197,7 @@ function findGrokPlayerEntry(p, report = state.currentReport) {
         (heroShort.includes(String(gp.hero)) || String(gp.hero).includes(heroShort))
     ) ||
     grokPlayers.find((gp) => gp && Number(gp.pos) === Number(p.pos)) ||
+    grokPlayers.find((gp) => gp && gp.slot !== undefined && Number(gp.slot) === Number(p.player_slot)) ||
     null
   );
 }
@@ -1349,30 +1349,44 @@ function buildStructuredFullReportHtml(report) {
   const grok = report.grok_coaching || {};
   const draft = report.draft_and_combo?.[side] || report.draft_and_combo || {};
 
-  // Normalize 100% contribution and 100% blame shares
+  // Normalize 100% contribution and 100% blame shares (preferring Grok 4.7 grok_share_pct)
   const rawContribSum =
-    own.reduce((s, p) => s + Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)), 0) || 100;
+    own.reduce((s, p) => {
+      const gp = findGrokPlayerEntry(p, report);
+      const val = ownWon && gp?.grok_share_pct ? Number(gp.grok_share_pct) : Number(p.contrib_share_pct ?? p.mvp_score ?? 20);
+      return s + Math.max(1, val);
+    }, 0) || 100;
   const contribMap = new Map();
   own.forEach((p) => {
-    const pct = Number(
-      ((Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)) / rawContribSum) * 100).toFixed(1)
-    );
+    const gp = findGrokPlayerEntry(p, report);
+    const val = ownWon && gp?.grok_share_pct ? Number(gp.grok_share_pct) : Number(p.contrib_share_pct ?? p.mvp_score ?? 20);
+    const pct = Number(((Math.max(1, val) / rawContribSum) * 100).toFixed(1));
     contribMap.set(Number(p.player_slot), pct);
   });
 
   const rawBlameSum =
-    own.reduce((s, p) => s + Math.max(1, Number(p.blame_share_pct || 20)), 0) || 100;
+    own.reduce((s, p) => {
+      const gp = findGrokPlayerEntry(p, report);
+      const val = !ownWon && gp?.grok_share_pct ? Number(gp.grok_share_pct) : Number(p.blame_share_pct || 20);
+      return s + Math.max(1, val);
+    }, 0) || 100;
   const blameMap = new Map();
   own.forEach((p) => {
-    const pct = Number(((Math.max(1, Number(p.blame_share_pct || 20)) / rawBlameSum) * 100).toFixed(1));
+    const gp = findGrokPlayerEntry(p, report);
+    const val = !ownWon && gp?.grok_share_pct ? Number(gp.grok_share_pct) : Number(p.blame_share_pct || 20);
+    const pct = Number(((Math.max(1, val) / rawBlameSum) * 100).toFixed(1));
     blameMap.set(Number(p.player_slot), pct);
   });
 
   const sortedByContrib = [...own].sort(
-    (a, b) => (contribMap.get(Number(b.player_slot)) || 0) - (contribMap.get(Number(a.player_slot)) || 0)
+    (a, b) =>
+      (contribMap.get(Number(b.player_slot)) || 0) - (contribMap.get(Number(a.player_slot)) || 0) ||
+      getHeroScore100(b, report) - getHeroScore100(a, report)
   );
   const sortedByBlame = [...own].sort(
-    (a, b) => (blameMap.get(Number(b.player_slot)) || 0) - (blameMap.get(Number(a.player_slot)) || 0)
+    (a, b) =>
+      (blameMap.get(Number(b.player_slot)) || 0) - (blameMap.get(Number(a.player_slot)) || 0) ||
+      getHeroScore100(a, report) - getHeroScore100(b, report)
   );
 
   const topMvp = sortedByContrib[0] || own[0];
@@ -1421,12 +1435,17 @@ function buildStructuredFullReportHtml(report) {
   const ledgerRowsHtml = own
     .map((p) => {
       const heroShort = p.hero_short_zh || p.hero_name || "";
+      const gp = findGrokPlayerEntry(p, report);
+      const sc100 = getHeroScore100(p, report);
+      const scTier = getScore100Tier(sc100, ownWon);
       const cPct = contribMap.get(Number(p.player_slot)) ?? 20.0;
       const bPct = blameMap.get(Number(p.player_slot)) ?? 20.0;
       const sharePct = ownWon ? cPct : bPct;
-      const roleNote = ownWon
-        ? p.praise_talk || (p.strengths || [])[0] || "稳定发挥完成战术任务"
-        : p.trash_talk || (p.weaknesses || [])[0] || "存在团战或对线细节失误";
+      const roleNote =
+        gp?.headline ||
+        (ownWon
+          ? p.praise_talk || (p.strengths || [])[0] || "稳定发挥完成战术任务"
+          : p.trash_talk || (p.weaknesses || [])[0] || "存在团战或对线细节失误");
       const isHighlight = ownWon
         ? Number(p.player_slot) === Number(topMvp?.player_slot)
         : Number(p.player_slot) === Number(topCulprit?.player_slot);
@@ -1447,9 +1466,7 @@ function buildStructuredFullReportHtml(report) {
           <td><b>${fmtNum(p.hero_damage)}</b><br/><span class="fs-sub">占全队 ${p.hero_damage_share_pct ?? 0}%</span></td>
           <td><b>${fmtNum(p.damage_taken)}</b><br/><span class="fs-sub">读秒 ${p.dead_seconds ?? 0}s</span></td>
           <td><b>${fmtNum(p.tower_damage)}</b><br/><span class="fs-sub">硬控 ${p.stuns_sec ?? 0}s</span></td>
-          <td><b>${p.rating_score ?? 0} 分</b><br/><span class="fs-sub">${escapeHtml(
-        ownWon ? p.contrib_tier || "核心功臣" : p.rating_tier || "常规表现"
-      )}</span></td>
+          <td><b>${sc100}/100 分</b><br/><span class="fs-sub">${escapeHtml(scTier.label)}</span></td>
           <td>
             <span class="fs-share-pill ${ownWon ? "win" : "loss"}">
               ${ownWon ? `功勋 ${sharePct}%` : `分锅 ${sharePct}%`}
@@ -1614,7 +1631,7 @@ function buildStructuredFullReportHtml(report) {
     .map((p) => {
       const heroShort = p.hero_short_zh || p.hero_name || "";
       const aiStoryObj = buildPlayerDossierAiStory(p, {
-        grokPlayer: grokPlayersMap.get(Number(p.player_slot)),
+        grokPlayer: findGrokPlayerEntry(p, report) || grokPlayersMap.get(Number(p.player_slot)),
         isTopCulprit: !ownWon && Number(p.player_slot) === topCulpritSlotNum,
         isMvp: Number(p.player_slot) === mvpSlotNum,
       });
@@ -3721,7 +3738,7 @@ async function downloadStructuredReportPdf() {
     const ch6Rows = own.map((p) => {
       const heroShort = p.hero_short_zh || p.hero_name || "";
       const aiStoryObj = buildPlayerDossierAiStory(p, {
-        grokPlayer: grokPlayersMapPdf.get(Number(p.player_slot)),
+        grokPlayer: findGrokPlayerEntry(p, report) || grokPlayersMapPdf.get(Number(p.player_slot)),
         isTopCulprit: !ownWon && Number(p.player_slot) === topCulpritSlotNumPdf,
         isMvp: Number(p.player_slot) === mvpSlotNumPdf,
       });
@@ -11137,7 +11154,7 @@ function renderVerdictAndBlameSection(report) {
           tabTag = "👑 头号首功";
           cardHeader = "👑 头号首功 · 本局擎天真大腿 (MVP)";
           themeClass = "mvp-theme";
-          statusTag = p.contrib_tier || "👑 头号首功";
+          statusTag = "👑 头号首功";
           copyBtnLabel = "复制首功贺电";
           isSpot = true;
         } else if (Number(p.player_slot) === Number(runnerP?.player_slot)) {
@@ -11145,7 +11162,7 @@ function renderVerdictAndBlameSection(report) {
           tabTag = "⚔️ 二号功臣";
           cardHeader = "⚔️ 二号功臣 · 破阵二当家 & 定海神针";
           themeClass = "runnerup-theme";
-          statusTag = p.contrib_tier || "⚔️ 破阵二当家";
+          statusTag = "⚔️ 破阵二当家";
           copyBtnLabel = "复制庆功词";
         } else if (Number(p.player_slot) === Number(stP?.player_slot)) {
           roleType = "struggle";
@@ -11164,7 +11181,7 @@ function renderVerdictAndBlameSection(report) {
               ? "🎖️ 三号功臣 · 关键节奏与火力兑现"
               : "🛡️ 四号功臣 · 团队视野与控制保障";
           themeClass = "runnerup-theme";
-          statusTag = p.contrib_tier || tabTag;
+          statusTag = tabTag;
           copyBtnLabel = "复制庆功词";
         }
 
@@ -14247,7 +14264,7 @@ function renderPlayersForensicsList(report) {
     cardsToShow
       .map((p) =>
         renderSingleForensicCard(p, {
-          grokPlayer: grokPlayersMap.get(Number(p.player_slot)),
+          grokPlayer: findGrokPlayerEntry(p, report) || grokPlayersMap.get(Number(p.player_slot)),
           isTopCulprit: !p.won && Number(p.player_slot) === Number(maxCulpritSlot),
           isMvp: Number(p.player_slot) === Number(mvpSlot),
         })
@@ -14368,21 +14385,21 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
     .join("");
 
   const goodList =
-    grokPlayer?.good && grokPlayer.good.length > 0
-      ? grokPlayer.good
+    gp?.good && gp.good.length > 0
+      ? gp.good
       : p.strengths || ["数据层面暂无突出亮点"];
   const badList =
-    grokPlayer?.bad && grokPlayer.bad.length > 0
-      ? grokPlayer.bad
+    gp?.bad && gp.bad.length > 0
+      ? gp.bad
       : p.weaknesses || ["本局无明显失误记录"];
   const fixList =
-    grokPlayer?.practice
-      ? [grokPlayer.practice, ...(p.improvements || []).slice(0, 2)]
+    gp?.practice
+      ? [gp.practice, ...(p.improvements || []).slice(0, 2)]
       : p.improvements || ["保持当前节奏与位置感"];
 
-  const headlineText = grokPlayer?.headline || "";
+  const headlineText = gp?.headline || "";
   const aiStoryObj = buildPlayerDossierAiStory(p, {
-    grokPlayer,
+    grokPlayer: gp,
     isTopCulprit,
     isMvp,
   });
@@ -14475,10 +14492,10 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
           ${
             pWon
               ? `<span class="blame-badge" style="color:#a8e5a7;border-color:#3a6a40;background:#152317;">🏆 胜局贡献 ${contribPct}% · ${escapeHtml(
-                  p.contrib_tier || p.rating_tier || "凯旋功臣"
+                  scoreTier.label
                 )}</span>`
               : `<span class="blame-badge">背锅 ${blamePct}% · ${escapeHtml(
-                  p.rating_tier || "普通背锅"
+                  scoreTier.label
                 )}</span>`
           }
         </div>
@@ -15206,16 +15223,21 @@ function openSharePosterDialog(report) {
     (side === "radiant" && Boolean(report.radiant_win)) ||
     (side === "dire" && !report.radiant_win);
   const grok = report.grok_coaching;
+  const getEffShare = (p) => {
+    const gp = findGrokPlayerEntry(p, report);
+    if (gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
+    return won ? Number(p.contrib_share_pct ?? 20) : Number(p.blame_share_pct ?? 20);
+  };
   const sortedBlame = [...own].sort(
-    (a, b) => (b.blame_share_pct || 0) - (a.blame_share_pct || 0)
+    (a, b) => getEffShare(b) - getEffShare(a) || getHeroScore100(a, report) - getHeroScore100(b, report)
   );
   const sortedContrib = [...own].sort(
-    (a, b) =>
-      (b.contrib_share_pct ?? b.rating_score ?? 0) -
-      (a.contrib_share_pct ?? a.rating_score ?? 0)
+    (a, b) => getEffShare(b) - getEffShare(a) || getHeroScore100(b, report) - getHeroScore100(a, report)
   );
   const topCulprit = sortedBlame[0];
-  const mvpPlayer = sortedContrib[0];
+  const mvpPlayer = won
+    ? sortedContrib[0]
+    : [...own].sort((a, b) => getHeroScore100(b, report) - getHeroScore100(a, report))[0] || sortedContrib[0];
   const runnerUpPlayer = sortedContrib[1] || sortedContrib[0];
 
   const df = report.deep_forensics || {};
@@ -15248,21 +15270,16 @@ function openSharePosterDialog(report) {
         `🔗 公开复盘分享链接：${shareUrl}`,
         `📣 凯旋定性：${grok?.title || report.match_narrative?.headline || "全员发力碾压获胜"}`,
         `────────────────────`,
-        `👑 头号首功 (MVP)：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${Number(
-          mvpPlayer?.contrib_share_pct ?? 25
-        ).toFixed(1)}% · 综合评分 ${mvpPlayer?.rating_score || 0}`,
-        `⚔️ 破阵二当家：${runnerUpPlayer?.personaname || ""} (${runnerUpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${Number(
-          runnerUpPlayer?.contrib_share_pct ?? 22
-        ).toFixed(1)}% · 综合评分 ${runnerUpPlayer?.rating_score || 0}`,
+        `👑 头号首功 (MVP)：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${getEffShare(mvpPlayer).toFixed(1)}% · 综合评分 ${getHeroScore100(mvpPlayer, report)}/100分`,
+        `⚔️ 破阵二当家：${runnerUpPlayer?.personaname || ""} (${runnerUpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${getEffShare(runnerUpPlayer).toFixed(1)}% · 综合评分 ${getHeroScore100(runnerUpPlayer, report)}/100分`,
         `────────────────────`,
         `📊 五黑全员胜局贡献榜 (100% 胜局贡献排位)：`,
         ...sortedContrib.map((p, i) => {
           const b0 = (p.hero_execution_audit?.headline_badges || [])[0];
           const b0Txt = typeof b0 === "string" ? b0 : b0?.text || "";
-          const cPct = Number(p.contrib_share_pct ?? 20).toFixed(1);
-          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | 胜局贡献 ${cPct}% (${
-            p.contrib_tier || p.rating_tier || "功臣"
-          }) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}%${
+          const cPct = getEffShare(p).toFixed(1);
+          const sc100 = getHeroScore100(p, report);
+          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | 评分 ${sc100}/100 | 胜局贡献 ${cPct}% | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}%${
             b0Txt ? ` | 🔬 ${b0Txt}` : ""
           }`;
         }),
@@ -15293,14 +15310,16 @@ function openSharePosterDialog(report) {
         `🔗 公开复盘分享链接：${shareUrl}`,
         `📣 终局定性：${grok?.title || report.match_narrative?.headline || "正面团战与节奏复盘"}`,
         `────────────────────`,
-        `🚨 头号背锅侠：${topCulprit?.personaname || ""} (${topCulprit?.hero_short_zh || ""}) — 分锅占比 ${topCulprit?.blame_share_pct || 0}%`,
-        `👑 败方尽力王：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 综合评分 ${mvpPlayer?.rating_score || 0}`,
+        `🚨 头号背锅侠：${topCulprit?.personaname || ""} (${topCulprit?.hero_short_zh || ""}) — 分锅占比 ${getEffShare(topCulprit).toFixed(1)}% · 综合评分 ${getHeroScore100(topCulprit, report)}/100分`,
+        `👑 败方尽力王：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 综合评分 ${getHeroScore100(mvpPlayer, report)}/100分`,
         `────────────────────`,
         `📊 五黑全员算账明细 (按背锅排序)：`,
         ...sortedBlame.map((p, i) => {
           const b0 = (p.hero_execution_audit?.headline_badges || [])[0];
           const b0Txt = typeof b0 === "string" ? b0 : b0?.text || "";
-          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s | 锅 ${p.blame_share_pct}%${
+          const bPct = getEffShare(p).toFixed(1);
+          const sc100 = getHeroScore100(p, report);
+          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | 评分 ${sc100}/100 | 锅 ${bPct}% | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s${
             b0Txt ? ` | 🔬 ${b0Txt}` : ""
           }`;
         }),
@@ -15406,7 +15425,7 @@ function drawVerdictPosterCanvas(
     ctx.font = "bold 19px sans-serif";
     ctx.fillText(
       `${mvpPlayer?.personaname || ""} · ${mvpPlayer?.hero_short_zh || ""} (贡献 ${Number(
-        mvpPlayer?.contrib_share_pct ?? 25
+        findGrokPlayerEntry(mvpPlayer, report)?.grok_share_pct ?? mvpPlayer?.contrib_share_pct ?? 25
       ).toFixed(1)}%)`,
       56,
       206
@@ -15424,7 +15443,7 @@ function drawVerdictPosterCanvas(
     ctx.font = "bold 19px sans-serif";
     ctx.fillText(
       `${runnerUpPlayer?.personaname || ""} · ${runnerUpPlayer?.hero_short_zh || ""} (贡献 ${Number(
-        runnerUpPlayer?.contrib_share_pct ?? 22
+        findGrokPlayerEntry(runnerUpPlayer, report)?.grok_share_pct ?? runnerUpPlayer?.contrib_share_pct ?? 22
       ).toFixed(1)}%)`,
       482,
       206
@@ -15441,7 +15460,9 @@ function drawVerdictPosterCanvas(
     ctx.fillStyle = "#f2efe9";
     ctx.font = "bold 19px sans-serif";
     ctx.fillText(
-      `${topCulprit?.personaname || ""} · ${topCulprit?.hero_short_zh || ""} (背锅 ${topCulprit?.blame_share_pct || 0}%)`,
+      `${topCulprit?.personaname || ""} · ${topCulprit?.hero_short_zh || ""} (背锅 ${Number(
+        findGrokPlayerEntry(topCulprit, report)?.grok_share_pct ?? topCulprit?.blame_share_pct ?? 25
+      ).toFixed(1)}%)`,
       56,
       206
     );
@@ -15457,7 +15478,7 @@ function drawVerdictPosterCanvas(
     ctx.fillStyle = "#f2efe9";
     ctx.font = "bold 19px sans-serif";
     ctx.fillText(
-      `${mvpPlayer?.personaname || ""} · ${mvpPlayer?.hero_short_zh || ""} (评分 ${mvpPlayer?.rating_score || 0})`,
+      `${mvpPlayer?.personaname || ""} · ${mvpPlayer?.hero_short_zh || ""} (评分 ${getHeroScore100(mvpPlayer, report)}/100)`,
       482,
       206
     );
@@ -15467,6 +15488,11 @@ function drawVerdictPosterCanvas(
   const rowsList = won ? sortedContrib || sortedBlame : sortedBlame;
   rowsList.forEach((p, idx) => {
     const isFirst = idx === 0;
+    const gpRow = findGrokPlayerEntry(p, report);
+    const rowShare = Number(
+      gpRow?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
+    ).toFixed(1);
+    const rowScore = getHeroScore100(p, report);
     ctx.fillStyle = isFirst ? (won ? "#182419" : "#201715") : "#181a16";
     ctx.fillRect(42, y, W - 84, 58);
     ctx.strokeStyle = isFirst ? (won ? "#4d8a54" : "#8c3b2e") : "#2e3028";
@@ -15491,8 +15517,8 @@ function drawVerdictPosterCanvas(
     ctx.textAlign = "right";
     ctx.fillText(
       won
-        ? `胜局贡献 ${Number(p.contrib_share_pct ?? 20).toFixed(1)}% · 评分 ${p.rating_score}`
-        : `分锅 ${p.blame_share_pct}% · 评分 ${p.rating_score}`,
+        ? `胜局贡献 ${rowShare}% · 评分 ${rowScore}/100`
+        : `分锅 ${rowShare}% · 评分 ${rowScore}/100`,
       W - 58,
       y + 34
     );

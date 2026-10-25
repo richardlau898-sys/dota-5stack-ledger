@@ -820,8 +820,11 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                         TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                         (TMP_REPORTS_DIR / f"match_{mid}.json").write_text(rep_txt, encoding="utf-8")
                     try:
-                        cloud_save_match_report(mid, report)
-                        cloud_save_coaching(mid, side, res["structured"])
+                        with ThreadPoolExecutor(max_workers=2) as save_pool:
+                            f1 = save_pool.submit(cloud_save_match_report, mid, report)
+                            f2 = save_pool.submit(cloud_save_coaching, mid, side, res["structured"])
+                            f1.result(timeout=12)
+                            f2.result(timeout=12)
                     except Exception:
                         pass
                 res["report"] = sanitize_report_mixed_english(report)
