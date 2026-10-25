@@ -325,8 +325,8 @@ def get_or_build_match_report(
                         and cached_rep.get("deep_forensics", {}).get("unpressed_saves_by_side") is not None
                     ):
                         cached_rep = _hydrate_grok_from_caches(cached_rep, match_id)
-                        # Only serve immediately if replay is parsed OR allow_build is False
-                        if cached_rep.get("is_parsed") or not allow_build:
+                        # Only serve immediately if replay is parsed
+                        if cached_rep.get("is_parsed"):
                             if (allow_build or require_ai) and not skip_llm:
                                 cached_rep = _ensure_grok_coaching(cached_rep, match_id, json_cache, tmp_json_cache, force=False)
                             return sanitize_report_mixed_english(cached_rep)
@@ -338,13 +338,13 @@ def get_or_build_match_report(
         cloud_rep = cloud_fetch_match_report(match_id)
         if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
             cloud_rep = _hydrate_grok_from_caches(cloud_rep, match_id)
-            if cloud_rep.get("is_parsed") or not allow_build:
+            if cloud_rep.get("is_parsed"):
                 if (allow_build or require_ai) and not skip_llm:
                     cloud_rep = _ensure_grok_coaching(cloud_rep, match_id, json_cache, tmp_json_cache, force=False)
                 return sanitize_report_mixed_english(cloud_rep)
             fallback_unparsed_rep = cloud_rep
 
-    if not allow_build and not json_cache.exists() and not tmp_json_cache.exists():
+    if not allow_build and fallback_unparsed_rep is None and not json_cache.exists() and not tmp_json_cache.exists():
         return None
 
     roster = load_roster()
@@ -369,14 +369,17 @@ def get_or_build_match_report(
             if raw_match and not raw_match.get("version"):
                 try:
                     api_post(f"/request/{match_id}")
-                    for _ in range(2):
-                        time.sleep(1.5)
-                        retry_raw = api_get(f"/matches/{match_id}")
-                        if retry_raw and retry_raw.get("version"):
-                            raw_match = retry_raw
-                            break
+                    if allow_build:
+                        for _ in range(2):
+                            time.sleep(1.5)
+                            retry_raw = api_get(f"/matches/{match_id}")
+                            if retry_raw and retry_raw.get("version"):
+                                raw_match = retry_raw
+                                break
                 except Exception:
                     pass
+                if not raw_match.get("version") and fallback_unparsed_rep and not force_refresh:
+                    return sanitize_report_mixed_english(fallback_unparsed_rep)
             # Only cache raw_match on disk if it is parsed (version is not None)
             if raw_match and raw_match.get("version"):
                 raw_txt = json.dumps(raw_match, ensure_ascii=False)

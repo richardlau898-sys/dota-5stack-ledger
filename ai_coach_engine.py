@@ -1915,26 +1915,30 @@ def call_llm_coach_review(
 
             url = f"{b_url.rstrip('/')}/chat/completions"
             # On xAI, grok-4.7 is a deep reasoning model that takes 50-120s (exceeding Vercel's 60s timeout).
-            # Use grok-4.20-0309-non-reasoning with 2 parallel requests (Part A: Global + Pos 1-3; Part B: Pos 4-5)
-            # so full 200-word stage paragraphs for all 5 players finish in ~20-25s (well inside Vercel's 60s window).
+            # Use grok-4.20-0309-non-reasoning with 6 parallel micro-shards (1 Global shard + 5 individual Pos 1..5 shards)
+            # so each shard only generates ~850 tokens and the entire 5,500-word review finishes in ~10-15s!
             api_model = "grok-4.20-0309-non-reasoning" if (prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4")) else model
             payload_json_str = json.dumps(compact_payload, ensure_ascii=False)
 
-            user_prompt_part_a = (
-                "【并发分片 A：全局复盘 + 1/2/3号位三位核心选手】\n"
-                "请基于以下完整全队 5 人录像证据，生成完整的全局字段（title, summary, verdict, team_practice, stage_reviews, mvp, windows），"
-                "并在 `players` 数组中只输出本方 **1号位、2号位、3号位（pos 为 1, 2, 3 的 3 名核心选手）** 的深度复盘对象！"
-                "注意：打分 `grok_score` 与占比 `grok_share_pct` 仍需结合全队 5 人整体表现来评定，且每位选手的 early_story / mid_story / late_story 必须各写满 110~160 字的一整段详实复盘：\n"
+            user_prompt_global = (
+                "【并发分片 0：全局总评与三幕复盘（无需输出 players 数组）】\n"
+                "请基于以下完整全队 5 人录像证据，只输出全局 JSON 字段：`title`, `summary`, `verdict`, `team_practice`, `stage_reviews`（含 `early_lanes`, `mid_tempo`, `late_and_roshan`, `overall_verdict` 四个长段，每段 130~180 字）, `mvp`, `windows`，并在顶层放一个空数组 `\"players\": []`（选手个人复盘由其他并发分片生成）：\n"
                 + payload_json_str
             )
-            user_prompt_part_b = (
-                "【并发分片 B：4/5号位两位辅助选手专项深度审讯】\n"
-                "请基于以下完整全队 5 人录像证据，返回一个 JSON 对象 `{\"players\": [ ... ]}`，"
-                "其中 `players` 数组只输出本方 **4号位、5号位（pos 为 4, 5 的 2 名辅助选手）** 的深度复盘对象！"
-                "必须重点结合 `role_duty_audit` 审讯该 4/5 号位是否执行了辅助本职工作（如 4 号位是否服务 3 号位带节奏、出推推/微光/跳刀/阿托斯/大骨灰等团队装，还是没钱硬憋散失/BKB 等大哥装自己打钱抢经济送人头），"
-                "打分 `grok_score` 与占比 `grok_share_pct` 需结合全队 5 人整体表现评定，且每位选手的 early_story / mid_story / late_story 必须各写满 110~160 字的一整段详实复盘：\n"
-                + payload_json_str
-            )
+
+            def _build_pos_prompt(target_pos: int) -> str:
+                role_hint = (
+                    "必须重点结合 `role_duty_audit` 深度审讯该辅助/节奏位是否执行了本职工作（如4号位是否服务3号位带节奏、出推推/微光/跳刀/阿托斯/莲花/大骨灰等团队装，还是没钱硬憋散失/BKB等大哥装自己打钱抢经济送人头；5号位是否保大哥线优、做真假眼视野、蹲后排救人）！"
+                    if target_pos in (4, 5)
+                    else "必须重点结合 `role_duty_audit` 深度审讯该核心位的本职执行（1号位经济转化率与BKB容错、2号位中路游走辐射与节奏带动、3号位前排先手开团与吃伤害护阵型）！"
+                )
+                return (
+                    f"【并发分片 Pos {target_pos}：{target_pos}号位选手个人深度审讯】\n"
+                    f"请基于以下全队 5 人录像证据，只返回一个 JSON 对象 `{{\"players\": [ ... ]}}`，其中 `players` 数组**只包含本方 {target_pos}号位（`pos` 为 {target_pos}）这一名选手**的完整复盘对象！\n"
+                    f"{role_hint}\n"
+                    f"注意：该选手的 `grok_score`（0-100）与 `grok_share_pct` 必须放在全队 5 人整体表现坐标系下客观评定；且该选手的 `deep_verdict`（160~220字）、`early_story`（120~170字）、`mid_story`（120~170字）、`late_story`（120~170字）、`item_and_blink_audit`（100~140字）必须全部写满一整段详实复盘（严禁写一句话敷衍，严禁夹杂英文术语）：\n"
+                    + payload_json_str
+                )
 
             def _call_xai_chunk(u_prompt: str, max_tok: int) -> Optional[Dict[str, Any]]:
                 p_body = {
@@ -1961,7 +1965,7 @@ def call_llm_coach_review(
                                 "User-Agent": "DotaAiAnalyst/2.0",
                             },
                         )
-                        with urllib.request.urlopen(req_c, timeout=48) as resp_c:
+                        with urllib.request.urlopen(req_c, timeout=28) as resp_c:
                             d_c = json.loads(resp_c.read().decode("utf-8"))
                         txt_c = d_c["choices"][0]["message"]["content"]
                         parsed_c = _parse_llm_json_robust(txt_c)
@@ -1973,24 +1977,34 @@ def call_llm_coach_review(
                     raise last_err_c
                 return None
 
-            with ThreadPoolExecutor(max_workers=2) as pool:
-                fut_a = pool.submit(_call_xai_chunk, user_prompt_part_a, 5200)
-                fut_b = pool.submit(_call_xai_chunk, user_prompt_part_b, 3200)
-                part_a = fut_a.result()
-                part_b = fut_b.result()
+            with ThreadPoolExecutor(max_workers=6) as pool:
+                fut_global = pool.submit(_call_xai_chunk, user_prompt_global, 2200)
+                fut_pos_map = {
+                    pos_i: pool.submit(_call_xai_chunk, _build_pos_prompt(pos_i), 1800)
+                    for pos_i in (1, 2, 3, 4, 5)
+                }
+                part_global = fut_global.result()
+                merged_players_by_pos: Dict[int, Dict[str, Any]] = {}
+                for pos_i, fut_p in fut_pos_map.items():
+                    try:
+                        res_p = fut_p.result()
+                        if isinstance(res_p, dict):
+                            p_list = res_p.get("players")
+                            if isinstance(p_list, list) and p_list:
+                                gp = p_list[0]
+                                if isinstance(gp, dict):
+                                    gp["pos"] = int(gp.get("pos") or pos_i)
+                                    merged_players_by_pos[pos_i] = gp
+                            elif res_p.get("hero") or res_p.get("deep_verdict"):
+                                res_p["pos"] = int(res_p.get("pos") or pos_i)
+                                merged_players_by_pos[pos_i] = res_p
+                    except Exception:
+                        pass
 
-            if not isinstance(part_a, dict):
-                raise RuntimeError("Grok 分片 A 解析失败")
-            merged_players_by_pos: Dict[int, Dict[str, Any]] = {}
-            for gp in (part_a.get("players") or []):
-                if isinstance(gp, dict) and gp.get("pos"):
-                    merged_players_by_pos[int(gp["pos"])] = gp
-            if isinstance(part_b, dict):
-                for gp in (part_b.get("players") or []):
-                    if isinstance(gp, dict) and gp.get("pos"):
-                        merged_players_by_pos[int(gp["pos"])] = gp
-            part_a["players"] = [merged_players_by_pos[k] for k in sorted(merged_players_by_pos.keys())]
-            out_txt = json.dumps(part_a, ensure_ascii=False)
+            if not isinstance(part_global, dict):
+                raise RuntimeError("Grok 全局分片解析失败")
+            part_global["players"] = [merged_players_by_pos[k] for k in sorted(merged_players_by_pos.keys())]
+            out_txt = json.dumps(part_global, ensure_ascii=False)
 
         # 尝试解析为结构化 JSON 并持久化
         structured = _parse_llm_json_robust(out_txt)

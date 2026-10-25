@@ -1117,6 +1117,8 @@ LEGACY_ENGLISH_TO_ZH_MAP = {
     "contrib ": "胜局贡献度 ",
     "contrib": "胜局贡献度",
     "rating只有": "评分只有",
+    "OD": "殁境神蚀者",
+    "AOE": "范围",
 }
 
 
