@@ -8697,6 +8697,71 @@ function computeStageRankings(stageKey, report) {
   const ss = df.stacking_and_smoke_by_side?.[side] || {};
   const mo = df.macro_objectives_by_side?.[side] || {};
 
+  const rawPhases = report.phases_data || [];
+  const phasesList = Array.isArray(rawPhases) ? rawPhases : Object.values(rawPhases);
+  const midPdForShare = phasesList.find((x) => x.key === "mid");
+  const midOwnPlayersForShare = (midPdForShare?.players || []).filter((x) => x.side === side);
+  const teamMidGoldTotal = Math.max(
+    1,
+    midOwnPlayersForShare.reduce((s, x) => s + Number(x.gold_gain || 0), 0)
+  );
+  const teamMidDmgTotal = Math.max(
+    1,
+    midOwnPlayersForShare.reduce((s, x) => s + Number(x.hero_damage_gain || 0), 0)
+  );
+  const teamMidTdmgTotal = Math.max(
+    1,
+    midOwnPlayersForShare.reduce((s, x) => s + Number(x.tower_damage_gain || 0), 0)
+  );
+
+  const LANE_BULLY_HEROES = new Set([
+    "剧毒术士",
+    "冥界亚龙",
+    "哈斯卡",
+    "剃刀",
+    "不朽尸王",
+    "杰奇洛",
+    "巫妖",
+    "伐木机",
+    "孽主",
+    "卓尔游侠",
+    "狙击手",
+    "戴泽",
+    "巫医",
+    "食人魔魔法师",
+    "矮人直升机",
+    "帕格纳",
+    "天怒法师",
+  ]);
+  const SINGLE_TARGET_MIDS = new Set([
+    "天怒法师",
+    "赏金猎人",
+    "克林克兹",
+    "司夜刺客",
+    "力丸",
+    "祸乱之源",
+    "帕吉",
+    "修补匠",
+  ]);
+  const PUSH_TRAIT_HEROES = new Set([
+    "帕格纳",
+    "死亡先知",
+    "暗影萨满",
+    "莱席克",
+    "兽王",
+    "德鲁伊",
+    "狼人",
+    "魅惑魔女",
+    "陈",
+    "先知",
+    "育母蜘蛛",
+    "恐怖利刃",
+    "卓尔游侠",
+    "主宰",
+    "露娜",
+    "龙骑士",
+  ]);
+
   const evaluated = own.map((p) => {
     const ctx = analyzePlayerPhaseAndRoleContext(p, report);
     const pos = Number(p.pos || 3);
@@ -8714,6 +8779,7 @@ function computeStageRankings(stageKey, report) {
       const dn = Number(p.laning_10m?.dn10 ?? lp.dn_gain ?? 0);
       const gold10 = Number(p.laning_10m?.gold10 ?? lp.gold_gain ?? 0);
       const dmg10 = Number(lp.hero_damage_gain || 0);
+      const tdmg10 = Number(lp.tower_damage_gain || 0);
       const eff = Number(p.lane_efficiency_pct || 60);
       const gDiff = Number(ctx.mirrorRow?.gold10_diff || 0);
       const pullPct = Number(ctx.pullRow?.pull_ratio_pct ?? 0);
@@ -8726,46 +8792,69 @@ function computeStageRankings(stageKey, report) {
       const laneWon = ctx.myLane && ctx.myLane.winner_side === side;
       const allyStr = ctx.laneAllies.map((a) => `${a.pos}号位${a.hero_short_zh}`).join("+");
       const enemyStr = ctx.laneEnemies.map((e) => `${e.hero_short_zh}(仅${e.lh10}刀)`).join("+");
+      const enemyNamesStr = ctx.laneEnemies.map((e) => e.hero_short_zh).join("+");
+      const facingStrongEnemyLane = ctx.laneEnemies.some((e) => LANE_BULLY_HEROES.has(e.hero_short_zh));
+      const isSingleTargetGankMid =
+        pos === 2 && (SINGLE_TARGET_MIDS.has(p.hero_short_zh) || (gDiff >= 0 && k >= 2 && dmg10 >= 3200));
 
       if (isCore) {
+        const expectedLh = isSingleTargetGankMid ? 30 : pos <= 2 ? 42 : 34;
         score +=
           k * 16 +
-          (lh - 38) * 0.9 +
+          (lh - expectedLh) * 0.85 +
           dn * 0.7 +
-          gDiff / 65 +
+          gDiff / 55 +
           (eff - 65) * 0.6 +
-          dmg10 / 450 +
+          dmg10 / 400 +
+          tdmg10 / 300 +
           (laneWon ? 14 : 0) -
-          ctx.laneDeathsCtx.effectiveBadDeaths * 18;
-        if (pos === 1 && lh >= 50 && d === 0) score += 15;
-        if (pos === 2 && lh < 35) score -= 12;
+          ctx.laneDeathsCtx.effectiveBadDeaths * 18 -
+          (d >= 3 ? (d - 2) * 14 : 0);
+        if (pos === 1 && lh >= 50 && d === 0) score += 16;
+        if (pos === 2 && gDiff >= 150 && k >= 2 && d <= 1) score += 16;
+        if (pos === 2 && lh < 35 && !isSingleTargetGankMid && gDiff < -200) score -= 12;
 
         const goodParts = [`10m <b>${lh}/${dn}刀（${fmtNum(gold10)}金·效率${eff}%）</b>，<b>${k}杀/${d}死</b>`];
         if (laneWon && allyStr) {
           goodParts.push(`联手${allyStr}把该路彻底打穿（压制${enemyStr}）`);
+        } else if (isSingleTargetGankMid && gDiff >= 0) {
+          goodParts.push(
+            `虽受${p.hero_short_zh}缺乏AOE清线影响正补偏少，但凭高频法术消耗（灌出 <b>${fmtNum(
+              dmg10
+            )} 伤害</b>）单杀/游走建功，10m经济反压对位 <b>+${fmtNum(gDiff)}金</b>`
+          );
         } else if (dmg10 >= 3800) {
-          goodParts.push(`对线凶悍灌出 <b>${fmtNum(dmg10)} 消耗伤害</b>`);
+          goodParts.push(
+            `顶着对位压力凶悍换血灌出 <b>${fmtNum(dmg10)} 消耗伤害</b>${
+              facingStrongEnemyLane && enemyNamesStr ? `（面对敌方${enemyNamesStr}强消耗组合硬咬住经济）` : ""
+            }`
+          );
         }
-        if (gDiff >= 300) goodParts.push(`对位领先 <b>+${fmtNum(gDiff)}金</b>`);
+        if (gDiff >= 300 && !isSingleTargetGankMid) goodParts.push(`对位领先 <b>+${fmtNum(gDiff)}金</b>`);
+        if (tdmg10 >= 500) goodParts.push(`磨塔 <b>${fmtNum(tdmg10)}</b>`);
         goodReason = goodParts.join("，");
 
         const badParts = [];
         if (d >= 2) {
+          const matchupNote =
+            facingStrongEnemyLane && enemyNamesStr
+              ? `面对敌方<b>${enemyNamesStr}</b>强减速/消耗组合外加中单游走，线上天然劣势抗压极难；虽打足换血伤害，但`
+              : "";
           badParts.push(
-            `对线期阵亡 <b>${d} 次</b>（${(lp.deaths_events || [])
+            `${matchupNote}对线期阵亡 <b>${d} 次</b>（${(lp.deaths_events || [])
               .slice(0, 3)
               .map((e) => `${e.time_str}被${e.killer}杀`)
-              .join("、")}），防游走意识薄弱`
+              .join("、")}），防游走站位偏深`
           );
         }
-        if (pos <= 2 && lh < 36) {
-          badParts.push(`身为 ${pos}号位前10分钟仅 <b>${lh} 刀（${fmtNum(gold10)}金）</b>，补刀基本功落后`);
+        if (pos <= 2 && lh < 34 && !isSingleTargetGankMid && gDiff < 0) {
+          badParts.push(`身为 ${pos}号位前10分钟仅 <b>${lh} 刀（${fmtNum(gold10)}金）</b>，补刀落后对位`);
         }
         if (badParts.length === 0) {
           badParts.push(
             d > 0
-              ? `${lp.deaths_events?.[0]?.time_str || "对线期"}被${lp.deaths_events?.[0]?.killer || "敌方"}击杀断了一波节奏`
-              : `前10分钟推塔伤害仅 ${p.tower_damage_10m || 0}，压制外塔血量可更激进`
+              ? `${lp.deaths_events?.[0]?.time_str || "对线期"}被${lp.deaths_events?.[0]?.killer || "敌方"}击杀断了一波节奏（对线整体占优）`
+              : `对线0死无解肥，唯前10分钟推塔伤害 ${tdmg10}，可呼叫辅助更早压塔`
           );
         }
         badReason = badParts.join("；");
@@ -8784,7 +8873,8 @@ function computeStageRankings(stageKey, report) {
           dmg10 / 280 +
           (laneWon ? 18 : 0) +
           (didNotStealCS ? 10 : 0) -
-          ctx.laneDeathsCtx.effectiveBadDeaths * 14;
+          ctx.laneDeathsCtx.effectiveBadDeaths * 15 -
+          (d >= 4 ? (d - 3) * 18 : 0);
 
         // Heavy penalty if support did NOT pull, did NOT ward, and farmed greedily
         if (pullPct < 10 && earlySen === 0 && lh > 22) {
@@ -8821,13 +8911,15 @@ function computeStageRankings(stageKey, report) {
 
         const supBad = [];
         if (d >= 3) {
+          const matchupExcuse =
+            facingStrongEnemyLane && enemyNamesStr
+              ? `对线面对敌方<b>${enemyNamesStr}</b>强减速削蓝组合天然极度难打，且为抢${lotusCnt}莲花/${wisdomCnt}智慧符及掩护3号位拼命换血；但`
+              : "";
           supBad.push(
-            `前10m阵亡 <b>${d} 次</b>（虽含抢符/换血拼刺刀，但 ${
-              (lp.deaths_events || [])
-                .slice(-2)
-                .map((e) => `${e.time_str}被${e.killer}收割`)
-                .join("、")
-            } 给敌方核心送了提款节奏）`
+            `${matchupExcuse}前10m阵亡 <b>${d} 次</b>（${(lp.deaths_events || [])
+              .slice(-3)
+              .map((e) => `${e.time_str}被${e.killer}收割`)
+              .join("、")}），客观上让敌方1号位拿到了人头提款`
           );
         } else if (d >= 1) {
           supBad.push(`${lp.deaths_events?.[0]?.time_str || ""}被${lp.deaths_events?.[0]?.killer || "敌方"}击杀阵亡 ${d} 次`);
@@ -8841,8 +8933,13 @@ function computeStageRankings(stageKey, report) {
       const d = Number(mp.deaths_count || 0);
       const gold = Number(mp.gold_gain || 0);
       const dmg = Number(mp.hero_damage_gain || 0);
+      const tdmg = Number(mp.tower_damage_gain || 0);
       const lh = Number(mp.lh_gain || 0);
-      const items = filterMajorItems(mp.items_bought, 2)
+      const goldSharePct = Number(((gold / teamMidGoldTotal) * 100).toFixed(1));
+      const dmgSharePct = Number(((dmg / teamMidDmgTotal) * 100).toFixed(1));
+      const tdmgSharePct = Number(((tdmg / teamMidTdmgTotal) * 100).toFixed(1));
+      const conversionDiff = Number((dmgSharePct - goldSharePct).toFixed(1));
+      const items = filterMajorItems(mp.items_bought, 3)
         .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
         .join("/");
       const midSolos = ctx.soloEvents.filter((ev) => {
@@ -8854,11 +8951,17 @@ function computeStageRankings(stageKey, report) {
       const smokedCnt = (ss.smoke_events || []).filter(
         (sm) => sm.initiator_hero === p.hero_short_zh || sm.activator_hero === p.hero_short_zh
       ).length;
+      const hasGankItem = (mp.items_bought || []).some((it) =>
+        /阿托斯|闪烁匕首|跳刀|紫苑|血棘|魂之灵瓮|大骨灰|诡计之雾/.test(String(it.zh_name || ""))
+      );
 
       score +=
         k * 14 +
-        dmg / 260 +
-        (isCore ? gold / 250 : gold / 420) +
+        dmg / 250 +
+        tdmg / 140 +
+        (isCore ? gold / 260 : gold / 420) +
+        Math.max(-10, Math.min(16, conversionDiff * 0.75)) +
+        (hasGankItem && k >= 2 ? 12 : 0) +
         smokedCnt * 12 +
         ctx.midDeathsCtx.sacList.length * 6 -
         ctx.midDeathsCtx.effectiveBadDeaths * 18 -
@@ -8868,7 +8971,10 @@ function computeStageRankings(stageKey, report) {
 
       // Role-specific mid checks
       if (pos === 1 && gold >= 9500 && d <= 2 && !p.is_afk_farmer) {
-        score += 22; // Pos 1 hitting massive farm timing cleanly
+        score += 22; // Pos 1 hitting massive farm timing cleanly while joining key kills
+      }
+      if (PUSH_TRAIT_HEROES.has(p.hero_short_zh) && tdmg >= 2000) {
+        score += 18; // Hero-specific pushing trait fulfilled!
       }
       if (p.is_afk_farmer) {
         score -= 35; // Pos 1/2/3 AFK farming all game without converting
@@ -8878,11 +8984,26 @@ function computeStageRankings(stageKey, report) {
       }
 
       const goodParts = [
-        `阶段 <b>${k}杀/${d}死</b>，进账 <b>+${fmtNum(gold)}金</b>、打出 <b>${fmtNum(dmg)} 英雄伤害</b>`,
+        `阶段 <b>${k}杀/${d}死</b>，吃 <b>${goldSharePct}% 经济（+${fmtNum(gold)}金）</b> 打出 <b>${fmtNum(
+          dmg
+        )} 伤害（占全队 ${dmgSharePct}%）</b>`,
       ];
+      if (tdmg >= 1500) {
+        goodParts.push(
+          `完美发挥${p.hero_short_zh}推进特性狂拆 <b>${fmtNum(tdmg)} 建筑伤害（占全队中期推塔 ${tdmgSharePct}%）</b>拔掉外塔`
+        );
+      } else if (tdmg >= 500) {
+        goodParts.push(`推塔 <b>+${fmtNum(tdmg)}</b>`);
+      }
       if (items) goodParts.push(`做出关键装 <b>${items}</b>`);
-      if (pos === 1 && gold >= 9500) goodParts.push(`利用队友拉扯空间极速刷出核心装奠定胜基`);
-      if (smokedCnt > 0) goodParts.push(`主动捏雾带队破局×${smokedCnt}`);
+      if (hasGankItem && k >= 2) {
+        const victims = (mp.kills_events || []).map((ke) => `${ke.time_str}杀${ke.victim_hero}`).join("、");
+        goodParts.push(`装备成型后立刻主动抓人节奏拉满（${victims}）`);
+      }
+      if (pos === 1 && gold >= 9500) {
+        goodParts.push(`黄金期狂刷 <b>${lh}刀</b> 极速做出三大件且参团收割两不误`);
+      }
+      if (smokedCnt > 0) goodParts.push(`主动买雾破局×${smokedCnt}`);
       if (isSup && ctx.midDeathsCtx.sacList.length > 0) {
         goodParts.push(`团战前排肉身换命×${ctx.midDeathsCtx.sacList.length}波掩护大哥发育`);
       }
@@ -8910,12 +9031,15 @@ function computeStageRankings(stageKey, report) {
           badParts.push(`中期连续阵亡 <b>${d} 次</b>导致节奏断档`);
         }
       }
+      if (PUSH_TRAIT_HEROES.has(p.hero_short_zh) && tdmg < 300 && pos !== 1) {
+        badParts.push(`身为具备推进机制的${p.hero_short_zh}，中期建筑伤害仅 ${tdmg}，未充分利用技能磨塔`);
+      }
       if (tfAbsent > 0 && pos !== 1) badParts.push(`团战缺席/边缘OB <b>${tfAbsent} 波</b>`);
       if (zeroTp) badParts.push(`整局主动买 <b>0 张 TP</b>`);
       if (pos === 5 && (mp.items_bought || []).some((it) => String(it.zh_name || "").includes("点金手"))) {
-        badParts.push(`五号位中期裸出点金手(21:21)，略微拖慢团队救人装节奏`);
+        badParts.push(`五号位中期裸出点金手(21:21)，略微拖慢团队微光/推推救人装成型节奏`);
       }
-      badReason = badParts.join("；") || (d > 0 ? `中期阵亡 ${d} 次，需注意抱团走位` : "中期发育稳健，可多带队拔外塔");
+      badReason = badParts.join("；") || (d > 0 ? `中期阵亡 ${d} 次，需注意抱团走位` : "中期资源转化与节奏稳健");
     } else if (stageKey === "late") {
       const ltp = ctx.lateP;
       const k = Number(ltp.kills_count || 0);
@@ -9282,20 +9406,39 @@ function buildRichFourStageCardsHtml(report) {
     .filter((p) => (p.pos || 9) <= 3)
     .map((c) => {
       const fullP = own.find((x) => Number(x.player_slot) === Number(c.player_slot)) || c;
-      const itemsStr = (c.items_bought || [])
-        .slice(0, 2)
+      const itemsStr = filterMajorItems(c.items_bought, 3)
         .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
         .join("/");
       return `${c.pos}号位${c.hero_short_zh}(+${fmtNum(c.gold_gain || 0)}金/+${
         c.lh_gain || 0
-      }刀·GPM ${fullP.gpm || "-"}${itemsStr ? `·出装:${itemsStr}` : ""})`;
+      }刀·伤${fmtNum(c.hero_damage_gain || 0)}·塔${fmtNum(c.tower_damage_gain || 0)}${
+        itemsStr ? `·出装:${itemsStr}` : ""
+      })`;
     })
     .join(" ｜ ");
-  const farmingBullet = `<span class="stage-key-pill">大哥打钱节奏与屯野</span> 全队堆野 <b>${
+  const farmingBullet = `<span class="stage-key-pill">大哥打钱与装备提速</span> 全队堆野 <b>${
     ss.total_stacks ?? 0
-  }</b> 组（辅助屯野 ${ss.support_stacks ?? 0} 组 / 核心自拉 ${
-    ss.core_stacks ?? 0
-  } 组）；10–25m三大哥发育：${escapeHtml(coreFarmingStr || "数据正常")}。`;
+  }</b> 组；10–25m三大哥资源转化：${escapeHtml(coreFarmingStr || "数据正常")}。`;
+
+  const midTotalTdmg = Math.max(1, midOwnP.reduce((s, x) => s + Number(x.tower_damage_gain || 0), 0));
+  const midTopPusher = [...midOwnP].sort((a, b) => (b.tower_damage_gain || 0) - (a.tower_damage_gain || 0))[0];
+  const midTopGanker = [...midOwnP].sort(
+    (a, b) =>
+      (b.kills_count || 0) * 1000 +
+      (b.hero_damage_gain || 0) -
+      ((a.kills_count || 0) * 1000 + (a.hero_damage_gain || 0))
+  )[0];
+  const midPushAndGankBullet = `<span class="stage-key-pill">特性推塔与主动抓人</span> 中期全队推塔伤害 <b>${fmtNum(
+    midTotalTdmg
+  )}</b>（拔塔王：<b>${midTopPusher?.pos || 3}号位${escapeHtml(
+    midTopPusher?.hero_short_zh || ""
+  )} ${fmtNum(midTopPusher?.tower_damage_gain || 0)} 塔伤·占全队 ${Math.round(
+    ((midTopPusher?.tower_damage_gain || 0) / midTotalTdmg) * 100
+  )}%</b>）；抓人节奏发动机：<b>${midTopGanker?.pos || 2}号位${escapeHtml(
+    midTopGanker?.hero_short_zh || ""
+  )}（${midTopGanker?.kills_count || 0}杀/${midTopGanker?.deaths_count || 0}死·${fmtNum(
+    midTopGanker?.hero_damage_gain || 0
+  )}伤）</b>。`;
 
   // --- STAGE 3: 25:00 - 终局 决胜团战 · 肉山高地 · 买活博弈与后期刷钱转化 ---
   const lateOwnP = (latePd?.players || [])
@@ -9430,8 +9573,8 @@ function buildRichFourStageCardsHtml(report) {
       stageKey: "mid",
       icon: "⚔️",
       badge: "阶段 2",
-      title: "10:00 - 25:00 中期 Gank · 开雾情况 · 打团齐整度与大哥打钱节奏",
-      bullets: [midOverviewBullet, smokeBullet, attendanceBullet, farmingBullet],
+      title: "10:00 - 25:00 中期资源转化 · 主动抓人 · 英雄特性推塔与开雾齐整度",
+      bullets: [midOverviewBullet, midPushAndGankBullet, farmingBullet, smokeBullet, attendanceBullet],
     },
     {
       stageKey: "late",
@@ -11631,6 +11774,553 @@ function renderDamageMatrix(report) {
 }
 
 /**
+ * Build Phase-Specific Deep Audit Panel:
+ * - "lane" (00:00–10:00): Per-lane (Safe / Mid / Offlane) breakdown with Hero Matchup Strength Context & Pos 1–5 Execution Details
+ * - "mid"  (10:00–25:00): Resource Conversion Efficiency, Active Ganking & Item Timing, and Hero-Trait Tower Pushing Audit
+ * - "late" (25:00–End):   Hyper-Carry Late Conversion, Roshan & Highground Push Chain, and Teamfight Sacrifice vs Solo Pickoff Audit
+ */
+function buildPhaseSpecificDeepAuditHtml(activePd, report) {
+  if (!activePd || !report) return "";
+  const { side, sideZh, own } = getOwnAndOppPlayers(report);
+  const oppZh = side === "radiant" ? "夜魇" : "天辉";
+  const df = report.deep_forensics || {};
+  const phaseKey = activePd.key;
+
+  const LANE_BULLY_HEROES = new Set([
+    "剧毒术士",
+    "冥界亚龙",
+    "哈斯卡",
+    "剃刀",
+    "不朽尸王",
+    "杰奇洛",
+    "巫妖",
+    "伐木机",
+    "孽主",
+    "卓尔游侠",
+    "狙击手",
+    "戴泽",
+    "巫医",
+    "食人魔魔法师",
+    "矮人直升机",
+    "帕格纳",
+    "天怒法师",
+  ]);
+  const SINGLE_TARGET_MIDS = new Set([
+    "天怒法师",
+    "赏金猎人",
+    "克林克兹",
+    "司夜刺客",
+    "力丸",
+    "祸乱之源",
+    "帕吉",
+    "修补匠",
+  ]);
+  const PUSH_TRAIT_HEROES = new Set([
+    "帕格纳",
+    "死亡先知",
+    "暗影萨满",
+    "莱席克",
+    "兽王",
+    "德鲁伊",
+    "狼人",
+    "魅惑魔女",
+    "陈",
+    "先知",
+    "育母蜘蛛",
+    "恐怖利刃",
+    "卓尔游侠",
+    "主宰",
+    "露娜",
+    "龙骑士",
+  ]);
+
+  if (phaseKey === "lane") {
+    const lanes = df.lane_matchups || [];
+    if (lanes.length === 0) return "";
+    // Order lanes: Safe Lane first, Mid Lane second, Offlane third
+    const sortedLanes = [...lanes].sort((a, b) => {
+      const aOwn = (side === "radiant" ? a.radiant_heroes : a.dire_heroes) || [];
+      const bOwn = (side === "radiant" ? b.radiant_heroes : b.dire_heroes) || [];
+      const aMinPos = Math.min(...aOwn.map((h) => Number(h.pos || 5)), 5);
+      const bMinPos = Math.min(...bOwn.map((h) => Number(h.pos || 5)), 5);
+      return aMinPos - bMinPos;
+    });
+
+    const laneCardsHtml = sortedLanes
+      .map((ln) => {
+        const ownHeroes = (side === "radiant" ? ln.radiant_heroes : ln.dire_heroes) || [];
+        const oppHeroes = (side === "radiant" ? ln.dire_heroes : ln.radiant_heroes) || [];
+        const ownGold10 = Number(side === "radiant" ? ln.radiant_gold10 : ln.dire_gold10) || 0;
+        const oppGold10 = Number(side === "radiant" ? ln.dire_gold10 : ln.radiant_gold10) || 0;
+        const ownLhDn = (side === "radiant" ? ln.radiant_lh_dn : ln.dire_lh_dn) || "0/0";
+        const oppLhDn = (side === "radiant" ? ln.dire_lh_dn : ln.radiant_lh_dn) || "0/0";
+        const laneGoldDiff = ownGold10 - oppGold10;
+
+        const ownNames = ownHeroes.map((h) => `${h.pos}号位${h.hero_short_zh}`).join(" + ");
+        const oppNames = oppHeroes.map((h) => `${h.pos}号位${h.hero_short_zh}`).join(" + ");
+        const hasPos1 = ownHeroes.some((h) => Number(h.pos) === 1);
+        const hasPos2 = ownHeroes.some((h) => Number(h.pos) === 2);
+        const laneRoleLabel = hasPos1
+          ? `🛡️ 本方优势路（保1号位发育主战场）`
+          : hasPos2
+          ? `⚔️ 中路 1v1 皇城 PK（节奏与单杀枢轴）`
+          : `🔥 本方劣势路（抗压·抢符·干扰敌方大哥）`;
+
+        let statusTheme = "even";
+        let statusTag = `⚖️ 均势互发育 (${fmtSigned(laneGoldDiff)} 金)`;
+        if (laneGoldDiff >= 1200) {
+          statusTheme = "good";
+          statusTag = `🟢 彻底打穿该路 (${fmtSigned(laneGoldDiff)} 金)`;
+        } else if (laneGoldDiff >= 250) {
+          statusTheme = "good";
+          statusTag = `🟢 对线小优压制 (${fmtSigned(laneGoldDiff)} 金)`;
+        } else if (laneGoldDiff <= -1200) {
+          statusTheme = "bad";
+          statusTag = `🔴 对线劣势抗压 (${fmtSigned(laneGoldDiff)} 金)`;
+        } else if (laneGoldDiff <= -250) {
+          statusTheme = "warn";
+          statusTag = `🟡 高压抗压微劣 (${fmtSigned(laneGoldDiff)} 金)`;
+        }
+
+        // Analyze hero matchup context objectively
+        const oppBullies = oppHeroes.filter((h) => LANE_BULLY_HEROES.has(h.hero_short_zh));
+        const ownBullies = ownHeroes.filter((h) => LANE_BULLY_HEROES.has(h.hero_short_zh));
+        let matchupContextHtml = "";
+        if (hasPos1) {
+          const p1 = ownHeroes.find((h) => Number(h.pos) === 1) || ownHeroes[0];
+          const p5 = ownHeroes.find((h) => Number(h.pos) >= 4) || ownHeroes[1];
+          if (laneGoldDiff >= 800) {
+            matchupContextHtml = `<b>英雄对位评估（本方组合占优并完美兑现）：</b>${ownNames} 具备极强的线上换血与斩杀联动，面对敌方 ${oppNames}，${
+              p5 ? `5号位${p5.hero_short_zh}主动顶前排给足压力` : "辅助保线到位"
+            }，让 1号位${p1?.hero_short_zh || ""}在毫无干扰的环境下无解肥正反补并完成线杀碾压。`;
+          } else if (oppBullies.length > 0 && laneGoldDiff < 0) {
+            matchupContextHtml = `<b>英雄对位评估（敌方劣势路强消耗组合施压）：</b>敌方派出了 ${oppNames}（含线上强消耗/恶心机制），本方优势路前期换血压力较大，重心在于拉野控线保1号位基础补刀。`;
+          } else {
+            matchupContextHtml = `<b>英雄对位评估：</b>${ownNames} 对阵 ${oppNames}，双方围绕兵线平衡与莲花池展开常规博弈。`;
+          }
+        } else if (hasPos2) {
+          const p2 = ownHeroes[0];
+          const opp2 = oppHeroes[0];
+          const isSingleTarget = p2 && SINGLE_TARGET_MIDS.has(p2.hero_short_zh);
+          if (isSingleTarget && laneGoldDiff >= 0) {
+            matchupContextHtml = `<b>英雄对位评估（单点法系压制 vs 高攻反补肉核）：</b>本方 2号位<b>${
+              p2.hero_short_zh
+            }</b>属于全单体高爆发技能机制、天生缺乏 AOE 推线清兵能力，面对敌方高攻击力/高血量的 <b>${
+              opp2?.hero_short_zh || "中单"
+            }</b> 拼纯补刀数天然吃亏（${p2.lh10}/${p2.dn10}刀 vs ${opp2?.lh10 || 0}/${
+              opp2?.dn10 || 0
+            }刀）；但 ${p2.hero_short_zh} 扬长避短，用高频法术耗血与单杀/游走硬生生在10分钟经济上反超 <b>+${fmtNum(
+              laneGoldDiff
+            )} 金</b>！`;
+          } else if (oppBullies.length > 0 && laneGoldDiff < -300) {
+            matchupContextHtml = `<b>英雄对位评估（先天对位被克制）：</b>面对敌方线上强势中单 <b>${
+              opp2?.hero_short_zh || ""
+            }</b>，本方 <b>${p2?.hero_short_zh || ""}</b> 前期换血与控符处于天然劣势，需依靠控水符与双辅助游走破局。`;
+          } else {
+            matchupContextHtml = `<b>英雄对位评估：</b>中路 <b>${p2?.hero_short_zh || ""}</b> 对决 <b>${
+              opp2?.hero_short_zh || ""
+            }</b>，10分钟对位经济差 <b>${fmtSigned(laneGoldDiff)} 金</b>。`;
+          }
+        } else {
+          // Offlane (Pos 3 + Pos 4 vs Enemy Pos 1 + Pos 5/4)
+          if (oppBullies.length > 0) {
+            const bullyNames = oppBullies.map((b) => b.hero_short_zh).join("+");
+            matchupContextHtml = `<b>英雄对位评估（⚠️ 敌方强线霸/高减速消耗组合，先天高压抗压路）：</b>敌方优势路拿出了 <b>${oppNames}</b>（其中 <b>${bullyNames}</b> 线上减速粘人与持续消耗极度恶心，再加敌方中单游走威胁），而本方 <b>${ownNames}</b> 缺乏硬位移逃生，一旦过河道极易被粘死。在此天然劣势对位下，虽然阵亡偏多，但两人靠凶悍换血与拉野抢符硬把10分钟总经济差距咬在 <b>${fmtSigned(
+              laneGoldDiff
+            )} 金</b>（${fmtNum(ownGold10)} vs ${fmtNum(oppGold10)}）。`;
+          } else {
+            matchupContextHtml = `<b>英雄对位评估：</b>本方劣势路 <b>${ownNames}</b> 对阵敌方优势路 <b>${oppNames}</b>，10分钟本路经济差 <b>${fmtSigned(
+              laneGoldDiff
+            )} 金</b>。`;
+          }
+        }
+
+        // Per-player detailed execution in this lane
+        const playerRowsHtml = ownHeroes
+          .map((lhHero) => {
+            const fullP = own.find((x) => x.hero_short_zh === lhHero.hero_short_zh) || lhHero;
+            const ctx = analyzePlayerPhaseAndRoleContext(fullP, report);
+            const lp = ctx.laneP;
+            const pos = Number(fullP.pos || lhHero.pos || 3);
+            const k = Number(lp.kills_count || 0);
+            const d = Number(lp.deaths_count || 0);
+            const dmg10 = Number(lp.hero_damage_gain || 0);
+            const tdmg10 = Number(lp.tower_damage_gain || 0);
+            const pullPct = Number(ctx.pullRow?.pull_ratio_pct ?? 0);
+            const earlySen = Number(ctx.pullRow?.early_sentries ?? 0);
+            const gateCnt = Number(ctx.interactRow?.twin_gate ?? 0);
+            const lotusCnt = Number(ctx.interactRow?.lotus_used ?? 0);
+            const wisdomCnt = Number(ctx.interactRow?.wisdom_runes ?? 0);
+            const lampCnt = Number(ctx.interactRow?.watcher_lamp ?? 0);
+            const killsStr =
+              (lp.kills_events || []).map((ke) => `${ke.time_str}杀${ke.victim_hero}`).join("、") || "0杀";
+            const deathsStr =
+              (lp.deaths_events || []).map((de) => `${de.time_str}被${de.killer}杀`).join("、") || "0死完美生存";
+
+            let roleAuditText = "";
+            if (pos === 1) {
+              roleAuditText = `<b>1号位打钱顺畅度：</b>10m 交出 <b>${lhHero.lh10}/${lhHero.dn10}刀（${fmtNum(
+                lhHero.gold10
+              )}金·效率${lhHero.lane_eff || 80}%）</b>，${
+                lhHero.lh10 >= 50 ? "打钱极其顺畅无解肥" : lhHero.lh10 >= 38 ? "发育平稳达标" : "受压补刀受限"
+              }；对线打出 <b>${fmtNum(dmg10)} 伤害</b>、磨塔 <b>${fmtNum(tdmg10)}</b>，战果 <b>${k}杀/${d}死</b>（${killsStr}；${deathsStr}）。`;
+            } else if (pos === 5) {
+              roleAuditText = `<b>5号位保核与给压力细活：</b>10m 仅补 <b>${lhHero.lh10} 刀</b>（彻底让刀给1号位），拉野驻留占比 <b>${pullPct}%</b>、封野/反封真眼 <b>${earlySen} 颗</b>；上线拼命换血灌出 <b>${fmtNum(
+                dmg10
+              )} 对线伤害</b>给足敌方压力，配合大哥拿下 <b>${k}杀/${d}死</b>（${killsStr}）${
+                gateCnt > 0 ? `，更主动钻双生门×${gateCnt}跨路Gank建功` : ""
+              }${lotusCnt > 0 ? `，控莲花×${lotusCnt}` : "，控住下路莲花池"}${lampCnt > 0 ? `·点灯×${lampCnt}` : ""}。`;
+            } else if (pos === 2) {
+              roleAuditText = `<b>2号位对位压制与游走：</b>10m <b>${lhHero.lh10}/${lhHero.dn10}刀（${fmtNum(
+                lhHero.gold10
+              )}金·效率${lhHero.lane_eff || 69}%）</b>，高频技能消耗灌出 <b>${fmtNum(
+                dmg10
+              )} 伤害</b>，战果 <b>${k}杀/${d}死</b>（${killsStr}；${deathsStr}），对线期单杀与支援节奏兼备。`;
+            } else if (pos === 3) {
+              roleAuditText = `<b>3号位抗压补刀与换血：</b>高压下抢到 <b>${lhHero.lh10}/${lhHero.dn10}刀（${fmtNum(
+                lhHero.gold10
+              )}金·效率${lhHero.lane_eff || 65}%）</b>，打出高达 <b>${fmtNum(
+                dmg10
+              )} 对线消耗伤害</b>，战果 <b>${k}杀/${d}死</b>（击杀：${killsStr}；阵亡：${deathsStr}）。${
+                d >= 3 ? "需注意敌方中单消失时的退塔缩线时机。" : ""
+              }`;
+            } else {
+              roleAuditText = `<b>4号位拉野抢符与游走牵制：</b>边路拉野驻留高达 <b>${pullPct}%</b>（真眼 <b>${earlySen} 颗</b>），硬抢 <b>${lotusCnt} 朵疗伤莲花 + ${wisdomCnt} 枚智慧神符</b>${
+                gateCnt > 0 ? ` + 钻双生门×${gateCnt}` : ""
+              }；线上肉搏换血灌出 <b>${fmtNum(dmg10)} 伤害</b>（<b>${k}杀/${d}死</b>：${killsStr}）。${
+                d >= 4
+                  ? `虽为抢符与掩护3号位拼得很凶，但阵亡 ${d} 次（${deathsStr}）偏多，面对强减速敌方组合需避免连死。`
+                  : ""
+              }`;
+            }
+
+            return `
+              <div class="phase-lane-player-row">
+                <div class="phase-lane-player-head">
+                  ${
+                    lhHero.hero_img
+                      ? `<img src="${escapeHtml(lhHero.hero_img)}" width="26" height="15" alt="" class="stage-rank-avatar" />`
+                      : ""
+                  }
+                  <strong>${pos}号位 ${escapeHtml(lhHero.hero_short_zh)}</strong>
+                  <span class="stage-rank-player">(${escapeHtml(lhHero.personaname || "")})</span>
+                  <span class="phase-lane-mini-kpi">${lhHero.lh10}/${lhHero.dn10}刀 · ${fmtNum(lhHero.gold10)}金 · ${k}杀/${d}死 · 伤${fmtNum(dmg10)}</span>
+                </div>
+                <div class="phase-lane-player-body">${injectHeroLogosIntoHtml(roleAuditText, report)}</div>
+              </div>
+            `;
+          })
+          .join("");
+
+        const oppSummaryStr = oppHeroes
+          .map(
+            (oh) =>
+              `${oh.pos}号位${oh.hero_short_zh}(${oh.lh10}/${oh.dn10}刀·${fmtNum(oh.gold10)}金·效率${oh.lane_eff || "-"}%)`
+          )
+          .join(" + ");
+
+        return `
+          <div class="phase-deep-lane-card ${statusTheme}">
+            <div class="phase-deep-lane-top">
+              <div>
+                <div class="phase-deep-lane-sub">${laneRoleLabel}</div>
+                <h4 class="phase-deep-lane-title">${escapeHtml(ln.title || "分路对线")}</h4>
+              </div>
+              <span class="phase-deep-lane-badge ${statusTheme}">${statusTag}</span>
+            </div>
+            <div class="phase-deep-lane-vs">
+              <span><b>${escapeHtml(sideZh)}本路合计：</b>${fmtNum(ownGold10)} 金 (${escapeHtml(ownLhDn)} 刀)</span>
+              <span><b>${escapeHtml(oppZh)}对位合计：</b>${fmtNum(oppGold10)} 金 (${escapeHtml(oppLhDn)} 刀 · ${injectHeroLogosIntoHtml(escapeHtml(oppSummaryStr), report)})</span>
+            </div>
+            <div class="phase-deep-lane-matchup-box">
+              🧬 ${injectHeroLogosIntoHtml(matchupContextHtml, report)}
+            </div>
+            <div class="phase-deep-lane-players">
+              ${playerRowsHtml}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="phase-deep-audit-section">
+        <div class="phase-deep-audit-header">
+          <h4>🗺️ 前期三路对线全景拆解（每条线胜负 · 英雄对位强弱客观评估 · 1~5号位履职细活）</h4>
+          <span>结合英雄先天清线/消耗机制，逐路审视1号位打钱顺畅度、5号位给压力与拉野、中路单杀及劣势路抗压</span>
+        </div>
+        <div class="phase-deep-lanes-grid">
+          ${laneCardsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  if (phaseKey === "mid") {
+    const midOwnP = (activePd.players || [])
+      .filter((p) => p.side === side)
+      .sort((a, b) => (a.pos || 9) - (b.pos || 9));
+    const teamMidGold = Math.max(1, midOwnP.reduce((s, p) => s + Number(p.gold_gain || 0), 0));
+    const teamMidDmg = Math.max(1, midOwnP.reduce((s, p) => s + Number(p.hero_damage_gain || 0), 0));
+    const teamMidTdmg = Math.max(1, midOwnP.reduce((s, p) => s + Number(p.tower_damage_gain || 0), 0));
+    const towersTaken = Number(activePd.team_summary?.towers_taken || 0);
+
+    const topPusher = [...midOwnP].sort((a, b) => (b.tower_damage_gain || 0) - (a.tower_damage_gain || 0))[0];
+    const topPusherShare = topPusher
+      ? Number(((Number(topPusher.tower_damage_gain || 0) / teamMidTdmg) * 100).toFixed(1))
+      : 0;
+    const topGanker = [...midOwnP].sort(
+      (a, b) =>
+        (b.kills_count || 0) * 1000 +
+        (b.hero_damage_gain || 0) -
+        ((a.kills_count || 0) * 1000 + (a.hero_damage_gain || 0))
+    )[0];
+    const pos1Mid = midOwnP.find((p) => Number(p.pos) === 1) || midOwnP[0];
+
+    const midCardsHtml = midOwnP
+      .map((mp) => {
+        const fullP = own.find((x) => x.hero_short_zh === mp.hero_short_zh) || mp;
+        const ctx = analyzePlayerPhaseAndRoleContext(fullP, report);
+        const pos = Number(mp.pos || 3);
+        const k = Number(mp.kills_count || 0);
+        const d = Number(mp.deaths_count || 0);
+        const gold = Number(mp.gold_gain || 0);
+        const dmg = Number(mp.hero_damage_gain || 0);
+        const tdmg = Number(mp.tower_damage_gain || 0);
+        const lh = Number(mp.lh_gain || 0);
+        const gShare = Number(((gold / teamMidGold) * 100).toFixed(1));
+        const dShare = Number(((dmg / teamMidDmg) * 100).toFixed(1));
+        const tShare = Number(((tdmg / teamMidTdmg) * 100).toFixed(1));
+        const itemsStr =
+          filterMajorItems(mp.items_bought, 4)
+            .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
+            .join(" → ") || "常规过渡装";
+        const killsStr =
+          (mp.kills_events || []).map((ke) => `${ke.time_str}斩${ke.victim_hero}`).join("、") || "0直接人头";
+        const midSolos = ctx.soloEvents.filter((ev) => {
+          const m = parseInt(String(ev.time_str || "0").split(":")[0], 10);
+          return m >= 9 && m <= 26;
+        });
+
+        let roleVerdict = "";
+        let cardTone = "even";
+        if (pos === 1) {
+          cardTone = gold >= 9000 && d <= 2 ? "good" : "even";
+          roleVerdict = `<b>1号位资源积累与参团转化：</b>10–25m 狂刷 <b>${lh} 刀（+${fmtNum(
+            gold
+          )}金，占全队 ${gShare}%）</b>，极速做出 <b>${itemsStr}</b>；在保证无解肥刷钱速率的同时，并没有当万年野区刷子——关键团战切入斩获 <b>${k}杀/${d}死（${killsStr}）</b>，打出 <b>${fmtNum(
+            dmg
+          )} 伤害</b>与 <b>${fmtNum(tdmg)} 推塔</b>，为25分钟后出山接管比赛打下铁血根基。`;
+        } else if (pos === 2) {
+          const hasAtosOrBlink = /阿托斯|跳刀|闪烁匕首|紫苑/.test(itemsStr);
+          cardTone = dShare >= gShare || k >= 3 ? "good" : "even";
+          roleVerdict = `<b>2号位抓人节奏与资源转化率：</b>中期仅吃全队 <b>${gShare}% 经济（+${fmtNum(
+            gold
+          )}金）</b>，却轰出 <b>${dShare}% 的英雄伤害（${fmtNum(dmg)}）</b>！${
+            hasAtosOrBlink
+              ? `做出核心抓人装 <b>${itemsStr}</b> 后立刻带队主动抓人，斩获 <b>${k}杀/${d}死（${killsStr}）</b>，成功压制敌方核心发育空间。`
+              : `做出 <b>${itemsStr}</b>，参团斩获 <b>${k}杀/${d}死（${killsStr}）</b>。`
+          }`;
+        } else if (pos === 3) {
+          const isPusher = PUSH_TRAIT_HEROES.has(mp.hero_short_zh);
+          cardTone = tdmg >= 1500 || dShare >= 22 ? "good" : "even";
+          roleVerdict = `<b>3号位英雄特性推塔与前排控场：</b>吃 <b>${gShare}% 经济（+${fmtNum(
+            gold
+          )}金）</b> 轰出高达 <b>${dShare}% 的全队英雄伤害（${fmtNum(dmg)}）</b>，斩获 <b>${k}杀/${d}死（${killsStr}）</b>；${
+            isPusher && tdmg >= 1500
+              ? `更完美利用 <b>${mp.hero_short_zh}</b> 的技能磨塔特性，一人狂轰 <b>${fmtNum(
+                  tdmg
+                )} 建筑伤害（独占全队中期推塔量的 ${tShare}%！）</b>，帮团队强行拔掉敌方外塔打开野区视野！`
+              : `推塔伤害 <b>${fmtNum(tdmg)}（占 ${tShare}%）</b>，成装 <b>${itemsStr}</b>。`
+          }`;
+        } else {
+          // Pos 4 / Pos 5
+          const hasGreedyMidas = (mp.items_bought || []).some((it) => String(it.zh_name || "").includes("点金手"));
+          cardTone = midSolos.length >= 2 || hasGreedyMidas ? "warn" : "good";
+          roleVerdict = `<b>${pos}号位中期针对出装与团战换命审计：</b>进账 <b>+${fmtNum(
+            gold
+          )}金（占 ${gShare}%）</b>，打出 <b>${fmtNum(dmg)} 伤害（占 ${dShare}%）</b>，做出 <b>${itemsStr}</b>（${killsStr}）。${
+            ctx.midDeathsCtx.goodDeaths > 0
+              ? `本阶段阵亡 ${d} 次中包含 <b>${ctx.midDeathsCtx.goodDeaths} 波团战/推塔前排肉身吃技能换赢</b>；`
+              : ""
+          }${
+            midSolos.length > 0
+              ? `⚠️ 但存在 <b>${midSolos.length} 次脱离大部队落单被抓</b>（${midSolos
+                  .map((s) => `${s.time_str}被${s.killer_zh}单抓`)
+                  .join("、")}），需严控野区孤走；`
+              : ""
+          }${hasGreedyMidas ? `⚠️ 中期裸出点金手略微延后了微光披风等救人装成型时间。` : ""}`;
+        }
+
+        return `
+          <div class="phase-deep-lane-card ${cardTone}">
+            <div class="phase-deep-lane-top">
+              <div class="phase-lane-player-head">
+                ${
+                  mp.hero_img
+                    ? `<img src="${escapeHtml(mp.hero_img)}" width="28" height="16" alt="" class="stage-rank-avatar" />`
+                    : ""
+                }
+                <strong>${pos}号位 ${escapeHtml(mp.hero_short_zh)}</strong>
+                <span class="stage-rank-player">(${escapeHtml(mp.personaname || "")})</span>
+              </div>
+              <span class="phase-deep-lane-badge ${cardTone}">吃钱 ${gShare}% → 伤害 ${dShare}% · 推塔 ${tShare}%</span>
+            </div>
+            <div class="phase-deep-lane-vs">
+              <span><b>中期KDA：</b>${k}杀 / ${d}死 (补刀 +${lh})</span>
+              <span><b>经济/伤害/塔伤：</b>+${fmtNum(gold)}金 / ${fmtNum(dmg)}伤 / ${fmtNum(tdmg)}塔伤</span>
+            </div>
+            <div class="phase-lane-player-body" style="margin-top:6px;">
+              ${injectHeroLogosIntoHtml(roleVerdict, report)}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="phase-deep-audit-section">
+        <div class="phase-deep-audit-header">
+          <h4>⚙️ 中期运营深度拆解：资源转化效率 · 主动抓人节奏 · 英雄特性推塔审计 (10:00–25:00)</h4>
+          <span>重点考核：吃下的经济有没有转化为抓人节奏与外塔压制？有没有利用英雄机制推塔？大哥刷钱与参团是否平衡？</span>
+        </div>
+        <div class="phase-mid-pillars-strip">
+          <div class="phase-mid-pillar">
+            <span class="pillar-tag">🏰 英雄特性推塔兑现</span>
+            <strong>全队中期拔 ${towersTaken} 塔（总塔伤 ${fmtNum(teamMidTdmg)}）</strong>
+            <p>${
+              topPusher && Number(topPusher.tower_damage_gain || 0) > 500
+                ? injectHeroLogosIntoHtml(
+                    `${topPusher.pos}号位${topPusher.hero_short_zh}发挥英雄推进机制狂轰 <b>${fmtNum(
+                      topPusher.tower_damage_gain
+                    )} 建筑伤害（独占全队 ${topPusherShare}%）</b>，扛起中期拔塔重任。`,
+                    report
+                  )
+                : "中期全队磨塔节奏偏慢，需围绕推进核技能冷却主动压塔。"
+            }</p>
+          </div>
+          <div class="phase-mid-pillar">
+            <span class="pillar-tag">🎯 主动抓人与关键装节奏</span>
+            <strong>${
+              topGanker ? `${topGanker.pos}号位${escapeHtml(topGanker.hero_short_zh)} 领衔抓人 (${topGanker.kills_count}杀)` : "中期抓人博弈"
+            }</strong>
+            <p>${
+              topGanker
+                ? injectHeroLogosIntoHtml(
+                    `${topGanker.pos}号位${topGanker.hero_short_zh}做出关键装后主动抓人斩获 <b>${
+                      topGanker.kills_count
+                    } 杀</b>、轰出 <b>${fmtNum(topGanker.hero_damage_gain)} 伤害</b>，把前中期装备优势转化为击杀压制。`,
+                    report
+                  )
+                : "围绕关键控制装第一波强势期开雾抓敌方带线核心。"
+            }</p>
+          </div>
+          <div class="phase-mid-pillar">
+            <span class="pillar-tag">🌾 1号位发育与参团平衡</span>
+            <strong>${
+              pos1Mid
+                ? `1号位${escapeHtml(pos1Mid.hero_short_zh)} +${fmtNum(pos1Mid.gold_gain)}金 (+${pos1Mid.lh_gain}刀)`
+                : "核心刷钱提速"
+            }</strong>
+            <p>${
+              pos1Mid
+                ? injectHeroLogosIntoHtml(
+                    `1号位${pos1Mid.hero_short_zh}吃下全队 <b>${((Number(pos1Mid.gold_gain || 0) / teamMidGold) * 100).toFixed(
+                      1
+                    )}%</b> 中期经济高速刷出核心大件，同时参团斩获 <b>${pos1Mid.kills_count}杀/${
+                      pos1Mid.deaths_count
+                    }死（${fmtNum(pos1Mid.hero_damage_gain)}伤）</b>，既保证了大核发育又未放任队友4打5。`,
+                    report
+                  )
+                : "1号位需在刷出BKB/分身等关键装后及时接应团队团战。"
+            }</p>
+          </div>
+        </div>
+        <div class="phase-deep-lanes-grid">
+          ${midCardsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  // Late Phase ("late": 25:00 - End)
+  const lateOwnP = (activePd.players || [])
+    .filter((p) => p.side === side)
+    .sort((a, b) => (a.pos || 9) - (b.pos || 9));
+  const teamLateGold = Math.max(1, lateOwnP.reduce((s, p) => s + Number(p.gold_gain || 0), 0));
+  const teamLateDmg = Math.max(1, lateOwnP.reduce((s, p) => s + Number(p.hero_damage_gain || 0), 0));
+  const teamLateTdmg = Math.max(1, lateOwnP.reduce((s, p) => s + Number(p.tower_damage_gain || 0), 0));
+
+  const lateCardsHtml = lateOwnP
+    .map((ltp) => {
+      const fullP = own.find((x) => x.hero_short_zh === ltp.hero_short_zh) || ltp;
+      const ctx = analyzePlayerPhaseAndRoleContext(fullP, report);
+      const pos = Number(ltp.pos || 3);
+      const k = Number(ltp.kills_count || 0);
+      const d = Number(ltp.deaths_count || 0);
+      const gold = Number(ltp.gold_gain || 0);
+      const dmg = Number(ltp.hero_damage_gain || 0);
+      const tdmg = Number(ltp.tower_damage_gain || 0);
+      const gShare = Number(((gold / teamLateGold) * 100).toFixed(1));
+      const dShare = Number(((dmg / teamLateDmg) * 100).toFixed(1));
+      const tShare = Number(((tdmg / teamLateTdmg) * 100).toFixed(1));
+      const itemsStr =
+        filterMajorItems(ltp.items_bought, 4)
+          .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
+          .join(" → ") || "六神成型";
+      const killsStr =
+        (ltp.kills_events || []).map((ke) => `${ke.time_str}斩${ke.victim_hero}`).join("、") || "团战控制拉扯";
+      const tone = dShare >= 25 || k >= 5 || ctx.lateDeathsCtx.sacList.length > 0 ? "good" : "even";
+
+      return `
+        <div class="phase-deep-lane-card ${tone}">
+          <div class="phase-deep-lane-top">
+            <div class="phase-lane-player-head">
+              ${
+                ltp.hero_img
+                  ? `<img src="${escapeHtml(ltp.hero_img)}" width="28" height="16" alt="" class="stage-rank-avatar" />`
+                  : ""
+              }
+              <strong>${pos}号位 ${escapeHtml(ltp.hero_short_zh)}</strong>
+              <span class="stage-rank-player">(${escapeHtml(ltp.personaname || "")})</span>
+            </div>
+            <span class="phase-deep-lane-badge ${tone}">后期伤害占比 ${dShare}% · 拆塔占比 ${tShare}%</span>
+          </div>
+          <div class="phase-deep-lane-vs">
+            <span><b>决胜期战果：</b>${k}杀 / ${d}死 (+${fmtNum(gold)}金 · 吃钱 ${gShare}%)</span>
+            <span><b>后期输出/拆塔：</b>${fmtNum(dmg)} 英雄伤害 / ${fmtNum(tdmg)} 建筑伤害</span>
+          </div>
+          <div class="phase-lane-player-body" style="margin-top:6px;">
+            ${injectHeroLogosIntoHtml(
+              `<b>后期决战兑现：</b>成装 <b>${itemsStr}</b>，决胜期收割（${killsStr}）。${
+                pos === 1 && dShare >= 40
+                  ? `🌟 前中期刷出的无解肥经济在后期100%转化为毁天灭地的团战收割（占全队后期总伤害 ${dShare}%）与高地平推（占全队拆塔 ${tShare}%），满分大核终结比赛！`
+                  : ctx.lateDeathsCtx.sacList.length > 0
+                  ? `🟢 后期 ${d} 次阵亡均属决胜团第一波顶前排吃满敌方技能、掩护1号位收割团灭对手的功勋战术牺牲！`
+                  : ""
+              }`,
+              report
+            )}
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="phase-deep-audit-section">
+      <div class="phase-deep-audit-header">
+        <h4>👑 后期决战深度拆解：大核神装出山接管 · 控盾破三路高地 · 决胜团前排牺牲审计 (25:00–终局)</h4>
+        <span>检验前中期刷钱的核心是否在后期真正接管比赛，以及辅助在决胜团中的换命价值</span>
+      </div>
+      <div class="phase-deep-lanes-grid">
+        ${lateCardsHtml}
+      </div>
+    </div>
+  `;
+}
+
+/**
  * 7. Module 3: 3-Stage Phase Breakdown (前期对线 0-10m / 中期运营 10-25m / 后期决策 25m+)
  */
 function renderPhaseSection(report) {
@@ -11864,6 +12554,8 @@ function renderPhaseSection(report) {
     </div>
 
     ${renderStageRankingsBlockHtml(activePd.key, report)}
+
+    ${buildPhaseSpecificDeepAuditHtml(activePd, report)}
 
     <div class="phase-team-diag-grid">
       <div class="phase-team-diag-card good">

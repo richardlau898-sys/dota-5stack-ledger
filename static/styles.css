@@ -8269,10 +8269,220 @@ body {
 @media (max-width: 860px) {
   .stage-rank-grid,
   .story-good-bad-grid,
-  .micro-radar-grid {
+  .micro-radar-grid,
+  .phase-deep-lanes-grid,
+  .phase-mid-pillars-strip {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* =========================================================================
+   v6.2 前期三路对线全景拆解 / 中期资源转化与特性推塔 / 后期大核兑现深度面板
+   ========================================================================= */
+.phase-deep-audit-section {
+  margin: 14px 0 16px;
+  padding: 14px 16px;
+  background: rgba(18, 22, 19, 0.94);
+  border: 1px solid #3c4234;
+  border-left: 3px solid var(--gold);
+}
+
+.phase-deep-audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.phase-deep-audit-header h4 {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--gold-light);
+  margin: 0;
+}
+
+.phase-deep-audit-header span {
+  font-size: 11.5px;
+  color: var(--dim);
+}
+
+.phase-deep-lanes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.phase-deep-lane-card {
+  background: rgba(26, 30, 25, 0.95);
+  border: 1px solid #383e31;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.phase-deep-lane-card.good {
+  border-top: 2px solid #4ca965;
+}
+
+.phase-deep-lane-card.warn {
+  border-top: 2px solid #d49b3b;
+}
+
+.phase-deep-lane-card.bad {
+  border-top: 2px solid #c94a4a;
+}
+
+.phase-deep-lane-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.phase-deep-lane-sub {
+  font-size: 11px;
+  color: var(--gold-light);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.phase-deep-lane-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f3efe4;
+  margin: 0;
+}
+
+.phase-deep-lane-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.phase-deep-lane-badge.good {
+  background: rgba(76, 169, 101, 0.18);
+  color: #8ce6a4;
+  border: 1px solid rgba(76, 169, 101, 0.4);
+}
+
+.phase-deep-lane-badge.warn {
+  background: rgba(212, 155, 59, 0.18);
+  color: #f5cd79;
+  border: 1px solid rgba(212, 155, 59, 0.4);
+}
+
+.phase-deep-lane-badge.bad {
+  background: rgba(201, 74, 74, 0.2);
+  color: #ff9e9e;
+  border: 1px solid rgba(201, 74, 74, 0.45);
+}
+
+.phase-deep-lane-badge.even {
+  background: rgba(180, 175, 160, 0.14);
+  color: #dcd6c8;
+  border: 1px solid rgba(180, 175, 160, 0.3);
+}
+
+.phase-deep-lane-vs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11.5px;
+  color: #cfc9b8;
+  background: rgba(12, 15, 13, 0.65);
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.phase-deep-lane-matchup-box {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #e6dfd0;
+  background: rgba(199, 155, 59, 0.08);
+  border-left: 2px solid var(--gold);
+  padding: 7px 10px;
+}
+
+.phase-deep-lane-players {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.phase-lane-player-row {
+  background: rgba(16, 19, 16, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 8px 10px;
+}
+
+.phase-lane-player-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.phase-lane-mini-kpi {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--gold-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.phase-lane-player-body {
+  font-size: 12px;
+  line-height: 1.62;
+  color: #dcd6c8;
+}
+
+.phase-lane-player-body b {
+  color: #f6e7c1;
+}
+
+.phase-mid-pillars-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.phase-mid-pillar {
+  background: rgba(24, 29, 24, 0.92);
+  border: 1px solid #3c4435;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.phase-mid-pillar .pillar-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+.phase-mid-pillar strong {
+  font-size: 12.5px;
+  color: #f3efe4;
+}
+
+.phase-mid-pillar p {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #d2ccbc;
+  margin: 2px 0 0;
+}
+
 
 
 
