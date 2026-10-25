@@ -1911,43 +1911,86 @@ def call_llm_coach_review(
                             texts.append(c["text"])
             out_txt = "\n".join(texts) or data.get("output_text") or ""
         else:
+            from concurrent.futures import ThreadPoolExecutor
+
             url = f"{b_url.rstrip('/')}/chat/completions"
             # On xAI, grok-4.7 is a deep reasoning model that takes 50-120s (exceeding Vercel's 60s timeout).
-            # Use grok-4.20-0309-non-reasoning for fast (~18s), deterministic JSON generation under grok-4.7 display label.
+            # Use grok-4.20-0309-non-reasoning with 2 parallel requests (Part A: Global + Pos 1-3; Part B: Pos 4-5)
+            # so full 200-word stage paragraphs for all 5 players finish in ~20-25s (well inside Vercel's 60s window).
             api_model = "grok-4.20-0309-non-reasoning" if (prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4")) else model
-            payload = {
-                "model": api_model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                "response_format": {"type": "json_object"},
-                "stream": False,
-                "max_tokens": 8192,
-            }
-            last_err = None
-            data = None
-            for _attempt in range(2):
-                try:
-                    req = urllib.request.Request(
-                        url,
-                        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-                        method="POST",
-                        headers={
-                            "Content-Type": "application/json",
-                            "Accept": "application/json",
-                            "Authorization": f"Bearer {key}",
-                            "User-Agent": "DotaAiAnalyst/2.0",
-                        },
-                    )
-                    with urllib.request.urlopen(req, timeout=75) as resp:
-                        data = json.loads(resp.read().decode("utf-8"))
-                    break
-                except Exception as e_req:
-                    last_err = e_req
-            if data is None and last_err is not None:
-                raise last_err
-            out_txt = data["choices"][0]["message"]["content"]
+            payload_json_str = json.dumps(compact_payload, ensure_ascii=False)
+
+            user_prompt_part_a = (
+                "【并发分片 A：全局复盘 + 1/2/3号位三位核心选手】\n"
+                "请基于以下完整全队 5 人录像证据，生成完整的全局字段（title, summary, verdict, team_practice, stage_reviews, mvp, windows），"
+                "并在 `players` 数组中只输出本方 **1号位、2号位、3号位（pos 为 1, 2, 3 的 3 名核心选手）** 的深度复盘对象！"
+                "注意：打分 `grok_score` 与占比 `grok_share_pct` 仍需结合全队 5 人整体表现来评定，且每位选手的 early_story / mid_story / late_story 必须各写满 110~160 字的一整段详实复盘：\n"
+                + payload_json_str
+            )
+            user_prompt_part_b = (
+                "【并发分片 B：4/5号位两位辅助选手专项深度审讯】\n"
+                "请基于以下完整全队 5 人录像证据，返回一个 JSON 对象 `{\"players\": [ ... ]}`，"
+                "其中 `players` 数组只输出本方 **4号位、5号位（pos 为 4, 5 的 2 名辅助选手）** 的深度复盘对象！"
+                "必须重点结合 `role_duty_audit` 审讯该 4/5 号位是否执行了辅助本职工作（如 4 号位是否服务 3 号位带节奏、出推推/微光/跳刀/阿托斯/大骨灰等团队装，还是没钱硬憋散失/BKB 等大哥装自己打钱抢经济送人头），"
+                "打分 `grok_score` 与占比 `grok_share_pct` 需结合全队 5 人整体表现评定，且每位选手的 early_story / mid_story / late_story 必须各写满 110~160 字的一整段详实复盘：\n"
+                + payload_json_str
+            )
+
+            def _call_xai_chunk(u_prompt: str, max_tok: int) -> Optional[Dict[str, Any]]:
+                p_body = {
+                    "model": api_model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": u_prompt},
+                    ],
+                    "response_format": {"type": "json_object"},
+                    "stream": False,
+                    "max_tokens": max_tok,
+                }
+                last_err_c = None
+                for _att in range(2):
+                    try:
+                        req_c = urllib.request.Request(
+                            url,
+                            data=json.dumps(p_body, ensure_ascii=False).encode("utf-8"),
+                            method="POST",
+                            headers={
+                                "Content-Type": "application/json",
+                                "Accept": "application/json",
+                                "Authorization": f"Bearer {key}",
+                                "User-Agent": "DotaAiAnalyst/2.0",
+                            },
+                        )
+                        with urllib.request.urlopen(req_c, timeout=48) as resp_c:
+                            d_c = json.loads(resp_c.read().decode("utf-8"))
+                        txt_c = d_c["choices"][0]["message"]["content"]
+                        parsed_c = _parse_llm_json_robust(txt_c)
+                        if isinstance(parsed_c, dict):
+                            return parsed_c
+                    except Exception as e_c:
+                        last_err_c = e_c
+                if last_err_c:
+                    raise last_err_c
+                return None
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                fut_a = pool.submit(_call_xai_chunk, user_prompt_part_a, 5200)
+                fut_b = pool.submit(_call_xai_chunk, user_prompt_part_b, 3200)
+                part_a = fut_a.result()
+                part_b = fut_b.result()
+
+            if not isinstance(part_a, dict):
+                raise RuntimeError("Grok 分片 A 解析失败")
+            merged_players_by_pos: Dict[int, Dict[str, Any]] = {}
+            for gp in (part_a.get("players") or []):
+                if isinstance(gp, dict) and gp.get("pos"):
+                    merged_players_by_pos[int(gp["pos"])] = gp
+            if isinstance(part_b, dict):
+                for gp in (part_b.get("players") or []):
+                    if isinstance(gp, dict) and gp.get("pos"):
+                        merged_players_by_pos[int(gp["pos"])] = gp
+            part_a["players"] = [merged_players_by_pos[k] for k in sorted(merged_players_by_pos.keys())]
+            out_txt = json.dumps(part_a, ensure_ascii=False)
 
         # 尝试解析为结构化 JSON 并持久化
         structured = _parse_llm_json_robust(out_txt)

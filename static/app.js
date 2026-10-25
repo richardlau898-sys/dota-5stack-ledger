@@ -5240,12 +5240,20 @@ async function loadMatchReport(
     showToast(`🤖 AI 正在深度拆解比赛 #${matchId} 录像日志并生成分享链接...`, 4000);
   }
   try {
-    const flags = `${forceRefresh ? "&refresh=1" : ""}${analyzeNow ? "&analyze=1" : ""}`;
+    const flags = `${forceRefresh ? "&refresh=1&skip_llm=1" : ""}${
+      analyzeNow && !forceRefresh ? "&analyze=1&skip_llm=1" : ""
+    }`;
     const url = `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
       state.accountId
     )}${flags}`;
     const res = await fetch(url);
-    const data = await res.json();
+    const rawText = await res.text();
+    let data = null;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      throw new Error(`服务端响应超时或异常 (${res.status})，请稍后重试`);
+    }
     if (!data.ok) throw new Error(data.error || "读取比赛失败");
 
     if (data.not_analyzed) {
@@ -5296,12 +5304,12 @@ async function loadMatchReport(
         6500
       );
       scheduleAutoReplayParsePoll(state.currentMatchId);
-    } else if ((analyzeNow || forceRefresh) && !hasGrokNow && !state.isGeneratingGrok) {
+    } else if ((analyzeNow || forceRefresh) && (!hasGrokNow || forceRefresh) && !state.isGeneratingGrok) {
       showToast(
-        `✅ 录像级 11 维拆解已完成！正在自动调用 Grok 4.7 生成本局毒舌大标题与深度判词...`,
-        5000
+        `✅ 录像级 12 维拆解已就绪！正在并发调用 Grok 4.7 生成五人深度研判与三幕长段复盘 (约15~20秒)...`,
+        6000
       );
-      triggerGrokReview({ force: false });
+      triggerGrokReview({ force: forceRefresh });
     } else if (analyzeNow) {
       showToast(`✅ 比赛 #${state.currentMatchId} AI 完整深度复盘已成功！点击右上角「分享本局链接」即可发群`);
     }
@@ -5385,8 +5393,9 @@ async function triggerGrokReview({ force = true } = {}) {
     if (!data.ok) throw new Error(data.error || "大模型调用失败");
     if (data.report) {
       state.currentReport = data.report;
+      saveLocalAnalyzedMatch(state.currentReport);
       renderFullMatchReport(state.currentReport);
-      showToast("Grok 4.7 赛后总账已更新并落盘缓存！");
+      showToast("✅ Grok 4.7 五人深度研判与三幕长段复盘已生成并持久化缓存！");
     }
   } catch (err) {
     console.error(err);

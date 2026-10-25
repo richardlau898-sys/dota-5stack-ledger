@@ -300,6 +300,7 @@ def get_or_build_match_report(
     force_refresh: bool = False,
     allow_build: bool = True,
     require_ai: bool = False,
+    skip_llm: bool = False,
 ) -> Optional[Dict[str, Any]]:
     import time
 
@@ -326,7 +327,7 @@ def get_or_build_match_report(
                         cached_rep = _hydrate_grok_from_caches(cached_rep, match_id)
                         # Only serve immediately if replay is parsed OR allow_build is False
                         if cached_rep.get("is_parsed") or not allow_build:
-                            if allow_build or require_ai:
+                            if (allow_build or require_ai) and not skip_llm:
                                 cached_rep = _ensure_grok_coaching(cached_rep, match_id, json_cache, tmp_json_cache, force=False)
                             return sanitize_report_mixed_english(cached_rep)
                         fallback_unparsed_rep = cached_rep
@@ -338,7 +339,7 @@ def get_or_build_match_report(
         if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
             cloud_rep = _hydrate_grok_from_caches(cloud_rep, match_id)
             if cloud_rep.get("is_parsed") or not allow_build:
-                if allow_build or require_ai:
+                if (allow_build or require_ai) and not skip_llm:
                     cloud_rep = _ensure_grok_coaching(cloud_rep, match_id, json_cache, tmp_json_cache, force=False)
                 return sanitize_report_mixed_english(cloud_rep)
             fallback_unparsed_rep = cloud_rep
@@ -364,12 +365,12 @@ def get_or_build_match_report(
     if not raw_match:
         try:
             raw_match = api_get(f"/matches/{match_id}")
-            # If the match just ended and OpenDota hasn't parsed the .dem replay yet, auto-request parse and poll!
+            # If the match just ended and OpenDota hasn't parsed the .dem replay yet, auto-request parse and poll briefly!
             if raw_match and not raw_match.get("version"):
                 try:
                     api_post(f"/request/{match_id}")
-                    for _ in range(4):
-                        time.sleep(2.5)
+                    for _ in range(2):
+                        time.sleep(1.5)
                         retry_raw = api_get(f"/matches/{match_id}")
                         if retry_raw and retry_raw.get("version"):
                             raw_match = retry_raw
@@ -404,9 +405,13 @@ def get_or_build_match_report(
                         break
                 except Exception:
                     pass
+        if not existing_grok:
+            hydrated = _hydrate_grok_from_caches(report, match_id)
+            if _has_complete_grok_coaching(hydrated.get("grok_coaching")):
+                existing_grok = hydrated["grok_coaching"]
     if existing_grok:
         report["grok_coaching"] = existing_grok
-    else:
+    elif not skip_llm:
         try:
             llm_res = call_llm_coach_review(report)
             if isinstance(llm_res, dict) and llm_res.get("ok") and isinstance(llm_res.get("structured"), dict):
@@ -421,6 +426,7 @@ def get_or_build_match_report(
         except Exception:
             pass
 
+    report = sanitize_report_mixed_english(report)
     md_text = render_markdown_report(report)
     rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
     try:
@@ -641,6 +647,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 mid = int(mid_str)
                 force = (qs.get("refresh") or ["0"])[0] == "1"
                 analyze_now = (qs.get("analyze") or ["0"])[0] == "1"
+                skip_llm = (qs.get("skip_llm") or ["0"])[0] == "1"
                 aid_str = (qs.get("account_id") or [""])[0].strip()
                 aid = resolve_player_input(aid_str) if aid_str else None
                 report = get_or_build_match_report(
@@ -648,7 +655,8 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     focus_account_id=aid,
                     force_refresh=force,
                     allow_build=(force or analyze_now),
-                    require_ai=True,
+                    require_ai=(not skip_llm),
+                    skip_llm=skip_llm,
                 )
                 roster = load_roster()
                 squad_ledger = build_squad_history_ledger(REPORTS_DIR, roster, [])
@@ -783,7 +791,15 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 base_url = body.get("base_url") or ""
                 side = body.get("side") or "dire"
                 force = bool(body.get("force", True))
-                report = get_or_build_match_report(mid)
+                report = get_or_build_match_report(mid, allow_build=True, require_ai=False, skip_llm=True)
+                if not force and isinstance(report, dict) and _has_complete_grok_coaching(report.get("grok_coaching")):
+                    self._send_json({
+                        "ok": True,
+                        "cached": True,
+                        "structured": report["grok_coaching"],
+                        "report": sanitize_report_mixed_english(report),
+                    })
+                    return
                 res = call_llm_coach_review(
                     report=report,
                     api_key=api_key,
