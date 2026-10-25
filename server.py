@@ -213,11 +213,56 @@ def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
     return out
 
 
+def _ensure_grok_coaching(
+    report: Dict[str, Any],
+    match_id: int,
+    json_cache: Path,
+    tmp_json_cache: Path,
+    force: bool = False,
+) -> Dict[str, Any]:
+    """Ensure every match report has deep xAI Grok 4.7 LLM coaching (stage_reviews + 5 players item/blink audit)."""
+    if not isinstance(report, dict):
+        return report
+    gc = report.get("grok_coaching")
+    has_deep_grok = (
+        isinstance(gc, dict)
+        and isinstance(gc.get("stage_reviews"), dict)
+        and bool(gc["stage_reviews"].get("early_lanes"))
+        and isinstance(gc.get("players"), list)
+        and len(gc.get("players") or []) >= 5
+    )
+    if has_deep_grok and not force:
+        return report
+
+    try:
+        llm_res = call_llm_coach_review(report)
+        if isinstance(llm_res, dict) and llm_res.get("ok") and isinstance(llm_res.get("structured"), dict):
+            structured = llm_res["structured"]
+            structured["model"] = llm_res.get("model", "grok-4.7")
+            report["grok_coaching"] = structured
+            rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
+            try:
+                REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                json_cache.write_text(rep_txt, encoding="utf-8")
+            except OSError:
+                TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                tmp_json_cache.write_text(rep_txt, encoding="utf-8")
+            try:
+                cloud_save_match_report(match_id, report)
+                cloud_save_coaching(match_id, report.get("focus_side", "radiant"), structured)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return report
+
+
 def get_or_build_match_report(
     match_id: int,
     focus_account_id: Optional[int] = None,
     force_refresh: bool = False,
     allow_build: bool = True,
+    require_ai: bool = False,
 ) -> Optional[Dict[str, Any]]:
     import time
 
@@ -242,6 +287,8 @@ def get_or_build_match_report(
                     ):
                         # Only serve immediately if replay is parsed OR allow_build is False
                         if cached_rep.get("is_parsed") or not allow_build:
+                            if allow_build or require_ai:
+                                cached_rep = _ensure_grok_coaching(cached_rep, match_id, json_cache, tmp_json_cache, force=False)
                             return sanitize_report_mixed_english(cached_rep)
                         fallback_unparsed_rep = cached_rep
                 except Exception:
@@ -251,6 +298,8 @@ def get_or_build_match_report(
         cloud_rep = cloud_fetch_match_report(match_id)
         if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
             if cloud_rep.get("is_parsed") or not allow_build:
+                if allow_build or require_ai:
+                    cloud_rep = _ensure_grok_coaching(cloud_rep, match_id, json_cache, tmp_json_cache, force=False)
                 return sanitize_report_mixed_english(cloud_rep)
             fallback_unparsed_rep = cloud_rep
 

@@ -261,10 +261,18 @@ function injectHeroLogosIntoHtml(safeHtml, report = state.currentReport) {
     ...(report.dire_pos_1_to_5 || report.dire_players || []),
   ];
   const heroMap = new Map();
+  const aliasPairs = {
+    食人魔魔法师: ["食人魔", "蓝胖"],
+    冥魂大帝: ["骷髅王"],
+    矮人直升机: ["直升机"],
+  };
   all.forEach((p) => {
     const name = (p.hero_short_zh || "").trim();
     if (name && p.hero_img && !heroMap.has(name)) {
       heroMap.set(name, p.hero_img);
+      (aliasPairs[name] || []).forEach((al) => {
+        if (!heroMap.has(al)) heroMap.set(al, p.hero_img);
+      });
     }
   });
   if (heroMap.size === 0) return safeHtml;

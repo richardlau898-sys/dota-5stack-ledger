@@ -6053,9 +6053,7 @@ dialog::backdrop {
 
 /* 英雄行内小 Logo (.inline-hero-chip & .micro-hero-cell-inline) */
 .inline-hero-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
+  display: inline;
   vertical-align: baseline;
   white-space: nowrap;
 }
@@ -6067,7 +6065,7 @@ dialog::backdrop {
   border-radius: 2px;
   border: 1px solid rgba(198, 164, 104, 0.5);
   vertical-align: -2px;
-  flex-shrink: 0;
+  margin: 0 3px 0 2px;
   display: inline-block;
 }
 
