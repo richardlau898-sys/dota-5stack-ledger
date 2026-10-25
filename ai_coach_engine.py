@@ -1647,7 +1647,7 @@ def call_llm_coach_review(
         '      "grok_score": 96,\n'
         '      "grok_share_pct": 34.0,\n'
         '      "headline": "一句切中该选手本局灵魂与出装/节奏要害的判词（20-35字）",\n'
-        '      "deep_verdict": "一整段深度个人研判总报告（120-165字）：全面剖析该选手为何是本局头号大锅一级战犯/次锅或头号首功MVP，串联其前中后期关键抉择、资源转化率、出装克制/BKB/跳刀得失与阵亡性质，并解释为何给出该 grok_score 评分与定责占比",\n'
+        '      "deep_verdict": "一整段深度个人研判总报告（120-165字）：全面剖析该选手为何是本局头号大锅一级战犯/次锅或头号首功MVP，串联其前中后期关键抉择、资源转化率、出装克制/BKB/跳刀得失与阵亡性质，并解释为何给出该本局评分与定责/贡献占比（纯中文叙述，切勿出现任何英文变量名）",\n'
         '      "early_story": "0-10m对线期表现、同路配合与英雄对位强弱点评（50-80字）",\n'
         '      "mid_story": "10-25m中期资源转化、抓人/推塔或刷钱参团点评（50-80字）",\n'
         '      "late_story": "25m-终局带盾推高地、决胜团收割或前排换命/落单点评（50-80字）",\n'
@@ -1743,17 +1743,41 @@ def call_llm_coach_review(
                 structured["model"] = model
                 structured["provider"] = prov
                 structured["side"] = focus_side
-                # Normalize players' grok_score & grok_share_pct and backfill assessment from deep_verdict
-                pls = structured.get("players")
-                if isinstance(pls, list) and len(pls) > 0:
-                    total_sh = sum(max(1.0, float(gp.get("grok_share_pct") or 20.0)) for gp in pls if isinstance(gp, dict))
-                    for gp in pls:
-                        if not isinstance(gp, dict):
-                            continue
-                        if gp.get("deep_verdict") and not gp.get("assessment"):
-                            gp["assessment"] = gp["deep_verdict"]
-                        raw_sh = max(1.0, float(gp.get("grok_share_pct") or 20.0))
-                        gp["grok_share_pct"] = round((raw_sh / (total_sh or 100.0)) * 100.0, 1)
+                # Normalize players' grok_score & grok_share_pct and enforce strict rank-order monotonicity:
+                # - In a WIN (own_won=True): higher grok_score MUST have higher grok_share_pct (victory contribution %)
+                # - In a LOSS (own_won=False): lower grok_score MUST have higher grok_share_pct (defeat blame %)
+                pls = [gp for gp in (structured.get("players") or []) if isinstance(gp, dict)]
+                if len(pls) > 0:
+                    total_sh = sum(max(1.0, float(gp.get("grok_share_pct") or 20.0)) for gp in pls) or 100.0
+                    norm_shares = sorted(
+                        [round((max(1.0, float(gp.get("grok_share_pct") or 20.0)) / total_sh) * 100.0, 1) for gp in pls],
+                        reverse=True,
+                    )
+                    # Fix rounding drift on largest share so sum is 100.0
+                    if norm_shares:
+                        norm_shares[0] = round(norm_shares[0] + (100.0 - sum(norm_shares)), 1)
+                    if own_won:
+                        # Highest score gets largest contribution share
+                        pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), float(x.get("grok_share_pct") or 20)), reverse=True)
+                    else:
+                        # Lowest score is #1 Culprit and gets largest blame share
+                        pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), -float(x.get("grok_share_pct") or 20)))
+                    for idx_r, gp in enumerate(pls_by_rank):
+                        gp["grok_share_pct"] = norm_shares[idx_r]
+                        dv = str(gp.get("deep_verdict") or "")
+                        if dv:
+                            dv = re.sub(r"严格依据\s*(top_weakness|专属技能)", "综合全周期录像证据", dv, flags=re.I)
+                            dv = re.sub(r"grok_score\s*(?:仅\s*)?[:：=]?\s*(\d+)\s*分?", r"本局评分 \1 分", dv, flags=re.I)
+                            dv = re.sub(r"grok_share_pct\s*[:：=]?\s*([\d.]+%?)", r"占比 \1", dv, flags=re.I)
+                            dv = re.sub(r"（与[^）]*并列头号）", "", dv)
+                            # Sync any trailing percentage in deep_verdict to the normalized monotonic share
+                            dv = re.sub(
+                                r"(?:胜局|败局)?(?:分锅|背锅|贡献|定责)(?:占比)?\s*\d+(?:\.\d+)?%",
+                                f"{'胜局贡献' if own_won else '败局分锅'} {norm_shares[idx_r]:.0f}%",
+                                dv,
+                            )
+                            gp["deep_verdict"] = dv
+                            gp["assessment"] = dv
                 mid = report.get("match_id")
                 if mid:
                     try:
