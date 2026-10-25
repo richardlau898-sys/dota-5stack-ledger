@@ -10121,47 +10121,36 @@ function buildRichFourStageCardsHtml(report) {
       icon: "🌅",
       badge: "阶段 1 · 前期",
       title: "00:00 - 10:00 对线期三路表现 · 游走Gank与抢符拉野",
-      bullets: [
-        ...(grokEarlyBullet ? [grokEarlyBullet] : []),
-        laneOverviewBullet,
-        ...laneMatchupBullets,
-        roamAndGankBullet,
-        resourcesBullet,
-      ],
+      bullets: grokEarlyBullet
+        ? [grokEarlyBullet, laneOverviewBullet, resourcesBullet]
+        : [laneOverviewBullet, ...laneMatchupBullets, roamAndGankBullet, resourcesBullet],
     },
     {
       stageKey: "mid",
       icon: "⚔️",
       badge: "阶段 2 · 中期",
       title: "10:00 - 25:00 中期资源转化 · 主动抓人 · 英雄特性推塔与开雾齐整度",
-      bullets: [
-        ...(grokMidBullet ? [grokMidBullet] : []),
-        midOverviewBullet,
-        midPushAndGankBullet,
-        farmingBullet,
-        smokeBullet,
-        attendanceBullet,
-      ],
+      bullets: grokMidBullet
+        ? [grokMidBullet, midOverviewBullet, smokeBullet]
+        : [midOverviewBullet, midPushAndGankBullet, farmingBullet, smokeBullet, attendanceBullet],
     },
     {
       stageKey: "late",
       icon: "🔥",
       badge: "阶段 3 · 后期",
       title: "25:00 - 终局 决胜团战 · 控盾推高地转化 · 买活博弈与刷钱兑现",
-      bullets: [
-        ...(grokLateBullet ? [grokLateBullet] : []),
-        lateOverviewBullet,
-        peakTfBullet,
-        roshAndPickoffBullet,
-        buybackAndSaveBullet,
-      ],
+      bullets: grokLateBullet
+        ? [grokLateBullet, roshAndPickoffBullet, buybackAndSaveBullet]
+        : [lateOverviewBullet, peakTfBullet, roshAndPickoffBullet, buybackAndSaveBullet],
     },
     {
       stageKey: "overall",
       icon: "🏆",
       badge: "全场总账",
       title: "整局五人硬实力 · 团队资源转化与 1~5 号位对位总评",
-      bullets: [...(grokOverallBullet ? [grokOverallBullet] : []), ...stage4Bullets],
+      bullets: grokOverallBullet
+        ? [grokOverallBullet, stage4Bullets[0], stage4Bullets[2]]
+        : stage4Bullets,
     },
   ];
 
@@ -10483,23 +10472,23 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     grokPlayers.find((gp) => Number(gp.pos) === Number(p.pos));
 
   if (grokP?.early_story) {
-    act1Story += `<div style="margin-top:6px;padding:6px 10px;background:rgba(139,92,246,0.12);border-left:3px solid #a78bfa;border-radius:6px;font-size:12px;color:#ede9fe;"><b>🧠 Grok 4.7 大模型前期洞察：</b>${escapeHtml(
+    act1Story = `<b>【10m: ${lh10}/${dn10}刀 · ${fmtNum(gold10)}金 · ${laneK}杀/${laneD}死】</b>${escapeHtml(
       grokP.early_story
-    )}</div>`;
+    )}`;
   }
   if (grokP?.mid_story) {
-    act2Story += `<div style="margin-top:6px;padding:6px 10px;background:rgba(139,92,246,0.12);border-left:3px solid #a78bfa;border-radius:6px;font-size:12px;color:#ede9fe;"><b>🧠 Grok 4.7 大模型中盘洞察：</b>${escapeHtml(
+    act2Story = `<b>【10–25m: +${fmtNum(midGold)}金 · ${midK}杀/${midD}死 · 伤${fmtNum(midDmg)}】</b>${escapeHtml(
       grokP.mid_story
-    )}</div>`;
+    )}`;
   }
   if (grokP?.late_story) {
-    act3Story += `<div style="margin-top:6px;padding:6px 10px;background:rgba(139,92,246,0.12);border-left:3px solid #a78bfa;border-radius:6px;font-size:12px;color:#ede9fe;"><b>🧠 Grok 4.7 大模型决胜洞察：</b>${escapeHtml(
-      grokP.late_story
-    )}</div>`;
+    act3Story = `<b>【25m+: +${fmtNum(lateGold)}金 · ${lateK}杀/${lateD}死 · 伤${fmtNum(
+      lateDmg
+    )} · 总塔伤${fmtNum(p.tower_damage || 0)}】</b>${escapeHtml(grokP.late_story)}`;
   }
 
   // =========================================================================
-  // 功过得失清单（👍 哪里做得好 vs 👎 哪里做得不好）
+  // 功过得失清单（👍 哪里做得好 vs 👎 哪里做得不好，与出装框去重合并）
   // =========================================================================
   const goodPoints = [];
   const badPoints = [];
@@ -10567,24 +10556,16 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       );
     }
   }
-  // Inject top itemization intelligence highlights into goodPoints
-  itemIntel.highlights.slice(0, 2).forEach((hl) => {
-    goodPoints.push(hl);
-  });
   if (goodPoints.length === 0 && Array.isArray(p.strengths)) {
     p.strengths.slice(0, 2).forEach((s) => goodPoints.push(escapeHtml(s)));
   }
 
-  // Bad Points (every player gets honest, constructive critique)
+  // Bad Points (every player gets honest, constructive critique; item warnings stay in itemIntelBox to avoid duplication)
   if (p.is_afk_farmer) {
     badPoints.push(
       `<b>核心失职（万年刷野躺平）：</b>中期吃下 ${midGoldShare}% 经济却仅打 ${midDmgShare}% 伤害，${tfAfkCnt} 波团战缺席卖队友独刷。`
     );
   }
-  // Inject itemization warnings (greedy support Midas, no Force Staff/BKB, low Blink conversion) into badPoints
-  itemIntel.warnings.forEach((w) => {
-    badPoints.push(w);
-  });
   if (soloEvents.length > 0) {
     badPoints.push(
       `<b>脱离团队落单被抓（${soloEvents.length}次）：</b>${soloEvents
@@ -10641,17 +10622,15 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   }
 
   const grokItemAuditLine = grokP?.item_and_blink_audit || grokP?.assessment || "";
-  const allItemBullets = [
-    ...(grokItemAuditLine
-      ? [
-          `<span style="color:#ddd6fe;"><b>🤖 XAI / GROK-4.7 深度 AI 出装·克制·跳刀锐评：</b>${escapeHtml(
-            grokItemAuditLine
-          )}</span>`,
-        ]
-      : []),
-    ...itemIntel.highlights,
-    ...itemIntel.warnings,
-  ];
+  const allItemBullets = grokItemAuditLine
+    ? [
+        `<span style="color:#ddd6fe;"><b>🤖 XAI / GROK-4.7 深度 AI 出装·克制·跳刀锐评：</b>${escapeHtml(
+          grokItemAuditLine
+        )}</span>`,
+        ...itemIntel.highlights.slice(0, 1),
+        ...itemIntel.warnings.slice(0, 1),
+      ]
+    : [...itemIntel.highlights, ...itemIntel.warnings];
   const itemIntelBoxHtml =
     allItemBullets.length > 0 || itemIntel.timelinePills
       ? `
@@ -10880,98 +10859,19 @@ function renderVerdictAndBlameSection(report) {
           .map((x) => x.trim())
           .filter(Boolean)
       : [];
-
-    if (won) {
-      return `
-        <div class="verdict-highlight-grid">
-          <div class="verdict-hl-item gold">
-            <span class="verdict-hl-tag">👑 头号首功 MVP</span>
-            <div class="verdict-hl-main">
-              ${top1?.hero_img ? `<img src="${escapeHtml(top1.hero_img)}" width="32" height="18" alt="" />` : ""}
-              <strong>${top1?.pos ?? 1}号位 ${escapeHtml(top1?.hero_short_zh || "")}</strong>
-              <span class="verdict-hl-player">(${escapeHtml(top1?.personaname || "")})</span>
-            </div>
-            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[0]?.contribShare ?? 25}%</b> · 本局打分 <b>${getHeroScore100(top1)}/100分</b></span>
-          </div>
-          <div class="verdict-hl-item green">
-            <span class="verdict-hl-tag">⚔️ 破阵二当家</span>
-            <div class="verdict-hl-main">
-              ${top2?.hero_img ? `<img src="${escapeHtml(top2.hero_img)}" width="32" height="18" alt="" />` : ""}
-              <strong>${top2?.pos ?? 2}号位 ${escapeHtml(top2?.hero_short_zh || "")}</strong>
-              <span class="verdict-hl-player">(${escapeHtml(top2?.personaname || "")})</span>
-            </div>
-            <span class="verdict-hl-metric">胜局贡献 <b>${sortedByContrib[1]?.contribShare ?? 22}%</b> · 本局打分 <b>${getHeroScore100(top2)}/100分</b></span>
-          </div>
-          <div class="verdict-hl-item muted">
-            <span class="verdict-hl-tag">🐟 惊险躺赢/短板提醒</span>
-            <div class="verdict-hl-main">
-              ${strugglePlayer?.hero_img ? `<img src="${escapeHtml(strugglePlayer.hero_img)}" width="32" height="18" alt="" />` : ""}
-              <strong>${strugglePlayer?.pos ?? 5}号位 ${escapeHtml(strugglePlayer?.hero_short_zh || "")}</strong>
-              <span class="verdict-hl-player">(${escapeHtml(strugglePlayer?.personaname || "")})</span>
-            </div>
-            <span class="verdict-hl-metric">本局打分 <b>${getHeroScore100(strugglePlayer)}/100分</b> · 读秒 <b>${strugglePlayer?.dead_seconds ?? 0}s</b></span>
-          </div>
-        </div>
-        ${
-          extraBullets.length > 0
-            ? `<ul class="verdict-rationale-list">${extraBullets
-                .map((b) => `<li>${injectHeroLogosIntoHtml(escapeHtml(b), report)}</li>`)
-                .join("")}</ul>`
-            : ""
-        }
-      `;
-    }
-
     const rationales =
       extraBullets.length > 0
         ? extraBullets
         : (mvpData.rationale_list || []).map((r) => sanitizeMixedEnglishClient(r));
-    return `
-      <div class="verdict-highlight-grid">
-        <div class="verdict-hl-item crimson">
-          <span class="verdict-hl-tag">🚨 本局首锅战犯</span>
-          <div class="verdict-hl-main">
-            ${topBlame1?.hero_img ? `<img src="${escapeHtml(topBlame1.hero_img)}" width="32" height="18" alt="" />` : ""}
-            <strong>${topBlame1?.pos ?? 1}号位 ${escapeHtml(topBlame1?.hero_short_zh || "")}</strong>
-            <span class="verdict-hl-player">(${escapeHtml(topBlame1?.personaname || "")})</span>
-          </div>
-          <span class="verdict-hl-metric">分锅占比 <b>${sortedByBlame[0]?.blameShare ?? 30}%</b> · 本局打分 <b>${getHeroScore100(topBlame1)}/100分</b></span>
-        </div>
-        <div class="verdict-hl-item warn">
-          <span class="verdict-hl-tag">⚠️ 次锅背锅位</span>
-          <div class="verdict-hl-main">
-            ${topBlame2?.hero_img ? `<img src="${escapeHtml(topBlame2.hero_img)}" width="32" height="18" alt="" />` : ""}
-            <strong>${topBlame2?.pos ?? 2}号位 ${escapeHtml(topBlame2?.hero_short_zh || "")}</strong>
-            <span class="verdict-hl-player">(${escapeHtml(topBlame2?.personaname || "")})</span>
-          </div>
-          <span class="verdict-hl-metric">分锅占比 <b>${sortedByBlame[1]?.blameShare ?? 24}%</b> · 本局打分 <b>${getHeroScore100(topBlame2)}/100分</b></span>
-        </div>
-        <div class="verdict-hl-item green">
-          <span class="verdict-hl-tag">🛡️ 本方尽力大腿</span>
-          <div class="verdict-hl-main">
-            ${top1?.hero_img ? `<img src="${escapeHtml(top1.hero_img)}" width="32" height="18" alt="" />` : ""}
-            <strong>${top1?.pos ?? 1}号位 ${escapeHtml(top1?.hero_short_zh || "")}</strong>
-            <span class="verdict-hl-player">(${escapeHtml(top1?.personaname || "")})</span>
-          </div>
-          <span class="verdict-hl-metric">仅分锅 <b>${
-            sortedByBlame[sortedByBlame.length - 1]?.blameShare ?? 10
-          }%</b> · 本局打分 <b>${getHeroScore100(top1)}/100分</b></span>
-        </div>
-      </div>
-      ${
-        rationales.length > 0
-          ? `<ul class="verdict-rationale-list">${rationales
-              .map((r) => `<li>${injectHeroLogosIntoHtml(escapeHtml(r), report)}</li>`)
-              .join("")}</ul>`
-          : ""
-      }
-    `;
+    return rationales.length > 0
+      ? `<ul class="verdict-rationale-list">${rationales
+          .map((r) => `<li>${injectHeroLogosIntoHtml(escapeHtml(r), report)}</li>`)
+          .join("")}</ul>`
+      : "";
   };
 
   const foldedStagesGridHtml = stagesGridHtml
-    ? `<details class="mobile-summary-fold" ${
-        typeof window !== "undefined" && window.innerWidth > 768 ? "open" : ""
-      }><summary class="mobile-summary-trigger">📖 展开/收起「BP·对线·中期·后期」四阶段全细节对账长文</summary>${stagesGridHtml}</details>`
+    ? `<details class="mobile-summary-fold"><summary class="mobile-summary-trigger">📖 展开/收起「前期·中期·后期·总账」四维全景速览卡（下方第 ③ 章含完整分阶段拆解）</summary>${stagesGridHtml}</details>`
     : "";
 
   if (grok && (!grok.side || grok.side === side)) {
@@ -11378,15 +11278,23 @@ function renderVerdictAndBlameSection(report) {
         return `
           <div
             class="blame-seg rank-${idx}"
-            style="--share: ${Math.max(share, 2.5)}"
-            title="${escapeHtml(tooltip)}"
+            style="--share: ${Math.max(share, 2.5)}; cursor: pointer;"
+            data-verdict-card-tab="slot_${p.player_slot}"
+            title="${escapeHtml(tooltip)}（点击切换查看详情卡）"
           >${innerLabel}</div>
         `;
       })
       .join("");
 
+    stackedBar.querySelectorAll("[data-verdict-card-tab]").forEach((seg) => {
+      seg.addEventListener("click", () => {
+        state.verdictActiveCard = seg.getAttribute("data-verdict-card-tab") || "all";
+        if (state.currentReport) renderVerdictAndBlameSection(state.currentReport);
+      });
+    });
+
     const rankMedals = ["🥇", "🥈", "🥉", "04", "05"];
-    rankingRows.innerHTML = listToDisplay
+    const rowsHtml = listToDisplay
       .map(({ player: p, share }, idx) => {
         const heroShort = p.hero_short_zh || p.hero_name;
         const sc100 = getHeroScore100(p);
@@ -11479,6 +11387,7 @@ function renderVerdictAndBlameSection(report) {
         }
       })
       .join("");
+    rankingRows.innerHTML = `<details class="mobile-summary-fold"><summary class="mobile-summary-trigger">📋 展开/收起五人 100% 贡献/分锅横向明细表（点击上方色块或标签可直接切换单人卡片）</summary><div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">${rowsHtml}</div></details>`;
   }
 
   document.querySelectorAll(".verdict-and-blame-section [data-copy-quote]").forEach((btn) => {
@@ -12808,9 +12717,6 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
             }</p>
           </div>
         </div>
-        <div class="phase-deep-lanes-grid">
-          ${midCardsHtml}
-        </div>
       </div>
     `;
   }
@@ -12973,9 +12879,6 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
           }</p>
         </div>
       </div>
-      <div class="phase-deep-lanes-grid">
-        ${lateCardsHtml}
-      </div>
     </div>
   `;
 }
@@ -13059,53 +12962,10 @@ function renderPhaseSection(report) {
     return { rk, smartBadLead };
   };
 
-  // Render 3-Stage Team Progression Roadmap (前期能做什么 / 中期能做什么 / 后期能做什么)
+  // Hide redundant 3-Stage Roadmap cards above phase tabs (merged into Phase Tabs + Active Panel below)
   if (roadmapBox) {
-    const stageTitles = {
-      lane: "前期团队能做什么 (00:00–10:00 对线与抢符)",
-      mid: "中期团队能做什么 (10:00–25:00 抱团与控图)",
-      late: "后期团队能做什么 (25:00–终局 盾奶与上高)",
-    };
-    roadmapBox.innerHTML = phasesList
-      .map((pd) => {
-        const isCurrent = pd.key === state.activePhaseKey;
-        const diag = pd.team_diagnostics?.[side] || {};
-        const actionList = toBulletList(diag.team_action, "围绕强势期抱团推进");
-        const { rk, smartBadLead } = buildSmartPhaseTeamDiagnosis(pd);
-        return `
-          <div
-            class="roadmap-stage-card ${isCurrent ? "active-stage" : ""}"
-            data-roadmap-stage="${escapeHtml(pd.key)}"
-            style="cursor: pointer;"
-            title="点击切换到 ${escapeHtml(pd.label)} 详细算账"
-          >
-            <div class="roadmap-stage-head">
-              <span class="roadmap-stage-title">${escapeHtml(stageTitles[pd.key] || pd.label)}</span>
-              <span class="roadmap-stage-badge">${escapeHtml(pd.time_label)}</span>
-            </div>
-            <div style="font-size: 11.5px; color: #f2c6b8; line-height: 1.55; background: rgba(201,74,74,0.1); border-left: 2px solid var(--red-light); padding: 5px 8px; margin: 4px 0;">
-              <strong>⚖️ 本阶病灶与阵亡审计：</strong>${injectHeroLogosIntoHtml(escapeHtml(smartBadLead), report)}
-            </div>
-            <div class="roadmap-mini-rank-strip">
-              <span class="rm-chip best">🥇最佳: ${rk.best1?.player?.pos}号${escapeHtml(rk.best1?.player?.hero_short_zh || "")}</span>
-              <span class="rm-chip best2">🥈次佳: ${rk.best2?.player?.pos}号${escapeHtml(rk.best2?.player?.hero_short_zh || "")}</span>
-              <span class="rm-chip worst1">💀首锅: ${rk.worst1?.player?.pos}号${escapeHtml(rk.worst1?.player?.hero_short_zh || "")}</span>
-              <span class="rm-chip worst2">⚠️次锅: ${rk.worst2?.player?.pos}号${escapeHtml(rk.worst2?.player?.hero_short_zh || "")}</span>
-            </div>
-            <ul class="roadmap-stage-list">
-              ${actionList.map((act) => `<li>${escapeHtml(act)}</li>`).join("")}
-            </ul>
-          </div>
-        `;
-      })
-      .join("");
-
-    roadmapBox.querySelectorAll("[data-roadmap-stage]").forEach((card) => {
-      card.addEventListener("click", () => {
-        state.activePhaseKey = card.getAttribute("data-roadmap-stage") || "lane";
-        renderPhaseSection(report);
-      });
-    });
+    roadmapBox.innerHTML = "";
+    roadmapBox.hidden = true;
   }
 
   tabsBar.innerHTML = phasesList
@@ -13204,39 +13064,22 @@ function renderPhaseSection(report) {
       </div>
     </div>
 
-    <div class="phase-narrative-box">
+    ${
+      !report.grok_coaching?.stage_reviews
+        ? `<div class="phase-narrative-box">
       <p>${injectHeroLogosIntoHtml(escapeHtml(summaryText), report)}</p>
       ${
         turningText
           ? `<div class="phase-turning-bar"><strong>阶段胜负拐点：</strong>${injectHeroLogosIntoHtml(escapeHtml(turningText), report)}</div>`
           : ""
       }
-    </div>
+    </div>`
+        : ""
+    }
 
     ${renderStageRankingsBlockHtml(activePd.key, report)}
 
     ${buildPhaseSpecificDeepAuditHtml(activePd, report)}
-
-    <div class="phase-team-diag-grid">
-      <div class="phase-team-diag-card good">
-        <h4>✓ 本阶段全队哪里做得好 (${escapeHtml(activePd.label)})</h4>
-        <ul>
-          ${goodBullets.map((item) => `<li>${injectHeroLogosIntoHtml(escapeHtml(item), report)}</li>`).join("")}
-        </ul>
-      </div>
-      <div class="phase-team-diag-card bad">
-        <h4>✕ 本阶段全队哪里做得不好 (含阵亡合理性审计)</h4>
-        <ul>
-          ${badBullets.map((item) => `<li>${injectHeroLogosIntoHtml(escapeHtml(item), report)}</li>`).join("")}
-        </ul>
-      </div>
-      <div class="phase-team-diag-card action">
-        <h4>→ 团队在${escapeHtml(activePd.label)}应该怎么做 (进步指南)</h4>
-        <ul>
-          ${actionBullets.map((item) => `<li>${injectHeroLogosIntoHtml(escapeHtml(item), report)}</li>`).join("")}
-        </ul>
-      </div>
-    </div>
 
     ${(() => {
       const spotlightPhasePos = Number(activeStageRk.best1?.player?.pos || phasePlayers[0]?.pos || 1);
@@ -13448,32 +13291,24 @@ function renderPhaseSection(report) {
                       : `<div style="font-size: 10px; color: var(--dim);">本阶段以基础装/消耗品过渡</div>`
                   }
 
-                  <div class="phase-p-prose">${injectHeroLogosIntoHtml(proseStory, report)}</div>
-
                   <div class="phase-p-eval-block">
                     <div class="phase-eval-group good">
-                      <b>✓ 哪里做得好（含对线换血·拉野封野·抢莲花·号位职责细节）</b>
+                      <b>✓ 本阶段高光与履职细活</b>
                       <ul>
                         ${smartGoodList
-                          .slice(0, 4)
+                          .slice(0, 3)
                           .map((g) => `<li>${injectHeroLogosIntoHtml(g, report)}</li>`)
                           .join("")}
                       </ul>
                     </div>
                     <div class="phase-eval-group bad">
-                      <b>✕ 哪里做得不好 &amp; 阵亡合理性审计</b>
+                      <b>✕ 本阶段瑕疵 &amp; 阵亡合理性审计</b>
                       <ul>
                         ${smartBadList
-                          .slice(0, 3)
+                          .slice(0, 2)
                           .map((b) => `<li>${injectHeroLogosIntoHtml(b, report)}</li>`)
                           .join("")}
                       </ul>
-                    </div>
-                    <div class="phase-eval-focus">
-                      <strong>阶段改进：</strong>${injectHeroLogosIntoHtml(
-                        escapeHtml(focusText),
-                        report
-                      )}
                     </div>
                   </div>
                 </article>
@@ -14481,12 +14316,6 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
         </div>
       </div>
 
-      <!-- AI 毒舌/封神个人结案陈词 (Chapter 6 AI Storytelling) -->
-      <div class="forensic-ai-story-box ${escapeHtml(aiStoryObj.tone)}">
-        <span class="forensic-ai-badge ${escapeHtml(aiStoryObj.tone)}">${escapeHtml(aiStoryObj.badge)}</span>
-        <div class="forensic-ai-text">${aiStoryObj.storyHtml}</div>
-      </div>
-
       <!-- 紧凑三栏 Bento 矩阵：左栏(六神装+主动按键+指向性技能目标) ｜ 中栏(技能释放+提款关系+全球同英雄百分位) ｜ 右栏(六维雷达图) -->
       <div class="forensic-visual-row">
         <div class="forensic-bento-col">
@@ -14580,34 +14409,6 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
           ${renderHexRadarSvg(p.radar)}
           <div class="radar-mini-scores"><b>本局打分 ${score100}/100</b> · ${escapeHtml(radarMiniSummary)}</div>
         </div>
-      </div>
-
-      <div class="forensic-prose-grid">
-        <div class="prose-col good">
-          <h4>${pWon ? "🏆 凯旋高光与胜局贡献" : "哪里干得漂亮 (高光与贡献)"}</h4>
-          <ul>
-            ${goodList.map((g) => `<li>${injectHeroLogosIntoHtml(escapeHtml(g), state.currentReport)}</li>`).join("")}
-          </ul>
-        </div>
-        <div class="prose-col bad">
-          <h4>${pWon ? "🔍 胜局复盘小瑕疵 (美中不足)" : "哪里在犯罪 (背锅铁证)"}</h4>
-          <ul>
-            ${badList.map((b) => `<li>${injectHeroLogosIntoHtml(escapeHtml(b), state.currentReport)}</li>`).join("")}
-          </ul>
-        </div>
-        <div class="prose-col fix">
-          <h4>${pWon ? "🚀 乘胜追击进阶建议" : "下把怎么改 (具体可执行动作)"}</h4>
-          <ul>
-            ${fixList.map((f) => `<li>${injectHeroLogosIntoHtml(escapeHtml(f), state.currentReport)}</li>`).join("")}
-          </ul>
-        </div>
-      </div>
-
-      <div class="forensic-trash-footer">
-        <span><strong>${pWon ? "🏆 专属庆功贺词：" : "专属算账金句："}</strong>${escapeHtml(footerQuote)}</span>
-        <button type="button" class="button secondary" data-copy-label="${pWon ? "个人庆功词" : "个人算账报告"}" data-copy-quote="${escapeHtml(copyText)}">${
-          pWon ? "复制庆功词" : "复制这段喷他"
-        }</button>
       </div>
     </article>
   `;
