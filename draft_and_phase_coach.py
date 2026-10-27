@@ -2635,12 +2635,22 @@ def build_squad_history_ledger(
                         "solo_pickoffs_total": 0,
                         "unsmoked_blind_total": 0,
                         "bad_builds_total": 0,
+                        "support_games": 0,
+                        "support_grief_count": 0,
+                        "support_grief_examples": [],
+                        "core_games": 0,
+                        "core_choke_count": 0,
+                        "core_choke_examples": [],
+                        "lane_loss_count": 0,
+                        "pos_map": {},
+                        "grok_quotes": [],
                         "heroes": [],
                     },
                 )
                 st["games"] += 1
                 p_sc100 = _eff_score(p)
                 p_sh = _eff_share(p)
+                gp_cur = grok_by_pos.get(pos_p) or {}
                 if won:
                     st["wins"] += 1
                     st["total_contrib_pct"] += p_sh
@@ -2667,9 +2677,74 @@ def build_squad_history_ledger(
                 if it_r.get("grade") == "bad":
                     st["bad_builds_total"] += 1
 
+                # Position tracking
+                pm = st["pos_map"].setdefault(
+                    pos_p,
+                    {"pos": pos_p, "games": 0, "wins": 0, "rating_sum": 0.0, "share_sum": 0.0, "heroes": []},
+                )
+                pm["games"] += 1
+                if won:
+                    pm["wins"] += 1
+                pm["rating_sum"] += p_sc100
+                pm["share_sum"] += p_sh
+                pm["heroes"].append(p.get("hero_short_zh") or "")
+
+                # Support duty / greedy itemization audit vs Core choke audit
+                combined_grok_txt = " ".join([
+                    str(gp_cur.get("verdict_tag") or ""),
+                    str(gp_cur.get("headline") or ""),
+                    str(gp_cur.get("deep_verdict") or ""),
+                    str(gp_cur.get("item_and_blink_audit") or ""),
+                ])
+                early_txt = str(gp_cur.get("early_story") or "")
+                lh10_val = int((p.get("lane_summary") or {}).get("lh_at_10") or p.get("lh_at_10") or 30)
+                if any(kw in early_txt for kw in ("崩盘", "被打穿", "坐牢", "被压", "连续暴毙", "提款")) or (
+                    pos_p in (1, 2, 3) and lh10_val > 0 and lh10_val < 32
+                ):
+                    st["lane_loss_count"] += 1
+
+                h_short = p.get("hero_short_zh") or ""
+                if pos_p in (4, 5):
+                    st["support_games"] += 1
+                    clean_grok_txt = combined_grok_txt
+                    for neg_pat in ("零毒瘤", "非毒瘤", "不毒瘤", "无毒瘤", "绝非毒瘤", "拒绝毒瘤", "没有毒瘤"):
+                        clean_grok_txt = clean_grok_txt.replace(neg_pat, "")
+                    grief_kws = ("散失", "抢经济", "抢钱", "抢核心", "毒瘤", "失职", "零保人", "不买眼", "当大哥", "不出救命")
+                    matched_kw = next((kw for kw in grief_kws if kw in clean_grok_txt), "")
+                    # Only flag support grief if score <= 72 when keyword matched, or score <= 58, or item audit grade is bad
+                    if (matched_kw and p_sc100 <= 72.0) or p_sc100 <= 58.0 or it_r.get("grade") == "bad":
+                        st["support_grief_count"] += 1
+                        reason_tag = f"Grok抓包「{matched_kw}」" if (matched_kw and p_sc100 <= 72.0) else (
+                            "毒瘤/违规出装" if it_r.get("grade") == "bad" else f"本职失职({int(round(p_sc100))}分)"
+                        )
+                        if len(st["support_grief_examples"]) < 3:
+                            st["support_grief_examples"].append(
+                                f"#{mid} {pos_p}号位{h_short} ({int(round(p_sc100))}分·{reason_tag})"
+                            )
+                else:
+                    st["core_games"] += 1
+                    if p_sc100 <= 56.0 or ((not won) and int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2))):
+                        st["core_choke_count"] += 1
+                        if len(st["core_choke_examples"]) < 3:
+                            st["core_choke_examples"].append(
+                                f"#{mid} {pos_p}号位{h_short} ({int(round(p_sc100))}分·{'落败首锅' if not won else '低迷'})"
+                            )
+
+                if gp_cur.get("headline") and len(st["grok_quotes"]) < 4:
+                    st["grok_quotes"].append({
+                        "match_id": mid,
+                        "pos": pos_p,
+                        "hero_short_zh": h_short,
+                        "won": won,
+                        "score": int(round(p_sc100)),
+                        "verdict_tag": gp_cur.get("verdict_tag") or "",
+                        "headline": gp_cur.get("headline") or "",
+                        "practice": gp_cur.get("practice") or "",
+                    })
+
                 st["heroes"].append({
                     "match_id": mid,
-                    "hero_short_zh": p.get("hero_short_zh") or "",
+                    "hero_short_zh": h_short,
                     "hero_img": p.get("hero_img") or "",
                     "pos": pos_p,
                     "kda": p.get("kda") or "",
@@ -2764,41 +2839,220 @@ def build_squad_history_ledger(
         avg_deaths = round(st["total_deaths"] / g, 1)
         avg_dead_sec = int(round(st["total_dead_sec"] / g))
 
-        # 汇总该队员的个人绝活英雄与冥币英雄
+        # 汇总该队员的个人绝活英雄与冥币英雄 (优先统计 >=2 局的多场代表作，防止单场偶然胜负掩盖主力英雄池)
         h_map: Dict[str, Dict[str, Any]] = {}
         for h_item in st["heroes"]:
             hz = h_item["hero_short_zh"]
-            hm = h_map.setdefault(hz, {"hero_short_zh": hz, "hero_img": h_item["hero_img"], "games": 0, "wins": 0, "rating_sum": 0.0})
+            hm = h_map.setdefault(
+                hz,
+                {
+                    "hero_short_zh": hz,
+                    "hero_img": h_item["hero_img"],
+                    "games": 0,
+                    "wins": 0,
+                    "rating_sum": 0.0,
+                    "pos_list": [],
+                },
+            )
             hm["games"] += 1
             if h_item["won"]:
                 hm["wins"] += 1
             hm["rating_sum"] += float(h_item.get("rating_score") or 60.0)
+            hm["pos_list"].append(int(h_item.get("pos") or 1))
+
         h_summary = []
         for hm in h_map.values():
             hg = max(1, hm["games"])
+            h_wr = round(hm["wins"] * 100.0 / hg, 1)
+            h_avg_r = round(hm["rating_sum"] / hg, 1)
+            main_pos = max(set(hm["pos_list"]), key=hm["pos_list"].count) if hm["pos_list"] else 1
             h_summary.append({
                 "hero_short_zh": hm["hero_short_zh"],
                 "hero_img": hm["hero_img"],
                 "games": hm["games"],
                 "wins": hm["wins"],
-                "win_rate": round(hm["wins"] * 100.0 / hg, 1),
-                "avg_rating": round(hm["rating_sum"] / hg, 1),
+                "losses": hm["games"] - hm["wins"],
+                "win_rate": h_wr,
+                "avg_rating": h_avg_r,
+                "main_pos": main_pos,
             })
-        h_summary.sort(key=lambda x: (x["win_rate"], x["avg_rating"], x["games"]), reverse=True)
-        best_hero = h_summary[0] if h_summary else None
-        worst_hero = h_summary[-1] if len(h_summary) >= 2 and h_summary[-1]["avg_rating"] < 62.0 else None
 
-        if st["mvp_count"] >= 1 and avg_contrib >= 22.0:
-            role_tag = "👑 车队大腿 · 历史凯瑞王"
-            tag_cls = "carry"
-        elif st["culprit_count"] >= 1 or avg_blame >= 24.0:
-            role_tag = "🚨 败局常客 · 重点分锅对象"
-            tag_cls = "culprit"
-        elif avg_deaths >= 10.0:
-            role_tag = "💀 泉水常客 · 场均十死俱乐部"
-            tag_cls = "culprit"
+        # 真命绝活排序：优先 >=2 局且胜率/评分双高，其次高评分胜场
+        sig_sorted = sorted(
+            h_summary,
+            key=lambda x: (
+                1 if (x["games"] >= 2 and (x["win_rate"] >= 50.0 or x["avg_rating"] >= 73.0)) else 0,
+                x["wins"],
+                x["avg_rating"],
+                x["win_rate"],
+            ),
+            reverse=True,
+        )
+        signature_heroes = [
+            x for x in sig_sorted if (x["wins"] >= 1 and x["avg_rating"] >= 66.0) or x["avg_rating"] >= 78.0
+        ][:3]
+        if not signature_heroes and sig_sorted:
+            signature_heroes = sig_sorted[:1]
+
+        # 永久封印冥币英雄排序：优先多局连败 (losses >= 2 且 win_rate <= 35%) 或低评分败局
+        cursed_candidates = [
+            x
+            for x in h_summary
+            if (x["losses"] >= 2 and x["win_rate"] <= 35.0)
+            or (x["wins"] == 0 and x["avg_rating"] < 62.0)
+            or (x["games"] >= 2 and x["avg_rating"] < 60.0)
+        ]
+        cursed_candidates.sort(
+            key=lambda x: (
+                1 if (x["games"] >= 2 and x["win_rate"] <= 35.0) else 0,
+                x["losses"],
+                -x["avg_rating"],
+            ),
+            reverse=True,
+        )
+        # 避免把已在 signature_heroes 首位的主力英雄误判为冥币
+        sig_names = {s["hero_short_zh"] for s in signature_heroes[:1]}
+        cursed_heroes = [x for x in cursed_candidates if x["hero_short_zh"] not in sig_names][:3]
+
+        best_hero = signature_heroes[0] if signature_heroes else (sig_sorted[0] if sig_sorted else None)
+        worst_hero = cursed_heroes[0] if cursed_heroes else None
+
+        # 1-5号位适岗矩阵
+        pos_breakdown = []
+        for p_num, pm in sorted(st.get("pos_map", {}).items(), key=lambda kv: kv[1]["games"], reverse=True):
+            pg = max(1, pm["games"])
+            p_wr = round(pm["wins"] * 100.0 / pg, 1)
+            p_ar = round(pm["rating_sum"] / pg, 1)
+            top_h = max(set(pm["heroes"]), key=pm["heroes"].count) if pm["heroes"] else ""
+            pos_breakdown.append({
+                "pos": p_num,
+                "pos_label": f"{p_num}号位",
+                "games": pm["games"],
+                "wins": pm["wins"],
+                "win_rate": p_wr,
+                "avg_rating": p_ar,
+                "top_hero": top_h,
+            })
+
+        multi_game_pos = [x for x in pos_breakdown if x["games"] >= 2 and x["avg_rating"] >= 65.0]
+        pos_pool_for_best = multi_game_pos if multi_game_pos else pos_breakdown
+        best_pos = (
+            max(
+                pos_pool_for_best,
+                key=lambda x: (
+                    x["win_rate"] * 0.40 + x["avg_rating"] * 0.60 + min(x["games"], 5) * 4.0
+                ),
+            )
+            if pos_pool_for_best
+            else None
+        )
+        worst_pos_candidates = [
+            x
+            for x in pos_breakdown
+            if (x["avg_rating"] < 66.0 or (x["games"] >= 2 and x["win_rate"] <= 35.0))
+            and (not best_pos or x["pos"] != best_pos["pos"])
+        ]
+        worst_pos = (
+            min(
+                worst_pos_candidates,
+                key=lambda x: (x["win_rate"] * 0.45 + x["avg_rating"] * 0.55 - x["games"] * 3.0),
+            )
+            if worst_pos_candidates
+            else None
+        )
+
+        sup_g = int(st.get("support_games") or 0)
+        sup_grief = int(st.get("support_grief_count") or 0)
+        sup_grief_rate = round((sup_grief / max(1, sup_g)) * 100, 1) if sup_g > 0 else 0.0
+        core_g = int(st.get("core_games") or 0)
+        core_choke = int(st.get("core_choke_count") or 0)
+        core_choke_rate = round((core_choke / max(1, core_g)) * 100, 1) if core_g > 0 else 0.0
+        lane_loss_c = int(st.get("lane_loss_count") or 0)
+        lane_loss_rate = round((lane_loss_c / g) * 100, 1)
+
+        # 生成跨局《五黑个人习性诊断书 & BP 处方》
+        pname_cur = st["personaname"]
+        if best_pos and worst_pos:
+            pos_verdict = (
+                f"最稳本命位置为【{best_pos['pos_label']}】（{best_pos['games']}局 {best_pos['win_rate']}%胜率 · 场均Grok {best_pos['avg_rating']}分，代表英雄：{best_pos['top_hero']}）；"
+                f"高危重灾区为【{worst_pos['pos_label']}】（{worst_pos['games']}局仅 {worst_pos['win_rate']}%胜率 · 场均 {worst_pos['avg_rating']}分，代表：{worst_pos['top_hero']}），换位掉分显著。"
+            )
+        elif best_pos:
+            pos_verdict = (
+                f"常驻主力位置为【{best_pos['pos_label']}】（{best_pos['games']}局 {best_pos['win_rate']}%胜率 · 场均Grok {best_pos['avg_rating']}分，代表英雄：{best_pos['top_hero']}），位置专注度高。"
+            )
         else:
-            role_tag = "⚖️ 车队中坚 · 稳定贡献"
+            pos_verdict = f"跨 {g} 局场均 Grok 评分 {avg_rating}/100 分，胜率 {win_rate}%。"
+
+        flaw_parts = []
+        if sup_grief > 0:
+            ex_str = "、".join(st.get("support_grief_examples") or [])
+            flaw_parts.append(
+                f"💸【辅助位本职审计】打4/5号位共 {sup_g} 局中有 {sup_grief} 局（{sup_grief_rate}%）触发毒瘤/抢经济/视野保人失职警报（实锤：{ex_str}）"
+            )
+        if core_choke > 0:
+            ex_c = "、".join(st.get("core_choke_examples") or [])
+            flaw_parts.append(
+                f"📉【核心位抗压审计】打1-3号位共 {core_g} 局中有 {core_choke} 局（{core_choke_rate}%）出现崩盘或背首锅（实锤：{ex_c}）"
+            )
+        if st["solo_pickoffs_total"] > 0:
+            flaw_parts.append(
+                f"🗺️【孤狼单带迷路】跨 {g} 局累计 {st['solo_pickoffs_total']} 次落单被抓（含 {st['unsmoked_blind_total']} 次无视野/破雾白给，场均 {st['solo_pickoffs_total']/g:.1f} 次）"
+            )
+        if st["unpressed_saves_total"] > 0 or st["bad_builds_total"] > 0:
+            flaw_parts.append(
+                f"🧤【救命装与憋刀】累计 {st['unpressed_saves_total']} 次身怀BKB/救命装0按出暴毙，{st['bad_builds_total']} 局被抓包头铁出装事故"
+            )
+        if not flaw_parts:
+            flaw_parts.append(
+                f"🛡️【纪律性极佳】跨 {g} 局几乎零毒瘤出装与低级憋刀事故，场均阵亡读秒 {avg_dead_sec} 秒。"
+            )
+        habit_flaws_summary = "；".join(flaw_parts) + "。"
+
+        sig_txt = (
+            "、".join(
+                f"{h['hero_short_zh']}({h['games']}局{h['win_rate']}%胜·{h['avg_rating']}分)"
+                for h in signature_heroes
+            )
+            if signature_heroes
+            else "暂无明显绝活"
+        )
+        cursed_txt = (
+            "、".join(
+                f"{h['hero_short_zh']}({h['games']}局{h['win_rate']}%胜·{h['avg_rating']}分)"
+                for h in cursed_heroes
+            )
+            if cursed_heroes
+            else ""
+        )
+        bp_mandate = (
+            f"BP死命令：优先为 {pname_cur} 抢下【{sig_txt}】锁死 {best_pos['pos_label'] if best_pos else '主力位'}；"
+            + (
+                f"队长务必口头禁选其【{cursed_txt}】"
+                + (f"及高危 {worst_pos['pos_label']}！" if worst_pos else "！")
+                if cursed_txt
+                else (
+                    f"尽量避免让其客串高危 {worst_pos['pos_label']}（场均仅{worst_pos['avg_rating']}分）！"
+                    if worst_pos
+                    else "继续保持当前英雄池舒适区！"
+                )
+            )
+        )
+
+        if st["mvp_count"] >= 2 and avg_rating >= 75.0:
+            role_tag = "👑 车队真大腿 · 核心定海神针"
+            tag_cls = "carry"
+        elif best_pos and best_pos["pos"] in (4, 5) and best_pos["avg_rating"] >= 75.0 and core_choke >= 2:
+            role_tag = "🎯 游走四号位绝活 · 核心位慎选"
+            tag_cls = "warn"
+        elif st["culprit_count"] >= 2 or avg_rating < 66.5:
+            role_tag = "🚨 重点整改对象 · 摇摆位事故高发"
+            tag_cls = "culprit"
+        elif avg_rating >= 74.0:
+            role_tag = "🛡️ 车队铁血支柱 · 稳定高分保障"
+            tag_cls = "carry"
+        else:
+            role_tag = "⚖️ 三号位开团中坚 · 顺逆风摇摆手"
             tag_cls = "neutral"
 
         squad_members_rank.append({
@@ -2820,11 +3074,33 @@ def build_squad_history_ledger(
             "solo_pickoffs_total": st["solo_pickoffs_total"],
             "unsmoked_blind_total": st["unsmoked_blind_total"],
             "bad_builds_total": st["bad_builds_total"],
+            "support_games": sup_g,
+            "support_grief_count": sup_grief,
+            "support_grief_rate": sup_grief_rate,
+            "support_grief_examples": st.get("support_grief_examples") or [],
+            "core_games": core_g,
+            "core_choke_count": core_choke,
+            "core_choke_rate": core_choke_rate,
+            "core_choke_examples": st.get("core_choke_examples") or [],
+            "lane_loss_count": lane_loss_c,
+            "lane_loss_rate": lane_loss_rate,
+            "pos_breakdown": pos_breakdown,
+            "best_pos": best_pos,
+            "worst_pos": worst_pos,
+            "signature_heroes": signature_heroes,
+            "cursed_heroes": cursed_heroes,
             "best_hero": best_hero,
             "worst_hero": worst_hero,
+            "habit_diagnosis": {
+                "archetype_title": role_tag,
+                "pos_verdict": pos_verdict,
+                "habit_flaws_summary": habit_flaws_summary,
+                "bp_and_team_mandate": bp_mandate,
+                "grok_quotes": st.get("grok_quotes") or [],
+            },
             "role_tag": role_tag,
             "tag_cls": tag_cls,
-            "heroes": st["heroes"][:5],
+            "heroes": st["heroes"][:6],
         })
 
     # 排序：先把主视角、车队好友、多局共同出场的排在前面，再按场均评分降序展示

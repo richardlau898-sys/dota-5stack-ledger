@@ -14986,6 +14986,247 @@ function renderSquadLedgerSection(squadLedger) {
     )
     .join("");
 
+  // 核心车队成员（>=2局，最多取前6人）跨局《五黑英雄池体检 & 毒瘤习性诊断书》
+  const coreHabitMembers = members.filter((m) => (m.games || 0) >= 2).slice(0, 6);
+  const selectedHabitKey = state.selectedHabitMemberKey || "all";
+  const visibleHabitMembers =
+    selectedHabitKey === "all"
+      ? coreHabitMembers
+      : coreHabitMembers.filter((m) => String(m.account_id || m.personaname) === String(selectedHabitKey));
+  const finalHabitMembers = visibleHabitMembers.length > 0 ? visibleHabitMembers : coreHabitMembers;
+
+  const habitDiagnosisSectionHtml =
+    coreHabitMembers.length > 0
+      ? `
+      <div class="squad-card" style="margin-bottom: 14px; border: 1px solid rgba(240,199,110,0.35); background: linear-gradient(180deg, rgba(28,31,24,0.96), rgba(18,20,16,0.98));">
+        <div class="squad-card-head" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px; margin-bottom:12px;">
+          <div>
+            <h3 style="font-size:16px; color:#f0c76e; margin:0;">🎯 五黑个人跨局《英雄池体检 &amp; 毒瘤习性诊断书》（跨 ${totalAnalyzed} 局 AI 实锤追踪）</h3>
+            <span style="font-size:12px; color:var(--muted);">自动审计：谁打4/5号位爱出散失抢经济？谁换到中单/三号位必崩盘？谁是真命绝活、谁该被队长永久Ban掉？</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            <button
+              type="button"
+              class="filter-chip ${selectedHabitKey === "all" ? "active" : ""}"
+              data-habit-member-filter="all"
+              style="padding:4px 10px; font-size:12px;"
+            >🔥 全员展开 (${coreHabitMembers.length}人)</button>
+            ${coreHabitMembers
+              .map((m) => {
+                const mKey = String(m.account_id || m.personaname);
+                const isAct = String(selectedHabitKey) === mKey;
+                return `
+                  <button
+                    type="button"
+                    class="filter-chip ${isAct ? "active" : ""}"
+                    data-habit-member-filter="${escapeHtml(mKey)}"
+                    style="padding:4px 10px; font-size:12px;"
+                  >${escapeHtml(m.personaname)} (${m.games}局·${m.avg_rating}分)</button>
+                `;
+              })
+              .join("")}
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap:12px;">
+          ${finalHabitMembers
+            .map((m, idx) => {
+              const hd = m.habit_diagnosis || {};
+              const posList = m.pos_breakdown || [];
+              const bestPosNum = m.best_pos?.pos;
+              const worstPosNum = m.worst_pos?.pos;
+              const sigHeroes = m.signature_heroes || (m.best_hero ? [m.best_hero] : []);
+              const cursedHeroes = m.cursed_heroes || (m.worst_hero ? [m.worst_hero] : []);
+              const borderCol =
+                m.tag_cls === "carry"
+                  ? "rgba(110,196,120,0.42)"
+                  : m.tag_cls === "culprit"
+                  ? "rgba(224,108,90,0.45)"
+                  : "rgba(240,199,110,0.35)";
+
+              const posPillsHtml = posList
+                .map((pb) => {
+                  const isBest = pb.pos === bestPosNum;
+                  const isWorst = pb.pos === worstPosNum;
+                  const pillStyle = isBest
+                    ? "background:rgba(46,96,54,0.38);border:1px solid #58b368;color:#a8f0b0;"
+                    : isWorst
+                    ? "background:rgba(110,36,30,0.42);border:1px solid #d96552;color:#ff9e8e;"
+                    : "background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:var(--text);";
+                  const prefix = isBest ? "🌟本命 " : isWorst ? "🚨重灾 " : "";
+                  return `
+                    <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11.5px;${pillStyle}">
+                      <b>${prefix}${escapeHtml(pb.pos_label)}</b>: ${pb.games}局 ${pb.win_rate}%胜 · 均分<b>${pb.avg_rating}</b> (${escapeHtml(
+                    pb.top_hero || "-"
+                  )})
+                    </span>
+                  `;
+                })
+                .join("");
+
+              const sigHtml =
+                sigHeroes.length > 0
+                  ? sigHeroes
+                      .map(
+                        (h) => `
+                        <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:rgba(34,68,40,0.45);border:1px solid rgba(98,186,108,0.4);margin:2px;">
+                          ${
+                            h.hero_img
+                              ? `<img src="${escapeHtml(h.hero_img)}" width="28" height="16" alt="" style="border-radius:2px;" />`
+                              : ""
+                          }
+                          <span style="font-size:11.5px;color:#d6f5d9;"><b>${escapeHtml(h.hero_short_zh)}</b> (${h.games}局 ${
+                          h.win_rate
+                        }%胜 · <b>${h.avg_rating}分</b>)</span>
+                        </div>
+                      `
+                      )
+                      .join("")
+                  : `<span style="font-size:11.5px;color:var(--muted);">暂无多局高分绝活样本</span>`;
+
+              const cursedHtml =
+                cursedHeroes.length > 0
+                  ? cursedHeroes
+                      .map(
+                        (h) => `
+                        <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:rgba(82,26,22,0.48);border:1px solid rgba(214,88,72,0.45);margin:2px;">
+                          ${
+                            h.hero_img
+                              ? `<img src="${escapeHtml(h.hero_img)}" width="28" height="16" alt="" style="border-radius:2px;" />`
+                              : ""
+                          }
+                          <span style="font-size:11.5px;color:#ffb4a8;"><b>${escapeHtml(h.hero_short_zh)}</b> (${h.games}局 ${
+                          h.win_rate
+                        }%胜 · <b>${h.avg_rating}分</b>)</span>
+                        </div>
+                      `
+                      )
+                      .join("")
+                  : `<span style="font-size:11.5px;color:#8fd196;">✅ 英雄池健康，无明显连败冥币英雄</span>`;
+
+              const copyDiagText = [
+                `📜 【五黑跨局生涯体检 & 毒瘤习性诊断书】${m.personaname}`,
+                `🏷️ 历史定位：${m.role_tag} ｜ 出勤：${m.games}局 (${m.win_rate}%胜率) ｜ Grok场均：${m.avg_rating}/100分 (${m.mvp_count}次MVP / ${m.culprit_count}次首锅)`,
+                `🧭 位置适岗结论：${hd.pos_verdict || ""}`,
+                `🏆 真命绝活英雄：${sigHeroes.map((h) => `${h.hero_short_zh}(${h.games}局${h.win_rate}%胜·${h.avg_rating}分)`).join("、") || "无"}`,
+                `🪦 建议永久Ban冥币：${cursedHeroes.map((h) => `${h.hero_short_zh}(${h.games}局${h.win_rate}%胜·${h.avg_rating}分)`).join("、") || "无"}`,
+                `🔬 跨局毒瘤与失误实锤：${hd.habit_flaws_summary || ""}`,
+                `🚨 下把BP与选位死命令：${hd.bp_and_team_mandate || ""}`,
+              ].join("\n");
+
+              return `
+                <article style="padding:12px 14px;border-radius:8px;background:rgba(15,17,14,0.92);border:1px solid ${borderCol};display:flex;flex-direction:column;gap:9px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+                    <div>
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <strong style="font-size:16px;color:#f5f2eb;">${escapeHtml(m.personaname)}${
+                m.is_me ? " <small style='color:var(--gold-light);'>[我]</small>" : ""
+              }</strong>
+                        <span class="squad-role-tag ${
+                          m.tag_cls === "carry" ? "mvp" : m.tag_cls === "culprit" ? "culprit" : ""
+                        }">${escapeHtml(m.role_tag)}</span>
+                      </div>
+                      <div style="font-size:12px;color:var(--muted);margin-top:3px;">
+                        跨 <b>${m.games}</b> 局 (${m.wins}胜${m.games - m.wins}负 · <b>${m.win_rate}%</b>) ｜ Grok 场均 <b style="color:#f0c76e;">${
+                m.avg_rating
+              }/100分</b> ｜ <b>${m.mvp_count}</b> 次MVP / <b style="color:${
+                m.culprit_count > 0 ? "var(--red-light)" : "inherit"
+              }">${m.culprit_count}</b> 次首锅 ｜ 场均KDA ${escapeHtml(m.avg_kda)}
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:6px;">
+                      <button
+                        type="button"
+                        class="copy-quote-btn"
+                        style="border-color:rgba(240,199,110,0.5);color:#f0c76e;"
+                        data-habit-poster-idx="${idx}"
+                      >🖼️ 生涯体检海报</button>
+                      <button
+                        type="button"
+                        class="copy-quote-btn"
+                        data-copy-habit="${escapeHtml(copyDiagText)}"
+                        data-copy-habit-name="${escapeHtml(m.personaname)}"
+                      >📋 复制诊断书</button>
+                    </div>
+                  </div>
+
+                  <!-- 1-5号位适岗体检条 -->
+                  <div>
+                    <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:4px;">🧭 1–5 号位适岗体检（本命舒适区 vs 换位掉分重灾区）：</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:5px;">${posPillsHtml}</div>
+                  </div>
+
+                  <!-- 真命绝活 vs 永久Ban冥币 -->
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div style="padding:7px 9px;border-radius:6px;background:rgba(22,38,25,0.45);border:1px solid rgba(86,168,96,0.3);">
+                      <div style="font-size:11px;font-weight:700;color:#8fd196;margin-bottom:4px;">🏆 真命绝活英雄（优先抢）</div>
+                      <div>${sigHtml}</div>
+                    </div>
+                    <div style="padding:7px 9px;border-radius:6px;background:rgba(44,20,18,0.45);border:1px solid rgba(196,78,64,0.3);">
+                      <div style="font-size:11px;font-weight:700;color:#ff9482;margin-bottom:4px;">🪦 建议永久 Ban 冥币英雄（队长封印）</div>
+                      <div>${cursedHtml}</div>
+                    </div>
+                  </div>
+
+                  <!-- 四大毒瘤与失误习性计数器 -->
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+                    <div style="padding:6px 8px;border-radius:5px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+                      <span style="display:block;font-size:10.5px;color:var(--muted);">💸 辅助毒瘤/失职率</span>
+                      <strong style="font-size:12.5px;color:${
+                        (m.support_grief_count || 0) >= 2 ? "var(--red-light)" : "var(--text)"
+                      };">${
+                (m.support_games || 0) > 0
+                  ? `${m.support_grief_count}/${m.support_games}局 (${m.support_grief_rate}%)`
+                  : "未打辅助"
+              }</strong>
+                    </div>
+                    <div style="padding:6px 8px;border-radius:5px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+                      <span style="display:block;font-size:10.5px;color:var(--muted);">📉 核心位崩盘/首锅</span>
+                      <strong style="font-size:12.5px;color:${
+                        (m.core_choke_rate || 0) >= 40 ? "var(--red-light)" : "var(--text)"
+                      };">${
+                (m.core_games || 0) > 0
+                  ? `${m.core_choke_count}/${m.core_games}局 (${m.core_choke_rate}%)`
+                  : "未打核心"
+              }</strong>
+                    </div>
+                    <div style="padding:6px 8px;border-radius:5px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+                      <span style="display:block;font-size:10.5px;color:var(--muted);">🗺️ 孤狼单带被抓</span>
+                      <strong style="font-size:12.5px;color:${
+                        (m.solo_pickoffs_total || 0) / Math.max(1, m.games) >= 2.2 ? "var(--red-light)" : "var(--text)"
+                      };">${m.solo_pickoffs_total || 0}次 (场均${(
+                (m.solo_pickoffs_total || 0) / Math.max(1, m.games)
+              ).toFixed(1)})</strong>
+                    </div>
+                    <div style="padding:6px 8px;border-radius:5px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+                      <span style="display:block;font-size:10.5px;color:var(--muted);">🧤 憋死救命装/蠢装</span>
+                      <strong style="font-size:12.5px;color:${
+                        (m.unpressed_saves_total || 0) >= 6 || (m.bad_builds_total || 0) >= 4
+                          ? "var(--gold-light)"
+                          : "var(--text)"
+                      };">憋${m.unpressed_saves_total || 0}次 / 蠢装${m.bad_builds_total || 0}局</strong>
+                    </div>
+                  </div>
+
+                  <!-- AI 习性诊断与 BP 死命令 -->
+                  <div style="padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.025);border-left:3px solid #f0c76e;font-size:12px;line-height:1.55;color:var(--text);">
+                    <div><b style="color:#f0c76e;">🧭 位置体检：</b>${escapeHtml(hd.pos_verdict || "")}</div>
+                    <div style="margin-top:4px;"><b style="color:#ff9e8e;">🔬 毒瘤与失误实锤：</b>${escapeHtml(
+                      hd.habit_flaws_summary || ""
+                    )}</div>
+                    <div style="margin-top:4px;color:#8fd196;"><b>🚨 队长 BP 铁律：</b>${escapeHtml(
+                      hd.bp_and_team_mandate || ""
+                    )}</div>
+                  </div>
+                </article>
+              `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `
+      : "";
+
   container.innerHTML = `
     <div class="squad-summary-banner">
       <div class="squad-summary-text">
@@ -15007,6 +15248,8 @@ function renderSquadLedgerSection(squadLedger) {
     </div>
 
     ${guinnessCardsHtml}
+
+    ${habitDiagnosisSectionHtml}
 
     <div class="squad-grid-2col">
       <article class="squad-card">
@@ -15148,10 +15391,300 @@ function renderSquadLedgerSection(squadLedger) {
     btn.addEventListener("click", async () => {
       const mid = Number(btn.getAttribute("data-load-archived"));
       if (mid) {
-        await loadMatchReport(mid);
+        await loadMatchReport(mid, { switchToPostgame: true });
       }
     });
   });
+
+  container.querySelectorAll("[data-habit-member-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.selectedHabitMemberKey = btn.getAttribute("data-habit-member-filter") || "all";
+      renderSquadLedgerSection(squadLedger);
+    });
+  });
+
+  container.querySelectorAll("[data-copy-habit]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const txt = btn.getAttribute("data-copy-habit") || "";
+      const name = btn.getAttribute("data-copy-habit-name") || "队员";
+      copyTextToClipboard(txt, `${name} 跨局习性诊断书`);
+    });
+  });
+
+  container.querySelectorAll("[data-habit-poster-idx]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.getAttribute("data-habit-poster-idx"));
+      const m = finalHabitMembers[idx];
+      if (m) {
+        openCareerHabitPosterDialog(m, squadLedger);
+      }
+    });
+  });
+}
+
+function openCareerHabitPosterDialog(member, squadLedger) {
+  const dlg = document.getElementById("share-verdict-dialog");
+  if (!dlg || !member) return;
+
+  const hd = member.habit_diagnosis || {};
+  const sigHeroes = member.signature_heroes || (member.best_hero ? [member.best_hero] : []);
+  const cursedHeroes = member.cursed_heroes || (member.worst_hero ? [member.worst_hero] : []);
+  const posList = member.pos_breakdown || [];
+  const totalAnalyzed = (squadLedger?.analyzed_matches || []).length;
+
+  const lines = [
+    `📜 【DOTA 2 五黑跨局生涯体检 & 毒瘤习性诊断书】`,
+    `👤 被审计队员：${member.personaname} ｜ ${member.role_tag}`,
+    `📊 跨 ${member.games} 局核心数据：${member.wins}胜${member.games - member.wins}负 (${member.win_rate}%胜率) ｜ Grok 场均评分：${member.avg_rating}/100分 ｜ ${member.mvp_count}次MVP / ${member.culprit_count}次首锅 ｜ 场均KDA ${member.avg_kda}`,
+    `────────────────────`,
+    `🧭 【1–5号位适岗体检矩阵】`,
+    ...posList.map(
+      (pb) =>
+        `• ${pb.pos_label}：${pb.games}局 (${pb.win_rate}%胜率) · 场均 ${pb.avg_rating}/100分 · 代表英雄：${pb.top_hero || "-"}`
+    ),
+    `📌 结论：${hd.pos_verdict || ""}`,
+    `────────────────────`,
+    `🏆 【真命绝活英雄池 (优先抢)】：${
+      sigHeroes.map((h) => `${h.hero_short_zh}(${h.games}局${h.win_rate}%胜·${h.avg_rating}分)`).join("、") || "暂无"
+    }`,
+    `🪦 【建议永久 Ban 冥币英雄 (队长封印)】：${
+      cursedHeroes.map((h) => `${h.hero_short_zh}(${h.games}局${h.win_rate}%胜·${h.avg_rating}分)`).join("、") || "无明显连败冥币"
+    }`,
+    `────────────────────`,
+    `🔬 【四大毒瘤与失误习性实锤】`,
+    `${hd.habit_flaws_summary || ""}`,
+    `────────────────────`,
+    `🚨 【队长下把 BP 与位置死命令】`,
+    `${hd.bp_and_team_mandate || ""}`,
+    `🔗 五黑算账工作台：${window.location.origin}/`,
+  ];
+
+  const textarea = document.getElementById("share-verdict-textarea");
+  if (textarea) textarea.value = lines.join("\n");
+
+  drawCareerHabitPosterCanvas(member, totalAnalyzed);
+  dlg.showModal();
+}
+
+function drawCareerHabitPosterCanvas(m, totalAnalyzed) {
+  const canvas = document.getElementById("share-poster-canvas");
+  if (!canvas) return;
+  canvas.width = 920;
+  canvas.height = 790;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const hd = m.habit_diagnosis || {};
+  const isCarry = m.tag_cls === "carry";
+  const isCulprit = m.tag_cls === "culprit";
+
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, isCarry ? "#131f16" : isCulprit ? "#221412" : "#1c1a13");
+  grad.addColorStop(1, "#0c0d0b");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = isCarry ? "#5db067" : isCulprit ? "#d96552" : "#d9b468";
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(18, 18, W - 36, H - 36);
+
+  // Header
+  ctx.fillStyle = "#c6a468";
+  ctx.font = "bold 15px sans-serif";
+  ctx.fillText(
+    `DOTA 2 五黑跨局生涯体检 · 英雄池与毒瘤习性诊断书 (跨 ${totalAnalyzed || m.games} 局录像实锤)`,
+    42,
+    52
+  );
+
+  // Player Name & Role Tag
+  ctx.fillStyle = "#f5f2eb";
+  ctx.font = "bold 28px sans-serif";
+  ctx.fillText(`👤 ${m.personaname}`, 42, 92);
+
+  ctx.fillStyle = isCarry ? "#8fd196" : isCulprit ? "#ff8a75" : "#f0c76e";
+  ctx.font = "bold 21px sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(`${m.role_tag} ｜ 场均 Grok ${m.avg_rating}/100分`, W - 42, 90);
+  ctx.textAlign = "left";
+
+  // Sub-stats bar
+  ctx.fillStyle = "#cfc9ba";
+  ctx.font = "14px sans-serif";
+  ctx.fillText(
+    `出勤 ${m.games} 局 (${m.wins}胜${m.games - m.wins}负 · 胜率 ${m.win_rate}%) ｜ 全场MVP ${m.mvp_count} 次 ｜ 败局首锅 ${m.culprit_count} 次 ｜ 场均KDA ${m.avg_kda} ｜ 场均黑屏 ${m.avg_dead_sec}s`,
+    42,
+    122
+  );
+
+  // Block 1: 1-5 Position Fitness Row
+  let y = 142;
+  ctx.fillStyle = "#161814";
+  ctx.fillRect(42, y, W - 84, 86);
+  ctx.strokeStyle = "#33362c";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(42, y, W - 84, 86);
+
+  ctx.fillStyle = "#f0c76e";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText("🧭 1–5 号位适岗体检矩阵 (本命舒适区 vs 换位掉分重灾区)", 56, y + 24);
+
+  const posList = (m.pos_breakdown || []).slice(0, 5);
+  const bestPosNum = m.best_pos?.pos;
+  const worstPosNum = m.worst_pos?.pos;
+  let px = 56;
+  posList.forEach((pb) => {
+    const isBest = pb.pos === bestPosNum;
+    const isWorst = pb.pos === worstPosNum;
+    const boxW = Math.min(255, Math.floor((W - 112 - (posList.length - 1) * 10) / Math.max(1, posList.length)));
+    ctx.fillStyle = isBest ? "#182b1c" : isWorst ? "#2d1715" : "#1e201b";
+    ctx.fillRect(px, y + 34, boxW, 40);
+    ctx.strokeStyle = isBest ? "#58b368" : isWorst ? "#d96552" : "#3a3d33";
+    ctx.strokeRect(px, y + 34, boxW, 40);
+
+    ctx.fillStyle = isBest ? "#9be8a4" : isWorst ? "#ff9e8e" : "#e3dfd5";
+    ctx.font = "bold 12.5px sans-serif";
+    const tag = isBest ? "🌟本命 " : isWorst ? "🚨重灾 " : "";
+    ctx.fillText(
+      `${tag}${pb.pos_label}: ${pb.games}局 ${pb.win_rate}%胜 · ${pb.avg_rating}分 (${pb.top_hero || "-"})`,
+      px + 10,
+      y + 59
+    );
+    px += boxW + 10;
+  });
+  y += 100;
+
+  // Block 2: Signature Heroes vs Cursed Auto-Ban Heroes (2 Columns)
+  const colW = Math.floor((W - 96) / 2);
+  ctx.fillStyle = "#142217";
+  ctx.fillRect(42, y, colW, 108);
+  ctx.strokeStyle = "#4c9656";
+  ctx.strokeRect(42, y, colW, 108);
+  ctx.fillStyle = "#8fd196";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText("🏆 真命绝活英雄池 (BP 优先抢)", 56, y + 24);
+  ctx.fillStyle = "#e5f5e7";
+  ctx.font = "13px sans-serif";
+  const sigHeroes = m.signature_heroes || [];
+  if (sigHeroes.length > 0) {
+    sigHeroes.slice(0, 3).forEach((h, i) => {
+      ctx.fillText(
+        `• ${h.hero_short_zh} — ${h.games}局 ${h.win_rate}%胜率 · Grok 均分 ${h.avg_rating}/100`,
+        56,
+        y + 48 + i * 22
+      );
+    });
+  } else {
+    ctx.fillText("暂无多局高分绝活样本", 56, y + 52);
+  }
+
+  const rightX = 42 + colW + 12;
+  ctx.fillStyle = "#241513";
+  ctx.fillRect(rightX, y, colW, 108);
+  ctx.strokeStyle = "#b85242";
+  ctx.strokeRect(rightX, y, colW, 108);
+  ctx.fillStyle = "#ff9482";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText("🪦 建议永久 Ban 冥币英雄池 (队长封印)", rightX + 14, y + 24);
+  ctx.fillStyle = "#f5dcd8";
+  ctx.font = "13px sans-serif";
+  const cursedHeroes = m.cursed_heroes || [];
+  if (cursedHeroes.length > 0) {
+    cursedHeroes.slice(0, 3).forEach((h, i) => {
+      ctx.fillText(
+        `• ${h.hero_short_zh} — ${h.games}局 ${h.win_rate}%胜率 · Grok 均分 ${h.avg_rating}/100`,
+        rightX + 14,
+        y + 48 + i * 22
+      );
+    });
+  } else {
+    ctx.fillStyle = "#8fd196";
+    ctx.fillText("✅ 英雄池健康，无明显连败冥币英雄", rightX + 14, y + 52);
+  }
+  y += 122;
+
+  // Block 3: 4 Habit Counters Bar
+  const kpiItems = [
+    {
+      label: "💸 辅助毒瘤/失职率",
+      val:
+        (m.support_games || 0) > 0
+          ? `${m.support_grief_count}/${m.support_games}局 (${m.support_grief_rate}%)`
+          : "未打辅助",
+    },
+    {
+      label: "📉 核心位崩盘/首锅率",
+      val:
+        (m.core_games || 0) > 0
+          ? `${m.core_choke_count}/${m.core_games}局 (${m.core_choke_rate}%)`
+          : "未打核心",
+    },
+    {
+      label: "🗺️ 孤狼单带迷路被抓",
+      val: `累计 ${m.solo_pickoffs_total || 0} 次 (场均 ${((m.solo_pickoffs_total || 0) / Math.max(1, m.games)).toFixed(1)} 次)`,
+    },
+    {
+      label: "🧤 憋死BKB / 头铁蠢装",
+      val: `憋死 ${m.unpressed_saves_total || 0} 次 / 蠢装 ${m.bad_builds_total || 0} 局`,
+    },
+  ];
+  const kw = Math.floor((W - 84 - 30) / 4);
+  kpiItems.forEach((k, idx) => {
+    const kx = 42 + idx * (kw + 10);
+    ctx.fillStyle = "#171915";
+    ctx.fillRect(kx, y, kw, 58);
+    ctx.strokeStyle = "#32352b";
+    ctx.strokeRect(kx, y, kw, 58);
+    ctx.fillStyle = "#a9a599";
+    ctx.font = "12px sans-serif";
+    ctx.fillText(k.label, kx + 12, y + 22);
+    ctx.fillStyle = "#f0c76e";
+    ctx.font = "bold 14.5px sans-serif";
+    ctx.fillText(k.val, kx + 12, y + 45);
+  });
+  y += 72;
+
+  // Block 4: AI Cross-Match Habit Diagnosis & Flaws
+  ctx.fillStyle = "#151713";
+  ctx.fillRect(42, y, W - 84, 210);
+  ctx.strokeStyle = "#3a3d31";
+  ctx.strokeRect(42, y, W - 84, 210);
+
+  ctx.fillStyle = "#f0c76e";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText("🔬 Grok 跨局位置与毒瘤习性实锤诊断书 (Cross-Match Habit Audit)", 56, y + 24);
+
+  ctx.fillStyle = "#e3dfd5";
+  ctx.font = "13px sans-serif";
+  const diagLines = [
+    ...wrapCanvasParagraph(ctx, `【位置结论】${hd.pos_verdict || ""}`, W - 112, 2),
+    ...wrapCanvasParagraph(ctx, `【习性实锤】${hd.habit_flaws_summary || ""}`, W - 112, 4),
+    ...wrapCanvasParagraph(ctx, `【BP死命令】${hd.bp_and_team_mandate || ""}`, W - 112, 2),
+  ];
+  diagLines.slice(0, 8).forEach((ln, idx) => {
+    if (ln.startsWith("【BP死命令】")) {
+      ctx.fillStyle = "#8fd196";
+      ctx.font = "bold 13px sans-serif";
+    } else if (ln.startsWith("【位置结论】")) {
+      ctx.fillStyle = "#f0c76e";
+      ctx.font = "13px sans-serif";
+    } else {
+      ctx.fillStyle = "#dcd8ce";
+      ctx.font = "13px sans-serif";
+    }
+    ctx.fillText(ln, 56, y + 48 + idx * 20);
+  });
+
+  // Footer
+  ctx.fillStyle = "#9e9b91";
+  ctx.font = "12px sans-serif";
+  ctx.fillText(
+    `生成自：战后算账 · Dota 2 录像级复盘工作台 (${window.location.origin})`,
+    42,
+    H - 28
+  );
 }
 
 /**

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=6.6.0" />
+  <link rel="stylesheet" href="/styles.css?v=6.7.0" />
 </head>
 <body>
   <header class="site-header">
@@ -111,6 +111,12 @@
             <button type="button" class="filter-chip" data-home-filter="party">👥 五黑/多排局</button>
             <button type="button" class="filter-chip" data-home-filter="win">🏆 获胜局</button>
             <button type="button" class="filter-chip" data-home-filter="loss">💀 落败局</button>
+            <button
+              type="button"
+              class="filter-chip"
+              style="border-color:rgba(240,199,110,0.55);color:#f0c76e;"
+              onclick="const d=document.getElementById('squad-ledger-details');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'});}"
+            >🎯 跨局英雄池体检 &amp; 毒瘤习性诊断书 ↓</button>
           </div>
         </div>
         <div id="home-matches-grid" class="home-matches-grid" role="list" aria-label="首页最近比赛卡片网格">
@@ -123,8 +129,8 @@
         <summary class="squad-ledger-summary">
           <div class="squad-ledger-summary-left">
             <span class="status-pill connected" id="squad-ledger-badge">跨比赛历史档案</span>
-            <strong>🏆 五黑车队历史封神榜 · 憋BKB/单带白给吉尼斯 · 个人绝活/冥币英雄池 &amp; 边路双排化学反应</strong>
-            <span class="section-caption">（汇总大厅所有比赛：谁是憋救命装总冠军、谁和谁走一路是天作之合或十把九炸）</span>
+            <strong>🎯 五黑个人跨局《英雄池体检 &amp; 毒瘤习性诊断书》 · 1–5号位适岗矩阵 · 真命绝活 vs 永久Ban冥币榜</strong>
+            <span class="section-caption">（自动审计谁打辅助爱出输出装抢经济、谁换到中单/三号位必崩盘、谁最爱单带被抓，支持一键生成生涯体检海报）</span>
           </div>
           <span class="squad-ledger-summary-arrow">收起/展开历史总账 ▾</span>
         </summary>
@@ -771,6 +777,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=6.6.0" defer></script>
+  <script src="/app.js?v=6.7.0" defer></script>
 </body>
 </html>
