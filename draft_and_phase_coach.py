@@ -2526,16 +2526,48 @@ def build_squad_history_ledger(
             won = (f_side == "radiant" and bool(rep.get("radiant_win"))) or (
                 f_side == "dire" and not bool(rep.get("radiant_win"))
             )
-            sorted_contrib = sorted(
-                own_list,
-                key=lambda x: (float(x.get("contrib_share_pct") or 0), float(x.get("mvp_score") or 0)),
-                reverse=True,
-            )
-            mvp_p = sorted_contrib[0] if sorted_contrib else ((rep.get("mvp") or {}).get("mvp_player") or own_list[0])
-            runner_up_p = sorted_contrib[1] if len(sorted_contrib) > 1 else mvp_p
-            sorted_blame = sorted(own_list, key=lambda x: float(x.get("blame_share_pct") or 0), reverse=True)
-            culprit_p = sorted_blame[0] if sorted_blame else own_list[0]
+            gc = rep.get("grok_coaching") if isinstance(rep.get("grok_coaching"), dict) else {}
+            gc_players = gc.get("players") if isinstance(gc.get("players"), list) else []
+            grok_by_pos = {int(gp.get("pos") or 0): gp for gp in gc_players if isinstance(gp, dict) and gp.get("pos")}
 
+            def _eff_score(pl: Dict[str, Any]) -> float:
+                gp = grok_by_pos.get(int(pl.get("pos") or 0))
+                if gp and gp.get("grok_score") is not None:
+                    return float(gp["grok_score"])
+                raw_r = float(pl.get("rating_score_100") or pl.get("rating_score") or 60.0)
+                return raw_r * 10.0 if raw_r <= 10.5 else raw_r
+
+            def _eff_share(pl: Dict[str, Any]) -> float:
+                gp = grok_by_pos.get(int(pl.get("pos") or 0))
+                if gp and gp.get("grok_share_pct") is not None:
+                    return float(gp["grok_share_pct"])
+                return float(pl.get("contrib_share_pct") if won else pl.get("blame_share_pct") or 20.0)
+
+            if won:
+                sorted_contrib = sorted(
+                    own_list,
+                    key=lambda x: (_eff_share(x), _eff_score(x)),
+                    reverse=True,
+                )
+                mvp_p = sorted_contrib[0] if sorted_contrib else own_list[0]
+                runner_up_p = sorted_contrib[1] if len(sorted_contrib) > 1 else mvp_p
+                culprit_p = sorted_contrib[-1] if sorted_contrib else own_list[0]
+            else:
+                sorted_blame = sorted(
+                    own_list,
+                    key=lambda x: (_eff_share(x), -_eff_score(x)),
+                    reverse=True,
+                )
+                culprit_p = sorted_blame[0] if sorted_blame else own_list[0]
+                runner_up_p = sorted_blame[1] if len(sorted_blame) > 1 else culprit_p
+                sorted_svp = sorted(
+                    own_list,
+                    key=lambda x: (_eff_score(x), -_eff_share(x)),
+                    reverse=True,
+                )
+                mvp_p = sorted_svp[0] if sorted_svp else own_list[-1]
+
+            me_p = next((x for x in own_list if x.get("is_me") or int(x.get("account_id") or 0) == main_aid), None) or own_list[0]
             analyzed_matches_summary.append({
                 "match_id": mid,
                 "start_time_str": rep.get("start_time_str") or "",
@@ -2544,19 +2576,25 @@ def build_squad_history_ledger(
                 "side_zh": "天辉" if f_side == "radiant" else "夜魇",
                 "won": won,
                 "is_parsed": bool(rep.get("is_parsed")),
-                "has_grok": bool(rep.get("grok_coaching")),
+                "has_grok": bool(gc.get("title")),
+                "grok_title": gc.get("title") or (rep.get("match_narrative") or {}).get("headline") or "",
+                "my_grok_score": int(round(_eff_score(me_p))),
+                "my_grok_share_pct": round(_eff_share(me_p), 1),
                 "mvp_hero": mvp_p.get("hero_short_zh") or "",
                 "mvp_img": mvp_p.get("hero_img") or "",
                 "mvp_player": mvp_p.get("personaname") or "",
-                "mvp_contrib_pct": round(float(mvp_p.get("contrib_share_pct") or 25.0), 1),
+                "mvp_score_100": int(round(_eff_score(mvp_p))),
+                "mvp_contrib_pct": round(_eff_share(mvp_p), 1),
                 "runner_up_hero": runner_up_p.get("hero_short_zh") or "",
                 "runner_up_img": runner_up_p.get("hero_img") or "",
                 "runner_up_player": runner_up_p.get("personaname") or "",
-                "runner_up_contrib_pct": round(float(runner_up_p.get("contrib_share_pct") or 22.0), 1),
+                "runner_up_score_100": int(round(_eff_score(runner_up_p))),
+                "runner_up_contrib_pct": round(_eff_share(runner_up_p), 1),
                 "culprit_hero": culprit_p.get("hero_short_zh") or "",
                 "culprit_img": culprit_p.get("hero_img") or "",
                 "culprit_player": culprit_p.get("personaname") or "",
-                "culprit_blame_pct": round(float(culprit_p.get("blame_share_pct") or 0), 1),
+                "culprit_score_100": int(round(_eff_score(culprit_p))),
+                "culprit_blame_pct": round(_eff_share(culprit_p), 1),
             })
 
             df_obj = rep.get("deep_forensics") or {}
@@ -2601,11 +2639,16 @@ def build_squad_history_ledger(
                     },
                 )
                 st["games"] += 1
+                p_sc100 = _eff_score(p)
+                p_sh = _eff_share(p)
                 if won:
                     st["wins"] += 1
-                st["total_blame_pct"] += float(p.get("blame_share_pct") or 0)
-                st["total_contrib_pct"] += float(p.get("contrib_share_pct") or 20.0)
-                st["total_rating"] += float(p.get("rating_score") or 60)
+                    st["total_contrib_pct"] += p_sh
+                    st["total_blame_pct"] += float(p.get("blame_share_pct") or 12.0)
+                else:
+                    st["total_blame_pct"] += p_sh
+                    st["total_contrib_pct"] += float(p.get("contrib_share_pct") or 18.0)
+                st["total_rating"] += p_sc100
                 if int(p.get("player_slot", -1)) == int(mvp_p.get("player_slot", -2)):
                     st["mvp_count"] += 1
                 if (not won) and int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2)):
@@ -2630,9 +2673,9 @@ def build_squad_history_ledger(
                     "hero_img": p.get("hero_img") or "",
                     "pos": pos_p,
                     "kda": p.get("kda") or "",
-                    "rating_score": round(float(p.get("rating_score") or 60.0), 1),
-                    "blame_pct": round(float(p.get("blame_share_pct") or 0), 1),
-                    "contrib_pct": round(float(p.get("contrib_share_pct") or 20.0), 1),
+                    "rating_score": round(p_sc100, 1),
+                    "blame_pct": round(p_sh if not won else float(p.get("blame_share_pct") or 0), 1),
+                    "contrib_pct": round(p_sh if won else float(p.get("contrib_share_pct") or 20.0), 1),
                     "won": won,
                 })
 

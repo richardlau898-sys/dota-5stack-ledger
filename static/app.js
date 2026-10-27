@@ -5045,20 +5045,25 @@ function renderHomeWorkspace() {
 
       let summaryPreviewHtml = "";
       if (arch) {
+        const grokHeadlineLine = arch.grok_title
+          ? `<div style="grid-column: 1 / -1; color: var(--gold-light); font-weight: 600; font-size: 12.5px; margin-bottom: 3px; line-height: 1.4;">🧠 ${escapeHtml(arch.grok_title)}</div>`
+          : "";
         if (arch.won) {
           summaryPreviewHtml = `
             <div class="hmc-verdict-preview win">
-              <span>🏆 终局比分 <b>${escapeHtml(arch.score || "")}</b></span>
-              <span>👑 首功 MVP：<b>${escapeHtml(arch.mvp_hero || "")}</b> (${arch.mvp_contrib_pct ?? 25}%)</span>
-              ${arch.runner_up_hero ? `<span>⚔️ 二功：<b>${escapeHtml(arch.runner_up_hero)}</b> (${arch.runner_up_contrib_pct ?? 22}%)</span>` : ""}
+              ${grokHeadlineLine}
+              <span>🏆 比分 <b>${escapeHtml(arch.score || "")}</b></span>
+              <span>👑 首功 MVP：<b>${escapeHtml(arch.mvp_hero || "")}</b> (${arch.mvp_score_100 ? `${arch.mvp_score_100}分·` : ""}${arch.mvp_contrib_pct ?? 25}%)</span>
+              ${arch.runner_up_hero ? `<span>⚔️ 二功：<b>${escapeHtml(arch.runner_up_hero)}</b> (${arch.runner_up_score_100 ? `${arch.runner_up_score_100}分·` : ""}${arch.runner_up_contrib_pct ?? 22}%)</span>` : ""}
             </div>
           `;
         } else {
           summaryPreviewHtml = `
             <div class="hmc-verdict-preview loss">
-              <span>⚖️ 终局比分 <b>${escapeHtml(arch.score || "")}</b></span>
-              <span>🛡️ 尽力王：<b>${escapeHtml(arch.mvp_hero || "")}</b></span>
-              <span>🚨 头号大锅：<b>${escapeHtml(arch.culprit_hero || "")}</b> (锅 ${arch.culprit_blame_pct ?? 28}%)</span>
+              ${grokHeadlineLine}
+              <span>⚖️ 比分 <b>${escapeHtml(arch.score || "")}</b></span>
+              <span>🚨 头号大锅：<b>${escapeHtml(arch.culprit_hero || "")}</b> (${arch.culprit_score_100 ? `${arch.culprit_score_100}分·` : ""}锅 ${arch.culprit_blame_pct ?? 28}%)</span>
+              <span>🛡️ 孤胆院长：<b>${escapeHtml(arch.mvp_hero || "")}</b>${arch.mvp_score_100 ? ` (${arch.mvp_score_100}分)` : ""}</span>
             </div>
           `;
         }
@@ -5108,9 +5113,15 @@ function renderHomeWorkspace() {
               <strong>${escapeHtml(durText || "-")}</strong>
             </div>
             <div class="hmc-stat-cell">
-              <span>AI 复盘状态</span>
+              <span>${arch?.my_grok_score ? "我本局 Grok 评分" : "AI 复盘状态"}</span>
               <strong style="color:${isAnalyzed ? "var(--green-light)" : "var(--gold-light)"};">
-                ${isAnalyzed ? "✅ 已生成复盘" : "⚡ 待按需分析"}
+                ${
+                  arch?.my_grok_score
+                    ? `${arch.my_grok_score}/100分 (${isWin ? `贡献${arch.my_grok_share_pct}%` : `锅${arch.my_grok_share_pct}%`})`
+                    : isAnalyzed
+                    ? "✅ 已生成复盘"
+                    : "⚡ 待按需分析"
+                }
               </strong>
             </div>
           </div>
@@ -11410,9 +11421,12 @@ function renderVerdictAndBlameSection(report) {
               ${chronologyHtml}
               <div class="verdict-quote-bar">
                 <span>${escapeHtml(quoteText)}</span>
-                <button type="button" class="button ${
-                  entry.roleType === "culprit1" ? "primary" : "secondary"
-                }" data-copy-quote="${escapeHtml(copyText)}">${escapeHtml(entry.copyBtnLabel)}</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;">
+                  <button type="button" class="button ${
+                    entry.roleType === "culprit1" ? "primary" : "secondary"
+                  }" data-copy-quote="${escapeHtml(copyText)}">${escapeHtml(entry.copyBtnLabel)}</button>
+                  <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(entry.cardHeader)}">🖼️ 生成个人海报</button>
+                </div>
               </div>
             </div>
           </article>
@@ -11525,6 +11539,7 @@ function renderVerdictAndBlameSection(report) {
               </div>
               <span class="blame-badge">${tierTag} · 贡献 ${share.toFixed(1)}%</span>
               <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制贺电</button>
+              <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(tierTag)}">🖼️ 海报</button>
             </div>
           `;
         } else {
@@ -11561,6 +11576,7 @@ function renderVerdictAndBlameSection(report) {
               </div>
               <span class="blame-badge">背锅 ${share.toFixed(1)}%</span>
               <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制算账</button>
+              <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="分锅账单 #${idx + 1}">🖼️ 海报</button>
             </div>
           `;
         }
@@ -11572,6 +11588,16 @@ function renderVerdictAndBlameSection(report) {
   document.querySelectorAll(".verdict-and-blame-section [data-copy-quote]").forEach((btn) => {
     btn.addEventListener("click", () => {
       copyTextToClipboard(btn.getAttribute("data-copy-quote") || "", won ? "庆功贺电" : "处刑判词");
+    });
+  });
+
+  document.querySelectorAll(".verdict-and-blame-section [data-player-poster-slot]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const slotNum = Number(btn.getAttribute("data-player-poster-slot"));
+      const roleTag = btn.getAttribute("data-player-poster-tag") || "";
+      if (state.currentReport) {
+        openSinglePlayerPosterDialog(state.currentReport, slotNum, roleTag);
+      }
     });
   });
 }
@@ -13966,6 +13992,43 @@ function renderKeyWindowsSection(report) {
         isSpot: cardIdx === 0,
       });
 
+      // Synthesize a counterfactual "What-If Reversal" & Grok Turning-Point Box for this teamfight
+      const unpressedInTf = ownExec
+        .filter((pe) => (pe.unused_self_saves_zh || []).length > 0 || (pe.unused_team_saves_zh || []).length > 0 || pe.egg_unpressed || pe.ult_unpressed_name)
+        .map((pe) => {
+          const items = [...(pe.unused_self_saves_zh || []), ...(pe.unused_team_saves_zh || [])];
+          const ultName = pe.ult_unpressed_name || (pe.egg_unpressed ? "超新星(变蛋)" : "");
+          return `${pe.pos}号位${pe.hero_short_zh}未按出【${[ultName, ...items].filter(Boolean).join("/")}】`;
+        });
+      const afkInTf = ownExec
+        .filter((pe) => Boolean(pe.afk_farm_zh))
+        .map((pe) => `${pe.pos}号位${pe.hero_short_zh}在战场外0伤害独刷`);
+      const firstDeadOwn = ownExec.find((pe) => Number(pe.deaths) > 0);
+      const pairedGrokWin = grokWindows[cardIdx] || null;
+      let whatIfAdvice = "";
+      if (outcomeTone === "praise") {
+        whatIfAdvice = `✅ 胜负手复盘：本波我方集火与技能衔接果断（总输出占比 ${ownDmgPct}%），打赢团后应第一时间顺势控盾或拔掉敌方外塔/高地，切忌打赢团全员回头钻野！`;
+      } else {
+        const fixes = [];
+        if (unpressedInTf.length > 0) {
+          fixes.push(`若被秒前果断按出救命键（${unpressedInTf.join("；")}），可规避第一波致命集火`);
+        }
+        if (afkInTf.length > 0) {
+          fixes.push(`若缺席人员（${afkInTf.join("、")}）提前TP落位参战补齐5v5火力，正面输出不至于落后(${ownDmgPct}% vs ${oppDmgPct}%)`);
+        }
+        if (fixes.length === 0 && firstDeadOwn) {
+          fixes.push(`若提前在交火区做好真假眼防先手，避免 ${firstDeadOwn.pos}号位${firstDeadOwn.hero_short_zh} 开团率先减员造成少打多，完全有机会反打或及时拉扯止损`);
+        }
+        whatIfAdvice = `💡 如果这波重打怎么赢（逆转推演）：${fixes.join("；")}！`;
+      }
+      const grokWinInlineHtml = pairedGrokWin
+        ? `<div style="margin-top:8px;padding:8px 11px;background:rgba(198,164,104,0.1);border-left:3px solid var(--gold);border-radius:4px;font-size:12.5px;line-height:1.55;">
+             <strong style="color:var(--gold-light);">🧠 Grok 4.7 拐点评书（${escapeHtml(pairedGrokWin.time_label || fObj.time_range)} · ${escapeHtml(pairedGrokWin.title || "关键转折")}）：</strong>
+             <span>${injectHeroLogosIntoHtml(escapeHtml(pairedGrokWin.detail || ""), report)}</span>
+           </div>`
+        : "";
+      const whatIfInlineHtml = `<div style="margin-top:6px;padding:7px 11px;background:rgba(255,255,255,0.03);border:1px dashed rgba(198,164,104,0.35);border-radius:4px;font-size:12.5px;color:var(--text-main);line-height:1.5;">${injectHeroLogosIntoHtml(escapeHtml(whatIfAdvice), report)}</div>`;
+
       cardsHtml.push(`
         <article class="window-card tf-scene-card ${escapeHtml(outcomeTone)}">
           <div class="window-head tf-scene-head">
@@ -13993,6 +14056,8 @@ function renderKeyWindowsSection(report) {
               </div>
             </div>
             <ul class="tf-causes-list">${causesHtml}</ul>
+            ${grokWinInlineHtml}
+            ${whatIfInlineHtml}
           </div>
 
           <!-- Part B & C 双栏/上下布局：左侧秒级时间轴剧本，右侧本方焦点人物微操审判 + 1~5号位切换 -->
@@ -14285,6 +14350,16 @@ function renderPlayersForensicsList(report) {
       copyTextToClipboard(btn.getAttribute("data-copy-quote") || "", label);
     });
   });
+
+  container.querySelectorAll("[data-player-poster-slot]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const slotNum = Number(btn.getAttribute("data-player-poster-slot"));
+      const roleTag = btn.getAttribute("data-player-poster-role") || "";
+      if (state.currentReport) {
+        openSinglePlayerPosterDialog(state.currentReport, slotNum, roleTag);
+      }
+    });
+  });
 }
 
 function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
@@ -14498,6 +14573,13 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
                   scoreTier.label
                 )}</span>`
           }
+          <button
+            type="button"
+            class="copy-quote-btn"
+            style="border-color:rgba(240,199,110,0.45);color:#f0c76e;"
+            data-player-poster-slot="${p.player_slot}"
+            data-player-poster-role="${escapeHtml(scoreTier.label)}"
+          >🖼️ 生成专属海报</button>
         </div>
       </div>
 
@@ -15367,6 +15449,8 @@ function drawVerdictPosterCanvas(
 ) {
   const canvas = document.getElementById("share-poster-canvas");
   if (!canvas) return;
+  canvas.width = 920;
+  canvas.height = 620;
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
@@ -15535,6 +15619,256 @@ function drawVerdictPosterCanvas(
       ? "继续保持核心强势期抱团开雾压制与进攻眼位铺设，乘胜追击！"
       : "前中期围绕核心第一件 BKB/跳刀出炉打主动开雾，拒绝无视野单带掉点。");
   ctx.fillText(`${won ? "乘胜追击备忘" : "下把改进铁律"}：${tip.slice(0, 62)}`, 42, H - 32);
+}
+
+function wrapCanvasParagraph(ctx, text, maxWidth, maxLines = 4) {
+  const raw = String(text || "").replace(/\s+/g, " ").trim();
+  if (!raw) return [];
+  const lines = [];
+  let cur = "";
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    const test = cur + ch;
+    if (ctx.measureText(test).width > maxWidth && cur.length > 0) {
+      lines.push(cur);
+      cur = ch;
+      if (lines.length >= maxLines) {
+        lines[lines.length - 1] = lines[lines.length - 1].slice(0, -1) + "…";
+        return lines;
+      }
+    } else {
+      cur = test;
+    }
+  }
+  if (cur && lines.length < maxLines) {
+    lines.push(cur);
+  }
+  return lines;
+}
+
+function openSinglePlayerPosterDialog(report, playerSlot, roleTag = "") {
+  const dlg = document.getElementById("share-verdict-dialog");
+  if (!dlg || !report) return;
+
+  const allPlayers = [...(report.own_players || []), ...(report.opp_players || [])];
+  const p =
+    allPlayers.find((x) => Number(x.player_slot) === Number(playerSlot)) ||
+    (report.own_players || [])[0];
+  if (!p) return;
+
+  const gp = findGrokPlayerEntry(p, report);
+  const won = Boolean(report.own_won);
+  const sideZh = report.own_side === "radiant" ? "天辉" : "夜魇";
+  const shareUrl = `${window.location.origin}/?match=${report.match_id}`;
+  const sc100 = getHeroScore100(p, report);
+  const sharePct = Number(
+    gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
+  ).toFixed(1);
+  const shareLabel = won ? "胜局功勋占比" : "败局背锅占比";
+  const badgeTitle =
+    roleTag ||
+    gp?.verdict_tag ||
+    (won
+      ? sc100 >= 84
+        ? "👑 胜局首功 MVP"
+        : "⚔️ 胜局功臣"
+      : sc100 < 55
+        ? "🚨 败局头号战犯"
+        : "🛡️ 败局尽力局");
+
+  const lines = [
+    `📜 【DOTA 2 录像级单人深度档案 · ${badgeTitle}】`,
+    `📍 比赛编号：#${report.match_id} (${sideZh}${won ? "获胜" : "落败"} · ${report.radiant_score}:${report.dire_score} · ${report.duration_str})`,
+    `🔗 复盘直达：${shareUrl}`,
+    `────────────────────`,
+    `👤 选手与英雄：${p.personaname} · ${p.hero_zh} ([${p.pos_label}])`,
+    `📊 Grok 4.7 终审评分：${sc100}/100 分 ｜ ${shareLabel}：${sharePct}%`,
+    `📈 基础面板：KDA ${p.kda} (参战率 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm} / XPM ${p.xpm} ｜ 英雄伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 建筑伤害 ${fmtNum(p.tower_damage)} ｜ 读秒 ${p.dead_seconds || 0}s`,
+    `🗣️ 一针见血定性：${gp?.headline || p.blame_Headline || "录像级全周期数据实锤定责"}`,
+    `────────────────────`,
+    `📋 【本职工作与全周期结案陈词】`,
+    `${gp?.deep_verdict || (p.verdict_bullets || []).join("；") || "详见全量战报"}`,
+    ...(gp?.item_and_blink_audit
+      ? [
+          `────────────────────`,
+          `🎒 【灵性/犯罪出装与憋刀审计】`,
+          `${gp.item_and_blink_audit}`,
+        ]
+      : []),
+    ...(gp?.early_story || gp?.mid_story || gp?.late_story
+      ? [
+          `────────────────────`,
+          `🎬 【Grok 三幕剧全周期处刑/封神复盘】`,
+          ...(gp?.early_story ? [`🌅 第一幕 (对线期 0-10m)：${gp.early_story}`] : []),
+          ...(gp?.mid_story ? [`⚔️ 第二幕 (中期节奏 10-25m)：${gp.mid_story}`] : []),
+          ...(gp?.late_story ? [`🔥 第三幕 (决胜高地 25m+)：${gp.late_story}`] : []),
+        ]
+      : []),
+    `────────────────────`,
+    `💡 【下把死命令】：${gp?.practice || p.next_game_action || "盯紧关键装第一波强势期抱团推进！"}`,
+  ];
+
+  const textarea = document.getElementById("share-verdict-textarea");
+  if (textarea) textarea.value = lines.join("\n");
+
+  drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle);
+  dlg.showModal();
+}
+
+function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
+  const canvas = document.getElementById("share-poster-canvas");
+  if (!canvas) return;
+  canvas.width = 920;
+  canvas.height = 790;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const won = Boolean(report.own_won);
+  const sideZh = report.own_side === "radiant" ? "天辉" : "夜魇";
+  const sc100 = getHeroScore100(p, report);
+  const sharePct = Number(
+    gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
+  ).toFixed(1);
+  const isHighPraise = (won && sc100 >= 78) || (!won && sc100 >= 75);
+
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, isHighPraise ? "#142016" : "#211513");
+  grad.addColorStop(1, "#0c0d0b");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = isHighPraise ? "#63b06b" : "#d96857";
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(18, 18, W - 36, H - 36);
+
+  // Top Header
+  ctx.fillStyle = "#c6a468";
+  ctx.font = "bold 15px sans-serif";
+  ctx.fillText(
+    `DOTA 2 录像级单人专属档案 · #${report.match_id} (${sideZh}${won ? "胜" : "负"} ${report.radiant_score}:${report.dire_score} · ${report.duration_str})`,
+    42,
+    52
+  );
+
+  // Player & Hero Main Banner
+  ctx.fillStyle = "#f2efe9";
+  ctx.font = "bold 28px sans-serif";
+  ctx.fillText(`[${p.pos_label}] ${p.personaname} · ${p.hero_zh}`, 42, 92);
+
+  // Score & Share Pill on Right
+  ctx.fillStyle = isHighPraise ? "#8fd196" : "#ff8a75";
+  ctx.font = "bold 24px sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(
+    `${badgeTitle} ｜ 评分 ${sc100}/100 · ${won ? "功勋" : "分锅"} ${sharePct}%`,
+    W - 42,
+    90
+  );
+  ctx.textAlign = "left";
+
+  // Stats Bar
+  ctx.fillStyle = "#cfc9ba";
+  ctx.font = "14px sans-serif";
+  ctx.fillText(
+    `KDA ${p.kda} (参战 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm} / XPM ${p.xpm} ｜ 英雄伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 推塔 ${fmtNum(p.tower_damage)} ｜ 读秒 ${p.dead_seconds || 0}s`,
+    42,
+    122
+  );
+
+  // Headline Quote
+  ctx.fillStyle = "#191b16";
+  ctx.fillRect(42, 138, W - 84, 44);
+  ctx.strokeStyle = "#3a3d31";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(42, 138, W - 84, 44);
+  ctx.fillStyle = "#f0c76e";
+  ctx.font = "bold 15px sans-serif";
+  const hlText = (gp?.headline || p.blame_Headline || "录像级全周期实锤审计").slice(0, 54);
+  ctx.fillText(`🗣️ “${hlText}”`, 56, 166);
+
+  let y = 198;
+
+  // Block 1: Deep Verdict & Role Duty
+  const verdictLines = wrapCanvasParagraph(
+    ctx,
+    gp?.deep_verdict || (p.verdict_bullets || []).join("；") || "",
+    W - 116,
+    4
+  );
+  const b1H = Math.max(88, 38 + verdictLines.length * 21);
+  ctx.fillStyle = "#151814";
+  ctx.fillRect(42, y, W - 84, b1H);
+  ctx.strokeStyle = "#35382e";
+  ctx.strokeRect(42, y, W - 84, b1H);
+  ctx.fillStyle = "#e0c389";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText("📋 本职工作与全周期结案陈词 (Role Duty & Deep Verdict)", 56, y + 24);
+  ctx.fillStyle = "#e3dfd5";
+  ctx.font = "13.5px sans-serif";
+  verdictLines.forEach((ln, idx) => {
+    ctx.fillText(ln, 56, y + 48 + idx * 20);
+  });
+  y += b1H + 12;
+
+  // Block 2: Item & Blink Audit
+  const itemText =
+    gp?.item_and_blink_audit ||
+    (p.item_Purchase_timeline || []).map((it) => `${it.name_zh}(${it.time_str})`).join(" → ");
+  ctx.font = "13.5px sans-serif";
+  const itemLines = wrapCanvasParagraph(ctx, itemText, W - 116, 3);
+  const b2H = Math.max(72, 36 + itemLines.length * 20);
+  ctx.fillStyle = "#181612";
+  ctx.fillRect(42, y, W - 84, b2H);
+  ctx.strokeStyle = "#4a3e28";
+  ctx.strokeRect(42, y, W - 84, b2H);
+  ctx.fillStyle = "#f0c76e";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText("🎒 灵性/犯罪出装与憋刀审计 (Itemization & Economy Audit)", 56, y + 23);
+  ctx.fillStyle = "#dcd6c8";
+  ctx.font = "13px sans-serif";
+  itemLines.forEach((ln, idx) => {
+    ctx.fillText(ln, 56, y + 45 + idx * 19);
+  });
+  y += b2H + 12;
+
+  // Block 3: 3-Act Chronological Breakdown
+  const acts = [
+    { label: "🌅 第一幕 (对线 0-10m)", txt: gp?.early_story || "" },
+    { label: "⚔️ 第二幕 (中期 10-25m)", txt: gp?.mid_story || "" },
+    { label: "🔥 第三幕 (决胜 25m+)", txt: gp?.late_story || "" },
+  ].filter((a) => a.txt);
+
+  if (acts.length > 0) {
+    const colW = Math.floor((W - 84 - (acts.length - 1) * 12) / acts.length);
+    const actH = 195;
+    acts.forEach((act, idx) => {
+      const cx = 42 + idx * (colW + 12);
+      ctx.fillStyle = "#141613";
+      ctx.fillRect(cx, y, colW, actH);
+      ctx.strokeStyle = "#2f3329";
+      ctx.strokeRect(cx, y, colW, actH);
+
+      ctx.fillStyle = "#8ec0e4";
+      ctx.font = "bold 13px sans-serif";
+      ctx.fillText(act.label, cx + 12, y + 22);
+
+      ctx.fillStyle = "#d5d1c5";
+      ctx.font = "12.5px sans-serif";
+      const aLines = wrapCanvasParagraph(ctx, act.txt, colW - 24, 8);
+      aLines.forEach((ln, lIdx) => {
+        ctx.fillText(ln, cx + 12, y + 44 + lIdx * 18);
+      });
+    });
+    y += actH + 14;
+  }
+
+  // Bottom Practice Mandate
+  const prac = (gp?.practice || p.next_game_action || "盯紧强势期第一波抱团推塔节奏").slice(0, 58);
+  ctx.fillStyle = "#8fd196";
+  ctx.font = "bold 13.5px sans-serif";
+  ctx.fillText(`💡 下把死命令：${prac}`, 42, H - 32);
 }
 
 /**
