@@ -1396,21 +1396,28 @@ def load_env_llm_config() -> Dict[str, str]:
                             env_vars[k] = v
             except Exception:
                 pass
-    for k in ("XAI_API_KEY", "XAI_MODEL", "GROK_MODEL", "XAI_BASE_URL", "GEMINI_API_KEY", "OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_BASE_URL"):
+    for k in ("XAI_API_KEY", "XAI_MODEL", "GROK_MODEL", "XAI_BASE_URL", "GEMINI_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_BASE_URL"):
         if os.environ.get(k):
             env_vars[k] = os.environ[k]
 
-    if env_vars.get("XAI_API_KEY"):
+    gemini_key = env_vars.get("GEMINI_API_KEY") or env_vars.get("GOOGLE_API_KEY") or ""
+    xai_key = env_vars.get("XAI_API_KEY") or ""
+
+    if xai_key:
         return {
             "provider": "xai",
-            "api_key": env_vars["XAI_API_KEY"],
+            "api_key": xai_key,
+            "xai_api_key": xai_key,
+            "gemini_api_key": gemini_key,
             "model_name": env_vars.get("XAI_MODEL") or env_vars.get("GROK_MODEL") or "grok-4.7",
             "base_url": (env_vars.get("XAI_BASE_URL") or "https://api.x.ai/v1").rstrip("/"),
         }
-    if env_vars.get("GEMINI_API_KEY"):
+    if gemini_key:
         return {
             "provider": "gemini",
-            "api_key": env_vars["GEMINI_API_KEY"],
+            "api_key": gemini_key,
+            "xai_api_key": xai_key,
+            "gemini_api_key": gemini_key,
             "model_name": "gemini-3.8-flash",
             "base_url": "https://generativelanguage.googleapis.com/v1beta",
         }
@@ -1418,26 +1425,36 @@ def load_env_llm_config() -> Dict[str, str]:
         return {
             "provider": "openai",
             "api_key": env_vars["OPENAI_API_KEY"],
+            "xai_api_key": xai_key,
+            "gemini_api_key": gemini_key,
             "model_name": env_vars.get("OPENAI_MODEL") or "gpt-4.1",
             "base_url": (env_vars.get("OPENAI_BASE_URL") or "https://api.openai.com/v1").rstrip("/"),
         }
-    return {"provider": "", "api_key": "", "model_name": "", "base_url": ""}
+    return {"provider": "", "api_key": "", "xai_api_key": "", "gemini_api_key": "", "model_name": "", "base_url": ""}
 
 
 def get_llm_status_safe() -> Dict[str, Any]:
     """返回给前端展示的安全模型状态（不含任何密钥值）"""
     cfg = load_env_llm_config()
+    has_gemini = bool(cfg.get("gemini_api_key"))
+    has_xai = bool(cfg.get("xai_api_key"))
     if cfg.get("api_key"):
         return {
             "configured": True,
             "provider": cfg["provider"],
             "model": cfg["model_name"],
+            "has_gemini_key": has_gemini,
+            "has_xai_key": has_xai,
+            "poster_engine": "gemini-nano-banana-2.1" if has_gemini else "grok-imagine-image-2.0",
             "label": f"已接入 {cfg['provider'].upper()} / {cfg['model_name']}",
         }
     return {
         "configured": False,
         "provider": "",
         "model": "",
+        "has_gemini_key": has_gemini,
+        "has_xai_key": has_xai,
+        "poster_engine": "gemini-nano-banana-2.1" if has_gemini else "",
         "label": "内置录像取证引擎已就绪",
     }
 
@@ -2255,5 +2272,483 @@ def call_llm_pregame_coach(
         return {"ok": True, "grok_live_brief": structured}
     except Exception as e:
         return {"ok": False, "error": str(e)}
+
+
+# ==============================================================================
+# Nano Banana (gemini-nano-banana-2.1) & Grok Imagine 2.0 战报超燃/处刑原画生成引擎
+# ==============================================================================
+
+HERO_VISUAL_TRAITS_MAP: Dict[str, str] = {
+    "主宰": "Juggernaut (Yurnero, masked samurai bladesman wearing carved ivory-and-crimson tribal mask, fur shoulder armor, wielding a blazing katana)",
+    "瘟疫法师": "Necrophos (Rotund'jere, glowing emerald-green plague prelate wielding a massive grim-reaper scythe surrounded by ghostly green souls)",
+    "马格纳斯": "Magnus (Magnoceros, mighty armored centaur-rhino warrior with glowing horn and crackling shockwave poleaxe)",
+    "天怒法师": "Skywrath Mage (Dragonus, winged celestial avian mage in golden-blue armor casting arcane mystic flares)",
+    "莱恩": "Lion (Demon Witch with glowing crimson hellfire demonic hand and hex wand)",
+    "破晓辰星": "Dawnbreaker (Valora, golden metallic celestial warrior maiden wielding a cosmic solar warhammer)",
+    "痛苦女王": "Queen of Pain (Akasha, winged demoness succubus with curved horns, sapphire skin, and sonic scream energy)",
+    "水晶室女": "Crystal Maiden (Rylai, frost sorceress in blue-and-white fur winter cloak with glowing ice crystal staff)",
+    "龙骑士": "Dragon Knight (Davion in crimson-and-gold dragonscale knight armor with shield and broadsword)",
+    "风行者": "Windranger (Lyralei, agile ginger archer in emerald woodland cloak with glowing windrun longbow)",
+    "影魔": "Shadow Fiend (Nevermore, pitch-black demonic soul collector with fiery red chest core unleashing Requiem of Souls)",
+    "帕吉": "Pudge (the Butcher with bloody meat hook and cleaver)",
+    "幻影刺客": "Phantom Assassin (Mortred, veiled spectral assassin in dark teal armor wielding twin curved blades with critical blood-splatter)",
+    "敌法师": "Anti-Mage (Magina, muscular monk warrior with purple warpaint and twin crescent mana-break glaives)",
+    "斧王": "Axe (Mogul Khan, red-skinned orc warlord leaping with giant double-bladed Culling Blade greataxe)",
+    "斯拉克": "Slark (agile deep-sea murloc nightcrawler in shadow dance mist with glowing dagger)",
+    "卡尔": "Invoker (Carl, grand blood-elf magus floating with glowing Quas-Wex-Exort elemental orbs)",
+    "祈求者": "Invoker (Carl, grand blood-elf magus floating with glowing Quas-Wex-Exort elemental orbs)",
+    "拉比克": "Rubick (the Grand Magus in green-and-gold robes with twitching mask and green telekinesis staff)",
+    "巫医": "Witch Doctor (Zharvakko, voodoo troll shaman with glowing purple Death Ward skull staff)",
+    "玛尔斯": "Mars (god of war with fiery beard, massive bronze tower shield and burning spear)",
+    "虚空假面": "Faceless Void (Darkterror, purple eyeless time-walker with glowing mace inside a frozen purple Chronosphere dome)",
+    "斯温": "Sven (Rogue Knight in blue-steel helm wielding a colossal God's Strength glowing greatsword)",
+    "莉娜": "Lina (the Slayer, fiery sorceress wreathed in flames casting Laguna Blade lightning)",
+    "宙斯": "Zeus (lord of heaven with white beard and crackling blue thunderbolts)",
+    "风暴之灵": "Storm Spirit (Raijin Thunderkeg, jovial lightning elemental zipping in electric blue ball lightning)",
+    "灰烬之灵": "Ember Spirit (Xin, twin-swordsman warrior ablaze in fiery crimson Flame Guard and Fire Remnants)",
+    "虚无之灵": "Void Spirit (Inai, astral purple martial master wielding a double-bladed cosmic halberd)",
+    "大地之灵": "Earth Spirit (Kaolin, jade stone general surrounded by glowing green stone remnants)",
+}
+
+
+def _extract_hero_en_visual(hero_zh: str, img_url: str = "") -> str:
+    clean_zh = (hero_zh or "").split("(")[0].strip()
+    if clean_zh in HERO_VISUAL_TRAITS_MAP:
+        return HERO_VISUAL_TRAITS_MAP[clean_zh]
+    slug = ""
+    if img_url:
+        m = re.search(r"/heroes/(?:icons/)?([a-z0-9_]+)\.", img_url)
+        if m:
+            slug = m.group(1).replace("_", " ").title()
+    if slug:
+        return f"Dota 2 hero {slug} ({clean_zh})"
+    return f"Dota 2 hero {clean_zh}"
+
+
+def build_dota_poster_art_prompt(
+    report: Optional[Dict[str, Any]],
+    player_slot: Optional[int] = None,
+    style_mode: str = "auto",
+    custom_scene: str = "",
+    career_member: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """
+    根据单局真实录像数据（击杀猎物、苦主天敌、大招斩击数、核心神装、Grok 评分与判词）或跨局生涯数据，
+    构建专门针对 Nano Banana (gemini-nano-banana-2.1) 优化的高张力 Dota 2 视觉场景 Prompt。
+    """
+    if career_member and not report:
+        m_name = career_member.get("name") or "五黑选手"
+        sigs = career_member.get("signature_heroes") or []
+        cursed = career_member.get("cursed_heroes") or []
+        best_h = sigs[0].get("hero_zh") if sigs else "主宰"
+        best_img = sigs[0].get("hero_img", "") if sigs else ""
+        worst_h = cursed[0].get("hero_zh") if cursed else ""
+        hero_vis = _extract_hero_en_visual(best_h, best_img)
+        if style_mode == "roast" and worst_h:
+            w_vis = _extract_hero_en_visual(worst_h, cursed[0].get("hero_img", ""))
+            prompt = (
+                f"Dark-fantasy comedic Dota 2 digital illustration, 16:9 widescreen poster art: "
+                f"{w_vis} looking panicked and overwhelmed in the dark Dire jungle, surrounded by enemy heroes "
+                f"while dropping gold coins and holding unpressed items. Dramatic volumetric lighting, "
+                f"Valve Dota 2 collector's art style, ultra-detailed, no text or watermarks."
+            )
+            scene_zh = f"生涯暗黑处刑画报：{m_name} 的魔咒英雄【{worst_h}】在野区被围剿暴毙名场面"
+        else:
+            prompt = (
+                f"Epic Dota 2 dark-fantasy collector's splash art, 16:9 widescreen masterpiece: "
+                f"{hero_vis} standing victorious atop the shattered enemy highground ancient, "
+                f"wielding glowing divine artifacts amidst golden embers and arcane lightning. "
+                f"Cinematic low-angle hero shot, Valve The International key art style, ultra-detailed, no text."
+            )
+            scene_zh = f"生涯封神招牌画报：{m_name} 的本命绝活【{best_h}】登顶遗迹王座"
+        if custom_scene.strip():
+            prompt += f" Specific user scene detail: {custom_scene.strip()}."
+            scene_zh += f"（定制细节：{custom_scene.strip()}）"
+        return {
+            "prompt": prompt[:980],
+            "scene_summary_zh": scene_zh,
+            "tone": "roast" if style_mode == "roast" else "epic",
+            "hero_zh": best_h,
+            "player_name": m_name,
+        }
+
+    report = report or {}
+    all_players = (report.get("radiant_pos_1_to_5") or []) + (report.get("dire_pos_1_to_5") or [])
+    raw_side = report.get("focus_side") or "dire"
+    own_players = report.get("radiant_pos_1_to_5", []) if raw_side == "radiant" else report.get("dire_pos_1_to_5", [])
+    won = bool((raw_side == "radiant" and report.get("radiant_win")) or (raw_side == "dire" and not report.get("radiant_win")))
+
+    p = None
+    if player_slot is not None:
+        p = next((x for x in all_players if int(x.get("player_slot", -1)) == int(player_slot)), None)
+    if not p:
+        p = own_players[0] if own_players else (all_players[0] if all_players else {})
+
+    hero_zh = p.get("hero_short_zh") or p.get("hero_name") or "主宰"
+    pname = p.get("personaname") or "匿名玩家"
+    pos = int(p.get("pos") or 1)
+    hero_vis = _extract_hero_en_visual(hero_zh, p.get("hero_img", ""))
+
+    # Find Grok entry & score
+    gc = report.get("grok_coaching") or {}
+    gp = next(
+        (
+            g for g in (gc.get("players") or [])
+            if isinstance(g, dict) and (g.get("slot") == p.get("player_slot") or int(g.get("pos") or 0) == pos)
+        ),
+        {},
+    )
+    sc100 = int(gp.get("grok_score") or round(float(p.get("mvp_score") or 75)))
+
+    # Victims killed by this player
+    kills_heroes = ((p.get("kills_breakdown") or {}).get("heroes") or [])[:3]
+    victim_vis_list = [
+        _extract_hero_en_visual(v.get("hero_short_zh", ""), v.get("hero_icon", "")).split("(")[0].strip()
+        for v in kills_heroes
+        if v.get("hero_short_zh")
+    ]
+    victim_zh_list = [f"{v.get('hero_short_zh')}×{v.get('count', 1)}" for v in kills_heroes if v.get("hero_short_zh")]
+
+    # Nemesis who killed this player
+    killed_by_heroes = ((p.get("killed_by_breakdown") or {}).get("heroes") or [])[:3]
+    nemesis_vis_list = [
+        _extract_hero_en_visual(v.get("hero_short_zh", ""), v.get("hero_icon", "")).split("(")[0].strip()
+        for v in killed_by_heroes
+        if v.get("hero_short_zh")
+    ]
+    nemesis_zh_list = [f"{v.get('hero_short_zh')}×{v.get('count', 1)}" for v in killed_by_heroes if v.get("hero_short_zh")]
+
+    # Signature ult / spells
+    exec_audit = p.get("hero_execution_audit") or {}
+    ults = exec_audit.get("ult_audits") or []
+    ult_zh = ults[0].get("ability_zh", "") if ults else ""
+    ult_casts = ults[0].get("casts", 0) if ults else 0
+    ult_hits = ults[0].get("hits", 0) if ults else 0
+    ult_unit = ults[0].get("unit_label", "次") if ults else ""
+
+    # Items
+    final_items = [str(it).split("(")[0] for it in (p.get("final_items") or []) if it and not str(it).startswith("[中立]")][:4]
+
+    # Decide tone
+    if style_mode in ("epic", "roast", "anime"):
+        tone = style_mode
+    else:
+        tone = "epic" if (won and sc100 >= 70) or (not won and sc100 >= 76) else "roast"
+
+    if tone == "roast":
+        nemesis_en = ", ".join(nemesis_vis_list) if nemesis_vis_list else "enemy heroes"
+        nemesis_zh = "、".join(nemesis_zh_list) if nemesis_zh_list else "敌方主力"
+        prompt = (
+            f"Dark-fantasy satirical Dota 2 cinematic illustration, 16:9 widescreen poster key art: "
+            f"{hero_vis} caught out of position alone in a misty dark Dota 2 river and jungle without ward vision, "
+            f"being ambushed and surrounded by menacing {nemesis_en}. "
+            f"Spilled gold coins and dropped items on the ground, dramatic crimson-and-shadow volumetric lighting, "
+            f"expressive dynamic action, Valve Dota 2 digital painting style, ultra-detailed, 8k, no text."
+        )
+        scene_zh = (
+            f"🤡 暗黑处刑名场面：[{pos}号位] {pname} 的【{hero_zh}】（评分 {sc100}/100）在黑图河道落单，"
+            f"惨遭敌方 {nemesis_zh} 围剿提款！"
+        )
+    else:
+        victims_en = ", ".join(victim_vis_list) if victim_vis_list else "defeated enemy heroes"
+        victims_zh = "、".join(victim_zh_list) if victim_zh_list else "敌方全员"
+        style_tag = (
+            "Ufotable / MAPPA anime movie sakuga action frame, extreme speed lines and glowing aura impact frames, 16:9 widescreen masterpiece"
+            if tone == "anime"
+            else "Valve Dota 2 The International Collector's Edition key art splash illustration, dark-fantasy oil-and-digital masterpiece, 16:9 widescreen"
+        )
+        ult_en_hint = ""
+        if "无敌斩" in ult_zh or "主宰" in hero_zh:
+            ult_en_hint = "unleashing a blinding storm of Omnislash golden-crimson sword slashes and Blade Fury whirlwind alongside a glowing golden Healing Ward totem"
+        elif "镰刀" in ult_zh or "瘟疫法师" in hero_zh:
+            ult_en_hint = "summoning a colossal glowing emerald Reaper's Scythe execution beam amidst Ghost Shroud spirits and golden Radiance aura"
+        elif "两极反转" in ult_zh or "马格纳斯" in hero_zh:
+            ult_en_hint = "slamming his crackling horn to unleash a massive Reverse Polarity gravitational shockwave pulling enemies together"
+        elif ult_zh:
+            ult_en_hint = f"unleashing their signature ultimate ability ({ult_zh}) in a storm of arcane energy"
+        else:
+            ult_en_hint = "unleashing devastating ultimate power in a storm of glowing energy"
+
+        prompt = (
+            f"{style_tag}: {hero_vis} in the center foreground, {ult_en_hint}, "
+            f"cutting down and overwhelming defeated {victims_en} on the shattered Dota 2 highground battlefield. "
+            f"Glowing embers, shattered armor, dramatic volumetric rim lighting, intense low-angle heroic perspective, "
+            f"ultra-detailed 8k, no text or watermarks."
+        )
+        ult_desc_zh = f"释放 {ult_casts} 次《{ult_zh}》狂砍 {ult_hits} {ult_unit}，" if ult_zh and ult_casts else ""
+        scene_zh = (
+            f"🔥 史诗封神名场面：[{pos}号位] {pname} 的【{hero_zh}】（评分 {sc100}/100）携 "
+            f"{'·'.join(final_items[:3]) or '神装'}，{ult_desc_zh}正面手刃 {victims_zh} 主宰战场！"
+        )
+
+    if custom_scene.strip():
+        prompt = f"{prompt[:760]} Additional specific scene detail requested: {custom_scene.strip()}."
+        scene_zh += f" ｜ 定制画面：{custom_scene.strip()}"
+
+    return {
+        "prompt": prompt[:980],
+        "scene_summary_zh": scene_zh,
+        "tone": tone,
+        "hero_zh": hero_zh,
+        "player_name": pname,
+        "score_100": sc100,
+        "victims_zh": victim_zh_list,
+        "nemesis_zh": nemesis_zh_list,
+    }
+
+
+def _call_gemini_nano_banana_api(prompt: str, gemini_key: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """
+    使用 Google Gemini Nano Banana (`gemini-nano-banana-2.1`) 生成图片。
+    优先走 Interactions API (`v1beta/interactions`)，若特定账号层级不支持则自动尝试 `generateContent` 接口。
+    返回: (data_uri, model_used, error_msg)
+    """
+    errors: List[str] = []
+
+    # 1. Modern Interactions API with gemini-nano-banana-2.1
+    for model_candidate in ("gemini-nano-banana-2.1", "gemini-3-pro-image"):
+        try:
+            url = "https://generativelanguage.googleapis.com/v1beta/interactions"
+            payload = {
+                "model": model_candidate,
+                "input": [{"type": "text", "text": prompt}],
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                method="POST",
+                headers={
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": gemini_key,
+                    "Api-Revision": "2026-05-20",
+                    "User-Agent": "DotaAiAnalyst/2.0",
+                },
+            )
+            with urllib.request.urlopen(req, timeout=55) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+
+            # Extract image bytes from Interactions response shapes
+            out_img = data.get("output_image")
+            if isinstance(out_img, dict) and out_img.get("data"):
+                mime = out_img.get("mime_type") or "image/png"
+                return f"data:{mime};base64,{out_img['data']}", model_candidate, None
+
+            for item in (data.get("outputs") or []):
+                if isinstance(item, dict) and item.get("type") == "image":
+                    b64 = item.get("data") or (item.get("image") or {}).get("data")
+                    mime = item.get("mime_type") or (item.get("image") or {}).get("mime_type") or "image/png"
+                    if b64:
+                        return f"data:{mime};base64,{b64}", model_candidate, None
+
+            for step in (data.get("steps") or []):
+                mo = (step or {}).get("model_output") or {}
+                for c in (mo.get("content") or []):
+                    if isinstance(c, dict) and c.get("type") == "image":
+                        img_obj = c.get("image") if isinstance(c.get("image"), dict) else c
+                        b64 = img_obj.get("data")
+                        mime = img_obj.get("mime_type") or "image/png"
+                        if b64:
+                            return f"data:{mime};base64,{b64}", model_candidate, None
+        except urllib.error.HTTPError as he:
+            body_err = ""
+            try:
+                body_err = he.read().decode("utf-8", errors="ignore")[:240]
+            except Exception:
+                pass
+            errors.append(f"{model_candidate}(interactions HTTP {he.code}): {body_err}")
+        except Exception as e:
+            errors.append(f"{model_candidate}(interactions): {e}")
+
+    # 2. Fallback to generateContent endpoint with IMAGE modality
+    for model_candidate in ("gemini-nano-banana-2.1", "gemini-3-pro-image"):
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_candidate}:generateContent?key={gemini_key}"
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                method="POST",
+                headers={
+                    "Content-Type": "application/json",
+                    "User-Agent": "DotaAiAnalyst/2.0",
+                },
+            )
+            with urllib.request.urlopen(req, timeout=55) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            for cand in (data.get("candidates") or []):
+                for part in ((cand.get("content") or {}).get("parts") or []):
+                    inl = part.get("inlineData") or part.get("inline_data")
+                    if isinstance(inl, dict) and inl.get("data"):
+                        mime = inl.get("mimeType") or inl.get("mime_type") or "image/png"
+                        return f"data:{mime};base64,{inl['data']}", model_candidate, None
+        except urllib.error.HTTPError as he:
+            body_err = ""
+            try:
+                body_err = he.read().decode("utf-8", errors="ignore")[:240]
+            except Exception:
+                pass
+            errors.append(f"{model_candidate}(generateContent HTTP {he.code}): {body_err}")
+        except Exception as e:
+            errors.append(f"{model_candidate}(generateContent): {e}")
+
+    return None, None, " | ".join(errors[:2]) if errors else "Gemini Nano Banana 未返回有效图像数据"
+
+
+def _call_xai_grok_image_api(prompt: str, xai_key: str, base_url: str = "https://api.x.ai/v1") -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """
+    使用服务端已配置的 xAI 图像生成引擎 (`grok-imagine-image-2.0`) 生成高清英雄战斗原画。
+    返回: (data_uri, model_used, error_msg)
+    """
+    try:
+        url = f"{base_url.rstrip('/')}/images/generations"
+        model_id = "grok-imagine-image-2.0"
+        payload = {
+            "model": model_id,
+            "prompt": prompt,
+            "n": 1,
+            "response_format": "b64_json",
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": f"Bearer {xai_key}",
+                "User-Agent": "DotaAiAnalyst/2.0",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=55) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        items = data.get("data") or []
+        if items and isinstance(items[0], dict):
+            b64 = items[0].get("b64_json")
+            mime = items[0].get("mime_type") or "image/jpeg"
+            if b64:
+                return f"data:{mime};base64,{b64}", model_id, None
+        return None, None, "xAI Image API 未返回 b64_json 数据"
+    except Exception as e:
+        return None, None, str(e)
+
+
+def call_nano_banana_poster_art(
+    report: Optional[Dict[str, Any]],
+    player_slot: Optional[int] = None,
+    style_mode: str = "auto",
+    custom_scene: str = "",
+    engine_pref: str = "auto",
+    gemini_api_key: str = "",
+    xai_api_key: str = "",
+    career_member: Optional[Dict[str, Any]] = None,
+    force: bool = False,
+) -> Dict[str, Any]:
+    """
+    生成单人本局超燃/处刑海报原画（或生涯本命英雄原画）：
+    - 若传入或配置了 `GEMINI_API_KEY`（且 engine_pref != "grok"），优先调用 Google Nano Banana (`gemini-nano-banana-2.1`)；
+    - 若尚未配置 `GEMINI_API_KEY`（或选择了内置引擎/自动回退），自动使用服务端已内置的 `grok-imagine-image-2.0` 生成，确保零门槛即点即出图！
+    """
+    import hashlib
+
+    env_cfg = load_env_llm_config()
+    g_key = (gemini_api_key or "").strip() or env_cfg.get("gemini_api_key", "")
+    x_key = (xai_api_key or "").strip() or env_cfg.get("xai_api_key", "")
+    x_base = env_cfg.get("base_url") or "https://api.x.ai/v1"
+    if "x.ai" not in x_base:
+        x_base = "https://api.x.ai/v1"
+
+    prompt_info = build_dota_poster_art_prompt(
+        report=report,
+        player_slot=player_slot,
+        style_mode=style_mode,
+        custom_scene=custom_scene,
+        career_member=career_member,
+    )
+    prompt = prompt_info["prompt"]
+
+    # Check disk cache unless force=True
+    mid = (report or {}).get("match_id") or "career"
+    slot_key = str(player_slot if player_slot is not None else (career_member or {}).get("account_id", "team"))
+    provider_tag = "gemini" if (g_key and engine_pref != "grok") else "xai"
+    cache_hash = hashlib.md5(f"{mid}:{slot_key}:{style_mode}:{provider_tag}:{custom_scene.strip()}".encode("utf-8")).hexdigest()[:12]
+    cache_filename = f"poster_art_{mid}_{slot_key}_{cache_hash}.json"
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    cache_dirs = [os.path.join(base_dir, "reports", "poster_art"), "/tmp/dota_reports/poster_art"]
+
+    if not force:
+        for cdir in cache_dirs:
+            cpath = os.path.join(cdir, cache_filename)
+            if os.path.exists(cpath):
+                try:
+                    with open(cpath, "r", encoding="utf-8") as cf:
+                        cached_obj = json.load(cf)
+                    if cached_obj.get("ok") and cached_obj.get("image_data_url"):
+                        cached_obj["cached"] = True
+                        return cached_obj
+                except Exception:
+                    pass
+
+    img_data_url = None
+    model_used = None
+    err_notes: List[str] = []
+
+    # Try Nano Banana (gemini-nano-banana-2.1) first when gemini_api_key is available and engine_pref != 'grok'
+    if engine_pref in ("auto", "nano_banana") and g_key:
+        img_data_url, model_used, g_err = _call_gemini_nano_banana_api(prompt, g_key)
+        if g_err:
+            err_notes.append(f"Nano Banana 提示: {g_err}")
+
+    # If Nano Banana strictly requested without a Gemini key and no fallback desired:
+    if not img_data_url and engine_pref == "nano_banana_strict" and not g_key:
+        return {
+            "ok": False,
+            "need_gemini_key": True,
+            "error": "尚未检测到 GEMINI_API_KEY。请在下方输入框粘贴 Gemini API Key，或切换为「智能双擎 (优先 Nano Banana / 内置引擎自动兜底)」。",
+            "prompt_info": prompt_info,
+        }
+
+    # Fallback or direct call to xAI Grok Imagine 2.0
+    if not img_data_url and x_key:
+        img_data_url, model_used, x_err = _call_xai_grok_image_api(prompt, x_key, x_base)
+        if x_err:
+            err_notes.append(f"Grok Imagine 提示: {x_err}")
+
+    if not img_data_url:
+        return {
+            "ok": False,
+            "need_gemini_key": not bool(g_key),
+            "error": "；".join(err_notes) if err_notes else "未检测到可用的生图 API Key（请填入 Gemini API Key）。",
+            "prompt_info": prompt_info,
+        }
+
+    result_obj = {
+        "ok": True,
+        "cached": False,
+        "model": model_used,
+        "used_nano_banana": "nano-banana" in str(model_used or "") or "gemini" in str(model_used or ""),
+        "has_server_gemini_key": bool(env_cfg.get("gemini_api_key")),
+        "image_data_url": img_data_url,
+        "prompt": prompt,
+        "scene_summary_zh": prompt_info["scene_summary_zh"],
+        "tone": prompt_info["tone"],
+        "hero_zh": prompt_info["hero_zh"],
+        "player_name": prompt_info["player_name"],
+    }
+
+    for cdir in cache_dirs:
+        try:
+            os.makedirs(cdir, exist_ok=True)
+            with open(os.path.join(cdir, cache_filename), "w", encoding="utf-8") as cf:
+                json.dump(result_obj, cf, ensure_ascii=False)
+            break
+        except OSError:
+            continue
+
+    return result_obj
+
 
 

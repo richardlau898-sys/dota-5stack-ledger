@@ -4816,10 +4816,33 @@ function bindEvents() {
       const canvas = document.getElementById("share-poster-canvas");
       if (!canvas) return;
       const link = document.createElement("a");
-      link.download = `dota2-verdict-${state.currentMatchId || "match"}.png`;
+      const heroSlug = state.activePosterContext?.player?.hero_short_zh || "verdict";
+      link.download = `dota2-poster-${state.currentMatchId || "match"}-${heroSlug}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
-      showToast("已导出高清 PNG 战报长图！");
+      showToast("已导出高清 PNG 战报海报！");
+    });
+  }
+
+  const nanoPosterBtn = document.getElementById("btn-generate-nano-poster");
+  if (nanoPosterBtn) {
+    nanoPosterBtn.addEventListener("click", () => {
+      generateNanoBananaPoster({ force: Boolean(state.lastGeneratedPosterArt) });
+    });
+  }
+
+  const inlineGeminiKeyInput = document.getElementById("input-gemini-key-inline");
+  if (inlineGeminiKeyInput) {
+    const savedGKey = localStorage.getItem("dota_gemini_poster_key") || "";
+    if (savedGKey) inlineGeminiKeyInput.value = savedGKey;
+    inlineGeminiKeyInput.addEventListener("change", () => {
+      const val = inlineGeminiKeyInput.value.trim();
+      if (val) {
+        localStorage.setItem("dota_gemini_poster_key", val);
+        showToast("已保存 Gemini API Key，将使用 Google Nano Banana 2.1 生成原画！");
+      } else {
+        localStorage.removeItem("dota_gemini_poster_key");
+      }
     });
   }
 
@@ -4856,12 +4879,18 @@ function bindEvents() {
       const model = document.getElementById("input-llm-model")?.value.trim() || "grok-4.7";
       const apiKey = document.getElementById("input-llm-key")?.value.trim() || "";
       const baseUrl = document.getElementById("input-llm-base")?.value.trim() || "";
+      const geminiPosterKey = document.getElementById("input-gemini-poster-key")?.value.trim() || "";
       localStorage.setItem(
         "dota_ledger_llm_override",
         JSON.stringify({ provider, model, apiKey, baseUrl })
       );
+      if (geminiPosterKey) {
+        localStorage.setItem("dota_gemini_poster_key", geminiPosterKey);
+        const inlineIn = document.getElementById("input-gemini-key-inline");
+        if (inlineIn) inlineIn.value = geminiPosterKey;
+      }
       renderHeaderStatus();
-      showToast(`已保存模型设置 (${provider.toUpperCase()} / ${model})`);
+      showToast(`已保存模型与 Nano Banana 海报设置 (${provider.toUpperCase()} / ${model})`);
       dialog?.close();
     });
   }
@@ -11503,6 +11532,7 @@ function renderVerdictAndBlameSection(report) {
                     entry.roleType === "culprit1" ? "primary" : "secondary"
                   }" data-copy-quote="${escapeHtml(copyText)}">${escapeHtml(entry.copyBtnLabel)}</button>
                   <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(entry.cardHeader)}">🖼️ 生成个人海报</button>
+                  <button type="button" class="button primary" style="background:linear-gradient(135deg,#c9983a 0%,#9e6918 100%);color:#0f110e;font-weight:700;border-color:#e5bd68;" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(entry.cardHeader)}" data-player-nano-auto="1">🍌 AI 超燃原画海报</button>
                 </div>
               </div>
             </div>
@@ -11672,8 +11702,9 @@ function renderVerdictAndBlameSection(report) {
     btn.addEventListener("click", () => {
       const slotNum = Number(btn.getAttribute("data-player-poster-slot"));
       const roleTag = btn.getAttribute("data-player-poster-tag") || "";
+      const autoAi = btn.getAttribute("data-player-nano-auto") === "1";
       if (state.currentReport) {
-        openSinglePlayerPosterDialog(state.currentReport, slotNum, roleTag);
+        openSinglePlayerPosterDialog(state.currentReport, slotNum, roleTag, { autoGenerateAiArt: autoAi });
       }
     });
   });
@@ -14432,8 +14463,9 @@ function renderPlayersForensicsList(report) {
     btn.addEventListener("click", () => {
       const slotNum = Number(btn.getAttribute("data-player-poster-slot"));
       const roleTag = btn.getAttribute("data-player-poster-role") || "";
+      const autoAi = btn.getAttribute("data-player-nano-auto") === "1";
       if (state.currentReport) {
-        openSinglePlayerPosterDialog(state.currentReport, slotNum, roleTag);
+        openSinglePlayerPosterDialog(state.currentReport, slotNum, roleTag, { autoGenerateAiArt: autoAi });
       }
     });
   });
@@ -14657,6 +14689,14 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
             data-player-poster-slot="${p.player_slot}"
             data-player-poster-role="${escapeHtml(scoreTier.label)}"
           >🖼️ 生成专属海报</button>
+          <button
+            type="button"
+            class="copy-quote-btn"
+            style="background:linear-gradient(135deg,#c9983a 0%,#9e6918 100%);color:#0f110e;font-weight:700;border-color:#e5bd68;"
+            data-player-poster-slot="${p.player_slot}"
+            data-player-poster-role="${escapeHtml(scoreTier.label)}"
+            data-player-nano-auto="1"
+          >🍌 AI 超燃原画海报</button>
         </div>
       </div>
 
@@ -14898,9 +14938,11 @@ function populateSettingsDialog() {
   const provSel = document.getElementById("select-llm-provider");
   const modelIn = document.getElementById("input-llm-model");
   const baseIn = document.getElementById("input-llm-base");
+  const geminiPosterIn = document.getElementById("input-gemini-poster-key");
   if (provSel) provSel.value = cfg.provider || "xai";
   if (modelIn) modelIn.value = cfg.model || "grok-4.7";
   if (baseIn) baseIn.value = cfg.baseUrl || "https://api.x.ai/v1";
+  if (geminiPosterIn) geminiPosterIn.value = localStorage.getItem("dota_gemini_poster_key") || "";
 }
 
 async function saveRosterConfig() {
@@ -15539,6 +15581,23 @@ function openCareerHabitPosterDialog(member, squadLedger) {
   const textarea = document.getElementById("share-verdict-textarea");
   if (textarea) textarea.value = lines.join("\n");
 
+  state.activePosterContext = {
+    mode: "career",
+    careerMember: member,
+    totalAnalyzed,
+    player: {
+      personaname: member.personaname,
+      hero_short_zh: (member.signature_heroes?.[0]?.hero_short_zh || member.best_hero?.hero_short_zh || "本命英雄"),
+      pos_label: member.best_pos?.pos_label || "常驻主力",
+    },
+  };
+  state.lastGeneratedPosterArt = null;
+  const statusBadge = document.getElementById("nano-poster-status-badge");
+  if (statusBadge) {
+    const bestH = member.signature_heroes?.[0]?.hero_short_zh || member.best_hero?.hero_short_zh || "本命英雄";
+    statusBadge.textContent = `🎯 待生成生涯原画：${member.personaname} 的代表英雄【${bestH}】（点击上方黄色按钮立即生成 AI 原画海报）`;
+  }
+
   drawCareerHabitPosterCanvas(member, totalAnalyzed);
   dlg.showModal();
 }
@@ -16040,6 +16099,21 @@ function openSharePosterDialog(report) {
   const textarea = document.getElementById("share-verdict-textarea");
   if (textarea) textarea.value = lines.join("\n");
 
+  const focusHeroPlayer = won ? mvpPlayer : topCulprit;
+  state.activePosterContext = {
+    mode: "team",
+    report,
+    player: focusHeroPlayer,
+    playerSlot: focusHeroPlayer?.player_slot,
+    grokPlayer: findGrokPlayerEntry(focusHeroPlayer, report),
+    badgeTitle: won ? "👑 胜局首功 MVP" : "🚨 败局头号战犯",
+  };
+  state.lastGeneratedPosterArt = null;
+  const statusBadge = document.getElementById("nano-poster-status-badge");
+  if (statusBadge && focusHeroPlayer) {
+    statusBadge.textContent = `🎯 点击上方「🍌 用 Nano Banana 生成 AI 超燃/处刑原画海报」可为本局主角【${focusHeroPlayer.personaname} · ${focusHeroPlayer.hero_short_zh}】生成专属战斗大片！`;
+  }
+
   drawVerdictPosterCanvas(report, {
     sideZh,
     won,
@@ -16256,7 +16330,12 @@ function wrapCanvasParagraph(ctx, text, maxWidth, maxLines = 4) {
   return lines;
 }
 
-function openSinglePlayerPosterDialog(report, playerSlot, roleTag = "") {
+function openSinglePlayerPosterDialog(
+  report,
+  playerSlot,
+  roleTag = "",
+  { autoGenerateAiArt = false } = {}
+) {
   const dlg = document.getElementById("share-poster-dialog");
   if (!dlg || !report) return;
 
@@ -16321,8 +16400,42 @@ function openSinglePlayerPosterDialog(report, playerSlot, roleTag = "") {
   const textarea = document.getElementById("share-verdict-textarea");
   if (textarea) textarea.value = lines.join("\n");
 
+  state.activePosterContext = {
+    mode: "single",
+    report,
+    playerSlot: p.player_slot,
+    player: p,
+    grokPlayer: gp,
+    badgeTitle,
+  };
+  state.lastGeneratedPosterArt = null;
+
+  const victimsStr = ((p.kills_breakdown?.heroes || []).slice(0, 3))
+    .map((v) => `${v.hero_short_zh}×${v.count}`)
+    .join(" / ");
+  const nemesisStr = ((p.killed_by_breakdown?.heroes || []).slice(0, 3))
+    .map((v) => `${v.hero_short_zh}×${v.count}`)
+    .join(" / ");
+  const statusBadge = document.getElementById("nano-poster-status-badge");
+  if (statusBadge) {
+    statusBadge.textContent =
+      (won && sc100 >= 70) || sc100 >= 76
+        ? `🎯 本局高光提取：[${p.pos_label}] ${p.personaname} · ${heroZh} (${sc100}分) — 手刃 ${victimsStr || "敌方主力"} ｜ 点击上方黄色按钮生成 AI 战斗大片`
+        : `🎯 本局名场面提取：[${p.pos_label}] ${p.personaname} · ${heroZh} (${sc100}分) — 被 ${nemesisStr || "敌方"} 提款 ｜ 点击上方黄色按钮生成 AI 处刑画报`;
+  }
+
+  const inlineIn = document.getElementById("input-gemini-key-inline");
+  if (inlineIn && !inlineIn.value) {
+    const savedGKey = localStorage.getItem("dota_gemini_poster_key") || "";
+    if (savedGKey) inlineIn.value = savedGKey;
+  }
+
   drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle);
   dlg.showModal();
+
+  if (autoGenerateAiArt) {
+    generateNanoBananaPoster({ force: false });
+  }
 }
 
 function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
@@ -16479,6 +16592,418 @@ function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
   ctx.fillStyle = "#8fd196";
   ctx.font = "bold 13.5px sans-serif";
   ctx.fillText(`💡 下把死命令：${prac}`, 42, H - 32);
+}
+
+async function generateNanoBananaPoster({ force = false } = {}) {
+  const ctxInfo = state.activePosterContext;
+  if (!ctxInfo) {
+    showToast("请先打开一张单人或团队战报海报");
+    return;
+  }
+
+  const btn = document.getElementById("btn-generate-nano-poster");
+  const statusBadge = document.getElementById("nano-poster-status-badge");
+  const styleMode = document.getElementById("select-nano-poster-style")?.value || "auto";
+  const enginePref = document.getElementById("select-nano-poster-engine")?.value || "auto";
+  const customScene = document.getElementById("input-nano-custom-scene")?.value.trim() || "";
+  const inlineGKey = document.getElementById("input-gemini-key-inline")?.value.trim() || "";
+  const geminiKey = inlineGKey || localStorage.getItem("dota_gemini_poster_key") || "";
+
+  if (inlineGKey) {
+    localStorage.setItem("dota_gemini_poster_key", inlineGKey);
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "🍌 AI 正在根据本局战绩绘制超燃英雄原画 (约4~8秒)...";
+  }
+  if (statusBadge) {
+    statusBadge.textContent = "🎨 正在读取本局击杀猎物、大招斩击与神装细节并渲染高清战斗大片...";
+  }
+
+  try {
+    const payload = {
+      match_id: ctxInfo.report?.match_id || null,
+      player_slot: ctxInfo.playerSlot ?? ctxInfo.player?.player_slot ?? null,
+      style_mode: styleMode,
+      engine_pref: enginePref,
+      custom_scene: customScene,
+      gemini_api_key: geminiKey,
+      career_member: ctxInfo.mode === "career" ? ctxInfo.careerMember : null,
+      force: Boolean(force),
+    };
+
+    const res = await fetch("/api/poster_art", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.ok || !data.image_data_url) {
+      if (data.need_gemini_key) {
+        const inlineIn = document.getElementById("input-gemini-key-inline");
+        inlineIn?.focus();
+      }
+      throw new Error(data.error || "生成海报原画失败");
+    }
+
+    state.lastGeneratedPosterArt = data;
+    const loadedImg = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("AI 原画图像解码失败"));
+      img.src = data.image_data_url;
+    });
+
+    drawNanoBananaIllustratedPosterCanvas(ctxInfo, data, loadedImg);
+
+    const engineLabel = data.used_nano_banana
+      ? `🍌 Google Nano Banana (${data.model})`
+      : `⚡ AI 原画引擎 (${data.model})`;
+    if (statusBadge) {
+      statusBadge.innerHTML = `<span style="color:#8fd196;font-weight:700;">✅ 已由 ${escapeHtml(
+        engineLabel
+      )} 生成完毕！</span> ${escapeHtml(data.scene_summary_zh || "")}`;
+    }
+    showToast(`已生成 ${data.hero_zh || ""} 专属 AI 战斗原画海报！点击「下载高清 PNG」即可保存`);
+  } catch (err) {
+    if (statusBadge) {
+      statusBadge.innerHTML = `<span style="color:#ff8a75;">❌ 生图提示：${escapeHtml(err.message)}</span>`;
+    }
+    showToast(`AI 海报生成失败: ${err.message}`);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "🍌 重新生成 Nano Banana AI 超燃/处刑原画海报";
+    }
+  }
+}
+
+function drawNanoBananaIllustratedPosterCanvas(ctxInfo, artData, loadedImg) {
+  const canvas = document.getElementById("share-poster-canvas");
+  if (!canvas || !loadedImg) return;
+
+  const W = 920;
+  const H = 1190;
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const report = ctxInfo.report;
+  const p = ctxInfo.player || {};
+  const gp = ctxInfo.grokPlayer || (report ? findGrokPlayerEntry(p, report) : {}) || {};
+  const isCareer = ctxInfo.mode === "career";
+  const m = ctxInfo.careerMember || {};
+
+  const { sideZh, won } = report
+    ? getOwnAndOppPlayers(report)
+    : { sideZh: "五黑跨局", won: (m.win_rate || 50) >= 50 };
+  const heroZh = p.hero_short_zh || p.hero_name || artData.hero_zh || "代表英雄";
+  const sc100 = isCareer ? Math.round(m.avg_rating || 75) : getHeroScore100(p, report);
+  const sharePct = isCareer
+    ? Number(m.avg_contrib_pct || 22).toFixed(1)
+    : Number(
+        gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
+      ).toFixed(1);
+  const isHighPraise = artData.tone !== "roast" && ((won && sc100 >= 70) || sc100 >= 75);
+  const badgeTitle =
+    ctxInfo.badgeTitle ||
+    (isCareer
+      ? m.role_tag || "🌟 跨局生涯档案"
+      : isHighPraise
+      ? "👑 胜局封神 MVP"
+      : "🚨 赛后处刑主角");
+
+  // 1. Deep Dark-Gold Background
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, "#0f120e");
+  bgGrad.addColorStop(0.45, isHighPraise ? "#121b14" : "#1c1311");
+  bgGrad.addColorStop(1, "#0a0b09");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // 2. Top Full-Bleed AI Illustration Viewport (x=18, y=18, w=884, h=510)
+  const artX = 18;
+  const artY = 18;
+  const artW = W - 36;
+  const artH = 510;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(artX, artY, artW, artH);
+  ctx.clip();
+
+  // Aspect-fill (cover) drawing
+  const imgRatio = loadedImg.width / Math.max(1, loadedImg.height);
+  const boxRatio = artW / artH;
+  let drawW = artW;
+  let drawH = artH;
+  let drawX = artX;
+  let drawY = artY;
+  if (imgRatio > boxRatio) {
+    drawH = artH;
+    drawW = artH * imgRatio;
+    drawX = artX - (drawW - artW) / 2;
+  } else {
+    drawW = artW;
+    drawH = artW / imgRatio;
+    drawY = artY - (drawH - artH) * 0.28;
+  }
+  ctx.drawImage(loadedImg, drawX, drawY, drawW, drawH);
+
+  // Top dark vignette for header pills
+  const topVig = ctx.createLinearGradient(0, artY, 0, artY + 90);
+  topVig.addColorStop(0, "rgba(10, 12, 10, 0.86)");
+  topVig.addColorStop(1, "rgba(10, 12, 10, 0)");
+  ctx.fillStyle = topVig;
+  ctx.fillRect(artX, artY, artW, 90);
+
+  // Bottom dramatic vignette blending into dossier
+  const botVig = ctx.createLinearGradient(0, artY + artH - 195, 0, artY + artH);
+  botVig.addColorStop(0, "rgba(12, 14, 11, 0)");
+  botVig.addColorStop(0.55, "rgba(12, 14, 11, 0.78)");
+  botVig.addColorStop(1, "rgba(12, 14, 11, 0.98)");
+  ctx.fillStyle = botVig;
+  ctx.fillRect(artX, artY + artH - 195, artW, 195);
+  ctx.restore();
+
+  // Outer Collector Border
+  ctx.strokeStyle = isHighPraise ? "#d4af63" : "#d96857";
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(18, 18, W - 36, H - 36);
+
+  // Divider below artwork
+  ctx.strokeStyle = isHighPraise ? "rgba(212, 175, 99, 0.55)" : "rgba(217, 104, 87, 0.55)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(18, artY + artH);
+  ctx.lineTo(W - 18, artY + artH);
+  ctx.stroke();
+
+  // 3. Top Header Badges over Artwork
+  ctx.fillStyle = "rgba(15, 17, 14, 0.78)";
+  ctx.fillRect(36, 34, 485, 32);
+  ctx.strokeStyle = "#c6a468";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(36, 34, 485, 32);
+  ctx.fillStyle = "#f0c76e";
+  ctx.font = "bold 13.5px sans-serif";
+  const topLeftTxt = isCareer
+    ? `DOTA 2 五黑跨局典藏海报 · 跨 ${ctxInfo.totalAnalyzed || m.games || 0} 局 AI 实锤档案`
+    : `DOTA 2 典藏级个人战报海报 · #${report.match_id} (${sideZh}${won ? "胜" : "负"} ${report.radiant_score}:${report.dire_score} · ${report.duration_str})`;
+  ctx.fillText(topLeftTxt, 48, 55);
+
+  const engTag = artData.used_nano_banana
+    ? "🍌 GOOGLE NANO BANANA 2.1 · AI 定制原画"
+    : "⚡ AI 定制超燃战斗原画 · HD COLLECTOR";
+  ctx.font = "bold 12.5px sans-serif";
+  const engW = ctx.measureText(engTag).width + 26;
+  ctx.fillStyle = "rgba(22, 26, 20, 0.85)";
+  ctx.fillRect(W - 36 - engW, 34, engW, 32);
+  ctx.strokeStyle = "#e0b965";
+  ctx.strokeRect(W - 36 - engW, 34, engW, 32);
+  ctx.fillStyle = "#f7d788";
+  ctx.textAlign = "right";
+  ctx.fillText(engTag, W - 49, 55);
+  ctx.textAlign = "left";
+
+  // 4. Hero & Player Title Overlaid on Bottom of Artwork (y = 390..515)
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.92)";
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = "#fffaf0";
+  ctx.font = "bold 31px sans-serif";
+  const mainTitle = isCareer
+    ? `${m.personaname} · 本命【${heroZh}】`
+    : `[${p.pos_label || `${p.pos || 1}号位`}] ${p.personaname} · ${heroZh}`;
+  ctx.fillText(mainTitle, 42, 434);
+
+  // Score & Contribution Badge on Right
+  ctx.fillStyle = isHighPraise ? "#98f5a0" : "#ff9482";
+  ctx.font = "bold 24px sans-serif";
+  ctx.textAlign = "right";
+  const rightScoreTxt = isCareer
+    ? `${badgeTitle} ｜ 场均 ${sc100}/100分 · 胜率 ${m.win_rate}%`
+    : `${badgeTitle} ｜ 评分 ${sc100}/100 · ${won ? "功勋" : "分锅"} ${sharePct}%`;
+  ctx.fillText(rightScoreTxt, W - 42, 432);
+  ctx.textAlign = "left";
+
+  // Trophy / Nemesis & Ult Ribbon inside Artwork Bottom
+  const killsList = ((p.kills_breakdown?.heroes || []).slice(0, 4))
+    .map((v) => `${v.hero_short_zh}×${v.count}`)
+    .join(" · ");
+  const nemList = ((p.killed_by_breakdown?.heroes || []).slice(0, 3))
+    .map((v) => `${v.hero_short_zh}×${v.count}`)
+    .join(" · ");
+  const execBadges = ((p.hero_execution_audit?.headline_badges || []).slice(0, 2))
+    .map((b) => (typeof b === "string" ? b : b?.text || ""))
+    .filter(Boolean)
+    .join(" ｜ ");
+
+  ctx.fillStyle = "#f3d078";
+  ctx.font = "bold 14.5px sans-serif";
+  const ribbonLine1 = isCareer
+    ? `🏆 绝活代表：${(m.signature_heroes || []).map((h) => `${h.hero_short_zh}(${h.win_rate}%胜·${h.avg_rating}分)`).join(" / ") || heroZh}`
+    : isHighPraise
+    ? `🗡️ 手刃猎物：${killsList || "正面碾压敌方全员"}${execBadges ? ` ｜ ⚡ ${execBadges}` : ""}`
+    : `💀 犯罪现场：被 ${nemList || "敌方核心"} 连续提款${execBadges ? ` ｜ 🔬 ${execBadges}` : ""}`;
+  ctx.fillText(ribbonLine1.slice(0, 68), 42, 468);
+
+  ctx.fillStyle = "#dad4c6";
+  ctx.font = "13px sans-serif";
+  const sceneLine = `🎬 ${artData.scene_summary_zh || ""}`.slice(0, 72);
+  ctx.fillText(sceneLine, 42, 496);
+  ctx.restore();
+
+  // 5. Lower Tactical Dossier Section (y = 542..1160)
+  let y = 544;
+
+  // Stats Bar
+  ctx.fillStyle = "#171a15";
+  ctx.fillRect(42, y, W - 84, 42);
+  ctx.strokeStyle = "#32362b";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(42, y, W - 84, 42);
+  ctx.fillStyle = "#e5dfd0";
+  ctx.font = "bold 13.5px sans-serif";
+  const finalItemsStr = (p.final_items || [])
+    .filter((it) => it && !String(it).startsWith("[中立]"))
+    .map((it) => String(it).split("(")[0])
+    .slice(0, 5)
+    .join("·");
+  const statsBarTxt = isCareer
+    ? `跨 ${m.games} 局 (${m.wins}胜${m.games - m.wins}负) ｜ ${m.mvp_count}次MVP / ${m.culprit_count}次首锅 ｜ 场均KDA ${m.avg_kda} ｜ 辅助失职 ${m.support_grief_count || 0}局 ｜ 孤狼被抓 ${m.solo_pickoffs_total || 0}次`
+    : `KDA ${p.kda} (参战 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm}/XPM ${p.xpm} ｜ 伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 塔伤 ${fmtNum(p.tower_damage)} ｜ 神装: ${finalItemsStr || "-"}`;
+  ctx.fillText(statsBarTxt.slice(0, 76), 54, y + 26);
+  y += 54;
+
+  // Headline Quote Box
+  ctx.fillStyle = "#1c1913";
+  ctx.fillRect(42, y, W - 84, 44);
+  ctx.strokeStyle = "#524326";
+  ctx.strokeRect(42, y, W - 84, 44);
+  ctx.fillStyle = "#f2c96d";
+  ctx.font = "bold 15px sans-serif";
+  const hlText = (
+    isCareer
+      ? m.habit_diagnosis?.pos_verdict || "五黑跨局生涯体检定性"
+      : gp?.headline || p.blame_Headline || "录像级全周期数据实锤定责"
+  ).slice(0, 56);
+  ctx.fillText(`🗣️ “${hlText}”`, 56, y + 28);
+  y += 56;
+
+  // Block 1: Deep Verdict & Role Duty
+  const verdictRaw = isCareer
+    ? m.habit_diagnosis?.habit_flaws_summary || ""
+    : gp?.deep_verdict || (p.verdict_bullets || []).join("；") || "";
+  ctx.font = "13.5px sans-serif";
+  const verdictLines = wrapCanvasParagraph(ctx, verdictRaw, W - 116, 4);
+  const b1H = Math.max(92, 38 + verdictLines.length * 21);
+  ctx.fillStyle = "#141713";
+  ctx.fillRect(42, y, W - 84, b1H);
+  ctx.strokeStyle = "#35382e";
+  ctx.strokeRect(42, y, W - 84, b1H);
+  ctx.fillStyle = "#e0c389";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText(
+    isCareer
+      ? "📋 跨局毒瘤与失误习性实锤 (Multi-Match Habit Forensics)"
+      : "📋 本职工作与全周期结案陈词 (Role Duty & Deep Verdict)",
+    56,
+    y + 24
+  );
+  ctx.fillStyle = "#e3dfd5";
+  ctx.font = "13.5px sans-serif";
+  verdictLines.forEach((ln, idx) => {
+    ctx.fillText(ln, 56, y + 48 + idx * 20);
+  });
+  y += b1H + 12;
+
+  // Block 2: Item & Blink Audit (or BP Mandate for Career)
+  const itemText = isCareer
+    ? m.habit_diagnosis?.bp_and_team_mandate || ""
+    : gp?.item_and_blink_audit ||
+      (p.key_item_timings || []).join(" → ") ||
+      (p.final_items || []).join(" · ");
+  ctx.font = "13.5px sans-serif";
+  const itemLines = wrapCanvasParagraph(ctx, itemText, W - 116, 3);
+  const b2H = Math.max(76, 36 + itemLines.length * 20);
+  ctx.fillStyle = "#181612";
+  ctx.fillRect(42, y, W - 84, b2H);
+  ctx.strokeStyle = "#4a3e28";
+  ctx.strokeRect(42, y, W - 84, b2H);
+  ctx.fillStyle = "#f0c76e";
+  ctx.font = "bold 14px sans-serif";
+  ctx.fillText(
+    isCareer
+      ? "🚨 队长下把 BP 封印与选位死命令 (Captain's Draft Mandate)"
+      : "🎒 灵性/犯罪出装与关键装时间轴审计 (Itemization & Timing Audit)",
+    56,
+    y + 23
+  );
+  ctx.fillStyle = "#dcd6c8";
+  ctx.font = "13px sans-serif";
+  itemLines.forEach((ln, idx) => {
+    ctx.fillText(ln, 56, y + 45 + idx * 19);
+  });
+  y += b2H + 12;
+
+  // Block 3: 3-Act Chronological Breakdown (for match posters)
+  const acts = isCareer
+    ? (m.pos_breakdown || []).slice(0, 3).map((pb) => ({
+        label: `🧭 ${pb.pos_label} (${pb.games}局 · ${pb.win_rate}%胜)`,
+        txt: `场均评分 ${pb.avg_rating}/100 分，代表英雄：${pb.top_hero || "-"}`,
+      }))
+    : [
+        { label: "🌅 第一幕 (对线 0-10m)", txt: gp?.early_story || "" },
+        { label: "⚔️ 第二幕 (中期 10-25m)", txt: gp?.mid_story || "" },
+        { label: "🔥 第三幕 (决胜 25m+)", txt: gp?.late_story || "" },
+      ].filter((a) => a.txt);
+
+  if (acts.length > 0) {
+    const colW = Math.floor((W - 84 - (acts.length - 1) * 12) / acts.length);
+    const actH = 195;
+    acts.forEach((act, idx) => {
+      const cx = 42 + idx * (colW + 12);
+      ctx.fillStyle = "#141613";
+      ctx.fillRect(cx, y, colW, actH);
+      ctx.strokeStyle = "#2f3329";
+      ctx.strokeRect(cx, y, colW, actH);
+
+      ctx.fillStyle = "#8ec0e4";
+      ctx.font = "bold 13px sans-serif";
+      ctx.fillText(act.label, cx + 12, y + 22);
+
+      ctx.fillStyle = "#d5d1c5";
+      ctx.font = "12.5px sans-serif";
+      const aLines = wrapCanvasParagraph(ctx, act.txt, colW - 24, 8);
+      aLines.forEach((ln, lIdx) => {
+        ctx.fillText(ln, cx + 12, y + 44 + lIdx * 18);
+      });
+    });
+    y += actH + 14;
+  }
+
+  // Footer
+  const prac = (
+    isCareer
+      ? m.habit_diagnosis?.bp_and_team_mandate || "扬长避短锁定本命位置"
+      : gp?.practice || p.next_game_action || "盯紧强势期第一波抱团推塔节奏"
+  ).slice(0, 56);
+  ctx.fillStyle = "#8fd196";
+  ctx.font = "bold 13.5px sans-serif";
+  ctx.fillText(`💡 下把铁律：${prac}`, 42, H - 30);
+
+  ctx.fillStyle = "#9e9b91";
+  ctx.font = "12px sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(
+    `dota-ai-analyst.vercel.app${report?.match_id ? `/?match=${report.match_id}` : ""}`,
+    W - 42,
+    H - 30
+  );
+  ctx.textAlign = "left";
 }
 
 /**

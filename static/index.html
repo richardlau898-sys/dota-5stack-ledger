@@ -660,6 +660,12 @@
               <input id="input-llm-base" type="url" placeholder="https://api.x.ai/v1" />
             </label>
           </div>
+          <div class="form-row-2" style="margin-top:8px;">
+            <label class="field" style="grid-column: 1 / -1;">
+              <span>🍌 Google Gemini API Key (用于 Nano Banana 2.1 个人超燃/处刑原画海报生成，保存在本地浏览器)</span>
+              <input id="input-gemini-poster-key" type="password" placeholder="填入 AIzaSy... 即可启用 gemini-nano-banana-2.1 原生生图；留空则自动回退服务端内置 Grok Imagine 2.0" autocomplete="off" />
+            </label>
+          </div>
           <div class="dialog-form-actions">
             <button type="button" id="btn-save-llm-local" class="button secondary">保存覆盖设置</button>
           </div>
@@ -677,10 +683,43 @@
       </div>
       <div class="dialog-body">
         <div class="poster-actions-row">
-          <button type="button" id="btn-copy-verdict-text" class="button primary">📋 一键复制群聊文字战报 (含公开分享链接)</button>
-          <button type="button" id="btn-modal-share-link" class="button secondary">🔗 仅复制本局公开分享链接</button>
-          <button type="button" id="btn-download-poster-png" class="button secondary">🖼️ 下载高清 PNG 战报长图</button>
-          <button type="button" id="btn-modal-export-pdf" class="button secondary">📊 打开全屏结构化报告 / 下载PDF</button>
+          <button type="button" id="btn-generate-nano-poster" class="button primary" style="background:linear-gradient(135deg,#c9983a 0%,#9e6918 100%);color:#0f110e;font-weight:800;border-color:#e5bd68;">🍌 用 Nano Banana 生成 AI 超燃/处刑原画海报</button>
+          <button type="button" id="btn-download-poster-png" class="button primary">🖼️ 下载高清 PNG 战报长图</button>
+          <button type="button" id="btn-copy-verdict-text" class="button secondary">📋 一键复制群聊文字战报</button>
+          <button type="button" id="btn-modal-share-link" class="button secondary">🔗 仅复制本局分享链接</button>
+          <button type="button" id="btn-modal-export-pdf" class="button secondary">📊 全屏结构化报告 / PDF</button>
+        </div>
+
+        <!-- Nano Banana 2.1 AI 战报原画定制工作台 -->
+        <div id="nano-poster-studio-bar" class="nano-poster-studio-bar" style="background:#151813;border:1px solid #35392d;border-radius:6px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1;">
+              <label style="font-size:12px;color:var(--gold-light);font-weight:700;display:flex;align-items:center;gap:5px;">
+                <span>🎨 海报原画风格：</span>
+                <select id="select-nano-poster-style" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
+                  <option value="auto">✨ 智能按本局表现生成 (MVP超燃砍翻全场 / 战犯暗黑处刑)</option>
+                  <option value="epic">🔥 史诗封神大片 (大招收割 · 刀光剑影手刃猎物)</option>
+                  <option value="roast">🤡 暗黑处刑画报 (战犯被抓 · 黑图落单被提款名场面)</option>
+                  <option value="anime">⚡ 热血番剧剧场版 (极致光影 · 必杀技动漫分镜)</option>
+                </select>
+              </label>
+              <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;">
+                <span>⚙️ 生图引擎：</span>
+                <select id="select-nano-poster-engine" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
+                  <option value="auto">🍌 智能双擎 (填 Gemini Key 走 Nano Banana 2.1 / 留空自动用内置 Grok Imagine 2.0)</option>
+                  <option value="nano_banana_strict">🍌 强制 Google Nano Banana 2.1 (gemini-nano-banana-2.1)</option>
+                  <option value="grok">⚡ 内置 xAI Grok Imagine 2.0 (服务端免配 Key)</option>
+                </select>
+              </label>
+            </div>
+            <div id="nano-gemini-key-wrap" style="display:flex;align-items:center;gap:6px;min-width:260px;">
+              <input id="input-gemini-key-inline" type="password" placeholder="🔑 填 Gemini API Key 启用 Nano Banana 2.1" autocomplete="off" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:11.5px;width:255px;" />
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+            <input id="input-nano-custom-scene" type="text" placeholder="✍️ 可选填自定义画面细节（如：剑圣开无敌斩把对面破晓辰星、痛苦女王和龙骑士全砍翻在天辉高地阶梯上）..." style="flex:1;min-width:260px;background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:5px 10px;border-radius:4px;font-size:12px;" />
+            <span id="nano-poster-status-badge" style="font-size:11.5px;color:#a5a296;">💡 自动读取本局击杀猎物、大招次数、神装与 Grok 判词生成专属原画</span>
+          </div>
         </div>
         <div class="poster-split-grid">
           <div class="poster-text-box">
@@ -777,6 +816,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=6.7.2" defer></script>
+  <script src="/app.js?v=6.8.0" defer></script>
 </body>
 </html>

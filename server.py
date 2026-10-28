@@ -25,7 +25,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from ai_coach_engine import call_llm_coach_review, call_llm_pregame_coach, get_llm_status_safe
+from ai_coach_engine import (
+    call_llm_coach_review,
+    call_llm_pregame_coach,
+    call_nano_banana_poster_art,
+    get_llm_status_safe,
+)
 from cloud_store import (
     cloud_fetch_match_report,
     cloud_save_coaching,
@@ -828,6 +833,42 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     except Exception:
                         pass
                 res["report"] = sanitize_report_mixed_english(report)
+                self._send_json(res)
+                return
+
+            if path == "/api/poster_art":
+                body = self._read_json_body()
+                mid_raw = body.get("match_id")
+                player_slot = body.get("player_slot")
+                style_mode = str(body.get("style_mode") or "auto")
+                custom_scene = str(body.get("custom_scene") or "")
+                engine_pref = str(body.get("engine_pref") or "auto")
+                gemini_api_key = str(body.get("gemini_api_key") or "")
+                xai_api_key = str(body.get("xai_api_key") or "")
+                career_member = body.get("career_member")
+                force = bool(body.get("force", False))
+
+                report = None
+                if mid_raw:
+                    try:
+                        mid = int(mid_raw)
+                        report = get_or_build_match_report(mid, allow_build=True, require_ai=False, skip_llm=True)
+                    except Exception:
+                        report = body.get("report")
+                elif isinstance(body.get("report"), dict):
+                    report = body.get("report")
+
+                res = call_nano_banana_poster_art(
+                    report=report,
+                    player_slot=int(player_slot) if player_slot is not None and str(player_slot) != "" else None,
+                    style_mode=style_mode,
+                    custom_scene=custom_scene,
+                    engine_pref=engine_pref,
+                    gemini_api_key=gemini_api_key,
+                    xai_api_key=xai_api_key,
+                    career_member=career_member if isinstance(career_member, dict) else None,
+                    force=force,
+                )
                 self._send_json(res)
                 return
 
