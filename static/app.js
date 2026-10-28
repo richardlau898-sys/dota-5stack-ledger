@@ -4254,7 +4254,7 @@ async function initApp() {
 function bindEvents() {
   // Browser Back / Forward (popstate) SPA routing handler
   window.addEventListener("popstate", async () => {
-    ["fullscreen-report-dialog", "share-verdict-dialog", "settings-dialog"].forEach((dlgId) => {
+    ["fullscreen-report-dialog", "share-poster-dialog", "settings-dialog"].forEach((dlgId) => {
       const dlg = document.getElementById(dlgId);
       if (dlg && dlg.open) dlg.close();
     });
@@ -15500,7 +15500,7 @@ function renderSquadLedgerSection(squadLedger) {
 }
 
 function openCareerHabitPosterDialog(member, squadLedger) {
-  const dlg = document.getElementById("share-verdict-dialog");
+  const dlg = document.getElementById("share-poster-dialog");
   if (!dlg || !member) return;
 
   const hd = member.habit_diagnosis || {};
@@ -16257,18 +16257,18 @@ function wrapCanvasParagraph(ctx, text, maxWidth, maxLines = 4) {
 }
 
 function openSinglePlayerPosterDialog(report, playerSlot, roleTag = "") {
-  const dlg = document.getElementById("share-verdict-dialog");
+  const dlg = document.getElementById("share-poster-dialog");
   if (!dlg || !report) return;
 
-  const allPlayers = [...(report.own_players || []), ...(report.opp_players || [])];
+  const { sideZh, won, own, opp } = getOwnAndOppPlayers(report);
+  const allPlayers = [...(own || []), ...(opp || [])];
   const p =
     allPlayers.find((x) => Number(x.player_slot) === Number(playerSlot)) ||
-    (report.own_players || [])[0];
+    (own || [])[0];
   if (!p) return;
 
   const gp = findGrokPlayerEntry(p, report);
-  const won = Boolean(report.own_won);
-  const sideZh = report.own_side === "radiant" ? "天辉" : "夜魇";
+  const heroZh = p.hero_short_zh || p.hero_name || p.hero_zh || "";
   const shareUrl = `${window.location.origin}/?match=${report.match_id}`;
   const sc100 = getHeroScore100(p, report);
   const sharePct = Number(
@@ -16291,7 +16291,7 @@ function openSinglePlayerPosterDialog(report, playerSlot, roleTag = "") {
     `📍 比赛编号：#${report.match_id} (${sideZh}${won ? "获胜" : "落败"} · ${report.radiant_score}:${report.dire_score} · ${report.duration_str})`,
     `🔗 复盘直达：${shareUrl}`,
     `────────────────────`,
-    `👤 选手与英雄：${p.personaname} · ${p.hero_zh} ([${p.pos_label}])`,
+    `👤 选手与英雄：${p.personaname} · ${heroZh} ([${p.pos_label}])`,
     `📊 Grok 4.7 终审评分：${sc100}/100 分 ｜ ${shareLabel}：${sharePct}%`,
     `📈 基础面板：KDA ${p.kda} (参战率 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm} / XPM ${p.xpm} ｜ 英雄伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 建筑伤害 ${fmtNum(p.tower_damage)} ｜ 读秒 ${p.dead_seconds || 0}s`,
     `🗣️ 一针见血定性：${gp?.headline || p.blame_Headline || "录像级全周期数据实锤定责"}`,
@@ -16335,8 +16335,8 @@ function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
 
   const W = canvas.width;
   const H = canvas.height;
-  const won = Boolean(report.own_won);
-  const sideZh = report.own_side === "radiant" ? "天辉" : "夜魇";
+  const { sideZh, won } = getOwnAndOppPlayers(report);
+  const heroZh = p.hero_short_zh || p.hero_name || p.hero_zh || "";
   const sc100 = getHeroScore100(p, report);
   const sharePct = Number(
     gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
@@ -16365,7 +16365,7 @@ function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
   // Player & Hero Main Banner
   ctx.fillStyle = "#f2efe9";
   ctx.font = "bold 28px sans-serif";
-  ctx.fillText(`[${p.pos_label}] ${p.personaname} · ${p.hero_zh}`, 42, 92);
+  ctx.fillText(`[${p.pos_label}] ${p.personaname} · ${heroZh}`, 42, 92);
 
   // Score & Share Pill on Right
   ctx.fillStyle = isHighPraise ? "#8fd196" : "#ff8a75";
