@@ -4046,15 +4046,30 @@ async function downloadStructuredReportHtml() {
   showToast(`✅ 已直接下载独立全屏报告文件：${filename}（发给队友双击即可全屏打开）`, 4200);
 }
 
-function syncMatchUrlInAddressBar(matchId) {
+function syncMatchUrlInAddressBar(matchId, { replace = false } = {}) {
   if (!matchId || state.workspaceMode !== "postgame") return;
   try {
-    if (window.history?.replaceState) {
+    if (window.history?.pushState) {
       const side = state.currentReport ? getAuditedSide(state.currentReport) : state.perspective;
       const sideQuery = side === "dire" || side === "radiant" ? `&side=${encodeURIComponent(side)}` : "";
-      const nextUrl = `/?match=${encodeURIComponent(matchId)}${sideQuery}`;
-      if (window.location.search !== `?match=${encodeURIComponent(matchId)}${sideQuery}`) {
-        window.history.replaceState({}, "", nextUrl);
+      const targetSearch = `?match=${encodeURIComponent(matchId)}${sideQuery}`;
+      const nextUrl = `/${targetSearch}`;
+      const curMatchId = getUrlRequestedMatchAndSide().matchId;
+      const isSameMatchInUrl =
+        window.location.pathname === "/" && Number(curMatchId) === Number(matchId);
+
+      if (window.location.pathname !== "/" || window.location.search !== targetSearch) {
+        const nextState = {
+          ...(window.history.state || {}),
+          workspaceMode: "postgame",
+          matchId: Number(matchId),
+          side,
+        };
+        if (replace || isSameMatchInUrl) {
+          window.history.replaceState(nextState, "", nextUrl);
+        } else {
+          window.history.pushState(nextState, "", nextUrl);
+        }
       }
     }
   } catch {
@@ -4144,10 +4159,36 @@ async function initApp() {
     const perspSelect = document.getElementById("perspective-select");
     if (perspSelect) perspSelect.value = urlSide;
   }
-  if (
+
+  const isInitialPregame =
     window.location.pathname.includes("/pregame") ||
-    new URLSearchParams(window.location.search).get("mode") === "pregame"
-  ) {
+    new URLSearchParams(window.location.search).get("mode") === "pregame";
+
+  // Seed Home ("/") in browser history when user opens a direct match/pregame URL so Browser Back returns to Home instead of exiting to external tab
+  try {
+    if ((urlMatchId || isInitialPregame) && window.history?.replaceState && window.history?.pushState) {
+      if (!window.history.state?.seededHome) {
+        const initialTargetUrl = window.location.pathname + window.location.search + window.location.hash;
+        window.history.replaceState({ workspaceMode: "home", seededHome: true }, "", "/");
+        window.history.pushState(
+          {
+            workspaceMode: isInitialPregame ? "pregame" : "postgame",
+            matchId: urlMatchId || null,
+            side: urlSide || null,
+            seededHome: true,
+          },
+          "",
+          initialTargetUrl
+        );
+      }
+    } else if (window.history?.replaceState && !window.history.state?.workspaceMode) {
+      window.history.replaceState({ workspaceMode: "home", seededHome: true }, "", "/");
+    }
+  } catch {
+    // ignore history errors
+  }
+
+  if (isInitialPregame) {
     switchWorkspaceMode("pregame", { pushUrl: false, animate: false });
   } else if (urlMatchId) {
     switchWorkspaceMode("postgame", { pushUrl: false, animate: false });
@@ -4158,7 +4199,7 @@ async function initApp() {
   let directMatchLoaded = false;
   if (urlMatchId) {
     try {
-      await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true });
+      await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true, fromPopState: true });
       directMatchLoaded = true;
     } catch (e) {
       console.warn("Direct match pre-load warning:", e);
@@ -4193,10 +4234,10 @@ async function initApp() {
     initPregameWorkspace();
 
     if (urlMatchId && !directMatchLoaded) {
-      await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true });
+      await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true, fromPopState: true });
     } else if (state.currentMatchId) {
       highlightSelectedMatchCard(state.currentMatchId);
-      if (urlMatchId) syncMatchUrlInAddressBar(state.currentMatchId);
+      if (urlMatchId) syncMatchUrlInAddressBar(state.currentMatchId, { replace: true });
     }
 
     if (urlViewReport && state.currentReport) {
@@ -4211,6 +4252,38 @@ async function initApp() {
 }
 
 function bindEvents() {
+  // Browser Back / Forward (popstate) SPA routing handler
+  window.addEventListener("popstate", async () => {
+    ["fullscreen-report-dialog", "share-verdict-dialog", "settings-dialog"].forEach((dlgId) => {
+      const dlg = document.getElementById(dlgId);
+      if (dlg && dlg.open) dlg.close();
+    });
+
+    const { matchId: popMatchId, side: popSide } = getUrlRequestedMatchAndSide();
+    if (popSide) {
+      state.perspective = popSide;
+      const perspSelect = document.getElementById("perspective-select");
+      if (perspSelect) perspSelect.value = popSide;
+    }
+
+    if (
+      window.location.pathname.includes("/pregame") ||
+      new URLSearchParams(window.location.search).get("mode") === "pregame"
+    ) {
+      switchWorkspaceMode("pregame", { pushUrl: false, animate: true });
+    } else if (popMatchId) {
+      switchWorkspaceMode("postgame", { pushUrl: false, animate: true });
+      if (Number(state.currentMatchId) !== Number(popMatchId) || state.pendingMatchId) {
+        await loadMatchReport(popMatchId, { switchToPostgame: true, fromPopState: true });
+      } else if (state.currentReport) {
+        toggleOnDemandGate(false);
+        renderFullMatchReport(state.currentReport);
+      }
+    } else {
+      switchWorkspaceMode("home", { pushUrl: false, animate: true });
+    }
+  });
+
   // Workspace mode switcher (Home vs Post-game Forensics vs Pre-game 5-Stack Strategy Planner)
   document.querySelectorAll("[data-ws-mode]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -5256,7 +5329,7 @@ async function handleSmartQuery(raw) {
 
 async function loadMatchReport(
   matchId,
-  { forceRefresh = false, analyzeNow = false, switchToPostgame = true } = {}
+  { forceRefresh = false, analyzeNow = false, switchToPostgame = true, fromPopState = false } = {}
 ) {
   if (switchToPostgame && state.workspaceMode !== "postgame") {
     switchWorkspaceMode("postgame", { pushUrl: false });
@@ -5291,10 +5364,14 @@ async function loadMatchReport(
           forceRefresh,
           analyzeNow: true,
           switchToPostgame,
+          fromPopState,
         });
       }
       highlightSelectedMatchCard(matchId);
       toggleOnDemandGate(true, matchId);
+      if (switchToPostgame) {
+        syncMatchUrlInAddressBar(matchId, { replace: Boolean(fromPopState) });
+      }
       showToast(`比赛 #${matchId} 尚未分析，点击页面中央按钮即可启动 AI 深度复盘`, 3000);
       return;
     }
@@ -5321,7 +5398,7 @@ async function loadMatchReport(
     renderHomeWorkspace();
     highlightSelectedMatchCard(state.currentMatchId);
     renderFullMatchReport(state.currentReport);
-    syncMatchUrlInAddressBar(state.currentMatchId);
+    syncMatchUrlInAddressBar(state.currentMatchId, { replace: Boolean(fromPopState) });
 
     const isParsedNow = Boolean(state.currentReport?.is_parsed);
     const hasGrokNow = Boolean(state.currentReport?.grok_coaching?.title);
@@ -16432,17 +16509,27 @@ function switchWorkspaceMode(mode, { pushUrl = true, animate = true } = {}) {
       .getElementById("nav-mode-pregame")
       ?.classList.toggle("active", validMode === "pregame");
 
-    if (pushUrl && window.history?.replaceState) {
+    if (pushUrl && window.history?.pushState) {
       if (validMode === "pregame") {
         if (window.location.pathname !== "/pregame") {
-          window.history.replaceState({}, "", "/pregame");
+          window.history.pushState(
+            { ...(window.history.state || {}), workspaceMode: "pregame" },
+            "",
+            "/pregame"
+          );
         }
       } else if (validMode === "home") {
-        window.history.replaceState({}, "", "/");
+        if (window.location.pathname !== "/" || window.location.search !== "") {
+          window.history.pushState(
+            { ...(window.history.state || {}), workspaceMode: "home" },
+            "",
+            "/"
+          );
+        }
       } else if (validMode === "postgame") {
-        const matchId = state.currentMatchId || state.currentReport?.match_id;
+        const matchId = state.pendingMatchId || state.currentMatchId || state.currentReport?.match_id;
         if (matchId) {
-          syncMatchUrlInAddressBar(matchId, state.selectedSide || "dire");
+          syncMatchUrlInAddressBar(matchId, { replace: false });
         }
       }
     }
