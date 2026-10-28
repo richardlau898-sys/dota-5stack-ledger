@@ -2551,29 +2551,171 @@ def build_dota_poster_art_prompt(
     # Items
     final_items = [str(it).split("(")[0] for it in (p.get("final_items") or []) if it and not str(it).startswith("[中立]")][:4]
 
-    # Decide tone
-    if style_mode in ("epic", "roast", "anime"):
-        tone = style_mode
-    else:
-        tone = "epic" if (won and sc100 >= 70) or (not won and sc100 >= 76) else "roast"
+    # Compute team rank by Grok score & share
+    def _p_score(px: Dict[str, Any]) -> int:
+        gpx = next(
+            (
+                g for g in (gc.get("players") or [])
+                if isinstance(g, dict) and (g.get("slot") == px.get("player_slot") or int(g.get("pos") or 0) == int(px.get("pos") or 0))
+            ),
+            {},
+        )
+        return int(gpx.get("grok_score") or round(float(px.get("mvp_score") or 70)))
 
-    if tone == "roast":
-        nemesis_en = ", ".join(nemesis_vis_list) if nemesis_vis_list else "enemy heroes"
-        nemesis_zh = "、".join(nemesis_zh_list) if nemesis_zh_list else "敌方主力"
+    own_sorted_desc = sorted(own_players, key=_p_score, reverse=True)
+    own_sorted_asc = sorted(own_players, key=_p_score)
+    rank_desc_idx = next((i for i, x in enumerate(own_sorted_desc) if x.get("player_slot") == p.get("player_slot")), 2)
+    rank_asc_idx = next((i for i, x in enumerate(own_sorted_asc) if x.get("player_slot") == p.get("player_slot")), 2)
+    top_ally = own_sorted_desc[0] if own_sorted_desc else p
+    top_ally_zh = top_ally.get("hero_short_zh") or top_ally.get("hero_name") or "主宰"
+    top_ally_vis = _extract_hero_en_visual(top_ally_zh, top_ally.get("hero_img", ""), cosmetic_mode).split("(")[0].strip()
+
+    # Crime / Forensics telemetry for this player
+    df = report.get("deep_forensics") or {}
+    role_audit = _compute_player_role_duty_audit(p, own_players, [], df, raw_side)
+    is_toxic_supp = bool(role_audit.get("is_toxic_fake_support"))
+    solo_cnt = int(role_audit.get("solo_pickoffs_count") or 0)
+    hdmg_share = float(p.get("hero_damage_share_pct") or 0.0)
+    deaths_cnt = int(p.get("deaths") or 0)
+
+    unpressed_side = (df.get("unpressed_saves_by_side") or {}).get(raw_side) or {}
+    unpressed_events = [
+        ev for ev in (unpressed_side.get("events") or [])
+        if int(ev.get("pos") or 0) == pos or ev.get("hero_short_zh") == hero_zh
+    ]
+    unpressed_cnt = len(unpressed_events)
+    unpressed_item_zh = unpressed_events[0].get("item_zh", "BKB黑皇杖") if unpressed_events else "BKB/救命装"
+
+    nemesis_en = ", ".join(nemesis_vis_list) if nemesis_vis_list else "enemy heroes"
+    nemesis_zh = "、".join(nemesis_zh_list) if nemesis_zh_list else "敌方主力"
+    defeated_en = "; ".join(defeated_props_list) if defeated_props_list else "defeated enemies knocked back in the shockwave"
+    victims_zh = "、".join(victim_zh_list) if victim_zh_list else "敌方全员"
+
+    # Determine specific scene archetype when style_mode == "auto"
+    archetype = style_mode
+    if style_mode == "auto":
+        if won:
+            if rank_desc_idx == 0:
+                archetype = "epic"
+            elif rank_desc_idx == 1:
+                archetype = "win_co_carry"
+            elif rank_asc_idx == 0 and (sc100 <= 70 or deaths_cnt >= 8 or solo_cnt >= 3):
+                archetype = "passenger"
+            else:
+                archetype = "win_role_pillar"
+        else:
+            # Loss match: differentiate SVP vs #1/#2 Culprit (and specific crime type)
+            if rank_desc_idx == 0 and sc100 >= 72:
+                archetype = "svp"
+            elif is_toxic_supp or (pos in (4, 5) and rank_asc_idx <= 1 and role_audit.get("built_selfish_core_items")):
+                archetype = "roast_greedy"
+            elif unpressed_cnt >= 2 and rank_asc_idx <= 2:
+                archetype = "roast_bkb"
+            elif pos in (1, 2) and hdmg_share < 18.0 and rank_asc_idx <= 1:
+                archetype = "roast_zero_dmg"
+            elif solo_cnt >= 3 or deaths_cnt >= 9:
+                archetype = "roast_atm"
+            else:
+                archetype = "roast"
+
+    cosmetic_label_zh = "经典造型" if cosmetic_mode == "classic" else ("二阶段赤红至宝" if cosmetic_mode == "arcana_red" else "顶配至宝+不朽神装")
+
+    if archetype == "svp":
         prompt = (
-            f"Dark-fantasy satirical Dota 2 cinematic illustration, 16:9 widescreen poster key art: "
-            f"{hero_vis} caught out of position alone in a misty dark Dota 2 river without ward vision, "
-            f"panicking while being ambushed and surrounded by menacing {nemesis_en}. "
-            f"Spilled gold coins and dropped items on the ground, dramatic crimson-and-shadow volumetric lighting, "
-            f"Valve Dota 2 digital painting style, ultra-detailed 8k, strictly NO text, NO letters, NO watermarks."
+            f"Tragic & heroic Dota 2 dark-fantasy cinematic masterpiece, 16:9 widescreen splash art. "
+            f"SOLO TRAGIC SVP PROTAGONIST (70% center foreground): {hero_vis} in battle-scarred, blood-stained armor "
+            f"standing defiantly alone on the burning steps of the crumbling Ancient throne, wielding glowing weapons "
+            f"to single-handedly hold back an overwhelming tidal wave of cinque menacing enemy heroes ({nemesis_en}). "
+            f"Behind him in the rubble lie his exhausted, fallen teammates. Intense volumetric fire and rain lighting, "
+            f"lone warrior 1v5 last stand atmosphere, ultra-detailed 8k, strictly NO text, NO letters, NO UI, NO watermarks."
         )
         scene_zh = (
-            f"🤡 暗黑处刑原画：[{pos}号位] {pname} 的【{hero_zh}】（评分 {sc100}/100）在黑图河道落单，"
-            f"惨遭敌方 {nemesis_zh} 围剿提款！"
+            f"🩸 悲情孤胆院长 1v5 原画（{cosmetic_label_zh}）：[{pos}号位] {pname} 的【{hero_zh}】（败方最高 {sc100}/100分）"
+            f"在崩塌的遗迹前浴血独战敌方五人，一人扛起全队！"
+        )
+    elif archetype == "passenger":
+        prompt = (
+            f"Hilarious dark-fantasy Dota 2 cinematic illustration, 16:9 widescreen key art: "
+            f"In the foreground, a battered, bruised, and bandaged {hero_vis} is lounging comfortably on a makeshift golden palanquin chair, "
+            f"grinning sheepishly and sipping a healing salve potion while clutching spilled gold coins. "
+            f"Right in front of him, a colossal, godlike {top_ally_vis} is doing all the work—unleashing devastating ultimate power "
+            f"and effortlessly slaughtering the enemy team ({nemesis_en}) to carry him to victory. "
+            f"Expressive Valve Dota 2 comic-fantasy painting style, ultra-detailed 8k, strictly NO text, NO letters, NO watermarks."
+        )
+        scene_zh = (
+            f"🛋️ 惊险躺赢抱大腿原画：[{pos}号位] {pname} 的【{hero_zh}】（{sc100}分·阵亡{deaths_cnt}次）"
+            f"鼻青脸肿坐在花轿上喝药看戏，全靠前方大腿【{top_ally_zh}】一刀砍翻全场带飞！"
+        )
+    elif archetype == "roast_greedy":
+        selfish_str = "、".join((role_audit.get("built_selfish_core_items") or ["散失之刃", "点金手"])[:2])
+        prompt = (
+            f"Satirical dark-fantasy Dota 2 disaster illustration, 16:9 widescreen poster art: "
+            f"{hero_vis} (supposed to be a support!) is crouching greedily inside a dark jungle camp, "
+            f"ignoring the burning allied base in the distant background while hoarding huge overflowing sacks of gold coins "
+            f"and clutching a glowing purple Diffusal Blade / Hand of Midas with zero observer wards anywhere. "
+            f"Suddenly, towering menacing silhouettes of {nemesis_en} ambush him from the shadows right behind his back with glowing weapons raised! "
+            f"Hilarious panicked expression, flying gold coins, Valve Dota 2 digital painting style, 8k, strictly NO text, NO letters, NO watermarks."
+        )
+        scene_zh = (
+            f"💸 假辅助真毒瘤处刑原画：[{pos}号位] {pname} 的【{hero_zh}】（{sc100}分）不出救人装，"
+            f"在黑图野区怀抱【{selfish_str}】偷刷钱抢经济，被敌方 {nemesis_zh} 当场瓮中捉鳖！"
+        )
+    elif archetype == "roast_bkb":
+        prompt = (
+            f"Satirical dark-fantasy Dota 2 disaster illustration, 16:9 widescreen poster art: "
+            f"{hero_vis} in the center of a chaotic teamfight, completely frozen, stunned, and hexed under heavy magical chains "
+            f"and arcane explosions from {nemesis_en}. In the close-up foreground, his golden Black King Bar (BKB) staff / defensive artifact "
+            f"is strapped to his belt covered in thick cobwebs and a rusty padlock—glowing full of charge but NEVER pressed! "
+            f"Comedic look of sheer regret and panic, dramatic lighting, Valve Dota 2 painting style, 8k, strictly NO text, NO letters, NO watermarks."
+        )
+        scene_zh = (
+            f"🧤 憋死救命装处刑原画：[{pos}号位] {pname} 的【{hero_zh}】（{sc100}分）腰间的【{unpressed_item_zh}】"
+            f"长满蜘蛛网省着下崽，被敌方 {nemesis_zh} 一套控到死秒躺！"
+        )
+    elif archetype == "roast_zero_dmg":
+        prompt = (
+            f"Satirical dark-fantasy Dota 2 disaster illustration, 16:9 widescreen poster art: "
+            f"{hero_vis} dressed in absurdly heavy, oversized, glittering luxury golden armor and carrying a mountain of expensive treasure chests "
+            f"and divine rapiers on his back, tripping flat on his face the very second he steps out of the jungle, "
+            f"instantly flattened by {nemesis_en} while dealing zero damage and scattering treasure everywhere like a loot piñata! "
+            f"Dark-humored Valve Dota 2 painting style, 8k, strictly NO text, NO letters, NO watermarks."
+        )
+        scene_zh = (
+            f"📦 高占经低输出快递员原画：[{pos}号位] {pname} 的【{hero_zh}】（{sc100}分·伤害占比仅{hdmg_share:.1f}%）"
+            f"刷了一整局豪华神装，出山一秒融化给 {nemesis_zh} 送温暖！"
+        )
+    elif archetype in ("roast_atm", "roast"):
+        prompt = (
+            f"Dark-fantasy satirical Dota 2 disaster illustration, 16:9 widescreen poster key art: "
+            f"{hero_vis} caught out of position completely alone in a pitch-black, misty Dota 2 river without ward vision, "
+            f"looking terrified and dropping overflowing showers of gold coins like a broken ATM machine while being ambushed "
+            f"and surrounded from all sides by menacing {nemesis_en} leaping from the shadows. "
+            f"Shattered armor, dramatic crimson-and-shadow volumetric lighting, Valve Dota 2 digital painting style, "
+            f"ultra-detailed 8k, strictly NO text, NO letters, NO watermarks."
+        )
+        scene_zh = (
+            f"🏧 黑图提款机处刑原画：[{pos}号位] {pname} 的【{hero_zh}】（{sc100}分·落单{solo_cnt}次/死{deaths_cnt}次）"
+            f"在漆黑河道无视野单走，惨遭 {nemesis_zh} 围剿狂爆金币！"
+        )
+    elif archetype in ("win_co_carry", "win_role_pillar") and pos >= 3:
+        role_action_en = (
+            f"blinking into the center of the enemy formation and slamming the ground with a massive {ult_zh or 'crowd-control shockwave'}, "
+            f"sending {defeated_en} flying into the air while shielding his teammates behind a wall of steel and magic"
+            if pos == 3
+            else f"emerging from purple Smoke of Deceit mist on a highground cliff surrounded by glowing blue and yellow Observer/Sentry wards, "
+                 f"casting decisive arcane disables ({ult_zh or 'hex and mystic flares'}) that lock down {defeated_en}"
+        )
+        prompt = (
+            f"Valve Dota 2 The International Collector's Edition splash art, dark-fantasy masterpiece, 16:9 widescreen. "
+            f"CENTERPIECE PLAYMAKER PROTAGONIST (70% center foreground): {hero_vis}, {role_action_en}. "
+            f"Dramatic low-angle heroic perspective, volumetric arcane and golden lighting, ultra-detailed 8k, "
+            f"strictly NO text, NO letters, NO UI, NO watermarks."
+        )
+        scene_zh = (
+            f"⚔️ {pos}号位破阵功臣原画（{cosmetic_label_zh}）：[{pos}号位] {pname} 的【{hero_zh}】（{sc100}/100分）"
+            f"{'先手开团控场震碎敌阵' if pos == 3 else '诡计之雾致命先手+视野封锁'}，助队拿下大胜！"
         )
     else:
-        defeated_en = "; ".join(defeated_props_list) if defeated_props_list else "defeated enemies knocked back in the shockwave"
-        victims_zh = "、".join(victim_zh_list) if victim_zh_list else "敌方全员"
         allies_list = [
             _extract_hero_en_visual(a.get("hero_short_zh", ""), a.get("hero_img", ""), cosmetic_mode).split("(")[0].strip()
             for a in own_players
@@ -2586,7 +2728,7 @@ def build_dota_poster_art_prompt(
         )
         style_tag = (
             "Ufotable / MAPPA anime movie sakuga climax impact frame, 16:9 widescreen masterpiece"
-            if tone == "anime"
+            if archetype == "anime"
             else "Valve Dota 2 The International Collector's Edition MVP centerpiece splash art, dark-fantasy oil-and-digital masterpiece, 16:9 widescreen"
         )
         ult_en_hint = ""
@@ -2623,7 +2765,6 @@ def build_dota_poster_art_prompt(
             f"blazing volumetric god-rays, flying sparks, ultra-detailed 8k, strictly NO text, NO letters, NO UI, NO watermarks."
         )
         ult_desc_zh = f"释放 {ult_casts} 次《{ult_zh}》狂砍 {ult_hits} {ult_unit}，" if ult_zh and ult_casts else ""
-        cosmetic_label_zh = "经典造型" if cosmetic_mode == "classic" else ("二阶段赤红至宝" if cosmetic_mode == "arcana_red" else "顶配至宝+不朽神装")
         scene_zh = (
             f"🔥 独尊 MVP 原画（{cosmetic_label_zh}）：[{pos}号位] {pname} 的【{hero_zh}】（评分 {sc100}/100）霸气独占C位，"
             f"{ult_desc_zh}将 {victims_zh} 斩于马下！"
@@ -2636,7 +2777,8 @@ def build_dota_poster_art_prompt(
     return {
         "prompt": prompt[:1150],
         "scene_summary_zh": scene_zh,
-        "tone": tone,
+        "tone": "roast" if archetype.startswith("roast") or archetype == "passenger" else "epic",
+        "archetype": archetype,
         "hero_zh": hero_zh,
         "player_name": pname,
         "score_100": sc100,

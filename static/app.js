@@ -53,7 +53,174 @@ const state = {
   forensicSelectedSlot: "focus", // Section 6 selected player slot ("focus" | slot | "all")
   llmStatus: null,
   isGeneratingGrok: false,
+  posterArtCache: new Map(), // Persistent in-memory + IndexedDB cache for generated Nano Banana AI artworks
 };
+
+const POSTER_IDB_NAME = "dota_ai_poster_db_v1";
+const POSTER_IDB_STORE = "posters";
+
+function getPosterCacheKey(matchId, playerSlot, careerName = "") {
+  if (careerName) {
+    return `career_${String(careerName).trim()}`;
+  }
+  return `match_${Number(matchId || 0)}_slot_${Number(playerSlot ?? -1)}`;
+}
+
+function openPosterIndexedDb() {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === "undefined") {
+      resolve(null);
+      return;
+    }
+    const req = indexedDB.open(POSTER_IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(POSTER_IDB_STORE)) {
+        const store = db.createObjectStore(POSTER_IDB_STORE, { keyPath: "cache_key" });
+        store.createIndex("by_match", "match_id", { unique: false });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+}
+
+async function idbSavePosterArt(cacheKey, artData, { matchId = 0, playerSlot = -1 } = {}) {
+  if (!cacheKey || !artData || !artData.image_data_url) return;
+  state.posterArtCache.set(cacheKey, artData);
+  try {
+    const db = await openPosterIndexedDb();
+    if (!db) return;
+    await new Promise((resolve) => {
+      const tx = db.transaction(POSTER_IDB_STORE, "readwrite");
+      tx.objectStore(POSTER_IDB_STORE).put({
+        cache_key: cacheKey,
+        match_id: Number(matchId || 0),
+        player_slot: Number(playerSlot ?? -1),
+        saved_at: Date.now(),
+        art: artData,
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    });
+  } catch {
+    // ignore storage quota or private browsing errors
+  }
+}
+
+async function idbGetPosterArt(cacheKey) {
+  if (!cacheKey) return null;
+  if (state.posterArtCache.has(cacheKey)) {
+    return state.posterArtCache.get(cacheKey);
+  }
+  try {
+    const db = await openPosterIndexedDb();
+    if (!db) return null;
+    const record = await new Promise((resolve) => {
+      const tx = db.transaction(POSTER_IDB_STORE, "readonly");
+      const req = tx.objectStore(POSTER_IDB_STORE).get(cacheKey);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+    if (record && record.art && record.art.image_data_url) {
+      state.posterArtCache.set(cacheKey, record.art);
+      return record.art;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+async function hydrateMatchPosterArtsFromIdb(matchId) {
+  if (!matchId) return false;
+  let addedCount = 0;
+  try {
+    const db = await openPosterIndexedDb();
+    if (!db) return false;
+    const records = await new Promise((resolve) => {
+      const tx = db.transaction(POSTER_IDB_STORE, "readonly");
+      const store = tx.objectStore(POSTER_IDB_STORE);
+      const idx = store.index("by_match");
+      const req = idx.getAll(Number(matchId));
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    });
+    records.forEach((rec) => {
+      if (rec && rec.cache_key && rec.art?.image_data_url && !state.posterArtCache.has(rec.cache_key)) {
+        state.posterArtCache.set(rec.cache_key, rec.art);
+        addedCount += 1;
+      }
+    });
+  } catch {
+    // ignore
+  }
+  return addedCount > 0;
+}
+
+function buildInlineCachedArtBannerHtml(matchId, playerSlot, roleTag = "") {
+  const cacheKey = getPosterCacheKey(matchId, playerSlot);
+  const art = state.posterArtCache.get(cacheKey);
+  if (!art || !art.image_data_url) return "";
+  const heroZh = art.hero_zh || "本局英雄";
+  const summaryZh = art.scene_summary_zh || `${heroZh} 专属 Nano Banana 2.1 原画`;
+  return `
+    <div class="inline-nano-art-showcase" style="margin: 10px 0 8px; padding: 10px; border-radius: 10px; background: linear-gradient(135deg, rgba(28, 24, 15, 0.95), rgba(14, 16, 13, 0.98)); border: 1px solid rgba(229, 189, 104, 0.45); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+        <div style="font-size: 12.5px; color: #f5d78e; font-weight: 700;">
+          🍌 已生成专属 AI 典藏原画（已自动持久保存，刷新或关闭弹窗均不丢失）
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button
+            type="button"
+            class="copy-quote-btn"
+            style="border-color: rgba(240, 199, 110, 0.55); color: #f0c76e;"
+            data-player-poster-slot="${Number(playerSlot)}"
+            data-player-poster-tag="${escapeHtml(roleTag)}"
+            data-player-poster-role="${escapeHtml(roleTag)}"
+          >🔍 放大查看 / 切换构图或重新生成</button>
+          <button
+            type="button"
+            class="copy-quote-btn"
+            style="background: rgba(98, 179, 108, 0.22); border-color: rgba(116, 207, 126, 0.55); color: #a7f3b0; font-weight: 700;"
+            data-download-cached-art="${escapeHtml(cacheKey)}"
+            data-download-hero="${escapeHtml(heroZh)}"
+          >💾 直接下载原画 PNG</button>
+        </div>
+      </div>
+      <div
+        style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.14); cursor: pointer; background: #090a08;"
+        data-player-poster-slot="${Number(playerSlot)}"
+        data-player-poster-tag="${escapeHtml(roleTag)}"
+        data-player-poster-role="${escapeHtml(roleTag)}"
+        title="点击放大查看高清原画"
+      >
+        <img
+          src="${escapeHtml(art.image_data_url)}"
+          alt="${escapeHtml(heroZh)} AI 原画"
+          style="display: block; width: 100%; max-height: 360px; object-fit: contain; margin: 0 auto;"
+          loading="lazy"
+        />
+      </div>
+      <div style="margin-top: 6px; font-size: 11.5px; color: #cfc9ba; line-height: 1.45;">
+        🎬 ${escapeHtml(summaryZh)}
+      </div>
+    </div>
+  `;
+}
+
+function downloadCachedPosterArtByKey(cacheKey, heroZh = "hero") {
+  const art = state.posterArtCache.get(cacheKey);
+  if (!art || !art.image_data_url) {
+    showToast("未找到已缓存的原画");
+    return;
+  }
+  const link = document.createElement("a");
+  link.download = `dota2-nano-banana-${state.currentMatchId || "match"}-${heroZh}.png`;
+  link.href = art.image_data_url;
+  link.click();
+  showToast(`已直接下载 ${heroZh} 高清无字原画 PNG！`);
+}
 
 const NW_COLORS_RAD = ["#76b87a", "#9ad49e", "#5d9e8f", "#b2d184", "#7fa882"];
 const NW_COLORS_DIRE = ["#e07a68", "#d9a75c", "#c95b4c", "#e4c282", "#b87a96"];
@@ -5583,6 +5750,14 @@ function renderFullMatchReport(report) {
   renderPhaseSection(report);
   renderKeyWindowsSection(report);
   renderPlayersForensicsList(report);
+
+  // Hydrate any saved Nano Banana AI artworks for this match from IndexedDB so they appear on cards even after refresh
+  hydrateMatchPosterArtsFromIdb(report.match_id).then((added) => {
+    if (added && state.currentReport && Number(state.currentReport.match_id) === Number(report.match_id)) {
+      renderVerdictAndBlameSection(state.currentReport);
+      renderPlayersForensicsList(state.currentReport);
+    }
+  });
 }
 
 /**
@@ -11538,6 +11713,7 @@ function renderVerdictAndBlameSection(report) {
                 </div>
               </div>
               ${chronologyHtml}
+              ${buildInlineCachedArtBannerHtml(report.match_id, p.player_slot, entry.cardHeader)}
               <div class="verdict-quote-bar">
                 <span>${escapeHtml(quoteText)}</span>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;">
@@ -11545,7 +11721,11 @@ function renderVerdictAndBlameSection(report) {
                     entry.roleType === "culprit1" ? "primary" : "secondary"
                   }" data-copy-quote="${escapeHtml(copyText)}">${escapeHtml(entry.copyBtnLabel)}</button>
                   <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(entry.cardHeader)}">🖼️ 生成个人海报</button>
-                  <button type="button" class="button primary" style="background:linear-gradient(135deg,#c9983a 0%,#9e6918 100%);color:#0f110e;font-weight:700;border-color:#e5bd68;" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(entry.cardHeader)}" data-player-nano-auto="1">🍌 AI 超燃原画海报</button>
+                  <button type="button" class="button primary" style="background:linear-gradient(135deg,#c9983a 0%,#9e6918 100%);color:#0f110e;font-weight:700;border-color:#e5bd68;" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(entry.cardHeader)}" data-player-nano-auto="1">${
+                    state.posterArtCache.has(getPosterCacheKey(report.match_id, p.player_slot))
+                      ? "🍌 查看已生成 AI 原画"
+                      : "🍌 AI 超燃原画海报"
+                  }</button>
                 </div>
               </div>
             </div>
@@ -11719,6 +11899,15 @@ function renderVerdictAndBlameSection(report) {
       if (state.currentReport) {
         openSinglePlayerPosterDialog(state.currentReport, slotNum, roleTag, { autoGenerateAiArt: autoAi });
       }
+    });
+  });
+
+  document.querySelectorAll(".verdict-and-blame-section [data-download-cached-art]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const cacheKey = btn.getAttribute("data-download-cached-art") || "";
+      const heroZh = btn.getAttribute("data-download-hero") || "hero";
+      downloadCachedPosterArtByKey(cacheKey, heroZh);
     });
   });
 }
@@ -14482,6 +14671,15 @@ function renderPlayersForensicsList(report) {
       }
     });
   });
+
+  container.querySelectorAll("[data-download-cached-art]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const cacheKey = btn.getAttribute("data-download-cached-art") || "";
+      const heroZh = btn.getAttribute("data-download-hero") || "hero";
+      downloadCachedPosterArtByKey(cacheKey, heroZh);
+    });
+  });
 }
 
 function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
@@ -14709,9 +14907,15 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
             data-player-poster-slot="${p.player_slot}"
             data-player-poster-role="${escapeHtml(scoreTier.label)}"
             data-player-nano-auto="1"
-          >🍌 AI 超燃原画海报</button>
+          >${
+            state.posterArtCache.has(getPosterCacheKey(state.currentReport?.match_id, p.player_slot))
+              ? "🍌 查看已生成 AI 原画"
+              : "🍌 AI 超燃原画海报"
+          }</button>
         </div>
       </div>
+
+      ${buildInlineCachedArtBannerHtml(state.currentReport?.match_id, p.player_slot, scoreTier.label)}
 
       <div class="forensic-metrics-grid">
         <div class="f-metric">
@@ -15594,25 +15798,32 @@ function openCareerHabitPosterDialog(member, squadLedger) {
   const textarea = document.getElementById("share-verdict-textarea");
   if (textarea) textarea.value = lines.join("\n");
 
+  const cacheKey = getPosterCacheKey(0, -1, member.personaname);
   state.activePosterContext = {
     mode: "career",
     careerMember: member,
     totalAnalyzed,
+    cacheKey,
     player: {
       personaname: member.personaname,
       hero_short_zh: (member.signature_heroes?.[0]?.hero_short_zh || member.best_hero?.hero_short_zh || "本命英雄"),
       pos_label: member.best_pos?.pos_label || "常驻主力",
     },
   };
-  state.lastGeneratedPosterArt = null;
-  const statusBadge = document.getElementById("nano-poster-status-badge");
-  if (statusBadge) {
-    const bestH = member.signature_heroes?.[0]?.hero_short_zh || member.best_hero?.hero_short_zh || "本命英雄";
-    statusBadge.textContent = `🎯 待生成生涯原画：${member.personaname} 的代表英雄【${bestH}】（点击上方黄色按钮立即生成 AI 原画海报）`;
-  }
 
-  drawCareerHabitPosterCanvas(member, totalAnalyzed);
   dlg.showModal();
+
+  restoreCachedPosterArtIfAvailable(state.activePosterContext, cacheKey).then((restored) => {
+    if (restored) return;
+    state.lastGeneratedPosterArt = null;
+    state.lastGeneratedPosterImg = null;
+    const statusBadge = document.getElementById("nano-poster-status-badge");
+    if (statusBadge) {
+      const bestH = member.signature_heroes?.[0]?.hero_short_zh || member.best_hero?.hero_short_zh || "本命英雄";
+      statusBadge.textContent = `🎯 待生成生涯原画：${member.personaname} 的代表英雄【${bestH}】（点击上方黄色按钮立即生成 AI 原画海报）`;
+    }
+    drawCareerHabitPosterCanvas(member, totalAnalyzed);
+  });
 }
 
 function drawCareerHabitPosterCanvas(m, totalAnalyzed) {
@@ -16343,7 +16554,36 @@ function wrapCanvasParagraph(ctx, text, maxWidth, maxLines = 4) {
   return lines;
 }
 
-function openSinglePlayerPosterDialog(
+async function restoreCachedPosterArtIfAvailable(ctxInfo, cacheKey) {
+  if (!ctxInfo || !cacheKey) return false;
+  const cachedArt = await idbGetPosterArt(cacheKey);
+  if (!cachedArt || !cachedArt.image_data_url) return false;
+  try {
+    const loadedImg = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("decode failed"));
+      img.src = cachedArt.image_data_url;
+    });
+    state.lastGeneratedPosterArt = cachedArt;
+    state.lastGeneratedPosterImg = loadedImg;
+    drawNanoBananaIllustratedPosterCanvas(ctxInfo, cachedArt, loadedImg);
+
+    const statusBadge = document.getElementById("nano-poster-status-badge");
+    if (statusBadge) {
+      statusBadge.innerHTML = `<span style="color:#8fd196;font-weight:700;">✅ 已为您恢复保存的专属 AI 原画（关闭弹窗或刷新网页均不会丢失）！</span> 如需换一张新构图，可点击上方按钮重新生成`;
+    }
+    const btn = document.getElementById("btn-generate-nano-poster");
+    if (btn) {
+      btn.textContent = "🍌 重新生成一张新的 Nano Banana AI 原画 (覆盖当前图)";
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function openSinglePlayerPosterDialog(
   report,
   playerSlot,
   roleTag = "",
@@ -16413,6 +16653,7 @@ function openSinglePlayerPosterDialog(
   const textarea = document.getElementById("share-verdict-textarea");
   if (textarea) textarea.value = lines.join("\n");
 
+  const cacheKey = getPosterCacheKey(report.match_id, p.player_slot);
   state.activePosterContext = {
     mode: "single",
     report,
@@ -16420,8 +16661,30 @@ function openSinglePlayerPosterDialog(
     player: p,
     grokPlayer: gp,
     badgeTitle,
+    cacheKey,
   };
+
+  const inlineIn = document.getElementById("input-gemini-key-inline");
+  if (inlineIn && !inlineIn.value) {
+    const savedGKey = localStorage.getItem("dota_gemini_poster_key") || "";
+    if (savedGKey) inlineIn.value = savedGKey;
+  }
+
+  dlg.showModal();
+
+  // Check if we already have a generated AI artwork saved in memory or IndexedDB for this player
+  const restored = await restoreCachedPosterArtIfAvailable(state.activePosterContext, cacheKey);
+  if (restored) {
+    // Already have a saved artwork! Do NOT wipe it or re-generate unless the user clicks the regenerate button inside the modal.
+    return;
+  }
+
   state.lastGeneratedPosterArt = null;
+  state.lastGeneratedPosterImg = null;
+  const btn = document.getElementById("btn-generate-nano-poster");
+  if (btn) {
+    btn.textContent = "🍌 用 Nano Banana 生成 AI 超燃/处刑原画海报";
+  }
 
   const victimsStr = ((p.kills_breakdown?.heroes || []).slice(0, 3))
     .map((v) => `${v.hero_short_zh}×${v.count}`)
@@ -16437,14 +16700,7 @@ function openSinglePlayerPosterDialog(
         : `🎯 本局名场面提取：[${p.pos_label}] ${p.personaname} · ${heroZh} (${sc100}分) — 被 ${nemesisStr || "敌方"} 提款 ｜ 点击上方黄色按钮生成 AI 处刑画报`;
   }
 
-  const inlineIn = document.getElementById("input-gemini-key-inline");
-  if (inlineIn && !inlineIn.value) {
-    const savedGKey = localStorage.getItem("dota_gemini_poster_key") || "";
-    if (savedGKey) inlineIn.value = savedGKey;
-  }
-
   drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle);
-  dlg.showModal();
 
   if (autoGenerateAiArt) {
     generateNanoBananaPoster({ force: false });
@@ -16671,6 +16927,23 @@ async function generateNanoBananaPoster({ force = false } = {}) {
     });
     state.lastGeneratedPosterImg = loadedImg;
 
+    // Persist in memory + browser IndexedDB so closing the dialog or refreshing NEVER loses the generated artwork!
+    const cacheKey =
+      ctxInfo.cacheKey ||
+      (ctxInfo.mode === "career"
+        ? getPosterCacheKey(0, -1, ctxInfo.careerMember?.personaname)
+        : getPosterCacheKey(ctxInfo.report?.match_id, ctxInfo.playerSlot ?? ctxInfo.player?.player_slot));
+    await idbSavePosterArt(cacheKey, data, {
+      matchId: ctxInfo.report?.match_id || 0,
+      playerSlot: ctxInfo.playerSlot ?? ctxInfo.player?.player_slot ?? -1,
+    });
+
+    // Update the underlying player cards immediately so the inline AI artwork banner appears on the page too
+    if (state.currentReport && ctxInfo.mode !== "career") {
+      renderVerdictAndBlameSection(state.currentReport);
+      renderPlayersForensicsList(state.currentReport);
+    }
+
     drawNanoBananaIllustratedPosterCanvas(ctxInfo, data, loadedImg);
 
     const engineLabel = data.used_nano_banana
@@ -16679,9 +16952,9 @@ async function generateNanoBananaPoster({ force = false } = {}) {
     if (statusBadge) {
       statusBadge.innerHTML = `<span style="color:#8fd196;font-weight:700;">✅ 已由 ${escapeHtml(
         engineLabel
-      )} 生成纯净无字原画！</span> ${escapeHtml(data.scene_summary_zh || "")}`;
+      )} 生成并自动永久保存！</span> ${escapeHtml(data.scene_summary_zh || "")}`;
     }
-    showToast(`已生成 ${data.hero_zh || ""} 纯净无字至宝原画！右键图片或点击「下载高清 PNG」即可保存`);
+    showToast(`已生成并保存 ${data.hero_zh || ""} 纯净无字原画！关闭弹窗或刷新网页均不会丢失`);
   } catch (err) {
     if (statusBadge) {
       statusBadge.innerHTML = `<span style="color:#ff8a75;">❌ 生图提示：${escapeHtml(err.message)}</span>`;
@@ -16690,7 +16963,7 @@ async function generateNanoBananaPoster({ force = false } = {}) {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "🍌 重新生成 Nano Banana AI 超燃/处刑原画";
+      btn.textContent = "🍌 重新生成一张新的 Nano Banana AI 原画 (覆盖当前图)";
     }
   }
 }
