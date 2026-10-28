@@ -2278,7 +2278,107 @@ def call_llm_pregame_coach(
 # Nano Banana (gemini-nano-banana-2.1) & Grok Imagine 2.0 战报超燃/处刑原画生成引擎
 # ==============================================================================
 
-HERO_VISUAL_TRAITS_MAP: Dict[str, str] = {
+HERO_ARCANA_VISUAL_MAP: Dict[str, str] = {
+    "主宰": (
+        "Juggernaut (Yurnero) wearing his legendary 'Bladeform Legacy' Arcana (至宝剑心之遗): "
+        "his ancient carved mask is split and cracked open down the center with blinding cyan-turquoise and fiery crimson "
+        "dragon-fire pouring from his glowing eyes and glowing runes tattooed across his muscular chest; "
+        "wielding a blazing dual-colored Immortal Dragon-Spirit Katana ('Edge of the Lost Order' / 'Serrakura'), "
+        "while a colossal, roaring translucent turquoise-and-crimson Ancestral Dragon Spirit coils majestically in the sky "
+        "directly behind him, and a glowing golden Immortal lucky-cat Healing Ward totem ('Fortune's Tout') radiates golden light"
+    ),
+    "瘟疫法师": (
+        "Necrophos wearing his full Golden-and-Emerald Immortal set ('Sullen Hollow' & 'Sullen Rampart'): "
+        "glowing golden plague-lord mantle and jade immortal shoulders, wielding a gigantic glowing emerald Immortal Grim Reaper Scythe"
+    ),
+    "马格纳斯": (
+        "Magnus wearing his full Immortal set ('Shock of the Anvil' & Golden Lightning Horn): "
+        "crackling golden-blue lightning horn and colossal molten-lava Immortal warhammer"
+    ),
+    "天怒法师": (
+        "Skywrath Mage wearing his 'The Devotions of Dragonus' Arcana and Golden Immortal Wings: "
+        "divine crimson-and-gold royal feathered wings, glowing arcane crown, and floating golden mystic staff"
+    ),
+    "莱恩": (
+        "Lion wearing his full Rainbow Immortal set ('Hell-Spar Anathema' glowing neon emerald-and-crimson demonic arm, "
+        "crystalline immortal shoulders, and golden hex staff)"
+    ),
+    "破晓辰星": (
+        "Dawnbreaker in her Starforged celestial golden-nebula armor with blazing solar warhammer"
+    ),
+    "痛苦女王": (
+        "Queen of Pain wearing her 'Eminence of Ristul' Arcana: fiery crimson demon-queen form with curved horns, "
+        "bat wings, and a crackling blood-red sonic whip"
+    ),
+    "水晶室女": (
+        "Crystal Maiden wearing her 'Frost Avalanche' Arcana: floating aurora-borealis winter cloak and glowing ice crystal staff"
+    ),
+    "龙骑士": (
+        "Dragon Knight in his ornate crimson-and-gold scaled Davion dragon-slayer armor with dragon crest shield and burning broadsword"
+    ),
+    "风行者": (
+        "Windranger wearing her 'Compass of the Rising Gale' Arcana: glowing turquoise wind-sylph armor and swirling gale longbow"
+    ),
+    "影魔": (
+        "Shadow Fiend wearing his 'Demon Eater' Arcana: pitch-black demonic lord with roaring hellfire magma core and triple shadowraze flames"
+    ),
+    "帕吉": (
+        "Pudge wearing his 'Feast of Abscession' Arcana with glowing green-and-crimson mechanical chainsaws and bloody Dragonclaw Hook"
+    ),
+    "幻影刺客": (
+        "Phantom Assassin wearing her 'Manifold Paradox' Arcana: luminous paradoxical blue-and-gold spectral armor wielding twin dimensional rift blades"
+    ),
+    "敌法师": (
+        "Anti-Mage wearing his Golden 'Basher Blades' Immortal glaives and purple energy mohawk crest"
+    ),
+    "斧王": (
+        "Axe in his 'Axe Unleashed' Immortal form with blazing molten lava mantle and glowing golden Culling Blade greataxe"
+    ),
+    "斯拉克": (
+        "Slark wearing his 'Sea Rake's Bridle' Golden Immortal shark-fin cowl and twin glowing hydrakan daggers"
+    ),
+    "卡尔": (
+        "Invoker wearing his iconic 'Dark Artistry' purple Immortal cape with blazing Quas-Wex-Exort cosmic orbs"
+    ),
+    "祈求者": (
+        "Invoker wearing his iconic 'Dark Artistry' purple Immortal cape with blazing Quas-Wex-Exort cosmic orbs"
+    ),
+    "拉比克": (
+        "Rubick wearing his 'Magus Cypher' Arcana floating green-and-gold geometric cube cape and golden Fantoccini staff"
+    ),
+    "虚空假面": (
+        "Faceless Void wearing his 'Claszian Apostasy' Arcana with eldritch cosmic purple tentacles and glowing Jewel of Aeons mace inside Chronosphere"
+    ),
+    "斯温": (
+        "Sven wearing his 'Vigil Triumph' Immortal glowing blue-and-gold colossal greatsword in red God's Strength armor"
+    ),
+    "莉娜": (
+        "Lina wearing her 'Fiery Soul of the Slayer' Arcana with blazing hair of pure fire and golden flame skirt"
+    ),
+    "宙斯": (
+        "Zeus wearing his 'Tempest Helm of the Thundergod' Arcana riding a crackling storm cloud with divine thunderbolt spear"
+    ),
+    "幽鬼": (
+        "Spectre wearing her 'Phantom Advent' Arcana floating spectral bladed armor with crimson energy daggers"
+    ),
+    "冥魂大帝": (
+        "Wraith King wearing his 'The One True King' Skeleton King Arcana on a fiery bone throne with blazing hellfire greatsword"
+    ),
+    "撼地者": (
+        "Earthshaker wearing his 'Planetfall' Arcana celestial starry-nebula form slamming a cosmic meteor totem"
+    ),
+    "卓尔游侠": (
+        "Drow Ranger wearing her 'Dread Retribution' Arcana in dark crimson-and-silver armor wielding a giant vengeance crossbow"
+    ),
+    "齐天大圣": (
+        "Monkey King wearing his 'Great Sage's Reckoning' Arcana in golden dragon-king armor riding a Nimbus cloud with glowing Golden Jingu Bang staff"
+    ),
+    "恐怖利刃": (
+        "Terrorblade wearing his 'Fractal Horns of Inner Abysm' Arcana with glowing prismatic demon wings and twin metamorphosis scythes"
+    ),
+}
+
+HERO_CLASSIC_VISUAL_MAP: Dict[str, str] = {
     "主宰": "Juggernaut (Yurnero, masked samurai bladesman wearing carved ivory-and-crimson tribal mask, fur shoulder armor, wielding a blazing katana)",
     "瘟疫法师": "Necrophos (Rotund'jere, glowing emerald-green plague prelate wielding a massive grim-reaper scythe surrounded by ghostly green souls)",
     "马格纳斯": "Magnus (Magnoceros, mighty armored centaur-rhino warrior with glowing horn and crackling shockwave poleaxe)",
@@ -2289,83 +2389,105 @@ HERO_VISUAL_TRAITS_MAP: Dict[str, str] = {
     "水晶室女": "Crystal Maiden (Rylai, frost sorceress in blue-and-white fur winter cloak with glowing ice crystal staff)",
     "龙骑士": "Dragon Knight (Davion in crimson-and-gold dragonscale knight armor with shield and broadsword)",
     "风行者": "Windranger (Lyralei, agile ginger archer in emerald woodland cloak with glowing windrun longbow)",
-    "影魔": "Shadow Fiend (Nevermore, pitch-black demonic soul collector with fiery red chest core unleashing Requiem of Souls)",
-    "帕吉": "Pudge (the Butcher with bloody meat hook and cleaver)",
-    "幻影刺客": "Phantom Assassin (Mortred, veiled spectral assassin in dark teal armor wielding twin curved blades with critical blood-splatter)",
-    "敌法师": "Anti-Mage (Magina, muscular monk warrior with purple warpaint and twin crescent mana-break glaives)",
-    "斧王": "Axe (Mogul Khan, red-skinned orc warlord leaping with giant double-bladed Culling Blade greataxe)",
-    "斯拉克": "Slark (agile deep-sea murloc nightcrawler in shadow dance mist with glowing dagger)",
-    "卡尔": "Invoker (Carl, grand blood-elf magus floating with glowing Quas-Wex-Exort elemental orbs)",
-    "祈求者": "Invoker (Carl, grand blood-elf magus floating with glowing Quas-Wex-Exort elemental orbs)",
-    "拉比克": "Rubick (the Grand Magus in green-and-gold robes with twitching mask and green telekinesis staff)",
-    "巫医": "Witch Doctor (Zharvakko, voodoo troll shaman with glowing purple Death Ward skull staff)",
-    "玛尔斯": "Mars (god of war with fiery beard, massive bronze tower shield and burning spear)",
-    "虚空假面": "Faceless Void (Darkterror, purple eyeless time-walker with glowing mace inside a frozen purple Chronosphere dome)",
-    "斯温": "Sven (Rogue Knight in blue-steel helm wielding a colossal God's Strength glowing greatsword)",
-    "莉娜": "Lina (the Slayer, fiery sorceress wreathed in flames casting Laguna Blade lightning)",
-    "宙斯": "Zeus (lord of heaven with white beard and crackling blue thunderbolts)",
-    "风暴之灵": "Storm Spirit (Raijin Thunderkeg, jovial lightning elemental zipping in electric blue ball lightning)",
-    "灰烬之灵": "Ember Spirit (Xin, twin-swordsman warrior ablaze in fiery crimson Flame Guard and Fire Remnants)",
-    "虚无之灵": "Void Spirit (Inai, astral purple martial master wielding a double-bladed cosmic halberd)",
-    "大地之灵": "Earth Spirit (Kaolin, jade stone general surrounded by glowing green stone remnants)",
+}
+
+DEFEATED_ENEMY_PROPS_MAP: Dict[str, str] = {
+    "破晓辰星": "fallen Dawnbreaker kneeling in the dark foreground rubble with her cracked golden warhammer on the ground",
+    "水晶室女": "defeated Crystal Maiden collapsed in the shadows with her shattered ice staff",
+    "痛苦女王": "defeated Queen of Pain knocked down in the lower smoke with torn demon wings",
+    "龙骑士": "fallen Dragon Knight kneeling with his broken dragon shield in the foreground",
+    "风行者": "defeated Windranger knocked back in the shadows with her dropped bow",
+    "主宰": "fallen Juggernaut with a cracked mask and dropped katana in the rubble",
+    "瘟疫法师": "defeated Necrophos knocked down in the shadows with his dropped scythe",
+    "马格纳斯": "fallen Magnus collapsed in the rubble",
+    "天怒法师": "defeated Skywrath Mage knocked down with scattered golden feathers",
+    "莱恩": "defeated Lion knocked down in the dark foreground",
 }
 
 
-def _extract_hero_en_visual(hero_zh: str, img_url: str = "") -> str:
+def _extract_hero_en_visual(hero_zh: str, img_url: str = "", cosmetic_mode: str = "arcana") -> str:
     clean_zh = (hero_zh or "").split("(")[0].strip()
-    if clean_zh in HERO_VISUAL_TRAITS_MAP:
-        return HERO_VISUAL_TRAITS_MAP[clean_zh]
+    if cosmetic_mode != "classic" and clean_zh in HERO_ARCANA_VISUAL_MAP:
+        base_arcana = HERO_ARCANA_VISUAL_MAP[clean_zh]
+        if cosmetic_mode == "arcana_red" and clean_zh == "主宰":
+            return (
+                "Juggernaut (Yurnero) in his Stage-2 Crimson 'Bladeform Legacy' Arcana (二阶段赤红至宝剑心之遗): "
+                "his split mask and armored body are wreathed in intense blood-crimson and molten-gold dragon fire, "
+                "wielding a blazing crimson Immortal katana while a colossal roaring red-and-gold Ancestral Dragon Spirit "
+                "erupts behind him"
+            )
+        return base_arcana
+    if clean_zh in HERO_CLASSIC_VISUAL_MAP:
+        return HERO_CLASSIC_VISUAL_MAP[clean_zh]
     slug = ""
     if img_url:
         m = re.search(r"/heroes/(?:icons/)?([a-z0-9_]+)\.", img_url)
         if m:
             slug = m.group(1).replace("_", " ").title()
     if slug:
+        if cosmetic_mode != "classic":
+            return f"Dota 2 hero {slug} ({clean_zh}) wearing their full glowing Arcana and Immortal cosmetic set"
         return f"Dota 2 hero {slug} ({clean_zh})"
     return f"Dota 2 hero {clean_zh}"
+
+
+def _extract_defeated_enemy_prop(hero_zh: str, img_url: str = "") -> str:
+    clean_zh = (hero_zh or "").split("(")[0].strip()
+    if clean_zh in DEFEATED_ENEMY_PROPS_MAP:
+        return DEFEATED_ENEMY_PROPS_MAP[clean_zh]
+    slug = ""
+    if img_url:
+        m = re.search(r"/heroes/(?:icons/)?([a-z0-9_]+)\.", img_url)
+        if m:
+            slug = m.group(1).replace("_", " ").title()
+    return f"defeated {slug or clean_zh} knocked down in the dark foreground rubble"
 
 
 def build_dota_poster_art_prompt(
     report: Optional[Dict[str, Any]],
     player_slot: Optional[int] = None,
     style_mode: str = "auto",
+    cosmetic_mode: str = "arcana",
     custom_scene: str = "",
     career_member: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     根据单局真实录像数据（击杀猎物、苦主天敌、大招斩击数、核心神装、Grok 评分与判词）或跨局生涯数据，
-    构建专门针对 Nano Banana (gemini-nano-banana-2.1) 优化的高张力 Dota 2 视觉场景 Prompt。
+    构建专门针对 Nano Banana (gemini-nano-banana-2.1) 优化的高张力 Dota 2 视觉场景 Prompt：
+    - 默认穿戴顶配至宝/不朽饰品（如至宝剑圣《剑心之遗》+ 巨型龙魂虚影 + 金色招财猫治疗守卫）；
+    - 绝对凸显主角 MVP C位霸气（占画面中心 75% 仰拍特写，手下败将仅作为脚下暗处被击倒的残影与碎裂武器，绝不像队友并排站立）；
+    - 画面 100% 纯净无任何文字/水印。
     """
     if career_member and not report:
-        m_name = career_member.get("name") or "五黑选手"
+        m_name = career_member.get("name") or career_member.get("personaname") or "五黑选手"
         sigs = career_member.get("signature_heroes") or []
         cursed = career_member.get("cursed_heroes") or []
-        best_h = sigs[0].get("hero_zh") if sigs else "主宰"
+        best_h = (sigs[0].get("hero_short_zh") or sigs[0].get("hero_zh")) if sigs else "主宰"
         best_img = sigs[0].get("hero_img", "") if sigs else ""
-        worst_h = cursed[0].get("hero_zh") if cursed else ""
-        hero_vis = _extract_hero_en_visual(best_h, best_img)
+        worst_h = (cursed[0].get("hero_short_zh") or cursed[0].get("hero_zh")) if cursed else ""
+        hero_vis = _extract_hero_en_visual(best_h, best_img, cosmetic_mode)
         if style_mode == "roast" and worst_h:
-            w_vis = _extract_hero_en_visual(worst_h, cursed[0].get("hero_img", ""))
+            w_vis = _extract_hero_en_visual(worst_h, cursed[0].get("hero_img", ""), cosmetic_mode)
             prompt = (
-                f"Dark-fantasy comedic Dota 2 digital illustration, 16:9 widescreen poster art: "
-                f"{w_vis} looking panicked and overwhelmed in the dark Dire jungle, surrounded by enemy heroes "
+                f"Dark-fantasy comedic Dota 2 digital illustration, 16:9 widescreen artwork: "
+                f"{w_vis} looking panicked and overwhelmed in the dark Dire jungle, surrounded by menacing enemy shadows "
                 f"while dropping gold coins and holding unpressed items. Dramatic volumetric lighting, "
-                f"Valve Dota 2 collector's art style, ultra-detailed, no text or watermarks."
+                f"Valve Dota 2 collector's art style, ultra-detailed, strictly NO text, NO letters, NO UI."
             )
-            scene_zh = f"生涯暗黑处刑画报：{m_name} 的魔咒英雄【{worst_h}】在野区被围剿暴毙名场面"
+            scene_zh = f"生涯暗黑处刑原画：{m_name} 的魔咒英雄【{worst_h}】在野区被围剿暴毙名场面"
         else:
             prompt = (
-                f"Epic Dota 2 dark-fantasy collector's splash art, 16:9 widescreen masterpiece: "
-                f"{hero_vis} standing victorious atop the shattered enemy highground ancient, "
-                f"wielding glowing divine artifacts amidst golden embers and arcane lightning. "
-                f"Cinematic low-angle hero shot, Valve The International key art style, ultra-detailed, no text."
+                f"Epic Dota 2 Collector's Edition key art splash illustration, 16:9 widescreen masterpiece: "
+                f"SOLO MVP FOCUS on {hero_vis} dominating 75% of the center frame in a towering, godlike low-angle hero shot "
+                f"atop the shattered enemy highground ancient throne, radiating golden Aegis of the Immortal light and divine aura. "
+                f"Ultra-detailed 8k, strictly NO text, NO letters, NO watermarks."
             )
-            scene_zh = f"生涯封神招牌画报：{m_name} 的本命绝活【{best_h}】登顶遗迹王座"
+            scene_zh = f"生涯封神招牌原画：{m_name} 的本命绝活【{best_h}】（至宝神装形态）登顶遗迹王座"
         if custom_scene.strip():
             prompt += f" Specific user scene detail: {custom_scene.strip()}."
             scene_zh += f"（定制细节：{custom_scene.strip()}）"
         return {
-            "prompt": prompt[:980],
+            "prompt": prompt[:1150],
             "scene_summary_zh": scene_zh,
             "tone": "roast" if style_mode == "roast" else "epic",
             "hero_zh": best_h,
@@ -2387,7 +2509,7 @@ def build_dota_poster_art_prompt(
     hero_zh = p.get("hero_short_zh") or p.get("hero_name") or "主宰"
     pname = p.get("personaname") or "匿名玩家"
     pos = int(p.get("pos") or 1)
-    hero_vis = _extract_hero_en_visual(hero_zh, p.get("hero_img", ""))
+    hero_vis = _extract_hero_en_visual(hero_zh, p.get("hero_img", ""), cosmetic_mode)
 
     # Find Grok entry & score
     gc = report.get("grok_coaching") or {}
@@ -2402,8 +2524,8 @@ def build_dota_poster_art_prompt(
 
     # Victims killed by this player
     kills_heroes = ((p.get("kills_breakdown") or {}).get("heroes") or [])[:3]
-    victim_vis_list = [
-        _extract_hero_en_visual(v.get("hero_short_zh", ""), v.get("hero_icon", "")).split("(")[0].strip()
+    defeated_props_list = [
+        _extract_defeated_enemy_prop(v.get("hero_short_zh", ""), v.get("hero_icon", ""))
         for v in kills_heroes
         if v.get("hero_short_zh")
     ]
@@ -2412,7 +2534,7 @@ def build_dota_poster_art_prompt(
     # Nemesis who killed this player
     killed_by_heroes = ((p.get("killed_by_breakdown") or {}).get("heroes") or [])[:3]
     nemesis_vis_list = [
-        _extract_hero_en_visual(v.get("hero_short_zh", ""), v.get("hero_icon", "")).split("(")[0].strip()
+        _extract_hero_en_visual(v.get("hero_short_zh", ""), v.get("hero_icon", ""), cosmetic_mode).split("(")[0].strip()
         for v in killed_by_heroes
         if v.get("hero_short_zh")
     ]
@@ -2440,53 +2562,79 @@ def build_dota_poster_art_prompt(
         nemesis_zh = "、".join(nemesis_zh_list) if nemesis_zh_list else "敌方主力"
         prompt = (
             f"Dark-fantasy satirical Dota 2 cinematic illustration, 16:9 widescreen poster key art: "
-            f"{hero_vis} caught out of position alone in a misty dark Dota 2 river and jungle without ward vision, "
-            f"being ambushed and surrounded by menacing {nemesis_en}. "
+            f"{hero_vis} caught out of position alone in a misty dark Dota 2 river without ward vision, "
+            f"panicking while being ambushed and surrounded by menacing {nemesis_en}. "
             f"Spilled gold coins and dropped items on the ground, dramatic crimson-and-shadow volumetric lighting, "
-            f"expressive dynamic action, Valve Dota 2 digital painting style, ultra-detailed, 8k, no text."
+            f"Valve Dota 2 digital painting style, ultra-detailed 8k, strictly NO text, NO letters, NO watermarks."
         )
         scene_zh = (
-            f"🤡 暗黑处刑名场面：[{pos}号位] {pname} 的【{hero_zh}】（评分 {sc100}/100）在黑图河道落单，"
+            f"🤡 暗黑处刑原画：[{pos}号位] {pname} 的【{hero_zh}】（评分 {sc100}/100）在黑图河道落单，"
             f"惨遭敌方 {nemesis_zh} 围剿提款！"
         )
     else:
-        victims_en = ", ".join(victim_vis_list) if victim_vis_list else "defeated enemy heroes"
+        defeated_en = "; ".join(defeated_props_list) if defeated_props_list else "defeated enemies knocked back in the shockwave"
         victims_zh = "、".join(victim_zh_list) if victim_zh_list else "敌方全员"
+        allies_list = [
+            _extract_hero_en_visual(a.get("hero_short_zh", ""), a.get("hero_img", ""), cosmetic_mode).split("(")[0].strip()
+            for a in own_players
+            if a.get("player_slot") != p.get("player_slot") and a.get("hero_short_zh")
+        ][:2]
+        allies_bg_en = (
+            f"In the distant background behind him, his smaller ally silhouettes ({', '.join(allies_list)}) back up his charge, "
+            if allies_list
+            else ""
+        )
         style_tag = (
-            "Ufotable / MAPPA anime movie sakuga action frame, extreme speed lines and glowing aura impact frames, 16:9 widescreen masterpiece"
+            "Ufotable / MAPPA anime movie sakuga climax impact frame, 16:9 widescreen masterpiece"
             if tone == "anime"
-            else "Valve Dota 2 The International Collector's Edition key art splash illustration, dark-fantasy oil-and-digital masterpiece, 16:9 widescreen"
+            else "Valve Dota 2 The International Collector's Edition MVP centerpiece splash art, dark-fantasy oil-and-digital masterpiece, 16:9 widescreen"
         )
         ult_en_hint = ""
         if "无敌斩" in ult_zh or "主宰" in hero_zh:
-            ult_en_hint = "unleashing a blinding storm of Omnislash golden-crimson sword slashes and Blade Fury whirlwind alongside a glowing golden Healing Ward totem"
+            ult_en_hint = (
+                "in a dramatic heroic low-angle close-up dominating 70% of the center foreground under a blazing golden MVP spotlight, "
+                "leaping forward and unleashing an unstoppable storm of Omnislash cyan-and-crimson dragon-spirit katana slashes"
+            )
         elif "镰刀" in ult_zh or "瘟疫法师" in hero_zh:
-            ult_en_hint = "summoning a colossal glowing emerald Reaper's Scythe execution beam amidst Ghost Shroud spirits and golden Radiance aura"
+            ult_en_hint = (
+                "in a dramatic heroic low-angle close-up dominating 70% of the center foreground under a blazing golden-emerald MVP spotlight, "
+                "summoning a colossal glowing emerald Immortal Reaper's Scythe execution beam"
+            )
         elif "两极反转" in ult_zh or "马格纳斯" in hero_zh:
-            ult_en_hint = "slamming his crackling horn to unleash a massive Reverse Polarity gravitational shockwave pulling enemies together"
+            ult_en_hint = (
+                "in a dramatic heroic low-angle close-up dominating 70% of the center foreground under a blazing golden MVP spotlight, "
+                "slamming his lightning Immortal warhammer to unleash a devastating Reverse Polarity shockwave"
+            )
         elif ult_zh:
-            ult_en_hint = f"unleashing their signature ultimate ability ({ult_zh}) in a storm of arcane energy"
+            ult_en_hint = (
+                f"in a dramatic heroic low-angle close-up dominating 70% of the center foreground under a blazing golden MVP spotlight, "
+                f"unleashing their signature ultimate ability ({ult_zh}) with overwhelming godlike MVP aura"
+            )
         else:
-            ult_en_hint = "unleashing devastating ultimate power in a storm of glowing energy"
+            ult_en_hint = (
+                "in a dramatic heroic low-angle close-up dominating 70% of the center foreground under a blazing golden MVP spotlight, "
+                "radiating overwhelming godlike MVP conqueror aura"
+            )
 
         prompt = (
-            f"{style_tag}: {hero_vis} in the center foreground, {ult_en_hint}, "
-            f"cutting down and overwhelming defeated {victims_en} on the shattered Dota 2 highground battlefield. "
-            f"Glowing embers, shattered armor, dramatic volumetric rim lighting, intense low-angle heroic perspective, "
-            f"ultra-detailed 8k, no text or watermarks."
+            f"{style_tag}. UNDISPUTED CENTERPIECE MVP PROTAGONIST (2x larger in foreground): {hero_vis}, {ult_en_hint}. "
+            f"{allies_bg_en}while in the lower corners and periphery his overwhelmed enemies ({defeated_en}) are being sent flying and cut down by his attack shockwave. "
+            f"Extreme visual hierarchy making the center hero the unmistakable #1 MVP superstar of the battlefield, "
+            f"blazing volumetric god-rays, flying sparks, ultra-detailed 8k, strictly NO text, NO letters, NO UI, NO watermarks."
         )
         ult_desc_zh = f"释放 {ult_casts} 次《{ult_zh}》狂砍 {ult_hits} {ult_unit}，" if ult_zh and ult_casts else ""
+        cosmetic_label_zh = "经典造型" if cosmetic_mode == "classic" else ("二阶段赤红至宝" if cosmetic_mode == "arcana_red" else "顶配至宝+不朽神装")
         scene_zh = (
-            f"🔥 史诗封神名场面：[{pos}号位] {pname} 的【{hero_zh}】（评分 {sc100}/100）携 "
-            f"{'·'.join(final_items[:3]) or '神装'}，{ult_desc_zh}正面手刃 {victims_zh} 主宰战场！"
+            f"🔥 独尊 MVP 原画（{cosmetic_label_zh}）：[{pos}号位] {pname} 的【{hero_zh}】（评分 {sc100}/100）霸气独占C位，"
+            f"{ult_desc_zh}将 {victims_zh} 斩于马下！"
         )
 
     if custom_scene.strip():
-        prompt = f"{prompt[:760]} Additional specific scene detail requested: {custom_scene.strip()}."
-        scene_zh += f" ｜ 定制画面：{custom_scene.strip()}"
+        prompt = f"{prompt[:920]} Additional specific scene detail requested: {custom_scene.strip()}."
+        scene_zh += f" ｜ 定制细节：{custom_scene.strip()}"
 
     return {
-        "prompt": prompt[:980],
+        "prompt": prompt[:1150],
         "scene_summary_zh": scene_zh,
         "tone": tone,
         "hero_zh": hero_zh,
@@ -2499,13 +2647,49 @@ def build_dota_poster_art_prompt(
 
 def _call_gemini_nano_banana_api(prompt: str, gemini_key: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
-    使用 Google Gemini Nano Banana (`gemini-nano-banana-2.1`) 生成图片。
-    优先走 Interactions API (`v1beta/interactions`)，若特定账号层级不支持则自动尝试 `generateContent` 接口。
+    使用 Google Gemini Nano Banana (`gemini-nano-banana-2.1`) 生成 16:9 纯净原画。
+    优先走速度最快、响应最稳的 `v1beta/models/gemini-nano-banana-2.1:generateContent` (~15s)，
+    若不可用再回退 `v1beta/interactions` 或 `gemini-3-pro-image`。
     返回: (data_uri, model_used, error_msg)
     """
     errors: List[str] = []
 
-    # 1. Modern Interactions API with gemini-nano-banana-2.1
+    # 1. Fast direct generateContent endpoint with gemini-nano-banana-2.1
+    for model_candidate in ("gemini-nano-banana-2.1", "nano-banana-pro-preview", "gemini-3-pro-image"):
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_candidate}:generateContent?key={gemini_key}"
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                method="POST",
+                headers={
+                    "Content-Type": "application/json",
+                    "User-Agent": "DotaAiAnalyst/2.0",
+                },
+            )
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            for cand in (data.get("candidates") or []):
+                for part in ((cand.get("content") or {}).get("parts") or []):
+                    inl = part.get("inlineData") or part.get("inline_data")
+                    if isinstance(inl, dict) and inl.get("data"):
+                        mime = inl.get("mimeType") or inl.get("mime_type") or "image/png"
+                        return f"data:{mime};base64,{inl['data']}", model_candidate, None
+        except urllib.error.HTTPError as he:
+            body_err = ""
+            try:
+                body_err = he.read().decode("utf-8", errors="ignore")[:240]
+            except Exception:
+                pass
+            errors.append(f"{model_candidate}(generateContent HTTP {he.code}): {body_err}")
+        except Exception as e:
+            errors.append(f"{model_candidate}(generateContent): {e}")
+
+    # 2. Fallback to Interactions API
     for model_candidate in ("gemini-nano-banana-2.1", "gemini-3-pro-image"):
         try:
             url = "https://generativelanguage.googleapis.com/v1beta/interactions"
@@ -2524,10 +2708,9 @@ def _call_gemini_nano_banana_api(prompt: str, gemini_key: str) -> Tuple[Optional
                     "User-Agent": "DotaAiAnalyst/2.0",
                 },
             )
-            with urllib.request.urlopen(req, timeout=55) as resp:
+            with urllib.request.urlopen(req, timeout=45) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
 
-            # Extract image bytes from Interactions response shapes
             out_img = data.get("output_image")
             if isinstance(out_img, dict) and out_img.get("data"):
                 mime = out_img.get("mime_type") or "image/png"
@@ -2539,60 +2722,8 @@ def _call_gemini_nano_banana_api(prompt: str, gemini_key: str) -> Tuple[Optional
                     mime = item.get("mime_type") or (item.get("image") or {}).get("mime_type") or "image/png"
                     if b64:
                         return f"data:{mime};base64,{b64}", model_candidate, None
-
-            for step in (data.get("steps") or []):
-                mo = (step or {}).get("model_output") or {}
-                for c in (mo.get("content") or []):
-                    if isinstance(c, dict) and c.get("type") == "image":
-                        img_obj = c.get("image") if isinstance(c.get("image"), dict) else c
-                        b64 = img_obj.get("data")
-                        mime = img_obj.get("mime_type") or "image/png"
-                        if b64:
-                            return f"data:{mime};base64,{b64}", model_candidate, None
-        except urllib.error.HTTPError as he:
-            body_err = ""
-            try:
-                body_err = he.read().decode("utf-8", errors="ignore")[:240]
-            except Exception:
-                pass
-            errors.append(f"{model_candidate}(interactions HTTP {he.code}): {body_err}")
         except Exception as e:
             errors.append(f"{model_candidate}(interactions): {e}")
-
-    # 2. Fallback to generateContent endpoint with IMAGE modality
-    for model_candidate in ("gemini-nano-banana-2.1", "gemini-3-pro-image"):
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_candidate}:generateContent?key={gemini_key}"
-            payload = {
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
-            }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-                method="POST",
-                headers={
-                    "Content-Type": "application/json",
-                    "User-Agent": "DotaAiAnalyst/2.0",
-                },
-            )
-            with urllib.request.urlopen(req, timeout=55) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-            for cand in (data.get("candidates") or []):
-                for part in ((cand.get("content") or {}).get("parts") or []):
-                    inl = part.get("inlineData") or part.get("inline_data")
-                    if isinstance(inl, dict) and inl.get("data"):
-                        mime = inl.get("mimeType") or inl.get("mime_type") or "image/png"
-                        return f"data:{mime};base64,{inl['data']}", model_candidate, None
-        except urllib.error.HTTPError as he:
-            body_err = ""
-            try:
-                body_err = he.read().decode("utf-8", errors="ignore")[:240]
-            except Exception:
-                pass
-            errors.append(f"{model_candidate}(generateContent HTTP {he.code}): {body_err}")
-        except Exception as e:
-            errors.append(f"{model_candidate}(generateContent): {e}")
 
     return None, None, " | ".join(errors[:2]) if errors else "Gemini Nano Banana 未返回有效图像数据"
 
@@ -2639,6 +2770,7 @@ def call_nano_banana_poster_art(
     report: Optional[Dict[str, Any]],
     player_slot: Optional[int] = None,
     style_mode: str = "auto",
+    cosmetic_mode: str = "arcana",
     custom_scene: str = "",
     engine_pref: str = "auto",
     gemini_api_key: str = "",
@@ -2664,6 +2796,7 @@ def call_nano_banana_poster_art(
         report=report,
         player_slot=player_slot,
         style_mode=style_mode,
+        cosmetic_mode=cosmetic_mode,
         custom_scene=custom_scene,
         career_member=career_member,
     )
@@ -2673,7 +2806,7 @@ def call_nano_banana_poster_art(
     mid = (report or {}).get("match_id") or "career"
     slot_key = str(player_slot if player_slot is not None else (career_member or {}).get("account_id", "team"))
     provider_tag = "gemini" if (g_key and engine_pref != "grok") else "xai"
-    cache_hash = hashlib.md5(f"{mid}:{slot_key}:{style_mode}:{provider_tag}:{custom_scene.strip()}".encode("utf-8")).hexdigest()[:12]
+    cache_hash = hashlib.md5(f"{mid}:{slot_key}:{style_mode}:{cosmetic_mode}:{provider_tag}:{custom_scene.strip()}".encode("utf-8")).hexdigest()[:12]
     cache_filename = f"poster_art_{mid}_{slot_key}_{cache_hash}.json"
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -2697,7 +2830,7 @@ def call_nano_banana_poster_art(
     err_notes: List[str] = []
 
     # Try Nano Banana (gemini-nano-banana-2.1) first when gemini_api_key is available and engine_pref != 'grok'
-    if engine_pref in ("auto", "nano_banana") and g_key:
+    if engine_pref in ("auto", "nano_banana", "nano_banana_strict") and g_key:
         img_data_url, model_used, g_err = _call_gemini_nano_banana_api(prompt, g_key)
         if g_err:
             err_notes.append(f"Nano Banana 提示: {g_err}")

@@ -841,6 +841,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 mid_raw = body.get("match_id")
                 player_slot = body.get("player_slot")
                 style_mode = str(body.get("style_mode") or "auto")
+                cosmetic_mode = str(body.get("cosmetic_mode") or "arcana")
                 custom_scene = str(body.get("custom_scene") or "")
                 engine_pref = str(body.get("engine_pref") or "auto")
                 gemini_api_key = str(body.get("gemini_api_key") or "")
@@ -862,6 +863,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     report=report,
                     player_slot=int(player_slot) if player_slot is not None and str(player_slot) != "" else None,
                     style_mode=style_mode,
+                    cosmetic_mode=cosmetic_mode,
                     custom_scene=custom_scene,
                     engine_pref=engine_pref,
                     gemini_api_key=gemini_api_key,

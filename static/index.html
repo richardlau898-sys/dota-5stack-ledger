@@ -695,30 +695,44 @@
           <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;">
             <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1;">
               <label style="font-size:12px;color:var(--gold-light);font-weight:700;display:flex;align-items:center;gap:5px;">
-                <span>🎨 海报原画风格：</span>
+                <span>👑 英雄饰品外观：</span>
+                <select id="select-nano-cosmetic" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
+                  <option value="arcana">👑 顶配至宝 + 不朽神装 (如至宝剑圣·剑心之遗+龙魂刀)</option>
+                  <option value="arcana_red">🔥 至宝二阶段·赤红烈焰形态 (狂暴杀神配色)</option>
+                  <option value="classic">🛡️ 原版默认造型</option>
+                </select>
+              </label>
+              <label style="font-size:12px;color:var(--gold-light);font-weight:700;display:flex;align-items:center;gap:5px;">
+                <span>🎨 构图风格：</span>
                 <select id="select-nano-poster-style" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
-                  <option value="auto">✨ 智能按本局表现生成 (MVP超燃砍翻全场 / 战犯暗黑处刑)</option>
-                  <option value="epic">🔥 史诗封神大片 (大招收割 · 刀光剑影手刃猎物)</option>
-                  <option value="roast">🤡 暗黑处刑画报 (战犯被抓 · 黑图落单被提款名场面)</option>
+                  <option value="auto">✨ 智能按本局表现 (MVP独尊C位砍翻全场 / 战犯暗黑处刑)</option>
+                  <option value="epic">🔥 史诗封神大片 (MVP霸气C位 · 手下败将斩于马下)</option>
+                  <option value="roast">🤡 暗黑处刑画报 (战犯落单 · 黑图被围剿提款名场面)</option>
                   <option value="anime">⚡ 热血番剧剧场版 (极致光影 · 必杀技动漫分镜)</option>
                 </select>
               </label>
               <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;">
-                <span>⚙️ 生图引擎：</span>
+                <span>🖼️ 导出样式：</span>
+                <select id="select-nano-layout" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
+                  <option value="pure">🖼️ 纯享无字原画 (100% 原图直出 · 零文字遮挡)</option>
+                  <option value="dossier">📜 合成战报长图版 (原画 + 底部数据卷宗)</option>
+                </select>
+              </label>
+              <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;">
+                <span>⚙️ 引擎：</span>
                 <select id="select-nano-poster-engine" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
-                  <option value="auto">🍌 智能双擎 (填 Gemini Key 走 Nano Banana 2.1 / 留空自动用内置 Grok Imagine 2.0)</option>
-                  <option value="nano_banana_strict">🍌 强制 Google Nano Banana 2.1 (gemini-nano-banana-2.1)</option>
-                  <option value="grok">⚡ 内置 xAI Grok Imagine 2.0 (服务端免配 Key)</option>
+                  <option value="auto">🍌 Google Nano Banana 2.1 (服务端已内置 Gemini Key)</option>
+                  <option value="grok">⚡ xAI Grok Imagine 2.0 (备用引擎)</option>
                 </select>
               </label>
             </div>
-            <div id="nano-gemini-key-wrap" style="display:flex;align-items:center;gap:6px;min-width:260px;">
-              <input id="input-gemini-key-inline" type="password" placeholder="🔑 填 Gemini API Key 启用 Nano Banana 2.1" autocomplete="off" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:11.5px;width:255px;" />
+            <div id="nano-gemini-key-wrap" style="display:none;align-items:center;gap:6px;">
+              <input id="input-gemini-key-inline" type="password" placeholder="🔑 自定义 Gemini Key (可选)" autocomplete="off" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:11.5px;width:190px;" />
             </div>
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-            <input id="input-nano-custom-scene" type="text" placeholder="✍️ 可选填自定义画面细节（如：剑圣开无敌斩把对面破晓辰星、痛苦女王和龙骑士全砍翻在天辉高地阶梯上）..." style="flex:1;min-width:260px;background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:5px 10px;border-radius:4px;font-size:12px;" />
-            <span id="nano-poster-status-badge" style="font-size:11.5px;color:#a5a296;">💡 自动读取本局击杀猎物、大招次数、神装与 Grok 判词生成专属原画</span>
+            <input id="input-nano-custom-scene" type="text" placeholder="✍️ 可选填自定义画面细节（如：至宝剑圣开启青色龙魂无敌斩，把破晓辰星、痛苦女王和水晶室女全砍翻在脚下）..." style="flex:1;min-width:260px;background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:5px 10px;border-radius:4px;font-size:12px;" />
+            <span id="nano-poster-status-badge" style="font-size:11.5px;color:#a5a296;">💡 已默认启用【至宝神装 + MVP 霸气C位 + 纯享无字原图】</span>
           </div>
         </div>
         <div class="poster-split-grid">
@@ -816,6 +830,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=6.8.0" defer></script>
+  <script src="/app.js?v=6.8.1" defer></script>
 </body>
 </html>

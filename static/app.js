@@ -4831,6 +4831,19 @@ function bindEvents() {
     });
   }
 
+  const nanoLayoutSelect = document.getElementById("select-nano-layout");
+  if (nanoLayoutSelect) {
+    nanoLayoutSelect.addEventListener("change", () => {
+      if (state.activePosterContext && state.lastGeneratedPosterArt && state.lastGeneratedPosterImg) {
+        drawNanoBananaIllustratedPosterCanvas(
+          state.activePosterContext,
+          state.lastGeneratedPosterArt,
+          state.lastGeneratedPosterImg
+        );
+      }
+    });
+  }
+
   const inlineGeminiKeyInput = document.getElementById("input-gemini-key-inline");
   if (inlineGeminiKeyInput) {
     const savedGKey = localStorage.getItem("dota_gemini_poster_key") || "";
@@ -16604,6 +16617,7 @@ async function generateNanoBananaPoster({ force = false } = {}) {
   const btn = document.getElementById("btn-generate-nano-poster");
   const statusBadge = document.getElementById("nano-poster-status-badge");
   const styleMode = document.getElementById("select-nano-poster-style")?.value || "auto";
+  const cosmeticMode = document.getElementById("select-nano-cosmetic")?.value || "arcana";
   const enginePref = document.getElementById("select-nano-poster-engine")?.value || "auto";
   const customScene = document.getElementById("input-nano-custom-scene")?.value.trim() || "";
   const inlineGKey = document.getElementById("input-gemini-key-inline")?.value.trim() || "";
@@ -16615,10 +16629,10 @@ async function generateNanoBananaPoster({ force = false } = {}) {
 
   if (btn) {
     btn.disabled = true;
-    btn.textContent = "🍌 AI 正在根据本局战绩绘制超燃英雄原画 (约4~8秒)...";
+    btn.textContent = "🍌 Nano Banana 2.1 正在绘制至宝 MVP 原画 (约8~15秒)...";
   }
   if (statusBadge) {
-    statusBadge.textContent = "🎨 正在读取本局击杀猎物、大招斩击与神装细节并渲染高清战斗大片...";
+    statusBadge.textContent = "🎨 正在按至宝神装与 MVP 霸气C位构图渲染纯净无字高清原画...";
   }
 
   try {
@@ -16626,6 +16640,7 @@ async function generateNanoBananaPoster({ force = false } = {}) {
       match_id: ctxInfo.report?.match_id || null,
       player_slot: ctxInfo.playerSlot ?? ctxInfo.player?.player_slot ?? null,
       style_mode: styleMode,
+      cosmetic_mode: cosmeticMode,
       engine_pref: enginePref,
       custom_scene: customScene,
       gemini_api_key: geminiKey,
@@ -16654,6 +16669,7 @@ async function generateNanoBananaPoster({ force = false } = {}) {
       img.onerror = () => reject(new Error("AI 原画图像解码失败"));
       img.src = data.image_data_url;
     });
+    state.lastGeneratedPosterImg = loadedImg;
 
     drawNanoBananaIllustratedPosterCanvas(ctxInfo, data, loadedImg);
 
@@ -16663,9 +16679,9 @@ async function generateNanoBananaPoster({ force = false } = {}) {
     if (statusBadge) {
       statusBadge.innerHTML = `<span style="color:#8fd196;font-weight:700;">✅ 已由 ${escapeHtml(
         engineLabel
-      )} 生成完毕！</span> ${escapeHtml(data.scene_summary_zh || "")}`;
+      )} 生成纯净无字原画！</span> ${escapeHtml(data.scene_summary_zh || "")}`;
     }
-    showToast(`已生成 ${data.hero_zh || ""} 专属 AI 战斗原画海报！点击「下载高清 PNG」即可保存`);
+    showToast(`已生成 ${data.hero_zh || ""} 纯净无字至宝原画！右键图片或点击「下载高清 PNG」即可保存`);
   } catch (err) {
     if (statusBadge) {
       statusBadge.innerHTML = `<span style="color:#ff8a75;">❌ 生图提示：${escapeHtml(err.message)}</span>`;
@@ -16674,7 +16690,7 @@ async function generateNanoBananaPoster({ force = false } = {}) {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "🍌 重新生成 Nano Banana AI 超燃/处刑原画海报";
+      btn.textContent = "🍌 重新生成 Nano Banana AI 超燃/处刑原画";
     }
   }
 }
@@ -16682,6 +16698,21 @@ async function generateNanoBananaPoster({ force = false } = {}) {
 function drawNanoBananaIllustratedPosterCanvas(ctxInfo, artData, loadedImg) {
   const canvas = document.getElementById("share-poster-canvas");
   if (!canvas || !loadedImg) return;
+
+  const layoutMode = document.getElementById("select-nano-layout")?.value || "pure";
+
+  // Default Mode: 100% Pure Unobstructed Original AI Artwork (zero text, zero boxes)
+  if (layoutMode === "pure") {
+    const natW = loadedImg.naturalWidth || loadedImg.width || 1344;
+    const natH = loadedImg.naturalHeight || loadedImg.height || 768;
+    canvas.width = natW;
+    canvas.height = natH;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, natW, natH);
+    ctx.drawImage(loadedImg, 0, 0, natW, natH);
+    return;
+  }
 
   const W = 920;
   const H = 1190;
