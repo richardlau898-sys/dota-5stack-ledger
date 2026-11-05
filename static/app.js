@@ -5614,13 +5614,16 @@ async function loadMatchReport(
 
     if (!isParsedNow) {
       showToast(
-        `⏳ 比赛 #${state.currentMatchId} 刚结束，OpenDota 正在解析 .dem 录像（当前为基础统计），已自动提交解析并为您轮询更新...`,
+        `⏳ 比赛 #${state.currentMatchId} OpenDota 正在解析 .dem 录像（当前为基础统计），已自动提交解析并为您轮询更新...`,
         6500
       );
       scheduleAutoReplayParsePoll(state.currentMatchId);
+      if ((analyzeNow || forceRefresh) && (!hasGrokNow || forceRefresh) && !state.isGeneratingGrok) {
+        triggerGrokReview({ force: forceRefresh });
+      }
     } else if ((analyzeNow || forceRefresh) && (!hasGrokNow || forceRefresh) && !state.isGeneratingGrok) {
       showToast(
-        `✅ 录像级 12 维拆解已就绪！正在并发调用 Grok 4.7 生成五人深度研判与三幕长段复盘 (约15~20秒)...`,
+        `✅ 录像级 12 维拆解已就绪！正在并发调用 Grok 4.7 生成五人深度研判与三幕长段复盘 (约15秒)...`,
         6000
       );
       triggerGrokReview({ force: forceRefresh });
@@ -5646,17 +5649,24 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
   }
   _autoParsePollTimer = setTimeout(async () => {
     if (Number(state.currentMatchId) !== Number(matchId) || state.currentReport?.is_parsed) return;
+    if (state.isGeneratingGrok) {
+      scheduleAutoReplayParsePoll(matchId, attempt);
+      return;
+    }
     try {
       const res = await fetch(
         `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
           state.accountId
-        )}&refresh=1&analyze=1`
+        )}&refresh=1&analyze=1&skip_llm=1`
       );
       const data = await res.json();
       if (data.ok && data.report?.is_parsed) {
+        if (state.currentReport?.grok_coaching?.title && !data.report.grok_coaching?.title) {
+          data.report.grok_coaching = state.currentReport.grok_coaching;
+        }
         state.currentReport = data.report;
         renderFullMatchReport(state.currentReport);
-        showToast(`🎉 OpenDota 录像解析已完成！已自动升级为完整 11 维录像级数据并启动 Grok 4.7 算账`, 5500);
+        showToast(`🎉 OpenDota 录像解析已完成！已自动升级为完整 12 维录像级数据`, 5500);
         if (!state.currentReport.grok_coaching?.title && !state.isGeneratingGrok) {
           triggerGrokReview({ force: true });
         }
@@ -5666,7 +5676,7 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
       // ignore poll error
     }
     scheduleAutoReplayParsePoll(matchId, attempt + 1);
-  }, 6000);
+  }, 8000);
 }
 
 async function triggerGrokReview({ force = true } = {}) {

@@ -401,22 +401,21 @@ def get_or_build_match_report(
 
     report = analyze_match_data(raw_match, roster, focus_account_id=aid)
 
-    # Preserve existing deep Grok coaching if not force-refreshing, otherwise auto-invoke xAI Grok 4.7 LLM review
+    # Preserve existing deep Grok coaching across replay parse refreshes, otherwise auto-invoke xAI Grok 4.7 LLM review
     existing_grok = None
-    if not force_refresh:
-        for jc in (json_cache, tmp_json_cache):
-            if jc.exists():
-                try:
-                    old_d = json.loads(jc.read_text(encoding="utf-8"))
-                    if isinstance(old_d, dict) and _has_complete_grok_coaching(old_d.get("grok_coaching")):
-                        existing_grok = old_d["grok_coaching"]
-                        break
-                except Exception:
-                    pass
-        if not existing_grok:
-            hydrated = _hydrate_grok_from_caches(report, match_id)
-            if _has_complete_grok_coaching(hydrated.get("grok_coaching")):
-                existing_grok = hydrated["grok_coaching"]
+    for jc in (tmp_json_cache, json_cache):
+        if jc.exists():
+            try:
+                old_d = json.loads(jc.read_text(encoding="utf-8"))
+                if isinstance(old_d, dict) and _has_complete_grok_coaching(old_d.get("grok_coaching")):
+                    existing_grok = old_d["grok_coaching"]
+                    break
+            except Exception:
+                pass
+    if not existing_grok:
+        hydrated = _hydrate_grok_from_caches(report, match_id)
+        if _has_complete_grok_coaching(hydrated.get("grok_coaching")):
+            existing_grok = hydrated["grok_coaching"]
     if existing_grok:
         report["grok_coaching"] = existing_grok
     elif not skip_llm:
@@ -799,7 +798,21 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 base_url = body.get("base_url") or ""
                 side = body.get("side") or "dire"
                 force = bool(body.get("force", True))
-                report = get_or_build_match_report(mid, allow_build=True, require_ai=False, skip_llm=True)
+
+                # Fast-path: load existing match report from local/tmp disk in 0ms without blocking on OpenDota parse polling
+                report = None
+                for jc_fast in (TMP_REPORTS_DIR / f"match_{mid}.json", REPORTS_DIR / f"match_{mid}.json"):
+                    if jc_fast.exists():
+                        try:
+                            cand_rep = json.loads(jc_fast.read_text(encoding="utf-8"))
+                            if isinstance(cand_rep, dict) and cand_rep.get("match_id"):
+                                report = _hydrate_grok_from_caches(cand_rep, mid)
+                                break
+                        except Exception:
+                            pass
+                if not isinstance(report, dict):
+                    report = get_or_build_match_report(mid, allow_build=True, require_ai=False, skip_llm=True)
+
                 if not force and isinstance(report, dict) and _has_complete_grok_coaching(report.get("grok_coaching")):
                     self._send_json({
                         "ok": True,
@@ -825,11 +838,9 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                         TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                         (TMP_REPORTS_DIR / f"match_{mid}.json").write_text(rep_txt, encoding="utf-8")
                     try:
-                        with ThreadPoolExecutor(max_workers=2) as save_pool:
+                        with ThreadPoolExecutor(max_workers=1) as save_pool:
                             f1 = save_pool.submit(cloud_save_match_report, mid, report)
-                            f2 = save_pool.submit(cloud_save_coaching, mid, side, res["structured"])
-                            f1.result(timeout=12)
-                            f2.result(timeout=12)
+                            f1.result(timeout=6)
                     except Exception:
                         pass
                 res["report"] = sanitize_report_mixed_english(report)
