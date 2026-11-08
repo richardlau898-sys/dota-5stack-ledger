@@ -4365,6 +4365,7 @@ async function initApp() {
   // If user opened a direct shared match URL (?match=<id>), load that match report immediately!
   let directMatchLoaded = false;
   if (urlMatchId) {
+    state.userSelectedMatch = true;
     try {
       await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true, fromPopState: true });
       directMatchLoaded = true;
@@ -4386,7 +4387,7 @@ async function initApp() {
     state.accountId = state.roster.main_account_id || 86080912;
 
     const firstReport = data.latest_match_report || data.latest_report;
-    if (!directMatchLoaded && firstReport) {
+    if (!directMatchLoaded && !state.userSelectedMatch && firstReport) {
       state.currentMatchId = firstReport.match_id;
       state.currentReport = firstReport;
       toggleOnDemandGate(false);
@@ -5232,7 +5233,7 @@ function renderRecentMatchesStrip(matches) {
         return;
       }
       const mid = Number(btn.getAttribute("data-match-card"));
-      if (mid) await loadMatchReport(mid);
+      if (mid) await loadMatchReport(mid, { analyzeNow: true, switchToPostgame: true });
     });
   });
 }
@@ -5449,7 +5450,7 @@ function renderHomeWorkspace() {
       }
       const mid = Number(card.getAttribute("data-home-match-id"));
       if (mid) {
-        await loadMatchReport(mid, { switchToPostgame: true });
+        await loadMatchReport(mid, { analyzeNow: true, switchToPostgame: true });
       }
     });
   });
@@ -5540,6 +5541,41 @@ async function loadMatchReport(
   matchId,
   { forceRefresh = false, analyzeNow = false, switchToPostgame = true, fromPopState = false } = {}
 ) {
+  state.userSelectedMatch = true;
+  state.loadMatchSeq = (state.loadMatchSeq || 0) + 1;
+  const reqSeq = state.loadMatchSeq;
+  const targetMid = Number(matchId);
+
+  // Immediately clear stale previous-match view if switching to a different match
+  if (Number(state.currentReport?.match_id) !== targetMid) {
+    state.currentMatchId = targetMid;
+    highlightSelectedMatchCard(targetMid);
+    const contentEl = document.getElementById("analyzed-report-content");
+    const gateEl = document.getElementById("on-demand-analysis-gate");
+    if (contentEl && gateEl) {
+      contentEl.hidden = true;
+      gateEl.hidden = false;
+      const recentList = state.profileData?.recent_matches || [];
+      const meta = recentList.find((m) => Number(m.match_id) === targetMid) || null;
+      const titleEl = document.getElementById("gate-title");
+      const summaryEl = document.getElementById("gate-summary");
+      const confirmBtn = document.getElementById("btn-confirm-analyze-match");
+      if (titleEl) {
+        const heroShort = meta ? meta.hero_short_zh || meta.hero_name || "" : "";
+        titleEl.textContent = analyzeNow
+          ? `⏳ 正在拉取并深度拆解比赛 #${targetMid}${heroShort ? `（${heroShort}）` : ""} 录像数据...`
+          : `比赛 #${targetMid}${heroShort ? `（${heroShort}）` : ""} 尚未执行 AI 复盘`;
+      }
+      if (summaryEl && analyzeNow) {
+        summaryEl.textContent = "正在读取比赛底层日志、构建十二维战术显微镜与五人时间轴复盘，请稍候 1~3 秒...";
+      }
+      if (confirmBtn && analyzeNow) {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = `🤖 正在加载比赛 #${targetMid} 深度复盘...`;
+      }
+    }
+  }
+
   if (switchToPostgame && state.workspaceMode !== "postgame") {
     switchWorkspaceMode("postgame", { pushUrl: false });
   }
@@ -5557,6 +5593,7 @@ async function loadMatchReport(
       state.accountId
     )}${flags}`;
     const res = await fetch(url);
+    if (reqSeq !== state.loadMatchSeq) return; // Ignore stale out-of-order response
     const rawText = await res.text();
     let data = null;
     try {
@@ -5565,6 +5602,12 @@ async function loadMatchReport(
       throw new Error(`服务端响应超时或异常 (${res.status})，请稍后重试`);
     }
     if (!data.ok) throw new Error(data.error || "读取比赛失败");
+
+    const confirmBtn = document.getElementById("btn-confirm-analyze-match");
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "⚡ 立即让 AI 深度分析本局并生成公开分享链接";
+    }
 
     if (data.not_analyzed) {
       const localMap = getLocalAnalyzedMatchesMap();
@@ -8990,12 +9033,6 @@ const RECIPE_COMPONENT_NAMES = new Set([
   "暗影护符",
   "魔力法杖",
   "食人魔之斧",
-  "欢欣之刃",
-  "阔剑",
-  "大剑",
-  "秘银锤",
-  "标枪",
-  "闪电指套",
   "坚韧球",
   "宝冕",
   "镇魂石",
@@ -9014,31 +9051,87 @@ const RECIPE_COMPONENT_NAMES = new Set([
   "怨灵系带",
   "护腕",
   "空灵挂件",
-  "精气之球",
-  "活力之球",
-  "能量之球",
-  "极限法球",
-  "神秘法杖",
   "王权",
   "玲珑心卷轴",
   "图纸",
+  "恐鳌之戒",
+  "精灵布带",
+  "闪避护符",
+  "护胫甲",
+  "圣者遗物",
+  "双刃剑",
+  "单刀",
+  "玉米聚宝盆",
+  "丰饶之环",
+  "钻石",
+  "短棍",
+  "攻击之爪",
+  "圆盾",
+  "压制之刃",
+  "魔棒",
+  "大魔棒",
+  "仙灵之火",
+  "芒果",
+  "净化药水",
+  "树之祭祀",
+  "治疗药膏",
+  "血腥榴弹",
 ]);
 
-function filterMajorItems(itemsBought, maxCnt = 3) {
+function filterMajorItems(itemsBought, maxCnt = 14) {
   const raw = Array.isArray(itemsBought) ? itemsBought : [];
   if (raw.length === 0) return [];
-  const major = raw.filter((it) => {
+  const parseSecLocal = (tStr) => {
+    const parts = String(tStr || "0:00").split(":");
+    if (parts.length !== 2) return 0;
+    return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+  };
+  const SUBCOMPONENT_UPGRADES_ZH = {
+    夜叉: ["夜慧对剑", "慧夜对剑", "散夜对剑", "幻影斧", "分身斧"],
+    散华: ["散夜对剑", "慧夜对剑", "深渊之刃"],
+    慧光: ["夜慧对剑", "慧夜对剑"],
+    魔龙枪: ["飓风长戟"],
+    原力法杖: ["飓风长戟"],
+    暗影之刃: ["白银之锋"],
+    影刃: ["白银之锋"],
+    紫怨: ["血棘"],
+    漩涡: ["雷神之锤", "缚灵索"],
+    阿托斯之棍: ["缚灵索"],
+    回音战刃: ["鱼叉"],
+    碎颅锤: ["深渊之刃"],
+    梅肯斯姆: ["卫士胫甲"],
+    奥术鞋: ["卫士胫甲"],
+    影之灵龛: ["魂之灵瓮"],
+    微光护盾: ["炎阳纹章"],
+    先锋盾: ["赤红甲", "深渊之刃"],
+    巫师之刃: ["英灵胸针"],
+    灵匣: ["绝刃"],
+  };
+
+  const major = raw.filter((it, idx) => {
     const name = String(it.zh_name || it.key || "").trim();
     if (!name) return false;
-    if (RECIPE_COMPONENT_NAMES.has(name)) return false;
+    if (RECIPE_COMPONENT_NAMES.has(name) || name.endsWith("卷轴")) return false;
     if (name.includes("速度之靴") && raw.some((x) => x !== it && String(x.zh_name || "").includes("鞋"))) {
       return false;
+    }
+    const upgrades = SUBCOMPONENT_UPGRADES_ZH[name];
+    if (upgrades) {
+      const mySec = parseSecLocal(it.time_str);
+      const hasImmediateUpgrade = raw.some((other, oIdx) => {
+        if (oIdx <= idx) return false;
+        const oName = String(other.zh_name || other.key || "").trim();
+        if (!upgrades.some((u) => oName.includes(u))) return false;
+        const oSec = parseSecLocal(other.time_str);
+        return oSec >= mySec && oSec - mySec <= 150;
+      });
+      if (hasImmediateUpgrade) return false;
     }
     return true;
   });
   const chosen = major.length > 0 ? major : raw.filter((it) => !RECIPE_COMPONENT_NAMES.has(String(it.zh_name || "")));
   const list = chosen.length > 0 ? chosen : raw;
-  return list.length > maxCnt ? list.slice(-maxCnt) : list;
+  return list.length > maxCnt ? list.slice(0, maxCnt) : list;
 }
 
 /**
@@ -9426,21 +9519,28 @@ function analyzePlayerItemizationIntelligence(p, report) {
   const khandaOrPhylactery = hasItemMatch(/绝刃|灵匣|phylactery|khanda/i);
 
   if (isCore) {
+    const pa = p.playstyle_archetype_audit || {};
+    const lotusItem = hasItemMatch(/清莲宝珠|莲花|lotus_orb/i);
     if (bkbItem) {
       badges.push(`🛡️ BKB稳健(${bkbItem.time_str})`);
       highlights.push(`🛡️ <b>核心BKB纪律性（${bkbItem.time_str} 黑皇杖）：</b>按时做出BKB保障团战输出环境。`);
     } else {
       // Did not buy BKB: judge whether it was a smart skip or a throw
-      const hasBuiltInImmunity = /主宰|噬魂鬼|全能骑士|帕克/.test(heroShort);
+      const hasBuiltInImmunity = /主宰|噬魂鬼|全能骑士|帕克|潮汐猎人/.test(heroShort);
       const totalDeaths = Number(p.deaths || 0);
-      if (hasBuiltInImmunity && totalDeaths <= 3) {
+      if (pa.is_smart_playstyle_pivot && (lotusItem || heroShort === "潮汐猎人")) {
+        badges.push(`🌊 ${pa.archetype_badge || "法系A杖巨浪炮台流"}`);
+        if (lotusItem) {
+          badges.push(`🪷 清莲宝珠反制(${lotusItem.time_str})`);
+        }
+      } else if (hasBuiltInImmunity && totalDeaths <= 3) {
         badges.push("🧠 剑舞分身免BKB满输出");
         highlights.push(
           `🧠 <b>不出BKB合理性审计（免喷认证）：</b>虽然整局未出黑皇杖(BKB)，但依靠 <b>剑刃风暴魔免 + ${
             mantaItem ? `分身斧(${mantaItem.time_str})解状态` : "技能机制"
           } + 双无敌斩无敌帧</b> 全场仅阵亡 <b>${totalDeaths} 次</b>，省下BKB格子直接合成 <b>金箍棒+A杖</b> 将输出拉到极致！`
         );
-      } else if (totalDeaths >= 6 && !forceItem) {
+      } else if (totalDeaths >= 6 && !forceItem && !lotusItem) {
         badges.push("🚨 缺BKB/推推自保");
         warnings.push(
           `🚨 <b>保命装缺失吐槽点（0 BKB / 0 推推棒）：</b>身为 ${pos}号位核心全场阵亡 <b>${totalDeaths} 次（泉水读秒 ${
@@ -9514,7 +9614,90 @@ function analyzePlayerItemizationIntelligence(p, report) {
     }
   }
 
-  const timelinePills = filterMajorItems(phaseItems.map((it) => ({ zh_name: it.zh, key: it.key, time_str: it.time_str })), 6)
+  // -------------------------------------------------------------------------
+  // 4. Deep Playstyle Archetype + Spell Damage Share + Skill/Talents + Neutral & 7.38 Enchantments
+  // -------------------------------------------------------------------------
+  const paAudit = p.playstyle_archetype_audit || {};
+  const df = report.deep_forensics || {};
+  const dqRows = df.damage_quality_and_build_by_side?.[side]?.player_rows || [];
+  const dqRow =
+    p.damage_and_build_audit ||
+    dqRows.find((r) => Number(r.pos) === pos || r.hero_short_zh === heroShort) ||
+    {};
+  const ncRows = df.macro_objectives_by_side?.[side]?.neutral_craft_rows || [];
+  const ncRow =
+    p.neutral_craft_audit ||
+    ncRows.find((r) => Number(r.pos) === pos || r.hero_short_zh === heroShort) ||
+    {};
+
+  if (paAudit.archetype_badge && !badges.some((b) => b.includes(paAudit.archetype_badge))) {
+    badges.unshift(paAudit.archetype_badge);
+  }
+
+  const deepForensicBullets = [];
+  if (paAudit.archetype_analysis_zh) {
+    deepForensicBullets.push(
+      `<span style="color:#a7f3d0;"><b>${escapeHtml(paAudit.archetype_analysis_zh)}</b></span>`
+    );
+  }
+  if (paAudit.spell_damage_breakdown_zh) {
+    deepForensicBullets.push(
+      `<span style="color:#fde68a;">${escapeHtml(paAudit.spell_damage_breakdown_zh)}</span>`
+    );
+  } else if (Array.isArray(p.damage_by_source_rich) && p.damage_by_source_rich.length > 0) {
+    const topSrcStr = p.damage_by_source_rich
+      .slice(0, 5)
+      .map(
+        (s) =>
+          `《${escapeHtml(s.zh_name || s.key)}》${s.casts ? `释放 ${s.casts} 次` : ""}造成 <b>${fmtNum(
+            s.damage
+          )}</b> 伤害（<b>${s.share_pct}%</b>）`
+      )
+      .join(" ｜ ");
+    deepForensicBullets.push(`💥 <b>核心技能与道具伤害占比拆解：</b>${topSrcStr}。`);
+  }
+
+  if (paAudit.skill_and_talent_audit_zh) {
+    deepForensicBullets.push(
+      `<span style="color:#bfdbfe;">${escapeHtml(paAudit.skill_and_talent_audit_zh)}</span>`
+    );
+  } else if (dqRow.skill_route_summary_zh || (dqRow.talents_chosen || []).length > 0) {
+    const tStr = (dqRow.talents_chosen || []).join(" → ") || "常规天赋";
+    deepForensicBullets.push(
+      `🌿 <b>技能加点路线 &amp; 10/15/20/25级天赋树选择：</b>前中期加点【<b>${escapeHtml(
+        dqRow.skill_route_summary_zh || "主核心技能"
+      )}</b>】，天赋依次点出【<b>${escapeHtml(tStr)}</b>】。`
+    );
+  }
+
+  if (paAudit.neutral_and_enchantment_audit_zh) {
+    deepForensicBullets.push(
+      `<span style="color:#e9d5ff;">${escapeHtml(paAudit.neutral_and_enchantment_audit_zh)}</span>`
+    );
+  } else if ((ncRow.craft_steps || []).length > 0) {
+    const cStr = ncRow.craft_steps
+      .map(
+        (cs) =>
+          `${escapeHtml(cs.time_str || "")}【T${escapeHtml(cs.tier || "?")}·<b>${escapeHtml(
+            cs.item_zh || ""
+          )}</b>${cs.ench_zh ? ` + <b>${escapeHtml(cs.ench_zh)}</b>` : ""}】`
+      )
+      .join(" → ");
+    deepForensicBullets.push(`🎲 <b>中立道具演进与 7.38 附魔词条选择：</b>${cStr}。`);
+  }
+
+  highlights.unshift(...deepForensicBullets);
+
+  // Build full chronological item progression pills from key_item_timings_rich or phaseItems (no .slice(-6) truncation!)
+  const richTimings = Array.isArray(p.key_item_timings_rich) && p.key_item_timings_rich.length > 0
+    ? p.key_item_timings_rich.map((it) => ({
+        zh_name: it.zh_name || it.key,
+        key: it.key,
+        time_str: it.time_str,
+      }))
+    : phaseItems.map((it) => ({ zh_name: it.zh, key: it.key, time_str: it.time_str }));
+
+  const timelinePills = filterMajorItems(richTimings, 14)
     .map((it) => `<span class="item-intel-step">${escapeHtml(it.zh_name)} <b>${escapeHtml(it.time_str)}</b></span>`)
     .join('<span class="item-intel-arrow">→</span>');
 
@@ -11206,13 +11389,14 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     }
   }
 
-  // When Grok 4.7 item audit is present, ONLY show Grok's superior item audit (no weak rule-based item warnings)
+  // Show BOTH Grok 4.7's deep item review AND the 4 granular forensic breakdowns (Playstyle + Spell Damage + Talents + Neutral & 7.38 Enchantments)
   const grokItemAuditLine = grokP?.item_and_blink_audit || "";
   const allItemBullets = grokItemAuditLine
     ? [
-        `<span style="color:#ddd6fe;"><b>🤖 XAI / GROK-4.7 深度 AI 出装·克制·跳刀锐评：</b>${escapeHtml(
+        `<span style="color:#ddd6fe;"><b>🤖 XAI / GROK-4.7 深度 AI 流派·出装·天赋·附魔·跳刀锐评：</b>${escapeHtml(
           grokItemAuditLine
         )}</span>`,
+        ...itemIntel.highlights.slice(0, 4),
       ]
     : [...itemIntel.highlights, ...itemIntel.warnings];
   const itemIntelBoxHtml =
@@ -12204,13 +12388,20 @@ function renderMinuteScrubber(report) {
     maxLabelEl.textContent = snaps[maxMin]?.time_str || `${maxMin}:00`;
   }
 
-  // Build quick-jump pills for key moments (10m Laning End, 20m Mid, Roshan/Highground markers, Final)
+  // Build quick-jump pills for key moments (10m Laning End, 20m Mid, Key Teamfights, Roshan/Highground markers, Final)
   if (jumpsEl) {
     const jumpTargets = [
       { m: Math.min(10, maxMin), label: "10:00 对线期交卷" },
-      { m: Math.min(20, maxMin), label: "20:00 中期抱团点" },
+      { m: Math.min(20, maxMin), label: "20:00 中期团战节点" },
     ];
-    (report.objective_markers || []).slice(0, 5).forEach((mk) => {
+    (report.key_teamfights || []).slice(0, 5).forEach((tf, idxTf) => {
+      const mVal = Math.min(maxMin, Math.max(1, Math.round(Number(tf.start_sec || 0) / 60)));
+      jumpTargets.push({
+        m: mVal,
+        label: `⚔️ ${String(mVal).padStart(2, "0")}:00 团战#${idxTf + 1}(${tf.kills_trade || ""})`,
+      });
+    });
+    (report.objective_markers || []).slice(0, 4).forEach((mk) => {
       const mVal = Math.min(maxMin, Math.max(1, Math.round(Number(mk.time_sec || 0) / 60)));
       jumpTargets.push({
         m: mVal,
@@ -12221,14 +12412,14 @@ function renderMinuteScrubber(report) {
 
     const seenMins = new Set();
     const uniqueJumps = jumpTargets.filter((jt) => {
-      const key = `${jt.m}_${jt.label}`;
+      const key = `${jt.m}`;
       if (seenMins.has(key)) return false;
       seenMins.add(key);
       return true;
     });
 
     jumpsEl.innerHTML =
-      `<span style="font-size:11px;color:var(--muted);margin-right:4px;">⚡ 一键跳至关键帧：</span>` +
+      `<span style="font-size:11px;color:var(--muted);margin-right:4px;">⚡ 一键跳至团战/关键帧：</span>` +
       uniqueJumps
         .map(
           (jt) =>
@@ -12275,6 +12466,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
 
   // Count active wards on map at this exact minute
   const allWards = report.vision_and_map_data?.wards || [];
+  const heatmaps = report.vision_and_map_data?.lane_heatmaps || [];
   const secNow = idx * 60;
   const activeObsAtMin = allWards.filter(
     (w) =>
@@ -12282,8 +12474,373 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       Number(w.time_sec ?? 0) <= secNow &&
       secNow <= Number(w.left_sec ?? Number(w.time_sec ?? 0) + 360)
   );
+  const activeSenAtMin = allWards.filter(
+    (w) =>
+      w.type === "sen" &&
+      Number(w.time_sec ?? 0) <= secNow &&
+      secNow <= Number(w.left_sec ?? Number(w.time_sec ?? 0) + 420)
+  );
   const radObsNow = activeObsAtMin.filter((w) => w.side === "radiant" || w.side === "天辉").length;
   const direObsNow = activeObsAtMin.filter((w) => w.side === "dire" || w.side === "夜魇").length;
+
+  // Find active teamfight in this minute window (±70 seconds around secNow)
+  const tfForensics = report.deep_forensics?.teamfight_forensics || [];
+  const keyTfs = report.key_teamfights || [];
+  const activeTfForensic =
+    tfForensics.find((tf) => {
+      const s = Number(tf.start_sec ?? 0);
+      const e = Number(tf.end_sec ?? s + 40);
+      return secNow >= s - 55 && secNow <= e + 55;
+    }) || null;
+  const activeKeyTf =
+    keyTfs.find((tf) => {
+      const s = Number(tf.start_sec ?? 0);
+      const e = Number(tf.end_sec ?? s + 40);
+      return secNow >= s - 55 && secNow <= e + 55;
+    }) || null;
+
+  // Check unpressed BKB / save incidents in this time window
+  const allUnpressedIncidents = [
+    ...(report.deep_forensics?.unpressed_saves_by_side?.radiant?.incidents || []),
+    ...(report.deep_forensics?.unpressed_saves_by_side?.dire?.incidents || []),
+  ];
+  const parseRangeStartSec = (tr) => {
+    const m = String(tr || "").match(/(\d+):(\d+)/);
+    return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : -999;
+  };
+  const activeUnpressedByHero = new Map();
+  allUnpressedIncidents.forEach((inc) => {
+    const incSec = parseRangeStartSec(inc.time_range);
+    if (Math.abs(incSec - secNow) <= 75 && inc.hero_short_zh) {
+      activeUnpressedByHero.set(inc.hero_short_zh, inc);
+    }
+  });
+
+  // Determine 2D Minimap coordinates (0..100%) for all 10 heroes at minute `idx`
+  const allFullPlayers = [...(report.radiant_pos_1_to_5 || []), ...(report.dire_pos_1_to_5 || [])];
+  const fullPlayerByHero = new Map(allFullPlayers.map((fp) => [fp.hero_short_zh, fp]));
+
+  // Compute clash center if a teamfight is happening
+  let clashCenter = null;
+  if (activeTfForensic && Array.isArray(activeTfForensic.deaths_pos) && activeTfForensic.deaths_pos.length > 0) {
+    const avgX =
+      activeTfForensic.deaths_pos.reduce((acc, d) => acc + Number(d.nx || 50), 0) /
+      activeTfForensic.deaths_pos.length;
+    const avgY =
+      activeTfForensic.deaths_pos.reduce((acc, d) => acc + Number(d.ny || 50), 0) /
+      activeTfForensic.deaths_pos.length;
+    clashCenter = { nx: Math.max(12, Math.min(88, avgX)), ny: Math.max(12, Math.min(88, avgY)) };
+  } else if (activeKeyTf || activeTfForensic) {
+    clashCenter = idx <= 15 ? { nx: 50, ny: 50 } : idx <= 28 ? { nx: 44, ny: 44 } : { nx: 62, ny: 38 };
+  }
+
+  const tfParticipantsMap = new Map();
+  const rawParts = activeTfForensic?.participants || activeKeyTf?.participants || [];
+  rawParts.forEach((pt) => {
+    if (pt.hero_short_zh) tfParticipantsMap.set(pt.hero_short_zh, pt);
+  });
+
+  const getHeroMinimapCoords = (pSnap, pIdx) => {
+    const hName = pSnap.hero_short_zh || "";
+    const isRad = pSnap.side === "radiant";
+    const posNum = Number(pSnap.pos || (pIdx % 5) + 1);
+    const fullP = fullPlayerByHero.get(hName) || {};
+
+    // 1. If in active teamfight and has exact death position, or participated in fight
+    if (activeTfForensic && Array.isArray(activeTfForensic.deaths_pos)) {
+      const exactDeath = activeTfForensic.deaths_pos.find((d) => d.hero_short_zh === hName);
+      if (exactDeath && exactDeath.nx && exactDeath.ny) {
+        return { nx: Number(exactDeath.nx), ny: Number(exactDeath.ny), inFight: true, diedNow: true };
+      }
+    }
+    const pt = tfParticipantsMap.get(hName);
+    if (clashCenter && pt && (Number(pt.damage || 0) > 0 || Number(pt.deaths || 0) > 0 || Number(pt.healing || 0) > 0)) {
+      const angle = ((posNum - 1) / 5) * Math.PI * 1.4 + (isRad ? 2.1 : -0.9);
+      const radius = 5.5 + (posNum % 2) * 2.5;
+      const nx = Math.max(8, Math.min(92, clashCenter.nx + Math.cos(angle) * radius));
+      const ny = Math.max(8, Math.min(92, clashCenter.ny + Math.sin(angle) * radius));
+      return { nx, ny, inFight: true, diedNow: Number(pt.deaths || 0) > 0 };
+    }
+
+    // 2. Laning phase (0 - 10m): use real lane_heatmaps centroid or raw_lane coordinates
+    if (idx <= 10) {
+      const myHeat = heatmaps.filter((h) => h.hero_short_zh === hName);
+      if (myHeat.length > 0) {
+        const wSum = myHeat.reduce((s, h) => s + Number(h.weight || 1), 0) || 1;
+        const hx = myHeat.reduce((s, h) => s + Number(h.nx || 50) * Number(h.weight || 1), 0) / wSum;
+        const hy = myHeat.reduce((s, h) => s + Number(h.ny || 50) * Number(h.weight || 1), 0) / wSum;
+        return { nx: Math.round(hx * 10) / 10, ny: Math.round(hy * 10) / 10, inFight: false, diedNow: false };
+      }
+      const laneId = Number(fullP.raw_lane || (posNum === 2 ? 2 : isRad ? (posNum === 1 || posNum === 5 ? 1 : 3) : posNum === 1 || posNum === 5 ? 3 : 1));
+      if (laneId === 3) {
+        return isRad
+          ? { nx: 17 + posNum * 1.5, ny: 26 + posNum * 1.8, inFight: false, diedNow: false }
+          : { nx: 23 + posNum * 1.5, ny: 18 + posNum * 1.5, inFight: false, diedNow: false };
+      }
+      if (laneId === 2) {
+        return isRad
+          ? { nx: 45, ny: 55, inFight: false, diedNow: false }
+          : { nx: 55, ny: 45, inFight: false, diedNow: false };
+      }
+      return isRad
+        ? { nx: 76 + (posNum % 2) * 3, ny: 80 - (posNum % 2) * 3, inFight: false, diedNow: false }
+        : { nx: 83 - (posNum % 2) * 3, ny: 71 + (posNum % 2) * 3, inFight: false, diedNow: false };
+    }
+
+    // 3. Mid / Late game map distribution along active vision / lanes / jungle
+    const progress = Math.min(1, Math.max(0, (idx - 10) / Math.max(15, snaps.length - 10)));
+    const advShift = Math.max(-18, Math.min(18, (radGoldAdv / 15000) * 14));
+    const laneAnchorsRad = [
+      { nx: 34 + advShift, ny: 64 - advShift }, // Pos 1 farming/pushing
+      { nx: 48 + advShift, ny: 52 - advShift }, // Pos 2 mid/roam
+      { nx: 28 + advShift, ny: 34 - advShift * 0.6 }, // Pos 3 offlane/front
+      { nx: 42 + advShift, ny: 46 - advShift }, // Pos 4 roam
+      { nx: 38 + advShift, ny: 58 - advShift }, // Pos 5 ward/babysit
+    ];
+    const laneAnchorsDire = [
+      { nx: 66 + advShift, ny: 36 - advShift }, // Pos 1
+      { nx: 54 + advShift, ny: 46 - advShift }, // Pos 2
+      { nx: 72 + advShift, ny: 64 - advShift * 0.6 }, // Pos 3
+      { nx: 58 + advShift, ny: 42 - advShift }, // Pos 4
+      { nx: 62 + advShift, ny: 38 - advShift }, // Pos 5
+    ];
+    const baseAnchor = (isRad ? laneAnchorsRad : laneAnchorsDire)[Math.min(4, Math.max(0, posNum - 1))];
+    const jitterX = Math.sin(idx * 1.3 + posNum * 2.1) * (4 + progress * 3);
+    const jitterY = Math.cos(idx * 1.7 + posNum * 1.9) * (4 + progress * 3);
+    return {
+      nx: Math.max(10, Math.min(90, Math.round((baseAnchor.nx + jitterX) * 10) / 10)),
+      ny: Math.max(10, Math.min(90, Math.round((baseAnchor.ny + jitterY) * 10) / 10)),
+      inFight: false,
+      diedNow: false,
+    };
+  };
+
+  // Build SVG Minimap with 10 Hero Avatars + Wards + Clash Ring
+  const wardNodesSvg = [
+    ...activeObsAtMin.map(
+      (w) =>
+        `<circle cx="${w.nx * 3.2}" cy="${w.ny * 3.2}" r="5" fill="${
+          w.side === "radiant" || w.side === "天辉" ? "#fbbf24" : "#f59e0b"
+        }" stroke="#111" stroke-width="1.2" opacity="0.9"><title>👁️ ${escapeHtml(
+          w.hero_short_zh || ""
+        )} 假眼 (${escapeHtml(w.time_str || "")})</title></circle>`
+    ),
+    ...activeSenAtMin.map(
+      (w) =>
+        `<circle cx="${w.nx * 3.2}" cy="${w.ny * 3.2}" r="3.8" fill="#60a5fa" stroke="#111" stroke-width="1" opacity="0.85"><title>🔵 ${escapeHtml(
+          w.hero_short_zh || ""
+        )} 真眼 (${escapeHtml(w.time_str || "")})</title></circle>`
+    ),
+  ].join("");
+
+  const clashRingSvg = clashCenter
+    ? `
+      <circle cx="${clashCenter.nx * 3.2}" cy="${clashCenter.ny * 3.2}" r="38" fill="rgba(239, 68, 68, 0.16)" stroke="#ef4444" stroke-width="1.8" stroke-dasharray="5,3" />
+      <circle cx="${clashCenter.nx * 3.2}" cy="${clashCenter.ny * 3.2}" r="22" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="1.2" />
+      <text x="${clashCenter.nx * 3.2}" y="${Math.max(16, clashCenter.ny * 3.2 - 42)}" fill="#fca5a5" font-size="10.5" font-weight="700" text-anchor="middle">⚔️ 团战交火中心 (${escapeHtml(
+        activeTfForensic?.time_range || activeKeyTf?.time_range || snap.time_str || ""
+      )})</text>
+    `
+    : "";
+
+  const heroAvatarNodesSvg = players
+    .map((pSnap, i) => {
+      const hName = pSnap.hero_short_zh || "";
+      const fullP = fullPlayerByHero.get(hName) || {};
+      const iconUrl = fullP.hero_icon || pSnap.hero_img || fullP.hero_img || "";
+      const coords = getHeroMinimapCoords(pSnap, i);
+      const cx = (coords.nx * 3.2).toFixed(1);
+      const cy = (coords.ny * 3.2).toFixed(1);
+      const isRad = pSnap.side === "radiant";
+      const strokeColor = isRad ? "#4ade80" : "#f87171";
+      const pt = tfParticipantsMap.get(hName);
+      const hasBkbInBag = (pSnap.items || []).some((it) => /黑皇杖|black_king_bar/i.test(it.zh || it.key || ""));
+      const bkbUsedInTf = Boolean(
+        pt?.bkb_used ||
+          (pt?.items_used || []).some((u) => /黑皇杖|black_king_bar/i.test(u.zh || u.key || "")) ||
+          (Array.isArray(pt?.item_uses) && pt.item_uses.some((u) => /黑皇杖|black_king_bar/i.test(String(u))))
+      );
+      const unpressedInc = activeUnpressedByHero.get(hName);
+      const clipId = `scrub-hero-clip-${idx}-${i}`;
+
+      let statusBadgeSvg = "";
+      if (unpressedInc) {
+        statusBadgeSvg = `<rect x="${Number(cx) - 18}" y="${Number(cy) - 23}" width="36" height="11" rx="3" fill="#dc2626" stroke="#fff" stroke-width="0.7" /><text x="${cx}" y="${Number(cy) - 15}" fill="#fff" font-size="7.5" font-weight="700" text-anchor="middle">🚨憋BKB</text>`;
+      } else if (bkbUsedInTf) {
+        statusBadgeSvg = `<rect x="${Number(cx) - 16}" y="${Number(cy) - 23}" width="32" height="11" rx="3" fill="#d97706" stroke="#fde68a" stroke-width="0.7" /><text x="${cx}" y="${Number(cy) - 15}" fill="#fff" font-size="7.5" font-weight="700" text-anchor="middle">🛡️BKB</text>`;
+      } else if (coords.diedNow) {
+        statusBadgeSvg = `<text x="${Number(cx) + 10}" y="${Number(cy) - 8}" font-size="11" text-anchor="middle">💀</text>`;
+      } else if (hasBkbInBag) {
+        statusBadgeSvg = `<circle cx="${Number(cx) + 9}" cy="${Number(cy) - 9}" r="4" fill="#fbbf24" stroke="#111" stroke-width="0.8"><title>已持有黑皇杖(BKB)</title></circle>`;
+      }
+
+      return `
+        <g class="scrub-map-hero-node" style="cursor:pointer;">
+          <defs>
+            <clipPath id="${clipId}">
+              <circle cx="${cx}" cy="${cy}" r="11" />
+            </clipPath>
+          </defs>
+          <circle cx="${cx}" cy="${cy}" r="12.5" fill="#141613" stroke="${
+        coords.diedNow ? "#ef4444" : strokeColor
+      }" stroke-width="${coords.inFight ? "2.6" : "2"}" />
+          ${
+            iconUrl
+              ? `<image href="${escapeHtml(iconUrl)}" x="${Number(cx) - 11}" y="${
+                  Number(cy) - 11
+                }" width="22" height="22" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})" opacity="${
+                  coords.diedNow ? "0.45" : "1"
+                }" />`
+              : `<circle cx="${cx}" cy="${cy}" r="10" fill="${strokeColor}" />`
+          }
+          ${statusBadgeSvg}
+          <text x="${cx}" y="${Number(cy) + 20}" fill="${
+        isRad ? "#bbf7d0" : "#fecaca"
+      }" font-size="8.5" font-weight="700" text-anchor="middle" style="paint-order:stroke;stroke:#0c0e0c;stroke-width:2.5px;">${
+        pSnap.pos ?? ""
+      }${escapeHtml(hName.slice(0, 3))}</text>
+          <title>[${isRad ? "天辉" : "夜魇"}${pSnap.pos}号位] ${escapeHtml(hName)} (${escapeHtml(
+        pSnap.personaname || ""
+      )}) · 净值 ${fmtNum(pSnap.networth || 0)} 金${
+        pt ? ` · 本波团战伤害 ${fmtNum(pt.damage || 0)}` : ""
+      }${unpressedInc ? ` · 🚨 ${unpressedInc.detail || "憋死保命装"}` : ""}</title>
+        </g>
+      `;
+    })
+    .join("");
+
+  const interactiveMinimapHtml = `
+    <div class="scrub-minimap-combat-grid" style="display:grid;grid-template-columns:minmax(250px, 310px) 1fr;gap:14px;margin-bottom:14px;align-items:stretch;">
+      <div class="scrub-mini-map-card" style="background:rgba(16,18,15,0.92);border:1px solid rgba(198,164,104,0.28);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;">
+        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <strong style="font-size:12.5px;color:var(--gold-light);">🗺️ ${escapeHtml(
+            snap.time_str || ""
+          )} 实时小地图英雄头像</strong>
+          <span style="font-size:10.5px;color:var(--muted);">🟢天辉 🔴夜魇 🛡️BKB 💀阵亡</span>
+        </div>
+        <svg viewBox="0 0 320 320" style="width:100%;max-width:290px;aspect-ratio:1/1;border-radius:8px;background:radial-gradient(circle at 50% 50%, #1d261f 0%, #111612 100%);border:1px solid #2e352c;">
+          <!-- River & Lanes -->
+          <path d="M 18 20 Q 150 155 302 300" fill="none" stroke="rgba(56, 189, 248, 0.22)" stroke-width="22" stroke-linecap="round" />
+          <polyline points="26,294 26,34 294,34" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="8" stroke-linejoin="round" />
+          <polyline points="26,294 294,294 294,34" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="8" stroke-linejoin="round" />
+          <line x1="26" y1="294" x2="294" y2="34" stroke="rgba(148, 163, 184, 0.18)" stroke-width="8" />
+          <!-- Radiant & Dire Bases + Roshan Pit -->
+          <rect x="14" y="272" width="34" height="34" rx="6" fill="rgba(74, 222, 128, 0.15)" stroke="#4ade80" stroke-width="1.2" />
+          <text x="31" y="293" fill="#86efac" font-size="9" font-weight="700" text-anchor="middle">天辉</text>
+          <rect x="272" y="14" width="34" height="34" rx="6" fill="rgba(248, 113, 113, 0.15)" stroke="#f87171" stroke-width="1.2" />
+          <text x="289" y="35" fill="#fca5a5" font-size="9" font-weight="700" text-anchor="middle">夜魇</text>
+          <circle cx="118" cy="118" r="10" fill="rgba(245, 158, 11, 0.14)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2,2" />
+          <text x="118" y="121" fill="#fcd34d" font-size="7.5" text-anchor="middle">肉山</text>
+          ${wardNodesSvg}
+          ${clashRingSvg}
+          ${heroAvatarNodesSvg}
+        </svg>
+      </div>
+      <div class="scrub-combat-log-card" style="background:rgba(16,18,15,0.92);border:1px solid rgba(198,164,104,0.28);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+            <strong style="font-size:13px;color:var(--gold-light);">📜 ${escapeHtml(
+              snap.time_str || ""
+            )} 实时战斗记录 &amp; 🛡️ BKB/保命装按键验尸</strong>
+            <span style="font-size:11px;color:${
+              activeTfForensic || activeKeyTf ? "#fca5a5" : "var(--muted)"
+            };font-weight:600;">
+              ${
+                activeTfForensic || activeKeyTf
+                  ? `🔥 正在发生大规模团战 (${escapeHtml(
+                      activeTfForensic?.time_range || activeKeyTf?.time_range || ""
+                    )} · 人头交换 ${escapeHtml(
+                      activeKeyTf?.kills_trade || `${activeTfForensic?.radiant_deaths ?? 0}:${activeTfForensic?.dire_deaths ?? 0}`
+                    )} · 经济波动 ${escapeHtml(String(activeKeyTf?.gold_swing || activeTfForensic?.gold_swing || ""))})`
+                  : "⏱️ 拖动上方时间轴滑块到任意团战分钟，即可查看十人实时站位、技能释放与BKB按键记录"
+              }
+            </span>
+          </div>
+          ${
+            rawParts.length > 0
+              ? `
+                <div style="max-height:215px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px;">
+                  ${rawParts
+                    .filter((pt) => Number(pt.damage || 0) > 0 || Number(pt.deaths || 0) > 0 || Number(pt.healing || 0) > 0)
+                    .sort((a, b) => Number(b.damage || 0) - Number(a.damage || 0))
+                    .map((pt) => {
+                      const hName = pt.hero_short_zh || "";
+                      const fp = fullPlayerByHero.get(hName) || {};
+                      const pSnap = players.find((x) => x.hero_short_zh === hName) || {};
+                      const hasBkbNow = (pSnap.items || []).some((it) =>
+                        /黑皇杖|black_king_bar/i.test(it.zh || it.key || "")
+                      );
+                      const unpressed = activeUnpressedByHero.get(hName);
+                      const spellsStr = Array.isArray(pt.ability_uses)
+                        ? pt.ability_uses.slice(0, 4).join("、")
+                        : Array.isArray(pt.abilities_used)
+                        ? pt.abilities_used
+                            .slice(0, 4)
+                            .map((a) => `${a.zh || a.key}×${a.count || 1}`)
+                            .join("、")
+                        : "";
+                      const itemsUsedStr = Array.isArray(pt.item_uses)
+                        ? pt.item_uses.slice(0, 4).join("、")
+                        : Array.isArray(pt.items_used)
+                        ? pt.items_used
+                            .slice(0, 4)
+                            .map((it) => `${it.zh || it.key}×${it.count || 1}`)
+                            .join("、")
+                        : "";
+                      const bkbPressed = /黑皇杖|black_king_bar/i.test(itemsUsedStr) || Boolean(pt.bkb_used);
+                      let bkbBadgeHtml = "";
+                      if (unpressed) {
+                        bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 憋死保命装：${escapeHtml(
+                          unpressed.detail || "阵亡前未按BKB/救命装"
+                        )}</span>`;
+                      } else if (bkbPressed) {
+                        bkbBadgeHtml = `<span style="background:rgba(217,119,6,0.22);color:#fde68a;border:1px solid #f59e0b;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🛡️ 已开启 BKB</span>`;
+                      } else if (hasBkbNow && Number(pt.deaths || 0) > 0) {
+                        bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 身怀BKB阵亡未开！</span>`;
+                      } else if (hasBkbNow) {
+                        bkbBadgeHtml = `<span style="background:rgba(59,130,246,0.18);color:#bfdbfe;padding:1px 6px;border-radius:4px;font-size:10.5px;">🎒 持有BKB(未按·存活)</span>`;
+                      }
+                      const isRadPt = (pt.side || fp.side) === "radiant" || (pt.side || fp.side) === "天辉";
+                      return `
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border-left:3px solid ${
+                          isRadPt ? "#4ade80" : "#f87171"
+                        };font-size:11.5px;flex-wrap:wrap;">
+                          <div style="display:flex;align-items:center;gap:6px;min-width:145px;">
+                            ${
+                              fp.hero_img
+                                ? `<img src="${escapeHtml(fp.hero_img)}" alt="" width="28" height="16" style="border-radius:3px;" />`
+                                : ""
+                            }
+                            <b>[${isRadPt ? "天辉" : "夜魇"}${fp.pos || ""}] ${escapeHtml(hName)}</b>
+                            <span style="color:${Number(pt.deaths || 0) > 0 ? "#f87171" : "#4ade80"};font-weight:700;">${
+                        Number(pt.deaths || 0) > 0 ? "💀阵亡" : "🟢存活"
+                      }</span>
+                          </div>
+                          <div style="flex:1;color:var(--text);font-size:11px;">
+                            💥 伤害 <b>${fmtNum(pt.damage || 0)}</b>
+                            ${spellsStr ? ` ｜ ⚡ 技能：${escapeHtml(spellsStr)}` : ""}
+                            ${itemsUsedStr ? ` ｜ 🎒 按键：<b>${escapeHtml(itemsUsedStr)}</b>` : ""}
+                          </div>
+                          <div>${bkbBadgeHtml}</div>
+                        </div>
+                      `;
+                    })
+                    .join("")}
+                </div>
+              `
+              : `<ul class="micro-insights-list" style="margin:0;">${eventsHtml}</ul>`
+          }
+        </div>
+        ${
+          rawParts.length > 0 && eventsList.length > 0
+            ? `<div style="margin-top:8px;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.1);font-size:11px;color:var(--muted);">📌 <b>本分钟击杀/推塔流水：</b>${eventsList
+                .map((e) => escapeHtml(e))
+                .join(" ； ")}</div>`
+            : ""
+        }
+      </div>
+    </div>
+  `;
 
   const barsHtml = players
     .map((p, rankIdx) => {
@@ -12391,6 +12948,9 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
     .join("");
 
   contentEl.innerHTML = `
+    <div style="grid-column: 1 / -1;">
+      ${interactiveMinimapHtml}
+    </div>
     <div class="scrub-left-col">
       <div class="scrub-col-title">
         <strong>🏆 ${escapeHtml(snap.time_str || "")} 时刻 · 十人实时净资产与已出核心装排位</strong>

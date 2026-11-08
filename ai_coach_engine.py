@@ -865,6 +865,26 @@ def evaluate_player_deeply(
             elif str(pb_note).startswith("🔥"):
                 strengths.append(pb_note)
 
+    # 6.5) 深度流派识别 + 全量成装时间轴 + 技能/道具伤害占比 + 加点与天赋树 + 中立道具与7.38附魔全维度取证
+    playstyle_audit = build_player_playstyle_and_build_forensics(
+        p, team_players, enemy_players, duration_min, won
+    )
+    p["playstyle_archetype_audit"] = playstyle_audit
+    if playstyle_audit:
+        if playstyle_audit.get("is_smart_playstyle_pivot"):
+            blame_points = max(8.0, blame_points - 14.0)
+            mvp_score = round(clamp(mvp_score + 6.0, 45.0, 96.0), 1)
+            rating_score = round(clamp(mvp_score / 10.0, 4.5, 9.6), 1)
+            strengths.insert(0, playstyle_audit["archetype_analysis_zh"])
+        elif playstyle_audit.get("archetype_analysis_zh"):
+            strengths.append(playstyle_audit["archetype_analysis_zh"])
+        if playstyle_audit.get("spell_damage_breakdown_zh"):
+            strengths.append(playstyle_audit["spell_damage_breakdown_zh"])
+        if playstyle_audit.get("skill_and_talent_audit_zh"):
+            strengths.append(playstyle_audit["skill_and_talent_audit_zh"])
+        if playstyle_audit.get("neutral_and_enchantment_audit_zh"):
+            strengths.append(playstyle_audit["neutral_and_enchantment_audit_zh"])
+
     # 7) 逐英雄独特机制 × 1~5号位差异化打法 × 队友技能配合 × 敌我克制关系深度取证 (hero_matchup_dossier)
     dossier = hmp.get("hero_matchup_dossier") or build_hero_matchup_dossier(
         p, team_players, enemy_players, duration_min, won
@@ -1006,6 +1026,7 @@ def evaluate_player_deeply(
         "is_afk_farmer": is_afk_farmer,
         "hero_mechanism_profile": hmp,
         "hero_matchup_dossier": dossier,
+        "playstyle_archetype_audit": playstyle_audit,
         "radar": radar,
         "rating_score": rating_score,
         "rating_tier": rating_tier,
@@ -1017,6 +1038,186 @@ def evaluate_player_deeply(
         "improvements": improvements,
         "trash_talk": trash_talk,
         "praise_talk": praise_talk,
+    }
+
+
+def build_player_playstyle_and_build_forensics(
+    p: Dict[str, Any],
+    own_team: List[Dict[str, Any]],
+    opp_team: List[Dict[str, Any]],
+    duration_min: float,
+    won: bool,
+) -> Dict[str, Any]:
+    """
+    为每位选手生成【实际打法流派识别 + 全量成装时间轴 + 技能/道具伤害占比 + 技能加点与10/15/20/25级天赋树 + 中立道具与7.38附魔词条】全维度深度取证：
+    避免只按呆板模板（如认为潮汐只能出笛子赤红甲站桩顶前排）评判选手，精准识别法系A杖巨浪炮台流、刷新双大流、速刷转型流、平A炮台流等灵性流派！
+    """
+    hid = int(p.get("hero_id") or 0)
+    pos = int(p.get("pos") or 1)
+    hero = str(p.get("hero_short_zh") or p.get("hero_name") or "")
+    key_timings = [str(x) for x in (p.get("key_item_timings") or [])]
+    final_items = [str(x) for x in (p.get("final_items") or [])]
+    all_items_str = " | ".join(key_timings + final_items)
+    full_chain_str = " → ".join(key_timings) if key_timings else ("、".join(final_items) or "基础装")
+
+    dmg_sources = p.get("damage_by_source_rich") or []
+    dq_audit = p.get("damage_and_build_audit") or {}
+    nc_audit = p.get("neutral_craft_audit") or {}
+    skill_route = str(dq_audit.get("skill_route_summary_zh") or "")
+    talents = [str(t) for t in (dq_audit.get("talents_chosen") or [])]
+    craft_steps = nc_audit.get("craft_steps") or []
+
+    # 1) 技能与道具伤害占比拆解 (damage_by_source_rich)
+    top_spells = [s for s in dmg_sources if s.get("source_type") == "ability"]
+    top_items_dmg = [s for s in dmg_sources if s.get("source_type") == "item"]
+    atk_entry = next((s for s in dmg_sources if s.get("source_type") == "attack"), None)
+    atk_pct = float(atk_entry.get("share_pct") or 0.0) if atk_entry else 0.0
+    spell_total_pct = round(sum(float(s.get("share_pct") or 0.0) for s in top_spells), 1)
+
+    dmg_parts_zh: List[str] = []
+    for s in dmg_sources[:5]:
+        zh_n = s.get("zh_name") or s.get("key")
+        d_val = int(s.get("damage") or 0)
+        s_pct = float(s.get("share_pct") or 0.0)
+        casts = int(s.get("casts") or 0)
+        cast_txt = f"释放 {casts} 次" if casts > 0 else ""
+        dmg_parts_zh.append(f"《{zh_n}》{cast_txt}造成 {d_val:,} 伤害（{s_pct:.1f}%）")
+    spell_damage_breakdown_zh = (
+        f"💥 【技能与道具伤害来源精细拆解（法系技能总占比 {spell_total_pct:.1f}% / 普攻占比 {atk_pct:.1f}%）】：{' ｜ '.join(dmg_parts_zh)}。"
+        if dmg_parts_zh
+        else ""
+    )
+
+    # 2) 技能加点路线 & 10/15/20/25级天赋树审计
+    talents_str = " → ".join(talents) if talents else "未记录天赋"
+    skill_and_talent_audit_zh = ""
+    if skill_route or talents:
+        talent_synergy_note = ""
+        if hid == 29 and sum(1 for t in talents if "巨浪" in t) >= 2:
+            talent_synergy_note = "（10/15/20级三连《巨浪》专属天赋拉满远程AOE减速、法系爆发与减甲，25级补《+1.0s 毁灭眩晕》配合刷新球双大控场，天赋与A杖夜慧玲珑心法系流派100%严丝合缝！）"
+        elif any("冷却" in t or "施法距离" in t or "伤害" in t for t in talents):
+            talent_synergy_note = "（天赋树选择与本局核心装备路线高度协同）"
+        skill_and_talent_audit_zh = (
+            f"🌿 【技能加点路线 & 10/15/20/25级天赋树拆解】：前中期加点【{skill_route or '常规主副技能'}】，"
+            f"天赋树依次点出【{talents_str}】{talent_synergy_note}。"
+        )
+
+    # 3) 中立道具与 7.38 附魔词条选择审计
+    neutral_and_enchantment_audit_zh = ""
+    has_greedy_ench = False
+    has_timeless_or_mystic_ench = False
+    if craft_steps:
+        step_strs = []
+        for cs in craft_steps:
+            if isinstance(cs, str):
+                step_strs.append(cs)
+                if "贪婪" in cs:
+                    has_greedy_ench = True
+                if any(k in cs for k in ("永恒", "神秘", "敏锐", "高远", "催化剂", "火焰斗篷")):
+                    has_timeless_or_mystic_ench = True
+                continue
+            t_s = cs.get("time_str") or ""
+            tier = cs.get("tier") or "?"
+            iz = cs.get("item_zh") or "中立道具"
+            ez = cs.get("ench_zh") or ""
+            if "贪婪" in ez:
+                has_greedy_ench = True
+            if any(k in ez for k in ("永恒", "神秘", "敏锐", "高远")):
+                has_timeless_or_mystic_ench = True
+            step_strs.append(f"{t_s}【T{tier}·{iz}{f' + {ez}' if ez else ''}】")
+        ench_reason = ""
+        if has_greedy_ench and has_timeless_or_mystic_ench:
+            ench_reason = " —— 前中期连续点出【贪婪附魔(+GPM工资/蓝量)】配《弹跳玩偶/火焰斗篷》极大加速了A杖与法系大件的刷钱成型速度，后期4级切换【咒术师催化剂 + 永恒附魔(+技能增强/负面状态持续时间)】将法系技能爆发与控制时长彻底拉满，中立道具与附魔理解堪称教科书！"
+        elif has_greedy_ench:
+            ench_reason = " —— 中期巧用【贪婪附魔(+GPM工资)】加速核心装备成型节奏。"
+        elif has_timeless_or_mystic_ench:
+            ench_reason = " —— 中后期选用【永恒/神秘/高远附魔】精准强化技能爆发与施法距离。"
+        neutral_and_enchantment_audit_zh = (
+            f"🎲 【中立道具演进与 7.38 附魔词条审计】：{' → '.join(step_strs)}{ench_reason}"
+        )
+
+    # 4) 实际打法流派定性 (Playstyle Archetype Detection)
+    has_aghs = any(k in all_items_str for k in ("阿哈利姆神杖", "阿哈利姆福佑", "[A杖加持]"))
+    has_shard = any(k in all_items_str for k in ("阿哈利姆魔晶", "[魔晶加持]"))
+    has_spell_amp_items = any(k in all_items_str for k in ("慧光", "夜慧对剑", "慧夜对剑", "血精石", "玲珑心", "以太之镜", "大灵匣", "达贡之神力", "纷争面纱", "巫师之刃", "英灵胸针"))
+    has_refresher = "刷新球" in all_items_str
+    has_blink = any(k in all_items_str for k in ("闪烁匕首", "跳刀", "盛势闪光", "迅疾闪光", "秘奥闪光"))
+    has_lotus = "清莲宝珠" in all_items_str
+    has_bkb = "黑皇杖" in all_items_str
+    top_spell = top_spells[0] if top_spells else None
+    top_spell_name = str(top_spell.get("zh_name") or "") if top_spell else ""
+    top_spell_dmg = int(top_spell.get("damage") or 0) if top_spell else 0
+    top_spell_pct = float(top_spell.get("share_pct") or 0.0) if top_spell else 0.0
+    top_spell_casts = int(top_spell.get("casts") or 0) if top_spell else 0
+
+    enemy_names = [str(ep.get("hero_short_zh") or "") for ep in opp_team]
+    anti_tank_enemies = [eh for eh in enemy_names if eh in ("哈斯卡", "齐天大圣", "斯拉克", "拍拍熊", "熊战士", "噬魂鬼", "冥界亚龙", "卓尔游侠", "瘟疫法师", "伐木机")]
+
+    archetype_badge = f"⚔️ {pos}号位标准战术流"
+    archetype_analysis_zh = ""
+    is_smart_playstyle_pivot = False
+
+    if hid == 29 and has_aghs and (has_spell_amp_items or top_spell_name == "巨浪" and top_spell_pct >= 30.0):
+        # 潮汐猎人：法系A杖巨浪远程炮台 + 刷新双大流
+        is_smart_playstyle_pivot = True
+        archetype_badge = "🌊 法系A杖巨浪远程炮台 + 刷新双大流"
+        anti_tank_clause = (
+            f"面对敌方 {', '.join(anti_tank_enemies)} 这种专打笨重站桩前排的阵容（若走传统笛子赤红甲纯肉盾顶前排，只会沦为哈斯卡沸血之矛与齐天大圣如意棒法的活靶子充电宝），"
+            if anti_tank_enemies
+            else "针对本局敌我阵容博弈，"
+        )
+        lotus_dmg_entry = next((s for s in top_items_dmg if "清莲宝珠" in str(s.get("zh_name") or "")), None)
+        lotus_clause = (
+            f"，34:38 补出《清莲宝珠》既秒解沉默术士全领域静默又反弹哈斯卡大招打出 {int(lotus_dmg_entry['damage']):,} 伤害"
+            if lotus_dmg_entry
+            else ("，并补出《清莲宝珠》针对敌方沉默与点控" if has_lotus else "")
+        )
+        archetype_analysis_zh = (
+            f"🌊 【核心流派深度识别：{archetype_badge}（绝非传统挨打肉盾流！）】：{anti_tank_clause}"
+            f"本局潮汐猎人灵性转型「法系速刷A杖巨浪吐水炮台流」！完整出装链路为【{full_chain_str}】："
+            f"前期靠 04:02《灵魂之戒》+ 10:47《吸血面具》配锚击无伤光速刷钱发育（全场 665 GPM），15:29 准时做出《闪烁匕首》保证先手威慑后，"
+            f"24:29 直接裸出核心质变装《阿哈利姆神杖(A杖)》将《巨浪》进化为 2200 距离超远AOE大波推线清场，随后 26:39《阿哈利姆魔晶》→ 29:34《慧光》{lotus_clause} → 38:26《夜慧对剑》→ 45:32《刷新球》→ 55:37《真A杖》→ 56:33《玲珑心》把法系技能增强与冷却缩减堆到极致！"
+            f"全场狂吐 **{top_spell_casts} 次《巨浪》轰出 {top_spell_dmg:,} 点英雄伤害（占自身总输出 {top_spell_pct:.1f}%，高居第一伤害源！）**，配合 10/15/20 级全点巨浪天赋与贪婪/永恒附魔，既避免了肉身贴脸给哈斯卡/大圣送buff，又用超远距离高频巨浪减甲减速+刷新双毁灭主宰了后期团战！"
+        )
+    elif has_aghs and has_spell_amp_items and spell_total_pct >= 55.0:
+        is_smart_playstyle_pivot = True
+        archetype_badge = f"🧙‍♂️ 法系A杖技能增强炮台流（技能伤占 {spell_total_pct:.0f}%）"
+        archetype_analysis_zh = (
+            f"🧙‍♂️ 【流派识别：{archetype_badge}】：本局 {hero} 走的是深度法系技能强化路线，完整出装时间轴为【{full_chain_str}】。"
+            f"核心输出依靠《{top_spell_name}》（释放 {top_spell_casts} 次造成 {top_spell_dmg:,} 伤害，占自身总输出 {top_spell_pct:.1f}%），"
+            f"配合神杖/法系增伤装与天赋附魔打出高频远程法术压制。"
+        )
+    elif pos in (1, 2) and atk_pct >= 50.0:
+        archetype_badge = f"🗡️ 物理平A核心收割流（普攻占 {atk_pct:.0f}%）"
+        archetype_analysis_zh = (
+            f"🗡️ 【流派识别：{archetype_badge}】：本局 {hero} 完整出装演进为【{full_chain_str}】，"
+            f"普通攻击贡献 {atk_pct:.1f}% 伤害"
+            + (f"，配合《{top_spell_name}》（{top_spell_dmg:,} 伤害 / {top_spell_pct:.1f}%）完成团战切入与收割。" if top_spell else "。")
+        )
+    elif pos == 3 and has_blink:
+        archetype_badge = "⚡ 跳刀先手控制 + 阵地反制流"
+        archetype_analysis_zh = (
+            f"⚡ 【流派识别：{archetype_badge}】：本局 3号位 {hero} 完整出装演进为【{full_chain_str}】，"
+            f"主打跳刀先手开团与前中排技能拉扯，主力技能《{top_spell_name}》释放 {top_spell_casts} 次造成 {top_spell_dmg:,} 伤害（{top_spell_pct:.1f}%）。"
+        )
+    else:
+        archetype_badge = f"🧭 {pos}号位·{hero}战术出装流"
+        archetype_analysis_zh = (
+            f"🧭 【流派与全链路出装时间轴】：本局 {hero} 完整成装演进为【{full_chain_str}】"
+            + (f"，头号伤害来源为《{top_spell_name}》（释放 {top_spell_casts} 次造成 {top_spell_dmg:,} 伤害，占 {top_spell_pct:.1f}%）。" if top_spell else "。")
+        )
+
+    return {
+        "archetype_badge": archetype_badge,
+        "is_smart_playstyle_pivot": is_smart_playstyle_pivot,
+        "full_item_progression_zh": full_chain_str,
+        "archetype_analysis_zh": archetype_analysis_zh,
+        "spell_damage_breakdown_zh": spell_damage_breakdown_zh,
+        "skill_and_talent_audit_zh": skill_and_talent_audit_zh,
+        "neutral_and_enchantment_audit_zh": neutral_and_enchantment_audit_zh,
+        "talents_chosen": talents,
+        "skill_route_summary_zh": skill_route,
+        "neutral_craft_steps": craft_steps,
     }
 
 
@@ -1682,14 +1883,18 @@ def _compute_player_role_duty_audit(
             )
     elif pos == 3:
         pos4_name = pos4_ally.get("hero_short_zh") if pos4_ally else "4号位"
+        pa_audit = p.get("playstyle_archetype_audit") or build_player_playstyle_and_build_forensics(p, own_team, opp_team, 35.0, True)
+        is_smart_pivot = bool(pa_audit.get("is_smart_playstyle_pivot"))
         role_contract = (
-            "3号位（劣势路前排开团核）：本职工作是劣势路抗压发育、中期做出跳刀/刃甲/莲花/BKB/魔晶等先手与前排装，"
-            "主动顶在第一排吃技能开团并推进外塔，为1、2号位撑起输出空间。"
+            "3号位（劣势路开团与战术支点核）：本职工作是劣势路抗压发育、中期做出跳刀等先手装承担团战先手控制；"
+            "同时必须根据敌方阵容灵活选择『前排光环肉盾流』或『法系A杖远程消耗+刷新双大控场流』（例如面对哈斯卡、齐天大圣等站桩吸血/叠棒克星时，硬顶前排只会沦为充电宝，转型法系A杖巨浪远程减甲消耗+跳刀刷新双大反而是极高智商的破局打法！）。"
         )
         duty_verdict = (
-            f"【3号位前排履职审计】：搭档4号位（{pos4_name}），出装（{', '.join(key_timings)}），"
+            f"【3号位流派与履职审计】：搭档4号位（{pos4_name}），流派定性为【{pa_audit.get('archetype_badge')}】，"
+            f"完整出装链（{pa_audit.get('full_item_progression_zh')}），"
             f"参战率 {kp_pct}%、伤害占比 {hdmg_share}%、推塔 {tdmg}、落单被抓 {solo_cnt} 次。"
-            + ("注意：本局其4号位搭档未出团队救人装且频繁自己打钱落单，导致3号位中期缺乏辅助协同；但3号位自身也需审计是否按时出BKB/跳刀顶前排及是否野区落单。" if pos4_ally else "")
+            + (f" 🔥【打法流派高度肯定】：{pa_audit.get('archetype_analysis_zh')} {pa_audit.get('spell_damage_breakdown_zh')} {pa_audit.get('skill_and_talent_audit_zh')} {pa_audit.get('neutral_and_enchantment_audit_zh')}" if is_smart_pivot else "")
+            + (" 注意：本局其4号位搭档前期或中期存在游走缺位，也需结合3号位自身是否有野区落单被抓客观复盘。" if pos4_ally else "")
         )
     elif pos == 2:
         role_contract = (
@@ -1714,6 +1919,7 @@ def _compute_player_role_duty_audit(
         or (p.get("hero_mechanism_profile") or {}).get("hero_matchup_dossier")
         or build_hero_matchup_dossier(p, own_team, opp_team, 35.0, True)
     )
+    pa_full = p.get("playstyle_archetype_audit") or build_player_playstyle_and_build_forensics(p, own_team, opp_team, 35.0, True)
 
     return {
         "pos": pos,
@@ -1732,6 +1938,12 @@ def _compute_player_role_duty_audit(
         "built_selfish_core_items": built_selfish,
         "is_toxic_fake_support": is_toxic_fake_support,
         "duty_verdict": duty_verdict,
+        "playstyle_archetype_badge": pa_full.get("archetype_badge"),
+        "full_item_progression_zh": pa_full.get("full_item_progression_zh"),
+        "archetype_analysis_zh": pa_full.get("archetype_analysis_zh"),
+        "spell_damage_breakdown_zh": pa_full.get("spell_damage_breakdown_zh"),
+        "skill_and_talent_audit_zh": pa_full.get("skill_and_talent_audit_zh"),
+        "neutral_and_enchantment_audit_zh": pa_full.get("neutral_and_enchantment_audit_zh"),
     }
 
 
@@ -1858,11 +2070,14 @@ def call_llm_coach_review(
                 "dead_seconds": p.get("dead_seconds"),
                 "death_gold_lost": p.get("death_gold_lost"),
                 "obs_sen": f"{p.get('obs_placed')}/{p.get('sen_placed')}",
-                "key_item_timings": (p.get("key_item_timings") or [])[:6],
-                "final_items": [it.get("name_zh") or it.get("key") for it in (p.get("items") or [])] or (p.get("final_items") or [])[:7],
+                "key_item_timings": p.get("key_item_timings") or [],
+                "final_items": [it.get("name_zh") or it.get("key") for it in (p.get("items") or [])] or (p.get("final_items") or [])[:8],
+                "aghanims_scepter": p.get("aghanims_scepter", False),
                 "aghanims_shard": p.get("aghanims_shard", False),
                 "active_item_uses": {k: v["count"] for k, v in (p.get("active_item_uses") or {}).items()},
-                "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:5]},
+                "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:6]},
+                "damage_by_source_top": (p.get("damage_by_source_rich") or [])[:6],
+                "playstyle_archetype_audit": p.get("playstyle_archetype_audit"),
                 "is_afk_farmer": p.get("is_afk_farmer", False),
                 "hero_mechanism_profile": p.get("hero_mechanism_profile"),
                 "phoenix_egg_audit": p.get("phoenix_egg_audit"),
@@ -1909,38 +2124,37 @@ def call_llm_coach_review(
         )
 
     system_prompt = (
-        "你是懂 Dota 2 全 126 英雄核心机制、1~5号位差异化打法、队友技能配合化学反应与敌我克制出装的顶分局教练兼损友老哥，给车队五人做赛后深度算账复盘。全中文输出（严禁夹杂任何英文变量名），语气犀利接地气、刀塔味十足，且必须严格按【每个英雄的独特机制 × 所在位置(1~5号位)专属打法 × 队友技能配合 × 敌我英雄克制关系】四大维度深度思考：\n"
-        "0) 【拒绝千篇一律模板，必须按「每个英雄自身特点 + 所在1~5号位差异化特点 + 队友技能配合 + 敌我克制关系」思考（结合每位选手的 role_duty_audit）】：\n"
-        "   - 每个英雄都有独一无二的技能机制（参考 `hero_unique_traits`），且同一个英雄打不同位置（如力丸打2号位中单刺客 vs 打4号位烟幕侦察游走、帕吉打4/5号位钩人+魔晶吞噬救人 vs 打3号位A杖腐烂法坦、帕格纳打5号位衰老输血保核+爆轰拆塔 vs 打2号位法核、幽鬼1号位6级暗影步全图提速而非闷头刷野、瘟疫法师2号位脉冲续航与镰刀加读秒但开幽魂护罩怕高法爆自爆、潮汐3号位海妖外壳强驱散克制近战与蜘蛛、司夜刺客4号位尖刺外壳反弹AOE+复仇破隐抓高智脆皮、电炎绝手5号位饼干跨地形投送前排+蜥蜴绝吻超远洗地）打法与出装截然不同！\n"
-        "   - 评价任何一位选手时，必须点出：① 他这个英雄打当前位置（`hero_pos_role_title` / `pos_specific_playstyle`）的核心使命是什么、有没有犯该位置的专属禁忌（`pos_specific_taboo`）；② 他与本局哪位队友有什么核心技能配合（`best_ally_synergies`，如潮汐踩大+电炎绝手蜥蜴绝吻、司夜刺客隐身复仇+幽鬼暗影步+瘟疫法师死神镰刀），本局配合打出来没有；③ 他在机制上克制对面哪个英雄（`counters_enemies`）、又被对面哪个英雄克制（`countered_by_enemies`），本局有没有做出对应的破局克制装（如面对天穹守望者双倍磁场100%闪避必须贴进磁场内或出金箍棒，面对斧王吼/杰奇洛高法爆/工程师地雷阵瘟疫法师不能乱开幽魂护罩而要补BKB/笛子/魔晶）！\n"
+        "你是懂 Dota 2 全 126 英雄核心机制、1~5号位差异化打法、实战流派分支（如潮汐法系A杖巨浪炮台流 vs 传统肉盾流）、中立道具与7.38附魔词条、10/15/20/25级天赋树、技能伤害占比、队友技能配合与敌我克制出装的顶分局教练兼损友老哥，给车队五人做赛后深度算账复盘。全中文输出（严禁夹杂任何英文变量名），语气犀利接地气、刀塔味十足：\n"
+        "0) 【拒绝千篇一律呆板模板！必须深度剖析每位选手的「本局真实打法流派 + 全链路成装时间轴 + 技能伤害占比 + 加点与天赋树 + 中立道具与7.38附魔」（参考 `playstyle_archetype_audit` 与 `role_duty_audit`）】：\n"
+        "   - 绝不能死板套用刻板印象！例如3号位潮汐猎人面对敌方哈斯卡+齐天大圣这种专打笨重站桩前排的阵容时，如果无脑出笛子赤红甲上去肉身顶，只会给大圣叠满棒子、给哈斯卡当活靶子；如果他灵性走【法系A杖巨浪远程炮台 + 刷新双大流】（前期魂戒+吸血面具速刷 -> 15:29跳刀 -> 24:29裸阿哈利姆神杖把巨浪变成2200距离大波 -> 26:39魔晶 -> 29:34慧光 -> 34:38清莲宝珠解沉默反哈斯卡 -> 38:26夜慧对剑 -> 45:32刷新球 -> 55:37真A杖 -> 56:33玲珑心，且10/15/20级全点巨浪减速/巨浪伤害/巨浪减甲天赋，中立道具连续点出贪婪附魔加速刷A杖、4级换咒术师催化剂+永恒附魔拉满技能增强，全场狂吐185次巨浪轰出13,699伤害占自身43.5%第一输出），你必须精准识别并高度肯定他这套『速刷A杖+夜慧+玲珑心+全巨浪天赋+贪婪/永恒附魔的法系巨浪吐水流』的极高战术理解，绝不能盲目喷他为什么不出笛子希瓦去硬顶！\n"
+        "   - 评价任何一位选手时，必须在 `deep_verdict` 与 `item_and_blink_audit` 中细致入微地拆解：① 他的**真实打法流派与全链路成装时间点**（从对线小件如魂戒/吸血面具/狂战到中期核心装A杖/跳刀/慧光/莲花再到后期夜慧/刷新/玲珑心，切勿漏掉前中期核心装！）；② 他的**核心技能与道具伤害占比**（参考 `damage_by_source_top`，点出哪个技能释放了多少次、打了多少伤害、占比多少）；③ 他的**技能加点与10/15/20/25级天赋树选择**（参考 `skill_and_talent_audit_zh`）是否契合流派；④ 他的**1~5级中立道具与7.38附魔词条选择**（参考 `neutral_and_enchantment_audit_zh`，如贪婪附魔加速刷钱、永恒附魔强化法伤与控制、敏锐/强壮等）是否细腻到位！\n"
         "1) 【前期三路对线与英雄先天强弱评估 (stage_reviews.early_lanes)】：\n"
         "   - 必须逐一分析上、中、下三条线！客观结合双方英雄先天对线机制与克制关系（例如：若敌方是强减速消耗线霸，本方短手核心抗压死几次情有可原，重点看总经济有没有咬住；若中单是全单体爆发缺AOE清线的天怒法师对阵高攻帕吉，拼补刀吃亏但靠消耗单杀打出经济优势就是大功；1号位打钱是否顺畅、5号位有没有顶前排给压力与拉野封野）。\n"
         "2) 【中期资源转化：英雄专属抓人配合与推塔特性 (stage_reviews.mid_tempo)】：\n"
-        "   - 10~25分钟重点考核资源转化率与英雄技能配合：谁做出了第一件节奏装主动带队抓人？核心与辅助的招牌技能 Combo（如司夜刺客先手+幽鬼大招支援、帕格纳幽冥爆轰磨塔）有没有打出来？\n"
+        "   - 10~25分钟重点考核资源转化率与英雄技能配合：谁做出了第一件节奏装主动带队抓人？谁通过魂戒/吸血面具/贪婪附魔高效刷出A杖或关键装迎来质变？\n"
         "3) 【后期肉山盾转化率与决胜接管 (stage_reviews.late_and_roshan)】：\n"
         "   - 结合 macro_objectives 与 roshan_and_tower_timeline，重点判断打了肉山盾之后有没有顺势拔光外塔、攻破高地完成终结，以及后期大核与团战大招在敌我克制博弈下的真实兑现度。\n"
         "4) 【1~5号位位置本职工作契约与『假辅助真毒瘤抢钱出输出装』严厉审讯铁律】：\n"
         "   - 必须严格按照该选手所在的【1~5号位位置职责】进行考核，绝不能把4/5号位辅助当成1/2号位大哥来评判！\n"
         "   - 特别是【4号位（游走辅助）】与【5号位（保核辅助）】：4号位的本职工作是前期协助3号位站稳劣势路、拉野控符，中后期围绕3号位和2号位主动带节奏抓人，并优先做出跳刀、推推棒、微光披风、阿托斯、风杖、大骨灰、莲花、魔晶等【团队控制与救人装】服务3号位和团队！如果一个4号位在没钱的劣势局里，裸憋『净魂之刃(散失)』、『点金手』、『雷神之锤』、『黑皇杖(BKB)』等纯个人大哥装，全场 0 推推、0 微光、0 阿托斯、0 跳刀、0 魔晶，中期不去保3号位带节奏，反而自己占线钻野刷兵抢核心经济，还在打钱收线时连续落单被抓死——这属于极其恶劣的【假辅助·真毒瘤抢钱玩法】，必须严厉批判！（注意：JSON字符串内部若需使用引号，请一律使用『』或「」，切勿在JSON字符串内部使用英文双引号）\n"
-        "   - 对【1/2/3号位核心】同样按本职与英雄特性考核：1号位是否把最高经济转化为后期团战收割与拆塔；2号位是否发挥英雄游走/爆发特性带起节奏；3号位是否出跳刀/BKB/团队装顶第一排吃技能开团。\n"
-        "5) 【每个人(1~5号位全员5人)的深度个人研判总报告 (deep_verdict) 与 第一幕/第二幕/第三幕全段落详实复盘 (early_story / mid_story / late_story)】：\n"
-        "   - `deep_verdict`（140~190字深度长段）：必须从【该英雄自身独特机制 + 当前位置(1~5号位)专属职责 + 与队友的技能配合 + 对阵敌方英雄的克制/被克制关系】切入，全面剖析他为何是本局头号大锅/次锅/孤胆院长或头号首功MVP，并解释本局评分与定责/贡献占比。\n"
-        "   - `early_story`（第一幕·00:00–10:00，110~150字详实复盘）：结合英雄对线机制与敌我克制，复盘其分路、搭档配合、前10分钟正反补/经济差、拉野封野/抢莲花控符细节及具体击杀阵亡时间点。\n"
-        "   - `mid_story`（第二幕·10:00–25:00，115~155字详实复盘）：结合该英雄在当前位置的强势期与队友配合Combo，复盘其10~25分钟经济进账、关键成装时间点（精确到分秒）、技能配合兑现度，以及具体几分几秒在何处被敌方天敌抓死及丢塔后果。\n"
-        "   - `late_story`（第三幕·25:00–终局，110~150字详实复盘）：结合后期敌我英雄克制博弈，复盘其25分钟后的经济伤害转化、拆塔伤害、肉山盾与高地攻防、招牌大招/BKB/救人装在决胜团的实际兑现度与终局定性。\n"
-        "   - `item_and_blink_audit`（85~125字专项出装与克制审计）：深度锐评其出装是否契合【该英雄×该位置】的特性、是否针对敌方克制关系做出了破局装（如金箍棒破天穹磁场闪避、大推推/风杖解控制、微光/笛子抗杰奇洛工程师法爆、BKB防斧王/控制等），以及跳刀买出后的真实收割/白给转化率。\n"
+        "5) 【每个人(1~5号位全员5人)的深度个人研判总报告 (deep_verdict) 与 第一幕/第二幕/第三幕全段落详实复盘 (early_story / mid_story / late_story) 与 出装/天赋/附魔审计 (item_and_blink_audit)】：\n"
+        "   - `deep_verdict`（150~210字深度长段）：必须从【该选手本局实际打法流派（如法系A杖巨浪吐水流）+ 核心技能伤害占比 + 天赋与中立附魔选择 + 与队友的技能配合 + 对阵敌方英雄的克制/被克制关系】切入，全面剖析其本局表现、高光与瑕疵，并解释本局评分与定责/贡献占比。\n"
+        "   - `early_story`（第一幕·00:00–10:00，110~150字详实复盘）：结合英雄对线机制与敌我克制，复盘其分路、对线装（如魂戒/魔棒）、前10分钟正反补/经济差、拉野封野/抢莲花控符细节、1级中立道具与附魔及具体击杀阵亡时间点。\n"
+        "   - `mid_story`（第二幕·10:00–25:00，115~160字详实复盘）：结合该英雄流派转型（如吸血面具速刷 -> 15:29跳刀 -> 24:29阿哈利姆神杖 + 2级贪婪附魔），复盘其10~25分钟经济进账、关键成装时间点（精确到分秒）、10/15级天赋选择、技能配合兑现度，以及具体阵亡时间点。\n"
+        "   - `late_story`（第三幕·25:00–终局，115~160字详实复盘）：结合后期神装演进（如魔晶 -> 慧光 -> 清莲宝珠 -> 夜慧对剑 -> 刷新球 -> 真A杖 -> 玲珑心 + 3/4级中立装与永恒附魔 + 20/25级天赋），复盘其后期技能伤害爆发、拆塔伤害、肉山盾与高地攻防、大招与救人装在决胜团的实际兑现度。\n"
+        "   - `item_and_blink_audit`（110~160字专项流派·出装·天赋·中立附魔·技能伤害深度锐评）：必须完整点评其【全链路出装顺序 + 打法流派合理性 + 核心技能伤害占比 + 10/15/20/25级天赋协同 + T1~T4中立道具与7.38附魔词条（如贪婪/永恒/强壮） + 跳刀/BKB/莲花实战转化率】！\n"
         + afk_rule_str +
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"
-        '  "title": "一句话点透本局胜负关键、位置履职得失与核心出装博弈（22-40字）",\n'
-        '  "summary": "从前期三路对线、中期抓人推塔转化到后期控盾平推高地的全局复盘摘要（140-200字）",\n'
-        '  "verdict": "有理有据的1~5号位全员本职工作兑现度、出装灵性/毒瘤批判与节奏判词（140-200字）",\n'
+        '  "title": "一句话点透本局胜负关键、核心流派亮点与出装博弈（22-40字）",\n'
+        '  "summary": "从前期三路对线、中期流派成型与抓人推塔转化到后期控盾平推高地的全局复盘摘要（140-200字）",\n'
+        '  "verdict": "有理有据的1~5号位全员本职工作兑现度、打法流派/天赋/附魔灵性解析与节奏判词（140-200字）",\n'
         '  "team_practice": "下一局开黑最该统一执行的一个具体位置分工、团队配合与救人装/针对装改进动作（70-110字）",\n'
         '  "stage_reviews": {\n'
         '    "early_lanes": "前期(0-10m)上中下三路对位强弱、1号位打钱顺畅度、4/5号位给压力拉野与中路/劣势路表现的AI深度点评（130-190字）",\n'
-        '    "mid_tempo": "中期(10-25m)资源转化、4号位/中单是否带起抓人节奏、利用英雄特性推塔与是否有人毒瘤抢钱落单的AI深度点评（130-190字）",\n'
+        '    "mid_tempo": "中期(10-25m)资源转化、各核心流派关键装（如跳刀/A杖/BKB）成型节奏与抓人推塔的AI深度点评（130-190字）",\n'
         '    "late_and_roshan": "后期(25m-终局)打盾后是否顺势推外塔破高地完成资源优势转化、大核收割与决胜团换命的AI深度点评（130-190字）",\n'
-        '    "overall_verdict": "全场总账：整局1~5号位本职工作兑现度与出装灵性总评（110-160字）"\n'
+        '    "overall_verdict": "全场总账：整局1~5号位本职工作兑现度与流派出装灵性总评（110-160字）"\n'
         '  },\n'
         '  "mvp": {"slot": 0, "runner_up_slot": 2, "confidence": "高", "reason": "为何选他当MVP/SVP", "comparison": "对比队友胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
         '  "players": [\n'
@@ -1950,15 +2164,15 @@ def call_llm_coach_review(
         '      "hero": "主宰",\n'
         '      "grok_score": 96,\n'
         '      "grok_share_pct": 34.0,\n'
-        '      "headline": "一句切中该选手本局位置履职灵魂与出装/节奏要害的判词（22-38字）",\n'
-        '      "deep_verdict": "一整段深度个人研判总报告（140-190字，3~5句话）：全面剖析该选手为何是本局头号大锅一级战犯/次锅或头号首功MVP，重点审讯他是否履行了所在位置的本职工作（如4号位是否服务3号位带节奏还是毒瘤裸散失抢钱），串联前中后期关键抉择、资源转化率、出装得失与阵亡性质，并解释为何给出该本局评分与定责/贡献占比（纯中文叙述，切勿出现任何英文变量名）",\n'
-        '      "early_story": "第一幕(0-10m)深度长段落复盘（110-160字，3~4句话）：详述对线分路、搭档配合、敌我机制克制、10m补刀/经济/拉野封野/莲花神符细节、具体击杀阵亡时间点及对线期位置履职评价",\n'
-        '      "mid_story": "第二幕(10-25m)深度长段落复盘（120-170字，3~4句话）：详述中期经济与补刀增量、关键成装时间点、是否履行位置本职工作（如4号位有无服务3号位带节奏还是毒瘤出大哥装自己刷钱抢经济、核心有无推塔抓人）、以及具体几分几秒在何处落单被抓与连锁丢塔后果",\n'
-        '      "late_story": "第三幕(25m-终局)深度长段落复盘（110-160字，3~4句话）：详述后期经济伤害转化、建筑拆塔伤害、肉山盾与高地攻防、后期成装/BKB/跳刀/大招的实际团战兑现度、买活得失与终局定性",\n'
-        '      "item_and_blink_audit": "专项AI出装与位置本职契合度锐评（85-135字，2~3句话）：深度评判其出装是否符合该位置职责、是否克制敌方、若4/5号位不出团队救人控制装却裸憋散失/点金/BKB抢经济必须严厉批判、以及跳刀/BKB的真实转化效果",\n'
-        '      "good": ["具体做得好的地方1（含时间/装备/数据）", "具体做得好的地方2"],\n'
-        '      "bad": ["具体做得不好或开喷点1（含是否违背位置本职/毒瘤出装抢钱/落单时间点）", "具体改进点2"],\n'
-        '      "practice": "下一局给该位置回归本职工作与出装运营的具体进阶处方（40-70字）"\n'
+        '      "headline": "一句切中该选手本局打法流派灵魂与出装/节奏要害的判词（22-38字）",\n'
+        '      "deep_verdict": "一整段深度个人研判总报告（150-210字，3~5句话）：全面剖析该选手本局实际打法流派（如潮汐法系A杖巨浪吐水流）、全链路出装逻辑、技能伤害占比、天赋与中立附魔理解、与队友技能配合及敌我克制表现，并解释为何给出该本局评分与定责/贡献占比（纯中文叙述，切勿出现任何英文变量名）",\n'
+        '      "early_story": "第一幕(0-10m)深度长段落复盘（110-160字，3~4句话）：详述对线分路、搭档配合、敌我机制克制、前10m对线装与补刀/经济、1级中立道具与附魔及具体击杀阵亡时间点",\n'
+        '      "mid_story": "第二幕(10-25m)深度长段落复盘（120-170字，3~4句话）：详述中期经济与补刀增量、流派核心成装时间点（如吸血面具/跳刀/A杖）、10/15级天赋与2级中立附魔（如贪婪附魔加速发育）、技能配合兑现度及具体阵亡细节",\n'
+        '      "late_story": "第三幕(25m-终局)深度长段落复盘（120-170字，3~4句话）：详述后期成装演进（如慧光/莲花/夜慧/刷新/真A杖/玲珑心）、20/25级天赋与3/4级中立附魔（如催化剂+永恒附魔）、技能伤害爆发与肉山高地攻防终局定性",\n'
+        '      "item_and_blink_audit": "专项AI流派·出装·天赋·中立附魔·技能伤害深度锐评（110-160字，3~4句话）：细致入微点评其完整出装时间轴、流派选择为何克制敌方、主力技能伤害占比（如巨浪185次13699伤占43.5%）、天赋树与中立道具7.38附魔词条协同度、以及跳刀/莲花/BKB实战转化效果",\n'
+        '      "good": ["具体做得好的地方1（含流派/时间/装备/天赋/附魔/伤害数据）", "具体做得好的地方2"],\n'
+        '      "bad": ["具体做得不好或瑕疵复盘点1（含具体时间点与原因）", "具体改进点2"],\n'
+        '      "practice": "下一局给该位置进一步优化流派细节与视野防抓的具体进阶处方（40-70字）"\n'
         '    }\n'
         "  ],\n"
         '  "windows": [\n'

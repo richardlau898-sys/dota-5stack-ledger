@@ -555,20 +555,55 @@ def extract_rich_items_and_abilities(
         "black_king_bar", "bfury", "maelstrom", "mjollnir", "gungir",
         "radiance", "desolator", "diffusal_blade", "disperser", "manta",
         "sange_and_yasha", "kaya_and_sange", "yasha_and_kaya",
+        "kaya", "sange", "yasha",
         "hand_of_midas", "echo_sabre", "harpoon",
         "armlet", "invis_sword", "silver_edge", "orchid", "bloodthorn",
         "nullifier", "ethereal_blade", "octarine_core", "bloodstone",
-        "aether_lens", "phylactery", "angels_demise", "spirit_vessel",
-        "solar_crest", "pavise", "vladmir", "boots_of_bearing",
-        "guardian_greaves", "mekansm", "pipe", "crimson_guard",
+        "aether_lens", "phylactery", "angels_demise", "spirit_vessel", "urn_of_shadows",
+        "solar_crest", "pavise", "medallion_of_courage", "vladmir", "boots_of_bearing", "ancient_janggo",
+        "guardian_greaves", "mekansm", "pipe", "crimson_guard", "vanguard", "hood_of_defiance",
         "blade_mail", "shivas_guard", "assault", "heart", "satanic",
-        "skadi", "butterfly", "greater_crit", "monkey_king_bar",
-        "abyssal_blade", "basher", "aghanims_scepter", "ultimate_scepter",
-        "aghanims_shard", "refresher", "sheepstick", "cyclone", "wind_waker",
+        "skadi", "butterfly", "greater_crit", "monkey_king_bar", "moon_shard",
+        "abyssal_blade", "basher", "aghanims_scepter", "ultimate_scepter", "ultimate_scepter_2",
+        "aghanims_shard", "refresher", "sheepstick", "cyclone", "wind_waker", "rod_of_atos",
         "force_staff", "hurricane_pike", "glimmer_cape", "aeon_disk", "lotus_orb",
-        "mage_slayer", "eternal_shroud", "sphere", "helm_of_the_overlord",
+        "mage_slayer", "eternal_shroud", "sphere", "helm_of_the_overlord", "helm_of_the_dominator",
         "witch_blade", "devastator", "revenants_brooch", "rapier",
-        "arcane_boots", "phase_boots", "power_treads", "tranquil_boots", "travel_boots",
+        "soul_ring", "lifesteal", "mask_of_madness", "falcon_blade", "veil_of_discord", "meteor_hammer", "holy_locket",
+        "dagon", "dagon_2", "dagon_3", "dagon_4", "dagon_5",
+        "arcane_boots", "phase_boots", "power_treads", "tranquil_boots", "travel_boots", "travel_boots_2",
+    }
+
+    # Check when combined items are purchased so we don't duplicate immediate sub-components bought within 120s
+    combined_purchase_times: Dict[str, int] = {}
+    for entry in purchase_log:
+        ck = entry.get("key")
+        ct = entry.get("time", 0)
+        if ck in {"yasha_and_kaya", "sange_and_yasha", "kaya_and_sange", "manta", "hurricane_pike", "silver_edge", "bloodthorn", "guardian_greaves", "spirit_vessel", "solar_crest", "harpoon", "abyssal_blade", "mjollnir", "gungir", "boots_of_bearing", "overwhelming_blink", "swift_blink", "arcane_blink", "wind_waker", "angels_demise", "devastator", "helm_of_the_overlord", "crimson_guard", "satanic"} and ck not in combined_purchase_times and ct > 0:
+            combined_purchase_times[ck] = int(ct)
+
+    SUBCOMPONENT_TO_UPGRADES = {
+        "yasha": ["yasha_and_kaya", "sange_and_yasha", "manta"],
+        "sange": ["sange_and_yasha", "kaya_and_sange", "abyssal_blade"],
+        "kaya": ["yasha_and_kaya", "kaya_and_sange"],
+        "mekansm": ["guardian_greaves"],
+        "arcane_boots": ["guardian_greaves"],
+        "urn_of_shadows": ["spirit_vessel"],
+        "pavise": ["solar_crest"],
+        "echo_sabre": ["harpoon"],
+        "basher": ["abyssal_blade"],
+        "maelstrom": ["mjollnir", "gungir"],
+        "rod_of_atos": ["gungir"],
+        "force_staff": ["hurricane_pike"],
+        "invis_sword": ["silver_edge"],
+        "orchid": ["bloodthorn"],
+        "ancient_janggo": ["boots_of_bearing"],
+        "tranquil_boots": ["boots_of_bearing"],
+        "cyclone": ["wind_waker"],
+        "phylactery": ["angels_demise"],
+        "witch_blade": ["devastator"],
+        "vanguard": ["crimson_guard", "abyssal_blade"],
+        "lifesteal": ["satanic", "mask_of_madness", "vladmir"],
     }
 
     timings: List[str] = []
@@ -578,6 +613,11 @@ def extract_rich_items_and_abilities(
         key = entry.get("key")
         t = entry.get("time", 0)
         if key in KEY_TIMING_ITEMS and key not in seen_keys and t > 0:
+            # Skip subcomponent only if its upgraded item was bought within 120 seconds (i.e. assembled together)
+            upgrades = SUBCOMPONENT_TO_UPGRADES.get(key) or []
+            if any(ug in combined_purchase_times and 0 <= (combined_purchase_times[ug] - int(t)) <= 120 for ug in upgrades):
+                seen_keys.add(key)
+                continue
             seen_keys.add(key)
             info = item_by_key.get(key) or {}
             zh = get_item_zh(key) or info.get("zh_name") or "战术道具"
@@ -617,6 +657,43 @@ def extract_rich_items_and_abilities(
             "img": f"{VALVE_CDN}/apps/dota2/images/dota_react/abilities/{ak}.png",
         })
 
+    # Extract detailed spell/item/right-click damage breakdown from damage_inflictor
+    damage_inflictor: Dict[str, Any] = p.get("damage_inflictor") or {}
+    total_hero_dmg = max(1, int(p.get("hero_damage") or sum(int(v or 0) for v in damage_inflictor.values()) or 1))
+    damage_by_source_rich: List[Dict[str, Any]] = []
+    for inf_key, dmg_val in sorted(damage_inflictor.items(), key=lambda x: int(x[1] or 0), reverse=True):
+        dmg_int = int(dmg_val or 0)
+        if dmg_int <= 0:
+            continue
+        pct = round(dmg_int * 100.0 / total_hero_dmg, 1)
+        if inf_key in ("null", "None", ""):
+            zh_src = "普通攻击(平A)"
+            src_type = "attack"
+            casts = 0
+        else:
+            item_zh = get_item_zh(inf_key)
+            ab_zh = get_ability_zh(inf_key)
+            if item_zh:
+                zh_src = item_zh
+                src_type = "item"
+                casts = int(item_uses.get(inf_key) or 0)
+            elif ab_zh:
+                zh_src = ab_zh
+                src_type = "ability"
+                casts = int(ability_uses.get(inf_key) or 0)
+            else:
+                zh_src = inf_key
+                src_type = "ability"
+                casts = int(ability_uses.get(inf_key) or item_uses.get(inf_key) or 0)
+        damage_by_source_rich.append({
+            "key": inf_key,
+            "zh_name": zh_src,
+            "source_type": src_type,
+            "damage": dmg_int,
+            "share_pct": pct,
+            "casts": casts,
+        })
+
     return {
         "final_items": final_items,
         "final_items_rich": final_items_rich,
@@ -628,6 +705,7 @@ def extract_rich_items_and_abilities(
         "key_item_timings_rich": timings_rich,
         "active_item_uses": active_item_uses,
         "ability_uses_rich": ability_uses_rich,
+        "damage_by_source_rich": damage_by_source_rich,
     }
 
 
@@ -1368,6 +1446,8 @@ def analyze_match_data(
     for side_key, team_list in (("radiant", radiant_report), ("dire", dire_report)):
         dq_side_rows = ((deep_forensics.get("damage_quality_and_build_by_side") or {}).get(side_key) or {}).get("player_rows") or []
         dq_by_pos = {int(r.get("pos") or 0): r for r in dq_side_rows}
+        nc_side_rows = ((deep_forensics.get("macro_objectives_by_side") or {}).get(side_key) or {}).get("neutral_craft_rows") or []
+        nc_by_pos = {int(r.get("pos") or 0): r for r in nc_side_rows}
         team_mid_gold = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("gold_gain") or 0) for tp in team_list) or 1
         team_mid_hdmg = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
         team_lane_hdmg = sum(max(0, lane_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
@@ -1376,6 +1456,7 @@ def analyze_match_data(
 
         for tp in team_list:
             tp["damage_and_build_audit"] = dq_by_pos.get(int(tp.get("pos") or 0)) or {}
+            tp["neutral_craft_audit"] = nc_by_pos.get(int(tp.get("pos") or 0)) or {}
             slot = tp["player_slot"]
             lp = lane_by_slot.get(slot, {})
             mp = mid_by_slot.get(slot, {})
