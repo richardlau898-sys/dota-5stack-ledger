@@ -299,6 +299,32 @@ def _ensure_grok_coaching(
     return report
 
 
+def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
+    """Ensure any cached or cloud-loaded report has v6.9.0 hero_matchup_matrix and dynamic combos."""
+    if not isinstance(report, dict):
+        return report
+    da = report.get("draft_analysis") or {}
+    if isinstance(da.get("hero_matchup_matrix"), list) and len(da["hero_matchup_matrix"]) >= 5:
+        return report
+    try:
+        from draft_and_phase_coach import build_draft_and_combo_analysis
+
+        rad = report.get("radiant_pos_1_to_5") or []
+        dire = report.get("dire_pos_1_to_5") or []
+        if rad and dire:
+            f_side = report.get("focus_side") or "radiant"
+            r_win = bool(report.get("radiant_win"))
+            dur_sec = report.get("duration_sec") or 2400
+            draft_res = build_draft_and_combo_analysis(
+                rad, dire, {"duration": dur_sec, "radiant_win": r_win}, f_side
+            )
+            report["draft_analysis_by_side"] = draft_res.get("by_side") or draft_res
+            report["draft_analysis"] = report["draft_analysis_by_side"].get(f_side) or draft_res
+    except Exception:
+        pass
+    return report
+
+
 def get_or_build_match_report(
     match_id: int,
     focus_account_id: Optional[int] = None,
@@ -319,8 +345,8 @@ def get_or_build_match_report(
 
     fallback_unparsed_rep = None
     if not force_refresh:
-        # Check tmp_json_cache FIRST (writable on Vercel runtime), then json_cache
-        for jc in (tmp_json_cache, json_cache):
+        # Check json_cache and tmp_json_cache
+        for jc in (json_cache, tmp_json_cache):
             if jc.exists():
                 try:
                     cached_rep = json.loads(jc.read_text(encoding="utf-8"))
@@ -329,6 +355,7 @@ def get_or_build_match_report(
                         and cached_rep.get("_zh_schema_v") == 2
                         and cached_rep.get("deep_forensics", {}).get("unpressed_saves_by_side") is not None
                     ):
+                        cached_rep = _ensure_v69_hero_matchup_matrix(cached_rep)
                         cached_rep = _hydrate_grok_from_caches(cached_rep, match_id)
                         # Only serve immediately if replay is parsed
                         if cached_rep.get("is_parsed"):
@@ -342,6 +369,7 @@ def get_or_build_match_report(
         # Read-through from Cloud DB (Supabase / GitHub Cloud) when container /tmp was wiped
         cloud_rep = cloud_fetch_match_report(match_id)
         if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
+            cloud_rep = _ensure_v69_hero_matchup_matrix(cloud_rep)
             cloud_rep = _hydrate_grok_from_caches(cloud_rep, match_id)
             if cloud_rep.get("is_parsed"):
                 if (allow_build or require_ai) and not skip_llm:
