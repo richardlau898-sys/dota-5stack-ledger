@@ -300,26 +300,54 @@ def _ensure_grok_coaching(
 
 
 def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
-    """Ensure any cached or cloud-loaded report has v6.9.0 hero_matchup_matrix and dynamic combos."""
+    """Ensure any cached or cloud-loaded report has v7.0.0 hero_matchup_matrix, counter_ledger, and lane_chemistry_by_side."""
     if not isinstance(report, dict):
         return report
     da = report.get("draft_analysis") or {}
-    if isinstance(da.get("hero_matchup_matrix"), list) and len(da["hero_matchup_matrix"]) >= 5:
+    hmm = da.get("hero_matchup_matrix")
+    df = report.get("deep_forensics") or {}
+    lms = df.get("lane_matchups") or []
+    has_v70_matrix = (
+        isinstance(hmm, list)
+        and len(hmm) >= 5
+        and isinstance(hmm[0], dict)
+        and "counter_ledger" in hmm[0]
+    )
+    has_v70_lanes = (
+        not lms
+        or (isinstance(lms[0], dict) and "lane_chemistry_by_side" in lms[0])
+    )
+    if has_v70_matrix and has_v70_lanes:
         return report
     try:
         from draft_and_phase_coach import build_draft_and_combo_analysis
+        from hero_profiles_126 import build_hero_matchup_dossier, analyze_lane_matchup_chemistry
 
         rad = report.get("radiant_pos_1_to_5") or []
         dire = report.get("dire_pos_1_to_5") or []
         if rad and dire:
             f_side = report.get("focus_side") or "radiant"
             r_win = bool(report.get("radiant_win"))
-            dur_sec = report.get("duration_sec") or 2400
+            dur_min = float(report.get("duration_min") or 40.0)
+            dur_sec = int(dur_min * 60)
+            for p in rad:
+                p["hero_matchup_dossier"] = build_hero_matchup_dossier(p, rad, dire, dur_min, r_win)
+            for p in dire:
+                p["hero_matchup_dossier"] = build_hero_matchup_dossier(p, dire, rad, dur_min, not r_win)
             draft_res = build_draft_and_combo_analysis(
                 rad, dire, {"duration": dur_sec, "radiant_win": r_win}, f_side
             )
             report["draft_analysis_by_side"] = draft_res.get("by_side") or draft_res
             report["draft_analysis"] = report["draft_analysis_by_side"].get(f_side) or draft_res
+            if lms:
+                rad_by_pos = {int(p.get("pos") or 0): p for p in rad}
+                dire_by_pos = {int(p.get("pos") or 0): p for p in dire}
+                for ln in lms:
+                    lnum = int(ln.get("lane_id") or 2)
+                    r_lp = [rad_by_pos.get(int(h.get("pos") or 0), h) for h in (ln.get("radiant_heroes") or [])]
+                    d_lp = [dire_by_pos.get(int(h.get("pos") or 0), h) for h in (ln.get("dire_heroes") or [])]
+                    diff_dire = int(ln.get("dire_gold10") or 0) - int(ln.get("radiant_gold10") or 0)
+                    ln["lane_chemistry_by_side"] = analyze_lane_matchup_chemistry(lnum, r_lp, d_lp, diff_dire)
     except Exception:
         pass
     return report

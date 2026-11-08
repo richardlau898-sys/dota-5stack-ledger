@@ -13099,11 +13099,14 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
           statusTag = `🟡 高压抗压微劣 (${fmtSigned(laneGoldDiff)} 金)`;
         }
 
-        // Analyze hero matchup context objectively
+        // Analyze hero matchup context objectively (prefer backend v7.0 lane_chemistry_by_side)
         const oppBullies = oppHeroes.filter((h) => LANE_BULLY_HEROES.has(h.hero_short_zh));
         const ownBullies = ownHeroes.filter((h) => LANE_BULLY_HEROES.has(h.hero_short_zh));
+        const backendLaneChem = ln.lane_chemistry_by_side?.[side] || "";
         let matchupContextHtml = "";
-        if (hasPos1) {
+        if (backendLaneChem) {
+          matchupContextHtml = injectHeroLogosIntoHtml(backendLaneChem, report);
+        } else if (hasPos1) {
           const p1 = ownHeroes.find((h) => Number(h.pos) === 1) || ownHeroes[0];
           const p5 = ownHeroes.find((h) => Number(h.pos) >= 4) || ownHeroes[1];
           if (laneGoldDiff >= 800) {
@@ -18090,16 +18093,18 @@ function renderPregamePlanOutput(plan) {
       </div>
     </section>
 
-    <!-- 4. 1~5 号位每人专属出装与本局铁律卡片 -->
+    <!-- 4. 1~5 号位每人专属位置打法、敌我克制、出装与禁忌卡片 -->
     <section>
       <div class="combos-header-bar">
-        <h3>🎯 三、1~5 号位每人专属推荐出装、最佳拍档与本局第一铁律</h3>
+        <h3>🎯 三、1~5 号位逐英雄位置专精打法、敌我克制解法、联动拍档与本局禁忌</h3>
         <span style="font-size:11px;color:var(--muted);">点击右上角「复制赛前作战简报」可一键发到开黑群</span>
       </div>
       <div class="pregame-roles-grid">
         ${roles
           .map((rg) => {
             const grokRoleTip = (grokBrief?.role_tips || {})[String(rg.pos)] || "";
+            const counters = Array.isArray(rg.counters_enemies) ? rg.counters_enemies : [];
+            const counteredBy = Array.isArray(rg.countered_by_enemies) ? rg.countered_by_enemies : [];
             return `
               <article class="pregame-role-card">
                 <div class="pregame-role-head">
@@ -18112,23 +18117,44 @@ function renderPregamePlanOutput(plan) {
                   }
                   <div style="min-width:0;">
                     <div style="font-size:12.5px;font-weight:700;color:var(--gold-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                      ${rg.pos}号位 · ${escapeHtml(rg.hero_short_zh)}
+                      ${escapeHtml(rg.pos_role_title || `${rg.pos}号位 · ${rg.hero_short_zh}`)}
                     </div>
                     <div style="font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                       玩家：${escapeHtml(rg.player_name)}
                     </div>
                   </div>
                 </div>
+                ${
+                  rg.pos_playstyle
+                    ? `<div style="font-size:11px;color:#d6e4f0;line-height:1.55;background:rgba(15,23,42,0.45);padding:5px 7px;border-radius:4px;border-left:2px solid #60a5fa;">
+                        <b style="color:#93c5fd;">🎯 ${rg.pos}号位专属打法：</b>${escapeHtml(rg.pos_playstyle)}
+                      </div>`
+                    : ""
+                }
                 <div style="font-size:11px;color:var(--muted);line-height:1.6;">
                   <b style="color:var(--gold);display:block;margin-bottom:2px;">🛠️ 关键出装顺序：</b>
                   ${escapeHtml((rg.recommended_items || []).join(" → "))}
                 </div>
                 <div style="font-size:11px;color:var(--muted);line-height:1.6;">
-                  <b style="color:var(--green-light);display:block;margin-bottom:2px;">🤝 联动拍档：</b>
+                  <b style="color:var(--green-light);display:block;margin-bottom:2px;">🤝 最佳队友技能配合：</b>
                   ${escapeHtml(rg.partner_synergy || "")}
                 </div>
+                ${
+                  counters.length > 0
+                    ? `<div style="font-size:11px;color:#bbf7d0;line-height:1.5;background:rgba(20,40,28,0.4);padding:5px 7px;border-radius:4px;">
+                        <b style="color:#86efac;">⚔️ 你克制敌方谁：</b>${escapeHtml(counters[0])}
+                      </div>`
+                    : ""
+                }
+                ${
+                  counteredBy.length > 0
+                    ? `<div style="font-size:11px;color:#fecaca;line-height:1.5;background:rgba(45,20,22,0.4);padding:5px 7px;border-radius:4px;">
+                        <b style="color:#fca5a5;">🛡️ 敌方谁克你 &amp; 解法：</b>${escapeHtml(counteredBy[0])}
+                      </div>`
+                    : ""
+                }
                 <div style="font-size:11px;color:#e5dec9;background:#161814;border-left:2px solid var(--gold);padding:6px 8px;line-height:1.55;margin-top:auto;">
-                  <b>📌 本局铁律：</b>${escapeHtml(grokRoleTip || rg.golden_rule || "")}
+                  <b>🚫 位置禁忌 / 铁律：</b>${escapeHtml(grokRoleTip || rg.pos_taboo || rg.golden_rule || "")}
                 </div>
               </article>
             `;

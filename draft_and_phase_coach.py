@@ -1696,11 +1696,15 @@ def build_deep_replay_forensics(
             winner_side = "radiant"
             verdict_zh = f"天辉对线小优 (10m 领先 +{abs(diff_dire):,} 金)"
 
+        from hero_profiles_126 import analyze_lane_matchup_chemistry
+        lane_chem = analyze_lane_matchup_chemistry(lane_num, rad_lp, dire_lp, diff_dire)
+
         lane_matchups.append({
             "lane_id": lane_num,
             "title": lane_title,
             "winner_side": winner_side,
             "verdict_zh": verdict_zh,
+            "lane_chemistry_by_side": lane_chem,
             "dire_gold10": dire_g10,
             "radiant_gold10": rad_g10,
             "dire_lh_dn": f"{dire_lh10}/{dire_dn10}",
@@ -3575,43 +3579,62 @@ def build_pregame_strategy_plan(
             "tip": "开团前先在语音里报大招/跳刀 CD 和蓝量，严禁一个人跳上去队友还在三百码外看戏。",
         })
 
+    from hero_profiles_126 import get_hero_profile_126, build_hero_matchup_dossier
+
+    prof1 = get_hero_profile_126(int(p1.get("hero_id") or 0), 1, p1.get("hero_short_zh", ""))
+    prof2 = get_hero_profile_126(int(p2.get("hero_id") or 0), 2, p2.get("hero_short_zh", ""))
+    prof3 = get_hero_profile_126(int(p3.get("hero_id") or 0), 3, p3.get("hero_short_zh", ""))
+    prof4 = get_hero_profile_126(int(p4.get("hero_id") or 0), 4, p4.get("hero_short_zh", ""))
+    prof5 = get_hero_profile_126(int(p5.get("hero_id") or 0), 5, p5.get("hero_short_zh", ""))
+
+    ep_by_pos = {int(ep.get("pos") or 0): ep for ep in enemy_players}
+    opp_offlane_str = (
+        f"（预计对阵敌方 {ep_by_pos[3]['hero_short_zh']}" + (f" + {ep_by_pos[4]['hero_short_zh']}）" if 4 in ep_by_pos else "）")
+        if 3 in ep_by_pos else ""
+    )
+    opp_mid_str = f"（预计 1v1 对决敌方 {ep_by_pos[2]['hero_short_zh']}）" if 2 in ep_by_pos else ""
+    opp_safelane_str = (
+        f"（预计施压敌方 {ep_by_pos[1]['hero_short_zh']}" + (f" + {ep_by_pos[5]['hero_short_zh']}）" if 5 in ep_by_pos else "）")
+        if 1 in ep_by_pos else ""
+    )
+
     early_plan = {
-        "title": "前期对线与抢符 (00:00 – 10:00) · 怎么分路 & 怎么打出线优",
+        "title": "前期对线与抢符 (00:00 – 10:00) · 英雄专属对线化学反应 & 击杀窗口",
         "lanes": [
             {
-                "lane": "优势路 (1号位 + 5号位)",
+                "lane": f"优势路 (1号位 + 5号位){opp_offlane_str}",
                 "heroes": f"{p1['hero_short_zh']} ({p1['personaname']}) + {p5['hero_short_zh']} ({p5['personaname']})",
                 "tasks": [
-                    f"00:00 抢完赏金符回线，{p5['hero_short_zh']} 用技能帮 {p1['hero_short_zh']} 抢前两波远程兵（先到2级就有击杀窗口）。",
-                    f"01:15 / 02:15 {p5['hero_short_zh']} 准时拉小野消兵线，03:00 / 06:00 提前卡位抢莲花池。",
+                    f"【英雄对线机制】{p1['hero_short_zh']}（{prof1.get('early_rule','稳住正反补')}）搭档 {p5['hero_short_zh']}（招牌：{'/'.join((prof5.get('signature_abilities') or ['控制消耗'])[:2])}），2级优先抢远程兵找第一波耗血/击杀窗口。",
+                    f"01:15 / 02:15 {p5['hero_short_zh']} 准时拉小野消兵线并封死敌方大野，03:00 / 06:00 提前卡位抢莲花池。",
                     f"10分钟硬指标：{p1['hero_short_zh']} 正补 ≥ 55 刀、阵亡 ≤ 1 次。",
                 ],
             },
             {
-                "lane": "中路单挑 (2号位)",
+                "lane": f"中路单挑 (2号位){opp_mid_str}",
                 "heroes": f"{p2['hero_short_zh']} ({p2['personaname']})",
                 "tasks": [
-                    f"01:50 / 03:50 提前用 AOE 技能推线进敌方塔下，再去控水符/神符。",
-                    f"05:30 补出中路高台假眼，06:00 配合 4号位 {p4['hero_short_zh']} 控第一个强化符，拿到加速/双倍直接包边路拿塔。",
+                    f"【中单英雄机制】{p2['hero_short_zh']}：{prof2.get('early_rule','利用核心技能推线控符')}。",
+                    f"01:50 / 03:50 提前用《{(prof2.get('signature_abilities') or ['AOE技能'])[0]}》推线进塔控水符；06:00 配合 4号位 {p4['hero_short_zh']} 控第一个强化神符提速抓边。",
                 ],
             },
             {
-                "lane": "劣势路抗压/施压 (3号位 + 4号位)",
+                "lane": f"劣势路抗压/施压 (3号位 + 4号位){opp_safelane_str}",
                 "heroes": f"{p3['hero_short_zh']} ({p3['personaname']}) + {p4['hero_short_zh']} ({p4['personaname']})",
                 "tasks": [
-                    f"{p4['hero_short_zh']} 开局用真眼/肉身封敌方小野，阻止敌方5号位拉野，逼迫兵线进本方塔前。",
-                    f"04:00 / 06:00 {p4['hero_short_zh']} 准时去中路帮 {p2['hero_short_zh']} 抢符；07:00 记得支援或偷敌方经验神龛(智慧符)。",
+                    f"【双人施压组合】{p3['hero_short_zh']}（{prof3.get('early_rule','占线抗压消耗')}）配合 {p4['hero_short_zh']}（招牌：{'/'.join((prof4.get('signature_abilities') or ['游走控制'])[:2])}）强压敌方1号位补刀。",
+                    f"{p4['hero_short_zh']} 开局封敌方小野，04:00 / 06:00 准时去中路帮 {p2['hero_short_zh']} 抢符；07:00 必控经验神龛(智慧符)。",
                 ],
             },
         ],
     }
 
     mid_plan = {
-        "title": "中期抱团与控图 (10:00 – 25:00) · 谁带节奏 & 抓谁推哪",
+        "title": "中期抱团与控图 (10:00 – 25:00) · 英雄强势期兑现 & 抓谁推哪",
         "key_timings": [
-            f"【12:00 – 15:00 第一波大节奏】一旦 {p3['hero_short_zh']} 或 {p4['hero_short_zh']} 做出跳刀/阿托斯，{p5['hero_short_zh']} 立刻买雾叫齐 2/3/4/5 四人，开雾抓敌方中路或优势路1号位，得手后顺势拔掉敌方中一塔！",
-            f"【15:00 – 20:00 视野压制与刷钱分配】拔掉敌方外塔后，{p4['hero_short_zh']}+{p5['hero_short_zh']} 把假眼插进敌方主野区高台，让 {p1['hero_short_zh']} 安全收三角区+边线，2/3号位占住危险线。",
-            f"【20:00 魔晶与一代肉山盾】20:00 准时抱团打痛苦魔方拿免费魔晶；随后一旦抓死敌方任一核心，立刻五人进肉山坑给 {p1['hero_short_zh']} 或 {p2['hero_short_zh']} 控下一代不朽盾！",
+            f"【12:00 – 15:00 第一波大节奏】围绕 3号位 {p3['hero_short_zh']}（{prof3.get('mid_rule','第一件先手装')}）与 2号位 {p2['hero_short_zh']}，由 {p5['hero_short_zh']} 买雾叫齐 2/3/4/5 四人抓敌方核心并拔掉中一塔！",
+            f"【15:00 – 20:00 英雄发育与控图】{p1['hero_short_zh']} 执行专属中期方针：{prof1.get('mid_rule','高效刷出核心三件套')}；{p4['hero_short_zh']}+{p5['hero_short_zh']} 将假眼铺入敌方主野区高台。",
+            f"【20:00 命脉魔晶与一代肉山盾】20:00 准时控下痛苦魔方（尤其关注本队质变魔晶），抓死敌方任一核心后立刻五人进肉山坑为 {p1['hero_short_zh']}/{p2['hero_short_zh']} 控下一代不朽盾！",
         ],
     }
 
@@ -3619,8 +3642,8 @@ def build_pregame_strategy_plan(
         "title": "后期盾团与高地终结 (25:00+) · 集火优先级 & 买活铁律",
         "rules": [
             f"【团战集火优先级】{target_priority_text}",
-            f"【核心 BKB 纪律】25分钟后 {p1['hero_short_zh']}、{p2['hero_short_zh']}、{p3['hero_short_zh']} 没有黑皇杖(BKB)或大招 CD 时，严禁接正面 5v5 团战，先带线牵制等关键装。",
-            f"【上高地唯一铁律】不带肉山盾绝不硬冲三塔！带盾上高时，只留盾核 {p1['hero_short_zh']} 站在高地拆建筑，{p3['hero_short_zh']} 与双辅助全部退在台阶下卡视野随时反手救人或秒跳！",
+            f"【大核决胜准则】{p1['hero_short_zh']}：{prof1.get('late_rule','带BKB与核心装完成正面收割')}；{p3['hero_short_zh']}：{prof3.get('late_rule','顶前排先手开团吸收第一波集火')}。",
+            f"【上高地唯一铁律】不带肉山盾绝不硬冲三塔！带盾上高时，只留盾核站在高地拆建筑，其余四人退在台阶下卡视野随时反手救人或秒跳！",
         ],
     }
 
@@ -3628,35 +3651,30 @@ def build_pregame_strategy_plan(
     for p in own_players:
         pos = p["pos"]
         hid = p["hero_id"]
-        arch = get_hero_archetype(p)
-        rec_items = HERO_CUSTOM_ITEMS.get(hid) or ROLE_DEFAULT_ITEMS.get(pos, [])
-        if pos == 1:
-            partner = f"对线绑定 5号位 {p5['hero_short_zh']}，团战紧跟 3号位 {p3['hero_short_zh']} 先手收割"
-            golden_rule = "前18分钟只接塔下反打与稳杀局，BKB出来前绝不第一个冲进黑雾！"
-        elif pos == 2:
-            partner = f"6分钟后联动 4号位 {p4['hero_short_zh']} 与 3号位 {p3['hero_short_zh']} 开雾提速"
-            golden_rule = "6/8/10分钟神符必须提前推线控住，中期切忌单人无视野过河道压二塔！"
-        elif pos == 3:
-            partner = f"对线搭档 4号位 {p4['hero_short_zh']}，中期绑定 5号位 {p5['hero_short_zh']} 开雾找节奏"
-            golden_rule = "跳刀第一波必须开雾打出击杀转推塔，团战盯死敌方核心或后排救人位！"
-        elif pos == 4:
-            partner = f"4/6分钟保 2号位 {p2['hero_short_zh']} 控符，12分钟后跟紧 3号位 {p3['hero_short_zh']} 接第二手控制"
-            golden_rule = "团战别跟3号位重叠交控制，等先手眩晕快结束再接技能最大化控制链！"
-        else:
-            partner = f"前10分钟死保 1号位 {p1['hero_short_zh']}，中期买满真假眼与诡计之雾"
-            golden_rule = "绝对不准一个人去黑雾河道插眼送人头，永远站在大哥身后 600 码随时给微光/控制！"
+        prof = get_hero_profile_126(hid, pos, p["hero_short_zh"])
+        dos = build_hero_matchup_dossier(p, own_players, enemy_players, duration_min=0.0, won=False)
+        item_rule_str = dos.get("pos_item_rule") or prof.get("core_item_hint") or ""
+        parsed_items = [x.strip() for x in item_rule_str.replace("->", "+").split("+") if x.strip()]
+        rec_items = parsed_items if parsed_items else (HERO_CUSTOM_ITEMS.get(hid) or ROLE_DEFAULT_ITEMS.get(pos, []))
+        partner = (dos.get("best_ally_synergies") or [""])[0] or f"与本队核心技能链保持同步切入"
+        golden_rule = f"【本位置打法】{dos.get('pos_playstyle', '')} 【绝对禁忌】{dos.get('pos_taboo', '')}"
 
         role_guides.append({
             "pos": pos,
-            "pos_label": p["pos_label"],
+            "pos_label": dos.get("pos_role_title") or p["pos_label"],
             "player_name": p["personaname"],
             "hero_id": hid,
             "hero_short_zh": p["hero_short_zh"],
             "hero_img": p["hero_img"],
-            "roles": arch.get("roles") or [],
-            "key_spells": arch.get("key_spells") or [],
+            "pos_role_title": dos.get("pos_role_title", p["pos_label"]),
+            "pos_playstyle": dos.get("pos_playstyle", ""),
+            "pos_taboo": dos.get("pos_taboo", ""),
+            "roles": prof.get("roles") or [],
+            "key_spells": prof.get("signature_abilities") or [],
             "recommended_items": rec_items,
             "partner_synergy": partner,
+            "counters_enemies": dos.get("counters_enemies") or [],
+            "countered_by_enemies": dos.get("countered_by_enemies") or [],
             "golden_rule": golden_rule,
         })
 
@@ -3665,7 +3683,12 @@ def build_pregame_strategy_plan(
         for c in pregame_combos[:3]
     )
     role_lines_txt = "\n".join(
-        f"  [{rg['pos']}号位 {rg['hero_short_zh']} · {rg['player_name']}] 推荐出装：{' → '.join(rg['recommended_items'][:3])} ｜ 铁律：{rg['golden_rule']}"
+        f"  [{rg['pos_role_title']} · {rg['player_name']}]\n"
+        f"    🛠️ 出装：{' → '.join(rg['recommended_items'][:4])}\n"
+        f"    🤝 配合：{rg['partner_synergy']}\n"
+        + (f"    ⚔️ 克制：{rg['counters_enemies'][0]}\n" if rg.get("counters_enemies") else "")
+        + (f"    🛡️ 提防：{rg['countered_by_enemies'][0]}\n" if rg.get("countered_by_enemies") else "")
+        + f"    🚫 禁忌：{rg['pos_taboo']}"
         for rg in role_guides
     )
 
@@ -3678,7 +3701,7 @@ def build_pregame_strategy_plan(
         f"⚠️ 翻车红线：{lose_condition}\n"
         f"🔥 必打技能配合：\n{combo_lines_txt}\n"
         f"🎯 团战集火：{target_priority_text}\n"
-        f"📋 五人各自任务与出装：\n{role_lines_txt}"
+        f"📋 1~5号位专属打法、克制与出装：\n{role_lines_txt}"
     )
 
     return {
@@ -3694,6 +3717,7 @@ def build_pregame_strategy_plan(
         "strengths": draft_eval.get("strengths") or [],
         "weaknesses": draft_eval.get("weaknesses") or [],
         "counter_tips": draft_eval.get("weaknesses") or [],
+        "hero_matchup_matrix": draft_eval.get("hero_matchup_matrix") or [],
         "combos": pregame_combos,
         "early_plan": early_plan,
         "mid_plan": mid_plan,
