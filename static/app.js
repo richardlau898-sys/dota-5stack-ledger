@@ -6049,6 +6049,175 @@ function renderDraftAndComboSection(report) {
       <span style="font-size: 11px; color: var(--muted);">对照本局录像按键次数，看看这套阵容的预设连招到底打出来了多少</span>
     </div>
     <div class="combos-grid">${combosHtml}</div>
+
+    ${renderHeroMatchupMatrixHtml(draft, own, sideZh, oppZh, report)}
+  `;
+}
+
+/**
+ * 1.5B Render 1~5号位逐英雄特性 × 位置专属打法 × 队友配合与敌我克制全景矩阵
+ */
+function renderHeroMatchupMatrixHtml(draft, own, sideZh, oppZh, report) {
+  const rawMatrix =
+    Array.isArray(draft?.hero_matchup_matrix) && draft.hero_matchup_matrix.length > 0
+      ? draft.hero_matchup_matrix
+      : (own || [])
+          .map((p) => p.hero_matchup_dossier || p.hero_mechanism_profile?.hero_matchup_dossier)
+          .filter(Boolean);
+  if (!rawMatrix || rawMatrix.length === 0) return "";
+
+  const sorted = [...rawMatrix].sort((a, b) => (a.pos || 9) - (b.pos || 9));
+  const cardsHtml = sorted
+    .map((m) => {
+      const ownP = (own || []).find(
+        (x) => Number(x.pos) === Number(m.pos) || x.hero_short_zh === (m.hero || m.hero_short_zh)
+      );
+      const heroName = m.hero || m.hero_short_zh || ownP?.hero_short_zh || "";
+      const playerName = m.player || m.personaname || ownP?.personaname || "";
+      const heroImg = m.hero_img || ownP?.hero_img || "";
+      const heroTraitsText = Array.isArray(m.hero_traits)
+        ? m.hero_traits.join(" · ")
+        : String(m.hero_traits || "");
+      const synergies = Array.isArray(m.best_ally_synergies) ? m.best_ally_synergies : [];
+      const counters = Array.isArray(m.counters_enemies) ? m.counters_enemies : [];
+      const counteredBy = Array.isArray(m.countered_by_enemies) ? m.countered_by_enemies : [];
+
+      const synHtml =
+        synergies.length > 0
+          ? synergies
+              .map(
+                (s) =>
+                  `<div class="hm-pill-line syn">${injectHeroLogosIntoHtml(escapeHtml(s), report)}</div>`
+              )
+              .join("")
+          : `<div class="hm-pill-line muted">围绕本方前排先手衔接核心技能爆发</div>`;
+
+      const countersHtml =
+        counters.length > 0
+          ? counters
+              .map((c) => {
+                if (typeof c === "string") {
+                  return `<div class="hm-counter-item good" style="margin-bottom:3px;">🟢 ${injectHeroLogosIntoHtml(
+                    escapeHtml(c),
+                    report
+                  )}</div>`;
+                }
+                return `
+                  <div class="hm-counter-item good" style="margin-bottom:3px;">
+                    <span class="hm-counter-tag good">🟢 ${escapeHtml(c.label || `克制 ${c.enemy_hero}`)}</span>
+                    <span>${injectHeroLogosIntoHtml(escapeHtml(c.reason || ""), report)}</span>
+                  </div>
+                `;
+              })
+              .join("")
+          : `<div class="hm-counter-item neutral"><span class="hm-counter-tag neutral">⚖️ 常规正面博弈</span><span>无极端天然克制猎物，拼装备时间点与先手视野</span></div>`;
+
+      const counteredByHtml =
+        counteredBy.length > 0
+          ? counteredBy
+              .map((cb) => {
+                if (typeof cb === "string") {
+                  return `<div class="hm-counter-item bad" style="margin-bottom:3px;">🔴 ${injectHeroLogosIntoHtml(
+                    escapeHtml(cb),
+                    report
+                  )}</div>`;
+                }
+                return `
+                  <div class="hm-counter-item bad" style="margin-bottom:3px;">
+                    <span class="hm-counter-tag bad">🔴 ${escapeHtml(cb.label || `被 ${cb.enemy_hero} 克制`)}</span>
+                    <span>${injectHeroLogosIntoHtml(escapeHtml(cb.reason || ""), report)}${
+                  cb.item_solution
+                    ? ` <strong style="color:var(--gold-light);">[${escapeHtml(cb.item_solution)}]</strong>`
+                    : ""
+                }</span>
+                  </div>
+                `;
+              })
+              .join("")
+          : `<div class="hm-counter-item good"><span class="hm-counter-tag good">🛡️ 无致命天敌机制克制</span><span>敌方缺乏直接废除该英雄核心机制的天敌，正常做出核心装即可发挥</span></div>`;
+
+      return `
+        <article class="combo-card" style="display:flex;flex-direction:column;gap:8px;border-left:3px solid var(--gold);">
+          <div class="combo-card-top" style="align-items:center;justify-content:space-between;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              ${
+                heroImg
+                  ? `<img src="${escapeHtml(heroImg)}" alt="${escapeHtml(heroName)}" width="38" height="22" style="border-radius:3px;border:1px solid rgba(235,194,117,0.45);" loading="lazy" />`
+                  : ""
+              }
+              <strong class="combo-title" style="font-size:13.5px;">[${m.pos}号位 · ${escapeHtml(
+        heroName
+      )}] ${escapeHtml(m.pos_role_title || "")}</strong>
+              ${
+                playerName
+                  ? `<span style="font-size:11.5px;color:var(--muted);">(${escapeHtml(playerName)})</span>`
+                  : ""
+              }
+            </div>
+            <span class="combo-status-pill ok" style="font-size:11px;">⏱️ ${escapeHtml(
+              m.timing_label || "全期支点"
+            )}</span>
+          </div>
+
+          <div class="combo-how" style="font-size:12px;line-height:1.52;">
+            <strong style="color:var(--gold-light);">🧬 英雄专属机制：</strong>${injectHeroLogosIntoHtml(
+              escapeHtml(heroTraitsText),
+              report
+            )}
+          </div>
+
+          <div class="combo-how" style="font-size:12px;line-height:1.52;background:rgba(15,23,42,0.45);padding:7px 9px;border-radius:6px;border:1px solid rgba(148,163,184,0.18);">
+            <div><strong style="color:#93c5fd;">🎯 ${m.pos}号位专属打法：</strong>${injectHeroLogosIntoHtml(
+              escapeHtml(m.pos_playstyle || ""),
+              report
+            )}</div>
+            <div style="margin-top:3px;"><strong style="color:#fca5a5;">🚫 ${m.pos}号位致命禁忌：</strong>${injectHeroLogosIntoHtml(
+              escapeHtml(m.pos_taboo || ""),
+              report
+            )}</div>
+            <div style="margin-top:3px;"><strong style="color:#fde68a;">🛠️ 位置出装法则：</strong>${injectHeroLogosIntoHtml(
+              escapeHtml(m.pos_item_rule || ""),
+              report
+            )}</div>
+          </div>
+
+          <div class="combo-how" style="font-size:12px;line-height:1.52;">
+            <strong style="color:#86efac;">🤝 与本局队友技能配合：</strong>
+            <div style="margin-top:3px;display:flex;flex-direction:column;gap:3px;">${synHtml}</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px;font-size:11.8px;line-height:1.48;">
+            <div style="background:rgba(20,40,28,0.42);border:1px solid rgba(74,222,128,0.28);padding:6px 8px;border-radius:6px;">
+              <div style="font-weight:700;color:#86efac;margin-bottom:3px;">⚔️ 本局克制敌方 (${escapeHtml(
+                oppZh
+              )})：</div>
+              ${countersHtml}
+            </div>
+            <div style="background:rgba(45,20,22,0.42);border:1px solid rgba(248,113,113,0.28);padding:6px 8px;border-radius:6px;">
+              <div style="font-weight:700;color:#fca5a5;margin-bottom:3px;">🛡️ 被敌方谁克制 &amp; 破局解法：</div>
+              ${counteredByHtml}
+            </div>
+          </div>
+
+          ${
+            m.match_execution_verdict
+              ? `<div class="combo-audit" style="margin-top:2px;"><strong>📊 本局实战兑现验尸：</strong>${injectHeroLogosIntoHtml(
+                  escapeHtml(m.match_execution_verdict),
+                  report
+                )}</div>`
+              : ""
+          }
+        </article>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="combos-header-bar" style="margin-top: 16px;">
+      <h3>🧬 ${escapeHtml(sideZh)} 1~5号位逐英雄特性 × 位置差异化打法 × 队友配合与敌我克制全景矩阵</h3>
+      <span style="font-size: 11px; color: var(--muted);">按「每个英雄独特机制 + 所在1~5号位专属职责 + 队友技能配合 + 敌我双向克制与破局出装」逐人拆解</span>
+    </div>
+    <div class="combos-grid">${cardsHtml}</div>
   `;
 }
 
@@ -11115,9 +11284,73 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     `
     : "";
 
+  const hDossier =
+    p.hero_matchup_dossier ||
+    p.hero_mechanism_profile?.hero_matchup_dossier ||
+    (report.draft_analysis_by_side?.[side]?.hero_matchup_matrix || []).find(
+      (m) => Number(m.pos) === Number(p.pos) || m.hero === heroShort
+    );
+  const heroRoleMatchupStripHtml = hDossier
+    ? `
+      <div style="margin-bottom:9px;padding:9px 12px;background:rgba(15,23,42,0.58);border:1px solid rgba(235,194,117,0.28);border-radius:8px;font-size:12px;line-height:1.55;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:4px;">
+          <strong style="color:var(--gold-light);">🧬 【${escapeHtml(
+            hDossier.pos_role_title || `${pos}号位·${heroShort}`
+          )}】英雄×位置法则 &amp; 敌我克制关系</strong>
+          <span style="font-size:11px;color:var(--muted);">强势期：${escapeHtml(
+            hDossier.timing_label || "全期支点"
+          )}</span>
+        </div>
+        <div style="color:#e2e8f0;"><b style="color:#93c5fd;">位置职责：</b>${escapeHtml(
+          hDossier.pos_playstyle || ""
+        )} <b style="color:#fca5a5;">｜位置禁忌：</b>${escapeHtml(hDossier.pos_taboo || "")}</div>
+        ${
+          (hDossier.best_ally_synergies || []).length > 0
+            ? `<div style="margin-top:3px;color:#cbd5e1;"><b style="color:#86efac;">队友配合：</b>${escapeHtml(
+                hDossier.best_ally_synergies.slice(0, 2).join("；")
+              )}</div>`
+            : ""
+        }
+        ${
+          (hDossier.counters_enemies || []).length > 0 || (hDossier.countered_by_enemies || []).length > 0
+            ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;">
+                ${(hDossier.counters_enemies || [])
+                  .slice(0, 2)
+                  .map((c) => {
+                    const txt = typeof c === "string" ? c.split("：")[0] : c.label || "";
+                    const full = typeof c === "string" ? c : `${c.label || ""}：${c.reason || ""}`;
+                    return `<span style="padding:1px 7px;border-radius:4px;background:rgba(22,163,74,0.22);border:1px solid rgba(74,222,128,0.4);color:#bbf7d0;font-size:11.2px;" title="${escapeHtml(
+                      full
+                    )}">🟢 ${escapeHtml(txt)}</span>`;
+                  })
+                  .join("")}
+                ${(hDossier.countered_by_enemies || [])
+                  .slice(0, 2)
+                  .map((cb) => {
+                    const txt =
+                      typeof cb === "string"
+                        ? cb.split("：")[0]
+                        : `${cb.label || ""}${
+                            cb.item_solution ? ` (${cb.item_solution.replace(/^破局装：/, "")})` : ""
+                          }`;
+                    const full =
+                      typeof cb === "string" ? cb : `${cb.reason || ""} ${cb.item_solution || ""}`;
+                    return `<span style="padding:1px 7px;border-radius:4px;background:rgba(185,28,28,0.22);border:1px solid rgba(248,113,113,0.4);color:#fecaca;font-size:11.2px;" title="${escapeHtml(
+                      full
+                    )}">🔴 ${escapeHtml(txt)}</span>`;
+                  })
+                  .join("")}
+              </div>`
+            : ""
+        }
+      </div>
+    `
+    : "";
+
   const html = `
     <div class="verdict-chronology-story-v2">
       ${grokDeepVerdictBoxHtml}
+      ${heroRoleMatchupStripHtml}
       <div class="story-act-row">
         <span class="story-act-badge early">🌅 第一幕 · 序章对线 (00:00–10:00)</span>
         <p class="story-act-text">${act1Story}</p>

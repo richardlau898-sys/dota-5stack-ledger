@@ -14,7 +14,11 @@ import re
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
-from hero_profiles_126 import audit_hero_mechanism_and_timing, get_hero_profile_126
+from hero_profiles_126 import (
+    audit_hero_mechanism_and_timing,
+    build_hero_matchup_dossier,
+    get_hero_profile_126,
+)
 
 
 def clamp(val: float, lo: float, hi: float) -> float:
@@ -861,6 +865,51 @@ def evaluate_player_deeply(
             elif str(pb_note).startswith("🔥"):
                 strengths.append(pb_note)
 
+    # 7) 逐英雄独特机制 × 1~5号位差异化打法 × 队友技能配合 × 敌我克制关系深度取证 (hero_matchup_dossier)
+    dossier = hmp.get("hero_matchup_dossier") or build_hero_matchup_dossier(
+        p, team_players, enemy_players, duration_min, won
+    )
+    p["hero_matchup_dossier"] = dossier
+    if dossier:
+        c_enemies = dossier.get("counters_enemies") or []
+        cb_enemies = dossier.get("countered_by_enemies") or []
+        synergies = dossier.get("best_ally_synergies") or []
+        pos_role_title = dossier.get("pos_role_title") or f"{pos}号位·{hero_name}"
+
+        # 检查是否兑现了对敌方特定英雄的先天克制
+        for ce in c_enemies[:2]:
+            ce_txt = ce if isinstance(ce, str) else f"{ce.get('label', '')}：{ce.get('reason', '')}"
+            matched_eh = next((ep.get("hero_short_zh", "") for ep in enemy_players if ep.get("hero_short_zh") and ep.get("hero_short_zh") in ce_txt), "")
+            k_cnt = int(kills_info.get(matched_eh, 0) or 0) if matched_eh else 0
+            if matched_eh and k_cnt >= 2:
+                strengths.append(
+                    f"⚔️ 【英雄机制克制完美兑现（手刃 {matched_eh}×{k_cnt}）】：{ce_txt} 本局精准锁定并击杀 {matched_eh} {k_cnt} 次，彻底打出英雄克制链价值！"
+                )
+            elif not won and matched_eh and k_cnt == 0 and pos in (1, 2, 3, 4) and ("天克" in ce_txt or "克制【" in ce_txt):
+                weaknesses.append(
+                    f"⚠️ 【未发挥先天英雄克制优势（本应克制 {matched_eh}）】：{ce_txt} 但本局全场 0 次击杀 {matched_eh}，未能针对敌方被克制点打开突破口。"
+                )
+
+        # 检查是否被敌方天敌英雄机制针对提款，并给出专属破局出装
+        for cbe in cb_enemies[:2]:
+            cbe_txt = cbe if isinstance(cbe, str) else f"{cbe.get('label', '')}：{cbe.get('reason', '')} {cbe.get('item_solution', '')}"
+            matched_eh = next((ep.get("hero_short_zh", "") for ep in enemy_players if ep.get("hero_short_zh") and ep.get("hero_short_zh") in cbe_txt), "")
+            d_cnt = int(killed_by_info.get(matched_eh, 0) or 0) if matched_eh else 0
+            if matched_eh and d_cnt >= 2:
+                weaknesses.append(
+                    f"🚨 【惨遭敌方天敌机制克制（被 {matched_eh} 击杀 {d_cnt} 次）】：{cbe_txt}"
+                )
+                improvements.insert(
+                    0,
+                    f"🛡️ 【反制天敌 {matched_eh} 破局方案】：{cbe_txt}",
+                )
+
+        # 注入该英雄在当前位置 (1~5号位) 的专属打法、禁忌与队友配合化学反应处方
+        syn_hint = f" | 最佳队友配合：{synergies[0]}" if synergies else ""
+        improvements.append(
+            f"🎯 【{pos_role_title} · 英雄×位置专属法则】：{dossier.get('pos_playstyle')} 禁忌：{dossier.get('pos_taboo')}（出装铁律：{dossier.get('pos_item_rule')}{syn_hint}）"
+        )
+
     if deaths <= 4 and duration_min >= 30 and not is_afk_farmer:
         strengths.append(
             f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次（读秒总计 {dead_min}分{dead_rem_s:02d}秒，仅占全场 {dead_pct:.1f}%），团战站位拉扯极佳。"
@@ -956,6 +1005,7 @@ def evaluate_player_deeply(
     return {
         "is_afk_farmer": is_afk_farmer,
         "hero_mechanism_profile": hmp,
+        "hero_matchup_dossier": dossier,
         "radar": radar,
         "rating_score": rating_score,
         "rating_tier": rating_tier,
@@ -1659,8 +1709,22 @@ def _compute_player_role_duty_audit(
             + ("🚨 警告：吃了全队极高经济却全场建筑伤害极低或团战零收割，未能兑现1号位后期推塔/接管比赛职责！" if (tdmg < 800 and int(p.get("net_worth") or 0) > 13000) else "")
         )
 
+    dossier = (
+        p.get("hero_matchup_dossier")
+        or (p.get("hero_mechanism_profile") or {}).get("hero_matchup_dossier")
+        or build_hero_matchup_dossier(p, own_team, opp_team, 35.0, True)
+    )
+
     return {
         "pos": pos,
+        "hero_pos_role_title": dossier.get("pos_role_title"),
+        "hero_unique_traits": dossier.get("hero_traits"),
+        "pos_specific_playstyle": dossier.get("pos_playstyle"),
+        "pos_specific_taboo": dossier.get("pos_taboo"),
+        "pos_specific_item_rule": dossier.get("pos_item_rule"),
+        "best_ally_synergies": dossier.get("best_ally_synergies"),
+        "counters_enemies": dossier.get("counters_enemies"),
+        "countered_by_enemies": dossier.get("countered_by_enemies"),
         "role_contract": role_contract,
         "post_10m_lh_farmed": post_10m_lh,
         "solo_pickoffs_count": solo_cnt,
@@ -1845,23 +1909,26 @@ def call_llm_coach_review(
         )
 
     system_prompt = (
-        "你是懂 Dota 2 全 126 英雄核心机制、克制出装与团队运营的顶分局教练兼损友老哥，给车队五人做赛后深度算账复盘。全中文输出（严禁夹杂任何英文变量名），语气犀利接地气、刀塔味十足，且必须严格基于录像证据深度推理以下核心维度：\n"
+        "你是懂 Dota 2 全 126 英雄核心机制、1~5号位差异化打法、队友技能配合化学反应与敌我克制出装的顶分局教练兼损友老哥，给车队五人做赛后深度算账复盘。全中文输出（严禁夹杂任何英文变量名），语气犀利接地气、刀塔味十足，且必须严格按【每个英雄的独特机制 × 所在位置(1~5号位)专属打法 × 队友技能配合 × 敌我英雄克制关系】四大维度深度思考：\n"
+        "0) 【拒绝千篇一律模板，必须按「每个英雄自身特点 + 所在1~5号位差异化特点 + 队友技能配合 + 敌我克制关系」思考（结合每位选手的 role_duty_audit）】：\n"
+        "   - 每个英雄都有独一无二的技能机制（参考 `hero_unique_traits`），且同一个英雄打不同位置（如力丸打2号位中单刺客 vs 打4号位烟幕侦察游走、帕吉打4/5号位钩人+魔晶吞噬救人 vs 打3号位A杖腐烂法坦、帕格纳打5号位衰老输血保核+爆轰拆塔 vs 打2号位法核、幽鬼1号位6级暗影步全图提速而非闷头刷野、瘟疫法师2号位脉冲续航与镰刀加读秒但开幽魂护罩怕高法爆自爆、潮汐3号位海妖外壳强驱散克制近战与蜘蛛、司夜刺客4号位尖刺外壳反弹AOE+复仇破隐抓高智脆皮、电炎绝手5号位饼干跨地形投送前排+蜥蜴绝吻超远洗地）打法与出装截然不同！\n"
+        "   - 评价任何一位选手时，必须点出：① 他这个英雄打当前位置（`hero_pos_role_title` / `pos_specific_playstyle`）的核心使命是什么、有没有犯该位置的专属禁忌（`pos_specific_taboo`）；② 他与本局哪位队友有什么核心技能配合（`best_ally_synergies`，如潮汐踩大+电炎绝手蜥蜴绝吻、司夜刺客隐身复仇+幽鬼暗影步+瘟疫法师死神镰刀），本局配合打出来没有；③ 他在机制上克制对面哪个英雄（`counters_enemies`）、又被对面哪个英雄克制（`countered_by_enemies`），本局有没有做出对应的破局克制装（如面对天穹守望者双倍磁场100%闪避必须贴进磁场内或出金箍棒，面对斧王吼/杰奇洛高法爆/工程师地雷阵瘟疫法师不能乱开幽魂护罩而要补BKB/笛子/魔晶）！\n"
         "1) 【前期三路对线与英雄先天强弱评估 (stage_reviews.early_lanes)】：\n"
-        "   - 必须逐一分析上、中、下三条线！客观结合双方英雄先天对线机制（例如：若敌方是剧毒术士+冥魂大帝等强减速消耗线霸，本方无位移英雄抗压死几次是情有可原的，重点看有没有把总经济咬住；若中单是天怒法师这种全单体爆发、缺乏AOE推线清兵的英雄对阵高攻击力帕吉，拼补刀数吃亏但靠消耗单杀打出经济优势就是大功；1号位打钱是否顺畅、5号位有没有顶前排给压力与拉野封野）。\n"
-        "2) 【中期资源转化：抓人节奏与英雄特性推塔 (stage_reviews.mid_tempo)】：\n"
-        "   - 10~25分钟重点考核资源转化率：谁做出了第一件节奏装（如阿托斯/跳刀/大骨灰）主动带队抓人？谁利用了英雄自身的推塔特性（如帕格纳幽冥爆轰磨塔、德鲁伊/兽王/龙骑/小Y等）拔掉外塔？1号位在刷核心装的同时有没有关键团切入收割？\n"
+        "   - 必须逐一分析上、中、下三条线！客观结合双方英雄先天对线机制与克制关系（例如：若敌方是强减速消耗线霸，本方短手核心抗压死几次情有可原，重点看总经济有没有咬住；若中单是全单体爆发缺AOE清线的天怒法师对阵高攻帕吉，拼补刀吃亏但靠消耗单杀打出经济优势就是大功；1号位打钱是否顺畅、5号位有没有顶前排给压力与拉野封野）。\n"
+        "2) 【中期资源转化：英雄专属抓人配合与推塔特性 (stage_reviews.mid_tempo)】：\n"
+        "   - 10~25分钟重点考核资源转化率与英雄技能配合：谁做出了第一件节奏装主动带队抓人？核心与辅助的招牌技能 Combo（如司夜刺客先手+幽鬼大招支援、帕格纳幽冥爆轰磨塔）有没有打出来？\n"
         "3) 【后期肉山盾转化率与决胜接管 (stage_reviews.late_and_roshan)】：\n"
-        "   - 结合 macro_objectives 与 roshan_and_tower_timeline，重点判断打了肉山盾之后有没有真正转化为胜势！比如拿到不朽之守护后，有没有顺势把外塔拔光、直接攻破敌方高地塔与兵营完成终结（教科书级控盾资源转化）？还是拿了盾却钻野空转白白浪费？同时考核1号位刷完钱是否在后期真正接管比赛。\n"
-        "4) 【1~5号位位置本职工作契约与『假辅助真毒瘤抢钱出输出装』严厉审讯铁律（结合每位选手的 role_duty_audit）】：\n"
+        "   - 结合 macro_objectives 与 roshan_and_tower_timeline，重点判断打了肉山盾之后有没有顺势拔光外塔、攻破高地完成终结，以及后期大核与团战大招在敌我克制博弈下的真实兑现度。\n"
+        "4) 【1~5号位位置本职工作契约与『假辅助真毒瘤抢钱出输出装』严厉审讯铁律】：\n"
         "   - 必须严格按照该选手所在的【1~5号位位置职责】进行考核，绝不能把4/5号位辅助当成1/2号位大哥来评判！\n"
-        "   - 特别是【4号位（游走辅助）】与【5号位（保核辅助）】：4号位的本职工作是前期协助3号位站稳劣势路、拉野控符，中后期围绕3号位和2号位主动带节奏抓人，并优先做出跳刀、推推棒、微光披风、阿托斯、风杖、大骨灰、莲花、魔晶等【团队控制与救人装】服务3号位和团队！4号位可以补输出装，但前提是已经履行好辅助本职、带起节奏且顺风肥起来；如果一个4号位在没钱的劣势局里，连鞋都没升好就裸憋『净魂之刃(散失)』、『点金手』、『雷神之锤』、『黑皇杖(BKB)』等纯个人大哥装，全场 0 推推、0 微光、0 阿托斯、0 跳刀、0 魔晶，中期不去保3号位或配合队友带节奏，反而自己占线钻野刷兵抢核心经济，还在打钱收线时连续落单被抓死、全场伤害占比极低且0塔伤——这属于极其恶劣的【假辅助·真毒瘤抢钱玩法】！遇到这种毒瘤4号位，严禁夸他『散失思路对』或按大哥标准『怪他BKB出得太晚』，必须狠批他『作为4号位完全不干人事，不去服务3号位带节奏、不出团队救人控制装，没钱硬憋散失还自己打钱抢经济送人头』！（注意：JSON字符串内部若需使用引号，请一律使用『』或「」，切勿在JSON字符串内部使用英文双引号）\n"
-        "   - 同样，对【1/2/3号位核心】也要按本职考核：1号位（如德鲁伊、恐怖利刃、主宰）是否把全队最高经济转化为后期团战收割与拆塔（若德鲁伊刷了2万多经济、赢了团却钻野不推塔、全场仅559建筑伤害，或恐怖利刃吃最多资源却后期团战0收割350塔伤，必须批其未兑现1号位推进/接管职责）；3号位是否出跳刀/BKB/前排装顶第一排吃技能（同时客观指出若其4号位搭档毒瘤抢钱不出救人装对3号位造成的连带困境）。\n"
+        "   - 特别是【4号位（游走辅助）】与【5号位（保核辅助）】：4号位的本职工作是前期协助3号位站稳劣势路、拉野控符，中后期围绕3号位和2号位主动带节奏抓人，并优先做出跳刀、推推棒、微光披风、阿托斯、风杖、大骨灰、莲花、魔晶等【团队控制与救人装】服务3号位和团队！如果一个4号位在没钱的劣势局里，裸憋『净魂之刃(散失)』、『点金手』、『雷神之锤』、『黑皇杖(BKB)』等纯个人大哥装，全场 0 推推、0 微光、0 阿托斯、0 跳刀、0 魔晶，中期不去保3号位带节奏，反而自己占线钻野刷兵抢核心经济，还在打钱收线时连续落单被抓死——这属于极其恶劣的【假辅助·真毒瘤抢钱玩法】，必须严厉批判！（注意：JSON字符串内部若需使用引号，请一律使用『』或「」，切勿在JSON字符串内部使用英文双引号）\n"
+        "   - 对【1/2/3号位核心】同样按本职与英雄特性考核：1号位是否把最高经济转化为后期团战收割与拆塔；2号位是否发挥英雄游走/爆发特性带起节奏；3号位是否出跳刀/BKB/团队装顶第一排吃技能开团。\n"
         "5) 【每个人(1~5号位全员5人)的深度个人研判总报告 (deep_verdict) 与 第一幕/第二幕/第三幕全段落详实复盘 (early_story / mid_story / late_story)】：\n"
-        "   - `deep_verdict`（140~190字深度长段）：全面剖析该选手为何是本局头号大锅一级战犯/次锅/孤胆院长或头号首功MVP，重点审讯他【有没有执行所在位置的本职工作】，串联前中后期抉择、出装是否毒瘤或克制、资源转化率与阵亡性质，并解释为何给出该本局评分与定责/贡献占比。\n"
-        "   - `early_story`（第一幕·00:00–10:00，必须写满 110~160 字的一整段详实复盘，严禁只写一句话！）：详细复盘其对线分路、搭档与敌方组合、先天对位克制关系、前10分钟正反补/经济/对位经济差、拉野封野驻留率、真假眼、抢莲花/智慧符/控符细节、具体击杀与阵亡时间点，以及是否履行了该位置的对线期职责。\n"
-        "   - `mid_story`（第二幕·10:00–25:00，必须写满 120~170 字的一整段详实复盘，严禁只写一句话！）：详细复盘其10~25分钟的经济进账、补刀数、伤害占比、关键装备合成时间点（精确到分秒），重点审讯其位置本职工作与节奏转化（如4号位是在帮3号位带节奏还是裸憋散失自己刷钱抢经济连续落单送塔？核心是在抓人推塔还是钻野空转/无视野孤狼白给？点出具体几分几秒被谁抓死及连锁丢塔后果）。\n"
-        "   - `late_story`（第三幕·25:00–终局，必须写满 110~160 字的一整段详实复盘，严禁只写一句话！）：详细复盘其25分钟后的经济与伤害转化、全场建筑拆塔伤害、肉山盾争夺与带盾推高地表现、后期装备与大招/BKB/救人装在决胜团的实际兑现度、买活得失以及终局定性。\n"
-        "   - `item_and_blink_audit`（85~135字专项出装审计段落）：深度锐评其出装是否符合该位置本职工作（如痛批4号位不出推推/微光/阿托斯/跳刀却裸出散失+BKB毒瘤抢钱；或肯定主宰A杖+跳刀+金箍棒精准克制、帕格纳魔晶+A杖爆塔、大骨灰克制回血等），以及跳刀买出后的真实收割/白给转化率。\n"
+        "   - `deep_verdict`（140~190字深度长段）：必须从【该英雄自身独特机制 + 当前位置(1~5号位)专属职责 + 与队友的技能配合 + 对阵敌方英雄的克制/被克制关系】切入，全面剖析他为何是本局头号大锅/次锅/孤胆院长或头号首功MVP，并解释本局评分与定责/贡献占比。\n"
+        "   - `early_story`（第一幕·00:00–10:00，110~150字详实复盘）：结合英雄对线机制与敌我克制，复盘其分路、搭档配合、前10分钟正反补/经济差、拉野封野/抢莲花控符细节及具体击杀阵亡时间点。\n"
+        "   - `mid_story`（第二幕·10:00–25:00，115~155字详实复盘）：结合该英雄在当前位置的强势期与队友配合Combo，复盘其10~25分钟经济进账、关键成装时间点（精确到分秒）、技能配合兑现度，以及具体几分几秒在何处被敌方天敌抓死及丢塔后果。\n"
+        "   - `late_story`（第三幕·25:00–终局，110~150字详实复盘）：结合后期敌我英雄克制博弈，复盘其25分钟后的经济伤害转化、拆塔伤害、肉山盾与高地攻防、招牌大招/BKB/救人装在决胜团的实际兑现度与终局定性。\n"
+        "   - `item_and_blink_audit`（85~125字专项出装与克制审计）：深度锐评其出装是否契合【该英雄×该位置】的特性、是否针对敌方克制关系做出了破局装（如金箍棒破天穹磁场闪避、大推推/风杖解控制、微光/笛子抗杰奇洛工程师法爆、BKB防斧王/控制等），以及跳刀买出后的真实收割/白给转化率。\n"
         + afk_rule_str +
         "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
         "{\n"
@@ -1967,6 +2034,10 @@ def call_llm_coach_review(
                         "obs_sen": p.get("obs_sen"),
                         "key_item_timings": p.get("key_item_timings"),
                         "final_items": p.get("final_items"),
+                        "hero_pos_role_title": (p.get("role_duty_audit") or {}).get("hero_pos_role_title"),
+                        "best_ally_synergies": ((p.get("role_duty_audit") or {}).get("best_ally_synergies") or [])[:2],
+                        "counters_enemies": [c if isinstance(c, str) else c.get("label") for c in ((p.get("role_duty_audit") or {}).get("counters_enemies") or [])[:2]],
+                        "countered_by_enemies": [c if isinstance(c, str) else c.get("label") for c in ((p.get("role_duty_audit") or {}).get("countered_by_enemies") or [])[:2]],
                         "role_duty_verdict": (p.get("role_duty_audit") or {}).get("duty_verdict"),
                     }
                     for p in (compact_payload.get("own_team") or [])
@@ -1977,15 +2048,15 @@ def call_llm_coach_review(
 
             user_prompt_global = (
                 "【并发分片 0：全局总评与三幕复盘（无需输出 players 数组）】\n"
-                "请基于以下全队 5 人证据，只输出全局 JSON 字段：`title`（22~36字）, `summary`（120~160字）, `verdict`（120~160字）, `team_practice`（65~95字）, `stage_reviews`（含 `early_lanes`, `mid_tempo`, `late_and_roshan`, `overall_verdict` 四个精炼长段，每段严格控制在 110~145 字以内，切勿超过 165 字）, `mvp`, `windows`（最多3条），并在顶层放一个空数组 `\"players\": []`（选手个人复盘由其他并发分片生成）：\n"
+                "请基于以下全队 5 人证据（重点结合每个英雄自身特性、1~5号位分工、队友技能Combo配合与敌我英雄克制关系），只输出全局 JSON 字段：`title`（22~36字）, `summary`（120~160字）, `verdict`（120~160字）, `team_practice`（65~95字）, `stage_reviews`（含 `early_lanes`, `mid_tempo`, `late_and_roshan`, `overall_verdict` 四个精炼长段，每段严格控制在 110~145 字以内，切勿超过 165 字）, `mvp`, `windows`（最多3条），并在顶层放一个空数组 `\"players\": []`（选手个人复盘由其他并发分片生成）：\n"
                 + payload_json_str
             )
 
             def _build_pos_prompt(target_pos: int) -> str:
                 role_hint = (
-                    "必须重点结合 `role_duty_audit` 深度审讯该辅助/节奏位是否执行了本职工作（如4号位是否服务3号位带节奏、出推推/微光/跳刀/阿托斯/莲花/大骨灰等团队装，还是没钱硬憋散失/BKB等大哥装自己打钱抢经济送人头；5号位是否保大哥线优、做真假眼视野、蹲后排救人）！"
+                    "必须重点结合 `role_duty_audit` 深度审讯该辅助/节奏位的：① 英雄自身独特机制（`hero_unique_traits`）；② 在当前4/5号位下的专属打法与禁忌（`pos_specific_playstyle` / `pos_specific_taboo`，如是否服务3号位/1号位带节奏出推推/微光/跳刀/阿托斯/魔晶，还是没钱硬憋散失/BKB自己打钱抢经济送人头）；③ 与本局队友的技能配合（`best_ally_synergies`）；④ 与敌方英雄的克制与被克制关系（`counters_enemies` / `countered_by_enemies`）！"
                     if target_pos in (4, 5)
-                    else "必须重点结合 `role_duty_audit` 深度审讯该核心位的本职执行（1号位经济转化率与BKB容错、2号位中路游走辐射与节奏带动、3号位前排先手开团与吃伤害护阵型）！"
+                    else "必须重点结合 `role_duty_audit` 深度审讯该核心位的：① 英雄自身独特机制（`hero_unique_traits`）；② 在当前1/2/3号位下的专属打法与禁忌（`pos_specific_playstyle` / `pos_specific_taboo`）；③ 与本局队友的技能配合Combo（`best_ally_synergies`）；④ 与敌方英雄的克制与被克制关系及破局出装（`counters_enemies` / `countered_by_enemies`）！"
                 )
                 pos_payload = {
                     "match_id": compact_payload.get("match_id"),

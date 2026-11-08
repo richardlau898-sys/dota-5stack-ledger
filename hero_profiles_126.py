@@ -1621,6 +1621,8 @@ def audit_hero_mechanism_and_timing(
         missing_mandatory_shard = True
         badges.append(f"🚫 {duration_min:.0f}m未出命脉魔晶!")
 
+    dossier = build_hero_matchup_dossier(p, team_players, enemy_players, duration_min, won)
+
     return {
         "hero_id": hid,
         "hero_short_zh": hero_name,
@@ -1643,4 +1645,571 @@ def audit_hero_mechanism_and_timing(
         "early_phase_note": early_phase_note,
         "mid_phase_note": mid_phase_note,
         "late_phase_note": late_phase_note,
+        "hero_matchup_dossier": dossier,
     }
+
+
+# ==============================================================================
+# 全 126 英雄 × 1~5 号位差异化专精、双英雄技能化学反应与敌我克制矩阵引擎
+# ==============================================================================
+
+HERO_POS_SPECIALIZATIONS: Dict[Tuple[int, int], Dict[str, str]] = {
+    # 幽鬼 Spectre (67)
+    (67, 1): {
+        "pos_role_title": "1号位 · 全图暗影步收割与后期折射真神",
+        "pos_playstyle": "幽鬼天生对线弱、无AOE刷野慢，前中期严禁像传统刷核一样死蹲野区不看全图！到6级后必须时刻盯紧全图残血，配合4号位（如司夜刺客/裂魂人）视野导引开启《暗影步》全图空降混助攻提速紫怨/刃甲/辉耀/分身斧；后期依靠《折射》顶前排并锁头切死敌方后排炮台。",
+        "pos_taboo": "大招冷却好却全场0全图支援闷头钻野，或后期不敢切后排真身、全场0拆塔伤害。",
+        "pos_item_rule": "骨灰/紫怨/刃甲/辉耀过渡 -> 分身斧 + 血棘/深渊之刃/魔晶/心（面对天穹守望者/高闪避必补金箍棒或血棘）",
+    },
+    # 瘟疫法师 Necrophos (36)
+    (36, 2): {
+        "pos_role_title": "2号位 · 中单脉冲续航与死神镰刀斩杀法坦",
+        "pos_playstyle": "对线期利用正反补被动回血回蓝压制近战中单；中期必须围绕大招《死神镰刀》CD抱团抓核心，每斩杀一人不仅永久叠加恢复还能延长敌方读秒！但瘟疫法师手短腿短，面对超远炮台（天穹守望者/狙击手/双头龙）必须有魔晶/跳刀切入，且面对高法爆阵容开启《幽魂护罩》前必出永世法衣/莲花/BKB防自爆！",
+        "pos_taboo": "面对敌方高法术爆发（如工程师/杰奇洛/天穹守望者/莱恩）不出魔抗/BKB就乱按《幽魂护罩》加深法伤自杀，或中期脱离团队单带被风筝提款。",
+        "pos_item_rule": "魔晶 + 永世法衣/莲花/黑皇杖 + 辉耀/希瓦/风杖",
+    },
+    (36, 3): {
+        "pos_role_title": "3号位 · 劣势路不死奶坦与反手镰刀支点",
+        "pos_playstyle": "作为3号位前排，核心任务是出卫士胫甲/笛子/莲花/刃甲顶在阵型最前方吃伤害并持续用《死亡脉冲》奶全队，把《死神镰刀》留给冲脸深入的敌方核心。",
+        "pos_taboo": "不出团队光环抗性装而裸憋纯输出装导致进场被秒，无法充当团队前排支点。",
+        "pos_item_rule": "卫士胫甲/洞察烟斗 + 清莲宝珠 + 阿哈利姆魔晶 + 希瓦的守护",
+    },
+    # 潮汐猎人 Tidehunter (29)
+    (29, 3): {
+        "pos_role_title": "3号位 · 海妖外壳强解控肉盾与跳刀毁灭团控核",
+        "pos_playstyle": "对线期利用《海妖外壳》与《锚击》百分比减基础攻击力单防敌方近战1号位与召唤物（如育母蜘蛛/凯/小鱼人）；中期第一铁律是速出《闪烁匕首(跳刀)》，团战耐心盯住敌方后排核心位置跳大《毁灭》，并在前排利用海妖外壳强驱散吃满第一波控制。",
+        "pos_taboo": "跳刀成型过晚、团战只敢在后排边缘逛街不顶前排吃伤害，或面对拉比克时放完《毁灭》不立刻接锚击被偷大招。",
+        "pos_item_hint": "闪烁匕首 + 希瓦/洞察烟斗 + 刷新球 + 阿哈利姆魔晶（锚枷锁死机动核）",
+    },
+    # 司夜刺客 Nyx Assassin (88)
+    (88, 4): {
+        "pos_role_title": "4号位 · 隐身雷达开雾导引与尖刺外壳反先手猎手",
+        "pos_playstyle": "4号位小强绝不是占线刷钱位！核心职责有二：① 开大招《复仇》深入敌后充当移动真假眼，为己方全球流（如幽鬼《暗影步》）或抱团开雾提供精准锁头视野，并一套《复仇+穿刺+心灵焦灼+达贡》单秒敌方高智力脆皮（如天穹守望者/杰奇洛/工程师/法师酱油）；② 团战主动用《尖刺外壳》去踩敌方地面AOE（如双头龙冰火/炸弹人地雷/电狗幽魂）实现超远反晕破阵！",
+        "pos_taboo": "不开大招探视野找节奏反而占线刷兵，或面对敌方满地AOE技能却不按《尖刺外壳》碰瓷反先手。",
+        "pos_item_rule": "奥术鞋 + 达贡之神力/闪烁匕首 + 阿哈利姆魔晶/原力法杖/微光披风",
+    },
+    # 电炎绝手 Snapfire (128)
+    (128, 5): {
+        "pos_role_title": "5号位 · 饼干跨地形救人先手与超远火炮保核辅助",
+        "pos_playstyle": "5号位老奶奶线上用《电光石火》贴脸散弹高伤保1号位；中期核心神技是《驯良之饼》——既能把己方短腿前排（如潮汐/死灵法）弹射进场先手，也能把被斧王吼/冰封路径困住的大哥弹走救命；团战站在后排2500码安全距离接队友团控开启大招《蜥蜴绝吻》洗地，并用《霹雳铁手》固定攻击次数秒拆敌方墓碑/地雷/守卫。",
+        "pos_taboo": "大招《蜥蜴绝吻》在无任何队友先手控制时随缘乱轰空大，或捏着《驯良之饼》不救被集火的核心。",
+        "pos_item_rule": "原力法杖(推推棒) + 微光披风/梅肯 + 阿哈利姆魔晶 + 阿托斯/风杖",
+    },
+    (128, 4): {
+        "pos_role_title": "4号位 · 游走饼干先手与远程重炮节奏辅助",
+        "pos_playstyle": "4号位电炎绝手前期游走中路与边路，用《驯良之饼》跳跃晕接《电光石火》贴脸爆发配合队友拿人头，团战接先手大招《蜥蜴绝吻》瞬间融化敌方阵地。",
+        "pos_taboo": "中期不出推推/阿托斯/跳刀等团队装而裸憋纯物理大炮导致团队缺乏救人与控制。",
+        "pos_item_rule": "阿托斯之棍/原力法杖 + 阿哈利姆魔晶 + 微光披风/闪烁匕首",
+    },
+    # 力丸 Riki (32)
+    (32, 2): {
+        "pos_role_title": "2号位 · 中单隐身刺杀与烟幕沉默致盲节奏核",
+        "pos_playstyle": "中单力丸6级迎来质变，必须利用永久隐身与高额背刺敏捷伤害全图游走猎杀敌方脆皮法师（如莱恩/拉比克）与无BKB核心（如斯拉克/编织者）；团战第一要务是在己方先手（如潮汐毁灭/帕吉钩）命中的瞬间铺下《烟幕》，用范围沉默+高额致盲彻底废掉敌方按BKB/缩地/黑暗契约的操作空间！",
+        "pos_taboo": "到6级后赖在中路闷头补刀不游走压制敌方野区，或团战不铺《烟幕》沉默关键人就孤身跳进真眼圈送死。",
+        "pos_item_rule": "净魂之刃(散失) + 幻影斧(分身解粉) + 敏捷跳刀/蝴蝶/代达罗斯之殇/否决",
+    },
+    (32, 1): {
+        "pos_role_title": "1号位 · 散失分身收割与烟幕切后排刺客大核",
+        "pos_playstyle": "1号位力丸前中期需兼顾散失成型速率与大招背刺参团，拿到散失+分身斧（解显影之尘）后专门盯防敌方后排酱油与脆皮远程核，团战靠《绝杀秘技》规避第一波指向性控制。",
+        "pos_taboo": "没有分身斧/BKB前顶着敌方真眼强冲前排肉盾，导致被反手点控秒杀。",
+        "pos_item_rule": "净魂之刃 + 幻影斧 + 黑皇杖/蝴蝶 + 深渊之刃/否决挂坠",
+    },
+    (32, 4): {
+        "pos_role_title": "4号位 · 移动真眼侦察与烟幕/睡眠飞镖控场辅助",
+        "pos_playstyle": "4号位辅助力丸的核心价值是利用永久隐身做全图活体侦察眼，配合魔晶《睡眠飞镖》先手留人、团战铺《烟幕》群体沉默致盲克制敌方冲脸，绝不能当大哥打去抢核心兵线！",
+        "pos_taboo": "身为4号位不出魔晶/推推/微光/莲花，反而毒瘤刷兵裸憋散失分身抢核心经济。",
+        "pos_item_rule": "阿哈利姆魔晶 + 原力法杖/微光披风 + 清莲宝珠/缚灵索",
+    },
+    # 帕吉 Pudge (14)
+    (14, 4): {
+        "pos_role_title": "4号位 · 阴影神钩破阵与魔晶吞噬救人游走辅助",
+        "pos_playstyle": "4号位屠夫是节奏发动机与后排救生员：前中期树林卡视野出《肉钩》把敌方核心钩离安全区配合队友秒杀，并用《肢解》无视BKB按死敌方机动核（如斯拉克/编织者）；中后期必须出《闪烁匕首 + 1400金阿哈利姆魔晶》，团战一口吞下被集火的己方1/2号位（如卓尔游侠）提供无敌与百分比回血救人！",
+        "pos_taboo": "把4号位辅助屠夫玩成毒瘤刷钱核，占线狂刷100+刀抢大哥经济，全场不出跳刀、不出推推微光、不用魔晶吞队友救人！",
+        "pos_item_rule": "闪烁匕首 + 阿哈利姆魔晶(吞队友救人必出) + 以太之镜 + 原力法杖/微光披风",
+    },
+    (14, 5): {
+        "pos_role_title": "5号位 · 保核反手钩与魔晶吞噬救命辅助",
+        "pos_playstyle": "5号位屠夫前期利用高攻击力反补与肉钩威慑保1号位补刀，中后期全程蹲在后排炮台大哥（如卓尔游侠/狙击手）身边，一旦大哥被冲脸立刻用《魔晶肢解》一口吞进肚子里无敌救走！",
+        "pos_taboo": "脱离1号位乱跑找钩子导致后排大哥无人保护被切死，或不出魔晶与微光推推救人。",
+        "pos_item_rule": "阿哈利姆魔晶 + 微光披风/原力法杖 + 以太之镜/闪烁匕首",
+    },
+    (14, 3): {
+        "pos_role_title": "3号位 · A杖腐烂高伤抽血与肉盾前排核心",
+        "pos_playstyle": "3号位核心屠夫速出先锋盾+阿哈利姆神杖（大幅提升腐烂范围伤害并降低敌方回血）+黑皇杖/永世法衣，团战直接开启《腐肉堆积》高格挡顶在敌方人堆中心烫穿全场。",
+        "pos_taboo": "3号位屠夫缩在后面只摸奖出钩、不敢顶第一排吃伤害开腐烂。",
+        "pos_item_rule": "先锋盾 + 阿哈利姆神杖 + 黑皇杖/永世法衣 + 希瓦的守护",
+    },
+    # 帕格纳 Pugna (45)
+    (45, 5): {
+        "pos_role_title": "5号位 · 爆轰拆塔发动机、幽冥守卫反法系与衰老输血保核辅助",
+        "pos_playstyle": "5号位骨法拥有三大战略机制：① 推进期无限《幽冥爆轰》无伤磨掉敌方所有外塔与高地；② 团战开打前插下《幽冥守卫》让敌方高耗蓝法师（如莱恩/拉比克）放技能即掉血；③ 当己方核心被敌方物理核（如斯拉克/PA）贴脸时立刻套《衰老》使其物理免疫，并在后排用大招《生命汲取》给大哥持续输血回蓝！",
+        "pos_taboo": "在己方物理大哥（如卓尔游侠/主宰）正在平A输出的目标头上乱套《衰老》帮倒忙，或团战站在第一排被秒开不出守卫与输血。",
+        "pos_item_rule": "奥术鞋 + 微光披风/以太之镜 + 阿哈利姆魔晶 + 原力法杖",
+    },
+    (45, 4): {
+        "pos_role_title": "4号位 · 游走法爆增伤与速推节奏骨法",
+        "pos_playstyle": "4号位骨法凭借高移速游走三路，用《衰老》减速加深法伤配合队友爆发拿人头，打赢立刻用《幽冥爆轰》速推外塔滚起团队经济雪球。",
+        "pos_taboo": "中期不跟队推外塔、不插幽冥守卫限制敌方法师。",
+        "pos_item_rule": "以太之镜 + 微光披风/闪烁匕首 + 阿哈利姆魔晶 + 达贡之神力/原力法杖",
+    },
+    # 卓尔游侠 Drow Ranger (6)
+    (6, 1): {
+        "pos_role_title": "1号位 · 射手天赋无视绿甲与冰川高台远程重炮大核",
+        "pos_playstyle": "卓尔游侠大招《射手天赋》触发时完全无视敌方基础敏捷护甲（天克斯拉克、编织者、水人等高敏英雄），但一旦400码内被敌方贴脸大招立刻失效！因此中后期必须站在前排（如潮汐/帕吉）与救人辅助（如帕格纳）身后，先用《数箭齐发》锥形洗地，被冲脸时第一时间用《狂风》推开沉默+《飓风长戟(大推推)》拉开距离或上《魔晶冰川》高台输出。",
+        "pos_taboo": "前中期刷完钱到了25m+团战却不敢跟队站在前排后面打输出，或者没有大推推/BKB时走第一排被先手秒杀。",
+        "pos_item_rule": "魔龙枪 -> 幻影斧 + 飓风长戟(大推推) + 黑皇杖(BKB) + 阿哈利姆魔晶/蝴蝶/大炮",
+    },
+    # 斯拉克 Slark (93)
+    (93, 1): {
+        "pos_role_title": "1号位 · 能量转移偷属性拉扯与双黑雾切入收割核",
+        "pos_playstyle": "斯拉克的精髓绝不是一波硬刚到底，而是『七进七出叠满敏捷层数再收割』！必须利用《黑暗契约》预判秒解敌方点控（如莱恩变羊/拉比克举），开启大招《暗影之舞》+ **必出1400金魔晶《深海劫掠》**两团黑雾反复拉扯回血并救下被控队友，叠到20+层敏捷后无人能挡。面对力丸《烟幕》必出推推/BKB，面对卓尔游侠必须贴脸400码内废掉其大招！",
+        "pos_taboo": "整局拒出1400金核心魔晶《深海劫掠》，在力丸烟幕里无BKB/推推原地罚站，或无视野单带连环被抓。",
+        "pos_item_rule": "净魂之刃/回音战刃 + 阿哈利姆魔晶(必出) + 黑皇杖(BKB) + 斯嘉蒂之眼/深渊之刃",
+    },
+    # 编织者 Weaver (63)
+    (63, 2): {
+        "pos_role_title": "2号位 · 缩地高机动拉扯与凰虫减甲点杀核",
+        "pos_playstyle": "2号位蚂蚁需利用《凰虫》群体减甲开视野配合《缩地+连击》切入敌方后排脆皮（如帕格纳/卓尔游侠），大招《时光倒流》解状态回满血；但极怕力丸《烟幕》沉默与帕吉《肢解》无视BKB咬，必须尽早做出分身斧/林肯/BKB防先手沉默点控！",
+        "pos_taboo": "没有林肯/BKB/分身解沉默时盲目缩地钻进力丸烟幕或帕吉脸上被秒按死开不出大招。",
+        "pos_item_rule": "魔龙枪/猎鹰战刃 + 雷神之锤/暗灭 + 林肯法球/黑皇杖/幻影斧 + 代达罗斯之殇",
+    },
+    # 育母蜘蛛 Broodmother (61)
+    (61, 3): {
+        "pos_role_title": "3号位 · 蛛网线霸推进与蜘蛛海视野压制核",
+        "pos_playstyle": "3号位蜘蛛的核心任务是6级后召满小蜘蛛打穿敌方优势路一塔并全面入侵敌方野区；但若对位遇到潮汐猎人《海妖外壳+锚击》，小蜘蛛海不仅咬不动潮汐还会沦为潮汐的移动提款机——此时严禁无脑喂小蜘蛛，必须利用蛛网高移速绕后切敌方后排酱油（帕格纳）或出紫怨/血棘/BKB抓单！",
+        "pos_taboo": "面对潮汐猎人《锚击》无脑喂小蜘蛛送钱，压不住塔又转换不了切后排节奏导致全图隐形。",
+        "pos_item_rule": "魂之灵瓮/紫怨 + 黑皇杖(BKB) + 血棘/散夜对剑/深渊之刃",
+    },
+    # 天穹守望者 Arc Warden (113)
+    (113, 2): {
+        "pos_role_title": "2号位 · 风暴双雄全图带线牵制与双磁场无伤炮台真核",
+        "pos_playstyle": "中单电狗靠《乱流》减速纯粹伤害与《闪光幽魂》封走位单杀对位；拿到点金+电锤/缚灵索后，真身安全刷钱，幻象《风暴双雄》无限全图带线飞鞋逼塔、团战铺双倍《磁场》（100%物理闪避+攻速）无伤融化敌方手短前排（如瘟疫法师/潮汐）。最怕司夜刺客隐身摸真身与幽鬼/潮汐跳刀切后排。",
+        "pos_taboo": "真身走位靠前被潮汐毁灭/幽鬼暗影步/司夜刺客直接骑脸秒杀。",
+        "pos_item_rule": "迈达斯之手 + 雷神之锤/缚灵索 + 远行鞋 + 幻影斧/飓风长戟/邪恶镰刀/大炮",
+    },
+    # 凯 Kez (145)
+    (145, 1): {
+        "pos_role_title": "1号位 · 双流派太刀流血突进与双钗格挡反击收割大核",
+        "pos_playstyle": "1号位凯利用爪钩与回音斩切入后排，团战被集火时切换双钗格挡群晕或开启《猛禽之舞》魔免强驱散回满血，再开《渡鸦之纱》隐身暴击收割全场。",
+        "pos_taboo": "面对斧王吼或潮汐锚击减攻时不切双钗格挡也不开BKB硬拼暴毙。",
+        "pos_item_rule": "狂战斧/散失 + 黑皇杖(BKB) + 代达罗斯之殇 + 深渊之刃/撒旦",
+    },
+    # 工程师 Techies (105)
+    (105, 4): {
+        "pos_role_title": "4号位 · 爆破起飞跳脸沉默群伤与雷区封野控图大师",
+        "pos_playstyle": "4号位炸弹人前期利用《粘性炸弹》超远减速消耗配合《爆破起飞》跳脸沉默高爆发打穿边路；中期在敌方野区入口、肉山坑与高坡布满《感应地雷》封锁视野，团战接队友先手（如斧王吼/双头龙冰径）跳入人群沉默接三雷连环引爆，专门融化开启幽魂护罩的瘟疫法师！",
+        "pos_taboo": "面对司夜刺客开启《尖刺外壳》时无脑跳脸自晕送死，或只埋被动防守雷不参团。",
+        "pos_item_rule": "静谧之鞋 + 以太之镜/原力法杖 + 阿哈利姆魔晶(电击队友/自己反手晕) + 虚灵之刃/羊刀",
+    },
+    # 杰奇洛 Jakiro (64)
+    (64, 5): {
+        "pos_role_title": "5号位 · 液态火无伤磨塔与冰封路径超远阵地封锁辅助",
+        "pos_playstyle": "5号位双头龙线上用《冰火交加》+《液态火》降攻速压制敌方补刀并速推一塔；团战站在侧后方用《冰封路径》封路留人接大招《烈焰焚身》融化敌方前排（尤其天克手短的瘟疫法师与潮汐猎人）。注意提防敌方司夜刺客踩在冰火上开《尖刺外壳》反晕！",
+        "pos_taboo": "技能前摇长却站位太靠前被先手秒杀，或冰封路径屡屡被司夜刺客尖刺外壳碰瓷反控。",
+        "pos_item_rule": "奥术鞋 + 原力法杖/微光披风 + 阿哈利姆魔晶(液态冰百分比扣血) + 以太之镜/阿哈利姆神杖",
+    },
+    # 拉比克 Rubick (86)
+    (86, 4): {
+        "pos_role_title": "4号位 · 隔空取物瞬发举先手与大招窃取反制大师",
+        "pos_playstyle": "4号位拉比克的核心任务是团战盯死敌方关键大招手（如潮汐猎人《毁灭》、帕吉《肉钩/肢解》、帕格纳《幽冥爆轰/生命汲取》），利用被动施法距离优势站在后排秒偷大招反打，并用《隔空取物》瞬发举打断敌方切入！",
+        "pos_taboo": "面对力丸《烟幕》与帕吉钩走位靠前0技能暴毙，或整局偷不到关键团控大招。",
+        "pos_item_rule": "奥术鞋 + 闪烁匕首/以太之镜 + 原力法杖(推推解力丸烟幕必出)/微光披风 + 阿哈利姆魔晶",
+    },
+    # 莱恩 Lion (26)
+    (26, 5): {
+        "pos_role_title": "5号位 · 瞬发变羊穿刺双控与死亡一指秒杀保核辅助",
+        "pos_playstyle": "5号位莱恩拥有全刀塔最稳的瞬发《妖术(变羊)》+《裂地尖刺》连环硬控，专门克制高机动切入核（如力丸/斯拉克/编织者）；但身板极脆且技能耗蓝高，面对帕格纳《幽冥守卫》放《死亡一指》前必须注意自身血量，面对力丸《烟幕》必出推推/绿杖/微光自保！",
+        "pos_taboo": "没有视野脸探草丛被力丸/屠夫连提10+次人头，或顶着帕格纳幽冥守卫放大招自爆。",
+        "pos_item_rule": "静谧之鞋 + 闪烁匕首 + 原力法杖/微光披风/幽魂权杖 + 阿哈利姆魔晶",
+    },
+}
+
+
+def get_hero_position_specialization(hid: int, pos: int, prof: Dict[str, Any]) -> Dict[str, str]:
+    """根据 (hero_id, pos) 返回英雄在当前 1~5 号位下的差异化专精档案"""
+    if (hid, pos) in HERO_POS_SPECIALIZATIONS:
+        spec = HERO_POS_SPECIALIZATIONS[(hid, pos)]
+        return {
+            "pos_role_title": spec["pos_role_title"],
+            "pos_playstyle": spec["pos_playstyle"],
+            "pos_taboo": spec["pos_taboo"],
+            "pos_item_rule": spec.get("pos_item_rule") or spec.get("pos_item_hint") or prof.get("core_item_hint", ""),
+        }
+
+    short = prof.get("short", f"英雄#{hid}")
+    sigs = [f"《{s}》" for s in (prof.get("signature_abilities") or [])[:3]]
+    sig_str = "、".join(sigs) if sigs else "核心技能组"
+    roles_str = " + ".join((prof.get("roles") or [])[:2])
+    shard_str = f"（魔晶关键机制：{prof['shard_desc']}）" if prof.get("shard_desc") else ""
+
+    if pos == 1:
+        return {
+            "pos_role_title": f"1号位 · {short}（优势路后期收割与推塔真核）",
+            "pos_playstyle": f"作为1号位{short}，核心特点是{roles_str}。前中期{prof.get('early_rule','')} {prof.get('mid_rule','')} 25分钟成型后必须依靠{sig_str}{shard_str}完成正面团战收割与高地拆塔转化。",
+            "pos_taboo": f"吃下全队最高经济却在后期团战边缘OB零输出、不拆建筑，或在敌方抓人核消失时无视野单带白给。",
+            "pos_item_rule": prof.get("core_item_hint") or "刷钱过渡装 + 黑皇杖(BKB) + 针对性输出/破被动大件",
+        }
+    if pos == 2:
+        return {
+            "pos_role_title": f"2号位 · {short}（中路节奏发动机与爆发支点）",
+            "pos_playstyle": f"作为2号位中单{short}，兼具{roles_str}。对线期需稳住补刀与状态并控好6/8分钟河道符；10~25分钟必须把等级与第一件节奏装优势通过{sig_str}转化为边路Gank与外塔压制，绝不能当中立刷子。",
+            "pos_taboo": f"中单拿到等级经济优势却闷头钻野不带节奏，或团战未等前排吃第一波控制就盲目切入暴毙。",
+            "pos_item_rule": prof.get("core_item_hint") or "魔瓶 + 第一件节奏/切入装 + 黑皇杖(BKB)/保命装",
+        }
+    if pos == 3:
+        return {
+            "pos_role_title": f"3号位 · {short}（劣势路抗压开团与前排顶梁柱）",
+            "pos_playstyle": f"作为3号位{short}，核心特点是{roles_str}。线上需抗压并干扰敌方1号位补刀；中期第一铁律是速出跳刀/刃甲/光环/BKB，主动顶在视野第一排用{sig_str}先手开团并吸收火力，为后排双核撑起输出空间。",
+            "pos_taboo": f"把3号位玩成二号大核闷头刷钱不出先手/前排装，或团战畏缩在后排不敢吃第一波技能。",
+            "pos_item_rule": prof.get("core_item_hint") or "闪烁匕首/刃甲 + 黑皇杖/洞察烟斗/清莲宝珠",
+        }
+    if pos == 4:
+        return {
+            "pos_role_title": f"4号位 · {short}（游走带节奏与先手/救人辅助）",
+            "pos_playstyle": f"作为4号位游走辅助{short}，不同于打核心位时的纯输出打法，本局必须围绕{sig_str}{shard_str}协助3号位稳线、控符开雾抓人，并优先做出跳刀/推推/微光/阿托斯/大骨灰/莲花等团队控制救人装服务全队！",
+            "pos_taboo": f"身为4号位完全不干辅助本职工作，在劣势局裸憋散失/点金/雷锤/BKB等纯个人大哥装，自己占线刷兵抢核心经济还连续落单送人头！",
+            "pos_item_rule": "原力法杖/微光披风/闪烁匕首/阿托斯之棍/魂之灵瓮 + 阿哈利姆魔晶（严禁裸憋纯大哥输出装抢钱）",
+        }
+    return {
+        "pos_role_title": f"5号位 · {short}（铁血保核、视野包揽与后排反手救人辅助）",
+        "pos_playstyle": f"作为5号位保核辅助{short}，核心职责是前期拉野封野保1号位无伤补刀，中后期包揽全队真假眼与反隐粉，团战站在核心侧后方树林用{sig_str}{shard_str}与微光/推推救下被集火的大哥。",
+        "pos_taboo": f"对线期不拉野不买真假眼，团战走第一排脸探草丛瞬间融化，或贪点金手/输出装不出微光推推保大哥。",
+        "pos_item_rule": "真假眼/诡计之雾/显影之尘 + 微光披风 + 原力法杖(推推棒) + 阿哈利姆魔晶/清莲宝珠",
+    }
+
+
+def _ab_cast_count(p: Dict[str, Any], keywords: List[str]) -> Tuple[str, int]:
+    """查询该玩家在本局录像中特定技能的真实释放次数"""
+    ab_list = p.get("ability_uses_rich") or []
+    for kw in keywords:
+        for ab in ab_list:
+            z = str(ab.get("zh_name") or "")
+            k = str(ab.get("key") or "")
+            if kw in z or kw in k:
+                return (z or kw, int(ab.get("count") or 0))
+    if ab_list:
+        top_ab = ab_list[0]
+        return (str(top_ab.get("zh_name") or keywords[0] if keywords else "核心技能"), int(top_ab.get("count") or 0))
+    return (keywords[0] if keywords else "核心技能", 0)
+
+
+def compute_hero_pair_counter(own_p: Dict[str, Any], opp_p: Dict[str, Any]) -> Dict[str, Optional[str]]:
+    """
+    分析本方英雄 own_p 与敌方英雄 opp_p 之间的双向机制克制关系：
+    - own_counters_opp: 若我方英雄机制克制该敌方英雄，返回具体技能机制说明
+    - opp_counters_own: 若敌方英雄机制克制我方英雄，返回威胁点及【破局出装/打法解法】
+    """
+    ohid = int(own_p.get("hero_id") or 0)
+    ehid = int(opp_p.get("hero_id") or 0)
+    oshort = own_p.get("hero_short_zh") or f"英雄#{ohid}"
+    eshort = opp_p.get("hero_short_zh") or f"英雄#{ehid}"
+    opos = int(own_p.get("pos") or 3)
+    epos = int(opp_p.get("pos") or 3)
+
+    oprof = get_hero_profile_126(ohid, opos, oshort)
+    eprof = get_hero_profile_126(ehid, epos, eshort)
+    otags = set(oprof.get("synergy_tags") or [])
+    etags = set(eprof.get("synergy_tags") or [])
+
+    own_counters_opp: Optional[str] = None
+    opp_counters_own: Optional[str] = None
+
+    # --- 专项高优先级机制克制规则 ---
+    # 1. 司夜刺客 (88) vs 高智力远程炮台 / 地面持续AOE法师 (天穹113, 杰奇洛64, 工程师105, 宙斯22, 天怒101, 帕克13, 光法90, 卡尔74, 莉娜25, 莱恩26, 拉比克86, 巫医30, 冰女5, 帕格纳45)
+    if ohid == 88 and ehid in (113, 64, 105, 22, 101, 13, 90, 74, 25, 26, 86, 30, 5, 45):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：司夜刺客《尖刺外壳》可直接踩在{eshort}的AOE技能（如冰火/地雷/闪光幽魂）上原路反弹伤害并眩晕破阵，且大招《复仇》破隐接《穿刺+心灵焦灼》天克高智力脆皮{eshort}！"
+        )
+    if ehid == 88 and ohid in (113, 64, 105, 22, 101, 13, 90, 74, 25, 26, 86, 30, 5, 45):
+        opp_counters_own = (
+            f"被【{epos}号位·司夜刺客】天克：我方{oshort}的地面AOE极易被司夜刺客开《尖刺外壳》碰瓷反晕，且身板脆怕其《复仇》隐身单秒（解法：推塔/团战必在脚下插真眼，尽早补盘子/微光/推推/BKB，切忌落单收线）！"
+        )
+
+    # 2. 瘟疫法师 (36) vs 高法术爆发/超远距离风筝 (天穹113, 工程师105, 杰奇洛64, 远古冰魄68, 莱恩26, 宙斯22, 天怒101, 帕格纳45, 卓尔游侠6, 狙击手35)
+    if ohid == 36 and ehid in (113, 105, 64, 68, 26, 22, 101, 45):
+        opp_counters_own = (
+            f"被【{epos}号位·{eshort}】机制克制：瘟疫法师开启《幽魂护罩》虽然物理免疫但会额外加深自身所受魔法伤害，面对{eshort}的高额法术轰炸（或禁疗/超远消耗）若无魔抗乱开护罩等同于自爆（解法：必出永世法衣/清莲宝珠/黑皇杖，切忌无BKB裸开幽魂护罩硬吃法爆）！"
+        )
+    if ehid == 36 and ohid in (113, 105, 64, 68, 26, 22, 101, 45):
+        own_counters_opp = (
+            f"克制【{epos}号位·瘟疫法师】：瘟疫法师腿短手短极易被我方{oshort}远程风筝，且一旦其开启《幽魂护罩》魔抗暴跌，我方{oshort}的高额魔法爆发可直接将其瞬秒！"
+        )
+
+    # 3. 天穹守望者 (113) 双倍磁场100%闪避 vs 近战/物理平A核 (幽鬼67, 斯拉克93, 卓尔游侠6, 力丸32, 凯145, 主宰8, 幻影刺客44, 斯温18)
+    if ehid == 113 and ohid in (67, 93, 6, 32, 145, 8, 44, 18):
+        opp_counters_own = (
+            f"受制于【{epos}号位·天穹守望者】：电狗双倍《磁场》提供100%远程物理闪避并可幻象无限带线守高（解法：我方{oshort}必须利用切入技能直接钻进磁场圈内贴脸或补《金箍棒(MKB)/紫怨血棘/否决》，团战第一优先级锁头电狗真身）！"
+        )
+    if ohid == 113 and ehid in (36, 29, 14, 99, 42, 54):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：天穹守望者超远射程配合《乱流》减速与双倍《磁场》100%闪避，可将手短腿短的{eshort}无限风筝消耗至死！"
+        )
+
+    # 4. 幽鬼 (67) 全图暗影步锁头 vs 后排脆皮炮台/带球真身 (天穹113, 狙击手35, 卓尔游侠6, 杰奇洛64, 工程师105, 宙斯22, 莱恩26, 拉比克86, 先知53)
+    if ohid == 67 and ehid in (113, 35, 6, 64, 105, 22, 26, 86, 53):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：{eshort}极度依赖后排安全距离站桩放技能，一旦我方幽鬼做出紫怨/分身斧/深渊直接开启《暗影步》全图骑脸真身，可瞬间打乱敌方后排阵型！"
+        )
+    if ehid == 67 and ohid in (113, 35, 6, 64, 105, 22, 26, 86, 53):
+        opp_counters_own = (
+            f"被【{epos}号位·幽鬼】全图锁头威胁：幽鬼《暗影步》专门骑脸后排脆皮{oshort}（解法：严禁离开队友独自站位，必补飓风长戟/微光披风/幽魂权杖/幻影斧拉开身位）！"
+        )
+
+    # 5. 斧王 (2) 狂战士之吼+反击螺旋 vs 近战敏捷核/小蜘蛛/薄葬 (幽鬼67, 斯拉克93, 编织者63, 育母蜘蛛61, 幻影长矛手12, 主宰8, 凯145, 戴泽50)
+    if ehid == 2 and ohid in (67, 93, 63, 61, 12, 8, 145, 50):
+        opp_counters_own = (
+            f"被【{epos}号位·斧王】先手克制：斧王跳刀《狂战士之吼》无视BKB强行群嘲配合《反击螺旋》纯粹伤害，极易在团战中按死我方{oshort}（解法：对线期防断兵强冲，团战切忌与队友扎堆站位，等斧王交吼后再切入或由队友出推推/风杖救）！"
+        )
+    if ohid == 2 and ehid in (67, 93, 63, 61, 12, 8, 145, 50):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：斧王跳刀《狂战士之吼》无视BKB强控配合刃甲《反击螺旋》，能让高攻速/近战核{eshort}自己把自己转死，残血直接《淘汰之刃》斩杀！"
+        )
+
+    # 6. 潮汐猎人 (29) 海妖外壳+锚击 vs 召唤物海/近战物理核 (育母蜘蛛61, 凯145, 斯拉克93, 幻影刺客44, 混沌骑士81, 主宰8, 兽王38, 狼人77)
+    if ohid == 29 and ehid in (61, 145, 93, 44, 81, 8, 38, 77):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：潮汐猎人《海妖外壳》高额物理格挡+强驱散配合《锚击》大幅削减敌方基础物理攻击力，天克{eshort}的近战物理平A与召唤物推进！"
+        )
+    if ehid == 29 and ohid in (61, 145, 44, 81, 38, 77):
+        opp_counters_own = (
+            f"被【{epos}号位·潮汐猎人】前排克制：潮汐《海妖外壳》格挡强解控+《锚击》大幅减基础攻击力，让我方{oshort}前中期完全打不动他（解法：切忌把技能与召唤物喂给潮汐，绕后直取敌方后排酱油或补破被动/法系爆发）！"
+        )
+
+    # 7. 力丸 (32) 烟幕范围沉默致盲 vs 依赖技能逃生/无BKB核心与法师 (斯拉克93, 编织者63, 拉比克86, 莱恩26, 帕克13, 风暴之灵17, 敌法师1, 变体精灵10)
+    if ohid == 32 and ehid in (93, 63, 86, 26, 13, 17, 1, 10):
+        own_counters_opp = (
+            f"天克【{epos}号位·{eshort}】：{eshort}极度依赖按出逃生/解控技能（如黑暗契约/缩地/隔空取物/变羊），一旦被力丸《烟幕》罩住陷入持续沉默+高额致盲，开不出BKB或推推就会当场罚站暴毙！"
+        )
+    if ehid == 32 and ohid in (93, 63, 86, 26, 13, 17, 1, 10):
+        opp_counters_own = (
+            f"被【{epos}号位·力丸】《烟幕》天克：力丸隐身近身铺下《烟幕》持续沉默+致盲，让我方{oshort}按不出保命/控制技能（解法：全队必带真眼显影之尘，第一时间做出《原力法杖(推推棒)》或《黑皇杖(BKB)》第一时间推离烟幕）！"
+        )
+
+    # 8. 卓尔游侠 (6) 射手天赋无视基础绿甲 vs 高敏捷叠甲核 (斯拉克93, 编织者63, 变体精灵10, 恐怖利刃109, 敌法师1)
+    if ohid == 6 and ehid in (93, 63, 10, 109, 1):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：卓尔游侠大招《射手天赋》无视基础敏捷护甲（绿甲），{eshort}靠高敏捷属性叠起的高护甲在冰箭与数箭齐发面前脆如薄纸！"
+        )
+    if ehid == 6 and ohid in (93, 63, 10, 109, 1):
+        opp_counters_own = (
+            f"被【{epos}号位·卓尔游侠】无视绿甲克制：卓尔游侠大招《射手天赋》无视我方{oshort}的基础敏捷护甲（解法：团战必须利用切入技能直接贴到卓尔游侠400码以内废掉其大招被动，并补板甲/闪避/冰眼）！"
+        )
+
+    # 9. 帕格纳 (45) 幽冥守卫+衰老 vs 高耗蓝法师(莱恩26, 拉比克86, 天怒101, 宙斯22) & 物理切入核(斯拉克93, 幻影刺客44, 主宰8)
+    if ohid == 45 and ehid in (26, 86, 101, 22):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：帕格纳团战插下《幽冥守卫》，高耗蓝的{eshort}每放一套技能就会被守卫反噬巨额魔法伤害！"
+        )
+    elif ohid == 45 and ehid in (93, 44, 8, 145):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：当物理核{eshort}跳脸切入时，帕格纳一手《衰老》虚无可直接废掉其物理平A窗口并用《生命汲取》保下队友！"
+        )
+    if ehid == 45 and ohid in (26, 86, 101, 22):
+        opp_counters_own = (
+            f"受制于【{epos}号位·帕格纳】《幽冥守卫》：团战放大招前务必先观察敌方幽冥守卫位置或开微光/BKB，切忌残血顶着棒子放高耗蓝大招自爆！"
+        )
+    elif ehid == 45 and ohid in (93, 44, 8, 145):
+        opp_counters_own = (
+            f"受制于【{epos}号位·帕格纳】《衰老》虚无救人：帕格纳频繁用《衰老》保护队友免受我方{oshort}物理平A（解法：中期核心出《否决挂坠(Nullifier)》驱散虚无，或团战第一刀先切死帕格纳）！"
+        )
+
+    # 10. 拉比克 (86) 技能窃取 vs 大招型英雄 (潮汐29, 谜团33, 莱恩26, 帕吉14, 杰奇洛64, 马格纳斯97)
+    if ohid == 86 and ehid in (29, 33, 26, 14, 64, 97, 45):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：拉比克《技能窃取》专门盯防{eshort}的招牌技能（如毁灭/肉钩/死亡一指/冰径），偷到手后无施法前摇反打极具毁灭性！"
+        )
+    if ehid == 86 and ohid in (29, 33, 26, 14, 64, 97):
+        opp_counters_own = (
+            f"提防【{epos}号位·拉比克】偷大招：我方{oshort}释放大招/关键技能后必须立刻秒按小技能（如潮汐放完毁灭立刻按锚击、帕吉出钩后立刻开关腐烂）覆盖技能栏，严禁把大招白送给拉比克！"
+        )
+
+    # 11. 帕吉 (14) 无视BKB肢解 vs 高机动脆皮核 (斯拉克93, 编织者63, 敌法师1, 帕克13, 风暴之灵17)
+    if ohid == 14 and ehid in (93, 63, 1, 13, 17):
+        own_counters_opp = (
+            f"克制【{epos}号位·{eshort}】：帕吉大招《肢解》无视BKB强行咬住高机动核{eshort}，配合队友集火可让其开不出逃生技能直接蒸发！"
+        )
+    if ehid == 14 and ohid in (93, 63, 6, 35, 25, 26, 86):
+        opp_counters_own = (
+            f"被【{epos}号位·帕吉】《肉钩+肢解》威胁：帕吉树林阴影出钩与无视BKB《肢解》专门针对{oshort}（解法：保持小兵掩护走位、高坡插眼，核心补林肯法球/分身斧，辅助补微光/推推救人）！"
+        )
+
+    # --- 通用机制标签兜底克制推导（确保任意英雄组合都能提炼出准确克制关系） ---
+    if not own_counters_opp:
+        if "aoe_teamfight" in otags and "illusion_swarm" in etags:
+            own_counters_opp = f"克制【{epos}号位·{eshort}】：我方{oshort}的高额范围AOE与控制链天生克制{eshort}的幻象/召唤物海。"
+        elif "true_sight_reveal" in otags and ("invis_roamer" in etags or "backline_assassin" in etags):
+            own_counters_opp = f"克制【{epos}号位·{eshort}】：我方{oshort}具备真视视野/显形机制，天克依赖隐身切入的{eshort}。"
+        elif "anti_heal_ult" in otags and "regen_core" in etags:
+            own_counters_opp = f"克制【{epos}号位·{eshort}】：我方{oshort}的禁疗机制精准克制高回血续航核心{eshort}。"
+        elif ("backline_assassin" in otags or "dive_initiator" in otags) and ("squishy_ranged" in etags or "glass_cannon_core" in etags):
+            own_counters_opp = f"猎杀目标【{epos}号位·{eshort}】：敌方{eshort}身板脆无位移，正是我方{oshort}切后排的首要提款目标。"
+        elif ("anti_tank_pure" in otags or "anti_tank_steal" in otags or "armor_reduction" in otags) and "frontline_tank" in etags:
+            own_counters_opp = f"克制【{epos}号位·{eshort}】：我方{oshort}具备减甲/百分比纯粹/偷属性机制，专门融化敌方前排肉盾{eshort}。"
+        elif ("bkb_pierce_init" in otags or "instant_hex_stun" in otags) and ("high_mobility_core" in etags or "hard_carry" in etags):
+            own_counters_opp = f"先手克制【{epos}号位·{eshort}】：我方{oshort}拥有瞬发硬控/无视BKB大招，团战可死死按住敌方核心{eshort}。"
+
+    if not opp_counters_own:
+        if "illusion_swarm" in otags and "aoe_teamfight" in etags:
+            opp_counters_own = f"受制于【{epos}号位·{eshort}】：敌方{eshort}的范围AOE容易清掉我方{oshort}的幻象/召唤物（解法：拉散幻象骗出敌方AOE后再切入真身）。"
+        elif ("squishy_ranged" in otags or "glass_cannon_core" in otags) and ("backline_assassin" in etags or "dive_initiator" in etags or "bkb_pierce_init" in etags):
+            opp_counters_own = f"被【{epos}号位·{eshort}】冲脸威胁：敌方{eshort}具备强切入/先手能力（解法：我方{oshort}团战严禁站第一排，必补推推/微光/BKB拉开身位）。"
+        elif "frontline_tank" in otags and ("anti_tank_pure" in etags or "anti_tank_steal" in etags or "armor_reduction" in etags):
+            opp_counters_own = f"受制于【{epos}号位·{eshort}】：敌方{eshort}具备偷属性/纯粹伤害/高减甲，前排{oshort}切忌原地站桩硬吃，需补跳刀/莲花/推推拉扯。"
+
+    return {
+        "own_counters_opp": own_counters_opp,
+        "opp_counters_own": opp_counters_own,
+    }
+
+
+def build_hero_matchup_dossier(
+    p: Dict[str, Any],
+    team_players: List[Dict[str, Any]],
+    enemy_players: List[Dict[str, Any]],
+    duration_min: float,
+    won: bool,
+) -> Dict[str, Any]:
+    """
+    为单名玩家生成【英雄固有特点 × 当前位置(1~5号位)专属打法 × 队友配合 × 敌我克制与本局实战验货】全维档案
+    """
+    hid = int(p.get("hero_id") or 0)
+    pos = int(p.get("pos") or 3)
+    short = p.get("hero_short_zh") or p.get("hero_name") or f"英雄#{hid}"
+    prof = get_hero_profile_126(hid, pos, short)
+    pos_spec = get_hero_position_specialization(hid, pos, prof)
+
+    # 1. 队友最佳化学反应 (best_ally_synergies)
+    ally_synergies: List[str] = []
+    other_allies = [a for a in team_players if int(a.get("player_slot", -1)) != int(p.get("player_slot", -2))]
+    by_ally_hid = {int(a.get("hero_id") or 0): a for a in other_allies}
+    by_ally_pos = {int(a.get("pos") or 0): a for a in other_allies}
+
+    if hid == 67:  # 幽鬼
+        spotter = by_ally_hid.get(88) or by_ally_hid.get(71) or by_ally_hid.get(62) or by_ally_pos.get(4)
+        burst_ally = by_ally_hid.get(36) or by_ally_pos.get(2)
+        if spotter:
+            ally_synergies.append(
+                f"与【{spotter['pos']}号位·{spotter['hero_short_zh']}】全图雷达锁头联动：{spotter['hero_short_zh']}先手找落单控住目标，幽鬼秒开《暗影步》全图空降收割"
+                + (f"，再由【{burst_ally['hero_short_zh']}】接技能斩杀！" if burst_ally else "！")
+            )
+    elif hid == 36:  # 瘟疫法师
+        init_ally = by_ally_hid.get(88) or by_ally_hid.get(29) or by_ally_pos.get(3) or by_ally_pos.get(4)
+        global_ally = by_ally_hid.get(67)
+        if init_ally:
+            ally_synergies.append(
+                f"与【{init_ally['pos']}号位·{init_ally['hero_short_zh']}】先手压血线 + 死神镰刀斩杀链：{init_ally['hero_short_zh']}先手控住破半血"
+                + (f"配合【幽鬼】《暗影步》切入，" if global_ally else "，")
+                + "瘟疫法师直接《死神镰刀》定点斩杀加读秒！"
+            )
+    elif hid == 29:  # 潮汐猎人
+        artillery = by_ally_hid.get(128) or by_ally_hid.get(6) or by_ally_hid.get(32) or by_ally_pos.get(2) or by_ally_pos.get(5)
+        if artillery:
+            ally_synergies.append(
+                f"与【{artillery['pos']}号位·{artillery['hero_short_zh']}】毁灭团控接重火力洗地：潮汐猎人跳刀《毁灭》大范围击飞接《锚击》减攻，{artillery['hero_short_zh']}同步倾泻大招/AOE瞬间清场！"
+            )
+    elif hid == 88:  # 司夜刺客
+        spec_ally = by_ally_hid.get(67) or by_ally_hid.get(36) or by_ally_pos.get(1) or by_ally_pos.get(2)
+        if spec_ally:
+            ally_synergies.append(
+                f"与【{spec_ally['pos']}号位·{spec_ally['hero_short_zh']}】隐身导引抓单链：司夜刺客《复仇》隐身深入敌后破隐《穿刺》定身，导引{spec_ally['hero_short_zh']}瞬间切入完成秒杀！"
+            )
+    elif hid == 128:  # 电炎绝手
+        front_ally = by_ally_hid.get(29) or by_ally_hid.get(36) or by_ally_pos.get(3)
+        if front_ally:
+            ally_synergies.append(
+                f"与【{front_ally['pos']}号位·{front_ally['hero_short_zh']}】饼干弹射 + 蜥蜴绝吻轰炸：给{front_ally['hero_short_zh']}喂《驯良之饼》跨地形跳晕留人，并在其团控期间拉满《蜥蜴绝吻》高爆火球！"
+            )
+    elif hid == 32:  # 力丸
+        stun_ally = by_ally_hid.get(29) or by_ally_hid.get(14) or by_ally_pos.get(3) or by_ally_pos.get(4)
+        if stun_ally:
+            ally_synergies.append(
+                f"与【{stun_ally['pos']}号位·{stun_ally['hero_short_zh']}】控制接烟幕关门打狗：等{stun_ally['hero_short_zh']}先手定住敌核瞬间，力丸立刻在目标脚下铺开《烟幕》沉默致盲，封死敌方BKB与位移！"
+            )
+    elif hid == 45:  # 帕格纳
+        core_ally = by_ally_hid.get(6) or by_ally_hid.get(32) or by_ally_pos.get(1) or by_ally_pos.get(2)
+        if core_ally:
+            ally_synergies.append(
+                f"与【{core_ally['pos']}号位·{core_ally['hero_short_zh']}】衰老救人+输血推进体系：用《幽冥爆轰》速融外塔，团战用《衰老》救被切队友并用《生命汲取》给{core_ally['hero_short_zh']}无线输血！"
+            )
+
+    if not ally_synergies and other_allies:
+        partner = by_ally_pos.get(5 if pos == 1 else (1 if pos == 5 else (4 if pos == 3 else (3 if pos == 4 else 4)))) or other_allies[0]
+        p_sigs = " / ".join(prof.get("signature_abilities") or ["核心技能"])
+        part_prof = get_hero_profile_126(int(partner.get("hero_id") or 0), int(partner.get("pos") or 3), partner.get("hero_short_zh", ""))
+        part_sigs = " / ".join(part_prof.get("signature_abilities") or ["控制技能"])
+        ally_synergies.append(
+            f"与【{partner['pos']}号位·{partner['hero_short_zh']}】位置联动：{short}的（{p_sigs}）与{partner['hero_short_zh']}的（{part_sigs}）形成先手控制与爆发/保护互补。"
+        )
+
+    # 2. 敌我英雄克制关系扫描 (counters_enemies & countered_by_enemies)
+    counters_list: List[str] = []
+    countered_by_list: List[str] = []
+    for ep in enemy_players:
+        rel = compute_hero_pair_counter(p, ep)
+        if rel["own_counters_opp"]:
+            counters_list.append(rel["own_counters_opp"])
+        if rel["opp_counters_own"]:
+            countered_by_list.append(rel["opp_counters_own"])
+
+    if not counters_list and enemy_players:
+        opp_core = next((ep for ep in enemy_players if int(ep.get("pos") or 0) in (1, 2)), enemy_players[0])
+        counters_list.append(
+            f"针对【{opp_core.get('pos',1)}号位·{opp_core.get('hero_short_zh','敌核')}】：利用{short}的{'/'.join((prof.get('roles') or ['核心机制'])[:2])}在团战中限制其输出空间。"
+        )
+    if not countered_by_list and enemy_players:
+        opp_init = next((ep for ep in enemy_players if int(ep.get("pos") or 0) in (3, 4, 2)), enemy_players[0])
+        countered_by_list.append(
+            f"提防【{opp_init.get('pos',3)}号位·{opp_init.get('hero_short_zh','敌方先手')}】：注意敌方先手控制与爆发集火，按《{pos_spec['pos_item_rule']}》补齐保命/针对装。"
+        )
+
+    # 3. 本局实战机制与位置兑现验货 (match_execution_verdict)
+    kda_str = p.get("kda") or f"{p.get('kills',0)}/{p.get('deaths',0)}/{p.get('assists',0)}"
+    kp_pct = float(p.get("kill_participation_pct") or 0.0)
+    hdmg = int(p.get("hero_damage") or 0)
+    hdmg_pct = float(p.get("hero_damage_share_pct") or 0.0)
+    tdmg = int(p.get("tower_damage") or 0)
+    items_final = "、".join([it.get("name_zh") or it.get("key") for it in (p.get("items") or [])][:5]) or "、".join((p.get("final_items") or [])[:5]) or "基础装"
+    ab_rich = p.get("ability_uses_rich") or []
+    ab_str = " / ".join(f"{a['zh_name']}×{a['count']}" for a in ab_rich[:3]) if ab_rich else "常规技能释放"
+
+    exec_verdict = (
+        f"本局实战验货：{pos}号位{short}交出 KDA {kda_str}（参战率 {kp_pct:.1f}%），英雄伤害 {hdmg:,}（占全队 {hdmg_pct:.1f}%），建筑伤害 {tdmg:,}；"
+        f"关键技能释放【{ab_str}】，终局出装【{items_final}】。"
+    )
+    if pos in (1, 2) and tdmg < 600 and not won:
+        exec_verdict += f" ⚠️ 未能兑现{pos}号位{short}的后期推进与切后排接管职责（建筑伤害仅 {tdmg}）！"
+    elif pos in (4, 5) and int(p.get("last_hits") or 0) >= 100 and not any(k in items_final for k in ("跳刀", "闪烁", "推推", "原力", "微光", "阿托斯", "莲花", "梅肯")):
+        exec_verdict += f" 🚨 违背{pos}号位辅助本职：刷了 {p.get('last_hits')} 刀却未出跳刀/推推/微光等核心团队装！"
+    elif won and (kp_pct >= 60.0 or hdmg_pct >= 22.0 or tdmg >= 4000):
+        exec_verdict += f" ✅ 成功打出了{pos}号位{short}的英雄机制特点与团队配合！"
+
+    sig_abs = " / ".join(prof.get("signature_abilities") or ["核心技能"])
+    roles_str = " · ".join(prof.get("roles") or ["核心支点"])
+    hero_traits_desc = f"【招牌技能：{sig_abs}｜定位标签：{roles_str}】{prof.get('playstyle_summary', '')}"
+    timing_curve = prof.get("timing_curve", "mid_tempo")
+    timing_label_map = {
+        "late_hyper_carry": "大后期决胜大核 (25m+)",
+        "glass_cannon_turret": "高爆发远程炮台 (全期)",
+        "sacrificial_initiator": "先手开团肉核 (10m+)",
+        "save_support": "反手救人保核支点 (全期)",
+        "mid_tempo": "中前期强势节奏核 (8-25m)",
+    }
+
+    return {
+        "pos": pos,
+        "hero_id": hid,
+        "hero": short,
+        "hero_short_zh": short,
+        "timing_label": timing_label_map.get(timing_curve, "中前期节奏支点"),
+        "pos_role_title": pos_spec["pos_role_title"],
+        "hero_traits": hero_traits_desc,
+        "hero_roles": list(prof.get("roles") or []),
+        "pos_playstyle": pos_spec["pos_playstyle"],
+        "pos_taboo": pos_spec["pos_taboo"],
+        "pos_item_rule": pos_spec["pos_item_rule"],
+        "best_ally_synergies": ally_synergies[:2],
+        "counters_enemies": counters_list[:2],
+        "countered_by_enemies": countered_by_list[:2],
+        "match_execution_verdict": exec_verdict,
+    }
+

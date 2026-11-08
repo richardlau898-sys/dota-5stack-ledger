@@ -430,7 +430,12 @@ HERO_ARCHETYPES: Dict[int, Dict[str, Any]] = {
 }
 
 
-from hero_profiles_126 import HERO_PROFILES_126, get_hero_profile_126
+from hero_profiles_126 import (
+    HERO_PROFILES_126,
+    build_hero_matchup_dossier,
+    compute_hero_pair_counter,
+    get_hero_profile_126,
+)
 
 # 将 126 英雄全量内置机制画像合并进 HERO_ARCHETYPES（保留手工精调项，补齐全部 126 英雄）
 for _hid, _prof in HERO_PROFILES_126.items():
@@ -675,7 +680,96 @@ def build_team_combos(
             ),
         })
 
-    # 通用兜底配合（确保任何比赛都有至少 3 条深度配合指南）
+    # 专项配合规则 6: 幽鬼 (67) + 司夜刺客 (88)/裂魂人 (71)/先知 (53)/赏金 (62) + 瘟疫法师 (36)
+    if 67 in by_hid:
+        spec = by_hid[67]
+        spotter = by_hid.get(88) or by_hid.get(71) or by_hid.get(62) or by_hid.get(53) or by_pos.get(4)
+        necro = by_hid.get(36)
+        step_cnt = ab_count(spec, "暗影步") or ab_count(spec, "鬼影重重") or ab_count(spec, "幽鬼之刃")
+        spot_cnt = (ab_count(spotter, "穿刺") or ab_count(spotter, "暗影冲刺") or ab_count(spotter, "发芽")) if spotter else 0
+        scythe_cnt = ab_count(necro, "死神镰刀") if necro else 0
+        hero_chips = [{"short": spec["hero_short_zh"], "img": spec["hero_img"], "pos": spec["pos"], "personaname": spec["personaname"]}]
+        if spotter and spotter["player_slot"] != spec["player_slot"]:
+            hero_chips.insert(0, {"short": spotter["hero_short_zh"], "img": spotter["hero_img"], "pos": spotter["pos"], "personaname": spotter["personaname"]})
+        if necro and necro["player_slot"] not in {h["pos"] for h in hero_chips}:
+            hero_chips.append({"short": necro["hero_short_zh"], "img": necro["hero_img"], "pos": necro["pos"], "personaname": necro["personaname"]})
+        spot_name = spotter["hero_short_zh"] if spotter else "4号位游走"
+        combos.append({
+            "title": f"【{spot_name}隐身/视野锁头 + 幽鬼《暗影步》全图空降" + (" + 瘟疫法师《死神镰刀》斩杀】全球定点猎杀链" if necro else "】全图定点提款链"),
+            "window": "06:00–28:00 · 幽鬼提速发育与全图抓落单核心窗口",
+            "heroes": hero_chips,
+            "how_to_play": (
+                f"幽鬼天生对线弱、打野慢，绝不能死蹲野区等崩盘！标准打法是：由 {spot_name}（如司夜刺客开启《复仇》隐身深入敌方野区/后排）充当全图活体雷达，"
+                f"一旦破隐《穿刺》咬住敌方落单脆皮（如{'、'.join(opp_names[:2])}），幽鬼第一时间开启《暗影步》全图飞脸挂《幽鬼之刃》触发《荒芜》纯粹伤害，"
+                + ("同时瘟疫法师跟上《死神镰刀》定点斩杀加读秒，打完幽鬼立刻传回原线继续收兵！" if necro else "打完幽鬼立刻传回原线继续收兵，实现刷钱打架两不误！")
+            ),
+            "execution_audit": (
+                f"本局实战验货：{spot_name}释放先手控制 {spot_cnt} 次，幽鬼释放核心技能 {step_cnt} 次（KDA {spec['kda']}，参战率 {spec['kill_participation_pct']}%，GPM {spec['gpm']}）"
+                + (f"，瘟疫法师斩出《死神镰刀》{scythe_cnt} 次（KDA {necro['kda']}）。" if necro else "。")
+                + ("本局这套全球抓单链成功盘活了幽鬼前中期节奏！" if spec["kill_participation_pct"] >= 58 and spec["gpm"] >= 550 else "但本局前中期视野被压、先手脱节，幽鬼未能靠暗影步节奏滚起雪球，后期推塔伤害甚至断档！")
+            ),
+        })
+
+    # 专项配合规则 7: 潮汐猎人 (29)/斧王 (2) + 电炎绝手 (128)/杰奇洛 (64)/天穹守望者 (113)/卓尔游侠 (6)/工程师 (105)
+    init_big = by_hid.get(29) or by_hid.get(2)
+    artillery_big = by_hid.get(128) or by_hid.get(64) or by_hid.get(113) or by_hid.get(6) or by_hid.get(105)
+    if init_big and artillery_big and init_big["player_slot"] != artillery_big["player_slot"]:
+        i_name = init_big["hero_short_zh"]
+        a_name = artillery_big["hero_short_zh"]
+        i_ult = "毁灭" if int(init_big["hero_id"]) == 29 else "狂战士之吼"
+        i_cnt = ab_count(init_big, i_ult) or ab_count(init_big, "锚击") or ab_count(init_big, "淘汰之刃")
+        a_prof = get_hero_profile_126(int(artillery_big["hero_id"]), int(artillery_big.get("pos") or 4), a_name)
+        a_sig = (a_prof.get("signature_abilities") or ["核心AOE"])[-1]
+        a_cnt = ab_count(artillery_big, a_sig)
+        cookie_cnt = ab_count(artillery_big, "驯良之饼") if int(artillery_big["hero_id"]) == 128 else 0
+        combos.append({
+            "title": f"【{init_big['pos']}号位{i_name}《{i_ult}》团控 + {artillery_big['pos']}号位{a_name}《{a_sig}》" + ("/《驯良之饼》】跨地形开团与重炮洗地链" if cookie_cnt or int(artillery_big["hero_id"]) == 128 else "】团控聚怪与重炮洗地链"),
+            "window": "12:00–终局 · 正面5v5团战与高地攻防决胜招",
+            "heroes": [
+                {"short": i_name, "img": init_big["hero_img"], "pos": init_big["pos"], "personaname": init_big["personaname"]},
+                {"short": a_name, "img": artillery_big["hero_img"], "pos": artillery_big["pos"], "personaname": artillery_big["personaname"]},
+            ],
+            "how_to_play": (
+                f"1) 先手投送与留人：{i_name}利用跳刀"
+                + (f"（或由电炎绝手喂《驯良之饼》跨地形弹射进场）" if int(artillery_big["hero_id"]) == 128 else "")
+                + f"直接切入敌方阵型中心释放《{i_ult}》控住多人；"
+                f"2) 远程火力覆盖：{a_name}严禁走第一排吃控制，必须站在侧后方安全距离，在《{i_ult}》眩晕/嘲讽命中的瞬间倾泻《{a_sig}》，把敌方核心死死摁在AOE火海里融化！"
+            ),
+            "execution_audit": (
+                f"本局实战验货：{i_name}释放《{i_ult}/核心控》{i_cnt} 次（全场控制 {init_big.get('stuns_sec', 0)} 秒，承伤 {init_big.get('damage_taken', 0):,}），"
+                f"{a_name}释放《{a_sig}》{a_cnt} 次"
+                + (f"、《驯良之饼》{cookie_cnt} 次" if int(artillery_big["hero_id"]) == 128 else "")
+                + f"（轰出 {artillery_big['hero_damage']:,} 英雄伤害）。"
+            ),
+        })
+
+    # 专项配合规则 8: 斯拉克 (93) + 编织者 (63)/拉比克 (86)/莱恩 (26)
+    if 93 in by_hid and (63 in by_hid or 86 in by_hid or 26 in by_hid):
+        slark = by_hid[93]
+        supp_ctrl = by_hid.get(26) or by_hid.get(86) or by_pos.get(4)
+        weaver = by_hid.get(63)
+        pounce_cnt = ab_count(slark, "突袭")
+        pact_cnt = ab_count(slark, "黑暗契约")
+        hero_chips = [{"short": slark["hero_short_zh"], "img": slark["hero_img"], "pos": slark["pos"], "personaname": slark["personaname"]}]
+        if supp_ctrl:
+            hero_chips.insert(0, {"short": supp_ctrl["hero_short_zh"], "img": supp_ctrl["hero_img"], "pos": supp_ctrl["pos"], "personaname": supp_ctrl["personaname"]})
+        if weaver:
+            hero_chips.append({"short": weaver["hero_short_zh"], "img": weaver["hero_img"], "pos": weaver["pos"], "personaname": weaver["personaname"]})
+        combos.append({
+            "title": f"【{supp_ctrl['hero_short_zh'] if supp_ctrl else '辅助'}瞬发举/羊先手 + 斯拉克《突袭》锁人偷属性" + (" + 编织者《凰虫》减甲收割】" if weaver else "】机动抓单链"),
+            "window": "08:00–28:00 · 抓单滚雪球与双黑雾拉扯",
+            "heroes": hero_chips,
+            "how_to_play": (
+                "斯拉克《突袭》无指向性，极怕敌方走位扭开！必须由莱恩《妖术》或拉比克《隔空取物》瞬发先手定住目标，"
+                "斯拉克立刻接《突袭》拴住并开启《黑暗契约》，同时编织者释放《凰虫》群体减甲开视野，让斯拉克安全叠满《能量转移》敏捷层数。"
+            ),
+            "execution_audit": (
+                f"本局实战验货：斯拉克释放《突袭》{pounce_cnt} 次、《黑暗契约》{pact_cnt} 次（KDA {slark['kda']}，英雄伤害 {slark['hero_damage']:,}）。"
+                f"{'但本局面对敌方力丸烟幕与潮汐帕吉前排，先手辅助多次被秒，斯拉克与编织者正面根本无法完成收割！' if slark.get('deaths', 0) >= 8 else '双机动核心在拉扯战中打出了不错的切入配合。'}"
+            ),
+        })
+
+    # 动态英雄专属技能组合生成器（彻底告别无技能名的通用模板，根据本局真实 5 名英雄的专属技能动态合成！）
     if len(combos) < 3:
         p1 = by_pos.get(1) or own_players[0]
         p2 = by_pos.get(2) or own_players[min(1, len(own_players) - 1)]
@@ -683,42 +777,60 @@ def build_team_combos(
         p4 = by_pos.get(4) or own_players[min(3, len(own_players) - 1)]
         p5 = by_pos.get(5) or own_players[-1]
 
+        def _sig_list(px: Dict[str, Any]) -> List[str]:
+            pr = get_hero_profile_126(int(px.get("hero_id") or 0), int(px.get("pos") or 3), px.get("hero_short_zh", ""))
+            return pr.get("signature_abilities") or ["核心技能"]
+
+        p1_sigs = _sig_list(p1)
+        p2_sigs = _sig_list(p2)
+        p3_sigs = _sig_list(p3)
+        p4_sigs = _sig_list(p4)
+        p5_sigs = _sig_list(p5)
+
         if len(combos) < 2:
+            p4_s0 = p4_sigs[0]
+            p2_s0 = p2_sigs[-1]
+            p4_c = ab_count(p4, p4_s0)
+            p2_c = ab_count(p2, p2_s0)
             combos.append({
-                "title": f"【{p4['hero_short_zh']} + {p5['hero_short_zh']} + {p2['hero_short_zh']}】双辅助控符游走与中路联动",
-                "window": "04:00–15:00 · 6分钟动力符与夜晚第一波游走抓人",
+                "title": f"【{p4['pos']}号位{p4['hero_short_zh']}《{p4_s0}》游走先手 + {p2['pos']}号位{p2['hero_short_zh']}《{p2_s0}》爆发收割】前中期节奏带动链",
+                "window": "04:00–20:00 · 河道控符与前中期开雾抓单窗口",
                 "heroes": [
-                    {"short": p2["hero_short_zh"], "img": p2["hero_img"], "pos": p2["pos"], "personaname": p2["personaname"]},
                     {"short": p4["hero_short_zh"], "img": p4["hero_img"], "pos": p4["pos"], "personaname": p4["personaname"]},
+                    {"short": p2["hero_short_zh"], "img": p2["hero_img"], "pos": p2["pos"], "personaname": p2["personaname"]},
                     {"short": p5["hero_short_zh"], "img": p5["hero_img"], "pos": p5["pos"], "personaname": p5["personaname"]},
                 ],
                 "how_to_play": (
-                    f"每逢 04:00 / 06:00 / 08:00 河道神符刷新前 20 秒，{p4['hero_short_zh']} 必须提前靠向河道帮中单 {p2['hero_short_zh']} 抢符；"
-                    f"拿到加速/双倍/奥术或到 6 级后，立刻带着 {p5['hero_short_zh']} 开雾包抄敌方优势路大哥，打断敌方一号位无解肥节奏。"
+                    f"前中期节奏铁律：由4号位 {p4['hero_short_zh']} 围绕6/8分钟河道神符与夜晚视野，利用《{p4_s0}》先手留人或破阵，"
+                    f"5号位 {p5['hero_short_zh']} 补上《{p5_sigs[0]}》控制/保护，2号位中单 {p2['hero_short_zh']} 第一时间切入倾泻《{p2_s0}》完成定点秒杀，打断敌方核心发育节奏。"
                 ),
                 "execution_audit": (
-                    f"本局实战验货：{p2['hero_short_zh']} 参战率 {p2['kill_participation_pct']}%，{p4['hero_short_zh']} 与 {p5['hero_short_zh']} 整局合计买雾 "
-                    f"{(p4.get('smokes_bought') or 0) + (p5.get('smokes_bought') or 0)} 根、插下假眼 {(p4.get('obs_placed') or 0) + (p5.get('obs_placed') or 0)} 颗。"
+                    f"本局实战验货：{p4['hero_short_zh']} 释放《{p4_s0}》{p4_c} 次（参战率 {p4['kill_participation_pct']}%），"
+                    f"{p2['hero_short_zh']} 释放《{p2_s0}》{p2_c} 次（参战率 {p2['kill_participation_pct']}%，英雄伤害 {p2['hero_damage']:,}），"
+                    f"双辅助整局合计买雾 {(p4.get('smokes_bought') or 0) + (p5.get('smokes_bought') or 0)} 根、插假眼 {(p4.get('obs_placed') or 0) + (p5.get('obs_placed') or 0)} 颗。"
                 ),
             })
 
+        p3_s0 = p3_sigs[-1] if len(p3_sigs) > 1 else p3_sigs[0]
+        p1_s0 = p1_sigs[-1]
+        p3_c = ab_count(p3, p3_s0)
+        p1_c = ab_count(p1, p1_s0)
         combos.append({
-            "title": f"【{p3['hero_short_zh']} 先手开团 + {p1['hero_short_zh']}/{p2['hero_short_zh']} 后手切入】核心团战阵型拉扯",
+            "title": f"【{p3['pos']}号位{p3['hero_short_zh']}《{p3_s0}》破阵吃伤 + {p1['pos']}号位{p1['hero_short_zh']}《{p1_s0}》收割 + {p5['pos']}号位{p5['hero_short_zh']}《{p5_sigs[0]}》反手保核】决胜团战链",
             "window": "18:00–终局 · 肉山团与高地攻坚战",
             "heroes": [
                 {"short": p3["hero_short_zh"], "img": p3["hero_img"], "pos": p3["pos"], "personaname": p3["personaname"]},
                 {"short": p1["hero_short_zh"], "img": p1["hero_img"], "pos": p1["pos"], "personaname": p1["personaname"]},
-                {"short": p2["hero_short_zh"], "img": p2["hero_img"], "pos": p2["pos"], "personaname": p2["personaname"]},
+                {"short": p5["hero_short_zh"], "img": p5["hero_img"], "pos": p5["pos"], "personaname": p5["personaname"]},
             ],
             "how_to_play": (
-                f"团战站位铁律：由三号位 {p3['hero_short_zh']} 顶在视野最前方吃第一波先手并反手打控制，"
-                f"一号位 {p1['hero_short_zh']} 与二号位 {p2['hero_short_zh']} 切忌站在同一个圈里吃敌方满额 AOE；"
-                f"等敌方交出关键大招后，双核同时开启 BKB/切入技能直取敌方后排酱油与脆皮炮台。"
+                f"团战分工铁律：由3号位 {p3['hero_short_zh']} 顶在第一排释放《{p3_s0}》先手开团并吸收敌方第一波爆发，"
+                f"5号位 {p5['hero_short_zh']} 蹲在侧后方用《{p5_sigs[0]}》与微光/推推保护后排，"
+                f"1号位大核 {p1['hero_short_zh']} 看准敌方控制技能真空期开启BKB与《{p1_s0}》切入收割残局。"
             ),
             "execution_audit": (
-                f"本局实战验货：{p3['hero_short_zh']} 承受英雄伤害 {p3.get('hero_damage_taken') or p3.get('damage_taken') or 0:,}，"
-                f"双核 {p1['hero_short_zh']} 与 {p2['hero_short_zh']} 合计打出 {p1['hero_damage'] + p2['hero_damage']:,} 英雄伤害与 "
-                f"{p1['tower_damage'] + p2['tower_damage']:,} 建筑推塔伤害。"
+                f"本局实战验货：{p3['hero_short_zh']} 释放《{p3_s0}》{p3_c} 次（承受伤害 {p3.get('hero_damage_taken') or p3.get('damage_taken') or 0:,}），"
+                f"{p1['hero_short_zh']} 释放《{p1_s0}》{p1_c} 次（打出 {p1['hero_damage']:,} 英雄伤害与 {p1['tower_damage']:,} 建筑伤害）。"
             ),
         })
 
@@ -832,6 +944,35 @@ def build_draft_and_combo_analysis(
                 "【技能机制存在『衰老』冲突隐患】帕格纳的『衰老(虚无)』虽然能救人并加深法系伤害，但若在主宰平A输出或无敌斩期间误套给目标，会直接导致主宰物理砍不出伤害！"
             )
 
+        # 2.5) 逐英雄扫描 5v5 敌我专属机制克制与反克制关系（优先挂载最核心的英雄克制与破局点）
+        dur_min = float(match.get("duration") or 2400) / 60.0
+        side_won = bool(match.get("radiant_win")) if side_key == "radiant" else not bool(match.get("radiant_win"))
+        hero_matchup_matrix: List[Dict[str, Any]] = []
+        specific_counter_advs: List[str] = []
+        specific_counter_disadvs: List[str] = []
+        for op_p in own:
+            dossier = build_hero_matchup_dossier(op_p, own, opp, dur_min, side_won)
+            dossier["hero_img"] = op_p.get("hero_img", "")
+            dossier["personaname"] = op_p.get("personaname", "")
+            dossier["kda"] = op_p.get("kda", "")
+            hero_matchup_matrix.append(dossier)
+            for c_adv in dossier.get("counters_enemies") or []:
+                if "克制【" in c_adv or "天克【" in c_adv or "猎杀目标【" in c_adv:
+                    msg_a = f"【{op_p['pos']}号位·{op_p['hero_short_zh']}】{c_adv}"
+                    if msg_a not in specific_counter_advs:
+                        specific_counter_advs.append(msg_a)
+            for c_dis in dossier.get("countered_by_enemies") or []:
+                if "被【" in c_dis or "受制于【" in c_dis or "提防【" in c_dis:
+                    msg_d = f"【{op_p['pos']}号位·{op_p['hero_short_zh']}】{c_dis}"
+                    if msg_d not in specific_counter_disadvs:
+                        specific_counter_disadvs.append(msg_d)
+
+        for adv_item in reversed(specific_counter_advs[:3]):
+            strengths.insert(0, adv_item)
+        for dis_item in specific_counter_disadvs[:3]:
+            if dis_item not in weaknesses:
+                weaknesses.insert(0, dis_item)
+
         # 3) 自动诊断阵容优势
         if own_s["push"] >= 82 or own_s["push"] - opp_s["push"] >= 8:
             strengths.append(
@@ -935,9 +1076,10 @@ def build_draft_and_combo_analysis(
             "scores": own_s,
             "opp_scores": opp_s,
             "verdict_summary": verdict_summary,
-            "strengths": strengths[:3],
-            "weaknesses": weaknesses[:3],
+            "strengths": strengths[:4],
+            "weaknesses": weaknesses[:4],
             "combos": build_team_combos(own, opp),
+            "hero_matchup_matrix": hero_matchup_matrix,
             "heroes_brief": [
                 {
                     "pos": p["pos"],
