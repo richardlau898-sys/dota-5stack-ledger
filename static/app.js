@@ -12522,20 +12522,21 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
 
   // Compute clash center if a teamfight is happening
   let clashCenter = null;
-  if (activeTfForensic && Array.isArray(activeTfForensic.deaths_pos) && activeTfForensic.deaths_pos.length > 0) {
-    const avgX =
-      activeTfForensic.deaths_pos.reduce((acc, d) => acc + Number(d.nx || 50), 0) /
-      activeTfForensic.deaths_pos.length;
-    const avgY =
-      activeTfForensic.deaths_pos.reduce((acc, d) => acc + Number(d.ny || 50), 0) /
-      activeTfForensic.deaths_pos.length;
+  const tfDeathsArr = activeTfForensic?.deaths_coords || activeTfForensic?.deaths_pos || [];
+  if (Array.isArray(tfDeathsArr) && tfDeathsArr.length > 0) {
+    const avgX = tfDeathsArr.reduce((acc, d) => acc + Number(d.nx || 50), 0) / tfDeathsArr.length;
+    const avgY = tfDeathsArr.reduce((acc, d) => acc + Number(d.ny || 50), 0) / tfDeathsArr.length;
     clashCenter = { nx: Math.max(12, Math.min(88, avgX)), ny: Math.max(12, Math.min(88, avgY)) };
   } else if (activeKeyTf || activeTfForensic) {
     clashCenter = idx <= 15 ? { nx: 50, ny: 50 } : idx <= 28 ? { nx: 44, ny: 44 } : { nx: 62, ny: 38 };
   }
 
   const tfParticipantsMap = new Map();
-  const rawParts = activeTfForensic?.participants || activeKeyTf?.participants || [];
+  const rawParts =
+    activeTfForensic?.players_execution_matrix ||
+    activeTfForensic?.participants ||
+    activeKeyTf?.participants ||
+    [];
   rawParts.forEach((pt) => {
     if (pt.hero_short_zh) tfParticipantsMap.set(pt.hero_short_zh, pt);
   });
@@ -12547,8 +12548,8 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
     const fullP = fullPlayerByHero.get(hName) || {};
 
     // 1. If in active teamfight and has exact death position, or participated in fight
-    if (activeTfForensic && Array.isArray(activeTfForensic.deaths_pos)) {
-      const exactDeath = activeTfForensic.deaths_pos.find((d) => d.hero_short_zh === hName);
+    if (Array.isArray(tfDeathsArr) && tfDeathsArr.length > 0) {
+      const exactDeath = tfDeathsArr.find((d) => d.hero_short_zh === hName);
       if (exactDeath && exactDeath.nx && exactDeath.ny) {
         return { nx: Number(exactDeath.nx), ny: Number(exactDeath.ny), inFight: true, diedNow: true };
       }
@@ -12655,12 +12656,16 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       const strokeColor = isRad ? "#4ade80" : "#f87171";
       const pt = tfParticipantsMap.get(hName);
       const hasBkbInBag = (pSnap.items || []).some((it) => /黑皇杖|black_king_bar/i.test(it.zh || it.key || ""));
+      const ptItemsArr = pt?.items_used_zh || pt?.items || pt?.item_uses || pt?.items_used || [];
       const bkbUsedInTf = Boolean(
         pt?.bkb_used ||
-          (pt?.items_used || []).some((u) => /黑皇杖|black_king_bar/i.test(u.zh || u.key || "")) ||
-          (Array.isArray(pt?.item_uses) && pt.item_uses.some((u) => /黑皇杖|black_king_bar/i.test(String(u))))
+          ptItemsArr.some((u) => /黑皇杖|black_king_bar|BKB/i.test(typeof u === "string" ? u : u.zh || u.key || ""))
       );
-      const unpressedInc = activeUnpressedByHero.get(hName);
+      const unpressedInc =
+        activeUnpressedByHero.get(hName) ||
+        (Array.isArray(pt?.unused_self_saves_zh) && pt.unused_self_saves_zh.length > 0
+          ? { detail: `憋死未开 ${pt.unused_self_saves_zh.join("/")}` }
+          : null);
       const clipId = `scrub-hero-clip-${idx}-${i}`;
 
       let statusBadgeSvg = "";
@@ -12709,6 +12714,32 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
     })
     .join("");
 
+  const eventsList = snap.events || [];
+  const eventsHtml =
+    eventsList.length > 0
+      ? eventsList.map((ev) => `<li>${escapeHtml(ev)}</li>`).join("")
+      : `<li>本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 双方平稳对线/刷钱发育，无英雄击杀或建筑摧毁</li>`;
+
+  const tfScriptArr = activeTfForensic?.second_by_second_script || [];
+  const tfScriptHtml =
+    tfScriptArr.length > 0
+      ? `<div style="margin-bottom:8px;padding:6px 8px;border-radius:6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);max-height:110px;overflow-y:auto;font-size:11px;line-height:1.5;">
+          <div style="font-weight:700;color:var(--gold-light);margin-bottom:3px;">⏱️ 团战秒级战斗流水 (${escapeHtml(
+            activeTfForensic?.location_zh || activeTfForensic?.time_range || ""
+          )})：</div>
+          ${tfScriptArr
+            .map(
+              (sc) =>
+                `<div style="margin-bottom:2px;"><span style="color:#fbbf24;font-family:monospace;">[${escapeHtml(
+                  sc.time_str || sc.rel_str || ""
+                )}]</span> <b>${escapeHtml(sc.badge || "")}</b> ${escapeHtml(sc.headline || "")} <span style="color:var(--muted);">— ${escapeHtml(
+                  sc.detail || ""
+                )}</span></div>`
+            )
+            .join("")}
+        </div>`
+      : "";
+
   const interactiveMinimapHtml = `
     <div class="scrub-minimap-combat-grid" style="display:grid;grid-template-columns:minmax(250px, 310px) 1fr;gap:14px;margin-bottom:14px;align-items:stretch;">
       <div class="scrub-mini-map-card" style="background:rgba(16,18,15,0.92);border:1px solid rgba(198,164,104,0.28);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;">
@@ -12749,17 +12780,18 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
                 activeTfForensic || activeKeyTf
                   ? `🔥 正在发生大规模团战 (${escapeHtml(
                       activeTfForensic?.time_range || activeKeyTf?.time_range || ""
-                    )} · 人头交换 ${escapeHtml(
-                      activeKeyTf?.kills_trade || `${activeTfForensic?.radiant_deaths ?? 0}:${activeTfForensic?.dire_deaths ?? 0}`
-                    )} · 经济波动 ${escapeHtml(String(activeKeyTf?.gold_swing || activeTfForensic?.gold_swing || ""))})`
+                    )} · ${escapeHtml(activeTfForensic?.location_zh || "正面战场")} · 人头交换 ${escapeHtml(
+                      activeKeyTf?.kills_trade || `${activeTfForensic?.rad_kills ?? 0}:${activeTfForensic?.dire_kills ?? 0}`
+                    )} · 经济波动 ${escapeHtml(String(activeKeyTf?.gold_swing || activeTfForensic?.gold_swing_rad || ""))})`
                   : "⏱️ 拖动上方时间轴滑块到任意团战分钟，即可查看十人实时站位、技能释放与BKB按键记录"
               }
             </span>
           </div>
+          ${tfScriptHtml}
           ${
             rawParts.length > 0
               ? `
-                <div style="max-height:215px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px;">
+                <div style="max-height:195px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px;">
                   ${rawParts
                     .filter((pt) => Number(pt.damage || 0) > 0 || Number(pt.deaths || 0) > 0 || Number(pt.healing || 0) > 0)
                     .sort((a, b) => Number(b.damage || 0) - Number(a.damage || 0))
@@ -12770,35 +12802,41 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
                       const hasBkbNow = (pSnap.items || []).some((it) =>
                         /黑皇杖|black_king_bar/i.test(it.zh || it.key || "")
                       );
-                      const unpressed = activeUnpressedByHero.get(hName);
-                      const spellsStr = Array.isArray(pt.ability_uses)
-                        ? pt.ability_uses.slice(0, 4).join("、")
-                        : Array.isArray(pt.abilities_used)
-                        ? pt.abilities_used
-                            .slice(0, 4)
-                            .map((a) => `${a.zh || a.key}×${a.count || 1}`)
-                            .join("、")
-                        : "";
-                      const itemsUsedStr = Array.isArray(pt.item_uses)
-                        ? pt.item_uses.slice(0, 4).join("、")
-                        : Array.isArray(pt.items_used)
-                        ? pt.items_used
-                            .slice(0, 4)
-                            .map((it) => `${it.zh || it.key}×${it.count || 1}`)
-                            .join("、")
-                        : "";
-                      const bkbPressed = /黑皇杖|black_king_bar/i.test(itemsUsedStr) || Boolean(pt.bkb_used);
+                      const unusedSelf = Array.isArray(pt.unused_self_saves_zh) ? pt.unused_self_saves_zh : [];
+                      const unpressed =
+                        activeUnpressedByHero.get(hName) ||
+                        (unusedSelf.length > 0 ? { detail: `憋死未开 ${unusedSelf.join("/")}` } : null);
+                      const rawSpells =
+                        pt.abilities_used_zh || pt.abilities || pt.ability_uses || pt.abilities_used || [];
+                      const spellsStr = rawSpells
+                        .slice(0, 4)
+                        .map((a) => (typeof a === "string" ? a : `${a.zh || a.key}×${a.count || 1}`))
+                        .join("、");
+                      const rawItems = pt.items_used_zh || pt.items || pt.item_uses || pt.items_used || [];
+                      const itemsUsedStr = rawItems
+                        .slice(0, 4)
+                        .map((it) => (typeof it === "string" ? it : `${it.zh || it.key}×${it.count || 1}`))
+                        .join("、");
+                      const bkbPressed = /黑皇杖|black_king_bar|BKB/i.test(itemsUsedStr) || Boolean(pt.bkb_used);
                       let bkbBadgeHtml = "";
                       if (unpressed) {
-                        bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 憋死保命装：${escapeHtml(
+                        bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 ${escapeHtml(
                           unpressed.detail || "阵亡前未按BKB/救命装"
                         )}</span>`;
+                      } else if (pt.ult_unpressed_name) {
+                        bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">💀 憋大暴毙(${escapeHtml(
+                          pt.ult_unpressed_name
+                        )})</span>`;
                       } else if (bkbPressed) {
                         bkbBadgeHtml = `<span style="background:rgba(217,119,6,0.22);color:#fde68a;border:1px solid #f59e0b;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🛡️ 已开启 BKB</span>`;
                       } else if (hasBkbNow && Number(pt.deaths || 0) > 0) {
                         bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 身怀BKB阵亡未开！</span>`;
                       } else if (hasBkbNow) {
                         bkbBadgeHtml = `<span style="background:rgba(59,130,246,0.18);color:#bfdbfe;padding:1px 6px;border-radius:4px;font-size:10.5px;">🎒 持有BKB(未按·存活)</span>`;
+                      } else if (pt.verdict_tag) {
+                        bkbBadgeHtml = `<span style="background:rgba(255,255,255,0.06);color:var(--muted);padding:1px 6px;border-radius:4px;font-size:10.5px;">${escapeHtml(
+                          pt.verdict_tag
+                        )}</span>`;
                       }
                       const isRadPt = (pt.side || fp.side) === "radiant" || (pt.side || fp.side) === "天辉";
                       return `
@@ -12807,11 +12845,11 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
                         };font-size:11.5px;flex-wrap:wrap;">
                           <div style="display:flex;align-items:center;gap:6px;min-width:145px;">
                             ${
-                              fp.hero_img
-                                ? `<img src="${escapeHtml(fp.hero_img)}" alt="" width="28" height="16" style="border-radius:3px;" />`
+                              fp.hero_img || pt.hero_img
+                                ? `<img src="${escapeHtml(fp.hero_img || pt.hero_img)}" alt="" width="28" height="16" style="border-radius:3px;" />`
                                 : ""
                             }
-                            <b>[${isRadPt ? "天辉" : "夜魇"}${fp.pos || ""}] ${escapeHtml(hName)}</b>
+                            <b>[${isRadPt ? "天辉" : "夜魇"}${pt.pos || fp.pos || ""}] ${escapeHtml(hName)}</b>
                             <span style="color:${Number(pt.deaths || 0) > 0 ? "#f87171" : "#4ade80"};font-weight:700;">${
                         Number(pt.deaths || 0) > 0 ? "💀阵亡" : "🟢存活"
                       }</span>
@@ -12885,12 +12923,6 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       `;
     })
     .join("");
-
-  const eventsList = snap.events || [];
-  const eventsHtml =
-    eventsList.length > 0
-      ? eventsList.map((ev) => `<li>${escapeHtml(ev)}</li>`).join("")
-      : `<li>本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 双方平稳对线/刷钱发育，无英雄击杀或建筑摧毁</li>`;
 
   // Compute live 5v5 team snapshot aggregates for the right column so no space is wasted
   const radPlayers = players.filter((p) => p.side === "radiant");
