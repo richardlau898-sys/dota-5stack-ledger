@@ -20847,8 +20847,55 @@ function renderPregamePlanOutput(plan) {
     })
     .join("");
 
+  const realBp = plan.real_data_bp_stats || null;
+  const realBpHtml = realBp
+    ? `<section style="margin-bottom:12px;">
+        <div class="combos-header-bar">
+          <h3>📊 零、真实数据 BP 底盘（车队历史胜率 / OpenDota 分段位胜率 / 历史交手克制）</h3>
+          <span style="font-size:12px;color:var(--muted);">遵循 T1-9 最小样本量规则（≥10局才展示胜率结论）</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;">
+          <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:10px 12px;">
+            <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:6px;">我方所选英雄 · 车队历史 &amp; 高分段胜率</div>
+            ${(realBp.own_hero_real_stats || [])
+              .map(
+                (h) => `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);">
+                  <span>${h.pos}号位 · <b>${escapeHtml(h.hero_short_zh)}</b></span>
+                  <span>车队：${h.squad_games}局 ${h.squad_wins}胜${
+                    !h.squad_insufficient_sample && h.squad_win_rate != null
+                      ? ` (${h.squad_win_rate}%)`
+                      : " (样本<10局)"
+                  } ｜ 高分段：${h.bracket_win_rate != null ? `${h.bracket_win_rate}%` : "无数据"}</span>
+                </div>`
+              )
+              .join("")}
+          </div>
+          <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:10px 12px;">
+            <div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:6px;">敌方所选英雄 · 车队历史对阵 (against_win)</div>
+            ${
+              (realBp.enemy_against_stats || []).length > 0
+                ? (realBp.enemy_against_stats || [])
+                    .map(
+                      (e) => `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);">
+                        <span>敌方${e.pos}号位 · <b>${escapeHtml(e.hero_short_zh)}</b></span>
+                        <span>交手 ${e.against_games}局 ${e.against_win}胜${
+                          !e.insufficient_sample && e.against_win_rate != null
+                            ? ` (对阵胜率 ${e.against_win_rate}%)`
+                            : " (样本<10局)"
+                        }</span>
+                      </div>`
+                    )
+                    .join("")
+                : `<div style="font-size:12px;color:var(--muted);">点选敌方阵容后自动核查车队历史交手胜率</div>`
+            }
+          </div>
+        </div>
+      </section>`
+    : "";
+
   out.innerHTML = `
     ${grokBannerHtml}
+    ${realBpHtml}
 
     <!-- 1. 核心赢法 vs 翻车红线 + 团战集火优先级 -->
     <div class="pregame-winloss-grid">

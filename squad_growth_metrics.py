@@ -747,8 +747,24 @@ def build_personal_trends_and_goals(
     并支持每人每周设定一个目标值，计算当前进度。
     """
     roster = roster or {}
-    friends = roster.get("friends") or {}
+    friends = roster.get("friends") or roster.get("teammates") or {}
     weekly_goals = weekly_goals or roster.get("weekly_goals") or {}
+    allowed_aids = set()
+    if roster.get("main_account_id"):
+        try:
+            allowed_aids.add(int(roster["main_account_id"]))
+        except Exception:
+            pass
+    for k in friends.keys():
+        try:
+            allowed_aids.add(int(k))
+        except Exception:
+            pass
+    for k in weekly_goals.keys():
+        try:
+            allowed_aids.add(int(k))
+        except Exception:
+            pass
 
     sorted_reports = sorted(
         [r for r in (reports or []) if isinstance(r, dict) and r.get("match_id")],
@@ -769,6 +785,8 @@ def build_personal_trends_and_goals(
                 if not isinstance(p, dict) or not p.get("account_id"):
                     continue
                 aid = int(p["account_id"])
+                if allowed_aids and aid not in allowed_aids:
+                    continue
                 pos = int(p.get("pos") or 0)
                 lane = int(p.get("raw_lane") or p.get("lane_id") or p.get("lane") or 0)
 

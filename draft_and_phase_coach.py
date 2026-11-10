@@ -9,428 +9,11 @@ Dota 2 阵容选择诊断 (BP & Combo 算账) + 分阶段个人/团队深度评�
 4. 综合整个团队在前期、中期、后期如何进步的实战作业本
 """
 
+import json
+import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from dota_constants_zh import ACTIVE_SAVE_ITEMS_ZH, get_held_active_save_items
-
-
-# 英雄战术画像：先手(init)、爆发(burst)、团战AOE(tf)、推塔(push)、抓人(pick)、后期(late)、前排肉度(tank)、物理/法系倾向
-HERO_ARCHETYPES: Dict[int, Dict[str, Any]] = {
-    1: {  # 敌法师 Anti-Mage
-        "short": "敌法师",
-        "roles": ["闪烁极限带球刷钱", "法力虚空引爆高蓝核", "法术反制克制点控法师"],
-        "scores": {"init": 42, "burst": 78, "tf": 68, "push": 84, "pick": 74, "late": 94, "tank": 64},
-        "dmg_type": "physical",
-        "synergy_tags": ["hard_carry", "split_pusher", "anti_mage"],
-    },
-    2: {  # 斧王 Axe
-        "short": "斧王",
-        "roles": ["跳刀狂战士之吼无视BKB群嘲", "反击螺旋克制近战与多段平A", "淘汰之刃斩杀收割"],
-        "scores": {"init": 94, "burst": 76, "tf": 86, "push": 52, "pick": 86, "late": 76, "tank": 92},
-        "dmg_type": "pure",
-        "synergy_tags": ["frontline_tank", "bkb_pierce_init", "instant_stun"],
-    },
-    5: {  # 水晶室女 Crystal Maiden
-        "short": "水晶室女",
-        "roles": ["冰封禁制先手留人", "奥术光环全队回蓝", "极寒领域团战高额AOE"],
-        "scores": {"init": 68, "burst": 76, "tf": 84, "push": 38, "pick": 75, "late": 55, "tank": 28},
-        "dmg_type": "magical",
-        "synergy_tags": ["root_setup", "mana_aura", "squishy_ranged"],
-    },
-    7: {  # 撼地者 Earthshaker
-        "short": "撼地者",
-        "roles": ["沟壑超远封路留人", "跳刀回音击毁天灭地反手清场", "余震连环控制克制幻象与扎堆"],
-        "scores": {"init": 92, "burst": 90, "tf": 94, "push": 42, "pick": 82, "late": 78, "tank": 64},
-        "dmg_type": "magical",
-        "synergy_tags": ["aoe_teamfight", "instant_stun"],
-    },
-    8: {  # 主宰 Juggernaut
-        "short": "主宰",
-        "roles": ["奶棒推进核", "魔免剑刃风暴", "无敌斩收割"],
-        "scores": {"init": 38, "burst": 84, "tf": 78, "push": 92, "pick": 68, "late": 86, "tank": 68},
-        "dmg_type": "physical",
-        "synergy_tags": ["hard_carry", "siege_healer", "empower_carrier"],
-    },
-    9: {  # 米拉娜 Mirana
-        "short": "米拉娜",
-        "roles": ["超远穿云箭接控", "全图月之暗面开雾", "流星爆发补伤害"],
-        "scores": {"init": 62, "burst": 72, "tf": 68, "push": 55, "pick": 88, "late": 65, "tank": 45},
-        "dmg_type": "magical",
-        "synergy_tags": ["follow_up_stun", "team_invis_gank", "squishy_ranged"],
-    },
-    11: {  # 影魔 Shadow Fiend
-        "short": "影魔",
-        "roles": ["三压高爆发清线刷钱", "魂之挽歌团战恐惧AOE", "魔王降临减甲拆塔"],
-        "scores": {"init": 45, "burst": 92, "tf": 82, "push": 86, "pick": 62, "late": 84, "tank": 44},
-        "dmg_type": "mixed",
-        "synergy_tags": ["glass_cannon_core", "squishy_ranged", "no_stun_greedy"],
-    },
-    12: {  # 幻影长矛手 Phantom Lancer
-        "short": "幻影长矛手",
-        "roles": ["并列幻象海无限拉扯消蓝", "神行百变躲技能切后排", "大后期无AOE阵容的绝对噩梦"],
-        "scores": {"init": 38, "burst": 68, "tf": 84, "push": 78, "pick": 64, "late": 95, "tank": 76},
-        "dmg_type": "physical",
-        "synergy_tags": ["hard_carry", "illusion_swarm"],
-    },
-    13: {  # 帕克 Puck
-        "short": "帕克",
-        "roles": ["梦境缠绕留人断TP", "新月之痕沉默接幻象法球高机动拉扯", "相位转移无伤秀翻后排"],
-        "scores": {"init": 88, "burst": 84, "tf": 88, "push": 62, "pick": 90, "late": 82, "tank": 52},
-        "dmg_type": "magical",
-        "synergy_tags": ["aoe_teamfight", "high_mobility_core"],
-    },
-    14: {  # 帕吉 Pudge
-        "short": "帕吉",
-        "roles": ["肉钩超远破阵先手/救人", "肢解无视BKB点控", "腐肉堆积高血量肉盾"],
-        "scores": {"init": 78, "burst": 76, "tf": 70, "push": 40, "pick": 88, "late": 72, "tank": 86},
-        "dmg_type": "magical",
-        "synergy_tags": ["frontline_tank", "bkb_pierce_init"],
-    },
-    15: {  # 剃刀 Razor
-        "short": "剃刀",
-        "roles": ["静电连接抽干敌方物理主C攻击力", "风暴之眼减甲持续冲脸", "等离子场范围减速压制"],
-        "scores": {"init": 58, "burst": 68, "tf": 84, "push": 76, "pick": 72, "late": 78, "tank": 82},
-        "dmg_type": "physical",
-        "synergy_tags": ["frontline_tank", "anti_carry_link"],
-    },
-    21: {  # 风行者 Windranger
-        "short": "风行者",
-        "roles": ["束缚击双人长晕", "集中火力定点秒杀核心与拆塔", "风行高闪避机动切入"],
-        "scores": {"init": 76, "burst": 88, "tf": 72, "push": 84, "pick": 88, "late": 82, "tank": 52},
-        "dmg_type": "physical",
-        "synergy_tags": ["pickoff_roamer", "squishy_ranged"],
-    },
-    22: {  # 宙斯 Zeus
-        "short": "宙斯",
-        "roles": ["雷神之怒全图支援与开视野", "雷击反隐排眼克制隐身系", "超远距离法系炮台"],
-        "scores": {"init": 40, "burst": 96, "tf": 90, "push": 48, "pick": 78, "late": 80, "tank": 34},
-        "dmg_type": "magical",
-        "synergy_tags": ["global_presence", "true_sight_reveal", "squishy_ranged"],
-    },
-    23: {  # 昆卡 Kunkka
-        "short": "昆卡",
-        "roles": ["X标记+洪流+幽灵船三连无解先手", "朗姆酒全队50%减伤", "潮汐使者水刀高额AOE"],
-        "scores": {"init": 88, "burst": 84, "tf": 94, "push": 68, "pick": 86, "late": 78, "tank": 86},
-        "dmg_type": "mixed",
-        "synergy_tags": ["frontline_tank", "aoe_teamfight"],
-    },
-    25: {  # 莉娜 Lina
-        "short": "莉娜",
-        "roles": ["神灭斩+光击阵超高单体秒杀", "炽魂高攻速远程物理/法系双修炮台", "龙破斩远程清线推塔"],
-        "scores": {"init": 64, "burst": 96, "tf": 78, "push": 82, "pick": 84, "late": 82, "tank": 40},
-        "dmg_type": "mixed",
-        "synergy_tags": ["glass_cannon_core", "squishy_ranged"],
-    },
-    26: {  # 莱恩 Lion
-        "short": "莱恩",
-        "roles": ["瞬发变羊+穿刺双控", "死亡一指高额单体秒杀", "抽蓝限制前排"],
-        "scores": {"init": 88, "burst": 92, "tf": 65, "push": 30, "pick": 92, "late": 60, "tank": 28},
-        "dmg_type": "magical",
-        "synergy_tags": ["instant_hex_stun", "high_magic_nuke", "squishy_ranged"],
-    },
-    27: {  # 暗影萨满 Shadow Shaman
-        "short": "暗影萨满",
-        "roles": ["妖术+枷锁超长双点控", "群蛇守卫强拆外塔与高地", "苍穹震击清线消耗"],
-        "scores": {"init": 88, "burst": 74, "tf": 76, "push": 96, "pick": 90, "late": 66, "tank": 32},
-        "dmg_type": "magical",
-        "synergy_tags": ["instant_hex_stun", "tower_melter", "squishy_ranged"],
-    },
-    28: {  # 斯拉达 Slardar
-        "short": "斯拉达",
-        "roles": ["跳刀鱼人碎击瞬发群晕", "侵蚀雾霭巨额减甲+真视克制隐身与肉核", "深海重击被动连晕"],
-        "scores": {"init": 90, "burst": 78, "tf": 80, "push": 62, "pick": 92, "late": 78, "tank": 86},
-        "dmg_type": "physical",
-        "synergy_tags": ["frontline_tank", "instant_stun", "true_sight_reveal", "armor_reduction"],
-    },
-    29: {  # 潮汐猎人 Tidehunter
-        "short": "潮汐猎人",
-        "roles": ["毁灭超大范围团控", "海妖外壳强解状态顶前排", "锚击降低敌方物理攻击"],
-        "scores": {"init": 94, "burst": 62, "tf": 98, "push": 58, "pick": 60, "late": 78, "tank": 95},
-        "dmg_type": "magical",
-        "synergy_tags": ["aoe_ravage_stun", "frontline_tank", "aoe_teamfight"],
-    },
-    30: {  # 巫医 Witch Doctor
-        "short": "巫医",
-        "roles": ["麻痹药剂弹射群控", "诅咒百分比掉血结算", "死亡守卫毁灭团战输出"],
-        "scores": {"init": 68, "burst": 94, "tf": 92, "push": 42, "pick": 82, "late": 72, "tank": 35},
-        "dmg_type": "magical",
-        "synergy_tags": ["maledict_burst_amp", "channeled_ward_ult", "squishy_ranged"],
-    },
-    31: {  # 巫妖 Lich
-        "short": "巫妖",
-        "roles": ["冰霜护甲提供前排高额物理减伤", "邪恶凝视瞬发拉人点控", "连环霜冻弹射毁灭扎堆阵型"],
-        "scores": {"init": 74, "burst": 88, "tf": 90, "push": 40, "pick": 80, "late": 68, "tank": 36},
-        "dmg_type": "magical",
-        "synergy_tags": ["aoe_teamfight", "save_support", "squishy_ranged"],
-    },
-    32: {  # 力丸 Riki
-        "short": "力丸",
-        "roles": ["烟幕范围沉默致盲", "隐身视野压制切后排", "绝杀秘技规避伤害"],
-        "scores": {"init": 72, "burst": 82, "tf": 70, "push": 38, "pick": 95, "late": 78, "tank": 45},
-        "dmg_type": "physical",
-        "synergy_tags": ["aoe_silence_cloud", "backline_assassin"],
-    },
-    35: {  # 狙击手 Sniper
-        "short": "狙击手",
-        "roles": ["超远射程无伤点塔与守高地", "榴霰弹视野压制消耗", "极怕冲脸切后排的纯炮台核"],
-        "scores": {"init": 25, "burst": 76, "tf": 80, "push": 88, "pick": 45, "late": 86, "tank": 32},
-        "dmg_type": "physical",
-        "synergy_tags": ["glass_cannon_core", "squishy_ranged", "no_stun_greedy"],
-    },
-    36: {  # 瘟疫法师 Necrophos
-        "short": "瘟疫法师",
-        "roles": ["死神镰刀斩杀加读秒", "竭心光环百分比磨血+死亡脉冲续航顶前排", "幽魂护罩物理免疫"],
-        "scores": {"init": 68, "burst": 84, "tf": 88, "push": 72, "pick": 74, "late": 80, "tank": 86},
-        "dmg_type": "magical",
-        "synergy_tags": ["frontline_tank", "regen_core"],
-    },
-    40: {  # 剧毒术士 Venomancer
-        "short": "剧毒术士",
-        "roles": ["瘟疫守卫铺视野守塔推进", "瘴气+毒刺持续减速折磨短腿前排", "恶性瘟疫百分比持续掉血"],
-        "scores": {"init": 45, "burst": 58, "tf": 84, "push": 78, "pick": 64, "late": 62, "tank": 40},
-        "dmg_type": "magical",
-        "synergy_tags": ["squishy_ranged", "no_stun_greedy"],
-    },
-    41: {  # 虚空假面 Faceless Void
-        "short": "虚空假面",
-        "roles": ["时间结界无视BKB毁天灭地大招", "时间漫游回血规避爆发", "时间锁定被动晕眩后期真神"],
-        "scores": {"init": 95, "burst": 86, "tf": 98, "push": 80, "pick": 82, "late": 98, "tank": 76},
-        "dmg_type": "physical",
-        "synergy_tags": ["hard_carry", "bkb_pierce_init", "aoe_teamfight"],
-    },
-    43: {  # 死亡先知 Death Prophet
-        "short": "死亡先知",
-        "roles": ["驱使恶灵团战清场与无解拆塔", "吸魂巫术百分比抽血续航", "沉默魔法范围沉默断连招"],
-        "scores": {"init": 62, "burst": 74, "tf": 90, "push": 96, "pick": 70, "late": 78, "tank": 78},
-        "dmg_type": "physical",
-        "synergy_tags": ["tower_melter", "aoe_teamfight"],
-    },
-    44: {  # 幻影刺客 Phantom Assassin
-        "short": "幻影刺客",
-        "roles": ["高暴击物理切入收割", "模糊闪避物理平A", "BKB成型期瞬秒后排"],
-        "scores": {"init": 55, "burst": 95, "tf": 75, "push": 62, "pick": 85, "late": 92, "tank": 58},
-        "dmg_type": "physical",
-        "synergy_tags": ["hard_carry", "backline_assassin", "empower_carrier"],
-    },
-    45: {  # 帕格纳 Pugna
-        "short": "帕格纳",
-        "roles": ["爆轰磨塔快推", "衰老虚无增伤/救人", "幽冥守卫反法系"],
-        "scores": {"init": 30, "burst": 85, "tf": 78, "push": 98, "pick": 65, "late": 62, "tank": 30},
-        "dmg_type": "magical",
-        "synergy_tags": ["magic_amp", "tower_melter", "anti_caster_ward", "squishy_ranged"],
-    },
-    49: {  # 龙骑士 Dragon Knight
-        "short": "龙骑士",
-        "roles": ["瞬发神龙摆尾先手", "古龙形态腐蚀推塔", "高护甲前排顶梁柱"],
-        "scores": {"init": 86, "burst": 68, "tf": 78, "push": 90, "pick": 80, "late": 80, "tank": 90},
-        "dmg_type": "physical",
-        "synergy_tags": ["instant_stun", "frontline_tank", "empower_carrier"],
-    },
-    53: {  # 先知 Nature's Prophet
-        "short": "先知",
-        "roles": ["全图传送支援收割与带球牵制", "发芽框人克制无推推近战", "正面5v5硬刚与抗冲脸能力偏弱的机动核"],
-        "scores": {"init": 64, "burst": 74, "tf": 60, "push": 95, "pick": 90, "late": 70, "tank": 44},
-        "dmg_type": "physical",
-        "synergy_tags": ["global_presence", "split_pusher", "squishy_ranged", "weak_frontal_carry"],
-    },
-    55: {  # 黑暗贤者 Dark Seer
-        "short": "黑暗贤者",
-        "roles": ["真空+复制之墙团战完美聚怪", "离子外壳推线消耗近战", "奔腾极限加速切入/救人"],
-        "scores": {"init": 90, "burst": 68, "tf": 96, "push": 62, "pick": 72, "late": 86, "tank": 80},
-        "dmg_type": "magical",
-        "synergy_tags": ["aoe_teamfight", "frontline_tank"],
-    },
-    56: {  # 克林克兹 Clinkz
-        "short": "克林克兹",
-        "roles": ["骨隐步全图隐身抓单偷塔", "炽烈火雨+焦油炸弹减甲点杀脆皮", "身板极脆、缺乏团控且怕反隐强留的刺客核"],
-        "scores": {"init": 42, "burst": 90, "tf": 58, "push": 90, "pick": 92, "late": 70, "tank": 38},
-        "dmg_type": "physical",
-        "synergy_tags": ["invis_roamer", "split_pusher", "squishy_ranged", "weak_frontal_carry", "no_stun_greedy"],
-    },
-    59: {  # 哈斯卡 Huskar
-        "short": "哈斯卡",
-        "roles": ["狂战士之血残血极限魔抗攻速", "牺牲冲脸强换前排", "极怕强禁疗与高物理爆发的节奏核"],
-        "scores": {"init": 72, "burst": 86, "tf": 76, "push": 84, "pick": 78, "late": 64, "tank": 84},
-        "dmg_type": "magical",
-        "synergy_tags": ["frontline_tank", "regen_core"],
-    },
-    60: {  # 暗夜魔王 Night Stalker
-        "short": "暗夜魔王",
-        "roles": ["暗夜猎影高空视野+无视地形切后排", "伤残恐惧近身持续沉默法师", "夜晚统治力极强的冲脸前排"],
-        "scores": {"init": 88, "burst": 82, "tf": 82, "push": 62, "pick": 94, "late": 76, "tank": 86},
-        "dmg_type": "physical",
-        "synergy_tags": ["frontline_tank", "backline_assassin"],
-    },
-    62: {  # 赏金猎人 Bounty Hunter
-        "short": "赏金猎人",
-        "roles": ["追踪术提供真视视野与团队高额赏金滚雪球", "暗影步破隐晕眩骚扰", "正面团战偏脆的游走节奏点"],
-        "scores": {"init": 62, "burst": 74, "tf": 60, "push": 40, "pick": 92, "late": 64, "tank": 48},
-        "dmg_type": "mixed",
-        "synergy_tags": ["true_sight_reveal", "invis_roamer"],
-    },
-    63: {  # 编织者 Weaver
-        "short": "编织者",
-        "roles": ["缩地极速切入与拉扯", "时光倒流回到5秒前满血解状态", "凰虫减甲配合连击点杀脆皮"],
-        "scores": {"init": 48, "burst": 84, "tf": 72, "push": 80, "pick": 86, "late": 82, "tank": 52},
-        "dmg_type": "physical",
-        "synergy_tags": ["invis_roamer", "squishy_ranged", "no_stun_greedy"],
-    },
-    64: {  # 杰奇洛 Jakiro
-        "short": "杰奇洛",
-        "roles": ["冰封路径超远群控留人", "液态火/液态冰无伤磨塔降攻速", "烈焰焚身狭窄地形毁灭AOE"],
-        "scores": {"init": 78, "burst": 76, "tf": 88, "push": 84, "pick": 76, "late": 66, "tank": 52},
-        "dmg_type": "magical",
-        "synergy_tags": ["aoe_teamfight", "tower_melter", "squishy_ranged"],
-    },
-    67: {  # 幽鬼 Spectre
-        "short": "幽鬼",
-        "roles": ["暗影步/鬼影重重全图定点切后排", "折射反弹伤害大后期无解肉核", "荒芜纯粹伤害克制落单"],
-        "scores": {"init": 82, "burst": 78, "tf": 90, "push": 62, "pick": 92, "late": 96, "tank": 92},
-        "dmg_type": "mixed",
-        "synergy_tags": ["hard_carry", "global_presence", "frontline_tank", "backline_assassin"],
-    },
-    68: {  # 远古冰魄 Ancient Apparition
-        "short": "远古冰魄",
-        "roles": ["冰晶爆轰全图斩杀+100%禁疗天克回血核", "寒霜之足+冰霜漩涡远程增伤留人", "极寒之触超远消耗"],
-        "scores": {"init": 64, "burst": 86, "tf": 88, "push": 42, "pick": 80, "late": 78, "tank": 30},
-        "dmg_type": "magical",
-        "synergy_tags": ["global_presence", "anti_heal_ult", "squishy_ranged"],
-    },
-    71: {  # 裂魂人 Spirit Breaker
-        "short": "裂魂人",
-        "roles": ["暗影冲刺全图跨地形锁定支援与破带球", "幽冥一击无视BKB击退", "威吓高状态抗性冲散敌方后排"],
-        "scores": {"init": 92, "burst": 78, "tf": 80, "push": 48, "pick": 96, "late": 74, "tank": 86},
-        "dmg_type": "magical",
-        "synergy_tags": ["global_presence", "bkb_pierce_init", "frontline_tank", "anti_split_push"],
-    },
-    73: {  # 炼金术士 Alchemist
-        "short": "炼金术士",
-        "roles": ["贪魔的贪婪超高速刷钱养A杖", "化学狂暴高回血中期平推肉盾", "极怕强禁疗与拖入大后期"],
-        "scores": {"init": 72, "burst": 76, "tf": 82, "push": 88, "pick": 74, "late": 72, "tank": 88},
-        "dmg_type": "physical",
-        "synergy_tags": ["frontline_tank", "regen_core"],
-    },
-    76: {  # 殁境神蚀者 Outworld Destroyer
-        "short": "殁境神蚀者",
-        "roles": ["星体禁锢断节奏救人", "奥术天球纯粹法球巨额点杀单前排", "神智之蚀大招清场"],
-        "scores": {"init": 76, "burst": 95, "tf": 88, "push": 55, "pick": 84, "late": 90, "tank": 64},
-        "dmg_type": "pure",
-        "synergy_tags": ["save_banish", "pure_damage_core", "anti_tank_pure"],
-    },
-    83: {  # 树精卫士 Treant Protector
-        "short": "树精卫士",
-        "roles": ["疯狂生长无视BKB大范围捆绑", "活体护甲全图修塔保人", "寄生种子+自然卷握强力线上消耗"],
-        "scores": {"init": 88, "burst": 58, "tf": 90, "push": 45, "pick": 74, "late": 74, "tank": 82},
-        "dmg_type": "magical",
-        "synergy_tags": ["bkb_pierce_init", "save_support", "frontline_tank"],
-    },
-    86: {  # 拉比克 Rubick
-        "short": "拉比克",
-        "roles": ["隔空取物瞬发先手举", "技能窃取反制大招", "弱化能流减攻清线"],
-        "scores": {"init": 80, "burst": 70, "tf": 85, "push": 45, "pick": 82, "late": 78, "tank": 35},
-        "dmg_type": "magical",
-        "synergy_tags": ["instant_lift_stun", "spell_steal_counter", "squishy_ranged"],
-    },
-    87: {  # 干扰者 Disruptor
-        "short": "干扰者",
-        "roles": ["瞥视千里抓回TP与隐身逃生英雄", "静态风暴+动能场框大范围沉默禁用物品", "天克全图带线与高机动游走核"],
-        "scores": {"init": 90, "burst": 78, "tf": 94, "push": 38, "pick": 95, "late": 82, "tank": 34},
-        "dmg_type": "magical",
-        "synergy_tags": ["anti_split_push", "aoe_teamfight", "squishy_ranged"],
-    },
-    88: {  # 司夜刺客 Nyx Assassin
-        "short": "司夜刺客",
-        "roles": ["复仇隐身超高爆发猎杀脆皮远程核", "尖刺外壳完美反弹敌方AOE先手", "穿刺+心灵焦灼控制消蓝"],
-        "scores": {"init": 84, "burst": 92, "tf": 76, "push": 36, "pick": 95, "late": 72, "tank": 62},
-        "dmg_type": "magical",
-        "synergy_tags": ["invis_roamer", "backline_assassin", "anti_squishy_ranged"],
-    },
-    93: {  # 斯拉克 Slark
-        "short": "斯拉克",
-        "roles": ["能量转移无限偷属性越打越猛", "黑暗契约强解一切非光环硬控", "暗影之舞+魔晶深海劫掠无敌切入与救人"],
-        "scores": {"init": 78, "burst": 84, "tf": 86, "push": 68, "pick": 94, "late": 94, "tank": 78},
-        "dmg_type": "physical",
-        "synergy_tags": ["hard_carry", "anti_tank_steal", "regen_core"],
-    },
-    96: {  # 半人马战行者 Centaur Warrunner
-        "short": "半人马战行者",
-        "roles": ["跳刀马蹄践踏稳定先手群晕", "奔袭冲撞全队极限加速开团/撤退", "双刃剑+反击高血量肉盾"],
-        "scores": {"init": 90, "burst": 76, "tf": 86, "push": 60, "pick": 82, "late": 78, "tank": 94},
-        "dmg_type": "magical",
-        "synergy_tags": ["frontline_tank", "instant_stun", "aoe_teamfight"],
-    },
-    97: {  # 马格纳斯 Magnus
-        "short": "马格纳斯",
-        "roles": ["授予力量刷钱引擎", "跳刀两极反转团控", "巨角冲撞破坏阵型"],
-        "scores": {"init": 95, "burst": 65, "tf": 96, "push": 72, "pick": 78, "late": 88, "tank": 75},
-        "dmg_type": "mixed",
-        "synergy_tags": ["aoe_vacuum_stun", "empower_buffer", "reposition", "bkb_pierce_init"],
-    },
-    99: {  # 钢背兽 Bristleback
-        "short": "钢背兽",
-        "roles": ["粘稠鼻涕叠甲减移速", "刺针扫射持续肉搏", "前排吸收成吨火力"],
-        "scores": {"init": 45, "burst": 60, "tf": 84, "push": 72, "pick": 58, "late": 76, "tank": 96},
-        "dmg_type": "physical",
-        "synergy_tags": ["armor_reduction", "frontline_tank"],
-    },
-    101: {  # 天怒法师 Skywrath Mage
-        "short": "天怒法师",
-        "roles": ["上古封印法系增伤沉默", "神秘之耀超高单体法术轰炸", "身板极脆怕冲脸的后排法核/辅助"],
-        "scores": {"init": 68, "burst": 98, "tf": 72, "push": 34, "pick": 88, "late": 66, "tank": 26},
-        "dmg_type": "magical",
-        "synergy_tags": ["high_magic_nuke", "squishy_ranged"],
-    },
-    105: {  # 工程师 Techies
-        "short": "工程师",
-        "roles": ["爆破起飞远程跳脸沉默群伤", "感应地雷阵地封锁与清线磨塔", "粘性炸弹拉扯但缺乏瞬发硬控"],
-        "scores": {"init": 74, "burst": 86, "tf": 78, "push": 74, "pick": 76, "late": 66, "tank": 44},
-        "dmg_type": "magical",
-        "synergy_tags": ["squishy_ranged"],
-    },
-    112: {  # 寒冬飞龙 Winter Wyvern
-        "short": "寒冬飞龙",
-        "roles": ["寒冬诅咒无视BKB反手团控克制抱团物理核", "极寒之拥物理免疫救人", "严寒烧灼超远距离百分比消耗"],
-        "scores": {"init": 82, "burst": 66, "tf": 90, "push": 42, "pick": 70, "late": 82, "tank": 38},
-        "dmg_type": "magical",
-        "synergy_tags": ["bkb_pierce_init", "save_support", "squishy_ranged"],
-    },
-    114: {  # 齐天大圣 Monkey King
-        "short": "齐天大圣",
-        "roles": ["猴子猴孙超大范围阵地团战封锁", "如意棒法叠被动高额吸血暴击", "丛林之舞树顶高机动视野侦察"],
-        "scores": {"init": 76, "burst": 86, "tf": 92, "push": 74, "pick": 86, "late": 88, "tank": 68},
-        "dmg_type": "physical",
-        "synergy_tags": ["hard_carry", "aoe_teamfight"],
-    },
-    123: {  # 森海飞霞 Hoodwink
-        "short": "森海飞霞",
-        "roles": ["野地奇袭捆树群控", "神枪在手超远破被动百分比狙杀", "松鼠步高机动游走逃生"],
-        "scores": {"init": 76, "burst": 86, "tf": 76, "push": 52, "pick": 88, "late": 68, "tank": 36},
-        "dmg_type": "magical",
-        "synergy_tags": ["squishy_ranged", "follow_up_stun"],
-    },
-    131: {  # 环轨百戏王 Ringmaster
-        "short": "环轨百戏王",
-        "roles": ["逃生魔盒无敌救下被集火核心", "奇观轮团战大范围魅惑控场", "驯兽长鞭恐惧打断"],
-        "scores": {"init": 76, "burst": 78, "tf": 88, "push": 44, "pick": 78, "late": 74, "tank": 38},
-        "dmg_type": "magical",
-        "synergy_tags": ["save_support", "aoe_teamfight", "squishy_ranged"],
-    },
-    135: {  # 破晓辰星 Dawnbreaker
-        "short": "破晓辰星",
-        "roles": ["天光现世全图空降回血群晕反打（天克抓单/带球体系）", "星破天惊+熠熠生辉高额前排肉搏回血", "上佳的一线全图反手三号位"],
-        "scores": {"init": 84, "burst": 80, "tf": 92, "push": 72, "pick": 84, "late": 80, "tank": 88},
-        "dmg_type": "physical",
-        "synergy_tags": ["frontline_tank", "global_presence", "anti_split_push", "save_support"],
-    },
-    136: {  # 玛西 Marci
-        "short": "玛西",
-        "roles": ["回身踢+健步强先手留人", "怒拳破高爆发冲脸", "护卫反击提供吸血攻击力"],
-        "scores": {"init": 88, "burst": 90, "tf": 80, "push": 68, "pick": 94, "late": 78, "tank": 76},
-        "dmg_type": "physical",
-        "synergy_tags": ["dive_initiator", "burst_brawler"],
-    },
-}
-
-
+from dota_constants_zh import ACTIVE_SAVE_ITEMS_ZH, HEROES_ZH, get_held_active_save_items
 from hero_profiles_126 import (
     HERO_PROFILES_126,
     build_hero_matchup_dossier,
@@ -438,41 +21,299 @@ from hero_profiles_126 import (
     get_hero_profile_126,
 )
 
-# 将 126 英雄全量内置机制画像合并进 HERO_ARCHETYPES（保留手工精调项，补齐全部 126 英雄）
-for _hid, _prof in HERO_PROFILES_126.items():
-    _full_prof = get_hero_profile_126(_hid, 3, _prof.get("short", ""))
-    _tc = _full_prof.get("timing_curve", "mid_tempo_brawler")
-    _tc_zh = _full_prof.get("timing_curve_zh", "中期节奏支点")
-    if _hid not in HERO_ARCHETYPES:
-        HERO_ARCHETYPES[_hid] = {
-            "short": _full_prof["short"],
-            "roles": list(_full_prof["roles"]),
-            "scores": dict(_full_prof["scores"]),
-            "dmg_type": _full_prof["dmg_type"],
-            "synergy_tags": list(_full_prof["synergy_tags"]),
-            "timing_curve": _tc,
-            "timing_curve_zh": _tc_zh,
-            "early_rule": _full_prof.get("early_rule", ""),
-            "mid_rule": _full_prof.get("mid_rule", ""),
-            "late_rule": _full_prof.get("late_rule", ""),
-            "shard_desc": _full_prof.get("shard_desc", ""),
-            "core_item_hint": _full_prof.get("core_item_hint", ""),
+_REPO_ROOT = Path(__file__).resolve().parent
+_HERO_STATS_CACHE: Optional[Dict[int, Dict[str, Any]]] = None
+
+
+def load_hero_stats_by_id() -> Dict[int, Dict[str, Any]]:
+    """从 .cache/hero_stats.json（及 .cache/heroes_constants.json 兜底）加载 OpenDota /heroStats 真实分段位数据。"""
+    global _HERO_STATS_CACHE
+    if _HERO_STATS_CACHE is not None:
+        return _HERO_STATS_CACHE
+
+    by_id: Dict[int, Dict[str, Any]] = {}
+    hs_path = _REPO_ROOT / ".cache" / "hero_stats.json"
+    if hs_path.exists():
+        try:
+            raw_list = json.loads(hs_path.read_text(encoding="utf-8"))
+            if isinstance(raw_list, list):
+                for item in raw_list:
+                    if isinstance(item, dict) and "id" in item:
+                        by_id[int(item["id"])] = item
+        except Exception:
+            pass
+
+    if not by_id:
+        hc_path = _REPO_ROOT / ".cache" / "heroes_constants.json"
+        if hc_path.exists():
+            try:
+                raw_dict = json.loads(hc_path.read_text(encoding="utf-8"))
+                for _, item in (raw_dict or {}).items():
+                    if isinstance(item, dict) and "id" in item:
+                        by_id[int(item["id"])] = item
+            except Exception:
+                pass
+
+    _HERO_STATS_CACHE = by_id
+    return by_id
+
+
+def load_squad_hero_pool_and_against_stats() -> Tuple[Dict[int, Dict[str, Any]], List[Dict[str, Any]]]:
+    """
+    聚合车队真实英雄池（我方使用各英雄的局数与胜场）与 against_games / against_win（对阵敌方各英雄的局数与胜场）。
+    数据来源：
+    1) .cache/player_heroes_against.json（OpenDota /players/{id}/heroes 同步快照）
+    2) reports/raw_*.json（本地已复盘比赛真实对局记录）
+    """
+    roster_ids = set()
+    roster_path = _REPO_ROOT / "roster.json"
+    if roster_path.exists():
+        try:
+            r_data = json.loads(roster_path.read_text(encoding="utf-8"))
+            main_aid = int(r_data.get("main_account_id") or 0)
+            if main_aid > 0:
+                roster_ids.add(main_aid)
+            for k in (r_data.get("teammates") or {}).keys():
+                try:
+                    roster_ids.add(int(k))
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    squad_pool: Dict[int, Dict[str, Any]] = {}
+    against_map: Dict[int, Dict[str, int]] = {}
+
+    against_cache_path = _REPO_ROOT / ".cache" / "player_heroes_against.json"
+    if against_cache_path.exists():
+        try:
+            raw_ag = json.loads(against_cache_path.read_text(encoding="utf-8"))
+            rows = raw_ag if isinstance(raw_ag, list) else (raw_ag.get("heroes") or [])
+            for r in rows:
+                hid = int(r.get("hero_id") or 0)
+                if hid <= 0:
+                    continue
+                ag_g = int(r.get("against_games") or 0)
+                ag_w = int(r.get("against_win") or 0)
+                if ag_g > 0:
+                    slot = against_map.setdefault(hid, {"hero_id": hid, "against_games": 0, "against_win": 0})
+                    slot["against_games"] += ag_g
+                    slot["against_win"] += ag_w
+                own_g = int(r.get("games") or 0)
+                own_w = int(r.get("win") or 0)
+                if own_g > 0:
+                    zh = (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+                    sp = squad_pool.setdefault(hid, {"hero_id": hid, "hero_short_zh": zh, "games": 0, "wins": 0})
+                    sp["games"] += own_g
+                    sp["wins"] += own_w
+        except Exception:
+            pass
+
+    reports_dir = _REPO_ROOT / "reports"
+    if reports_dir.exists() and (not squad_pool or not against_map):
+        need_pool = not bool(squad_pool)
+        need_against = not bool(against_map)
+        for raw_p in sorted(reports_dir.glob("raw_*.json")):
+            try:
+                raw_m = json.loads(raw_p.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            players = raw_m.get("players") or []
+            if not players:
+                continue
+            rad_win = bool(raw_m.get("radiant_win"))
+            rad_cnt = sum(1 for pl in players if int(pl.get("player_slot") or 0) < 128 and int(pl.get("account_id") or 0) in roster_ids)
+            dire_cnt = sum(1 for pl in players if int(pl.get("player_slot") or 0) >= 128 and int(pl.get("account_id") or 0) in roster_ids)
+            squad_is_rad = rad_cnt >= dire_cnt
+            squad_won = rad_win if squad_is_rad else (not rad_win)
+            for pl in players:
+                hid = int(pl.get("hero_id") or 0)
+                if hid <= 0:
+                    continue
+                is_rad = int(pl.get("player_slot") or 0) < 128
+                if is_rad == squad_is_rad:
+                    if need_pool:
+                        zh = (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+                        sp = squad_pool.setdefault(hid, {"hero_id": hid, "hero_short_zh": zh, "games": 0, "wins": 0})
+                        sp["games"] += 1
+                        if squad_won:
+                            sp["wins"] += 1
+                else:
+                    if need_against:
+                        slot = against_map.setdefault(hid, {"hero_id": hid, "against_games": 0, "against_win": 0})
+                        slot["against_games"] += 1
+                        if squad_won:
+                            slot["against_win"] += 1
+
+    return squad_pool, list(against_map.values())
+
+
+def compute_real_bp_matchup_stats(
+    own_picks: List[Dict[str, Any]],
+    enemy_picks: List[Dict[str, Any]],
+    squad_hero_pool: Optional[Dict[int, Dict[str, Any]]] = None,
+    against_heroes_data: Optional[List[Dict[str, Any]]] = None,
+    hero_stats_by_id: Optional[Dict[int, Dict[str, Any]]] = None,
+    min_games: int = 10,
+) -> Dict[str, Any]:
+    """
+    F5 真实数据 BP 评估：
+    1. 车队自身全量英雄池（F1）：展示本方所选英雄的真实场次与胜率（<10 局 win_rate=None，标记 insufficient_sample=True）。
+    2. OpenDota /players/{id}/heroes 的 against_games 与 against_win：计算对阵敌方英雄的真实胜率及“车队最常输给谁”（遵守 against_games >= 10）。
+    3. OpenDota /heroStats：展示分段位（超凡/冠绝 6_pick+7_pick 与全分段 pub_pick）真实选取数与胜率。
+    """
+    hs_map = hero_stats_by_id if hero_stats_by_id is not None else load_hero_stats_by_id()
+    if squad_hero_pool is None or against_heroes_data is None:
+        default_pool, default_against = load_squad_hero_pool_and_against_stats()
+        if squad_hero_pool is None:
+            squad_hero_pool = default_pool
+        if against_heroes_data is None:
+            against_heroes_data = default_against
+
+    against_by_hid: Dict[int, Dict[str, int]] = {}
+    for row in against_heroes_data or []:
+        hid = int(row.get("hero_id") or 0)
+        if hid <= 0:
+            continue
+        slot = against_by_hid.setdefault(hid, {"hero_id": hid, "against_games": 0, "against_win": 0})
+        slot["against_games"] += int(row.get("against_games") or 0)
+        slot["against_win"] += int(row.get("against_win") or 0)
+
+    def _extract_bracket_stats(hid: int) -> Dict[str, Any]:
+        hs = hs_map.get(hid) or {}
+        b_pick = int(hs.get("6_pick") or 0) + int(hs.get("7_pick") or 0) + int(hs.get("8_pick") or 0)
+        b_win = int(hs.get("6_win") or 0) + int(hs.get("7_win") or 0) + int(hs.get("8_win") or 0)
+        pub_pick = int(hs.get("pub_pick") or 0) or b_pick
+        pub_win = int(hs.get("pub_win") or 0) or b_win
+        return {
+            "bracket_pick": b_pick if b_pick > 0 else None,
+            "bracket_win": b_win if b_pick > 0 else None,
+            "bracket_win_rate": round(b_win / b_pick * 100.0, 1) if b_pick > 0 else None,
+            "pub_pick": pub_pick if pub_pick > 0 else None,
+            "pub_win": pub_win if pub_pick > 0 else None,
+            "pub_win_rate": round(pub_win / pub_pick * 100.0, 1) if pub_pick > 0 else None,
         }
-    else:
-        HERO_ARCHETYPES[_hid]["timing_curve"] = _tc
-        HERO_ARCHETYPES[_hid]["timing_curve_zh"] = _tc_zh
-        for _k in ("early_rule", "mid_rule", "late_rule", "shard_desc", "core_item_hint"):
-            if _k not in HERO_ARCHETYPES[_hid] and _k in _full_prof:
-                HERO_ARCHETYPES[_hid][_k] = _full_prof[_k]
+
+    own_hero_real_stats: List[Dict[str, Any]] = []
+    for item in own_picks or []:
+        hid = int(item.get("hero_id") or 0)
+        if hid <= 0:
+            continue
+        pos = int(item.get("pos") or 1)
+        zh = item.get("hero_short_zh") or (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+        sp = (squad_hero_pool or {}).get(hid) or {}
+        g = int(sp.get("games") or 0)
+        w = int(sp.get("wins") or 0)
+        insuff = g < min_games
+        wr = round(w / g * 100.0, 1) if (g >= min_games and g > 0) else None
+        b_info = _extract_bracket_stats(hid)
+        own_hero_real_stats.append({
+            "pos": pos,
+            "hero_id": hid,
+            "hero_short_zh": zh,
+            "player_name": item.get("player_name") or item.get("personaname") or "",
+            "squad_games": g,
+            "squad_wins": w,
+            "squad_win_rate": wr,
+            "squad_insufficient_sample": insuff,
+            **b_info,
+        })
+
+    enemy_against_stats: List[Dict[str, Any]] = []
+    for item in enemy_picks or []:
+        hid = int(item.get("hero_id") or 0)
+        if hid <= 0:
+            continue
+        pos = int(item.get("pos") or 1)
+        zh = item.get("hero_short_zh") or (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+        ag = against_by_hid.get(hid) or {}
+        ag_g = int(ag.get("against_games") or 0)
+        ag_w = int(ag.get("against_win") or 0)
+        ag_l = max(0, ag_g - ag_w)
+        insuff = ag_g < min_games
+        ag_wr = round(ag_w / ag_g * 100.0, 1) if (ag_g >= min_games and ag_g > 0) else None
+        b_info = _extract_bracket_stats(hid)
+        enemy_against_stats.append({
+            "pos": pos,
+            "hero_id": hid,
+            "hero_short_zh": zh,
+            "against_games": ag_g,
+            "against_win": ag_w,
+            "against_losses": ag_l,
+            "against_win_rate": ag_wr,
+            "insufficient_sample": insuff,
+            **b_info,
+        })
+
+    most_lost_against_top: List[Dict[str, Any]] = []
+    for hid, ag in against_by_hid.items():
+        ag_g = int(ag.get("against_games") or 0)
+        ag_w = int(ag.get("against_win") or 0)
+        if ag_g < min_games:
+            continue
+        ag_l = max(0, ag_g - ag_w)
+        ag_wr = round(ag_w / ag_g * 100.0, 1)
+        zh = (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+        most_lost_against_top.append({
+            "hero_id": hid,
+            "hero_short_zh": zh,
+            "against_games": ag_g,
+            "against_win": ag_w,
+            "against_losses": ag_l,
+            "against_win_rate": ag_wr,
+            "loss_rate": round(100.0 - ag_wr, 1),
+            "insufficient_sample": False,
+        })
+    most_lost_against_top.sort(key=lambda x: (x["against_win_rate"], -x["against_losses"], -x["against_games"]))
+
+    return {
+        "min_games": min_games,
+        "own_hero_real_stats": own_hero_real_stats,
+        "enemy_against_stats": enemy_against_stats,
+        "most_lost_against_top": most_lost_against_top[:10],
+        "data_sources": {
+            "squad_history": "F1_player_matches_and_ledger",
+            "against_stats": "opendota_players_heroes_against",
+            "bracket_stats": "opendota_heroStats",
+            "uses_pro_only_matchups_endpoint": False,
+            "stratz_token_configured": bool(os.environ.get("STRATZ_API_TOKEN")),
+            "note": "OpenDota /heroes/{id}/matchups 仅统计职业比赛，不直接冒充路人局克制数据；克制统计采用车队真实交手 against_games/against_win（>=10局）与 /heroStats 分段位胜率。",
+        },
+    }
 
 
 def get_hero_archetype(p: Dict[str, Any]) -> Dict[str, Any]:
+    """基于 OpenDota /heroStats 官方角色与属性常量 + 126 英雄机制配置动态构建英雄画像（移除 59 英雄手写打分字典）。"""
     hid = int(p.get("hero_id") or 0)
     pos = int(p.get("pos") or 3)
-    short = p.get("hero_short_zh") or p.get("hero_name") or f"英雄#{hid}"
-    if hid in HERO_ARCHETYPES:
-        return HERO_ARCHETYPES[hid]
-    return get_hero_profile_126(hid, pos, short)
+    short = p.get("hero_short_zh") or p.get("hero_name") or (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+    prof = dict(get_hero_profile_126(hid, pos, short))
+    hs = load_hero_stats_by_id().get(hid) or {}
+    if hs:
+        roles_api = set(hs.get("roles") or [])
+        base_scores = dict(prof.get("scores") or {})
+        b_pick = int(hs.get("6_pick") or 0) + int(hs.get("7_pick") or 0)
+        b_win = int(hs.get("6_win") or 0) + int(hs.get("7_win") or 0)
+        wr_delta = ((b_win / b_pick) - 0.50) * 20.0 if b_pick > 0 else 0.0
+        str_gain = float(hs.get("str_gain") or 2.2)
+        agi_gain = float(hs.get("agi_gain") or 2.0)
+        int_gain = float(hs.get("int_gain") or 2.0)
+        for k in ("init", "burst", "tf", "push", "pick", "late", "tank"):
+            v = float(base_scores.get(k, 65)) + wr_delta
+            if k == "tank":
+                v += (str_gain - 2.4) * 3.0 + (4.0 if "Durable" in roles_api else 0.0)
+            elif k == "init":
+                v += 4.0 if "Initiator" in roles_api else 0.0
+            elif k == "push":
+                v += 4.0 if "Pusher" in roles_api else 0.0
+            elif k == "burst":
+                v += (int_gain - 2.2) * 1.5 + (3.0 if "Nuker" in roles_api else 0.0)
+            elif k == "late":
+                v += (agi_gain - 2.2) * 1.5 + (3.0 if "Carry" in roles_api else 0.0)
+            base_scores[k] = max(25, min(98, int(round(v))))
+        prof["scores"] = base_scores
+        prof["key_spells"] = list(prof.get("signature_abilities") or [])
+    return prof
 
 
 def compute_team_draft_scores(team_players: List[Dict[str, Any]], opp_players: Optional[List[Dict[str, Any]]] = None) -> Dict[str, int]:
@@ -916,36 +757,23 @@ def build_draft_and_combo_analysis(
             structural_flaws.append(flaw_msg)
             weaknesses.append(flaw_msg)
 
-        # 2) 先天克制检测
-        anti_split_opps = [opp_hids[h] for h in (87, 135, 71, 88) if h in opp_hids]
-        if ("weak_frontal_carry" in p1_arch.get("synergy_tags", []) or "weak_frontal_carry" in p2_arch.get("synergy_tags", [])) and len(anti_split_opps) >= 2:
-            cnt_msg = (
-                f"【机动带球与隐身抓单被敌方天克】敌方选出『{' + '.join(anti_split_opps)}』（如干扰者瞥视框大专抓TP/隐身、破晓辰星全图大招反打、司夜刺客隐身猎杀脆皮），"
-                f"我方『{p1['hero_short_zh']}/{p2['hero_short_zh']}』一旦单带或先手抓人未秒掉，极易被敌方全图支援与留人反杀。"
-            )
-            counter_disadvantages.append(cnt_msg)
-            weaknesses.append(cnt_msg)
-
-        anti_tank_opps = [opp_hids[h] for h in (76, 93) if h in opp_hids]
-        if len(frontliners) == 1 and len(anti_tank_opps) >= 1:
-            cnt_msg = (
-                f"【单前排『{frontliners[0]}』被敌方『{' + '.join(anti_tank_opps)}』克制】"
-                f"{'殁境神蚀者星体禁锢+纯粹法球' if 76 in opp_hids else ''}{'与' if (76 in opp_hids and 93 in opp_hids) else ''}{'斯拉克能量转移无限偷属性' if 93 in opp_hids else ''}"
-                f"天克我方唯一的单前排『{frontliners[0]}』，正面接团前排极难站住。"
-            )
-            counter_disadvantages.append(cnt_msg)
-            weaknesses.append(cnt_msg)
-
-        if 68 in opp_hids and any(h in own_hids for h in (59, 93, 73, 36)):
-            regen_own = [own_hids[h] for h in (59, 93, 73, 36) if h in own_hids]
-            cnt_msg = f"【回血核心被远古冰魄大招禁疗天克】我方『{'/'.join(regen_own)}』极度依赖回血续航，被敌方远古冰魄『冰晶爆轰』100%禁疗精准克制。"
-            counter_disadvantages.append(cnt_msg)
-            weaknesses.append(cnt_msg)
-
-        if 45 in own_hids and 8 in own_hids:
-            weaknesses.append(
-                "【技能机制存在『衰老』冲突隐患】帕格纳的『衰老(虚无)』虽然能救人并加深法系伤害，但若在主宰平A输出或无敌斩期间误套给目标，会直接导致主宰物理砍不出伤害！"
-            )
+        # 2) 基于真实历史交手 (against_games / against_win) 与分段位胜率的克制检测
+        real_bp_stats = compute_real_bp_matchup_stats(own_picks=own, enemy_picks=opp)
+        for opp_stat in real_bp_stats.get("enemy_against_stats") or []:
+            if not opp_stat.get("insufficient_sample") and opp_stat.get("against_win_rate") is not None:
+                if opp_stat["against_win_rate"] < 45.0:
+                    cnt_msg = (
+                        f"【真实交手克制数据】车队历史对阵『{opp_stat['hero_short_zh']}』累计 {opp_stat['against_games']} 局"
+                        f"（{opp_stat['against_win']}胜 {opp_stat['against_losses']}负，胜率 {opp_stat['against_win_rate']}%），需重点针对其核心节奏。"
+                    )
+                    counter_disadvantages.append(cnt_msg)
+                    weaknesses.append(cnt_msg)
+        for own_stat in real_bp_stats.get("own_hero_real_stats") or []:
+            if not own_stat.get("squad_insufficient_sample") and own_stat.get("squad_win_rate") is not None:
+                if own_stat["squad_win_rate"] >= 58.0:
+                    strengths.append(
+                        f"【车队真实高胜率英雄】『{own_stat['hero_short_zh']}』车队历史 {own_stat['squad_games']} 局 {own_stat['squad_wins']} 胜（胜率 {own_stat['squad_win_rate']}%）。"
+                    )
 
         # 2.5) 逐英雄扫描 5v5 敌我专属机制克制与反克制关系（优先挂载最核心的英雄克制与破局点）
         dur_min = float(match.get("duration") or 2400) / 60.0
@@ -1060,8 +888,8 @@ def build_draft_and_combo_analysis(
                 else f"在【{dim_names[worst1]} ({own_s[worst1]} vs {opp_s[worst1]})】与【{dim_names[worst2]} ({own_s[worst2]} vs {opp_s[worst2]})】上处于明显劣势"
             )
             counter_brief = (
-                f"，且极易被{opp_zh}『{'/'.join(anti_split_opps[:3])}』的反手留人与全图支援克制"
-                if anti_split_opps
+                f"，且历史交手胜率偏低（{counter_disadvantages[0]}）"
+                if counter_disadvantages
                 else ""
             )
             verdict_summary = (
@@ -1081,6 +909,7 @@ def build_draft_and_combo_analysis(
             "verdict_summary": verdict_summary,
             "strengths": strengths[:4],
             "weaknesses": weaknesses[:4],
+            "real_data_bp_stats": real_bp_stats,
             "combos": build_team_combos(own, opp, is_parsed=bool(match.get("version"))),
             "hero_matchup_matrix": hero_matchup_matrix,
             "heroes_brief": [
@@ -3598,7 +3427,7 @@ def build_pregame_strategy_plan(
         hinfo = heroes_by_id.get(hid) or {}
         short_zh = hinfo.get("short_zh") or item.get("hero_short_zh") or f"英雄#{hid}"
         player_name = item.get("player_name") or default_teammates.get(pos, f"{pos}号位队友")
-        arch = HERO_ARCHETYPES.get(hid) or {}
+        arch = get_hero_archetype({"hero_id": hid, "pos": pos, "hero_short_zh": short_zh})
         own_players.append({
             "player_slot": 128 + idx,
             "pos": pos,
@@ -3631,7 +3460,7 @@ def build_pregame_strategy_plan(
             continue
         hinfo = heroes_by_id.get(hid) or {}
         short_zh = hinfo.get("short_zh") or item.get("hero_short_zh") or f"英雄#{hid}"
-        arch = HERO_ARCHETYPES.get(hid) or {}
+        arch = get_hero_archetype({"hero_id": hid, "pos": pos, "hero_short_zh": short_zh})
         enemy_players.append({
             "player_slot": idx,
             "pos": pos,
@@ -3875,12 +3704,18 @@ def build_pregame_strategy_plan(
         f"📋 1~5号位专属打法、克制与出装：\n{role_lines_txt}"
     )
 
+    real_data_bp_stats = compute_real_bp_matchup_stats(
+        own_picks=own_players,
+        enemy_picks=enemy_players,
+    )
+
     return {
         "own_players": own_players,
         "enemy_players": enemy_players,
         "grade": grade_str,
         "overall_score": overall_score,
         "dimensions": draft_eval.get("scores") or {},
+        "real_data_bp_stats": real_data_bp_stats,
         "tempo_style": tempo_style,
         "win_condition": win_condition,
         "lose_condition": lose_condition,
