@@ -247,7 +247,7 @@ HERO_ARCHETYPES: Dict[int, Dict[str, Any]] = {
     },
     59: {  # 哈斯卡 Huskar
         "short": "哈斯卡",
-        "roles": ["狂战士之血残血极限魔抗攻速", "牺牲冲脸强换前排", "极怕远古冰魄禁疗与高物理爆发的节奏核"],
+        "roles": ["狂战士之血残血极限魔抗攻速", "牺牲冲脸强换前排", "极怕强禁疗与高物理爆发的节奏核"],
         "scores": {"init": 72, "burst": 86, "tf": 76, "push": 84, "pick": 78, "late": 64, "tank": 84},
         "dmg_type": "magical",
         "synergy_tags": ["frontline_tank", "regen_core"],
@@ -303,7 +303,7 @@ HERO_ARCHETYPES: Dict[int, Dict[str, Any]] = {
     },
     73: {  # 炼金术士 Alchemist
         "short": "炼金术士",
-        "roles": ["贪魔的贪婪超高速刷钱养A杖", "化学狂暴高回血中期平推肉盾", "极怕冰魂禁疗与拖入大后期"],
+        "roles": ["贪魔的贪婪超高速刷钱养A杖", "化学狂暴高回血中期平推肉盾", "极怕强禁疗与拖入大后期"],
         "scores": {"init": 72, "burst": 76, "tf": 82, "push": 88, "pick": 74, "late": 72, "tank": 88},
         "dmg_type": "physical",
         "synergy_tags": ["frontline_tank", "regen_core"],
@@ -331,7 +331,7 @@ HERO_ARCHETYPES: Dict[int, Dict[str, Any]] = {
     },
     87: {  # 干扰者 Disruptor
         "short": "干扰者",
-        "roles": ["瞥视千里抓回TP与隐身逃生英雄", "静态风暴+动能场框大范围沉默禁用物品", "天克先知/小骷髅等高机动游走核"],
+        "roles": ["瞥视千里抓回TP与隐身逃生英雄", "静态风暴+动能场框大范围沉默禁用物品", "天克全图带线与高机动游走核"],
         "scores": {"init": 90, "burst": 78, "tf": 94, "push": 38, "pick": 95, "late": 82, "tank": 34},
         "dmg_type": "magical",
         "synergy_tags": ["anti_split_push", "aoe_teamfight", "squishy_ranged"],
@@ -555,7 +555,7 @@ def build_team_combos(
             c_short = carry["hero_short_zh"]
             combos.append({
                 "title": f"【马格纳斯 + {c_short}】授予力量刷钱引擎 & 两极反转 (RP) 团灭链",
-                "window": "10:00–终局 · 刷钱提速与团战一锤定音",
+                "window": "10分钟至终局 · 刷钱提速与团战一锤定音",
                 "heroes": [
                     {"short": mag["hero_short_zh"], "img": mag["hero_img"], "pos": mag["pos"], "personaname": mag["personaname"]},
                     {"short": c_short, "img": carry["hero_img"], "pos": carry["pos"], "personaname": carry["personaname"]},
@@ -568,7 +568,6 @@ def build_team_combos(
                 "execution_audit": (
                     f"本局实战验货：马格纳斯整局释放『授予力量』{emp_cnt} 次、『两极反转』{rp_cnt} 次、『巨角冲撞』{skewer_cnt} 次；"
                     f"{c_short} 终局刷出 {carry['gpm']} GPM（净资产 {carry['net_worth']:,} 金，英雄伤害 {carry['hero_damage']:,}）。"
-                    f"{'这套猛犸赋能+大招体系在后期团战成功兑现，是翻盘的核心引擎。' if carry['gpm'] >= 600 and rp_cnt >= 4 else '但本局中期多次出现猛犸与大哥脱节、大招控住人时核心不在场的断档情况，配合熟练度还得练！'}"
                 ),
             })
 
@@ -582,7 +581,7 @@ def build_team_combos(
         moon_cnt = ab_count(pom, "月之暗面")
         combos.append({
             "title": "【莱恩瞬发戳羊 + 米拉娜穿云箭】长达 6 秒的无解点控秒人链",
-            "window": "02:00–25:00 · 线上击杀与月之暗面抓单节奏",
+            "window": "2–25分钟 · 线上击杀与月之暗面抓单节奏",
             "heroes": [
                 {"short": lion["hero_short_zh"], "img": lion["hero_img"], "pos": lion["pos"], "personaname": lion["personaname"]},
                 {"short": pom["hero_short_zh"], "img": pom["hero_img"], "pos": pom["pos"], "personaname": pom["personaname"]},
@@ -595,7 +594,7 @@ def build_team_combos(
             "execution_audit": (
                 f"本局实战验货：莱恩整局释放『裂地尖刺』{impale_cnt} 次、『妖术』{hex_cnt} 次；米拉娜射出『月神之箭』{arrow_cnt} 次、开启『月之暗面』{moon_cnt} 次。"
                 f"两人合计参战率分别为 {lion['kill_participation_pct']}% 与 {pom['kill_participation_pct']}%，"
-                f"但两人整局合计阵亡高达 {lion['deaths'] + pom['deaths']} 次（莱恩 {lion['deaths']} 死 / 米拉娜 {pom['deaths']} 死）——抓人链有亮眼击杀，但中期的走位脱节也给对面送足了提款！"
+                f"整局合计阵亡 {lion['deaths'] + pom['deaths']} 次（莱恩 {lion['deaths']} 死 / 米拉娜 {pom['deaths']} 死）。"
             ),
         })
 
@@ -611,17 +610,17 @@ def build_team_combos(
         if partner and partner["player_slot"] != pugna["player_slot"]:
             p_list.append({"short": partner["hero_short_zh"], "img": partner["hero_img"], "pos": partner["pos"], "personaname": partner["personaname"]})
         combos.append({
-            "title": "【帕格纳衰老增伤 + 幽冥守卫反法系 + 爆轰奶棒速推】阵地折磨与高地拆迁体系",
-            "window": "08:00–终局 · 推塔压制与限制敌方冲脸/高耗蓝法师",
+            "title": "【帕格纳衰老增伤 + 幽冥守卫反法系 + 爆轰速推】阵地折磨与高地拆迁体系",
+            "window": "8分钟至终局 · 推塔压制与限制敌方冲脸/高耗蓝法师",
             "heroes": p_list,
             "how_to_play": (
                 "1) 团战开打前：帕格纳必须先把『幽冥守卫(棒子)』插在侧翼树林或高坡后方，让敌方法师每放一个大招都先掉半管血；"
-                "2) 集火与救人：队友被敌方物理核（如幻影刺客）跳砍时立刻给『衰老(虚无)』废掉其物理平A；集火敌方时套『衰老』配合幽冥爆轰/莱恩一指瞬间融化（注意别在剑圣正要平A输出时乱给衰老！）；"
-                "3) 推塔：配合主宰『治疗守卫(奶棒)』站在兵线后无限『幽冥爆轰』磨塔，对面根本守不住外塔与兵营。"
+                "2) 集火与救人：队友被敌方物理核跳砍时立刻给『衰老(虚无)』废掉其物理平A；集火敌方时套『衰老』配合幽冥爆轰与队友法系爆发瞬间融化（注意别在己方物理核正要平A输出时乱给衰老！）；"
+                "3) 推塔：站在兵线后高频使用『幽冥爆轰』磨塔消耗防御塔血量。"
             ),
             "execution_audit": (
                 f"本局实战验货：帕格纳整局轰出 {blast_cnt} 次『幽冥爆轰』、插下 {ward_cnt} 根『幽冥守卫』、释放 {decrep_cnt} 次『衰老』与 {drain_cnt} 次『生命汲取』，"
-                f"打出全场最高的 {pugna['hero_damage']:,} 英雄伤害与 {pugna['tower_damage']:,} 建筑伤害！火力完全拉满，唯一瑕疵是中期无保命装时死得略多（整局 {pugna['deaths']} 死）。"
+                f"打出 {pugna['hero_damage']:,} 英雄伤害与 {pugna['tower_damage']:,} 建筑伤害（整局阵亡 {pugna['deaths']} 次）。"
             ),
         })
 
@@ -637,19 +636,19 @@ def build_team_combos(
             hero_chips.append({"short": setup_hero["hero_short_zh"], "img": setup_hero["hero_img"], "pos": setup_hero["pos"], "personaname": setup_hero["personaname"]})
         if wd_hero:
             hero_chips.append({"short": wd_hero["hero_short_zh"], "img": wd_hero["hero_img"], "pos": wd_hero["pos"], "personaname": wd_hero["personaname"]})
+        setup_name = setup_hero["hero_short_zh"] if setup_hero else "先手前排"
 
         combos.append({
-            "title": "【先手跳控 + 力丸烟幕沉默致盲 + 巫医诅咒守卫】完美关门打狗连招",
-            "window": "12:00–30:00 · 中期抓人与小规模团战",
+            "title": f"【{setup_name}先手跳控 + 力丸烟幕沉默致盲】关门打狗连招",
+            "window": "12–30分钟 · 中期抓人与小规模团战",
             "heroes": hero_chips,
             "how_to_play": (
                 "力丸本身没有硬眩晕，最怕对面直接推推/BKB或反手硬控！标准打法是："
-                "必须等龙骑士『神龙摆尾』或马格纳斯『两极反转/拱』先手定住人的瞬间，力丸立刻在目标脚下铺开『烟幕(雾)』使其沉默+丢失平A无法按出逃生技能，"
-                "同时巫医挂上『诅咒(Maledict)』插下『死亡守卫』，在烟幕持续时间内完成无伤猎杀。"
+                f"必须等 {setup_name} 先手定住人的瞬间，力丸立刻在目标脚下铺开『烟幕(雾)』使其沉默+丢失平A无法按出逃生技能，"
+                "在烟幕持续时间内配合队友爆发完成击杀。"
             ),
             "execution_audit": (
-                f"本局实战验货：力丸整局仅释放 {cloud_cnt} 次『烟幕』、{blink_cnt} 次『闪烁突袭』，打出 {riki['hero_damage']:,} 伤害（KDA {riki['kda']}）。"
-                f"由于前排跳刀时间拖后、视野被压，本局多次出现力丸和前排各自为战、烟幕罩不住关键人的尴尬局面。"
+                f"本局实战验货：力丸整局释放 {cloud_cnt} 次『烟幕』、{blink_cnt} 次『闪烁突袭』，打出 {riki['hero_damage']:,} 伤害（KDA {riki['kda']}）。"
             ),
         })
 
@@ -663,7 +662,7 @@ def build_team_combos(
         snot_cnt = ab_count(bb, "粘稠鼻涕")
         combos.append({
             "title": "【钢背兽前排叠刺减甲 + 龙骑士变龙跳晕推进】双肉平推抱团战车",
-            "window": "10:00–25:00 · 变龙逼塔与正面肉搏期",
+            "window": "10–25分钟 · 变龙逼塔与正面肉搏期",
             "heroes": [
                 {"short": dk["hero_short_zh"], "img": dk["hero_img"], "pos": dk["pos"], "personaname": dk["personaname"]},
                 {"short": bb["hero_short_zh"], "img": bb["hero_img"], "pos": bb["pos"], "personaname": bb["personaname"]},
@@ -675,8 +674,7 @@ def build_team_combos(
             ),
             "execution_audit": (
                 f"本局实战验货：龙骑士开启『古龙形态』{dragon_cnt} 次、『神龙摆尾』{stun_cnt} 次（建筑伤害 {dk['tower_damage']:,}）；"
-                f"钢背兽释放『刺针扫射』{quill_cnt} 次、『粘稠鼻涕』{snot_cnt} 次，但建筑伤害仅有 {bb['tower_damage']:,} 且阵亡 {bb['deaths']} 次——"
-                f"中期领先时没能利用双肉强势期一鼓作气拆光外塔控死肉山，给了对面喘息翻盘的机会。"
+                f"钢背兽释放『刺针扫射』{quill_cnt} 次、『粘稠鼻涕』{snot_cnt} 次（建筑伤害 {bb['tower_damage']:,}，阵亡 {bb['deaths']} 次）。"
             ),
         })
 
@@ -696,17 +694,16 @@ def build_team_combos(
         spot_name = spotter["hero_short_zh"] if spotter else "4号位游走"
         combos.append({
             "title": f"【{spot_name}隐身/视野锁头 + 幽鬼《暗影步》全图空降" + (" + 瘟疫法师《死神镰刀》斩杀】全球定点猎杀链" if necro else "】全图定点提款链"),
-            "window": "06:00–28:00 · 幽鬼提速发育与全图抓落单核心窗口",
+            "window": "6–28分钟 · 幽鬼提速发育与全图抓落单核心窗口",
             "heroes": hero_chips,
             "how_to_play": (
-                f"幽鬼天生对线弱、打野慢，绝不能死蹲野区等崩盘！标准打法是：由 {spot_name}（如司夜刺客开启《复仇》隐身深入敌方野区/后排）充当全图活体雷达，"
-                f"一旦破隐《穿刺》咬住敌方落单脆皮（如{'、'.join(opp_names[:2])}），幽鬼第一时间开启《暗影步》全图飞脸挂《幽鬼之刃》触发《荒芜》纯粹伤害，"
+                f"幽鬼天生对线弱、打野慢，绝不能死蹲野区等崩盘！标准打法是：由 {spot_name} 深入敌方野区/后排充当全图雷达，"
+                f"一旦先手留住敌方落单脆皮（如{'、'.join(opp_names[:2])}），幽鬼第一时间开启《暗影步》全图飞脸挂《幽鬼之刃》触发《荒芜》纯粹伤害，"
                 + ("同时瘟疫法师跟上《死神镰刀》定点斩杀加读秒，打完幽鬼立刻传回原线继续收兵！" if necro else "打完幽鬼立刻传回原线继续收兵，实现刷钱打架两不误！")
             ),
             "execution_audit": (
                 f"本局实战验货：{spot_name}释放先手控制 {spot_cnt} 次，幽鬼释放核心技能 {step_cnt} 次（KDA {spec['kda']}，参战率 {spec['kill_participation_pct']}%，GPM {spec['gpm']}）"
                 + (f"，瘟疫法师斩出《死神镰刀》{scythe_cnt} 次（KDA {necro['kda']}）。" if necro else "。")
-                + ("本局这套全球抓单链成功盘活了幽鬼前中期节奏！" if spec["kill_participation_pct"] >= 58 and spec["gpm"] >= 550 else "但本局前中期视野被压、先手脱节，幽鬼未能靠暗影步节奏滚起雪球，后期推塔伤害甚至断档！")
             ),
         })
 
@@ -724,7 +721,7 @@ def build_team_combos(
         cookie_cnt = ab_count(artillery_big, "驯良之饼") if int(artillery_big["hero_id"]) == 128 else 0
         combos.append({
             "title": f"【{init_big['pos']}号位{i_name}《{i_ult}》团控 + {artillery_big['pos']}号位{a_name}《{a_sig}》" + ("/《驯良之饼》】跨地形开团与重炮洗地链" if cookie_cnt or int(artillery_big["hero_id"]) == 128 else "】团控聚怪与重炮洗地链"),
-            "window": "12:00–终局 · 正面5v5团战与高地攻防决胜招",
+            "window": "12分钟至终局 · 正面5v5团战与高地攻防决胜招",
             "heroes": [
                 {"short": i_name, "img": init_big["hero_img"], "pos": init_big["pos"], "personaname": init_big["personaname"]},
                 {"short": a_name, "img": artillery_big["hero_img"], "pos": artillery_big["pos"], "personaname": artillery_big["personaname"]},
@@ -755,17 +752,18 @@ def build_team_combos(
             hero_chips.insert(0, {"short": supp_ctrl["hero_short_zh"], "img": supp_ctrl["hero_img"], "pos": supp_ctrl["pos"], "personaname": supp_ctrl["personaname"]})
         if weaver:
             hero_chips.append({"short": weaver["hero_short_zh"], "img": weaver["hero_img"], "pos": weaver["pos"], "personaname": weaver["personaname"]})
+        supp_name = supp_ctrl["hero_short_zh"] if supp_ctrl else "辅助"
         combos.append({
-            "title": f"【{supp_ctrl['hero_short_zh'] if supp_ctrl else '辅助'}瞬发举/羊先手 + 斯拉克《突袭》锁人偷属性" + (" + 编织者《凰虫》减甲收割】" if weaver else "】机动抓单链"),
-            "window": "08:00–28:00 · 抓单滚雪球与双黑雾拉扯",
+            "title": f"【{supp_name}瞬发先手 + 斯拉克《突袭》锁人偷属性" + (" + 编织者《凰虫》减甲收割】" if weaver else "】机动抓单链"),
+            "window": "8–28分钟 · 抓单滚雪球与双黑雾拉扯",
             "heroes": hero_chips,
             "how_to_play": (
-                "斯拉克《突袭》无指向性，极怕敌方走位扭开！必须由莱恩《妖术》或拉比克《隔空取物》瞬发先手定住目标，"
-                "斯拉克立刻接《突袭》拴住并开启《黑暗契约》，同时编织者释放《凰虫》群体减甲开视野，让斯拉克安全叠满《能量转移》敏捷层数。"
+                f"斯拉克《突袭》无指向性，极怕敌方走位扭开！必须由 {supp_name} 瞬发控制先手定住目标，"
+                "斯拉克立刻接《突袭》拴住并开启《黑暗契约》"
+                + ("，同时编织者释放《凰虫》群体减甲开视野，让斯拉克安全叠满《能量转移》敏捷层数。" if weaver else "，安全叠起《能量转移》敏捷层数。")
             ),
             "execution_audit": (
                 f"本局实战验货：斯拉克释放《突袭》{pounce_cnt} 次、《黑暗契约》{pact_cnt} 次（KDA {slark['kda']}，英雄伤害 {slark['hero_damage']:,}）。"
-                f"{'但本局面对敌方力丸烟幕与潮汐帕吉前排，先手辅助多次被秒，斯拉克与编织者正面根本无法完成收割！' if slark.get('deaths', 0) >= 8 else '双机动核心在拉扯战中打出了不错的切入配合。'}"
             ),
         })
 
@@ -794,7 +792,7 @@ def build_team_combos(
             p2_c = ab_count(p2, p2_s0)
             combos.append({
                 "title": f"【{p4['pos']}号位{p4['hero_short_zh']}《{p4_s0}》游走先手 + {p2['pos']}号位{p2['hero_short_zh']}《{p2_s0}》爆发收割】前中期节奏带动链",
-                "window": "04:00–20:00 · 河道控符与前中期开雾抓单窗口",
+                "window": "4–20分钟 · 河道控符与前中期开雾抓单窗口",
                 "heroes": [
                     {"short": p4["hero_short_zh"], "img": p4["hero_img"], "pos": p4["pos"], "personaname": p4["personaname"]},
                     {"short": p2["hero_short_zh"], "img": p2["hero_img"], "pos": p2["pos"], "personaname": p2["personaname"]},
@@ -817,7 +815,7 @@ def build_team_combos(
         p1_c = ab_count(p1, p1_s0)
         combos.append({
             "title": f"【{p3['pos']}号位{p3['hero_short_zh']}《{p3_s0}》破阵吃伤 + {p1['pos']}号位{p1['hero_short_zh']}《{p1_s0}》收割 + {p5['pos']}号位{p5['hero_short_zh']}《{p5_sigs[0]}》反手保核】决胜团战链",
-            "window": "18:00–终局 · 肉山团与高地攻坚战",
+            "window": "18分钟至终局 · 肉山团与高地攻坚战",
             "heroes": [
                 {"short": p3["hero_short_zh"], "img": p3["hero_img"], "pos": p3["pos"], "personaname": p3["personaname"]},
                 {"short": p1["hero_short_zh"], "img": p1["hero_img"], "pos": p1["pos"], "personaname": p1["personaname"]},
@@ -1236,7 +1234,7 @@ def enrich_phases_with_evaluations(
                     bad_list.append(f"前10分钟推塔伤害为 {td_gain:,}，对线期拿到优势后未能进一步磨掉敌方一塔血量。")
 
                 focus_tip = (
-                    f"前期改进重点（{hmp.get('early_rule') or ('注意 03:00 莲花与 06:00 河道动力符时间点，残血及时补大药别硬拼送人头。' if deaths >= 1 else '保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。')}）"
+                    f"前期改进重点（{hmp.get('early_rule') or ('注意 3 分钟莲花与 6 分钟河道动力符时间点，残血及时补大药别硬拼送人头。' if deaths >= 1 else '保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。')}）"
                 )
 
             # 2. 中期运营 (10:00–25:00) 规则诊断
@@ -1308,19 +1306,26 @@ def enrich_phases_with_evaluations(
                     f"中期改进重点（{hmp.get('mid_rule') or ('第一件关键装到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！' if (deaths >= 3 or mid_solos) else '中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。')}）"
                 )
 
-            # 3. 后期决策 (25:00–终局) 规则诊断
+            # 3. 后期决策 (25分钟–终局) 规则诊断
             else:
+                late_hdmg_pct_val = pt_meta.get("late_hdmg_share_pct")
+                late_gold_pct_val = pt_meta.get("late_gold_share_pct")
+                late_hdmg_pct_str = f"{late_hdmg_pct_val}%" if late_hdmg_pct_val is not None else "无数据"
+                late_gold_pct_str = f"{late_gold_pct_val}%" if late_gold_pct_val is not None else "无数据"
+                dmg_per_death_val = full_p.get("dmg_per_death")
+                dmg_per_death_str = f"{int(dmg_per_death_val):,}" if dmg_per_death_val is not None else "无数据"
+
                 if late_harvest_ok:
                     good_list.insert(
                         0,
-                        f"大核出山收割完全兑现（{t_curve_zh}）：前中期闭关刷钱成型后，25m+ 决胜期轰出 {hd_gain:,} 英雄伤害（占全队 {pt_meta.get('late_hdmg_share_pct', 25)}%）与 {td_gain:,} 推塔伤害，完美回馈团队空间！",
+                        f"大核出山收割完全兑现（{t_curve_zh}）：前中期闭关刷钱成型后，25m+ 决胜期轰出 {hd_gain:,} 英雄伤害（占全队 {late_hdmg_pct_str}）与 {td_gain:,} 推塔伤害，完美回馈团队空间！",
                     )
                 elif hd_gain >= 12000 or kills >= 5:
                     good_list.append(f"后期决战火力全开：单阶段砍下 {kills} 杀、轰出 {hd_gain:,} 英雄伤害" + (f"，更新 {items_str}。" if items_str else "。"))
                 if is_turret_ok:
                     good_list.insert(
                         0,
-                        f"炮台法核输出职责兑现（{t_curve_zh}）：后期顶着敌方强切入轰出 {hd_gain:,} 英雄伤害（全场每死换出 {full_p.get('dmg_per_death', 3000):,} 伤害），死前把爆发倾泻拉满！",
+                        f"炮台法核输出职责兑现（{t_curve_zh}）：后期顶着敌方强切入轰出 {hd_gain:,} 英雄伤害（全场每死换出 {dmg_per_death_str} 伤害），死前把爆发倾泻拉满！",
                     )
                 if hmp.get("sacrificial_initiator_fulfilled"):
                     good_list.insert(
@@ -1337,31 +1342,13 @@ def enrich_phases_with_evaluations(
                 if pos in (4, 5) and (obs_p + sen_p >= 5 or items_str):
                     good_list.append(f"后期辅助尽职尽责：插下 {obs_p} 假眼 / {sen_p} 真眼" + (f"，做出 {items_str} 保护核心。" if items_str else "。"))
 
-                if slark_audit:
-                    late_solos = [
-                        (f"{s.get('time_str')}(被{s.get('killer','敌方')}单抓)" if isinstance(s, dict) else str(s))
-                        for s in solo_picks
-                        if int(s.get("time", 0) if isinstance(s, dict) else int(str(s).split(":")[0]) * 60) >= 1500
-                    ]
+                if late_harvest_fail:
                     bad_list.insert(
                         0,
-                        f"后期机制与输出双重断档：25m+ 吃下全队最高 +{gold_gain:,} 金（占全队 {pt_meta.get('late_gold_share_pct', 26)}%），却仅打出 {hd_gain:,} 伤害（占全队 {pt_meta.get('late_hdmg_share_pct', 15.5)}% 全队倒数第一）；"
-                        + ("且整局拒出 1400 金核心魔晶《深海劫掠》（既救不了被抓队友也叠不起被动敏捷导致正面根本 A 不过人）！" if not slark_audit.get("has_shard") else "")
-                        + (f" 外加 {'、'.join(late_solos)} 单带无故被抓！" if late_solos else ""),
-                    )
-                elif phoenix_audit and phoenix_audit.get("shattered_cnt", 0) >= 2:
-                    late_shatters = [t for t in (phoenix_audit.get("shattered_times") or []) if int(t.split(":")[0]) >= 25]
-                    bad_list.insert(
-                        0,
-                        f"后期团战大招《超新星》变蛋再次被秒碎（{'、'.join(late_shatters) if late_shatters else '碎蛋率 ' + str(phoenix_audit.get('shatter_rate_pct')) + '%'}），全场仅放 {phoenix_audit.get('sun_ray_casts', 0)} 次《烈日炙烤》激光，后期团战零控制零奶量！",
-                    )
-                elif late_harvest_fail:
-                    bad_list.insert(
-                        0,
-                        f"后期出山收割断档（{t_curve_zh}）：25m+ 吃下 +{gold_gain:,} 金（占全队 {pt_meta.get('late_gold_share_pct', 22)}%），却仅打出 {hd_gain:,} 伤害（占全队 {pt_meta.get('late_hdmg_share_pct', 15)}%），前中期刷的资源未能转化为决胜团战收割！",
+                        f"后期出山收割断档（{t_curve_zh}）：25m+ 吃下 +{gold_gain:,} 金（占全队 {late_gold_pct_str}），却仅打出 {hd_gain:,} 伤害（占全队 {late_hdmg_pct_str}），前中期刷的资源未能转化为决胜团战收割！",
                     )
 
-                if hmp.get("missing_mandatory_shard") and not slark_audit:
+                if hmp.get("missing_mandatory_shard"):
                     bad_list.append(
                         f"整局拒出 1400 金质变魔晶（{hmp.get('shard_desc', '核心技能机制加强')}），后期团战少一个关键救人/切入/输出机制！"
                     )
@@ -1370,10 +1357,10 @@ def enrich_phases_with_evaluations(
                     good_list.append("后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！")
                 elif deaths >= 3 and not is_turret_ok and not hmp.get("sacrificial_initiator_fulfilled"):
                     bad_list.append(f"后期高价值人头连送 {deaths} 次（{', '.join(death_times[:4])}），后期每一次读秒都直接让队伍少人接团/守高地！")
-                elif deaths >= 1 and not slark_audit:
+                elif deaths >= 1:
                     bad_list.append(f"后期阵亡 {deaths} 次（{', '.join(death_times)}）" + (f"，并交出 {pp.get('buybacks',0)} 次买活。" if pp.get("buybacks") else "，后期高地/肉山团站位与自保装需更到位。"))
 
-                if pos in (1, 2, 3) and hd_gain < 9000 and not slark_audit and not late_harvest_fail and not hmp.get("sacrificial_initiator_fulfilled"):
+                if pos in (1, 2, 3) and hd_gain < 9000 and not late_harvest_fail and not hmp.get("sacrificial_initiator_fulfilled"):
                     bad_list.append(f"后期团战输出匮乏：25分钟后吃下 +{gold_gain:,} 金却仅打出 +{hd_gain:,} 英雄伤害，未能承担核心收割职责。")
 
                 if not good_list:
@@ -1381,12 +1368,8 @@ def enrich_phases_with_evaluations(
                 if not bad_list:
                     bad_list.append("后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。")
 
-                if slark_audit:
-                    focus_tip = "后期改进重点：小鱼人 20 分钟后必补 1400 金阿哈利姆魔晶《深海劫掠》（救被控制队友+双倍叠敏捷），面对蝴蝶/高闪避核心必补金箍棒/冰眼，后期严禁无视野单带被抓！"
-                elif phoenix_audit:
-                    focus_tip = "后期改进重点：凤凰变蛋前必须先用《烈火精灵》精准挂上敌方物理核减攻速，并卡高坡/树林视野或出希瓦/刷新球保蛋，拉扯期多开《烈日炙烤》激光！"
-                elif is_turret_ok:
-                    focus_tip = "后期改进重点：炮台法核输出已拉满，面对先知发芽框人+帕克梦境缠绕务必把隐刀升级为《飓风长戟（大推推）》推开树圈自救！"
+                if is_turret_ok:
+                    focus_tip = "后期改进重点：炮台法核输出已拉满，面对敌方强留人/框人控制时可补出《飓风长戟（大推推）》推开自己自救！"
                 elif hmp.get("late_rule"):
                     focus_tip = f"后期改进重点（{hmp.get('late_rule')}）"
                 else:
@@ -1443,9 +1426,9 @@ def enrich_phases_with_evaluations(
                     else "三路对线虽然稳住，但双辅助游走中路与抢 6 分钟河道神符的联动压制力还不够紧凑。"
                 )
                 t_action = (
-                    "【前期团队怎么进步 (00:00–10:00)】：① 03:00 边路莲花与 06:00/08:00 河道动力符必须由 4 号位提前 15 秒靠过去配合中单控下；"
+                    "【前期团队怎么进步 (0–10分钟)】：① 3分钟边路莲花与 6分钟/8分钟河道动力符必须由 4 号位提前 15 秒靠过去配合中单控下；"
                     "② 优势路 5 号位前 5 分钟以拉野消兵、保 1 号位无解肥补刀为第一铁律，别盲目TP支援导致大哥线被冲；"
-                    "③ 一旦中单或三号位到 6 级有大招，立刻带帕格纳/辅助推掉敌方优势路一塔解放野区。"
+                    "③ 一旦中单或三号位到 6 级有大招，立刻带辅助推掉敌方优势路一塔解放野区。"
                 )
             elif pkey == "mid":
                 t_good = (
@@ -1458,7 +1441,7 @@ def enrich_phases_with_evaluations(
                     else f"中期拿到击杀优势后推塔转化率偏低（阶段全队建筑伤害 {s_td:,}），没有在 20 分钟前早早控下一代肉山盾锁死胜局。"
                 )
                 t_action = (
-                    "【中期团队怎么进步 (10:00–25:00)】：① 明确中期带队核心：当 1 号位正在刷狂战/分身/BKB 关键成型点时，2/3/4/5 号位要么开雾去抓敌方落单刷钱核，要么蹲在己方刷钱大哥侧翼高坡反蹲，绝不无脑 4 打 5 强冲；"
+                    "【中期团队怎么进步 (10–25分钟)】：① 明确中期带队核心：当 1 号位正在刷狂战/分身/BKB 关键成型点时，2/3/4/5 号位要么开雾去抓敌方落单刷钱核，要么蹲在己方刷钱大哥侧翼高坡反蹲，绝不无脑 4 打 5 强冲；"
                     "② 3 号位跳刀出炉的第一时间必须立刻买雾打第一波信息差先手，打赢顺势拔掉敌方中一塔与优势路一塔；"
                     "③ 20~24 分钟一旦抓死敌方双核或大招流辅助，全队立刻集合打掉第一代肉山，拒绝散开各刷各的野！"
                 )
@@ -1473,8 +1456,8 @@ def enrich_phases_with_evaluations(
                     "上高地或压三塔时存在抗塔过深、技能交完不果断后撤被敌方买活反打的惊险失误！"
                 )
                 t_action = (
-                    "【后期团队怎么进步 (25:00–终局)】：① 25 分钟后全员严守『买活钱红线』，差 500 金以内买大件时优先留买活；"
-                    "② 上高地前必须确保带盾（或敌方至少减员 2 人且无买活），由带盾核+奶棒/爆轰磨塔，猛犸/莱恩蹲在后面专门断对面冲高地反扑；"
+                    "【后期团队怎么进步 (25分钟至终局)】：① 25 分钟后全员严守『买活钱红线』，差 500 金以内买大件时优先留买活；"
+                    "② 上高地前必须确保带盾（或敌方至少减员 2 人且无买活），由带盾核心上前拆塔，后排控制蹲在台阶下专门断对面冲高地反扑；"
                     "③ 破掉一路高地或逼出对面双买活后，全队立刻语音喊撤退转打肉山/控魔晶，绝不残血赖在敌方高地上送翻盘！"
                 )
 
@@ -3600,14 +3583,14 @@ def build_pregame_strategy_plan(
     )
 
     early_plan = {
-        "title": "前期对线与抢符 (00:00 – 10:00) · 英雄专属对线化学反应 & 击杀窗口",
+        "title": "前期对线与抢符 (0–10分钟) · 英雄专属对线化学反应 & 击杀窗口",
         "lanes": [
             {
                 "lane": f"优势路 (1号位 + 5号位){opp_offlane_str}",
                 "heroes": f"{p1['hero_short_zh']} ({p1['personaname']}) + {p5['hero_short_zh']} ({p5['personaname']})",
                 "tasks": [
                     f"【英雄对线机制】{p1['hero_short_zh']}（{prof1.get('early_rule','稳住正反补')}）搭档 {p5['hero_short_zh']}（招牌：{'/'.join((prof5.get('signature_abilities') or ['控制消耗'])[:2])}），2级优先抢远程兵找第一波耗血/击杀窗口。",
-                    f"01:15 / 02:15 {p5['hero_short_zh']} 准时拉小野消兵线并封死敌方大野，03:00 / 06:00 提前卡位抢莲花池。",
+                    f"第1–2分钟 {p5['hero_short_zh']} 准时拉小野消兵线并封死敌方大野，3分钟 / 6分钟提前卡位抢莲花池。",
                     f"10分钟硬指标：{p1['hero_short_zh']} 正补 ≥ 55 刀、阵亡 ≤ 1 次。",
                 ],
             },
@@ -3616,7 +3599,7 @@ def build_pregame_strategy_plan(
                 "heroes": f"{p2['hero_short_zh']} ({p2['personaname']})",
                 "tasks": [
                     f"【中单英雄机制】{p2['hero_short_zh']}：{prof2.get('early_rule','利用核心技能推线控符')}。",
-                    f"01:50 / 03:50 提前用《{(prof2.get('signature_abilities') or ['AOE技能'])[0]}》推线进塔控水符；06:00 配合 4号位 {p4['hero_short_zh']} 控第一个强化神符提速抓边。",
+                    f"2分钟 / 4分钟前提前用《{(prof2.get('signature_abilities') or ['AOE技能'])[0]}》推线进塔控水符；6分钟配合 4号位 {p4['hero_short_zh']} 控第一个强化神符提速抓边。",
                 ],
             },
             {
@@ -3624,23 +3607,23 @@ def build_pregame_strategy_plan(
                 "heroes": f"{p3['hero_short_zh']} ({p3['personaname']}) + {p4['hero_short_zh']} ({p4['personaname']})",
                 "tasks": [
                     f"【双人施压组合】{p3['hero_short_zh']}（{prof3.get('early_rule','占线抗压消耗')}）配合 {p4['hero_short_zh']}（招牌：{'/'.join((prof4.get('signature_abilities') or ['游走控制'])[:2])}）强压敌方1号位补刀。",
-                    f"{p4['hero_short_zh']} 开局封敌方小野，04:00 / 06:00 准时去中路帮 {p2['hero_short_zh']} 抢符；07:00 必控经验神龛(智慧符)。",
+                    f"{p4['hero_short_zh']} 开局封敌方小野，4分钟 / 6分钟准时去中路帮 {p2['hero_short_zh']} 抢符；7分钟必控经验神龛(智慧符)。",
                 ],
             },
         ],
     }
 
     mid_plan = {
-        "title": "中期抱团与控图 (10:00 – 25:00) · 英雄强势期兑现 & 抓谁推哪",
+        "title": "中期抱团与控图 (10–25分钟) · 英雄强势期兑现 & 抓谁推哪",
         "key_timings": [
-            f"【12:00 – 15:00 第一波大节奏】围绕 3号位 {p3['hero_short_zh']}（{prof3.get('mid_rule','第一件先手装')}）与 2号位 {p2['hero_short_zh']}，由 {p5['hero_short_zh']} 买雾叫齐 2/3/4/5 四人抓敌方核心并拔掉中一塔！",
-            f"【15:00 – 20:00 英雄发育与控图】{p1['hero_short_zh']} 执行专属中期方针：{prof1.get('mid_rule','高效刷出核心三件套')}；{p4['hero_short_zh']}+{p5['hero_short_zh']} 将假眼铺入敌方主野区高台。",
-            f"【20:00 命脉魔晶与一代肉山盾】20:00 准时控下痛苦魔方（尤其关注本队质变魔晶），抓死敌方任一核心后立刻五人进肉山坑为 {p1['hero_short_zh']}/{p2['hero_short_zh']} 控下一代不朽盾！",
+            f"【12–15分钟 第一波大节奏】围绕 3号位 {p3['hero_short_zh']}（{prof3.get('mid_rule','第一件先手装')}）与 2号位 {p2['hero_short_zh']}，由 {p5['hero_short_zh']} 买雾叫齐 2/3/4/5 四人抓敌方核心并拔掉中一塔！",
+            f"【15–20分钟 英雄发育与控图】{p1['hero_short_zh']} 执行专属中期方针：{prof1.get('mid_rule','高效刷出核心三件套')}；{p4['hero_short_zh']}+{p5['hero_short_zh']} 将假眼铺入敌方主野区高台。",
+            f"【20分钟 命脉魔晶与一代肉山盾】20分钟准时控下痛苦魔方（尤其关注本队质变魔晶），抓死敌方任一核心后立刻五人进肉山坑为 {p1['hero_short_zh']}/{p2['hero_short_zh']} 控下一代不朽盾！",
         ],
     }
 
     late_plan = {
-        "title": "后期盾团与高地终结 (25:00+) · 集火优先级 & 买活铁律",
+        "title": "后期盾团与高地终结 (25分钟后) · 集火优先级 & 买活铁律",
         "rules": [
             f"【团战集火优先级】{target_priority_text}",
             f"【大核决胜准则】{p1['hero_short_zh']}：{prof1.get('late_rule','带BKB与核心装完成正面收割')}；{p3['hero_short_zh']}：{prof3.get('late_rule','顶前排先手开团吸收第一波集火')}。",

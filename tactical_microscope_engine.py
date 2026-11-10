@@ -666,7 +666,7 @@ def build_tactical_microscope(
             ray_msg = (
                 f"☀️《烈日炙烤(激光) & 烈火精灵》机制审计：{duration_min:.0f} 分钟比赛仅开启《烈日炙烤》{ray_casts} 次（造成 {ray_dmg:,} 伤害、全队治疗仅 {total_heal:,} 点），"
                 f"召唤《烈火精灵》{spirits_casts} 次（造成 {di.get('phoenix_fire_spirits', 0):,} 伤害）、《伊卡洛斯之翼》{dive_casts} 次。"
-                + ("⚠️ 凤凰最核心的远程百分比灼烧/奶人神技《烈日炙烤》全场只按了寥寥几次，打团既没在后排拉激光融化前排，变蛋前也没用烈火精灵糊住先知/酒仙攻速！" if ray_grade == "bad" else "")
+                + ("⚠️ 凤凰最核心的远程百分比灼烧/奶人神技《烈日炙烤》全场只按了寥寥几次，打团既没在后排拉激光融化前排，变蛋前也没用烈火精灵糊住敌方物理核心攻速！" if ray_grade == "bad" else "")
             )
             headline_badges.insert(1, {
                 "text": f"烈日炙烤: 仅{ray_casts}次(奶{total_heal:,})",
@@ -709,7 +709,7 @@ def build_tactical_microscope(
                 f"🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》{dance_casts} 次、《黑暗契约》{pact_casts} 次、《突袭》{pounce_casts} 放 {pounce_hits} 中；"
                 + (
                     f"🚨 致命机制缺失：比赛打到 {duration_min:.0f} 分钟竟然未购买仅 1,400 金的阿哈利姆魔晶《深海劫掠》（0 次释放）！"
-                    f"既少了 3 秒群体黑雾救队友（原本可完美克制屠夫咬与帕克大），自己也少了一团黑雾拉扯叠《能量转移》敏捷层数，导致正面根本 A 不过敌方大哥！"
+                    f"既少了 3 秒群体黑雾救队友（原本可化解敌方点控留人），自己也少了一团黑雾拉扯叠《能量转移》敏捷层数，导致正面根本 A 不过敌方大哥！"
                     if not has_shard and duration_min >= 22
                     else f"魔晶《深海劫掠》释放 {shroud_casts} 次掩护队友。"
                 )
@@ -1436,7 +1436,7 @@ def build_tactical_microscope(
         if own_lotus_total < opp_lotus_total:
             lotus_verdict = (
                 f"⚠️ 边路莲花池被压制：本方全队仅吃下 {own_lotus_total} 朵疗伤莲花（{'、'.join(own_lotus_breakdown) or '全员0莲花'}），"
-                f"而敌方抢下了 {opp_lotus_total} 朵莲花（{'、'.join(opp_lotus_breakdown)}）！03:00 / 06:00 / 09:00 整点莲花池争夺吃亏。"
+                f"而敌方抢下了 {opp_lotus_total} 朵莲花（{'、'.join(opp_lotus_breakdown)}）！3分钟 / 6分钟 / 9分钟整点莲花池争夺吃亏。"
             )
         elif own_lotus_total > opp_lotus_total:
             lotus_verdict = (
@@ -1499,7 +1499,7 @@ def build_tactical_microscope(
         if own_wisdom_cnt >= opp_wisdom_cnt and own_wisdom_cnt > 0:
             wisdom_verdict = f"✓ 智慧经验符控制占优：本方抢下 {own_wisdom_cnt} 颗经验符 vs 敌方 {opp_wisdom_cnt} 颗，辅助等级与天赋节点没有落入下风。"
         else:
-            wisdom_verdict = f"⚠️ 智慧经验符落后：本方仅吃到 {own_wisdom_cnt} 颗经验符 vs 敌方吃到 {opp_wisdom_cnt} 颗！07:00 与 14:00 必须提前 15 秒去劣势路祭坛蹲守经验符。"
+            wisdom_verdict = f"⚠️ 智慧经验符落后：本方仅吃到 {own_wisdom_cnt} 颗经验符 vs 敌方吃到 {opp_wisdom_cnt} 颗！7分钟与14分钟必须提前 15 秒去劣势路祭坛蹲守经验符。"
 
         return {
             "side": side_key,
@@ -3316,7 +3316,7 @@ def build_tactical_microscope(
                     "enemy_threats": "、".join(purge_threats[:4]),
                     "our_response": "、".join(purge_owners) if purge_owners else "🚨 全队 0 否决坠饰 / 0 驱散装",
                     "grade": "bad" if len(purge_threats) >= 2 else "warn",
-                    "verdict": f"🚨 抓不死人根源：敌方拥有【{'、'.join(purge_threats[:3])}】多层救人拉扯，但我方物理核心整局 0 把【否决坠饰(Nullifier)】，导致切后排屡屡被绿杖/吹风/微光溜走！",
+                    "verdict": f"🚨 进攻驱散缺失：敌方拥有【{'、'.join(purge_threats[:3])}】等保命装，但我方物理核心整局 0 把【否决坠饰(Nullifier)】，缺乏进攻驱散手段限制敌方救人装！",
                 })
 
         # 4) 🛡️ 团队解控与辅助救人装审计（BKB/分身/微光/推推/莲花）
@@ -3426,7 +3426,7 @@ def build_tactical_microscope(
                     fix_list.append(f"第二/三件大件必须果断锁下【黑皇杖(BKB)】保证团战输出环境（推荐路线：{core_hint_str}）")
                 elif (not needs_bkb_by_prof) and int(fp.get("deaths") or 0) >= 9 and not any(k in seen_major for k in ("black_king_bar", "lotus_orb", "cyclone", "wind_waker", "aeon_disk", "pipe", "heavens_halberd")):
                     issues_list.append(f"🚫 阵亡 {fp.get('deaths')} 次却缺乏解控/自救装（无吹风/莲花/BKB/盘子）")
-                    fix_list.append(f"面对敌方高频沉默/打断，应补出【吹风杖 / 清莲宝珠 / BKB】保证变蛋或技能释放（推荐路线：{core_hint_str}）")
+                    fix_list.append(f"面对敌方高频沉默/打断，应补出【吹风杖 / 清莲宝珠 / BKB】保证技能释放与生存容错（推荐路线：{core_hint_str}）")
                 elif has_bkb:
                     bkb_sec = next((x["time_sec"] for x in major_timeline if x["key"] == "black_king_bar"), 0)
                     if bkb_sec >= 2100 and int(fp.get("deaths") or 0) >= 6:
@@ -3926,7 +3926,7 @@ def build_tactical_microscope(
                     elif b_norm == "phoenix_sun_ray":
                         skill_build_grade = "warn"
                         skill_build_flags.append(
-                            f"⚠️ 偏科加点抓包：前 {learned_lv - 1} 级完全不学三技能【{b_zh}】（把小鸟和F飞全点满），直到 L{learned_lv} 才点出 1 级激光，前中期打对面帕吉+酒仙双肉盾缺失百分比灼烧与远距离救人奶量！"
+                            f"⚠️ 偏科加点抓包：前 {learned_lv - 1} 级完全不学三技能【{b_zh}】（把小鸟和F飞全点满），直到 L{learned_lv} 才点出 1 级激光，前中期面对敌方前排肉盾缺失百分比灼烧与远距离救人奶量！"
                         )
                     else:
                         if skill_build_grade == "good":
@@ -3940,11 +3940,12 @@ def build_tactical_microscope(
                 pts_by_9 = skill_counts_by_lvl9.get("ringmaster_the_box", 0)
                 if pts_by_9 == 1:
                     skill_build_flags.append(
-                        "💡 技能取舍：前 11 级仅保留 1 级【逃生暗箱(救人箱)】（主皮鞭副飞刀打消耗），中期救人箱冷却偏长、施法距离较短。"
+                        f"💡 技能取舍：前 9 级仅保留 {pts_by_9} 级【逃生暗箱(救人箱)】（主【{skill_route_summary_zh}】打消耗），中期救人箱冷却偏长、施法距离较短。"
                     )
             if h_key == "slark" and skill_counts_by_lvl9.get("slark_saltwater_shiv", 0) <= 1:
+                shiv_pts_9 = skill_counts_by_lvl9.get("slark_saltwater_shiv", 0)
                 skill_build_flags.append(
-                    "💡 加点路线：L7 点满【黑暗契约】、L10 点满【突袭】，前 11 级仅留 1 级【能量转移】（刷钱快但前中期每次平A偷属性持续时间短）。"
+                    f"💡 加点路线：{skill_route_summary_zh}，前 9 级仅点 {shiv_pts_9} 级【能量转移】（刷钱快但前中期每次平A偷属性持续时间短）。"
                 )
             if early_attr_pts >= 2:
                 skill_build_issues_cnt += 1

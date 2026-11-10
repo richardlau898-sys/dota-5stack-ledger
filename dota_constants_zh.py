@@ -1146,7 +1146,10 @@ def sanitize_mixed_english_text(text: str) -> str:
     # 1. 替换已知的英文词组技能名
     for eng_phrase, zh_val in LEGACY_ENGLISH_TO_ZH_MAP.items():
         if eng_phrase in out:
-            out = out.replace(eng_phrase, zh_val)
+            if eng_phrase.isascii() and eng_phrase.isalpha() and len(eng_phrase) <= 4:
+                out = re.sub(rf"(?<![A-Za-z0-9_]){re.escape(eng_phrase)}(?![A-Za-z0-9_])", zh_val, out)
+            else:
+                out = out.replace(eng_phrase, zh_val)
     # 2. 替换 ABILITIES_ZH 与 ITEMS_ZH 中的 snake_case key
     if "_" in out or any(k in out for k in ("tpscroll", "famango", "clarity", "tango", "flask", "dagon")):
         for ak, azh in ABILITIES_ZH.items():

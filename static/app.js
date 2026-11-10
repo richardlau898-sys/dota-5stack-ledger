@@ -2029,7 +2029,7 @@ function buildStructuredFullReportHtml(report) {
       <section class="fs-chapter">
         <div class="fs-chapter-head">
           <span class="fs-chapter-num">第一章</span>
-          <h2>赛后总账与四阶段复盘矩阵（00:00 对线 → 中期节奏 → 决胜团战 → 全局硬实力）</h2>
+          <h2>赛后总账与四阶段复盘矩阵（0–10分钟对线 → 中期节奏 → 决胜团战 → 全局硬实力）</h2>
         </div>
         ${
           grok.summary
@@ -3281,7 +3281,7 @@ async function downloadStructuredReportPdf() {
     // =========================================================================
     drawChapterHeader(
       "第一章",
-      "赛后总账与四阶段复盘矩阵（00:00 对线期 → 10:00-25:00 中期节奏 → 25:00-终局 决胜团战 → 全局硬实力）"
+      "赛后总账与四阶段复盘矩阵（0–10分钟对线期 → 10–25分钟中期节奏 → 25分钟至终局决胜团战 → 全局硬实力）"
     );
     const stages = report.match_narrative?.stages || [];
     const stageRows = stages.map((s, idx) => [
@@ -10259,7 +10259,7 @@ function analyzePlayerItemizationIntelligence(p, report) {
     const regenTargets = oppHighRegenHeroes.map((o) => o.hero_short_zh).join(" / ") || "敌方力量前排";
     badges.push("🏺 大骨灰克制回血");
     highlights.push(
-      `🏺 <b>灵性克制针对装（${vesselItem.time_str} 魂之灵瓮·大骨灰）：</b>针对敌方 <b>${regenTargets}</b> 的高血量高恢复特性，18分钟准时合成大骨灰削减回血并附带百分比灼烧，克制思路非常清晰！`
+      `🏺 <b>灵性克制针对装（${vesselItem.time_str} 魂之灵瓮·大骨灰）：</b>针对敌方 <b>${regenTargets}</b> 的高血量高恢复特性，于 ${vesselItem.time_str} 合成大骨灰削减回血并附带百分比灼烧，克制思路非常清晰！`
     );
   }
 
@@ -10275,7 +10275,7 @@ function analyzePlayerItemizationIntelligence(p, report) {
   const atosItem = hasItemMatch(/阿托斯之棍|rod_of_atos|缚灵索/i);
   if (atosItem && heroShort === "天怒法师") {
     highlights.push(
-      `🎯 <b>节奏捕猎核心装（${atosItem.time_str} 阿托斯之棍）：</b>11分钟极速裸出阿托斯配合上古封印+神秘之耀，前中期连续单抓敌法师与帕吉打开局面。`
+      `🎯 <b>节奏捕猎核心装（${atosItem.time_str} 阿托斯之棍）：</b>于 ${atosItem.time_str} 做出阿托斯配合上古封印+神秘之耀提供远程缠绕留人。`
     );
   }
 
@@ -10411,9 +10411,9 @@ function analyzePlayerItemizationIntelligence(p, report) {
       warnings.push(
         `🚨 <b>辅助贪心毒瘤点金预警（${midasItem.time_str} 迈达斯之手）：</b>身为 <b>${pos}号位${heroShort}</b> 在中期花 2200 金裸出 <b>点金手(${midasItem.time_str})</b>${
           glimmerItem
-            ? `，导致第一件团队救人装 <b>微光披风(${glimmerItem.time_str})</b> 拖到将近30分钟才成型`
+            ? `，导致第一件团队救人装 <b>微光披风(${glimmerItem.time_str})</b> 成型延后`
             : "，整局 0 微光 0 推推"
-        }，且面对敌方 <b>${kiteThreats} + 敌法师</b> 全场 <b>0 原力法杖(推推棒)</b>，属于典型的五号位贪发育出装（所幸后期36:22憋出羊刀将功补过）。`
+        }，且面对敌方 <b>${kiteThreats}</b> 全场 <b>0 原力法杖(推推棒)</b>，属于典型的辅助贪发育出装。`
       );
     }
 
@@ -11128,8 +11128,10 @@ function computeStageRankings(stageKey, report) {
       }
       if (tfAbsent > 0 && pos !== 1) badParts.push(`团战缺席/边缘OB <b>${tfAbsent} 波</b>`);
       if (zeroTp) badParts.push(`整局主动买 <b>0 张 TP</b>`);
-      if (pos === 5 && (mp.items_bought || []).some((it) => String(it.zh_name || "").includes("点金手"))) {
-        badParts.push(`五号位中期裸出点金手(21:21)，略微拖慢团队微光/推推救人装成型节奏`);
+      const midasBought = (mp.items_bought || []).find((it) => String(it.zh_name || "").includes("点金手"));
+      if (pos === 5 && midasBought) {
+        const mTime = midasBought.time_str ? `(${midasBought.time_str})` : "";
+        badParts.push(`五号位中期裸出点金手${mTime}，拖慢团队微光/推推救人装成型节奏`);
       }
       badReason = badParts.join("；") || (d > 0 ? `中期阵亡 ${d} 次，需注意抱团走位` : "中期资源转化与节奏稳健");
     } else if (stageKey === "late") {
@@ -11719,7 +11721,7 @@ function buildRichFourStageCardsHtml(report) {
       stageKey: "lane",
       icon: "🌅",
       badge: "阶段 1 · 前期",
-      title: "00:00 - 10:00 对线期三路表现 · 游走Gank与抢符拉野",
+      title: "0–10分钟 对线期三路表现 · 游走Gank与抢符拉野",
       bullets: grokEarlyBullet
         ? [grokEarlyBullet, laneOverviewBullet, resourcesBullet]
         : [laneOverviewBullet, ...laneMatchupBullets, roamAndGankBullet, resourcesBullet],
@@ -11728,7 +11730,7 @@ function buildRichFourStageCardsHtml(report) {
       stageKey: "mid",
       icon: "⚔️",
       badge: "阶段 2 · 中期",
-      title: "10:00 - 25:00 中期资源转化 · 主动抓人 · 英雄特性推塔与开雾齐整度",
+      title: "10–25分钟 中期资源转化 · 主动抓人 · 英雄特性推塔与开雾齐整度",
       bullets: grokMidBullet
         ? [grokMidBullet, midOverviewBullet, smokeBullet]
         : [midOverviewBullet, midPushAndGankBullet, farmingBullet, smokeBullet, attendanceBullet],
@@ -11737,7 +11739,7 @@ function buildRichFourStageCardsHtml(report) {
       stageKey: "late",
       icon: "🔥",
       badge: "阶段 3 · 后期",
-      title: "25:00 - 终局 决胜团战 · 控盾推高地转化 · 买活博弈与刷钱兑现",
+      title: "25分钟至终局 决胜团战 · 控盾推高地转化 · 买活博弈与刷钱兑现",
       bullets: grokLateBullet
         ? [grokLateBullet, roshAndPickoffBullet, buybackAndSaveBullet]
         : [lateOverviewBullet, peakTfBullet, roshAndPickoffBullet, buybackAndSaveBullet],
@@ -12386,15 +12388,15 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       ${grokDeepVerdictBoxHtml}
       ${heroRoleMatchupStripHtml}
       <div class="story-act-row">
-        <span class="story-act-badge early">🌅 第一幕 · 序章对线 (00:00–10:00)</span>
+        <span class="story-act-badge early">🌅 第一幕 · 序章对线 (0–10分钟)</span>
         <p class="story-act-text">${act1Story}</p>
       </div>
       <div class="story-act-row">
-        <span class="story-act-badge mid">⚔️ 第二幕 · 中盘风云 (10:00–25:00)</span>
+        <span class="story-act-badge mid">⚔️ 第二幕 · 中盘风云 (10–25分钟)</span>
         <p class="story-act-text">${act2Story}</p>
       </div>
       <div class="story-act-row">
-        <span class="story-act-badge late">🔥 第三幕 · 终局决战 (25:00–终局)</span>
+        <span class="story-act-badge late">🔥 第三幕 · 终局决战 (25分钟至终局)</span>
         <p class="story-act-text">${act3Story}</p>
       </div>
       ${itemIntelBoxHtml}
@@ -13375,8 +13377,8 @@ function renderMinuteScrubber(report) {
   // Build quick-jump pills for key moments with exact second precision
   if (jumpsEl) {
     const jumpTargets = [
-      { sec: Math.min(600, maxSec), m: Math.min(10, maxMin), label: "10:00 对线期交卷" },
-      { sec: Math.min(1200, maxSec), m: Math.min(20, maxMin), label: "20:00 中期团战节点" },
+      { sec: Math.min(600, maxSec), m: Math.min(10, maxMin), label: "10分钟 对线期交卷" },
+      { sec: Math.min(1200, maxSec), m: Math.min(20, maxMin), label: "20分钟 中期团战节点" },
     ];
     (report.key_teamfights || []).slice(0, 5).forEach((tf, idxTf) => {
       const sVal = Math.min(maxSec, Math.max(30, Math.round(Number(tf.start_sec || 0))));
@@ -15175,7 +15177,7 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
     return `
       <div class="phase-deep-audit-section">
         <div class="phase-deep-audit-header">
-          <h4>⚙️ 中期运营深度拆解：资源转化效率 · 主动抓人节奏 · 英雄特性推塔审计 (10:00–25:00)</h4>
+          <h4>⚙️ 中期运营深度拆解：资源转化效率 · 主动抓人节奏 · 英雄特性推塔审计 (10–25分钟)</h4>
           <span>重点考核：吃下的经济有没有转化为抓人节奏与外塔压制？有没有利用英雄机制推塔？大哥刷钱与参团是否平衡？</span>
         </div>
         ${grokMidBanner}
@@ -15349,7 +15351,7 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
   return `
     <div class="phase-deep-audit-section">
       <div class="phase-deep-audit-header">
-        <h4>👑 后期决战深度拆解：肉山盾资源转化 · 大核神装出山接管 · 灵性出装与换命审计 (25:00–终局)</h4>
+        <h4>👑 后期决战深度拆解：肉山盾资源转化 · 大核神装出山接管 · 灵性出装与换命审计 (25分钟至终局)</h4>
         <span>重点考核：打完肉山盾有没有顺势推外塔破高地？大哥前中期刷的钱有没有接管比赛？出装与跳刀是否真正发挥作用？</span>
       </div>
       ${grokLateBanner}
@@ -15702,7 +15704,7 @@ function renderPhaseSection(report) {
               const focusText =
                 pp.focus ||
                 (activePd.key === "lane"
-                  ? "前期改进重点：盯紧 03:00/06:00 边路莲花与 07:00 智慧符，辅助做好拉野消兵与封野反封，残血及时补给莫硬拼。"
+                  ? "前期改进重点：盯紧 3分钟/6分钟边路莲花与 7分钟智慧符，辅助做好拉野消兵与封野反封，残血及时补给莫硬拼。"
                   : activePd.key === "mid"
                   ? "中期改进重点：包里常备至少 1 张 TP，1 号位刷关键装期间其余四人围绕视野高坡反蹲或开雾抓单，严禁黑图孤狼过河。"
                   : "后期改进重点：25 分钟后严守买活钱红线，带盾抱团推进，辅助站核心身后留救人装与控制反手。");
@@ -19907,7 +19909,7 @@ function renderPregamePlanOutput(plan) {
       </div>
       <div class="pregame-stages-grid">
         <article class="pregame-stage-box">
-          <h3>🌅 ${escapeHtml(early.title || "前期对线与抢符 (00:00–10:00)")}</h3>
+          <h3>🌅 ${escapeHtml(early.title || "前期对线与抢符 (0–10分钟)")}</h3>
           <ul>
             ${
               grokBrief?.early_game
@@ -19928,7 +19930,7 @@ function renderPregamePlanOutput(plan) {
         </article>
 
         <article class="pregame-stage-box">
-          <h3>🔥 ${escapeHtml(mid.title || "中期抱团与控图 (10:00–25:00)")}</h3>
+          <h3>🔥 ${escapeHtml(mid.title || "中期抱团与控图 (10–25分钟)")}</h3>
           <ul>
             ${
               grokBrief?.mid_game
@@ -19942,7 +19944,7 @@ function renderPregamePlanOutput(plan) {
         </article>
 
         <article class="pregame-stage-box">
-          <h3>👑 ${escapeHtml(late.title || "后期盾团与高地终结 (25:00+)")}</h3>
+          <h3>👑 ${escapeHtml(late.title || "后期盾团与高地终结 (25分钟后)")}</h3>
           <ul>
             ${
               grokBrief?.late_game

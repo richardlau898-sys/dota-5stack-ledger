@@ -720,7 +720,7 @@ def build_three_phases_breakdown(
     focus_side: str,
 ) -> List[Dict[str, Any]]:
     """
-    构建前期对线 (00:00–10:00)、中期运营 (10:00–25:00)、后期决策 (25:00–终局) 的精确差分账本
+    构建前期对线 (0–10分钟)、中期运营 (10–25分钟)、后期决策 (25分钟–终局) 的精确差分账本
     """
     duration = int(match.get("duration") or 0)
     if duration <= 0:
