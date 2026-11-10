@@ -402,7 +402,7 @@ function getScore100Tier(score100, won = true) {
   if (s >= 90) return { grade: "S+", label: "封神真神", cls: "score-s" };
   if (s >= 80) return { grade: "A", label: won ? "凯旋主力" : "孤胆院长", cls: "score-a" };
   if (s >= 70) return { grade: "B", label: "合格执行", cls: "score-b" };
-  if (s >= 60) return { grade: "C", label: won ? "惊险躺赢" : "节奏迷失", cls: "score-c" };
+  if (s >= 60) return { grade: "C", label: won ? "团队拼图" : "节奏迷失", cls: "score-c" };
   return { grade: "D", label: won ? "短板隐身" : "犯罪背锅", cls: "score-d" };
 }
 
@@ -984,7 +984,7 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
       const tempoRoast = hmp.mid_tempo_wasted
         ? `身为【${hmp.timing_curve_zh || "中期节奏核"}】却在 10~25m 强势期当大核闷头独刷不参战，`
         : `全场在泉水读秒长达 ${p.dead_seconds} 秒，`;
-      punchline = `本局百人制得分仅 ${score100}/100 分（贡献 ${cPct}%）——虽然最后跟着车队躺赢拿下比赛，但 ${heroShort} ${tempoRoast}属于边混边赢的“惊险气氛组”，下把务必按英雄强势期打节奏！`;
+      punchline = `本局百人制得分 ${score100}/100 分（贡献 ${cPct}%）——${heroShort} ${tempoRoast}在团队配合下拿下比赛，下把可按英雄强势期优化节奏！`;
     } else {
       badge = `🏆 AI 凯旋功臣点评${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
@@ -1000,19 +1000,7 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
       badge = `🚨 AI 一级战犯处刑词${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
       let mechCrimeClause = "";
-      if (p.slark_mechanism_audit) {
-        const sm = p.slark_mechanism_audit;
-        mechCrimeClause = `中后期不仅多次单带无故被抓断节奏，且整局拒出 1400 金核心魔晶《深海劫掠》（既救不了被抓队友也叠不起能量转移属性导致正面根本 A 不过人），后期 25m+ 吃下全队最高 +${fmtNum(
-          sm.late_gold_gain || 0
-        )} 金（${sm.late_gold_share_pct || 26}%）却只打出全队垫底的 ${fmtNum(
-          sm.late_hdmg_gain || 0
-        )} 伤害（${sm.late_hdmg_share_pct || 15.5}%），`;
-      } else if (p.phoenix_egg_audit && p.phoenix_egg_audit.shattered_cnt >= 2) {
-        const pe = p.phoenix_egg_audit;
-        mechCrimeClause = `团战大招《超新星》变蛋 ${pe.tf_egg_casts} 次竟有 ${pe.shattered_cnt} 次被集火打碎（碎蛋率 ${
-          pe.shatter_rate_pct
-        }%：${(pe.shattered_times || []).join("、")}），且全场仅放 ${pe.sun_ray_casts} 次《烈日炙烤》激光，`;
-      } else if (hmp.late_harvest_failed) {
+      if (hmp.late_harvest_failed) {
         mechCrimeClause = `前中期吃了团队大量安全线与野区资源，但 25m+ 决胜期吃下 ${hmp.late_gold_share_pct || 22}% 经济却仅打出 ${
           hmp.late_hdmg_share_pct || 15
         }% 伤害，完全没能兑现【${hmp.timing_curve_zh || "大核"}】后期收割职责${
@@ -12478,7 +12466,7 @@ function renderVerdictAndBlameSection(report) {
       thirdCardEl.classList.remove("culprit-theme");
       thirdCardEl.classList.add("struggle-theme");
     }
-    if (thirdCardLabel) thirdCardLabel.textContent = "🐟 惊险躺赢/短板算账 · 为什么这把表现不行";
+    if (thirdCardLabel) thirdCardLabel.textContent = "🔍 胜局短板复盘 · 可优化细节";
     if (ledgerTitle) ledgerTitle.textContent = `🎉 ${sideZh}五黑 100% 胜局贡献庆功榜 · 谁的军功章最大一目了然`;
     if (ledgerCaption) {
       ledgerCaption.textContent =
@@ -12761,8 +12749,8 @@ function renderVerdictAndBlameSection(report) {
           copyBtnLabel = "复制庆功词";
         } else if (Number(p.player_slot) === Number(stP?.player_slot)) {
           roleType = "struggle";
-          tabTag = "🐟 短板提醒";
-          cardHeader = "🐟 惊险躺赢/短板算账 · 为什么这把表现有瑕疵";
+          tabTag = "🔍 短板提醒";
+          cardHeader = "🔍 胜局短板复盘 · 可优化细节";
           themeClass = "struggle-theme";
           statusTag = "⚠️ 胜局短板复盘";
           copyBtnLabel = "复制短板提醒";
@@ -13095,7 +13083,7 @@ function renderVerdictAndBlameSection(report) {
               : idx === 1
               ? "⚔️ 破阵次功"
               : Number(p.player_slot) === Number(strugglePlayer?.player_slot) && sc100 <= 82
-              ? "🐟 惊险躺赢"
+              ? "🛡️ 团队拼图"
               : "🔥 凯旋功臣";
           const copyQuote = `🏆【凯旋庆功榜 #${idx + 1} · ${tierTag}】${p.personaname} (${heroShort} · ${p.pos_label}) 本局评分 ${sc100}/100 分，胜局贡献 ${share}%：KDA ${p.kda}，${oneLinePraise}`;
           const extraStat =

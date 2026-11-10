@@ -215,7 +215,7 @@ def evaluate_player_deeply(
         elif rating_score >= 6.8:
             rating_tier = "B+ 稳健功臣"
         else:
-            rating_tier = "B 躺赢福将"
+            rating_tier = "B 团队拼图"
     else:
         if rating_score >= 8.8:
             rating_tier = "S 孤胆院长"
@@ -397,7 +397,7 @@ def evaluate_player_deeply(
     bkb_uses = (active_uses.get("black_king_bar") or {}).get("count", 0)
     enemy_total_stuns = sum(ep.get("stuns_sec", 0) for ep in enemy_players)
 
-    if bkb_timing_min is not None:
+    if pos in (1, 2, 3) and bkb_timing_min is not None:
         if bkb_timing_min <= 24 and bkb_uses >= 3:
             strengths.append(
                 f"BKB 节点与使用果断：{bkb_timing_str} 准时做出黑皇杖，全场有效开启 {bkb_uses} 次顶住敌方第一波控制链。"
@@ -563,12 +563,14 @@ def evaluate_player_deeply(
                 "辅助位必须保证商店观察者守卫不积压，进攻期将眼位推进至敌方主野区高台与肉山坑口。"
             )
 
+        team_smokes = sum(int(tp.get("smokes_bought") or 0) for tp in team_players)
+        team_dusts = sum(int(tp.get("dusts_bought") or 0) for tp in team_players)
+
         if smokes >= 3:
             strengths.append(f"进攻节奏组织者：全场主动购买 {smokes} 颗诡计之雾带动抓人节奏。")
-        elif is_parsed and smokes == 0 and duration_min >= 25:
-            blame_points += 10.0
-            weaknesses.append("零买雾消极节奏：全场购买诡计之雾次数为 0，缺乏主动拉人开雾抓单意识。")
-            improvements.append("核心摸出跳刀或BKB的第一时间，4/5号位应立刻买雾发信号召集队友抓敌方落单打钱核。")
+        elif is_parsed and team_smokes == 0 and duration_min >= 25:
+            weaknesses.append("全队零买雾：本方五人全场购买诡计之雾总次数为 0，缺乏开雾抓单组织。")
+            improvements.append("核心摸出跳刀或BKB的第一时间，全队应及时买雾发信号召集队友抓敌方落单打钱核。")
 
         enemy_has_invis = any(
             ("微光" in " ".join(ep.get("final_items") or []))
@@ -576,15 +578,10 @@ def evaluate_player_deeply(
             or any(k in ep.get("hero_name", "") for k in ["力丸", "克林克兹", "赏金", "司夜刺客", "编织者", "米拉娜", "沙王"])
             for ep in enemy_players
         )
-        if is_parsed and enemy_has_invis and dusts == 0:
-            blame_points += 12.0
+        if is_parsed and enemy_has_invis and team_dusts == 0:
             weaknesses.append(
-                "零买粉眼神反隐：面对敌方微光披风/隐身单位，整局显影之尘购买次数为 0，多次放任残血隐身逃生。"
+                "全队零买粉：面对敌方微光披风/隐身单位，本方五人显影之尘总购买次数为 0。"
             )
-            trash_candidates.append((
-                81,
-                f"@{pname} 对面微光隐身秀麻了你全场0买粉，80块钱的显影之尘是烫手吗？",
-            ))
 
     # --- (G) 录像级：黑白电视时长、阵亡扣钱、天敌提款机与野怪/塔杀取证 ---
     dead_min, dead_rem_s = divmod(int(dead_sec), 60)
@@ -761,51 +758,8 @@ def evaluate_player_deeply(
                 f"凤凰本局共施放 {egg_casts} 次《超新星》（团战 {tf_egg_total} 次）、{ray_casts} 次《烈日炙烤》（全队治疗 {heal:,} 点），可提高团战中后排《烈日炙烤》开启频率以兼顾消耗与治疗。",
             )
 
-    # 3) 斯拉克 (Slark) 与核心位「单带无故被抓 + 拒出魔晶/克制装导致A不过人 + 后期团战隐身零输出」深度博弈审计
-    if hid_cur == 93 and duration_min >= 22:
-        all_my_item_keys = {it.get("key") for it in (p.get("final_items_rich") or []) + (p.get("backpack_items_rich") or [])}
-        has_counter_evasion_or_heal = bool(all_my_item_keys.intersection({"monkey_king_bar", "skadi", "bloodthorn", "nullifier", "abyssal_blade"}))
-        has_bare_javelin = "javelin" in all_my_item_keys
-        enemy_has_evasion_or_satanic = any(
-            any(k in " ".join(ep.get("final_items") or []) for k in ["蝴蝶", "撒旦", "金箍棒"])
-            or int(ep.get("hero_id") or 0) in (78, 44, 21, 53)
-            for ep in enemy_players
-        )
-        pickoff_str = "、".join(f"{sp['time_str']}(被{sp['killer']}单抓)" for sp in solo_pickoffs[:4])
-        if not has_shard or late_hdmg_share <= 17.5 or len(solo_pickoffs) >= 2:
-            radar["damage"] = min(radar["damage"], 44)
-            radar["tempo"] = min(radar["tempo"], 34)
-            radar["utility"] = min(radar["utility"], 30)
-            mvp_score = round(clamp(mvp_score - 9.5, 35.0, 52.0), 1)
-            rating_score = round(clamp(mvp_score / 10.0, 4.0, 5.2), 1)
-            rating_tier = "C 隐身背锅" if won else "D 头号战犯"
-            blame_points += 34.0
-            weaknesses.insert(
-                0,
-                f"三大致命败因（单带无故被抓 + 拒出魔晶A不过人 + 后期零输出）："
-                f"① 【单带无故被抓断节奏】中后期在 {pickoff_str or '多波危险线'} 脱离团队视野独自带线无故被抓{nemesis_str}，全场泉水读秒长达 {dead_min}分{dead_rem_s:02d}秒；"
-                f"② 【{duration_min:.0f}分钟拒出魔晶 + 出装被克制导致正面A不过人】整局未买仅售 1,400 金的命脉魔晶《深海劫掠》（既少了 3 秒群体黑雾救队友化解敌方点控留人，自己也少了一层黑雾拉扯叠《能量转移》敏捷层数），"
-                + (
-                    "且面对敌方高闪避/高吸血核心既不出金箍棒/冰眼克制"
-                    + ("（终局包里还揣着一根散件标枪）" if has_bare_javelin else "")
-                    + "，导致贴脸对A完全打不过任何人；"
-                    if enemy_has_evasion_or_satanic and not has_counter_evasion_or_heal
-                    else "导致正面拉扯根本叠不起属性、A不过敌方核心；"
-                )
-                + f"③ 【后期吃满经济却毫无输出】25m+ 决胜后期吃下全队第一的 +{late_gold:,} 金（占全队后期经济 {late_gold_share:.1f}%），"
-                f"却仅打出 **{late_hdmg:,} 点后期伤害（仅占全队后期伤害 {late_hdmg_share:.1f}%，全队倒数第一，连 4/5 号位辅助都不如）**，"
-                f"在 {', '.join(low_dmg_tfs[:4]) or '多波后期关键团战'} 中近乎零输出蒸发，全场参战率仅 {kp:.1f}%（全队垫底）！",
-            )
-            trash_candidates.append((
-                110,
-                f"@{pname} 玩个1号位{hero_name}{duration_min:.0f}分钟不出1400块的魔晶《深海劫掠》救队友叠属性，单带连环被抓，后期狂吃{late_gold:,}金就打了{late_hdmg:,}伤害（全队倒数第一比5号位还低），团战既救不了人又A不过敌方核心，全场参战率{kp:.0f}%纯隐身人！",
-            ))
-            improvements.insert(
-                0,
-                "斯拉克在团队局的核心价值是「双黑雾救人拉扯 + 叠满敏捷收割」：① 20分钟必须第一时间补出 1,400 金魔晶《深海劫掠》，队友被敌方集火控制时立刻给魔晶黑雾救人，自己依靠【大招暗影之舞 + 魔晶深海劫掠】两团黑雾反复进出战场叠出 20+ 层敏捷；② 面对敌方高闪避与高吸血核心，中期刷完过渡装必须果断转【冰眼 + 金箍棒/血棘】而非散件标枪；③ 敌方抓人核心小地图消失时严禁无视野单带过河道。",
-            )
-    elif pos in (1, 2) and not is_turret_fulfilled and duration_min >= 25:
-        # 4) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」&「单带被抓」审计
+    # 3) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」&「单带被抓」审计
+    if pos in (1, 2) and not is_turret_fulfilled and duration_min >= 25:
         if hmp.get("late_harvest_fulfilled") and not is_afk_farmer:
             strengths.insert(0, hmp["late_phase_note"])
         elif hmp.get("late_harvest_failed"):
@@ -826,7 +780,7 @@ def evaluate_player_deeply(
             )
 
     # 5) 针对全 126 英雄的「节奏核闷头刷错失强势期」「先手肉核敢死开团功臣」「救人辅助保核兑现」「必出命脉魔晶缺失」审计
-    if hmp.get("mid_tempo_wasted") and hid_cur != 93 and not is_afk_farmer:
+    if hmp.get("mid_tempo_wasted") and not is_afk_farmer:
         blame_points += 14.0
         weaknesses.insert(0, hmp["mid_phase_note"])
     if hmp.get("sacrificial_initiator_fulfilled"):
@@ -834,7 +788,7 @@ def evaluate_player_deeply(
         strengths.insert(0, hmp["mechanism_summary"])
     if hmp.get("save_support_fulfilled"):
         strengths.insert(0, hmp["mechanism_summary"])
-    if hmp.get("missing_mandatory_shard") and hid_cur != 93:
+    if hmp.get("missing_mandatory_shard"):
         blame_points += 12.0
         weaknesses.insert(
             0,
@@ -943,15 +897,19 @@ def evaluate_player_deeply(
             f"🎯 【{pos_role_title} · 英雄×位置专属法则】：{dossier.get('pos_playstyle')} 禁忌：{dossier.get('pos_taboo')}（出装铁律：{dossier.get('pos_item_rule')}{syn_hint}）"
         )
 
+    deaths_per_10m = deaths / max(1.0, duration_min / 10.0)
+    death_rate_threshold = 2.0 if pos in (1, 2) else (2.4 if pos == 3 else 2.8)
+    death_rate_weight = 10.0 if pos in (1, 2) else (8.0 if pos == 3 else 6.0)
+
     if deaths <= 4 and duration_min >= 30 and not is_afk_farmer:
         strengths.append(
             f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次（读秒总计 {dead_min}分{dead_rem_s:02d}秒，仅占全场 {dead_pct:.1f}%），团战站位拉扯极佳。"
         )
-    elif deaths >= 8 and not is_turret_fulfilled and not hmp.get("sacrificial_initiator_fulfilled"):
-        blame_points += (deaths - 6) * 5.5
+    elif deaths >= 6 and deaths_per_10m >= death_rate_threshold and not is_turret_fulfilled and not hmp.get("sacrificial_initiator_fulfilled"):
+        blame_points += (deaths_per_10m - death_rate_threshold + 0.5) * death_rate_weight
         gold_lost_txt = f"，光阵亡直接扣掉 **{death_gold_lost:,} 金币**" if death_gold_lost > 0 else ""
         weaknesses.append(
-            f"高频阵亡提款机：全场阵亡 **{deaths} 次**{nemesis_str}，黑白屏幕读秒长达 **{dead_min}分{dead_rem_s:02d}秒（占整局比赛 {dead_pct:.1f}% 时间）**{gold_lost_txt}！"
+            f"高频阵亡提款机：全场阵亡 **{deaths} 次**（每10分钟 {deaths_per_10m:.1f} 死）{nemesis_str}，黑白屏幕读秒长达 **{dead_min}分{dead_rem_s:02d}秒（占整局比赛 {dead_pct:.1f}% 时间）**{gold_lost_txt}！"
         )
         trash_candidates.append((
             88 + deaths,
@@ -1024,7 +982,7 @@ def evaluate_player_deeply(
         praise_talk = f"@{pname} 最佳幕后功臣！{hero_name} 全场点亮 {obs} 假 {sen} 真视野 + 参战率 {kp:.0f}%，吃草挤奶把大哥伺候得明明白白！"
     elif deaths >= 10:
         if won:
-            praise_talk = f"@{pname} 虽然这把 {hero_name} 阵亡 {deaths} 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！"
+            praise_talk = f"@{pname} 这把 {hero_name} 阵亡 {deaths} 次吸引大量敌方火力，协助团队赢下比赛！"
         else:
             praise_talk = f"@{pname} 这把 {hero_name} 阵亡 {deaths} 次承压严重（读秒 {dead_min}分{dead_rem_s:02d}秒），团战站位与切入时机亟待复盘优化。"
     else:
@@ -1328,7 +1286,10 @@ def assign_team_blame_percentages(team_players: List[Dict[str, Any]]) -> None:
             elif rank_idx == 3:
                 cp["contrib_tier"] = "🔥 黄金拼图 · 稳健节奏"
             else:
-                cp["contrib_tier"] = "🎉 躺赢锦鲤 · 吸火福将" if (cp.get("deaths", 0) >= 8) else "🥂 凯旋功臣 · 团队拼图"
+                cp["contrib_tier"] = "🛡️ 吸火支点 · 团队拼图" if (cp.get("deaths", 0) >= 8) else "🥂 凯旋功臣 · 团队拼图"
+
+
+BLAME_CULPRIT_THRESHOLD = 45.0
 
 
 def select_match_mvp_and_culprit(
@@ -1376,10 +1337,19 @@ def select_match_mvp_and_culprit(
         f"败方孤胆院长 (SVP)：{lose_side_zh} {svp['pos']}号位 {svp['hero_short_zh']}（{svp['personaname']}，评分 {svp['rating_score']}）交出 {svp['kda']}（伤害 {svp['hero_damage']:,}），一神带四坑实在带不动。",
     ]
 
+    max_blame_pts = max((float(p.get("raw_blame_points") or 0.0) for p in focus_team), default=0.0)
+    no_clear_culprit = bool(focus_won or max_blame_pts < BLAME_CULPRIT_THRESHOLD)
+    culprit_label = "无明显责任人" if no_clear_culprit else "车队头号大锅"
+
     if focus_won:
         culprit_verdict = (
             f"凯旋庆功总结：{focus_side_zh}头号首功 {mvp['hero_short_zh']}（{mvp['personaname']}，贡献 {mvp.get('contrib_share_pct', 25)}%）与二当家 {runner_up['hero_short_zh']}（{runner_up['personaname']}，贡献 {runner_up.get('contrib_share_pct', 22)}%）携手带飞！"
-            f" 本局惊险躺赢锦鲤：{culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，贡献 {culprit.get('contrib_share_pct', 14)}%）。"
+            f" 本局复盘短板位：{culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，贡献 {culprit.get('contrib_share_pct', 14)}%）。"
+        )
+    elif no_clear_culprit:
+        culprit_verdict = (
+            f"无明显责任人：本局{focus_side_zh}五人最高分锅点数（{max_blame_pts:.1f}）低于阈值（{BLAME_CULPRIT_THRESHOLD:.0f}），不指定头号大锅。"
+            f" 相对待改进点（{culprit['pos']}号位 {culprit['hero_short_zh']}）：{culprit['weaknesses'][0]}"
         )
     else:
         culprit_verdict = (
@@ -1388,6 +1358,8 @@ def select_match_mvp_and_culprit(
         )
 
     return {
+        "no_clear_culprit": no_clear_culprit,
+        "culprit_label": culprit_label,
         "mvp_player": {
             "player_slot": mvp["player_slot"],
             "side": win_side_zh,
@@ -1477,7 +1449,9 @@ def select_match_mvp_and_culprit(
             "rating_tier": culprit["rating_tier"],
             "blame_share_pct": culprit["blame_share_pct"],
             "contrib_share_pct": culprit.get("contrib_share_pct", 14.0),
-            "contrib_tier": culprit.get("contrib_tier", "🎉 躺赢锦鲤 · 吸火福将"),
+            "contrib_tier": culprit.get("contrib_tier", "🥂 凯旋功臣 · 团队拼图"),
+            "no_clear_culprit": no_clear_culprit,
+            "culprit_label": culprit_label,
             "dead_seconds": culprit.get("dead_seconds", 0),
             "death_gold_lost": culprit.get("death_gold_lost", 0),
             "main_crime": culprit["weaknesses"][0],
@@ -2596,7 +2570,7 @@ def call_llm_coach_review(
                             dv = re.sub(r"grok_share_pct\s*[:：=]?\s*([\d.]+%?)", r"占比 \1", dv, flags=re.I)
                             dv = re.sub(r"（与[^）]*并列头号）", "", dv)
                             if own_won and idx_r == len(pls_by_rank) - 1:
-                                dv = re.sub(r"头号大锅[、·]?一级战犯|头号大锅", "本局胜方短板（惊险躺赢复盘位）", dv)
+                                dv = re.sub(r"头号大锅[、·]?一级战犯|头号大锅", "本局胜方短板（复盘改进位）", dv)
                             # Sync any trailing percentage in deep_verdict to the normalized monotonic share
                             dv = re.sub(
                                 r"(?:胜局|败局)?(?:分锅|背锅|贡献|定责)(?:占比)?(?:仅)?\s*\d+(?:\.\d+)?%",
@@ -3110,7 +3084,7 @@ def build_dota_poster_art_prompt(
             f"Expressive Valve Dota 2 comic-fantasy painting style, ultra-detailed 8k, strictly NO text, NO letters, NO watermarks."
         )
         scene_zh = (
-            f"🛋️ 惊险躺赢抱大腿原画：[{pos}号位] {pname} 的【{hero_zh}】（{sc100}分·阵亡{deaths_cnt}次）"
+            f"🛋️ 团队拼图抱大腿原画：[{pos}号位] {pname} 的【{hero_zh}】（{sc100}分·阵亡{deaths_cnt}次）"
             f"鼻青脸肿坐在花轿上喝药看戏，全靠前方大腿【{top_ally_zh}】一刀砍翻全场带飞！"
         )
     elif archetype == "roast_greedy":

@@ -2496,7 +2496,7 @@ def build_deep_replay_forensics(
                 fb_rel = max(0, fb["time_sec"] - start_s)
                 if fb["victim_side"] == s_key:
                     reasons.append(
-                        f"① 先手掉点成突破口：开团仅 {fb_rel} 秒（{fmt_mmss(fb['time_sec'])}），本方 {fb['victim_pos']}号位 {fb['victim_hero']} 率先被 {fb['killer_hero']} 秒杀，导致正面瞬间陷入 4打5 被动！"
+                        f"① 本波最先阵亡：开团 {fb_rel} 秒（{fmt_mmss(fb['time_sec'])}），本方 {fb['victim_pos']}号位 {fb['victim_hero']} 被 {fb['killer_hero']} 击杀。"
                     )
                 else:
                     reasons.append(
