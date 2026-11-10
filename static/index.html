@@ -540,19 +540,19 @@
       <div class="section-heading">
         <div>
           <h2 id="charts-hub-heading">⑤ ⏱️ 逐分钟比赛时间轴回放器 &amp; 全局战术图表中心</h2>
-          <p class="section-caption">拖动下方分钟滑块（00:00 → 终局），实时回放任意一分钟的十人经济排位、正反补、当时已合成装备、击杀掉塔战报，并支持与 2D 战术小地图联动</p>
+          <p class="section-caption">拖动下方分钟滑块（00:00 → 终局），实时回放任意一分钟的十人经济排位、正反补、最近购买、击杀掉塔战报，并支持与 2D 战术小地图联动</p>
         </div>
       </div>
 
-      <!-- 全新交互：0:00 ~ 终局逐秒级时间轴拖拽回放器 -->
+      <!-- 全新交互：0:00 ~ 终局时间轴拖拽回放器 -->
       <article id="minute-scrubber-box" class="chart-box minute-scrubber-box" aria-labelledby="scrubber-title">
         <div class="scrubber-top-bar">
           <div>
-            <h3 id="scrubber-title">⏱️ 逐秒级时空回放沙盘 · 拖动滑块或点击播放复盘任意时刻十人走位、成装与团战细节</h3>
-            <p class="chart-sub">支持按秒无级拖动（00:00 → 终局）与自动连播，左侧大尺寸战术小地图仅展示纯净英雄头像并自动防重叠散开</p>
+            <h3 id="scrubber-title">⏱️ 时间轴回放沙盘 · 拖动滑块或点击播放复盘任意时刻十人经济、最近购买与团战细节（示意位置，非真实走位）</h3>
+            <p class="chart-sub">支持按秒拖动（00:00 → 终局）与自动连播，真实点（眼位、阵亡点、前10分钟热力图）实心展示，合成点半透明标注为示意位置，非真实走位</p>
           </div>
           <div class="scrubber-controls">
-            <button type="button" id="btn-scrub-autoplay" class="button primary" style="padding:5px 14px;font-weight:700;" title="自动按秒回放全场十人小地图英雄走位、团战交火、泉水读秒与装备演进">▶ 播放回放</button>
+            <button type="button" id="btn-scrub-autoplay" class="button primary" style="padding:5px 14px;font-weight:700;" title="自动按秒回放小地图示意位置（非真实走位）、团战交火、泉水读秒与最近购买">▶ 播放回放</button>
             <button type="button" id="btn-scrub-speed" class="button secondary" style="padding:4px 10px;" title="切换时间轴播放倍速 (1x 逐秒 / 2x / 5x)">1x 逐秒</button>
             <button type="button" id="btn-scrub-prev" class="button secondary" style="padding:4px 9px;" title="后退 1 分钟">⏪ -1分</button>
             <button type="button" id="btn-scrub-prev-15s" class="button secondary" style="padding:4px 9px;" title="后退 15 秒">◀ -15秒</button>

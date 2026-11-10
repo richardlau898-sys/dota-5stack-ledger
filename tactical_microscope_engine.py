@@ -2438,7 +2438,7 @@ def build_tactical_microscope(
         if max_idx == 0:
             return []
 
-        # 预先整理每位玩家的核心成装购买时间表 (cost >= 1400 或在 ITEMS_ZH 中且非消耗品)
+        # 预先整理每位玩家的最近购买记录（最近 6 次购买，非消耗品）
         SKIP_CONSUMABLES = {
             "tpscroll", "ward_observer", "ward_sentry", "smoke_of_deceit", "dust",
             "clarity", "faerie_fire", "enchanted_mango", "tango", "flask", "blood_grenade",
@@ -2517,7 +2517,7 @@ def build_tactical_microscope(
                         }
                         break
 
-                items_now = [
+                recent_purchases = [
                     {"key": it["key"], "zh": it["zh"], "img": it["img"]}
                     for it in player_core_purchases.get(pslot, [])
                     if it["time"] <= sec_cutoff
@@ -2537,7 +2537,8 @@ def build_tactical_microscope(
                     "hero_damage": hdmg_val,
                     "tower_damage": tdmg_val,
                     "dead_status": dead_status,
-                    "items": items_now,
+                    "recent_purchases": recent_purchases,
+                    "items": recent_purchases,
                 })
 
                 # 收集这一分钟内该玩家的击杀事件

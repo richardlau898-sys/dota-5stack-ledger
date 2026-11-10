@@ -6643,7 +6643,7 @@ function renderWorkstationFactCheckSection(report) {
       title: `${timeLabel} · ${tradeLabel} (${swingLabel})`,
       detail: `${
         biggestTf.headline || biggestTf.summary || `${topDmgHero}这是本局经济天平倾斜最剧烈的决定性团战。`
-      } 点击右侧按钮可直接在小地图回放该分钟十人走位与技能清单。`,
+      } 点击右侧按钮可直接在小地图查看该分钟团战示意位置与技能清单。`,
       jumpMinute: tfMin,
     });
   }
@@ -6681,7 +6681,7 @@ function renderWorkstationFactCheckSection(report) {
             <span class="ws-fc-kicker">✅ REPLAY FACT-CHECK</span>
             <h3>录像底层事实核查 (5 项硬核取证)</h3>
           </div>
-          <span class="ws-fc-sub">100% 源自 .dem 战斗日志，拒绝印象流分锅</span>
+          <span class="ws-fc-sub">基于 OpenDota 解析数据自动核对关键指标</span>
         </div>
         <div class="ws-fc-cards-list">
           ${factCards
@@ -13353,7 +13353,10 @@ function declusterMinimapNodes(nodes, minDist = 35, minBound = 24, maxBound = 39
   for (let pass = 0; pass < 14; pass++) {
     let moved = false;
     for (let i = 0; i < nodes.length; i++) {
+      const iReal = Boolean(nodes[i].isReal || nodes[i].coords?.isReal);
       for (let j = i + 1; j < nodes.length; j++) {
+        const jReal = Boolean(nodes[j].isReal || nodes[j].coords?.isReal);
+        if (iReal && jReal) continue;
         let dx = nodes[j].cx - nodes[i].cx;
         let dy = nodes[j].cy - nodes[i].cy;
         let dist = Math.hypot(dx, dy);
@@ -13367,10 +13370,14 @@ function declusterMinimapNodes(nodes, minDist = 35, minBound = 24, maxBound = 39
           const push = (minDist - dist) * 0.52;
           const ux = dx / dist;
           const uy = dy / dist;
-          nodes[i].cx = Math.max(minBound, Math.min(maxBound, nodes[i].cx - ux * push));
-          nodes[i].cy = Math.max(minBound, Math.min(maxBound, nodes[i].cy - uy * push));
-          nodes[j].cx = Math.max(minBound, Math.min(maxBound, nodes[j].cx + ux * push));
-          nodes[j].cy = Math.max(minBound, Math.min(maxBound, nodes[j].cy + uy * push));
+          if (!iReal) {
+            nodes[i].cx = Math.max(minBound, Math.min(maxBound, nodes[i].cx - ux * (jReal ? push * 1.8 : push)));
+            nodes[i].cy = Math.max(minBound, Math.min(maxBound, nodes[i].cy - uy * (jReal ? push * 1.8 : push)));
+          }
+          if (!jReal) {
+            nodes[j].cx = Math.max(minBound, Math.min(maxBound, nodes[j].cx + ux * (iReal ? push * 1.8 : push)));
+            nodes[j].cy = Math.max(minBound, Math.min(maxBound, nodes[j].cy + uy * (iReal ? push * 1.8 : push)));
+          }
           moved = true;
         }
       }
@@ -13668,9 +13675,11 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
             ny: Math.max(8, Math.min(92, targetNy + Math.sin(offsetAng) * offsetR)),
             inFight: true,
             diedNow: false,
+            isReal: false,
+            isSynthetic: true,
           };
         }
-        return { nx: targetNx, ny: targetNy, inFight: true, diedNow: true };
+        return { nx: targetNx, ny: targetNy, inFight: true, diedNow: true, isReal: true, isSynthetic: false };
       }
     }
     const pt = tfParticipantsMap.get(hName);
@@ -13680,49 +13689,51 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
       const radius = (diedAtThisSec ? 5.5 : 7.5 + (1 - approachFactor) * 7) + (posNum % 2) * 2.8;
       const nx = Math.max(8, Math.min(92, clashCenter.nx + Math.cos(orbitAngle) * radius));
       const ny = Math.max(8, Math.min(92, clashCenter.ny + Math.sin(orbitAngle) * radius));
-      return { nx, ny, inFight: true, diedNow: diedAtThisSec };
+      return { nx, ny, inFight: true, diedNow: diedAtThisSec, isReal: false, isSynthetic: true };
     }
 
     // 1b. If currently respawning in fountain at this exact second, place in fountain respawn area
     if (diedAtThisSec && Boolean(deadInfo?.in_fountain_now)) {
       return isRad
-        ? { nx: 8 + posNum * 1.6, ny: 92 - posNum * 1.6, inFight: false, diedNow: true, inFountain: true }
-        : { nx: 92 - posNum * 1.6, ny: 8 + posNum * 1.6, inFight: false, diedNow: true, inFountain: true };
+        ? { nx: 8 + posNum * 1.6, ny: 92 - posNum * 1.6, inFight: false, diedNow: true, inFountain: true, isReal: false, isSynthetic: true }
+        : { nx: 92 - posNum * 1.6, ny: 8 + posNum * 1.6, inFight: false, diedNow: true, inFountain: true, isReal: false, isSynthetic: true };
     }
 
-    // 2. Laning phase (0 - 600s): use real lane_heatmaps centroid or raw_lane coordinates with continuous micro-movement
+    // 2. Laning phase (0 - 600s): use real lane_heatmaps centroid (solid, no synthetic oscillation) or synthetic lane anchor
     if (secNow <= 600) {
-      const waveOscX = Math.sin(secNow * 0.09 + posNum * 1.7) * 2.2;
-      const waveOscY = Math.cos(secNow * 0.08 + posNum * 2.1) * 2.2;
       const myHeat = heatmaps.filter((h) => h.hero_short_zh === hName);
       if (myHeat.length > 0) {
         const wSum = myHeat.reduce((s, h) => s + Number(h.weight || 1), 0) || 1;
         const hx = myHeat.reduce((s, h) => s + Number(h.nx || 50) * Number(h.weight || 1), 0) / wSum;
         const hy = myHeat.reduce((s, h) => s + Number(h.ny || 50) * Number(h.weight || 1), 0) / wSum;
         return {
-          nx: Math.max(8, Math.min(92, hx + waveOscX)),
-          ny: Math.max(8, Math.min(92, hy + waveOscY)),
+          nx: Math.max(8, Math.min(92, hx)),
+          ny: Math.max(8, Math.min(92, hy)),
           inFight: false,
           diedNow: diedAtThisSec,
+          isReal: true,
+          isSynthetic: false,
         };
       }
+      const waveOscX = Math.sin(secNow * 0.09 + posNum * 1.7) * 2.2;
+      const waveOscY = Math.cos(secNow * 0.08 + posNum * 2.1) * 2.2;
       const laneId = Number(fullP.raw_lane || (posNum === 2 ? 2 : isRad ? (posNum === 1 || posNum === 5 ? 1 : 3) : posNum === 1 || posNum === 5 ? 3 : 1));
       if (laneId === 3) {
         return isRad
-          ? { nx: 17 + posNum * 1.6 + waveOscX, ny: 26 + posNum * 1.8 + waveOscY, inFight: false, diedNow: diedAtThisSec }
-          : { nx: 23 + posNum * 1.6 + waveOscX, ny: 18 + posNum * 1.6 + waveOscY, inFight: false, diedNow: diedAtThisSec };
+          ? { nx: 17 + posNum * 1.6 + waveOscX, ny: 26 + posNum * 1.8 + waveOscY, inFight: false, diedNow: diedAtThisSec, isReal: false, isSynthetic: true }
+          : { nx: 23 + posNum * 1.6 + waveOscX, ny: 18 + posNum * 1.6 + waveOscY, inFight: false, diedNow: diedAtThisSec, isReal: false, isSynthetic: true };
       }
       if (laneId === 2) {
         return isRad
-          ? { nx: 45 + waveOscX, ny: 55 + waveOscY, inFight: false, diedNow: diedAtThisSec }
-          : { nx: 55 + waveOscX, ny: 45 + waveOscY, inFight: false, diedNow: diedAtThisSec };
+          ? { nx: 45 + waveOscX, ny: 55 + waveOscY, inFight: false, diedNow: diedAtThisSec, isReal: false, isSynthetic: true }
+          : { nx: 55 + waveOscX, ny: 45 + waveOscY, inFight: false, diedNow: diedAtThisSec, isReal: false, isSynthetic: true };
       }
       return isRad
-        ? { nx: 76 + (posNum % 2) * 3 + waveOscX, ny: 80 - (posNum % 2) * 3 + waveOscY, inFight: false, diedNow: diedAtThisSec }
-        : { nx: 83 - (posNum % 2) * 3 + waveOscX, ny: 71 + (posNum % 2) * 3 + waveOscY, inFight: false, diedNow: diedAtThisSec };
+        ? { nx: 76 + (posNum % 2) * 3 + waveOscX, ny: 80 - (posNum % 2) * 3 + waveOscY, inFight: false, diedNow: diedAtThisSec, isReal: false, isSynthetic: true }
+        : { nx: 83 - (posNum % 2) * 3 + waveOscX, ny: 71 + (posNum % 2) * 3 + waveOscY, inFight: false, diedNow: diedAtThisSec, isReal: false, isSynthetic: true };
     }
 
-    // 3. Mid / Late game continuous second-by-second movement along active vision / lanes / jungle
+    // 3. Mid / Late game synthetic anchor positions
     const minCont = secNow / 60;
     const progress = Math.min(1, Math.max(0, (minCont - 10) / Math.max(15, snaps.length - 10)));
     const advShift = Math.max(-18, Math.min(18, (radGoldAdv / 15000) * 14));
@@ -13748,6 +13759,8 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
       ny: Math.max(10, Math.min(90, baseAnchor.ny + jitterY)),
       inFight: false,
       diedNow: diedAtThisSec,
+      isReal: false,
+      isSynthetic: true,
     };
   };
 
@@ -13758,13 +13771,13 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
       (w) =>
         `<circle cx="${(w.nx * MAP_SCALE).toFixed(1)}" cy="${(w.ny * MAP_SCALE).toFixed(1)}" r="6" fill="${
           w.side === "radiant" || w.side === "天辉" ? "#fbbf24" : "#f59e0b"
-        }" stroke="#111" stroke-width="1.4" opacity="0.92"><title>👁️ ${escapeHtml(
+        }" stroke="#111" stroke-width="1.4" opacity="1"><title>👁️ ${escapeHtml(
           w.hero_short_zh || ""
         )} 假眼 (${escapeHtml(w.time_str || "")})</title></circle>`
     ),
     ...activeSenAtMin.map(
       (w) =>
-        `<circle cx="${(w.nx * MAP_SCALE).toFixed(1)}" cy="${(w.ny * MAP_SCALE).toFixed(1)}" r="4.5" fill="#60a5fa" stroke="#111" stroke-width="1.2" opacity="0.88"><title>🔵 ${escapeHtml(
+        `<circle cx="${(w.nx * MAP_SCALE).toFixed(1)}" cy="${(w.ny * MAP_SCALE).toFixed(1)}" r="4.5" fill="#60a5fa" stroke="#111" stroke-width="1.2" opacity="1"><title>🔵 ${escapeHtml(
           w.hero_short_zh || ""
         )} 真眼 (${escapeHtml(w.time_str || "")})</title></circle>`
     ),
@@ -13784,13 +13797,15 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
     `
     : "";
 
-  // Compute raw coordinates for all 10 heroes and run force-directed anti-collision so avatars never overlap
+  // Compute raw coordinates for all 10 heroes and run force-directed anti-collision on synthetic nodes only
   const rawHeroNodes = players.map((pSnap, i) => {
     const coords = getHeroMinimapCoords(pSnap, i);
     return {
       pSnap,
       i,
       coords,
+      isReal: Boolean(coords.isReal),
+      isSynthetic: Boolean(coords.isSynthetic),
       cx: coords.nx * MAP_SCALE,
       cy: coords.ny * MAP_SCALE,
     };
@@ -13807,7 +13822,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
       const isRad = pSnap.side === "radiant";
       const strokeColor = isRad ? "#22c55e" : "#ef4444";
       const pt = tfParticipantsMap.get(hName);
-      const hasBkbInBag = (pSnap.items || []).some((it) => /黑皇杖|black_king_bar/i.test(it.zh || it.key || ""));
+      const hasBkbInBag = (pSnap.recent_purchases || pSnap.items || []).some((it) => /黑皇杖|black_king_bar/i.test(it.zh || it.key || ""));
       const ptItemsArr = pt?.items_used_zh || pt?.items || pt?.item_uses || pt?.items_used || [];
       const bkbUsedInTf = Boolean(
         pt?.bkb_used ||
@@ -13821,8 +13836,10 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
       const clipId = `scrub-hero-clip-${secNow}-${i}`;
       const deadInfo = pSnap.dead_status || null;
       const isDeadHero = Boolean(coords.diedNow);
+      const isSyntheticNode = Boolean(coords.isSynthetic);
+      const nodeOpacity = isSyntheticNode ? "0.52" : "1";
 
-      // Clean visual ring & subtle corner indicator ONLY (no overlapping text labels on the minimap!)
+      // Clean visual ring & subtle corner indicator ONLY
       const outerRingColor = bkbUsedInTf && !isDeadHero ? "#fbbf24" : isDeadHero ? "#991b1b" : strokeColor;
       const deadOverlaySvg = isDeadHero
         ? `<line x1="${(rawCx - 8).toFixed(1)}" y1="${(rawCy - 8).toFixed(1)}" x2="${(rawCx + 8).toFixed(1)}" y2="${(rawCy + 8).toFixed(1)}" stroke="#ef4444" stroke-width="2.4" stroke-linecap="round" />
@@ -13832,7 +13849,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
         : "";
 
       return `
-        <g class="scrub-map-hero-node" style="cursor:pointer;">
+        <g class="scrub-map-hero-node ${isSyntheticNode ? "synthetic-pos" : "real-pos"}" opacity="${nodeOpacity}" style="cursor:pointer;">
           <defs>
             <clipPath id="${clipId}">
               <circle cx="${cx}" cy="${cy}" r="15" />
@@ -13840,7 +13857,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
           </defs>
           <circle cx="${cx}" cy="${cy}" r="17" fill="#10130f" stroke="${outerRingColor}" stroke-width="${
         coords.inFight ? "3.2" : "2.5"
-      }" />
+      }" ${isSyntheticNode ? 'stroke-dasharray="3,2"' : ""} />
           ${
             iconUrl
               ? `<image href="${escapeHtml(iconUrl)}" x="${(rawCx - 15).toFixed(1)}" y="${(
@@ -13853,7 +13870,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
           ${deadOverlaySvg}
           <title>[${isRad ? "天辉" : "夜魇"}${escapeHtml(pSnap.pos)}号位] ${escapeHtml(hName)} (${escapeHtml(
         pSnap.personaname || ""
-      )}) · ${escapeHtml(timeStrNow)} 净值 ${fmtNum(pSnap.networth || 0)} 金 · 累计伤害 ${fmtNum(pSnap.hero_damage || 0)}${
+      )}) · ${isSyntheticNode ? "示意位置，非真实走位" : "真实录像坐标"} · ${escapeHtml(timeStrNow)} 净值 ${fmtNum(pSnap.networth || 0)} 金 · 累计伤害 ${fmtNum(pSnap.hero_damage || 0)}${
         pt ? ` · 本波团战伤害 ${fmtNum(pt.damage || 0)}` : ""
       }${
         isDeadHero && deadInfo
@@ -13908,12 +13925,12 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
           <div style="display:flex;align-items:center;gap:8px;">
             <strong style="font-size:13.5px;color:var(--gold-light);font-variant-numeric:tabular-nums;">🗺️ ${escapeHtml(
               timeStrNow
-            )} 实时小地图</strong>
+            )} 小地图（示意位置，非真实走位）</strong>
             <button type="button" id="btn-scrub-map-play" class="button primary" style="padding:2px 10px;font-size:11.5px;font-weight:700;">${
               state.scrubberPlaying ? "⏸ 暂停" : "▶ 播放团战"
             }</button>
           </div>
-          <span style="font-size:11px;color:var(--muted);">🟢天辉 🔴夜魇 🟡BKB ✕阵亡</span>
+          <span style="font-size:11px;color:var(--muted);">实心=真实点 ｜ 半透明=示意位置，非真实走位</span>
         </div>
         <svg viewBox="0 0 420 420" style="width:100%;max-width:468px;aspect-ratio:1/1;border-radius:10px;background:radial-gradient(circle at 50% 50%, #1e2820 0%, #101511 100%);border:1px solid #333b30;box-shadow:0 6px 20px rgba(0,0,0,0.45);">
           <!-- River & Lanes -->
@@ -13949,7 +13966,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
                     )} · ${escapeHtml(activeTfForensic?.location_zh || "正面战场")} · 人头交换 ${escapeHtml(
                       activeKeyTf?.kills_trade || `${activeTfForensic?.rad_kills ?? 0}:${activeTfForensic?.dire_kills ?? 0}`
                     )} · 经济波动 ${escapeHtml(String(activeKeyTf?.gold_swing || activeTfForensic?.gold_swing_rad || ""))})`
-                  : "⏱️ 拖动上方时间轴滑块到任意团战秒数，即可逐秒回放十人走位、技能释放与BKB按键记录"
+                  : "⏱️ 拖动上方时间轴滑块到任意团战秒数，查看小地图示意位置（非真实走位）、技能释放与BKB按键记录"
               }
             </span>
           </div>
@@ -14062,12 +14079,12 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
             deadInfo.gold_lost || 0
           }金)</span>`
         : "";
-      const itemsHtml = (p.items || [])
+      const itemsHtml = (p.recent_purchases || p.items || [])
         .map(
           (it) =>
             `<img class="scrub-item-icon" src="${escapeHtml(it.img || "")}" alt="${escapeHtml(
               it.zh || it.key || ""
-            )}" title="${escapeHtml(it.zh || it.key || "")}" width="24" height="18" loading="lazy" />`
+            )}" title="最近购买：${escapeHtml(it.zh || it.key || "")}" width="24" height="18" loading="lazy" />`
         )
         .join("");
       return `
@@ -14164,8 +14181,8 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
     </div>
     <div class="scrub-left-col">
       <div class="scrub-col-title">
-        <strong>🏆 ${escapeHtml(timeStrNow)} 时刻 · 十人实时净资产与已出核心装排位</strong>
-        <span>正补/反补与装备栏按秒同步插值定格</span>
+        <strong>🏆 ${escapeHtml(timeStrNow)} 时刻 · 十人实时净资产与最近购买排位</strong>
+        <span>正补/反补与最近购买（近 6 次购买记录）</span>
       </div>
       <div class="scrub-players-list">${barsHtml}</div>
     </div>
@@ -14514,7 +14531,6 @@ function renderMinimap(report) {
         const isOwn = pt.side === side || pt.side === sideZh;
         const fill = pt.side === "radiant" || pt.side === "天辉" ? "#8aa78b" : "#df8978";
         const w = Number(pt.weight || 1);
-        const alpha = Math.min(0.82, Math.max(0.2, w / maxWeight));
         const r = 1.5 + (w / maxWeight) * 2.4;
         const x = Number(pt.nx ?? pt.x ?? 50).toFixed(1);
         const y = Number(pt.ny ?? pt.y ?? 50).toFixed(1);
@@ -14524,7 +14540,7 @@ function renderMinimap(report) {
             cy="${y}"
             r="${r.toFixed(1)}"
             fill="${fill}"
-            fill-opacity="${alpha.toFixed(2)}"
+            fill-opacity="1"
             stroke="${isOwn ? "#e6e3dc" : "none"}"
             stroke-width="0.2"
           >
@@ -14543,20 +14559,17 @@ function renderMinimap(report) {
 
     const markers = [];
     activeTfs.forEach((tf, tfIdx) => {
-      (tf.deaths_coords || []).forEach((d, dIdx) => {
+      (tf.deaths_coords || []).forEach((d) => {
         const isOwn = d.side === side;
         const fill = isOwn ? "#d95548" : "#6fbf73";
-        // Slight spiral jitter if multiple deaths at exact same spot
-        const angle = (dIdx * 2.2) + tfIdx;
-        const jitterR = dIdx > 0 ? 1.4 : 0;
-        const cx = Math.min(95, Math.max(5, Number(d.nx || 50) + Math.cos(angle) * jitterR)).toFixed(1);
-        const cy = Math.min(95, Math.max(5, Number(d.ny || 50) + Math.sin(angle) * jitterR)).toFixed(1);
+        const cx = Math.min(95, Math.max(5, Number(d.nx || 50))).toFixed(1);
+        const cy = Math.min(95, Math.max(5, Number(d.ny || 50))).toFixed(1);
         const tip = `[团战 #${tf.index || tfIdx + 1} · ${tf.time_range}] ${
           isOwn ? "本方阵亡" : "敌方阵亡"
         }: ${d.hero_short_zh} (${d.personaname}) ×${d.deaths}`;
         markers.push(`
           <g>
-            <circle cx="${cx}" cy="${cy}" r="2.8" fill="${fill}" stroke="#121312" stroke-width="0.55">
+            <circle cx="${cx}" cy="${cy}" r="2.8" fill="${fill}" fill-opacity="1" stroke="#121312" stroke-width="0.55">
               <title>${escapeHtml(tip)}</title>
             </circle>
             <text x="${cx}" y="${(Number(cy) + 1.0).toFixed(1)}" fill="#fff" font-size="2.7" font-weight="700" text-anchor="middle" pointer-events="none">✕</text>
