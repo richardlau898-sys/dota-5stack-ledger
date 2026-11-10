@@ -1,0 +1,24 @@
+name: Postgame Match Parse & Webhook Notify
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check new squad matches, request parse, and send webhook summary
+        env:
+          POSTGAME_WEBHOOK_URL: ${{ secrets.POSTGAME_WEBHOOK_URL }}
+          PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL || 'https://dota-5stack-ledger.vercel.app' }}
+        run: python3 tools/postgame_webhook_notifier.py
