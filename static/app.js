@@ -510,6 +510,47 @@ function injectHeroLogosIntoHtml(safeHtml, report = state.currentReport) {
     .join("");
 }
 
+function formatMatchStartTime(val, { short = false } = {}) {
+  const ts =
+    typeof val === "number"
+      ? val
+      : val && typeof val === "object"
+      ? Number(val.start_time || 0)
+      : 0;
+  if (Number.isFinite(ts) && ts > 0) {
+    try {
+      const dt = new Date(ts * 1000);
+      const opts = short
+        ? { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }
+        : {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          };
+      const parts = new Intl.DateTimeFormat("zh-CN", opts).formatToParts(dt);
+      const map = {};
+      parts.forEach((p) => {
+        map[p.type] = p.value;
+      });
+      const hh = map.hour === "24" ? "00" : map.hour || "00";
+      const mm = map.minute || "00";
+      if (short) {
+        return `${map.month}-${map.day} ${hh}:${mm}`;
+      }
+      return `${map.year}-${map.month}-${map.day} ${hh}:${mm}`;
+    } catch {
+      // Fallback below
+    }
+  }
+  if (val && typeof val === "object") {
+    return String(val.start_time_str || val.time_ago || val.date_str || "");
+  }
+  return "";
+}
+
 function showToast(msg, durationMs = 3200) {
   const el = document.getElementById("toast-banner");
   if (!el) return;
@@ -1970,7 +2011,7 @@ function buildStructuredFullReportHtml(report) {
   }</span>
             </h1>
             <p class="fs-doc-sub">
-              比赛时间：${escapeHtml(report.start_time_str || "-")} ｜ 模式：${escapeHtml(
+              比赛时间：${escapeHtml(formatMatchStartTime(report) || "-")} ｜ 模式：${escapeHtml(
     report.game_mode_str || "全英雄选择"
   )} ｜ 赛果：${escapeHtml(report.winner || "")}获胜（天辉 ${report.radiant_score} : ${
     report.dire_score
@@ -3188,7 +3229,7 @@ async function downloadStructuredReportPdf() {
     const shareUrl = getPublicShareUrl(report.match_id);
     doc.text(
       cleanPdfVectorText(
-        `比赛时间：${report.start_time_str || "-"}  |  模式：${
+        `比赛时间：${formatMatchStartTime(report) || "-"}  |  模式：${
           report.game_mode_str || "全英雄选择"
         }  |  终局比分：天辉 ${report.radiant_score} : ${report.dire_score} 夜魇 (${
           report.duration_str
@@ -5594,7 +5635,7 @@ function renderHomeWorkspace() {
       const heroShort = m.hero_short_zh || m.hero_name || "未知英雄";
       const partyLabel = m.party_label || (m.party_size >= 2 ? `${m.party_size}人黑` : "单排");
       const durText = m.duration_str || m.duration || "";
-      const timeAgo = m.start_time_str || m.time_ago || "";
+      const timeAgo = formatMatchStartTime(m, { short: true }) || m.start_time_str || m.time_ago || "";
       const sideLabel = m.side_zh || m.side || (arch ? arch.side_zh : "");
       const isCurrent = Number(activeMid) === mid;
 
@@ -5771,7 +5812,8 @@ function renderWorkstationSidebarMatches() {
       hero_img: focusP.hero_img || "",
       kda: `${focusP.kills ?? 0}/${focusP.deaths ?? 0}/${focusP.assists ?? 0}`,
       duration_str: cr.duration_str || "",
-      start_time_str: cr.start_time_str || "",
+      start_time: cr.start_time ?? null,
+      start_time_str: formatMatchStartTime(cr, { short: true }) || cr.start_time_str || "",
       party_size: cr.party_size || 5,
       party_label: cr.party_label || "车队局",
     });
@@ -5796,7 +5838,8 @@ function renderWorkstationSidebarMatches() {
         hero_img: am.my_hero_img || heroMeta?.img || "",
         kda: am.my_kda || (am.score ? `比分 ${am.score}` : "-"),
         duration_str: am.duration_str || "",
-        start_time_str: am.start_time_str || am.date_str || "",
+        start_time: am.start_time ?? null,
+        start_time_str: formatMatchStartTime(am, { short: true }) || am.start_time_str || am.date_str || "",
         party_size: am.party_size || 5,
         party_label: am.party_label || "5人黑",
       });
@@ -5840,7 +5883,13 @@ function renderWorkstationSidebarMatches() {
       const heroImg = m.hero_img || arch?.my_hero_img || "";
       const partyLabel = m.party_label || (Number(m.party_size || 1) >= 2 ? `${m.party_size}人黑` : "单排");
       const durText = m.duration_str || m.duration || arch?.duration_str || "";
-      const timeStr = m.start_time_str || m.time_ago || arch?.start_time_str || "";
+      const timeStr =
+        formatMatchStartTime(m, { short: true }) ||
+        formatMatchStartTime(arch, { short: true }) ||
+        m.start_time_str ||
+        m.time_ago ||
+        arch?.start_time_str ||
+        "";
       const isSelected = mid === activeMid;
 
       let snippetHtml = "";
@@ -6539,7 +6588,8 @@ function renderMatchOverview(report) {
         : isParsed
         ? `🟢 OpenDota 录像级解析已成功 (可点下方「用 ${modelLabel} 重算判词」生成大模型标题)`
         : "🟡 当前仅基础统计 (刚结束的比赛 OpenDota 尚未解析 .dem 录像，系统正自动请求解析)";
-    metaEl.textContent = `比赛编号 #${report.match_id} · ${report.start_time_str || ""} · ${
+    const formattedStartTime = formatMatchStartTime(report);
+    metaEl.textContent = `比赛编号 #${report.match_id} · ${formattedStartTime} · ${
       report.mode_str || ""
     } · 当前审视阵营：${sideZh} (${side.toUpperCase()}) · ${statusText}`;
   }
@@ -6622,7 +6672,7 @@ function renderMatchOverview(report) {
       } ${report.radiant_score}:${report.dire_score})`;
     }
     if (locSub) {
-      locSub.textContent = `${report.start_time_str || ""} · ${report.duration_str || ""} · ${
+      locSub.textContent = `${formatMatchStartTime(report)} · ${report.duration_str || ""} · ${
         isParsed ? "录像级13维深潜" : "基础统计"
       }`;
     }
@@ -19822,7 +19872,7 @@ function switchWorkspaceMode(mode, { pushUrl = true, animate = true } = {}) {
         })`;
       }
       if (locSub) {
-        locSub.textContent = `${state.currentReport.start_time_str || ""} · ${
+        locSub.textContent = `${formatMatchStartTime(state.currentReport)} · ${
           state.currentReport.duration_str || ""
         } · 左侧边栏可随时点开切换任意一场比赛`;
       }

@@ -1077,7 +1077,7 @@ def analyze_match_data(
     radiant_win = bool(match.get("radiant_win"))
     radiant_score = match.get("radiant_score") or 0
     dire_score = match.get("dire_score") or 0
-    start_time = match.get("start_time") or 0
+    start_time = int(match.get("start_time") or 0)
     start_dt = (
         datetime.datetime.fromtimestamp(start_time).strftime("%Y-%m-%d %H:%M")
         if start_time
@@ -1706,6 +1706,7 @@ def analyze_match_data(
         "patch": match.get("patch"),
         "patch_str": resolve_patch_name(match.get("patch")),
         "mode_str": get_mode_and_lobby(match.get("game_mode", 0), match.get("lobby_type", 0)),
+        "start_time": start_time if start_time > 0 else None,
         "start_time_str": start_dt,
         "duration_str": format_duration(duration),
         "duration_min": round(duration_min, 1),
@@ -1822,6 +1823,7 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
         "patch",
         "patch_str",
         "mode_str",
+        "start_time",
         "start_time_str",
         "duration_str",
         "duration_min",

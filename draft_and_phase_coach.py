@@ -2706,6 +2706,7 @@ def build_squad_history_ledger(
             me_p = next((x for x in own_list if x.get("is_me") or int(x.get("account_id") or 0) == main_aid), None) or own_list[0]
             analyzed_matches_summary.append({
                 "match_id": mid,
+                "start_time": rep.get("start_time"),
                 "start_time_str": rep.get("start_time_str") or "",
                 "duration_str": rep.get("duration_str") or "",
                 "score": rep.get("score") or "",
