@@ -382,11 +382,17 @@ def aggregate_full_history_stats(
             "insufficient_sample": not sufficient,
         })
 
+    from squad_growth_metrics import compute_duration_and_session_tilt_buckets
+
+    all_norm_rows = [r for p_rows in by_account.values() for r in p_rows]
+    duration_and_session_tilt = compute_duration_and_session_tilt_buckets(all_norm_rows, min_games=min_games)
+
     return {
         "min_sample_games": min_games,
         "players": players_out,
         "combo_winrates": combo_list,
         "party_size_winrates": party_size_list,
+        "duration_and_session_tilt": duration_and_session_tilt,
     }
 
 
