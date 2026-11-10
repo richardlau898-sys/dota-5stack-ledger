@@ -1519,11 +1519,11 @@ def build_four_stage_narrative(
                 verdict = f"夜魇小优 (+{abs(diff):,}金)"
 
             rad_desc = " + ".join(
-                f"{p['pos']}号位{p.get('hero_short_zh', p['hero_name'])}(10m:{(p.get('laning_10m') or {}).get('lh10', 0)}刀/{(p.get('laning_10m') or {}).get('gold10', 0):,}金)"
+                f"{p['pos']}号位{p.get('hero_short_zh', p['hero_name'])}(10m:{int((p.get('laning_10m') or {}).get('lh10') or 0)}刀/{int((p.get('laning_10m') or {}).get('gold10') or 0):,}金)"
                 for p in rad_in_lane
             ) or "游走"
             dire_desc = " + ".join(
-                f"{p['pos']}号位{p.get('hero_short_zh', p['hero_name'])}(10m:{(p.get('laning_10m') or {}).get('lh10', 0)}刀/{(p.get('laning_10m') or {}).get('gold10', 0):,}金)"
+                f"{p['pos']}号位{p.get('hero_short_zh', p['hero_name'])}(10m:{int((p.get('laning_10m') or {}).get('lh10') or 0)}刀/{int((p.get('laning_10m') or {}).get('gold10') or 0):,}金)"
                 for p in dire_in_lane
             ) or "游走"
 

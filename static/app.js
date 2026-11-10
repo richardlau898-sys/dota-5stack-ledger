@@ -5776,6 +5776,14 @@ async function triggerGrokReview({ force = true } = {}) {
   }
 }
 
+function safeRenderSection(sectionName, fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`[SafeRender] Section "${sectionName}" failed:`, err);
+  }
+}
+
 /**
  * Master Render Function for the entire Match Forensics Dashboard
  */
@@ -5790,19 +5798,19 @@ function renderFullMatchReport(report) {
     state.microExecSelectedPos = "focus";
     state.forensicSelectedSlot = "focus";
   }
-  renderMatchOverview(report);
-  renderDraftAndComboSection(report);
-  renderVerdictAndBlameSection(report);
-  renderTacticalMicroscopeSection(report);
-  renderMinuteScrubber(report);
-  renderAdvChart(report);
-  renderNetWorthChart(report);
-  renderMinimap(report);
-  renderDamageMatrix(report);
-  renderFocusFireMatrix(report);
-  renderPhaseSection(report);
-  renderKeyWindowsSection(report);
-  renderPlayersForensicsList(report);
+  safeRenderSection("MatchOverview", () => renderMatchOverview(report));
+  safeRenderSection("DraftAndCombo", () => renderDraftAndComboSection(report));
+  safeRenderSection("VerdictAndBlame", () => renderVerdictAndBlameSection(report));
+  safeRenderSection("TacticalMicroscope", () => renderTacticalMicroscopeSection(report));
+  safeRenderSection("MinuteScrubber", () => renderMinuteScrubber(report));
+  safeRenderSection("AdvChart", () => renderAdvChart(report));
+  safeRenderSection("NetWorthChart", () => renderNetWorthChart(report));
+  safeRenderSection("Minimap", () => renderMinimap(report));
+  safeRenderSection("DamageMatrix", () => renderDamageMatrix(report));
+  safeRenderSection("FocusFireMatrix", () => renderFocusFireMatrix(report));
+  safeRenderSection("PhaseSection", () => renderPhaseSection(report));
+  safeRenderSection("KeyWindows", () => renderKeyWindowsSection(report));
+  safeRenderSection("PlayersForensics", () => renderPlayersForensicsList(report));
 
   // Hydrate any saved Nano Banana AI artworks for this match from IndexedDB so they appear on cards even after refresh
   hydrateMatchPosterArtsFromIdb(report.match_id).then((added) => {
@@ -6564,7 +6572,7 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
 
   const mSel = document.getElementById("micro-mobile-select");
   if (mSel) {
-    Array.from(mSel.options).forEach((opt) => {
+    Array.from(mSel.options || []).forEach((opt) => {
       const k = opt.value;
       if (results[k] && baseLabels[k]) {
         opt.textContent = `${baseLabels[k]} [${results[k].badge}]`;
