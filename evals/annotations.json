@@ -1,0 +1,346 @@
+{
+  "dataset_version": "1.0",
+  "description": "Dota 5-stack Ledger 10场固定样本基准评测集（谁的问题最大 + 3个关键时刻）",
+  "matches": [
+    {
+      "match_id": 9046276667,
+      "side": "dire",
+      "user_won": false,
+      "duration_str": "41:27",
+      "biggest_issue_pos": 2,
+      "biggest_issue_slot": 128,
+      "biggest_issue_hero_zh": "龙骑士",
+      "secondary_issue_pos": 1,
+      "biggest_issue_reason_zh": "中单2号位龙骑士全场2/8/10，对线与中期节奏断档，多次团战先倒且伤害转化偏低；1号位先知后期多次单带被玛西抓死（21:46、36:06、40:25）为次要问题。",
+      "key_moments": [
+        {
+          "time_sec": 1398,
+          "time_str": "23:18",
+          "window_sec": [1398, 1442],
+          "event_type": "teamfight",
+          "description_zh": "23:18–24:02 团战夜魇0换4溃败，天辉经济单波+3,427并完成局势翻转"
+        },
+        {
+          "time_sec": 1734,
+          "time_str": "28:54",
+          "window_sec": [1734, 1817],
+          "event_type": "teamfight",
+          "description_zh": "28:54–30:17 双方4换4惨烈交火，拉比克与暗影恶魔交出买活，先知被虚空击杀"
+        },
+        {
+          "time_sec": 2383,
+          "time_str": "39:43",
+          "window_sec": [2383, 2443],
+          "event_type": "teamfight",
+          "description_zh": "39:43–40:43 终局高地决战夜魇阵亡4人、天辉经济+5,625，随后基地告破"
+        }
+      ]
+    },
+    {
+      "match_id": 9046364324,
+      "side": "dire",
+      "user_won": true,
+      "duration_str": "42:40",
+      "biggest_issue_pos": 3,
+      "biggest_issue_slot": 131,
+      "biggest_issue_hero_zh": "马格纳斯",
+      "secondary_issue_pos": 2,
+      "biggest_issue_reason_zh": "3号位马格纳斯全场4/8/22，中期多波团战（23:34、27:01）两极反转未能有效命中核心甚至被拉比克偷大反打，分锅占比最高。",
+      "key_moments": [
+        {
+          "time_sec": 1935,
+          "time_str": "32:15",
+          "window_sec": [1935, 1983],
+          "event_type": "teamfight",
+          "description_zh": "32:15–33:03 夜魇开雾先手打出1换5团灭天辉，单波经济+6,044扭转劣势"
+        },
+        {
+          "time_sec": 2109,
+          "time_str": "35:09",
+          "window_sec": [2109, 2165],
+          "event_type": "teamfight",
+          "description_zh": "35:09–36:05 夜魇进攻过深遭遇1换5反扑，天辉单波经济+7,184"
+        },
+        {
+          "time_sec": 2451,
+          "time_str": "40:51",
+          "window_sec": [2451, 2491],
+          "event_type": "teamfight",
+          "description_zh": "40:51–41:31 决胜团夜魇0换3击溃天辉，单波经济+4,867锁定胜局"
+        }
+      ]
+    },
+    {
+      "match_id": 9049240640,
+      "side": "dire",
+      "user_won": true,
+      "duration_str": "39:51",
+      "biggest_issue_pos": 5,
+      "biggest_issue_slot": 128,
+      "biggest_issue_hero_zh": "工程师",
+      "secondary_issue_pos": 3,
+      "biggest_issue_reason_zh": "5号位工程师全场1/12/14阵亡12次，前中期多次开雾及接团第一时间阵亡且无伤害贡献，3号位龙骑士（6/7/14）次之。",
+      "key_moments": [
+        {
+          "time_sec": 1561,
+          "time_str": "26:01",
+          "window_sec": [1561, 1605],
+          "event_type": "teamfight",
+          "description_zh": "26:01–26:45 双方3换3混战，夜魇虽打出高额爆发但赏金交换亏损1,666金"
+        },
+        {
+          "time_sec": 2038,
+          "time_str": "33:58",
+          "window_sec": [2038, 2090],
+          "event_type": "teamfight",
+          "description_zh": "33:58–34:50 夜魇在优势局势下脱节被打出1换5团灭，天辉经济+6,748"
+        },
+        {
+          "time_sec": 2304,
+          "time_str": "38:24",
+          "window_sec": [2304, 2356],
+          "event_type": "teamfight",
+          "description_zh": "38:24–39:16 终局团战夜魇1换5团灭天辉，单波经济+7,737终结比赛"
+        }
+      ]
+    },
+    {
+      "match_id": 9049336548,
+      "side": "dire",
+      "user_won": true,
+      "duration_str": "41:31",
+      "biggest_issue_pos": 2,
+      "biggest_issue_slot": 132,
+      "biggest_issue_hero_zh": "影魔",
+      "secondary_issue_pos": 1,
+      "biggest_issue_reason_zh": "本局为夜魇胜局，2号位影魔（11/4/5）中期参战率偏低、单带刷钱较多导致队友局部少打多，1号位虚空假面35:29波次阵亡次之。",
+      "key_moments": [
+        {
+          "time_sec": 1867,
+          "time_str": "31:07",
+          "window_sec": [1867, 1915],
+          "event_type": "teamfight",
+          "description_zh": "31:07–31:55 夜魇0换3赢下关键中期团战，单波经济+4,851"
+        },
+        {
+          "time_sec": 2129,
+          "time_str": "35:29",
+          "window_sec": [2129, 2194],
+          "event_type": "teamfight",
+          "description_zh": "35:29–36:34 夜魇推进受阻被天辉打出1换4，天辉经济+5,166"
+        },
+        {
+          "time_sec": 2414,
+          "time_str": "40:14",
+          "window_sec": [2414, 2474],
+          "event_type": "teamfight",
+          "description_zh": "40:14–41:14 终局高地团战交火后夜魇拆基地获胜"
+        }
+      ]
+    },
+    {
+      "match_id": 9049526926,
+      "side": "dire",
+      "user_won": false,
+      "duration_str": "44:35",
+      "biggest_issue_pos": 1,
+      "biggest_issue_slot": 132,
+      "biggest_issue_hero_zh": "斯拉克",
+      "secondary_issue_pos": 3,
+      "biggest_issue_reason_zh": "1号位斯拉克（10/10/9）全场阵亡10次，中期关键团战（20:09）输出脱节且后期正面团战无法处理敌方核心；3号位凤凰（13/15/15）15次阵亡次之。",
+      "key_moments": [
+        {
+          "time_sec": 989,
+          "time_str": "16:29",
+          "window_sec": [989, 1070],
+          "event_type": "teamfight",
+          "description_zh": "16:29–17:50 双方爆发9人阵亡的4换5长团战，成为中期节奏分水岭"
+        },
+        {
+          "time_sec": 1209,
+          "time_str": "20:09",
+          "window_sec": [1209, 1262],
+          "event_type": "teamfight",
+          "description_zh": "20:09–21:02 夜魇2换4失利，天辉单波经济+2,666拉开差距"
+        },
+        {
+          "time_sec": 2068,
+          "time_str": "34:28",
+          "window_sec": [2068, 2125],
+          "event_type": "teamfight",
+          "description_zh": "34:28–35:25 夜魇1换5遭团灭，天辉经济+5,630奠定胜势"
+        }
+      ]
+    },
+    {
+      "match_id": 9058105598,
+      "side": "radiant",
+      "user_won": false,
+      "duration_str": "71:25",
+      "biggest_issue_pos": 1,
+      "biggest_issue_slot": 3,
+      "biggest_issue_hero_zh": "米拉娜",
+      "secondary_issue_pos": 3,
+      "biggest_issue_reason_zh": "71分钟超长局中，1号位米拉娜（10/9/42）后期正面终结能力不足且关键大后期团战阵亡；3号位马格纳斯（12/8/29）后期先手容错次之。",
+      "key_moments": [
+        {
+          "time_sec": 1404,
+          "time_str": "23:24",
+          "window_sec": [1404, 1465],
+          "event_type": "teamfight",
+          "description_zh": "23:24–24:25 天辉阵亡5人被打出2换5，夜魇经济+4,098"
+        },
+        {
+          "time_sec": 3577,
+          "time_str": "59:37",
+          "window_sec": [3577, 3626],
+          "event_type": "teamfight",
+          "description_zh": "59:37–60:26 60分钟大后期团战天辉阵亡4人，夜魇经济+5,883"
+        },
+        {
+          "time_sec": 4126,
+          "time_str": "68:46",
+          "window_sec": [4126, 4172],
+          "event_type": "teamfight",
+          "description_zh": "68:46–69:32 终局决战天辉0换4溃败，夜魇经济+10,354一波终结比赛"
+        }
+      ]
+    },
+    {
+      "match_id": 9059717808,
+      "side": "dire",
+      "user_won": false,
+      "duration_str": "40:09",
+      "biggest_issue_pos": 2,
+      "biggest_issue_slot": 129,
+      "biggest_issue_hero_zh": "先知",
+      "secondary_issue_pos": 3,
+      "biggest_issue_reason_zh": "2号位先知（8/13/29）全场阵亡13次，中后期多次在野区或带线时被抓，导致团战少人；3号位破晓辰星（4/12/24）阵亡12次次之。",
+      "key_moments": [
+        {
+          "time_sec": 1801,
+          "time_str": "30:01",
+          "window_sec": [1801, 1848],
+          "event_type": "teamfight",
+          "description_zh": "30:01–30:48 夜魇1换5遭团灭，天辉单波经济+4,809"
+        },
+        {
+          "time_sec": 1961,
+          "time_str": "32:41",
+          "window_sec": [1961, 2009],
+          "event_type": "teamfight",
+          "description_zh": "32:41–33:29 夜魇反打1换3追回3,835经济"
+        },
+        {
+          "time_sec": 2323,
+          "time_str": "38:43",
+          "window_sec": [2323, 2365],
+          "event_type": "teamfight",
+          "description_zh": "38:43–39:25 决胜团夜魇0换5团灭且买活阵亡，天辉经济+7,196终结比赛"
+        }
+      ]
+    },
+    {
+      "match_id": 9059800017,
+      "side": "dire",
+      "user_won": false,
+      "duration_str": "35:05",
+      "biggest_issue_pos": 1,
+      "biggest_issue_slot": 128,
+      "biggest_issue_hero_zh": "恐怖利刃",
+      "secondary_issue_pos": 2,
+      "biggest_issue_reason_zh": "1号位恐怖利刃全场1/8/1，对线期至中期连续阵亡彻底断节奏，参战率与伤害转化极低，分锅占比51.8%毫无悬念。",
+      "key_moments": [
+        {
+          "time_sec": 1493,
+          "time_str": "24:53",
+          "window_sec": [1493, 1551],
+          "event_type": "teamfight",
+          "description_zh": "24:53–25:51 夜魇0换4溃败，天辉单波经济+4,330"
+        },
+        {
+          "time_sec": 1690,
+          "time_str": "28:10",
+          "window_sec": [1690, 1739],
+          "event_type": "teamfight",
+          "description_zh": "28:10–28:59 夜魇再次0换4团灭，天辉经济+5,186破高"
+        },
+        {
+          "time_sec": 2040,
+          "time_str": "34:00",
+          "window_sec": [2040, 2082],
+          "event_type": "teamfight",
+          "description_zh": "34:00–34:42 终局高地团夜魇1换4落败，天辉经济+3,342结束比赛"
+        }
+      ]
+    },
+    {
+      "match_id": 9059875959,
+      "side": "dire",
+      "user_won": false,
+      "duration_str": "34:45",
+      "biggest_issue_pos": 3,
+      "biggest_issue_slot": 128,
+      "biggest_issue_hero_zh": "冥魂大帝",
+      "secondary_issue_pos": 2,
+      "biggest_issue_reason_zh": "本局夜魇整体被碾压，3号位冥魂大帝（2/8/7，分锅25.2%）面对强控未出BKB多次阵亡，2号位先知（5/7/6，分锅24.3%）29:26团战先手阵亡紧随其后。",
+      "key_moments": [
+        {
+          "time_sec": 1481,
+          "time_str": "24:41",
+          "window_sec": [1481, 1547],
+          "event_type": "teamfight",
+          "description_zh": "24:41–25:47 夜魇2换5团灭，天辉单波经济+2,719并控盾"
+        },
+        {
+          "time_sec": 1766,
+          "time_str": "29:26",
+          "window_sec": [1766, 1814],
+          "event_type": "teamfight",
+          "description_zh": "29:26–30:14 夜魇0换3溃败，天辉单波经济+4,644攻破高地"
+        },
+        {
+          "time_sec": 1851,
+          "time_str": "30:51",
+          "window_sec": [1851, 1897],
+          "event_type": "teamfight",
+          "description_zh": "30:51–31:37 连续高地团战夜魇1换4失利，天辉经济+3,565扩大胜势"
+        }
+      ]
+    },
+    {
+      "match_id": 9059958125,
+      "side": "radiant",
+      "user_won": true,
+      "duration_str": "37:17",
+      "biggest_issue_pos": 2,
+      "biggest_issue_slot": 3,
+      "biggest_issue_hero_zh": "天怒法师",
+      "secondary_issue_pos": 4,
+      "biggest_issue_reason_zh": "天辉胜局中，2号位天怒法师（9/9/13）中后期走位靠前阵亡9次送出较多终结赏金，4号位矮人直升机（5/13/18）13次阵亡次之。",
+      "key_moments": [
+        {
+          "time_sec": 1505,
+          "time_str": "25:05",
+          "window_sec": [1505, 1554],
+          "event_type": "teamfight",
+          "description_zh": "25:05–25:54 中期团战天辉阵亡3人、夜魇经济+2,188"
+        },
+        {
+          "time_sec": 1673,
+          "time_str": "27:53",
+          "window_sec": [1673, 1732],
+          "event_type": "teamfight",
+          "description_zh": "27:53–28:52 双方4换3拉锯战，夜魇经济+1,806"
+        },
+        {
+          "time_sec": 2122,
+          "time_str": "35:22",
+          "window_sec": [2122, 2159],
+          "event_type": "teamfight",
+          "description_zh": "35:22–35:59 决胜团天辉0换3击溃夜魇，单波经济+6,017一波平推获胜"
+        }
+      ]
+    }
+  ]
+}
