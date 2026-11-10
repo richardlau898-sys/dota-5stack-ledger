@@ -1030,7 +1030,7 @@ def get_item_zh(item_key: str, fallback_dname: str = "") -> str:
         return f"死灵书({lvl}级)"
     if k.startswith("enhancement_"):
         return "中立附魔词条"
-    return "战术道具"
+    return ""
 
 
 def get_ability_zh(ability_key: str) -> str:

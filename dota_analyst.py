@@ -239,7 +239,7 @@ def get_item_constants_map() -> Tuple[Dict[int, Dict[str, Any]], Dict[str, Dict[
         if isinstance(val, dict) and "id" in val:
             item_id = int(val["id"])
             dname = val.get("dname") or key
-            zh_name = get_item_zh(key, dname)
+            zh_name = get_item_zh(key, dname) or "战术道具"
             raw_img = (val.get("img") or f"/apps/dota2/images/dota_react/items/{key}.png").split("?")[0]
             img_url = f"{VALVE_CDN}{raw_img}" if raw_img.startswith("/") else raw_img
             cost = int(val.get("cost") or 0)
@@ -672,10 +672,16 @@ def extract_rich_items_and_abilities(
             src_type = "attack"
             casts = 0
         else:
-            item_zh = get_item_zh(inf_key)
+            is_known_item = (
+                inf_key in ITEMS_ZH
+                or inf_key.lower() in ITEMS_ZH
+                or inf_key in item_by_key
+                or inf_key.startswith(("dagon_", "necronomicon_", "recipe_"))
+            )
+            item_zh = get_item_zh(inf_key) if is_known_item else ""
             ab_zh = get_ability_zh(inf_key)
-            if item_zh:
-                zh_src = item_zh
+            if is_known_item and (item_zh or inf_key in item_by_key):
+                zh_src = item_zh or (item_by_key.get(inf_key) or {}).get("zh_name") or "战术道具"
                 src_type = "item"
                 casts = int(item_uses.get(inf_key) or 0)
             elif ab_zh:
@@ -1280,6 +1286,14 @@ def analyze_match_data(
                 "raw_benchmarks": raw_bm,
                 "tags": tags,
             })
+        team_total_dmg_taken = sum(int(tp.get("damage_taken") or 0) for tp in out)
+        for tp in out:
+            if team_total_dmg_taken > 0:
+                tp["damage_taken_share_pct"] = round(
+                    int(tp.get("damage_taken") or 0) * 100.0 / team_total_dmg_taken, 1
+                )
+            else:
+                tp["damage_taken_share_pct"] = None
         return out
 
     radiant_report = format_team_players(radiant_sorted, "radiant")

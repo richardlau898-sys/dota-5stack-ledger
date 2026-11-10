@@ -88,7 +88,22 @@ def evaluate_player_deeply(
     tdmg_share = tdmg / team_tdmg * 100.0
     dmg_taken_share = dmg_taken / team_dmg_taken * 100.0
 
-    opp_same_pos = next((ep for ep in enemy_players if ep.get("pos") == pos), None)
+    my_lane = p.get("raw_lane") if p.get("raw_lane") is not None else p.get("lane")
+    same_lane_enemies = [
+        ep
+        for ep in enemy_players
+        if my_lane in (1, 2, 3)
+        and (ep.get("raw_lane") if ep.get("raw_lane") is not None else ep.get("lane")) == my_lane
+    ]
+    if same_lane_enemies:
+        if pos in (1, 2, 3):
+            core_cands = [ep for ep in same_lane_enemies if int(ep.get("pos") or 0) in (1, 2, 3)]
+            opp_same_pos = sorted(core_cands or same_lane_enemies, key=lambda ep: int(ep.get("pos") or 9))[0]
+        else:
+            sup_cands = [ep for ep in same_lane_enemies if int(ep.get("pos") or 0) in (4, 5)]
+            opp_same_pos = sorted(sup_cands or same_lane_enemies, key=lambda ep: int(ep.get("pos") or 0), reverse=True)[0]
+    else:
+        opp_same_pos = None
 
     # 1. 计算六维雷达图 (0~100)
     gpm_pct = raw_bm.get("gold_per_min", 0.5)
@@ -264,8 +279,21 @@ def evaluate_player_deeply(
                     f"@{pname} 对线期给对面 {opp_hero} 养了个无解肥大爹出来，10分钟落后 {abs(gold_diff_10)} 块，中期团不过从你这儿开始算账！",
                 ))
         else:
-            core_partner_pos = 1 if pos == 5 else 3
-            core_partner = next((tp for tp in team_players if tp.get("pos") == core_partner_pos), None)
+            core_partner = None
+            if my_lane in (1, 2, 3):
+                core_partner = next(
+                    (
+                        tp
+                        for tp in team_players
+                        if tp.get("player_slot") != p.get("player_slot")
+                        and (tp.get("raw_lane") if tp.get("raw_lane") is not None else tp.get("lane")) == my_lane
+                        and int(tp.get("pos") or 0) in (1, 2, 3)
+                    ),
+                    None,
+                )
+            if not core_partner:
+                core_partner_pos = 1 if pos == 5 else 3
+                core_partner = next((tp for tp in team_players if tp.get("pos") == core_partner_pos), None)
             if core_partner and (core_partner.get("laning_10m") or {}).get("gold10"):
                 cp_g10 = core_partner["laning_10m"]["gold10"]
                 cp_lh10 = core_partner["laning_10m"]["lh10"]
@@ -896,11 +924,21 @@ def evaluate_player_deeply(
         synergies = dossier.get("best_ally_synergies") or []
         pos_role_title = dossier.get("pos_role_title") or f"{pos}号位·{hero_name}"
 
+        def _lookup_hero_count(breakdown: Dict[str, Any], h_short: str) -> int:
+            if not h_short or not isinstance(breakdown, dict):
+                return 0
+            h_list = breakdown.get("heroes")
+            if isinstance(h_list, list):
+                for entry in h_list:
+                    if isinstance(entry, dict) and entry.get("hero_short_zh") == h_short:
+                        return int(entry.get("count") or 0)
+            return int(breakdown.get(h_short, 0) or 0)
+
         # 检查是否兑现了对敌方特定英雄的先天克制
         for ce in c_enemies[:2]:
             ce_txt = ce if isinstance(ce, str) else f"{ce.get('label', '')}：{ce.get('reason', '')}"
             matched_eh = next((ep.get("hero_short_zh", "") for ep in enemy_players if ep.get("hero_short_zh") and ep.get("hero_short_zh") in ce_txt), "")
-            k_cnt = int(kills_info.get(matched_eh, 0) or 0) if matched_eh else 0
+            k_cnt = _lookup_hero_count(kills_info, matched_eh) if matched_eh else 0
             if matched_eh and k_cnt >= 2:
                 strengths.append(
                     f"⚔️ 【英雄机制克制完美兑现（手刃 {matched_eh}×{k_cnt}）】：{ce_txt} 本局精准锁定并击杀 {matched_eh} {k_cnt} 次，彻底打出英雄克制链价值！"
@@ -914,7 +952,7 @@ def evaluate_player_deeply(
         for cbe in cb_enemies[:2]:
             cbe_txt = cbe if isinstance(cbe, str) else f"{cbe.get('label', '')}：{cbe.get('reason', '')} {cbe.get('item_solution', '')}"
             matched_eh = next((ep.get("hero_short_zh", "") for ep in enemy_players if ep.get("hero_short_zh") and ep.get("hero_short_zh") in cbe_txt), "")
-            d_cnt = int(killed_by_info.get(matched_eh, 0) or 0) if matched_eh else 0
+            d_cnt = _lookup_hero_count(killed_by_info, matched_eh) if matched_eh else 0
             if matched_eh and d_cnt >= 2:
                 weaknesses.append(
                     f"🚨 【惨遭敌方天敌机制克制（被 {matched_eh} 击杀 {d_cnt} 次）】：{cbe_txt}"
@@ -1010,7 +1048,10 @@ def evaluate_player_deeply(
     elif pos in (4, 5) and (obs + sen) >= 12:
         praise_talk = f"@{pname} 最佳幕后功臣！{hero_name} 全场点亮 {obs} 假 {sen} 真视野 + 参战率 {kp:.0f}%，吃草挤奶把大哥伺候得明明白白！"
     elif deaths >= 10:
-        praise_talk = f"@{pname} 虽然这把 {hero_name} 阵亡 {deaths} 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！"
+        if won:
+            praise_talk = f"@{pname} 虽然这把 {hero_name} 阵亡 {deaths} 次惊险刺激（全队头号吸火避雷针），但电子竞技赢了就是好兄弟，喜提躺赢金杯！"
+        else:
+            praise_talk = f"@{pname} 这把 {hero_name} 阵亡 {deaths} 次承压严重（读秒 {dead_min}分{dead_rem_s:02d}秒），团战站位与切入时机亟待复盘优化。"
     else:
         praise_talk = f"@{pname} 稳健上分拼图！{hero_name} 交出 {kills}/{deaths}/{assists}（参战率 {kp:.0f}% · 伤害 {hdmg:,}），关键团战从不掉链子！"
 
@@ -1020,7 +1061,10 @@ def evaluate_player_deeply(
     elif rating_score >= 8.8 or is_turret_fulfilled:
         trash_talk = f"@{pname} 这把 {hero_name} 中路打出线优+全场狂灌 {hdmg:,} 伤害（每死换 {int(dmg_per_death):,} 血），已经把炮台输出拉满了，已尽力扛起全队输出重任！"
     else:
-        trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 标准打卡下班，背锅占比 {blame_points:.0f} 点，赢了跟着笑，输了怪队友！"
+        if won:
+            trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 标准打卡下班，平稳跟团完成基础任务！"
+        else:
+            trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 标准打卡下班，背锅占比 {blame_points:.0f} 点，逆风局未能站出来破局！"
 
     return {
         "is_afk_farmer": is_afk_farmer,
@@ -1064,7 +1108,11 @@ def build_player_playstyle_and_build_forensics(
     dq_audit = p.get("damage_and_build_audit") or {}
     nc_audit = p.get("neutral_craft_audit") or {}
     skill_route = str(dq_audit.get("skill_route_summary_zh") or "")
-    talents = [str(t) for t in (dq_audit.get("talents_chosen") or [])]
+    talents = [
+        str(t.get("zh") or t.get("tier") or "") if isinstance(t, dict) else str(t)
+        for t in (dq_audit.get("talents_chosen") or [])
+        if (t.get("zh") if isinstance(t, dict) else t)
+    ]
     craft_steps = nc_audit.get("craft_steps") or []
 
     # 1) 技能与道具伤害占比拆解 (damage_by_source_rich)
@@ -1186,28 +1234,46 @@ def build_player_playstyle_and_build_forensics(
         is_smart_playstyle_pivot = True
         archetype_badge = f"🧙‍♂️ 法系A杖技能增强炮台流（技能伤占 {spell_total_pct:.0f}%）"
         archetype_analysis_zh = (
-            f"🧙‍♂️ 【流派识别：{archetype_badge}】：本局 {hero} 走的是深度法系技能强化路线，完整出装时间轴为【{full_chain_str}】。"
-            f"核心输出依靠《{top_spell_name}》（释放 {top_spell_casts} 次造成 {top_spell_dmg:,} 伤害，占自身总输出 {top_spell_pct:.1f}%），"
-            f"配合神杖/法系增伤装与天赋附魔打出高频远程法术压制。"
+            f"🧙‍♂️ 【流派识别：{archetype_badge}】：本局 {hero} 走的是深度法系技能强化路线，完整出装时间轴为【{full_chain_str}】"
+            + (
+                f"。核心输出依靠《{top_spell_name}》（"
+                + (f"释放 {top_spell_casts} 次" if top_spell_casts > 0 else "")
+                + f"造成 {top_spell_dmg:,} 伤害，占自身总输出 {top_spell_pct:.1f}%），配合神杖/法系增伤装与天赋附魔打出高频远程法术压制。"
+                if top_spell_name and top_spell_dmg > 0
+                else "，配合神杖/法系增伤装与天赋附魔打出高频远程法术压制。"
+            )
         )
     elif pos in (1, 2) and atk_pct >= 50.0:
         archetype_badge = f"🗡️ 物理平A核心收割流（普攻占 {atk_pct:.0f}%）"
         archetype_analysis_zh = (
             f"🗡️ 【流派识别：{archetype_badge}】：本局 {hero} 完整出装演进为【{full_chain_str}】，"
             f"普通攻击贡献 {atk_pct:.1f}% 伤害"
-            + (f"，配合《{top_spell_name}》（{top_spell_dmg:,} 伤害 / {top_spell_pct:.1f}%）完成团战切入与收割。" if top_spell else "。")
+            + (f"，配合《{top_spell_name}》（{top_spell_dmg:,} 伤害 / {top_spell_pct:.1f}%）完成团战切入与收割。" if top_spell_name and top_spell_dmg > 0 else "。")
         )
     elif pos == 3 and has_blink:
         archetype_badge = "⚡ 跳刀先手控制 + 阵地反制流"
         archetype_analysis_zh = (
             f"⚡ 【流派识别：{archetype_badge}】：本局 3号位 {hero} 完整出装演进为【{full_chain_str}】，"
-            f"主打跳刀先手开团与前中排技能拉扯，主力技能《{top_spell_name}》释放 {top_spell_casts} 次造成 {top_spell_dmg:,} 伤害（{top_spell_pct:.1f}%）。"
+            f"主打跳刀先手开团与前中排技能拉扯"
+            + (
+                f"，主力技能《{top_spell_name}》"
+                + (f"释放 {top_spell_casts} 次" if top_spell_casts > 0 else "")
+                + f"造成 {top_spell_dmg:,} 伤害（{top_spell_pct:.1f}%）。"
+                if top_spell_name and top_spell_dmg > 0
+                else "。"
+            )
         )
     else:
         archetype_badge = f"🧭 {pos}号位·{hero}战术出装流"
         archetype_analysis_zh = (
             f"🧭 【流派与全链路出装时间轴】：本局 {hero} 完整成装演进为【{full_chain_str}】"
-            + (f"，头号伤害来源为《{top_spell_name}》（释放 {top_spell_casts} 次造成 {top_spell_dmg:,} 伤害，占 {top_spell_pct:.1f}%）。" if top_spell else "。")
+            + (
+                f"，头号伤害来源为《{top_spell_name}》（"
+                + (f"释放 {top_spell_casts} 次" if top_spell_casts > 0 else "")
+                + f"造成 {top_spell_dmg:,} 伤害，占 {top_spell_pct:.1f}%）。"
+                if top_spell_name and top_spell_dmg > 0
+                else "。"
+            )
         )
 
     # 5) 技能×敌方目标精准命中账本 & 单发最高名场面 (spell_target_matrix + max_hit_summary_zh)
@@ -1219,13 +1285,13 @@ def build_player_playstyle_and_build_forensics(
         mh_prefix = f"🔥 【单发最高名场面】：{max_hit_str} ｜ " if (max_hit_str and "无单发" not in max_hit_str) else ""
         spell_target_audit_zh = f"🎯 【技能×敌方目标精准命中账本】：{mh_prefix}{' ｜ '.join(st_summaries)}"
 
-    # 6) 永久 Buff 叠层与 7.38 命石审计 (perm_buff_badges + perm_buff_notes)
+    # 6) 永久 Buff 叠层与命石审计 (perm_buff_badges + perm_buff_notes)
     pb_badges = [str(b) for b in (dq_audit.get("perm_buff_badges") or []) if b]
     pb_notes = [str(n) for n in (dq_audit.get("perm_buff_notes") or []) if n]
     perm_buff_audit_zh = ""
     if pb_badges or pb_notes:
         perm_buff_audit_zh = (
-            f"♾️ 【永久 Buff 叠层 & 7.38 命石审计】：{' · '.join(pb_badges)}"
+            f"♾️ 【永久 Buff 叠层 & 命石审计】：{' · '.join(pb_badges)}"
             + (f" —— {' '.join(pb_notes)}" if pb_notes else "")
         )
 

@@ -588,10 +588,13 @@ def build_tactical_microscope(
             for k_ab, cnt_ab in sorted(au.items(), key=lambda x: x[1], reverse=True):
                 if k_ab.startswith("rubick_") or k_ab in ("ability_capture", "ability_lamp_use", "twin_gate_portal_warp", "plus_high_five", "seasonal_dark_carnival_pie"):
                     continue
+                ab_zh = get_ability_zh(k_ab)
+                if not ab_zh:
+                    continue
                 h_ab = hh.get(k_ab, 0)
                 d_ab = di.get(k_ab, 0)
                 stolen_used.append(
-                    f"偷《{get_ability_zh(k_ab)}》放 {cnt_ab} 次"
+                    f"偷《{ab_zh}》放 {cnt_ab} 次"
                     + (f"(中{h_ab}人/{d_ab:,}伤)" if (h_ab > 0 or d_ab > 0) else "")
                 )
             rub_msg = (
@@ -2612,10 +2615,30 @@ def build_tactical_microscope(
 
         for own_p in own_players:
             pos_i = int(own_p.get("pos") or 1)
-            opp_p = opp_by_pos.get(pos_i) or (opp_players[pos_i - 1] if pos_i - 1 < len(opp_players) else opp_players[0])
             own_slot = int(own_p["player_slot"])
-            opp_slot = int(opp_p["player_slot"])
             own_rp = raw_by_slot.get(own_slot, {})
+            own_lane = own_rp.get("lane") if own_rp.get("lane") is not None else own_p.get("raw_lane")
+            same_lane_opps = [
+                ep
+                for ep in opp_players
+                if own_lane in (1, 2, 3)
+                and (
+                    raw_by_slot.get(int(ep["player_slot"]), {}).get("lane")
+                    if raw_by_slot.get(int(ep["player_slot"]), {}).get("lane") is not None
+                    else ep.get("raw_lane")
+                )
+                == own_lane
+            ]
+            if same_lane_opps:
+                if pos_i in (1, 2, 3):
+                    core_opps = [ep for ep in same_lane_opps if int(ep.get("pos") or 0) in (1, 2, 3)]
+                    opp_p = sorted(core_opps or same_lane_opps, key=lambda ep: int(ep.get("pos") or 9))[0]
+                else:
+                    sup_opps = [ep for ep in same_lane_opps if int(ep.get("pos") or 0) in (4, 5)]
+                    opp_p = sorted(sup_opps or same_lane_opps, key=lambda ep: int(ep.get("pos") or 0), reverse=True)[0]
+            else:
+                opp_p = opp_by_pos.get(pos_i) or (opp_players[pos_i - 1] if pos_i - 1 < len(opp_players) else opp_players[0])
+            opp_slot = int(opp_p["player_slot"])
             opp_rp = raw_by_slot.get(opp_slot, {})
 
             own_hid = int(own_p.get("hero_id") or 0)
@@ -3511,6 +3534,7 @@ def build_tactical_microscope(
         _ABILITY_CATALOG = {"by_id": {}, "hero_basic_skills": {}}
     _AID_BY_ID: Dict[str, Dict[str, Any]] = _ABILITY_CATALOG.get("by_id") or {}
     _HERO_BASIC_SKILLS: Dict[str, List[str]] = _ABILITY_CATALOG.get("hero_basic_skills") or {}
+    _HERO_TALENT_TIERS: Dict[str, Dict[str, str]] = _ABILITY_CATALOG.get("hero_talent_tiers") or {}
 
     TANK_SPONGE_HERO_KEYS = {
         "pudge", "brewmaster", "bristleback", "centaur", "tidehunter",
@@ -3559,7 +3583,11 @@ def build_tactical_microscope(
         "kunkka_return": "kunkka_x_marks_the_spot",
         "puck_ethereal_jaunt": "puck_illusory_orb",
         "Tiny_toss_tree": "tiny_avalanche",
+        "monkey_king_primal_spring": "monkey_king_tree_dance",
         "monkey_king_primal_spring_early": "monkey_king_tree_dance",
+        "nevermore_shadowraze2": "nevermore_shadowraze1",
+        "nevermore_shadowraze3": "nevermore_shadowraze1",
+        "alchemist_unstable_concoction_throw": "alchemist_unstable_concoction",
         "pangolier_gyroshell_stop": "pangolier_gyroshell",
         "ancient_apparition_ice_blast_release": "ancient_apparition_ice_blast",
         "bane_nightmare_end": "bane_nightmare",
@@ -3843,8 +3871,14 @@ def build_tactical_microscope(
 
             talent_tiers = ["10级天赋", "15级天赋", "20级天赋", "25级天赋"]
             talent_idx = 0
+            hero_tal_map = _HERO_TALENT_TIERS.get(h_npc) or {}
+            has_explicit_attr = any(
+                bool((_AID_BY_ID.get(str(a)) or {}).get("is_attr")) for a in upgrades_arr
+            )
+            pt_to_level_map = {17: 18, 18: 20, 19: 25, 20: 27, 21: 28, 22: 29, 23: 30}
 
-            for lv_idx, raw_aid in enumerate(upgrades_arr, 1):
+            for pt_idx, raw_aid in enumerate(upgrades_arr, 1):
+                lv_idx = pt_idx if has_explicit_attr else pt_to_level_map.get(pt_idx, pt_idx)
                 cat_entry = _AID_BY_ID.get(str(raw_aid)) or {}
                 akey = cat_entry.get("key") or f"ability_{raw_aid}"
                 akey_norm = SUB_SKILL_REMAP.get(akey, akey)
@@ -3854,7 +3888,11 @@ def build_tactical_microscope(
                 slot_lbl = skill_slot_map.get(akey_norm, "大招" if "ult" in akey_norm else "技能")
 
                 if is_tal:
-                    t_label = talent_tiers[min(talent_idx, len(talent_tiers) - 1)]
+                    t_label = (
+                        hero_tal_map.get(akey)
+                        or cat_entry.get("tier")
+                        or talent_tiers[min(talent_idx, len(talent_tiers) - 1)]
+                    )
                     talent_idx += 1
                     talents_chosen.append({
                         "tier": t_label,
@@ -3914,7 +3952,9 @@ def build_tactical_microscope(
             # 检查基础三技能是否有前8~9级完全不学的情况
             for idx_b, b_skill in enumerate(basic_skills_order[:3]):
                 b_norm = SUB_SKILL_REMAP.get(b_skill, b_skill)
-                learned_lv = first_learned_lvl.get(b_norm, 99)
+                learned_lv = first_learned_lvl.get(b_norm)
+                if learned_lv is None:
+                    continue
                 b_zh = get_ability_zh(b_norm)
                 if learned_lv >= 9:
                     skill_build_issues_cnt += 1
@@ -3932,7 +3972,7 @@ def build_tactical_microscope(
                         if skill_build_grade == "good":
                             skill_build_grade = "warn"
                         skill_build_flags.append(
-                            f"⚠️ 偏科加点：前 {learned_lv - 1} 级完全没学【{b_zh}】（{ '直到 L' + str(learned_lv) + ' 才点 1 级' if learned_lv < 99 else '整局 0 级' }），前中期少一个技能维度。"
+                            f"⚠️ 偏科加点：前 {learned_lv - 1} 级完全没学【{b_zh}】（直到 L{learned_lv} 才点 1 级），前中期少一个技能维度。"
                         )
 
             # 检查关键救人/叠层技能是否只点1级拖到12级后才补
@@ -3957,15 +3997,14 @@ def build_tactical_microscope(
             if not skill_build_flags:
                 skill_build_flags.append(f"✓ 加点路线合理（{skill_route_summary_zh}，三技能衔接顺畅）。")
 
-            # 3) 永久 Buff 与英雄成长叠层审计 (permanent_buffs + 7.38 命石 hero_variant)
+            # 3) 永久 Buff 与英雄成长叠层审计 (permanent_buffs + 命石 hero_variant)
             raw_pbuffs = raw_p.get("permanent_buffs") or []
             perm_buff_badges = []
             perm_buff_notes = []
             found_buff_ids = {}
             h_variant = raw_p.get("hero_variant")
-            if h_variant is not None:
-                v_idx = int(h_variant) + 1 if int(h_variant) == 0 else int(h_variant)
-                perm_buff_badges.append(f"🪨 7.38 命石 #{v_idx}")
+            if h_variant:
+                perm_buff_badges.append(f"🪨 命石 #{int(h_variant)}")
 
             for pb in raw_pbuffs:
                 bid = int(pb.get("permanent_buff") or 0)

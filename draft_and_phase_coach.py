@@ -1157,6 +1157,7 @@ def enrich_phases_with_evaluations(
         plabel = pd.get("label", "")
         tlabel = pd.get("time_label", "")
         g_phase = grok_phase_map.get(pkey, {})
+        phase_min = max(1.0, (int(pd.get("end_sec") or 0) - int(pd.get("start_sec") or 0)) / 60.0)
 
         for pp in pd.get("players") or []:
             slot = int(pp.get("slot", 0))
@@ -1168,7 +1169,9 @@ def enrich_phases_with_evaluations(
             gpm_p = float(pp.get("gpm_phase") or 0.0)
             lh_gain = int(pp.get("lh_gain") or 0)
             dn_gain = int(pp.get("dn_gain") or 0)
-            hd_gain = int(pp.get("hero_damage_gain") or 0)
+            raw_hd_gain = pp.get("hero_damage_gain")
+            has_hd_data = raw_hd_gain is not None
+            hd_gain = int(raw_hd_gain or 0)
             td_gain = int(pp.get("tower_damage_gain") or 0)
             obs_p = int(pp.get("obs_placed") or 0)
             sen_p = int(pp.get("sen_placed") or 0)
@@ -1360,7 +1363,7 @@ def enrich_phases_with_evaluations(
                 elif deaths >= 1:
                     bad_list.append(f"后期阵亡 {deaths} 次（{', '.join(death_times)}）" + (f"，并交出 {pp.get('buybacks',0)} 次买活。" if pp.get("buybacks") else "，后期高地/肉山团站位与自保装需更到位。"))
 
-                if pos in (1, 2, 3) and hd_gain < 9000 and not late_harvest_fail and not hmp.get("sacrificial_initiator_fulfilled"):
+                if has_hd_data and pos in (1, 2, 3) and hd_gain < phase_min * 600.0 and not late_harvest_fail and not hmp.get("sacrificial_initiator_fulfilled"):
                     bad_list.append(f"后期团战输出匮乏：25分钟后吃下 +{gold_gain:,} 金却仅打出 +{hd_gain:,} 英雄伤害，未能承担核心收割职责。")
 
                 if not good_list:
@@ -2670,7 +2673,7 @@ def build_squad_history_ledger(
                 gp = grok_by_pos.get(int(pl.get("pos") or 0))
                 if gp and gp.get("grok_share_pct") is not None:
                     return float(gp["grok_share_pct"])
-                return float(pl.get("contrib_share_pct") if won else pl.get("blame_share_pct") or 20.0)
+                return float((pl.get("contrib_share_pct") if won else pl.get("blame_share_pct")) or 20.0)
 
             if won:
                 sorted_contrib = sorted(
@@ -2826,9 +2829,10 @@ def build_squad_history_ledger(
                     str(gp_cur.get("item_and_blink_audit") or ""),
                 ])
                 early_txt = str(gp_cur.get("early_story") or "")
-                lh10_val = int((p.get("lane_summary") or {}).get("lh_at_10") or p.get("lh_at_10") or 30)
+                raw_lh10 = (p.get("laning_10m") or {}).get("lh10")
+                lh10_val = int(raw_lh10) if isinstance(raw_lh10, (int, float)) else None
                 if any(kw in early_txt for kw in ("崩盘", "被打穿", "坐牢", "被压", "连续暴毙", "提款")) or (
-                    pos_p in (1, 2, 3) and lh10_val > 0 and lh10_val < 32
+                    pos_p in (1, 2, 3) and lh10_val is not None and lh10_val > 0 and lh10_val < 32
                 ):
                     st["lane_loss_count"] += 1
 
@@ -2924,7 +2928,16 @@ def build_squad_history_ledger(
                 db["games"] += 1
                 if won:
                     db["wins"] += 1
-                avg_r_pair = (float(pa.get("rating_score") or 60.0) + float(pb.get("rating_score") or 60.0)) / 2.0
+                def _to_score_100(pl_obj: Dict[str, Any]) -> float:
+                    raw_val = float(
+                        pl_obj.get("mvp_score")
+                        or pl_obj.get("rating_score_100")
+                        or pl_obj.get("rating_score")
+                        or 60.0
+                    )
+                    return raw_val * 10.0 if raw_val <= 10.5 else raw_val
+
+                avg_r_pair = (_to_score_100(pa) + _to_score_100(pb)) / 2.0
                 db["total_rating"] += avg_r_pair
                 db["hero_pairs"].append({
                     "pair_zh": f"{pa.get('hero_short_zh')}+{pb.get('hero_short_zh')}",

@@ -10506,7 +10506,11 @@ function analyzePlayerItemizationIntelligence(p, report) {
       `<span style="color:#bfdbfe;">${escapeHtml(paAudit.skill_and_talent_audit_zh)}</span>`
     );
   } else if (dqRow.skill_route_summary_zh || (dqRow.talents_chosen || []).length > 0) {
-    const tStr = (dqRow.talents_chosen || []).join(" → ") || "常规天赋";
+    const tStr =
+      (dqRow.talents_chosen || [])
+        .map((t) => (typeof t === "object" && t !== null ? t.zh || t.tier || "" : String(t)))
+        .filter(Boolean)
+        .join(" → ") || "常规天赋";
     deepForensicBullets.push(
       `🌿 <b>技能加点路线 &amp; 10/15/20/25级天赋树选择：</b>前中期加点【<b>${escapeHtml(
         dqRow.skill_route_summary_zh || "主核心技能"

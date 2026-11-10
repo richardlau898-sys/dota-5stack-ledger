@@ -100,7 +100,6 @@ class TestT10Invariants(unittest.TestCase):
                                 )
         self.assertEqual(violations, [], f"Found dead-at-start players marked absent: {violations[:5]}")
 
-    @unittest.expectedFailure  # T1-3: 报告任意字符串字段不含 {' (Python dict repr) 或 undefined
     def test_t1_3_no_dict_repr_or_undefined_in_report_strings(self) -> None:
         violations = []
         for mid, report in self.reports.items():
