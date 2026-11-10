@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DotaMatchReport",
+  "type": "object",
+  "required": [
+    "_zh_schema_v",
+    "engine_version",
+    "match_id",
+    "patch_str",
+    "mode_str",
+    "start_time",
+    "duration_str",
+    "duration_min",
+    "is_parsed",
+    "winner",
+    "radiant_win",
+    "radiant_score",
+    "dire_score",
+    "score",
+    "focus_side",
+    "radiant_gold_adv",
+    "radiant_xp_adv",
+    "objective_markers",
+    "vision_and_map_data",
+    "economy_timeline",
+    "key_teamfights",
+    "draft_analysis",
+    "draft_analysis_by_side",
+    "deep_forensics",
+    "phases_data",
+    "mvp",
+    "match_narrative",
+    "radiant_pos_1_to_5",
+    "dire_pos_1_to_5"
+  ],
+  "properties": {
+    "_zh_schema_v": { "type": "integer" },
+    "engine_version": { "type": "string" },
+    "match_id": { "type": "integer" },
+    "patch": { "type": ["integer", "string", "null"] },
+    "patch_str": { "type": "string" },
+    "mode_str": { "type": "string" },
+    "start_time": { "type": ["integer", "null"] },
+    "start_time_str": { "type": "string" },
+    "duration_str": { "type": "string" },
+    "duration_min": { "type": "number" },
+    "is_parsed": { "type": "boolean" },
+    "winner": { "type": "string" },
+    "radiant_win": { "type": "boolean" },
+    "radiant_score": { "type": "integer" },
+    "dire_score": { "type": "integer" },
+    "score": { "type": "string" },
+    "user_team_side": { "type": ["string", "null"] },
+    "focus_side": { "type": "string", "enum": ["radiant", "dire"] },
+    "user_won": { "type": ["boolean", "null"] },
+    "radiant_gold_adv": { "type": "array" },
+    "radiant_xp_adv": { "type": "array" },
+    "objective_markers": { "type": "array" },
+    "vision_and_map_data": {
+      "type": "object",
+      "required": ["wards", "lane_heatmaps"],
+      "properties": {
+        "wards": { "type": "array" },
+        "lane_heatmaps": { "type": "array" }
+      }
+    },
+    "economy_timeline": { "type": "object" },
+    "key_teamfights": { "type": "array" },
+    "draft_analysis": { "type": "object" },
+    "draft_analysis_by_side": {
+      "type": "object",
+      "required": ["radiant", "dire"],
+      "properties": {
+        "radiant": { "type": "object" },
+        "dire": { "type": "object" }
+      }
+    },
+    "deep_forensics": {
+      "type": "object",
+      "required": [
+        "hero_execution_by_side",
+        "itemization_audit_by_side",
+        "damage_quality_and_build_by_side",
+        "support_vision_by_side",
+        "stacking_and_smoke_by_side",
+        "laning_mechanics_by_side",
+        "tp_rotation_by_side",
+        "unpressed_saves_by_side",
+        "map_space_by_side",
+        "damage_received_by_side",
+        "economy_and_pings_by_side",
+        "role_mirror_by_side",
+        "macro_objectives_by_side"
+      ]
+    },
+    "phases_data": { "type": "array" },
+    "mvp": {
+      "type": "object",
+      "required": ["mvp_player", "runner_up_player", "svp_player", "culprit_player"],
+      "properties": {
+        "mvp_player": {
+          "type": "object",
+          "required": ["player_slot", "pos", "hero_short_zh", "personaname", "rating_score", "contrib_share_pct"]
+        },
+        "culprit_player": {
+          "type": "object",
+          "required": ["player_slot", "pos", "hero_short_zh", "personaname", "rating_score", "blame_share_pct"]
+        }
+      }
+    },
+    "match_narrative": { "type": "object" },
+    "radiant_pos_1_to_5": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["player_slot", "side", "pos", "hero_id", "hero_short_zh", "personaname", "is_me", "rating_score", "blame_share_pct", "contrib_share_pct"],
+        "properties": {
+          "side": { "type": "string", "enum": ["radiant", "dire"] },
+          "is_me": { "type": "boolean" }
+        }
+      }
+    },
+    "dire_pos_1_to_5": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["player_slot", "side", "pos", "hero_id", "hero_short_zh", "personaname", "is_me", "rating_score", "blame_share_pct", "contrib_share_pct"],
+        "properties": {
+          "side": { "type": "string", "enum": ["radiant", "dire"] },
+          "is_me": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

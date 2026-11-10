@@ -1607,7 +1607,7 @@ function buildStructuredFullReportHtml(report) {
     (side === "dire" && !Boolean(report.radiant_win));
   const df = report.deep_forensics || {};
   const grok = report.grok_coaching || {};
-  const draft = report.draft_and_combo?.[side] || report.draft_and_combo || {};
+  const draft = report.draft_analysis_by_side?.[side] || report.draft_analysis || {};
 
   // Normalize 100% contribution and 100% blame shares (preferring AI coach grok_share_pct)
   const rawContribSum =
@@ -2351,7 +2351,7 @@ async function downloadStructuredReportPdf() {
 
     const df = report.deep_forensics || {};
     const grok = report.grok_coaching || {};
-    const draft = report.draft_and_combo?.[side] || report.draft_and_combo || {};
+    const draft = report.draft_analysis_by_side?.[side] || report.draft_analysis || {};
     const rm = df.role_mirror_by_side?.[side] || {};
 
     // Normalize 100% contribution and blame shares
@@ -5459,17 +5459,19 @@ function saveLocalAnalyzedMatch(report) {
     const sideZh = side === "radiant" ? "天辉" : "夜魇";
     const won = Boolean(report.user_won ?? (side === "radiant" ? report.radiant_win : !report.radiant_win));
     const score = `${report.radiant_score ?? 0}:${report.dire_score ?? 0}`;
-    const mvpHero = report.mvp?.hero_short_zh || report.mvp?.hero_name || "";
-    const culpritHero = report.culprit?.hero_short_zh || report.culprit?.hero_name || "";
+    const mvpPlayer = report.mvp?.mvp_player || {};
+    const culpritPlayer = report.mvp?.culprit_player || {};
+    const mvpHero = mvpPlayer.hero_short_zh || mvpPlayer.hero_name || "";
+    const culpritHero = culpritPlayer.hero_short_zh || culpritPlayer.hero_name || "";
     obj[String(mid)] = {
       match_id: mid,
       won,
       score,
       side_zh: sideZh,
       mvp_hero: mvpHero,
-      mvp_contrib_pct: report.mvp?.contrib_share_pct ?? null,
+      mvp_contrib_pct: mvpPlayer.contrib_share_pct ?? null,
       culprit_hero: culpritHero,
-      culprit_blame_pct: report.culprit?.blame_share_pct ?? null,
+      culprit_blame_pct: culpritPlayer.blame_share_pct ?? null,
       saved_at: Date.now(),
     };
     localStorage.setItem(LOCAL_ANALYZED_STORAGE_KEY, JSON.stringify(obj));
@@ -5800,7 +5802,7 @@ function renderWorkstationSidebarMatches() {
   if (state.currentReport && state.currentReport.match_id) {
     const cr = state.currentReport;
     const { side, own } = getOwnAndOppPlayers(cr);
-    const focusP = own.find((x) => x.is_focus_player) || own[0] || {};
+    const focusP = own.find((x) => x.is_me) || own[0] || {};
     const crWon =
       (side === "radiant" && Boolean(cr.radiant_win)) ||
       (side === "dire" && !cr.radiant_win);
@@ -6558,11 +6560,73 @@ async function ensureReportPartLoaded(partName) {
   }
 }
 
+function readReportField(obj, key, contextLabel = "report") {
+  if (!obj || typeof obj !== "object") {
+    console.error(`[FieldContract] Expected object at ${contextLabel} when reading '${key}'`);
+    return undefined;
+  }
+  if (!(key in obj) || obj[key] === undefined) {
+    console.error(`[FieldContract] Missing field '${key}' on ${contextLabel}`);
+    return undefined;
+  }
+  return obj[key];
+}
+
+function validateReportContract(report) {
+  if (!report || typeof report !== "object") {
+    console.error("[FieldContract] Report is null or not an object");
+    return false;
+  }
+  const requiredTop = [
+    "match_id",
+    "is_parsed",
+    "radiant_win",
+    "radiant_score",
+    "dire_score",
+    "focus_side",
+    "draft_analysis_by_side",
+    "deep_forensics",
+    "mvp",
+    "radiant_pos_1_to_5",
+    "dire_pos_1_to_5",
+  ];
+  let ok = true;
+  for (const k of requiredTop) {
+    if (readReportField(report, k, "report") === undefined) ok = false;
+  }
+  if (report.mvp && typeof report.mvp === "object") {
+    if (readReportField(report.mvp, "mvp_player", "report.mvp") === undefined) ok = false;
+    if (readReportField(report.mvp, "culprit_player", "report.mvp") === undefined) ok = false;
+  }
+  const df = report.deep_forensics;
+  if (df && typeof df === "object") {
+    for (const dfKey of [
+      "hero_execution_by_side",
+      "itemization_audit_by_side",
+      "damage_quality_and_build_by_side",
+      "support_vision_by_side",
+      "stacking_and_smoke_by_side",
+      "laning_mechanics_by_side",
+      "tp_rotation_by_side",
+      "unpressed_saves_by_side",
+      "map_space_by_side",
+      "damage_received_by_side",
+      "economy_and_pings_by_side",
+      "role_mirror_by_side",
+      "macro_objectives_by_side",
+    ]) {
+      if (readReportField(df, dfKey, "report.deep_forensics") === undefined) ok = false;
+    }
+  }
+  return ok;
+}
+
 /**
  * Master Render Function for the entire Match Forensics Dashboard
  */
 function renderFullMatchReport(report) {
   if (!report) return;
+  validateReportContract(report);
   hydrateReportData(report);
   if (state._lastRenderedMatchId !== report.match_id) {
     state._lastRenderedMatchId = report.match_id;
@@ -6699,7 +6763,7 @@ function renderMatchOverview(report) {
   if (state.workspaceMode === "postgame") {
     const locTitle = document.getElementById("ws-location-title");
     const locSub = document.getElementById("ws-location-subtitle");
-    const focusP = own.find((x) => x.is_focus_player) || own[0] || {};
+    const focusP = own.find((x) => x.is_me) || own[0] || {};
     if (locTitle) {
       locTitle.textContent = `比赛 #${report.match_id} · ${focusP.hero_short_zh || sideZh} (${
         won ? "胜利" : "落败"
@@ -6864,7 +6928,7 @@ function renderWorkstationFactCheckSection(report) {
       const tierTag = p.rating_tier || (won ? p.contrib_tier : "") || "";
 
       return `
-        <tr class="ws-num-row ${p.is_focus_player || p.is_me ? "is-focus" : ""}" data-ws-jump-pos="${escapeHtml(
+        <tr class="ws-num-row ${p.is_me ? "is-focus" : ""}" data-ws-jump-pos="${escapeHtml(
         p.pos
       )}" title="点击查看 ${escapeHtml(p.hero_short_zh)} 完整出装与按键卷宗">
           <td>
@@ -6880,7 +6944,7 @@ function renderWorkstationFactCheckSection(report) {
                 <div class="ws-num-hero-line">
                   <span class="ws-pos-tag">${p.pos}号</span>
                   <strong>${escapeHtml(p.hero_short_zh || "")}</strong>
-                  ${p.is_focus_player || p.is_me ? `<span class="ws-me-badge">我</span>` : ""}
+                  ${p.is_me ? `<span class="ws-me-badge">我</span>` : ""}
                 </div>
                 <div class="ws-num-sub">${escapeHtml(p.personaname || "")} · KDA <b>${p.kills}/${p.deaths}/${p.assists}</b></div>
               </div>
@@ -6992,7 +7056,7 @@ function renderWorkstationFactCheckSection(report) {
 
   // Fact 2: Unpressed BKB / Defensive Items Audit
   const unpressedBlock = report.deep_forensics?.unpressed_saves_by_side?.[side];
-  const unpressedEvents = unpressedBlock?.events || unpressedBlock?.deaths_with_unused_saves || [];
+  const unpressedEvents = unpressedBlock?.incidents || [];
   if (unpressedEvents.length === 0) {
     factCards.push({
       status: "verified",
@@ -7002,17 +7066,20 @@ function renderWorkstationFactCheckSection(report) {
     });
   } else {
     const worstEv = unpressedEvents[0];
+    const itemsStr = Array.isArray(worstEv.unpressed_items) && worstEv.unpressed_items.length
+      ? worstEv.unpressed_items.join("、")
+      : "保命装/技能";
     factCards.push({
       status: "danger",
       badge: `🚨 憋死罪证 (${unpressedEvents.length}次)`,
       title: `${worstEv.pos ? `${worstEv.pos}号位 ` : ""}${
-        worstEv.hero_short_zh || worstEv.victim_hero || "核心"
-      } 揣着绿灯救命装阵亡`,
-      detail: `全队本局共发生 ${unpressedEvents.length} 次保命装未按阵亡。最致命一幕：${
-        worstEv.time_str || ""
-      } ${worstEv.hero_short_zh || ""} 在拥有可用【${
-        worstEv.unused_items_str || worstEv.item_zh || "BKB/救命装"
-      }】情况下被 ${worstEv.killer_hero || "敌方"} 击杀。`,
+        worstEv.hero_short_zh || "核心"
+      } 团战未按保命装或0技能阵亡`,
+      detail:
+        worstEv.detail ||
+        `全队本局共发生 ${unpressedEvents.length} 次团战未按保命装或 0 技能阵亡记录。代表性一幕：${
+          worstEv.time_range || ""
+        } ${worstEv.hero_short_zh || ""}（${itemsStr}）。`,
     });
   }
 
@@ -7575,11 +7642,13 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
   const results = {};
 
   // 1. hero_ult
-  const sidePlayers = (report.players || []).filter((p) => p.side === targetSide);
+  const sidePlayers = Array.isArray(df.hero_execution_by_side?.[targetSide])
+    ? df.hero_execution_by_side[targetSide]
+    : [];
   let heldUlts = 0;
   let zeroCasts = 0;
   sidePlayers.forEach((p) => {
-    (p.hero_execution_audit?.ult_audits || []).forEach((u) => {
+    (p.ult_audits || []).forEach((u) => {
       heldUlts += Number(u.tf_held_death_count || 0);
       if (Number(u.casts || 0) === 0) zeroCasts += 1;
     });
@@ -7590,17 +7659,17 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
           level: "critical",
           badge: `🚨 憋大招×${heldUlts + zeroCasts}`,
           title: "1. 英雄绝活与大招审判",
-          reason: `存在 ${heldUlts} 次团战憋死大招未放或关键技能 0 释放，团战技能兑现急需加强！`,
+          reason: `存在 ${heldUlts} 次团战未放关键大招或关键技能 0 释放，团战技能兑现急需加强！`,
         }
       : { level: "good", badge: "✓ 达标", title: "1. 英雄绝活与大招审判", reason: "主力大招与控制链正常兑现" };
 
   // 2. itemization
-  const ia = df.item_audit_by_side?.[targetSide] || {};
-  const missingCnt = Number(ia.missing_counter_cnt ?? 0);
-  const badBuildCnt = Number(ia.bad_build_players_cnt ?? 0);
-  const missingNames = (ia.team_counter_checklist || [])
-    .filter((c) => c.status === "missing")
-    .map((c) => c.category_zh || c.title || "针对装")
+  const ia = df.itemization_audit_by_side?.[targetSide] || {};
+  const missingCnt = Number(ia.bad_counter_cnt ?? 0);
+  const badBuildCnt = Number(ia.bad_build_cnt ?? 0);
+  const missingNames = (ia.team_counter_checks || [])
+    .filter((c) => c.grade === "bad")
+    .map((c) => c.category || "针对装")
     .slice(0, 3)
     .join("、");
   if (missingCnt >= 2 || badBuildCnt >= 2) {
@@ -7687,11 +7756,16 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
 
   // 6. damage_received
   const dr = df.damage_received_by_side?.[targetSide] || {};
-  const noDefPlayers = (dr.player_rows || []).filter((r) => String(r.audit_verdict || "").includes("裸奔") || String(r.audit_verdict || "").includes("缺失"));
+  const noDefPlayers = (dr.rows || []).filter(
+    (r) =>
+      r.grade === "bad" ||
+      String(r.verdict || "").includes("裸奔") ||
+      String(r.verdict || "").includes("缺失")
+  );
   results.damage_received =
-    noDefPlayers.length >= 2
+    noDefPlayers.length >= 1
       ? {
-          level: "warn",
+          level: noDefPlayers.length >= 2 ? "critical" : "warn",
           badge: `⚠️ ${noDefPlayers.length}人防装薄弱`,
           title: "6. 承伤来源与防装审计",
           reason: `有 <b>${noDefPlayers.length} 名选手</b>面对高额物理/魔法爆发缺乏针对性护甲或魔抗防装。`,
@@ -7700,8 +7774,8 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
 
   // 7. vision
   const vis = df.support_vision_by_side?.[targetSide] || {};
-  const darkCnt = Number((vis.dark_map_windows || []).length);
-  const dewardedCnt = Number(vis.quick_dewarded_cnt ?? 0);
+  const darkCnt = Number((vis.blackout_windows || []).length);
+  const dewardedCnt = Number((vis.instant_dewards || []).length || vis.dewarded_total || 0);
   results.vision =
     darkCnt >= 3 || dewardedCnt >= 4
       ? {
@@ -7786,7 +7860,9 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
 
   // 11. econ_pings
   const ep = df.economy_and_pings_by_side?.[targetSide] || {};
-  const lostGold = (ep.player_econ_rows || []).reduce((s, r) => s + Number(r.death_gold_lost || 0), 0);
+  const lostGold = Math.abs(
+    (ep.econ_rows || []).reduce((s, r) => s + Number(r.death_loss || 0), 0)
+  );
   results.econ_pings =
     lostGold >= 5500
       ? {
@@ -7823,7 +7899,7 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
   // 13. macro_neutrals
   const mo = df.macro_objectives_by_side?.[targetSide] || {};
   const diebacks = Number(mo.dieback_cnt ?? 0);
-  const couriers = Number(mo.courier_deaths_cnt ?? 0);
+  const couriers = Number(mo.own_couriers_lost ?? 0);
   results.macro_neutrals =
     diebacks >= 1 || couriers >= 2
       ? {
@@ -11109,12 +11185,12 @@ function analyzePlayerPhaseAndRoleContext(p, report) {
   const mirrorRow = (df.role_mirror_by_side?.[side]?.mirror_rows || []).find(
     (r) => r.own_hero === p.hero_short_zh || Number(r.pos) === Number(p.pos)
   );
-  const itemAudit = df.item_audit_by_side?.[side] || {};
+  const itemAudit = df.itemization_audit_by_side?.[side] || {};
   const counterItemsBuilt = [];
-  (itemAudit.team_counter_checklist || []).forEach((chk) => {
-    (chk.built_holders || []).forEach((h) => {
-      if (String(h).includes(p.hero_short_zh)) counterItemsBuilt.push(h);
-    });
+  (itemAudit.team_counter_checks || []).forEach((chk) => {
+    if (chk.our_response && String(chk.our_response).includes(p.hero_short_zh)) {
+      counterItemsBuilt.push(chk.our_response);
+    }
   });
 
   // Find which lane the player was in during 0-10m
@@ -14936,7 +15012,7 @@ function renderNetWorthChart(report) {
 
   const colorForPlayer = (p) => {
     const posIdx = Math.min(4, Math.max(0, (p.pos || 1) - 1));
-    return p.side === "天辉" ? NW_COLORS_RAD[posIdx] : NW_COLORS_DIRE[posIdx];
+    return p.side === "radiant" ? NW_COLORS_RAD[posIdx] : NW_COLORS_DIRE[posIdx];
   };
 
   const linesSvg = withSeries
@@ -15263,7 +15339,7 @@ function renderDamageMatrix(report) {
 
   container.innerHTML = allPlayers
     .map((p) => {
-      const isRad = p.side === "天辉";
+      const isRad = p.side === "radiant";
       const heroShort = p.hero_short_zh || p.hero_name;
       const wDmg = ((p.hero_damage || 0) / maxHeroDmg) * 100;
       const wTank = ((p.damage_taken || 0) / maxTaken) * 100;
@@ -19897,7 +19973,7 @@ function switchWorkspaceMode(mode, { pushUrl = true, animate = true } = {}) {
       const won =
         (side === "radiant" && Boolean(state.currentReport.radiant_win)) ||
         (side === "dire" && !state.currentReport.radiant_win);
-      const focusP = own.find((x) => x.is_focus_player) || own[0] || {};
+      const focusP = own.find((x) => x.is_me) || own[0] || {};
       if (locTitle) {
         locTitle.textContent = `比赛 #${state.currentReport.match_id} · ${
           focusP.hero_short_zh || sideZh
@@ -20054,9 +20130,9 @@ function renderPregameSlots() {
 
       let poolAuditHtml = "";
       if (matchedSig) {
-        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#86efac;background:rgba(34,197,94,0.14);border:1px solid rgba(74,222,128,0.35);padding:2px 5px;border-radius:4px;">👑 本人绝活招牌 (${matchedSig.games}局 ${matchedSig.win_rate}%胜 · 均分${matchedSig.avg_score})</div>`;
+        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#86efac;background:rgba(34,197,94,0.14);border:1px solid rgba(74,222,128,0.35);padding:2px 5px;border-radius:4px;">👑 本人绝活招牌 (${matchedSig.games}局 ${matchedSig.win_rate}%胜 · 均分${matchedSig.avg_rating})</div>`;
       } else if (matchedCursed) {
-        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#fca5a5;background:rgba(220,38,38,0.18);border:1px solid rgba(248,113,113,0.45);padding:2px 5px;border-radius:4px;">🚨 科研陷阱警告 (${matchedCursed.games}局仅 ${matchedCursed.win_rate}%胜 · 均分${matchedCursed.avg_score})</div>`;
+        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#fca5a5;background:rgba(220,38,38,0.18);border:1px solid rgba(248,113,113,0.45);padding:2px 5px;border-radius:4px;">🚨 科研陷阱警告 (${matchedCursed.games}局仅 ${matchedCursed.win_rate}%胜 · 均分${matchedCursed.avg_rating})</div>`;
       } else if (!hero && sigList.length > 0) {
         poolAuditHtml = `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;">
           <span style="font-size:9.5px;color:var(--gold-light);">👑绝活秒选:</span>
@@ -20572,12 +20648,12 @@ function renderPregamePlanOutput(plan) {
             let squadPoolStripHtml = "";
             if (member) {
               const statusTxt = sigMatch
-                ? `👑 本人绝活招牌 (${sigMatch.games}局 ${sigMatch.win_rate}%胜 · 均分${sigMatch.avg_score})`
+                ? `👑 本人绝活招牌 (${sigMatch.games}局 ${sigMatch.win_rate}%胜 · 均分${sigMatch.avg_rating})`
                 : cursedMatch
-                ? `🚨 历史低胜率科研陷阱 (${cursedMatch.games}局仅 ${cursedMatch.win_rate}%胜 · 均分${cursedMatch.avg_score}，建议慎选或严格跟团)`
+                ? `🚨 历史低胜率科研陷阱 (${cursedMatch.games}局仅 ${cursedMatch.win_rate}%胜 · 均分${cursedMatch.avg_rating}，建议慎选或严格跟团)`
                 : posStat
-                ? `📊 该玩家 ${rg.pos}号位历史 ${posStat.games}局 ${posStat.win_rate}%胜 (均分${posStat.avg_score})`
-                : `📊 车队总场次 ${member.games || 0}局 (${member.win_rate || 0}%胜 · 均分${member.avg_score || 0})`;
+                ? `📊 该玩家 ${rg.pos}号位历史 ${posStat.games}局 ${posStat.win_rate}%胜 (均分${posStat.avg_rating})`
+                : `📊 车队总场次 ${member.games || 0}局 (${member.win_rate || 0}%胜 · 均分${member.avg_rating || 0})`;
               squadPoolStripHtml = `<div style="font-size:10.5px;color:${
                 cursedMatch ? "#fca5a5" : sigMatch ? "#86efac" : "#fde68a"
               };background:${
