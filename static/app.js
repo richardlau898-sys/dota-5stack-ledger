@@ -5161,21 +5161,6 @@ function bindEvents() {
     });
   }
 
-  const inlineGeminiKeyInput = document.getElementById("input-gemini-key-inline");
-  if (inlineGeminiKeyInput) {
-    const savedGKey = localStorage.getItem("dota_gemini_poster_key") || "";
-    if (savedGKey) inlineGeminiKeyInput.value = savedGKey;
-    inlineGeminiKeyInput.addEventListener("change", () => {
-      const val = inlineGeminiKeyInput.value.trim();
-      if (val) {
-        localStorage.setItem("dota_gemini_poster_key", val);
-        showToast("已保存 Gemini API Key，将使用 Google Nano Banana 2.1 生成原画！");
-      } else {
-        localStorage.removeItem("dota_gemini_poster_key");
-      }
-    });
-  }
-
   const dialog = document.getElementById("settings-dialog");
   const openBtn = document.getElementById("btn-open-settings");
   const closeBtn = document.getElementById("btn-close-dialog");
@@ -5201,48 +5186,12 @@ function bindEvents() {
       await saveRosterConfig();
     });
   }
-
-  const saveLlmBtn = document.getElementById("btn-save-llm-local");
-  if (saveLlmBtn) {
-    saveLlmBtn.addEventListener("click", () => {
-      const provider = document.getElementById("select-llm-provider")?.value || "xai";
-      const model = document.getElementById("input-llm-model")?.value.trim() || "grok-4.7";
-      const apiKey = document.getElementById("input-llm-key")?.value.trim() || "";
-      const baseUrl = document.getElementById("input-llm-base")?.value.trim() || "";
-      const geminiPosterKey = document.getElementById("input-gemini-poster-key")?.value.trim() || "";
-      localStorage.setItem(
-        "dota_ledger_llm_override",
-        JSON.stringify({ provider, model, apiKey, baseUrl })
-      );
-      if (geminiPosterKey) {
-        localStorage.setItem("dota_gemini_poster_key", geminiPosterKey);
-        const inlineIn = document.getElementById("input-gemini-key-inline");
-        if (inlineIn) inlineIn.value = geminiPosterKey;
-      }
-      renderHeaderStatus();
-      showToast(`已保存模型与 Nano Banana 海报设置 (${provider.toUpperCase()} / ${model})`);
-      dialog?.close();
-    });
-  }
 }
 
 function getEffectiveLlmConfig() {
-  try {
-    const raw = localStorage.getItem("dota_ledger_llm_override");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && (parsed.apiKey || parsed.provider)) {
-        return parsed;
-      }
-    }
-  } catch {
-    // ignore
-  }
   return {
     provider: state.llmStatus?.provider || "xai",
     model: state.llmStatus?.model || "grok-4.7",
-    apiKey: "",
-    baseUrl: state.llmStatus?.base_url || "https://api.x.ai/v1",
   };
 }
 
@@ -5250,7 +5199,7 @@ function renderHeaderStatus() {
   const pill = document.getElementById("llm-status-pill");
   if (pill) {
     const cfg = getEffectiveLlmConfig();
-    const hasServerKey = Boolean(state.llmStatus?.configured || cfg.apiKey);
+    const hasServerKey = Boolean(state.llmStatus?.configured);
     pill.textContent = hasServerKey
       ? `已接入 ${String(cfg.provider || "xai").toUpperCase()} / ${cfg.model || "grok-4.7"}`
       : "内置录像算账引擎";
@@ -6069,10 +6018,6 @@ async function triggerGrokReview({ force = true } = {}) {
         account_id: state.accountId,
         side,
         force,
-        provider: llmCfg.provider,
-        model: llmCfg.model,
-        api_key: llmCfg.apiKey,
-        base_url: llmCfg.baseUrl,
       }),
     });
     const rawText = await res.text();
@@ -17142,16 +17087,6 @@ function populateSettingsDialog() {
       )
       .join("");
   }
-
-  const cfg = getEffectiveLlmConfig();
-  const provSel = document.getElementById("select-llm-provider");
-  const modelIn = document.getElementById("input-llm-model");
-  const baseIn = document.getElementById("input-llm-base");
-  const geminiPosterIn = document.getElementById("input-gemini-poster-key");
-  if (provSel) provSel.value = cfg.provider || "xai";
-  if (modelIn) modelIn.value = cfg.model || "grok-4.7";
-  if (baseIn) baseIn.value = cfg.baseUrl || "https://api.x.ai/v1";
-  if (geminiPosterIn) geminiPosterIn.value = localStorage.getItem("dota_gemini_poster_key") || "";
 }
 
 async function saveRosterConfig() {
@@ -18656,12 +18591,6 @@ async function openSinglePlayerPosterDialog(
     cacheKey,
   };
 
-  const inlineIn = document.getElementById("input-gemini-key-inline");
-  if (inlineIn && !inlineIn.value) {
-    const savedGKey = localStorage.getItem("dota_gemini_poster_key") || "";
-    if (savedGKey) inlineIn.value = savedGKey;
-  }
-
   dlg.showModal();
 
   // Check if we already have a generated AI artwork saved in memory or IndexedDB for this player
@@ -18868,12 +18797,6 @@ async function generateNanoBananaPoster({ force = false } = {}) {
   const cosmeticMode = document.getElementById("select-nano-cosmetic")?.value || "arcana";
   const enginePref = document.getElementById("select-nano-poster-engine")?.value || "auto";
   const customScene = document.getElementById("input-nano-custom-scene")?.value.trim() || "";
-  const inlineGKey = document.getElementById("input-gemini-key-inline")?.value.trim() || "";
-  const geminiKey = inlineGKey || localStorage.getItem("dota_gemini_poster_key") || "";
-
-  if (inlineGKey) {
-    localStorage.setItem("dota_gemini_poster_key", inlineGKey);
-  }
 
   if (btn) {
     btn.disabled = true;
@@ -18891,7 +18814,6 @@ async function generateNanoBananaPoster({ force = false } = {}) {
       cosmetic_mode: cosmeticMode,
       engine_pref: enginePref,
       custom_scene: customScene,
-      gemini_api_key: geminiKey,
       career_member: ctxInfo.mode === "career" ? ctxInfo.careerMember : null,
       force: Boolean(force),
     };
@@ -18903,10 +18825,6 @@ async function generateNanoBananaPoster({ force = false } = {}) {
     });
     const data = await res.json();
     if (!data.ok || !data.image_data_url) {
-      if (data.need_gemini_key) {
-        const inlineIn = document.getElementById("input-gemini-key-inline");
-        inlineIn?.focus();
-      }
       throw new Error(data.error || "生成海报原画失败");
     }
 
@@ -19767,7 +19685,6 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
   }
 
   try {
-    const llmCfg = getEffectiveLlmConfig();
     const res = await fetch("/api/pregame_plan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -19775,10 +19692,6 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
         own_picks: validOwn,
         enemy_picks: (state.pregameEnemyPicks || []).filter((x) => Number(x.hero_id) > 0),
         use_llm: Boolean(useLlm),
-        api_key: llmCfg.apiKey || "",
-        provider: llmCfg.provider || "xai",
-        model: llmCfg.model || "grok-4.7",
-        base_url: llmCfg.baseUrl || "https://api.x.ai/v1",
       }),
     });
     const data = await res.json();

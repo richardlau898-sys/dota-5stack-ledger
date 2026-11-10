@@ -1984,10 +1984,10 @@ def call_llm_coach_review(
     生成结构化赛后算账 JSON 并持久化到 reports/coaching-{match_id}-{side}.json。
     """
     env_cfg = load_env_llm_config()
-    key = (api_key or "").strip() or env_cfg.get("api_key", "")
-    prov = (provider or "").strip().lower() or env_cfg.get("provider", "xai")
-    model = (model_name or "").strip() or env_cfg.get("model_name", "grok-4.7")
-    b_url = (base_url or "").strip() or env_cfg.get("base_url", "https://api.x.ai/v1")
+    key = (env_cfg.get("api_key") or "").strip()
+    prov = (env_cfg.get("provider") or "xai").strip().lower()
+    model = (env_cfg.get("model_name") or "grok-4.7").strip()
+    b_url = (env_cfg.get("base_url") or "https://api.x.ai/v1").strip()
 
     if prov in ("grok", "x.ai"):
         prov = "xai"
@@ -1999,7 +1999,7 @@ def call_llm_coach_review(
     if not key:
         return {
             "ok": False,
-            "error": "尚未检测到 API Key。可在配置中填入 xAI Grok / Gemini / OpenAI Key。",
+            "error": "服务端尚未配置大模型密钥。",
         }
 
     raw_side = report.get("focus_side") or report.get("user_team_side") or ("radiant" if report.get("radiant_win") else "dire")
@@ -2211,7 +2211,7 @@ def call_llm_coach_review(
         if prov == "gemini":
             if any(dep in model for dep in ["gemini-2.5", "gemini-2.0", "gemini-1.5"]):
                 model = "gemini-3.8-flash"
-            url = f"https://generativelanguage.googleapis.com/v1beta/interactions?key={key}"
+            url = "https://generativelanguage.googleapis.com/v1beta/interactions"
             payload = {
                 "model": model,
                 "system_instruction": system_prompt,
@@ -2221,7 +2221,11 @@ def call_llm_coach_review(
                 url,
                 data=json.dumps(payload).encode("utf-8"),
                 method="POST",
-                headers={"Content-Type": "application/json", "User-Agent": "DotaAiAnalyst/2.0"},
+                headers={
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": key,
+                    "User-Agent": "DotaAiAnalyst/2.0",
+                },
             )
             with urllib.request.urlopen(req, timeout=75) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -2583,10 +2587,10 @@ def call_llm_pregame_coach(
     调用 xAI Grok (grok-4.7) 为五黑选人结束后的赛前阵容做 10 秒实战推演。
     """
     env_cfg = load_env_llm_config()
-    key = (api_key or "").strip() or env_cfg.get("api_key", "")
-    prov = (provider or "").strip().lower() or env_cfg.get("provider", "xai")
-    model = (model_name or "").strip() or env_cfg.get("model_name", "grok-4.7")
-    b_url = (base_url or "").strip() or env_cfg.get("base_url", "https://api.x.ai/v1")
+    key = (env_cfg.get("api_key") or "").strip()
+    prov = (env_cfg.get("provider") or "xai").strip().lower()
+    model = (env_cfg.get("model_name") or "grok-4.7").strip()
+    b_url = (env_cfg.get("base_url") or "https://api.x.ai/v1").strip()
 
     if prov in ("grok", "x.ai"):
         prov = "xai"
@@ -3199,7 +3203,7 @@ def _call_gemini_nano_banana_api(prompt: str, gemini_key: str) -> Tuple[Optional
     # 1. Fast direct generateContent endpoint with gemini-nano-banana-2.1
     for model_candidate in ("gemini-nano-banana-2.1", "nano-banana-pro-preview", "gemini-3-pro-image"):
         try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_candidate}:generateContent?key={gemini_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_candidate}:generateContent"
             payload = {
                 "contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
@@ -3210,6 +3214,7 @@ def _call_gemini_nano_banana_api(prompt: str, gemini_key: str) -> Tuple[Optional
                 method="POST",
                 headers={
                     "Content-Type": "application/json",
+                    "x-goog-api-key": gemini_key,
                     "User-Agent": "DotaAiAnalyst/2.0",
                 },
             )
@@ -3328,8 +3333,8 @@ def call_nano_banana_poster_art(
     import hashlib
 
     env_cfg = load_env_llm_config()
-    g_key = (gemini_api_key or "").strip() or env_cfg.get("gemini_api_key", "")
-    x_key = (xai_api_key or "").strip() or env_cfg.get("xai_api_key", "")
+    g_key = (env_cfg.get("gemini_api_key") or "").strip()
+    x_key = (env_cfg.get("xai_api_key") or "").strip()
     x_base = env_cfg.get("base_url") or "https://api.x.ai/v1"
     if "x.ai" not in x_base:
         x_base = "https://api.x.ai/v1"

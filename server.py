@@ -778,13 +778,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 hero_map, _ = get_hero_constants_map()
                 plan = build_pregame_strategy_plan(own_picks, enemy_picks, roster, hero_map)
                 if use_llm:
-                    llm_res = call_llm_pregame_coach(
-                        plan=plan,
-                        api_key=body.get("api_key") or "",
-                        provider=body.get("provider") or "",
-                        model_name=body.get("model") or "",
-                        base_url=body.get("base_url") or "",
-                    )
+                    llm_res = call_llm_pregame_coach(plan=plan)
                     if llm_res.get("ok") and llm_res.get("grok_live_brief"):
                         plan["grok_live_brief"] = llm_res["grok_live_brief"]
                     elif llm_res.get("error"):
@@ -848,10 +842,6 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             if path in ("/api/llm_review", "/api/llm_coach"):
                 body = self._read_json_body()
                 mid = int(body.get("match_id"))
-                api_key = body.get("api_key") or ""
-                provider = body.get("provider") or ""
-                model_name = body.get("model_name") or body.get("model") or ""
-                base_url = body.get("base_url") or ""
                 side = body.get("side") or "dire"
                 force = bool(body.get("force", True))
 
@@ -877,13 +867,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                         "report": sanitize_report_mixed_english(report),
                     })
                     return
-                res = call_llm_coach_review(
-                    report=report,
-                    api_key=api_key,
-                    provider=provider,
-                    model_name=model_name,
-                    base_url=base_url,
-                )
+                res = call_llm_coach_review(report=report)
                 if res.get("ok") and res.get("structured"):
                     res["structured"] = sanitize_report_mixed_english(res["structured"])
                     report["grok_coaching"] = res["structured"]
@@ -911,8 +895,6 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 cosmetic_mode = str(body.get("cosmetic_mode") or "arcana")
                 custom_scene = str(body.get("custom_scene") or "")
                 engine_pref = str(body.get("engine_pref") or "auto")
-                gemini_api_key = str(body.get("gemini_api_key") or "")
-                xai_api_key = str(body.get("xai_api_key") or "")
                 career_member = body.get("career_member")
                 force = bool(body.get("force", False))
 
@@ -933,8 +915,6 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     cosmetic_mode=cosmetic_mode,
                     custom_scene=custom_scene,
                     engine_pref=engine_pref,
-                    gemini_api_key=gemini_api_key,
-                    xai_api_key=xai_api_key,
                     career_member=career_member if isinstance(career_member, dict) else None,
                     force=force,
                 )
