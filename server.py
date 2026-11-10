@@ -63,7 +63,7 @@ STATIC_DIR = BASE_DIR / "static"
 def resolve_player_input(raw_input: str) -> int:
     """
     支持用户输入（严格限制防 SSRF）:
-    1. 纯数字 ID（Steam32 如 86080912 或 Steam64 如 76561198046346640）
+    1. 纯数字 ID（Steam32 好友 ID 或 Steam64 ID）
     2. 主机名严格等于 steamcommunity.com 的 https 链接（/id/<short> 或 /profiles/<digits>）
     3. 匹配 ^[A-Za-z0-9_-]{2,32}$ 的自定义短名
     其余一律抛出 ValueError（由 HTTP 层返回 400）。
@@ -628,6 +628,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Robots-Tag", "noindex")
         self.end_headers()
         self.wfile.write(body)
 
@@ -686,8 +687,8 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
 
             if path == "/api/init":
                 roster = load_roster()
-                main_id = roster.get("main_account_id") or 86080912
-                recent = fetch_recent_matches_formatted(main_id, limit=12)
+                main_id = int(roster.get("main_account_id") or 0)
+                recent = fetch_recent_matches_formatted(main_id, limit=12) if main_id else []
                 wins = sum(1 for m in recent if m.get("won"))
                 losses = len(recent) - wins
                 win_rate = round((wins / len(recent)) * 100, 1) if recent else 0.0
@@ -710,7 +711,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 profile_obj = {
                     "profile": {
                         "account_id": main_id,
-                        "personaname": roster.get("main_name") or roster.get("main_player_name") or "Flame = ez mute",
+                        "personaname": roster.get("main_name") or roster.get("main_player_name") or "主视角玩家",
                         "rank_label": "万古流芳 5 [75]",
                     },
                     "wl": {"win": wins, "lose": losses, "win_rate": win_rate},
@@ -736,7 +737,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             if path in ("/api/recent", "/api/player"):
                 raw_q = (qs.get("query") or qs.get("q") or qs.get("account_id") or [""])[0].strip()
                 roster = load_roster()
-                aid = resolve_player_input(raw_q) if raw_q else (roster.get("main_account_id") or 86080912)
+                aid = resolve_player_input(raw_q) if raw_q else int(roster.get("main_account_id") or 0)
                 recent = fetch_recent_matches_formatted(aid, limit=12)
                 wins = sum(1 for m in recent if m.get("won"))
                 losses = len(recent) - wins
@@ -828,6 +829,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(content)))
             self.send_header("Cache-Control", "no-cache")
+            self.send_header("X-Robots-Tag", "noindex")
             self.end_headers()
             self.wfile.write(content)
 
@@ -898,7 +900,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 main_in = body.get("main_account_input") or body.get("main_account_id")
                 if main_in:
                     aid = resolve_player_input(str(main_in))
-                    mname = body.get("main_name") or body.get("main_player_name") or roster.get("main_name") or "Flame = ez mute"
+                    mname = body.get("main_name") or body.get("main_player_name") or roster.get("main_name") or "主视角玩家"
                     roster["main_account_id"] = aid
                     roster["main_name"] = mname
                     roster["main_player_name"] = mname

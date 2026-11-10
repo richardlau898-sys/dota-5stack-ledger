@@ -2642,7 +2642,7 @@ def build_squad_history_ledger(
     from pathlib import Path
 
     rdir = Path(reports_dir)
-    main_aid = int(roster.get("main_account_id") or 86080912)
+    main_aid = int(roster.get("main_account_id") or 0)
     roster_players = roster.get("players") or {}
 
     analyzed_matches_summary = []
@@ -3380,12 +3380,13 @@ def build_pregame_strategy_plan(
     - 1~5 号位每人专属出装与阶段任务小抄卡
     - 群聊/语音一键复制文本简报
     """
+    pos_names_cfg = (roster or {}).get("default_pos_names") or {}
     default_teammates = {
-        1: (roster or {}).get("main_name") or "Flame = ez mute",
-        2: "Replica",
-        3: "Make Your Choice",
-        4: "Paphets",
-        5: "Mr. Brightside",
+        1: pos_names_cfg.get("1") or (roster or {}).get("main_name") or "1号位主核",
+        2: pos_names_cfg.get("2") or "2号位中单",
+        3: pos_names_cfg.get("3") or "3号位前排",
+        4: pos_names_cfg.get("4") or "4号位游走",
+        5: pos_names_cfg.get("5") or "5号位辅助",
     }
 
     ROLE_LABELS = {

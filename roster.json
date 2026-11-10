@@ -1,6 +1,13 @@
 {
   "main_account_id": 86080912,
   "main_name": "Flame = ez mute",
+  "default_pos_names": {
+    "1": "Flame = ez mute",
+    "2": "Replica",
+    "3": "Make Your Choice",
+    "4": "Paphets",
+    "5": "Mr. Brightside"
+  },
   "players": {
     "86080912": {
       "name": "Flame = ez mute",

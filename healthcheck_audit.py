@@ -64,8 +64,12 @@ def main() -> int:
         with open("/tmp/dota_healthcheck_unparsed.json", "w", encoding="utf-8") as f:
             json.dump(rep_unparsed, f, ensure_ascii=False)
     ledger = build_squad_history_ledger("reports", roster, [])
+    pos_names = (roster or {}).get("default_pos_names") or {}
     pregame_sample = build_pregame_strategy_plan(
-        [{"pos": 1, "hero_id": 11, "player_name": "Flame = ez mute"}, {"pos": 3, "hero_id": 29, "player_name": "Make Your Choice"}],
+        [
+            {"pos": 1, "hero_id": 11, "player_name": pos_names.get("1") or roster.get("main_name") or "1号位主核"},
+            {"pos": 3, "hero_id": 29, "player_name": pos_names.get("3") or "3号位前排"},
+        ],
         [{"pos": 1, "hero_id": 114}, {"pos": 2, "hero_id": 59}],
         roster,
         get_hero_constants_map()[0],
@@ -262,7 +266,7 @@ for (const file of reportFiles) {
 if (fs.existsSync("/tmp/dota_healthcheck_ledger.json")) {
   const extra = JSON.parse(fs.readFileSync("/tmp/dota_healthcheck_ledger.json", "utf8"));
   sandbox.__state.squadLedger = extra.ledger;
-  sandbox.__state.pregameOwnPicks = [{ pos: 1, hero_id: 11, player_name: "Flame = ez mute" }, { pos: 3, hero_id: 29, player_name: "Make Your Choice" }];
+  sandbox.__state.pregameOwnPicks = [{ pos: 1, hero_id: 11, player_name: "1号位主核" }, { pos: 3, hero_id: 29, player_name: "3号位前排" }];
   sandbox.renderPregameSlots();
   sandbox.renderPregameHeroGrid();
   sandbox.renderPregamePlanOutput(extra.pregame);

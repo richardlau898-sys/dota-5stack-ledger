@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
   <meta name="color-scheme" content="dark" />
   <title>Workstation · 战后算账 &amp; Dota 2 录像级复盘工作台</title>
   <link rel="stylesheet" href="/styles.css?v=9.2.0" />
@@ -89,7 +90,7 @@
       <div class="ws-account">
         <div class="ws-avatar">刀</div>
         <div class="ws-account-copy">
-          <div id="ws-sidebar-account-name" class="ws-account-name">Flame = ez mute</div>
+          <div id="ws-sidebar-account-name" class="ws-account-name">主视角玩家</div>
           <div id="llm-status-pill" class="model-status connected ws-account-email">已接入 XAI / grok-4.7</div>
         </div>
         <button type="button" id="btn-open-settings" class="ws-icon-btn" title="车队花名册与大模型设置">⚙️</button>
@@ -714,11 +715,11 @@
             <div class="form-row-2">
               <label class="field">
                 <span>你的 Steam 链接 / 好友 ID</span>
-                <input id="input-main-id" type="text" placeholder="如 86080912" />
+                <input id="input-main-id" type="text" placeholder="输入 Steam32 好友 ID" />
               </label>
               <label class="field">
                 <span>你的昵称备注</span>
-                <input id="input-main-name" type="text" placeholder="如 Flame = ez mute" />
+                <input id="input-main-name" type="text" placeholder="输入主视角昵称" />
               </label>
             </div>
             <div class="form-row-3">
@@ -728,7 +729,7 @@
               </label>
               <label class="field">
                 <span>队友称呼</span>
-                <input id="input-friend-name" type="text" placeholder="如 Siesta / Paphets" />
+                <input id="input-friend-name" type="text" placeholder="输入队友称呼" />
               </label>
               <label class="field">
                 <span>常打位置备注</span>

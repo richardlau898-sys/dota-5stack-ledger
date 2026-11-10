@@ -4,7 +4,7 @@
  */
 
 const state = {
-  accountId: 86080912,
+  accountId: null,
   roster: null,
   profileData: null,
   squadLedger: null,
@@ -15,11 +15,11 @@ const state = {
   wsSidebarCollapsed: false,
   wsPostgameTab: "summary", // "summary" | "timeline" | "phases" | "microscope" | "players" | "all"
   pregameOwnPicks: [
-    { pos: 1, hero_id: 8, player_name: "Flame = ez mute" },
-    { pos: 2, hero_id: 45, player_name: "Replica" },
-    { pos: 3, hero_id: 97, player_name: "Make Your Choice" },
-    { pos: 4, hero_id: 9, player_name: "Paphets" },
-    { pos: 5, hero_id: 26, player_name: "Mr. Brightside" },
+    { pos: 1, hero_id: 8, player_name: "" },
+    { pos: 2, hero_id: 45, player_name: "" },
+    { pos: 3, hero_id: 97, player_name: "" },
+    { pos: 4, hero_id: 9, player_name: "" },
+    { pos: 5, hero_id: 26, player_name: "" },
   ],
   pregameEnemyPicks: [
     { pos: 1, hero_id: 44 },
@@ -4393,7 +4393,11 @@ async function initApp() {
     state.squadLedger = data.squad_ledger || null;
     state.heroesCatalog = data.heroes_catalog || [];
     state.llmStatus = data.llm_status || {};
-    state.accountId = state.roster.main_account_id || 86080912;
+    state.accountId = state.roster.main_account_id || state.accountId;
+    state.pregameOwnPicks = (state.pregameOwnPicks || []).map((slot) => ({
+      ...slot,
+      player_name: slot.player_name || getSquadPlayerNameForPos(slot.pos),
+    }));
 
     const firstReport = data.latest_match_report || data.latest_report;
     if (!directMatchLoaded && !state.userSelectedMatch && firstReport) {
@@ -4659,11 +4663,11 @@ function bindEvents() {
   if (btnPresetBest) {
     btnPresetBest.addEventListener("click", () => {
       state.pregameOwnPicks = [
-        { pos: 1, hero_id: 8, player_name: "Flame = ez mute" },
-        { pos: 2, hero_id: 49, player_name: "Replica" },
-        { pos: 3, hero_id: 29, player_name: "Make Your Choice" },
-        { pos: 4, hero_id: 136, player_name: "Paphets" },
-        { pos: 5, hero_id: 30, player_name: "Mr. Brightside" },
+        { pos: 1, hero_id: 8, player_name: getSquadPlayerNameForPos(1) },
+        { pos: 2, hero_id: 49, player_name: getSquadPlayerNameForPos(2) },
+        { pos: 3, hero_id: 29, player_name: getSquadPlayerNameForPos(3) },
+        { pos: 4, hero_id: 136, player_name: getSquadPlayerNameForPos(4) },
+        { pos: 5, hero_id: 30, player_name: getSquadPlayerNameForPos(5) },
       ];
       state.pregameEnemyPicks = [];
       renderPregameSlots();
@@ -5418,12 +5422,12 @@ function renderHomeWorkspace() {
     kpiWrap.innerHTML = `
       <div class="home-kpi-card">
         <span class="home-kpi-label">👤 当前主视角账号</span>
-        <strong class="home-kpi-val">${escapeHtml(p.personaname || "Flame = ez mute")}</strong>
-        <span class="home-kpi-sub">Steam ID #${escapeHtml(state.accountId)} · ${escapeHtml(p.rank_label || "万古流芳 5")}</span>
+        <strong class="home-kpi-val">${escapeHtml(p.personaname || state.roster?.main_name || "无数据")}</strong>
+        <span class="home-kpi-sub">Steam ID #${escapeHtml(state.accountId || "无数据")} · ${escapeHtml(p.rank_label || "无数据")}</span>
       </div>
       <div class="home-kpi-card">
-        <span class="home-kpi-label">📈 近 ${matches.length || 12} 场战绩与开黑率</span>
-        <strong class="home-kpi-val">${winCount} 胜 ${Math.max(0, matches.length - winCount)} 负 (${wl.win_rate ?? 50}% 胜率)</strong>
+        <span class="home-kpi-label">📈 近 ${matches.length} 场战绩与开黑率</span>
+        <strong class="home-kpi-val">${winCount} 胜 ${Math.max(0, matches.length - winCount)} 负 (${wl.win_rate ?? 0}% 胜率)</strong>
         <span class="home-kpi-sub">其中五黑/组排开黑 ${partyCount} 局 · 单排 ${Math.max(0, matches.length - partyCount)} 局</span>
       </div>
       <div class="home-kpi-card">
@@ -5433,8 +5437,8 @@ function renderHomeWorkspace() {
       </div>
       <div class="home-kpi-card">
         <span class="home-kpi-label">👑 车队历史大腿 vs 锅王</span>
-        <strong class="home-kpi-val">大腿 ${escapeHtml(topCarry?.personaname || "Make Your Choice")}</strong>
-        <span class="home-kpi-sub">锅王：${escapeHtml(topCulprit?.personaname || "TheReal")} (场均锅 ${topCulprit?.avg_blame_pct ?? 24}%)</span>
+        <strong class="home-kpi-val">大腿 ${escapeHtml(topCarry?.personaname || "无数据")}</strong>
+        <span class="home-kpi-sub">锅王：${escapeHtml(topCulprit?.personaname || "无数据")} (场均锅 ${topCulprit?.avg_blame_pct ?? "无数据"}%)</span>
       </div>
     `;
   }
@@ -5616,10 +5620,10 @@ function renderWorkstationSidebarMatches() {
   if (accountEl) {
     const p = state.profileData?.profile || {};
     const wl = state.profileData?.wl || {};
-    const nameStr = p.personaname || state.roster?.main_name || "Flame = ez mute";
-    const rankStr = p.rank_label || "万古流芳 5";
+    const nameStr = p.personaname || state.roster?.main_name || "主视角玩家";
+    const rankStr = p.rank_label || "";
     const wrStr = wl.win_rate !== undefined ? ` · ${wl.win_rate}%胜` : "";
-    accountEl.textContent = `${nameStr} · ${rankStr}${wrStr}`;
+    accountEl.textContent = `${nameStr}${rankStr ? ` · ${rankStr}` : ""}${wrStr}`;
   }
 
   if (!listEl) return;
@@ -17127,7 +17131,7 @@ function populateSettingsDialog() {
   const tokenInput = document.getElementById("input-team-token");
   if (mainIdInput) mainIdInput.value = roster.main_account_id || state.accountId || "";
   if (mainNameInput) {
-    mainNameInput.value = roster.main_name || roster.main_player_name || "Flame = ez mute";
+    mainNameInput.value = roster.main_name || roster.main_player_name || "";
   }
   if (tokenInput) {
     tokenInput.value = getStoredTeamToken();
@@ -19421,14 +19425,10 @@ function getHeroMetaById(heroId) {
 }
 
 function getSquadPlayerNameForPos(pos) {
-  const defaultMap = {
-    1: state.roster?.main_name || "Flame = ez mute",
-    2: "Replica",
-    3: "Make Your Choice",
-    4: "Paphets",
-    5: "Mr. Brightside",
-  };
-  return defaultMap[pos] || `${pos}号位队友`;
+  const cfgMap = state.roster?.default_pos_names || {};
+  if (cfgMap[String(pos)]) return cfgMap[String(pos)];
+  if (Number(pos) === 1 && state.roster?.main_name) return state.roster.main_name;
+  return `${pos}号位队友`;
 }
 
 function findSquadMemberForName(playerName) {
