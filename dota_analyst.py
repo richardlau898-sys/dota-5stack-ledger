@@ -265,8 +265,62 @@ def format_duration(seconds: Optional[int]) -> str:
     return f"{'-' if neg else ''}{m:02d}:{sec:02d}"
 
 
-def infer_positions_1_to_5(team_players: List[Dict[str, Any]], is_parsed: bool) -> List[Dict[str, Any]]:
-    """智能推断一方 5 名玩家的 1~5 号位"""
+def _apply_manual_position_overrides(
+    base_sorted: List[Dict[str, Any]],
+    manual_overrides: Optional[Dict[str, Any]],
+    pos_labels: Dict[int, str],
+) -> List[Dict[str, Any]]:
+    if not isinstance(manual_overrides, dict) or not manual_overrides:
+        return base_sorted
+    overridden: Dict[int, Dict[str, Any]] = {}
+    remaining: List[Dict[str, Any]] = []
+    for p in base_sorted:
+        aid = p.get("account_id")
+        slot = p.get("player_slot")
+        hid = p.get("hero_id")
+        target_pos = None
+        for key_candidate in (
+            str(aid) if aid is not None else "",
+            f"slot:{slot}" if slot is not None else "",
+            str(slot) if slot is not None else "",
+            f"hero:{hid}" if hid is not None else "",
+        ):
+            if key_candidate and key_candidate in manual_overrides:
+                try:
+                    cand = int(manual_overrides[key_candidate])
+                    if 1 <= cand <= 5 and cand not in overridden:
+                        target_pos = cand
+                        break
+                except (TypeError, ValueError):
+                    pass
+        if target_pos is not None:
+            p["inferred_pos"] = target_pos
+            p["pos_source"] = "manual"
+            p["pos_label"] = pos_labels[target_pos]
+            overridden[target_pos] = p
+        else:
+            remaining.append(p)
+    if not overridden:
+        return base_sorted
+    result: List[Dict[str, Any]] = []
+    rem_iter = iter(remaining)
+    for pos in range(1, 6):
+        if pos in overridden:
+            result.append(overridden[pos])
+        else:
+            p = next(rem_iter)
+            p["inferred_pos"] = pos
+            p["pos_label"] = pos_labels[pos]
+            result.append(p)
+    return result
+
+
+def infer_positions_1_to_5(
+    team_players: List[Dict[str, Any]],
+    is_parsed: bool,
+    manual_overrides: Optional[Dict[str, Any]] = None,
+) -> List[Dict[str, Any]]:
+    """优先使用 OpenDota 的 position_est (1~5)，缺失时回退推断，并支持 roster.json 按比赛手动覆盖"""
     pos_labels = {
         1: "1号位 · 优势路核心",
         2: "2号位 · 中路核心",
@@ -279,8 +333,21 @@ def infer_positions_1_to_5(team_players: List[Dict[str, Any]], is_parsed: bool) 
     if len(players) != 5:
         for idx, p in enumerate(players, 1):
             p["inferred_pos"] = idx
+            p["pos_source"] = "inferred"
             p["pos_label"] = pos_labels.get(idx, f"{idx}号位")
         return players
+
+    est_positions = [p.get("position_est") for p in players]
+    if set(est_positions) == {1, 2, 3, 4, 5}:
+        by_est = {int(p["position_est"]): p for p in players}
+        result_est = []
+        for pos in range(1, 6):
+            p = by_est[pos]
+            p["inferred_pos"] = pos
+            p["pos_source"] = "opendota"
+            p["pos_label"] = pos_labels[pos]
+            result_est.append(p)
+        return _apply_manual_position_overrides(result_est, manual_overrides, pos_labels)
 
     max_nw = max((p.get("net_worth") or p.get("total_gold") or 1) for p in players) or 1
     max_lh = max((p.get("last_hits") or 1) for p in players) or 1
@@ -337,9 +404,10 @@ def infer_positions_1_to_5(team_players: List[Dict[str, Any]], is_parsed: bool) 
         for pos in range(1, 6):
             p = assigned[pos]
             p["inferred_pos"] = pos
+            p["pos_source"] = "inferred"
             p["pos_label"] = pos_labels[pos]
             result.append(p)
-        return result
+        return _apply_manual_position_overrides(result, manual_overrides, pos_labels)
 
     def unparsed_pos_score(p: Dict[str, Any]) -> float:
         prior = get_hero_default_pos(p.get("hero_id", 0))
@@ -392,9 +460,10 @@ def infer_positions_1_to_5(team_players: List[Dict[str, Any]], is_parsed: bool) 
     for pos in range(1, 6):
         p = assigned_unparsed[pos]
         p["inferred_pos"] = pos
+        p["pos_source"] = "inferred"
         p["pos_label"] = pos_labels[pos]
         result.append(p)
-    return result
+    return _apply_manual_position_overrides(result, manual_overrides, pos_labels)
 
 
 def generate_player_tags(
@@ -1037,8 +1106,19 @@ def analyze_match_data(
 
     focus_side_resolved = user_team_side or ("radiant" if radiant_win else "dire")
 
-    radiant_sorted = infer_positions_1_to_5(radiant_raw, is_parsed)
-    dire_sorted = infer_positions_1_to_5(dire_raw, is_parsed)
+    match_overrides_map = (
+        (roster.get("match_position_overrides") or roster.get("position_overrides") or {})
+        if isinstance(roster, dict)
+        else {}
+    )
+    manual_overrides = (
+        match_overrides_map.get(str(match_id))
+        if isinstance(match_overrides_map, dict)
+        else None
+    )
+
+    radiant_sorted = infer_positions_1_to_5(radiant_raw, is_parsed, manual_overrides=manual_overrides)
+    dire_sorted = infer_positions_1_to_5(dire_raw, is_parsed, manual_overrides=manual_overrides)
 
     # 收集全图真假眼坐标与对线期走位热力点
     all_wards_map: List[Dict[str, Any]] = []
@@ -1218,6 +1298,7 @@ def analyze_match_data(
                 "player_slot": slot,
                 "side": side_key,
                 "pos": p.get("inferred_pos"),
+                "pos_source": p.get("pos_source", "inferred"),
                 "pos_label": p.get("pos_label"),
                 "account_id": aid,
                 "personaname": persona,
