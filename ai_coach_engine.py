@@ -1717,12 +1717,15 @@ def load_env_llm_config() -> Dict[str, str]:
     xai_key = env_vars.get("XAI_API_KEY") or ""
 
     if xai_key:
+        raw_xai_model = env_vars.get("XAI_MODEL") or env_vars.get("GROK_MODEL") or "grok-4.20-0309-non-reasoning"
+        if raw_xai_model in ("grok-4.7", "grok-4.6", "grok-4"):
+            raw_xai_model = "grok-4.20-0309-non-reasoning"
         return {
             "provider": "xai",
             "api_key": xai_key,
             "xai_api_key": xai_key,
             "gemini_api_key": gemini_key,
-            "model_name": env_vars.get("XAI_MODEL") or env_vars.get("GROK_MODEL") or "grok-4.7",
+            "model_name": raw_xai_model,
             "base_url": (env_vars.get("XAI_BASE_URL") or "https://api.x.ai/v1").rstrip("/"),
         }
     if gemini_key:
@@ -2023,7 +2026,7 @@ def call_llm_coach_review(
     env_cfg = load_env_llm_config()
     key = (env_cfg.get("api_key") or "").strip()
     prov = (env_cfg.get("provider") or "xai").strip().lower()
-    model = (env_cfg.get("model_name") or "grok-4.7").strip()
+    model = (env_cfg.get("model_name") or "grok-4.20-0309-non-reasoning").strip()
     b_url = (env_cfg.get("base_url") or "https://api.x.ai/v1").strip()
 
     if prov in ("grok", "x.ai"):
@@ -2031,7 +2034,9 @@ def call_llm_coach_review(
     if prov == "xai" and (not b_url or "openai.com" in b_url):
         b_url = "https://api.x.ai/v1"
     if prov == "xai" and ("gemini" in model or not model):
-        model = env_cfg.get("model_name") or "grok-4.7"
+        model = env_cfg.get("model_name") or "grok-4.20-0309-non-reasoning"
+    if prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4"):
+        model = "grok-4.20-0309-non-reasoning"
 
     if not key:
         return {
@@ -2282,6 +2287,7 @@ def call_llm_coach_review(
             # Use grok-4.20-0309-non-reasoning with 6 parallel micro-shards (1 Global shard + 5 individual Pos 1..5 shards)
             # so each shard only generates ~800-1000 tokens and the entire review finishes in ~12-16s!
             api_model = "grok-4.20-0309-non-reasoning" if (prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4")) else model
+            model = api_model
 
             global_payload = {
                 "match_id": compact_payload.get("match_id"),
@@ -2435,172 +2441,120 @@ def call_llm_coach_review(
                     pos_i: pool.submit(_call_xai_chunk, _build_pos_prompt(pos_i), 2200)
                     for pos_i in (1, 2, 3, 4, 5)
                 }
-                try:
-                    part_global = fut_global.result()
-                except Exception:
-                    part_global = None
+                part_global = fut_global.result()
+                if not isinstance(part_global, dict):
+                    raise RuntimeError("Grok 全局分片返回格式无效")
                 merged_players_by_pos: Dict[int, Dict[str, Any]] = {}
                 for pos_i, fut_p in fut_pos_map.items():
-                    try:
-                        res_p = fut_p.result()
-                        if isinstance(res_p, dict):
-                            p_list = res_p.get("players")
-                            if isinstance(p_list, list) and p_list:
-                                gp = p_list[0]
-                                if isinstance(gp, dict):
-                                    gp["pos"] = int(gp.get("pos") or pos_i)
-                                    merged_players_by_pos[pos_i] = gp
-                            elif res_p.get("hero") or res_p.get("deep_verdict"):
-                                res_p["pos"] = int(res_p.get("pos") or pos_i)
-                                merged_players_by_pos[pos_i] = res_p
-                    except Exception:
-                        pass
+                    res_p = fut_p.result()
+                    if not isinstance(res_p, dict):
+                        raise RuntimeError(f"Grok {pos_i}号位分片返回格式无效")
+                    p_list = res_p.get("players")
+                    if isinstance(p_list, list) and p_list and isinstance(p_list[0], dict):
+                        gp = next(
+                            (x for x in p_list if isinstance(x, dict) and int(x.get("pos") or 0) == pos_i),
+                            p_list[0],
+                        )
+                        gp["pos"] = pos_i
+                        merged_players_by_pos[pos_i] = gp
+                    elif res_p.get("hero") or res_p.get("deep_verdict"):
+                        res_p["pos"] = pos_i
+                        merged_players_by_pos[pos_i] = res_p
+                    else:
+                        raise RuntimeError(f"Grok {pos_i}号位分片缺少选手数据")
 
-            # Fill any missing player shard from telemetry so all 5 positions are guaranteed present
-            for p_raw in own_team:
-                pos_k = int(p_raw.get("pos") or 1)
-                if pos_k not in merged_players_by_pos:
-                    h_zh = p_raw.get("hero_short_zh") or "英雄"
-                    kda_s = p_raw.get("kda") or "0/0/0"
-                    gpm_s = p_raw.get("gpm") or 0
-                    hd_pct = p_raw.get("hero_damage_share_pct") or 0
-                    td_s = p_raw.get("tower_damage") or 0
-                    items_s = "、".join([it.get("name_zh") or it.get("key") for it in (p_raw.get("items") or [])][:5]) or "常规出装"
-                    merged_players_by_pos[pos_k] = {
-                        "slot": p_raw.get("player_slot", 0),
-                        "pos": pos_k,
-                        "hero": h_zh,
-                        "grok_score": int(p_raw.get("impact_score") or (75 if own_won else 55)),
-                        "grok_share_pct": 20.0,
-                        "headline": f"{pos_k}号位{h_zh}全场 KDA {kda_s}，伤害占比 {hd_pct}%，装备 {items_s}",
-                        "deep_verdict": f"本局 {pos_k}号位{h_zh}最终战绩 KDA {kda_s}，GPM {gpm_s}，打出全队 {hd_pct}% 的英雄伤害与 {td_s} 点建筑拆塔伤害，终局装备为 {items_s}。结合全队整体节奏与位置职责，完成了该位置的基础数据输出，但在中期抱团协同与关键团战容错上仍有提升空间。",
-                        "early_story": f"第一幕对线期（0-10m），{pos_k}号位{h_zh}在对应分路执行基础对线任务，围绕补刀发育与线上消耗展开博弈，为中期过渡提供基础经济支撑。",
-                        "mid_story": f"第二幕中期节奏（10-25m），{pos_k}号位{h_zh}逐步合成核心过渡装备（{items_s}），参与局部小规模接战与外塔攻防，全场参战率 {p_raw.get('kill_participation_pct', 0)}%。",
-                        "late_story": f"第三幕决胜阶段（25m-终局），{pos_k}号位{h_zh}在后期高地与团战拉扯中累计贡献 {p_raw.get('hero_damage', 0)} 点英雄伤害（占全队 {hd_pct}%）及 {td_s} 点塔伤。",
-                        "item_and_blink_audit": f"{pos_k}号位{h_zh}本局成型装备为 {items_s}，整体出装路线贴合英雄属性，建议根据敌方核心控制与爆发进一步优化保命与先手切入装时机。",
-                        "good": [f"全场贡献 {hd_pct}% 英雄伤害与 {kda_s} KDA"],
-                        "bad": ["中后期抱团节奏与关键技能容错仍需打磨"],
-                        "practice": "下一局围绕本职位置提前沟通开雾与推进节奏，提升中期资源转化效率。",
-                    }
-
-            if not isinstance(part_global, dict):
-                if not merged_players_by_pos:
-                    raise RuntimeError("Grok 全局分片与选手分片均解析失败")
-                narr = report.get("match_narrative") or {}
-                part_global = {
-                    "title": narr.get("headline") or f"比赛 #{report.get('match_id')} 1~5号位全周期深度算账复盘",
-                    "summary": narr.get("summary") or "本局双方围绕前中期对线过渡、外塔视野压制与中后期团战展开激烈博弈，五名选手的位置职责兑现度直接决定了最终胜负走向。",
-                    "verdict": narr.get("verdict") or "综合全队 1~5 号位全周期录像证据，各位置在经济转化、出装选择与团战切入上展现出明显分化。",
-                    "team_practice": "下一局开黑务必明确 1~5 号位前中期抱团抓人与控盾推塔分工，辅助优先做出团队救人控制装，核心严禁无视野孤狼收线。",
-                    "stage_reviews": {
-                        "early_lanes": "前期（0-10m）三路对线围绕正反补、消耗换血与游走支援展开，线上优劣势直接影响了第一波核心节奏装的出炉时间。",
-                        "mid_tempo": "中期（10-25m）进入抱团抓人与外塔攻防阶段，第一件关键节奏装与团队救人装的到位速度成为双方视野与地图控制权的分水岭。",
-                        "late_and_roshan": "后期（25m-终局）围绕肉山盾控制权与高地攻防展开终局决战，核心位BKB容错与买活纪律直接决定了最终胜负。",
-                        "overall_verdict": "全场总账：严格按照 1~5 号位本职契约考核，赢在团队协同与资源转化，输在脱节落单与出装偏离位置职责。",
-                    },
-                    "mvp": {"slot": 0, "runner_up_slot": 1, "confidence": "高", "reason": "综合全周期评分与位置履职表现评定", "comparison": "在经济转化与团战贡献上领先队友", "evidence": ["全周期KDA与伤害转化率突出"]},
-                    "windows": [],
-                }
+            if len(merged_players_by_pos) < 5:
+                raise RuntimeError("Grok 选手分片未全部成功返回")
             part_global["players"] = [merged_players_by_pos[k] for k in sorted(merged_players_by_pos.keys())]
             out_txt = json.dumps(part_global, ensure_ascii=False)
 
         # 尝试解析为结构化 JSON 并持久化
         structured = _parse_llm_json_robust(out_txt)
-        try:
-            if isinstance(structured, dict):
-                structured["author"] = f"{prov} / {model}"
-                structured["model"] = model
-                structured["provider"] = prov
-                structured["side"] = focus_side
-                # Normalize players' grok_score & grok_share_pct and enforce strict rank-order monotonicity:
-                # - In a WIN (own_won=True): higher grok_score MUST have higher grok_share_pct (victory contribution %)
-                # - In a LOSS (own_won=False): lower grok_score MUST have higher grok_share_pct (defeat blame %)
-                own_pos_map = {int(p.get("pos") or 0): p for p in own_team if isinstance(p, dict)}
-                pls = [gp for gp in (structured.get("players") or []) if isinstance(gp, dict)]
-                for gp in pls:
-                    p_orig = own_pos_map.get(int(gp.get("pos") or 0))
-                    if p_orig:
-                        gp["slot"] = p_orig.get("player_slot")
-                        gp["hero"] = p_orig.get("hero_short_zh") or p_orig.get("hero_name") or gp.get("hero")
-                if len(pls) > 0:
-                    total_sh = sum(max(1.0, float(gp.get("grok_share_pct") or 20.0)) for gp in pls) or 100.0
-                    norm_shares = sorted(
-                        [round((max(1.0, float(gp.get("grok_share_pct") or 20.0)) / total_sh) * 100.0, 1) for gp in pls],
-                        reverse=True,
+        if not isinstance(structured, dict) or not isinstance(structured.get("players"), list) or len(structured["players"]) < 5:
+            raise RuntimeError("大模型未返回完整的 5 人结构化判词 JSON")
+
+        structured["author"] = f"{prov} / {model}"
+        structured["model"] = model
+        structured["provider"] = prov
+        structured["side"] = focus_side
+        own_pos_map = {int(p.get("pos") or 0): p for p in own_team if isinstance(p, dict)}
+        pls = [gp for gp in (structured.get("players") or []) if isinstance(gp, dict)]
+        for gp in pls:
+            p_orig = own_pos_map.get(int(gp.get("pos") or 0))
+            if p_orig:
+                gp["slot"] = p_orig.get("player_slot")
+                gp["hero"] = p_orig.get("hero_short_zh") or p_orig.get("hero_name") or gp.get("hero")
+        if len(pls) > 0:
+            total_sh = sum(max(1.0, float(gp.get("grok_share_pct") or 20.0)) for gp in pls) or 100.0
+            norm_shares = sorted(
+                [round((max(1.0, float(gp.get("grok_share_pct") or 20.0)) / total_sh) * 100.0, 1) for gp in pls],
+                reverse=True,
+            )
+            for idx_ns in range(1, len(norm_shares)):
+                if norm_shares[idx_ns] >= norm_shares[idx_ns - 1]:
+                    norm_shares[idx_ns] = max(1.0, round(norm_shares[idx_ns - 1] - 0.3, 1))
+            if norm_shares:
+                drift = round(100.0 - sum(norm_shares), 1)
+                if drift >= 0:
+                    norm_shares[0] = round(norm_shares[0] + drift, 1)
+                else:
+                    norm_shares[-1] = max(1.0, round(norm_shares[-1] + drift, 1))
+            if own_won:
+                pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), float(x.get("grok_share_pct") or 20)), reverse=True)
+                for idx_s in range(1, len(pls_by_rank)):
+                    prev_sc = int(pls_by_rank[idx_s - 1].get("grok_score") or 75)
+                    cur_sc = int(pls_by_rank[idx_s].get("grok_score") or 70)
+                    if cur_sc >= prev_sc:
+                        pls_by_rank[idx_s]["grok_score"] = max(40, prev_sc - 1)
+            else:
+                max_sc = max(int(x.get("grok_score") or 60) for x in pls)
+                for x in pls:
+                    txt_c = f"{x.get('headline', '')} {x.get('deep_verdict', '')}"
+                    if ("孤胆院长" in txt_c or "SVP" in txt_c) and int(x.get("grok_score") or 60) < max_sc:
+                        x["grok_score"] = min(88, max_sc + 3)
+                pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), -float(x.get("grok_share_pct") or 20)))
+                for idx_s in range(1, len(pls_by_rank)):
+                    prev_sc = int(pls_by_rank[idx_s - 1].get("grok_score") or 45)
+                    cur_sc = int(pls_by_rank[idx_s].get("grok_score") or 50)
+                    if cur_sc <= prev_sc:
+                        pls_by_rank[idx_s]["grok_score"] = min(95, prev_sc + 1)
+            for idx_r, gp in enumerate(pls_by_rank):
+                gp["grok_share_pct"] = norm_shares[idx_r]
+                dv = str(gp.get("deep_verdict") or "")
+                if dv:
+                    dv = re.sub(r"严格依据\s*(top_weakness|专属技能)", "综合全周期录像证据", dv, flags=re.I)
+                    dv = re.sub(r"grok_score\s*(?:仅\s*)?[:：=]?\s*(\d+)\s*分?", r"本局评分 \1 分", dv, flags=re.I)
+                    dv = re.sub(r"grok_share_pct\s*[:：=]?\s*([\d.]+%?)", r"占比 \1", dv, flags=re.I)
+                    dv = re.sub(r"（与[^）]*并列头号）", "", dv)
+                    if own_won and idx_r == len(pls_by_rank) - 1:
+                        dv = re.sub(r"头号大锅[、·]?一级战犯|头号大锅", "本局胜方短板（复盘改进位）", dv)
+                    dv = re.sub(
+                        r"(?:胜局|败局)?(?:分锅|背锅|贡献|定责)(?:占比)?(?:仅)?\s*\d+(?:\.\d+)?%",
+                        f"{'胜局贡献' if own_won else '败局分锅'} {norm_shares[idx_r]:.1f}%",
+                        dv,
                     )
-                    # Enforce strict non-tied descending shares before fixing rounding drift
-                    for idx_ns in range(1, len(norm_shares)):
-                        if norm_shares[idx_ns] >= norm_shares[idx_ns - 1]:
-                            norm_shares[idx_ns] = max(1.0, round(norm_shares[idx_ns - 1] - 0.3, 1))
-                    # Fix rounding drift on largest share (if positive) or smallest share (if negative) so sum is 100.0
-                    if norm_shares:
-                        drift = round(100.0 - sum(norm_shares), 1)
-                        if drift >= 0:
-                            norm_shares[0] = round(norm_shares[0] + drift, 1)
-                        else:
-                            norm_shares[-1] = max(1.0, round(norm_shares[-1] + drift, 1))
-                    if own_won:
-                        # Highest score gets largest contribution share
-                        pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), float(x.get("grok_share_pct") or 20)), reverse=True)
-                        for idx_s in range(1, len(pls_by_rank)):
-                            prev_sc = int(pls_by_rank[idx_s - 1].get("grok_score") or 75)
-                            cur_sc = int(pls_by_rank[idx_s].get("grok_score") or 70)
-                            if cur_sc >= prev_sc:
-                                pls_by_rank[idx_s]["grok_score"] = max(40, prev_sc - 1)
-                    else:
-                        # If Grok explicitly named someone 孤胆院长/SVP in headline/deep_verdict, ensure their score is top of team
-                        max_sc = max(int(x.get("grok_score") or 60) for x in pls)
-                        for x in pls:
-                            txt_c = f"{x.get('headline', '')} {x.get('deep_verdict', '')}"
-                            if ("孤胆院长" in txt_c or "SVP" in txt_c) and int(x.get("grok_score") or 60) < max_sc:
-                                x["grok_score"] = min(88, max_sc + 3)
-                        # Lowest score is #1 Culprit and gets largest blame share
-                        pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), -float(x.get("grok_share_pct") or 20)))
-                        for idx_s in range(1, len(pls_by_rank)):
-                            prev_sc = int(pls_by_rank[idx_s - 1].get("grok_score") or 45)
-                            cur_sc = int(pls_by_rank[idx_s].get("grok_score") or 50)
-                            if cur_sc <= prev_sc:
-                                pls_by_rank[idx_s]["grok_score"] = min(95, prev_sc + 1)
-                    for idx_r, gp in enumerate(pls_by_rank):
-                        gp["grok_share_pct"] = norm_shares[idx_r]
-                        dv = str(gp.get("deep_verdict") or "")
-                        if dv:
-                            dv = re.sub(r"严格依据\s*(top_weakness|专属技能)", "综合全周期录像证据", dv, flags=re.I)
-                            dv = re.sub(r"grok_score\s*(?:仅\s*)?[:：=]?\s*(\d+)\s*分?", r"本局评分 \1 分", dv, flags=re.I)
-                            dv = re.sub(r"grok_share_pct\s*[:：=]?\s*([\d.]+%?)", r"占比 \1", dv, flags=re.I)
-                            dv = re.sub(r"（与[^）]*并列头号）", "", dv)
-                            if own_won and idx_r == len(pls_by_rank) - 1:
-                                dv = re.sub(r"头号大锅[、·]?一级战犯|头号大锅", "本局胜方短板（复盘改进位）", dv)
-                            # Sync any trailing percentage in deep_verdict to the normalized monotonic share
-                            dv = re.sub(
-                                r"(?:胜局|败局)?(?:分锅|背锅|贡献|定责)(?:占比)?(?:仅)?\s*\d+(?:\.\d+)?%",
-                                f"{'胜局贡献' if own_won else '败局分锅'} {norm_shares[idx_r]:.1f}%",
-                                dv,
-                            )
-                            dv = re.sub(
-                                r"\d+(?:\.\d+)?%\s*(?:的)?(?:胜局|败局)?(?:功勋|贡献|分锅|背锅)",
-                                f"{norm_shares[idx_r]:.1f}%的{'胜局功勋' if own_won else '败局分锅'}",
-                                dv,
-                            )
-                            gp["deep_verdict"] = dv
-                            gp["assessment"] = dv
-                    structured["players"] = pls_by_rank
-                mid = report.get("match_id")
-                if mid:
-                    try:
-                        reports_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
-                        os.makedirs(reports_dir, exist_ok=True)
-                        cache_path = os.path.join(reports_dir, f"coaching-{mid}-{focus_side}.json")
-                        with open(cache_path, "w", encoding="utf-8") as cf:
-                            json.dump(structured, cf, ensure_ascii=False, indent=2)
-                    except OSError:
-                        tmp_dir = "/tmp/dota_reports"
-                        os.makedirs(tmp_dir, exist_ok=True)
-                        cache_path = os.path.join(tmp_dir, f"coaching-{mid}-{focus_side}.json")
-                        with open(cache_path, "w", encoding="utf-8") as cf:
-                            json.dump(structured, cf, ensure_ascii=False, indent=2)
-        except Exception:
-            structured = None
+                    dv = re.sub(
+                        r"\d+(?:\.\d+)?%\s*(?:的)?(?:胜局|败局)?(?:功勋|贡献|分锅|背锅)",
+                        f"{norm_shares[idx_r]:.1f}%的{'胜局功勋' if own_won else '败局分锅'}",
+                        dv,
+                    )
+                    gp["deep_verdict"] = dv
+                    gp["assessment"] = dv
+            structured["players"] = pls_by_rank
+        mid = report.get("match_id")
+        if mid:
+            try:
+                reports_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
+                os.makedirs(reports_dir, exist_ok=True)
+                cache_path = os.path.join(reports_dir, f"coaching-{mid}-{focus_side}.json")
+                with open(cache_path, "w", encoding="utf-8") as cf:
+                    json.dump(structured, cf, ensure_ascii=False, indent=2)
+            except OSError:
+                tmp_dir = "/tmp/dota_reports"
+                os.makedirs(tmp_dir, exist_ok=True)
+                cache_path = os.path.join(tmp_dir, f"coaching-{mid}-{focus_side}.json")
+                with open(cache_path, "w", encoding="utf-8") as cf:
+                    json.dump(structured, cf, ensure_ascii=False, indent=2)
 
         return {
             "ok": True,
@@ -2626,7 +2580,7 @@ def call_llm_pregame_coach(
     env_cfg = load_env_llm_config()
     key = (env_cfg.get("api_key") or "").strip()
     prov = (env_cfg.get("provider") or "xai").strip().lower()
-    model = (env_cfg.get("model_name") or "grok-4.7").strip()
+    model = (env_cfg.get("model_name") or "grok-4.20-0309-non-reasoning").strip()
     b_url = (env_cfg.get("base_url") or "https://api.x.ai/v1").strip()
 
     if prov in ("grok", "x.ai"):
@@ -2634,7 +2588,9 @@ def call_llm_pregame_coach(
     if prov == "xai" and (not b_url or "openai.com" in b_url):
         b_url = "https://api.x.ai/v1"
     if prov == "xai" and ("gemini" in model or not model):
-        model = env_cfg.get("model_name") or "grok-4.7"
+        model = env_cfg.get("model_name") or "grok-4.20-0309-non-reasoning"
+    if prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4"):
+        model = "grok-4.20-0309-non-reasoning"
 
     if not key:
         return {"ok": False, "error": "未配置大模型密钥"}
@@ -2680,6 +2636,7 @@ def call_llm_pregame_coach(
     try:
         url = f"{b_url.rstrip('/')}/chat/completions"
         api_model = "grok-4.20-0309-non-reasoning" if (prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4")) else model
+        model = api_model
         payload = {
             "model": api_model,
             "messages": [
@@ -2709,8 +2666,9 @@ def call_llm_pregame_coach(
             if out_txt.startswith("json"):
                 out_txt = out_txt[4:].strip()
         structured = json.loads(out_txt)
+        structured["model"] = model
         structured["author"] = f"{prov.upper()} / {model}"
-        return {"ok": True, "grok_live_brief": structured}
+        return {"ok": True, "model": model, "grok_live_brief": structured}
     except Exception as e:
         return {"ok": False, "error": str(e)}
 

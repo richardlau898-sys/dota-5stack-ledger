@@ -91,7 +91,7 @@
         <div class="ws-avatar">刀</div>
         <div class="ws-account-copy">
           <div id="ws-sidebar-account-name" class="ws-account-name">主视角玩家</div>
-          <div id="llm-status-pill" class="model-status connected ws-account-email">已接入 XAI / grok-4.7</div>
+          <div id="llm-status-pill" class="model-status connected ws-account-email">读取模型状态中...</div>
         </div>
         <button type="button" id="btn-open-settings" class="ws-icon-btn" title="车队花名册与大模型设置">⚙️</button>
       </div>
@@ -168,7 +168,7 @@
           <button type="button" id="btn-export-pdf" class="ws-cmd-btn" title="全屏结构化报告 &amp; 下载 PDF">📄 PDF报告</button>
           <button type="button" id="btn-hero-share-link" class="ws-cmd-btn" title="复制本局公开分享链接">🔗 分享</button>
           <button type="button" id="btn-open-share-poster-2" class="ws-cmd-btn" title="导出群聊庆功/处刑海报">🖼️ 海报</button>
-          <button type="button" id="btn-trigger-grok" class="ws-cmd-btn primary" title="呼叫 Grok 4.7 生成深度判词">🧠 Grok 判词</button>
+          <button type="button" id="btn-trigger-grok" class="ws-cmd-btn primary" title="呼叫 AI 教练生成深度判词">🧠 Grok 判词</button>
         </div>
       </div>
 
@@ -184,7 +184,7 @@
           <h2 id="home-hero-heading" class="home-hero-title" tabindex="-1">选择一局比赛记录，开启十二维录像级算账复盘</h2>
           <p class="home-hero-desc">
             告别一进页面就被密密麻麻的数据淹没。在这里先浏览近期战绩账本，点击任意一局比赛即可进入该局的
-            <b>六大章节深度复盘</b>、<b>Grok 4.7 毒舌/庆功评书</b> 与 <b>原生矢量 PDF 报告导出</b>。
+            <b>六大章节深度复盘</b>、<b>AI 教练评书</b> 与 <b>原生矢量 PDF 报告导出</b>。
           </p>
           <div id="home-player-kpis" class="home-kpi-strip">
             <span class="status-pill connected">正在加载主视角玩家战绩...</span>
@@ -263,7 +263,7 @@
           <button type="button" id="btn-pregame-preset-best" class="button secondary" title="一键填入车队高胜率绝活体系">套用车队绝活体系</button>
           <button type="button" id="btn-pregame-clear" class="button secondary">清空重选</button>
           <button type="button" id="btn-pregame-copy-brief" class="button secondary">📋 复制赛前作战简报</button>
-          <button type="button" id="btn-pregame-grok" class="button primary">🧠 呼叫 Grok 4.7 深度推演本局战术</button>
+          <button type="button" id="btn-pregame-grok" class="button primary">🧠 呼叫 AI 教练深度推演本局战术</button>
         </div>
       </section>
 
@@ -373,10 +373,10 @@
         <span id="parse-quality-badge" class="status-pill">录像解析核对中</span>
       </div>
 
-      <!-- Grok 4.7 总判词横幅 -->
+      <!-- AI 教练总判词横幅 -->
       <article id="grok-verdict-banner" class="grok-banner">
         <div class="grok-banner-head">
-          <span class="grok-tag" id="grok-author-label">XAI / GROK-4.7 赛后总账</span>
+          <span class="grok-tag" id="grok-author-label">AI 教练赛后总账</span>
           <span id="grok-title-text" class="grok-banner-title">正在装载赛后判词...</span>
         </div>
         <div id="grok-summary-text" class="grok-summary-p"></div>
@@ -871,7 +871,7 @@
   <footer class="site-footer">
     <span>战后算账 · Dota 2 录像级战术复盘与车队分锅工作台</span>
     <span>·</span>
-    <span>有据才喷，数据来自 OpenDota 录像解析与 xAI Grok 4.7</span>
+    <span>有据才喷，数据来自 OpenDota 录像解析与 AI 教练</span>
   </footer>
 
   <!-- 手机端底部拇指快捷导航栏（仅 <= 768px 显示） -->

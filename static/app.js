@@ -1,6 +1,6 @@
 /**
  * 战后算账 · Dota 2 录像级复盘与车队分锅账本
- * Frontend Application (Vanilla ES2024, Zero-Framework, 6 Interactive SVG Visuals + xAI Grok 4.7)
+ * Frontend Application (Vanilla ES2024, Zero-Framework, 6 Interactive SVG Visuals + AI Coach)
  */
 
 const state = {
@@ -351,8 +351,16 @@ function fmtSigned(n) {
   return num > 0 ? `+${fmtNum(num)}` : fmtNum(num);
 }
 
+function getCoachModelDisplayName(report = state.currentReport, fallback = "AI 教练") {
+  const gc = report?.grok_coaching || state.currentReport?.grok_coaching || null;
+  if (gc?.model) return String(gc.model);
+  if (gc?._meta?.model) return String(gc._meta.model);
+  if (state.llmStatus?.model) return String(state.llmStatus.model);
+  return fallback;
+}
+
 /**
- * Look up Grok 4.7 player entry by player_slot, pos+hero, or pos
+ * Look up AI coach player entry by player_slot, pos+hero, or pos
  */
 function findGrokPlayerEntry(p, report = state.currentReport) {
   if (!p || !report?.grok_coaching?.players) return null;
@@ -378,7 +386,7 @@ function findGrokPlayerEntry(p, report = state.currentReport) {
 
 /**
  * Compute 0..100 integer score for any player (100 highest, 0 lowest).
- * Prioritizes Grok 4.7 AI re-evaluated score (`grok_score`) when available!
+ * Prioritizes AI coach re-evaluated score (`grok_score`) when available!
  */
 function getHeroScore100(p, report = state.currentReport) {
   if (!p) return 60;
@@ -870,7 +878,7 @@ function buildTeamfightDotaStory(tf, fObj, idx, { side, sideZh, oppZh, grokWin }
   }
 
   if (grokWin && grokWin.detail && grokWin.detail.length > 25) {
-    storyText = `${storyText} 【Grok 4.7 追评：${grokWin.detail}】`;
+    storyText = `${storyText} 【${getCoachModelDisplayName()} 追评：${grokWin.detail}】`;
   }
 
   const mappedTone = toneClass === "win" ? "praise" : toneClass === "loss" ? "roast" : "mixed";
@@ -1055,7 +1063,7 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
 
   const fullText =
     grokPlayer?.assessment && grokPlayer.assessment.length > 20
-      ? `${baseStory} 【Grok 4.7 深度追评：${grokPlayer.assessment}】`
+      ? `${baseStory} 【${getCoachModelDisplayName()} 深度追评：${grokPlayer.assessment}】`
       : baseStory;
 
   return {
@@ -1511,7 +1519,7 @@ function buildStructuredFullReportHtml(report) {
   const grok = report.grok_coaching || {};
   const draft = report.draft_and_combo?.[side] || report.draft_and_combo || {};
 
-  // Normalize 100% contribution and 100% blame shares (preferring Grok 4.7 grok_share_pct)
+  // Normalize 100% contribution and 100% blame shares (preferring AI coach grok_share_pct)
   const rawContribSum =
     own.reduce((s, p) => {
       const gp = findGrokPlayerEntry(p, report);
@@ -2021,7 +2029,7 @@ function buildStructuredFullReportHtml(report) {
         </div>
         ${
           grok.summary
-            ? `<div class="fs-exec-callout"><strong>Grok 4.7 核心定性：</strong>${escapeHtml(
+            ? `<div class="fs-exec-callout"><strong>${escapeHtml(getCoachModelDisplayName(report))} 核心定性：</strong>${escapeHtml(
                 grok.summary
               )}</div>`
             : ""
@@ -3280,7 +3288,7 @@ async function downloadStructuredReportPdf() {
         .replace(/主视角（[^）]+）车队全局数据对比：/g, "；"),
     ]);
     if (grok.summary) {
-      stageRows.unshift(["Grok 4.7 核心总评", grok.summary]);
+      stageRows.unshift([`${getCoachModelDisplayName(report)} 核心总评`, grok.summary]);
     }
     runVectorTable(["阶段维度", "录像级核心对账数据与关键胜负节点还原"], stageRows, {
       0: { cellWidth: 42, fontStyle: "bold" },
@@ -4059,7 +4067,7 @@ async function downloadStructuredReportPdf() {
       doc.setTextColor(100, 116, 139);
       doc.text(
         cleanPdfVectorText(
-          `战后算账 · Dota 2 五黑录像级复盘工作台 (OpenDota 录像解析 + xAI Grok 4.7)  |  ${shareUrl}`
+          `战后算账 · Dota 2 五黑录像级复盘工作台 (OpenDota 录像解析 + ${getCoachModelDisplayName(report)})  |  ${shareUrl}`
         ),
         marginX,
         pageH - 5.2
@@ -5234,7 +5242,7 @@ function promptTeamTokenOn401(res, data = null) {
 function getEffectiveLlmConfig() {
   return {
     provider: state.llmStatus?.provider || "xai",
-    model: state.llmStatus?.model || "grok-4.7",
+    model: state.llmStatus?.model || getCoachModelDisplayName(state.currentReport, "AI 教练"),
   };
 }
 
@@ -5244,7 +5252,7 @@ function renderHeaderStatus() {
     const cfg = getEffectiveLlmConfig();
     const hasServerKey = Boolean(state.llmStatus?.configured);
     pill.textContent = hasServerKey
-      ? `已接入 ${String(cfg.provider || "xai").toUpperCase()} / ${cfg.model || "grok-4.7"}`
+      ? `已接入 ${String(cfg.provider || "xai").toUpperCase()} / ${cfg.model || getCoachModelDisplayName(state.currentReport, "AI 教练")}`
       : "内置录像算账引擎";
     pill.classList.toggle("connected", hasServerKey);
   }
@@ -6084,7 +6092,7 @@ async function triggerGrokReview({ force = true } = {}) {
   state.isGeneratingGrok = true;
   if (grokBtn) {
     grokBtn.disabled = true;
-    grokBtn.textContent = "Grok 4.7 正在逐帧算账 (约15秒)...";
+    grokBtn.textContent = `${getCoachModelDisplayName()} 正在逐帧算账 (约15秒)...`;
   }
   showToast(`正在调用 ${llmCfg.provider.toUpperCase()} / ${llmCfg.model} 重新生成深度判词...`, 12000);
 
@@ -6112,7 +6120,7 @@ async function triggerGrokReview({ force = true } = {}) {
       state.currentReport = data.report;
       saveLocalAnalyzedMatch(state.currentReport);
       renderFullMatchReport(state.currentReport);
-      showToast("✅ Grok 4.7 五人深度研判与三幕长段复盘已生成并持久化缓存！");
+      showToast(`✅ ${getCoachModelDisplayName(state.currentReport)} 五人深度研判与三幕长段复盘已生成并持久化缓存！`);
     }
   } catch (err) {
     console.error(err);
@@ -6121,7 +6129,7 @@ async function triggerGrokReview({ force = true } = {}) {
     state.isGeneratingGrok = false;
     if (grokBtn) {
       grokBtn.disabled = false;
-      grokBtn.textContent = "用 Grok 4.7 重算判词";
+      grokBtn.textContent = `用 ${getCoachModelDisplayName()} 重算判词`;
     }
   }
 }
@@ -6189,12 +6197,13 @@ function renderMatchOverview(report) {
   const hasGrok = Boolean(grok?.title);
 
   const metaEl = document.getElementById("match-meta-line");
+  const modelLabel = getCoachModelDisplayName(report);
   if (metaEl) {
     const statusText =
       isParsed && hasGrok
-        ? "✅ AI 完整判定已成功 (OpenDota 录像级11维解析 + Grok 4.7 深度判词已就绪)"
+        ? `✅ AI 完整判定已成功 (OpenDota 录像级11维解析 + ${modelLabel} 深度判词已就绪)`
         : isParsed
-        ? "🟢 OpenDota 录像级解析已成功 (可点下方「用 Grok 4.7 重算判词」生成大模型标题)"
+        ? `🟢 OpenDota 录像级解析已成功 (可点下方「用 ${modelLabel} 重算判词」生成大模型标题)`
         : "🟡 当前仅基础统计 (刚结束的比赛 OpenDota 尚未解析 .dem 录像，系统正自动请求解析)";
     metaEl.textContent = `比赛编号 #${report.match_id} · ${report.start_time_str || ""} · ${
       report.mode_str || ""
@@ -6205,7 +6214,7 @@ function renderMatchOverview(report) {
   if (parseBadge) {
     parseBadge.textContent =
       isParsed && hasGrok
-        ? "✅ 录像级 + Grok 4.7 完整判定已就绪"
+        ? `✅ 录像级 + ${modelLabel} 完整判定已就绪`
         : isParsed
         ? "🟢 录像级解析已就绪 (含眼位/时间轴/按键次数)"
         : "🟡 未解析录像 (正在自动请求 OpenDota 解析...)";
@@ -11739,23 +11748,24 @@ function buildRichFourStageCardsHtml(report) {
   ];
 
   const grokStages = report.grok_coaching?.stage_reviews || {};
+  const stageModelName = escapeHtml(getCoachModelDisplayName(report));
   const grokEarlyBullet = grokStages.early_lanes
-    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 AI 复盘</span> ${escapeHtml(
+    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(
         grokStages.early_lanes
       )}`
     : null;
   const grokMidBullet = grokStages.mid_tempo
-    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 AI 复盘</span> ${escapeHtml(
+    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(
         grokStages.mid_tempo
       )}`
     : null;
   const grokLateBullet = grokStages.late_and_roshan
-    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 AI 复盘</span> ${escapeHtml(
+    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(
         grokStages.late_and_roshan
       )}`
     : null;
   const grokOverallBullet = grokStages.overall_verdict
-    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 AI 总评</span> ${escapeHtml(
+    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 总评</span> ${escapeHtml(
         grokStages.overall_verdict
       )}`
     : null;
@@ -12106,8 +12116,9 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   // =========================================================================
   const itemIntel = analyzePlayerItemizationIntelligence(p, report);
   const grokP = findGrokPlayerEntry(p, report);
+  const coachNameEsc = escapeHtml(getCoachModelDisplayName(report));
 
-  const grokBadgeHtml = `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 Grok 4.7 研判</span> `;
+  const grokBadgeHtml = `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${coachNameEsc} 研判</span> `;
 
   const baseAct1Story = act1Story;
   const baseAct2Story = act2Story;
@@ -12136,7 +12147,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   }
 
   // =========================================================================
-  // 功过得失清单（当 Grok 4.7 AI 研判存在时，完全采用 AI 深度研判，去除弱规则模板！）
+  // 功过得失清单（当 AI 教练研判存在时，完全采用 AI 深度研判，去除弱规则模板！）
   // =========================================================================
   const goodPoints = [];
   const badPoints = [];
@@ -12154,7 +12165,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
 
   if (grokGoodItems.length > 0) {
     grokGoodItems.forEach((g) => {
-      goodPoints.push(`<b>🧠 Grok 4.7 肯定：</b>${escapeHtml(g)}`);
+      goodPoints.push(`<b>🧠 ${coachNameEsc} 肯定：</b>${escapeHtml(g)}`);
     });
   } else {
     if (isCore) {
@@ -12218,7 +12229,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
 
   if (grokBadItems.length > 0) {
     grokBadItems.forEach((b) => {
-      badPoints.push(`<b>🧠 Grok 4.7 锐评：</b>${escapeHtml(b)}`);
+      badPoints.push(`<b>🧠 ${coachNameEsc} 锐评：</b>${escapeHtml(b)}`);
     });
     if (grokP?.practice) {
       badPoints.push(`<b>🎯 下把改进处方：</b>${escapeHtml(grokP.practice)}`);
@@ -12285,11 +12296,11 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     }
   }
 
-  // Show BOTH Grok 4.7's deep item review AND the 6 granular forensic breakdowns (Playstyle + Spell Damage + Spell×Target Matrix + Talents + Neutral & 7.38 Enchantments + Perm Buffs/Facet)
+  // Show BOTH AI coach's deep item review AND the 6 granular forensic breakdowns (Playstyle + Spell Damage + Spell×Target Matrix + Talents + Neutral & 7.38 Enchantments + Perm Buffs/Facet)
   const grokItemAuditLine = grokP?.item_and_blink_audit || "";
   const allItemBullets = grokItemAuditLine
     ? [
-        `<span style="color:#ddd6fe;"><b>🤖 XAI / GROK-4.7 深度 AI 流派·出装·天赋·附魔·跳刀锐评：</b>${escapeHtml(
+        `<span style="color:#ddd6fe;"><b>🤖 ${coachNameEsc} 深度 AI 流派·出装·天赋·附魔·跳刀锐评：</b>${escapeHtml(
           grokItemAuditLine
         )}</span>`,
         ...itemIntel.highlights.slice(0, 8),
@@ -12324,7 +12335,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     `
       : "";
 
-  // Prominent Grok 4.7 Deep 1-Paragraph Personal Judgment Report Box (`deep_verdict`)
+  // Prominent AI Coach Deep 1-Paragraph Personal Judgment Report Box (`deep_verdict`)
   const deepVerdictText = grokP?.deep_verdict || grokP?.assessment || "";
   const isRoleBad = roleType === "culprit1" || roleType === "culprit2" || roleType === "struggle";
   const roleVerdictTag =
@@ -12352,7 +12363,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
           <span style="font-size:12.5px;font-weight:800;color:${
             isRoleBad ? "#fca5a5" : "#ddd6fe"
-          };letter-spacing:0.3px;">🧠 XAI / GROK-4.7 · ${escapeHtml(roleVerdictTag)}</span>
+          };letter-spacing:0.3px;">🧠 ${coachNameEsc} · ${escapeHtml(roleVerdictTag)}</span>
           <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(15,23,42,0.65);border:1px solid rgba(167,139,250,0.4);color:#e9d5ff;">🎯 Grok 重新打分：<b>${score100}/100分</b> · ${
             roleType === "mvp" || roleType === "runnerup" || roleType === "svp" ? "功勋占比" : "定责占比"
           } <b>${sharePct}%</b></span>
@@ -12465,7 +12476,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
 }
 
 /**
- * 2. Render Grok 4.7 Verdict Banner + 3 Verdict Cards (MVP / #2 / #3 Struggle or 2nd Culprit) + 5-Stack Blame Ledger
+ * 2. Render AI Coach Verdict Banner + 3 Verdict Cards (MVP / #2 / #3 Struggle or 2nd Culprit) + 5-Stack Blame Ledger
  */
 function renderVerdictAndBlameSection(report) {
   const { side, sideZh, own, all } = getOwnAndOppPlayers(report);
@@ -12645,12 +12656,13 @@ function renderVerdictAndBlameSection(report) {
   const topBlame1 = sortedByBlame[0]?.player;
   const topBlame2 = sortedByBlame[1]?.player;
 
-  // 2.1 Grok Verdict Banner (When Grok 4.7 is active, show Grok's superior summary & verdict without redundant rule-based stage grid)
+  // 2.1 AI Coach Verdict Banner (When AI coach is active, show its summary & verdict without redundant rule-based stage grid)
   const authorEl = document.getElementById("grok-author-label");
   const titleEl = document.getElementById("grok-title-text");
   const summaryEl = document.getElementById("grok-summary-text");
   const verdictEl = document.getElementById("grok-verdict-text");
   const practiceEl = document.getElementById("grok-team-practice-box");
+  const coachDisplayName = getCoachModelDisplayName(report);
 
   const buildStructuredVerdictHtml = (extraText = "") => {
     const extraClean = sanitizeMixedEnglishClient(String(extraText || "")).trim();
@@ -12674,7 +12686,7 @@ function renderVerdictAndBlameSection(report) {
   if (grok && (!grok.side || grok.side === side)) {
     const modelTag = grok._meta?.model
       ? `🧠 ${String(grok._meta.provider || "XAI").toUpperCase()} / ${grok._meta.model} ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`
-      : `🧠 XAI / GROK-4.7 ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`;
+      : `🧠 ${String(grok.provider || "XAI").toUpperCase()} / ${coachDisplayName} ${won ? "赛后庆功与复盘总账" : "赛后分锅总账"}`;
     if (authorEl) authorEl.textContent = modelTag;
     if (titleEl) titleEl.textContent = sanitizeMixedEnglishClient(grok.title || (won ? "凯旋庆功与战术复盘" : "本局赛后复盘总账"));
     if (summaryEl) {
@@ -12699,8 +12711,8 @@ function renderVerdictAndBlameSection(report) {
       : "";
     if (authorEl) {
       authorEl.textContent = won
-        ? "录像级庆功引擎 · 四阶段全细节对账与论功行赏 (含英雄小图标 · 可点右上角用 Grok 4.7 深度重算)"
-        : "录像级算账引擎 · 四阶段全细节对账与分锅判词 (含英雄小图标 · 可点右上角用 Grok 4.7 深度重算)";
+        ? `录像级庆功引擎 · 四阶段全细节对账与论功行赏 (含英雄小图标 · 可点右上角用 ${coachDisplayName} 深度重算)`
+        : `录像级算账引擎 · 四阶段全细节对账与分锅判词 (含英雄小图标 · 可点右上角用 ${coachDisplayName} 深度重算)`;
     }
     if (titleEl) {
       titleEl.textContent = won
@@ -12714,9 +12726,9 @@ function renderVerdictAndBlameSection(report) {
       verdictEl.innerHTML = buildStructuredVerdictHtml("");
     }
     if (practiceEl) {
-      practiceEl.innerHTML = `<strong>提示：</strong>点击右上角「让 Grok 4.7 生成深度判词」即可调用服务端已配置的 xAI Grok 4.7 生成针对『${escapeHtml(
+      practiceEl.innerHTML = `<strong>提示：</strong>点击右上角「让 ${escapeHtml(coachDisplayName)} 生成深度判词」即可调用服务端已配置的 ${escapeHtml(coachDisplayName)} 生成针对『${escapeHtml(
         sideZh
-      )}』阵容的毒舌复盘；或点击「📄 导出 PDF 分析报告」一键保存完整复盘文档发给队友。`;
+      )}』阵容的复盘；或点击「📄 导出 PDF 分析报告」一键保存完整复盘文档发给队友。`;
       practiceEl.hidden = false;
     }
   }
@@ -15080,7 +15092,7 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
     const grokEarlyText = report.grok_coaching?.stage_reviews?.early_lanes || "";
     const grokEarlyBanner = grokEarlyText
       ? `<div style="margin-bottom:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(139,92,246,0.16),rgba(59,130,246,0.10));border:1px solid rgba(167,139,250,0.4);border-radius:10px;font-size:12.5px;line-height:1.65;color:#ede9fe;">
-          <b style="color:#c4b5fd;">🧠 XAI / GROK-4.7 大模型对线期深度复盘：</b>${injectHeroLogosIntoHtml(
+          <b style="color:#c4b5fd;">🧠 ${escapeHtml(getCoachModelDisplayName(report))} 大模型对线期深度复盘：</b>${injectHeroLogosIntoHtml(
             escapeHtml(grokEarlyText),
             report
           )}
@@ -15226,7 +15238,7 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
     const grokMidText = report.grok_coaching?.stage_reviews?.mid_tempo || "";
     const grokMidBanner = grokMidText
       ? `<div style="margin-bottom:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(139,92,246,0.16),rgba(59,130,246,0.10));border:1px solid rgba(167,139,250,0.4);border-radius:10px;font-size:12.5px;line-height:1.65;color:#ede9fe;">
-          <b style="color:#c4b5fd;">🧠 XAI / GROK-4.7 大模型中期节奏深度复盘：</b>${injectHeroLogosIntoHtml(
+          <b style="color:#c4b5fd;">🧠 ${escapeHtml(getCoachModelDisplayName(report))} 大模型中期节奏深度复盘：</b>${injectHeroLogosIntoHtml(
             escapeHtml(grokMidText),
             report
           )}
@@ -15400,7 +15412,7 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
   const grokLateText = report.grok_coaching?.stage_reviews?.late_and_roshan || "";
   const grokLateBanner = grokLateText
     ? `<div style="margin-bottom:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(139,92,246,0.16),rgba(59,130,246,0.10));border:1px solid rgba(167,139,250,0.4);border-radius:10px;font-size:12.5px;line-height:1.65;color:#ede9fe;">
-        <b style="color:#c4b5fd;">🧠 XAI / GROK-4.7 大模型决胜与控盾转化复盘：</b>${injectHeroLogosIntoHtml(
+        <b style="color:#c4b5fd;">🧠 ${escapeHtml(getCoachModelDisplayName(report))} 大模型决胜与控盾转化复盘：</b>${injectHeroLogosIntoHtml(
           escapeHtml(grokLateText),
           report
         )}
@@ -15878,7 +15890,7 @@ function renderPhaseSection(report) {
                       return `
                         <div class="phase-p-eval-block" style="grid-template-columns:1fr;">
                           <div class="phase-eval-group" style="background:rgba(109,40,217,0.14);border-color:rgba(167,139,250,0.4);">
-                            <b style="color:#ddd6fe;">🧠 XAI / GROK-4.7 本阶段深度个人研判</b>
+                            <b style="color:#ddd6fe;">🧠 ${escapeHtml(getCoachModelDisplayName(report))} 本阶段深度个人研判</b>
                             <div style="font-size:12.5px;line-height:1.68;color:#f1f5f9;">
                               ${injectHeroLogosIntoHtml(escapeHtml(grokPhaseStory), report)}
                             </div>
@@ -16394,7 +16406,7 @@ function renderKeyWindowsSection(report) {
       }
       const grokWinInlineHtml = pairedGrokWin
         ? `<div style="margin-top:8px;padding:8px 11px;background:rgba(198,164,104,0.1);border-left:3px solid var(--gold);border-radius:4px;font-size:12.5px;line-height:1.55;">
-             <strong style="color:var(--gold-light);">🧠 Grok 4.7 拐点评书（${escapeHtml(pairedGrokWin.time_label || fObj.time_range)} · ${escapeHtml(pairedGrokWin.title || "关键转折")}）：</strong>
+             <strong style="color:var(--gold-light);">🧠 ${escapeHtml(getCoachModelDisplayName(report))} 拐点评书（${escapeHtml(pairedGrokWin.time_label || fObj.time_range)} · ${escapeHtml(pairedGrokWin.title || "关键转折")}）：</strong>
              <span>${injectHeroLogosIntoHtml(escapeHtml(pairedGrokWin.detail || ""), report)}</span>
            </div>`
         : "";
@@ -16481,10 +16493,10 @@ function renderKeyWindowsSection(report) {
     });
   }
 
-  // Append Grok 4.7 turning point windows if present
+  // Append AI coach turning point windows if present
   grokWindows.forEach((w, gIdx) => {
     waveTabsMeta.push({
-      label: `🧠 Grok拐点 #${gIdx + 1}`,
+      label: `🧠 拐点 #${gIdx + 1}`,
       sub: w.time_label || "关键节点",
       isSpot: false,
     });
@@ -16492,7 +16504,7 @@ function renderKeyWindowsSection(report) {
       <article class="window-card">
         <div class="window-head">
           <span class="window-time-badge">${escapeHtml(w.time_label || "关键节点")}</span>
-          <span class="window-tone-badge praise">🧠 Grok 4.7 拐点剧场</span>
+          <span class="window-tone-badge praise">🧠 ${escapeHtml(getCoachModelDisplayName(report))} 拐点剧场</span>
           <h3 class="window-title">${escapeHtml(w.title || "胜负转折点")}</h3>
         </div>
         <div class="window-story-box praise">
@@ -18684,7 +18696,7 @@ async function openSinglePlayerPosterDialog(
     `🔗 复盘直达：${shareUrl}`,
     `────────────────────`,
     `👤 选手与英雄：${p.personaname} · ${heroZh} ([${p.pos_label}])`,
-    `📊 Grok 4.7 终审评分：${sc100}/100 分 ｜ ${shareLabel}：${sharePct}%`,
+    `📊 ${getCoachModelDisplayName(report)} 终审评分：${sc100}/100 分 ｜ ${shareLabel}：${sharePct}%`,
     `📈 基础面板：KDA ${p.kda} (参战率 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm} / XPM ${p.xpm} ｜ 英雄伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 建筑伤害 ${fmtNum(p.tower_damage)} ｜ 读秒 ${p.dead_seconds || 0}s`,
     `🗣️ 一针见血定性：${gp?.headline || p.blame_Headline || "录像级全周期数据实锤定责"}`,
     `────────────────────`,
@@ -19381,7 +19393,7 @@ function switchWorkspaceMode(mode, { pushUrl = true, animate = true } = {}) {
       if (locSub) locSub.textContent = "跨局五人大腿/锅王排行 · 全部比赛卡片总览";
     } else if (validMode === "pregame") {
       if (locTitle) locTitle.textContent = "赛前锦囊 · 五黑 BP 实时作战室";
-      if (locSub) locSub.textContent = "1~5号位车队绝活联动 · 敌方克制预警 · Grok 4.7 赛前死命令";
+      if (locSub) locSub.textContent = `1~5号位车队绝活联动 · 敌方克制预警 · ${getCoachModelDisplayName()} 赛前死命令`;
     } else if (validMode === "postgame" && state.currentReport) {
       const { side, sideZh, own } = getOwnAndOppPlayers(state.currentReport);
       const won =
@@ -19811,7 +19823,7 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
   const grokBtn = document.getElementById("btn-pregame-grok");
   if (useLlm && grokBtn) {
     grokBtn.disabled = true;
-    grokBtn.textContent = "🧠 Grok 4.7 正在推演本局五黑战术...";
+    grokBtn.textContent = `🧠 ${getCoachModelDisplayName()} 正在推演本局五黑战术...`;
   }
 
   try {
@@ -19831,7 +19843,7 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
     renderPregamePlanOutput(data.plan);
     if (useLlm) {
       if (data.plan?.grok_live_brief) {
-        showToast("Grok 4.7 赛前深度战术推演已就绪！");
+        showToast(`${data.plan.grok_live_brief.model || getCoachModelDisplayName()} 赛前深度战术推演已就绪！`);
       } else if (data.plan?.llm_error) {
         showToast(`Grok 推演提示: ${data.plan.llm_error}`);
       }
@@ -19841,7 +19853,7 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
   } finally {
     if (useLlm && grokBtn) {
       grokBtn.disabled = false;
-      grokBtn.textContent = "🧠 呼叫 Grok 4.7 深度推演本局战术";
+      grokBtn.textContent = `🧠 呼叫 ${getCoachModelDisplayName()} 深度推演本局战术`;
     }
   }
 }
@@ -19861,7 +19873,7 @@ function renderPregamePlanOutput(plan) {
     ? `
       <article class="grok-banner" style="margin-bottom:4px;">
         <div class="grok-banner-head">
-          <span class="grok-tag">XAI / GROK-4.7 赛前实时推演</span>
+          <span class="grok-tag">${escapeHtml(grokBrief.author || grokBrief.model || getCoachModelDisplayName())} 赛前实时推演</span>
           <span class="grok-banner-title">${escapeHtml(
             grokBrief.headline || "五黑赛前战术总纲"
           )}</span>

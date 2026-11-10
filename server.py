@@ -300,7 +300,8 @@ def _ensure_grok_coaching(
         llm_res = call_llm_coach_review(report)
         if isinstance(llm_res, dict) and llm_res.get("ok") and isinstance(llm_res.get("structured"), dict):
             structured = llm_res["structured"]
-            structured["model"] = llm_res.get("model", "grok-4.7")
+            if llm_res.get("model"):
+                structured["model"] = llm_res["model"]
             report["grok_coaching"] = structured
             rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
             try:
