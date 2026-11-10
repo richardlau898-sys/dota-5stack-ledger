@@ -559,7 +559,7 @@ async function copyMatchShareLink({ viewReport = false } = {}) {
 
 async function exportMatchPdfReport(targetMatchId = null, { autoDownloadPdf = false } = {}) {
   if (targetMatchId && Number(targetMatchId) !== Number(state.currentMatchId)) {
-    await loadMatchReport(Number(targetMatchId), { analyzeNow: true });
+    await loadMatchReport(Number(targetMatchId), { analyzeNow: false });
   }
   if (!state.currentReport || !state.currentMatchId) {
     showToast("请先选择或完成一局比赛的 AI 复盘后再打开结构化报告");
@@ -4376,7 +4376,7 @@ async function initApp() {
   if (urlMatchId) {
     state.userSelectedMatch = true;
     try {
-      await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true, fromPopState: true });
+      await loadMatchReport(urlMatchId, { analyzeNow: false, switchToPostgame: true, fromPopState: true });
       directMatchLoaded = true;
     } catch (e) {
       console.warn("Direct match pre-load warning:", e);
@@ -4412,7 +4412,7 @@ async function initApp() {
     initPregameWorkspace();
 
     if (urlMatchId && !directMatchLoaded) {
-      await loadMatchReport(urlMatchId, { analyzeNow: true, switchToPostgame: true, fromPopState: true });
+      await loadMatchReport(urlMatchId, { analyzeNow: false, switchToPostgame: true, fromPopState: true });
     } else if (state.currentMatchId) {
       highlightSelectedMatchCard(state.currentMatchId);
       if (urlMatchId) syncMatchUrlInAddressBar(state.currentMatchId, { replace: true });
@@ -4578,7 +4578,7 @@ function bindEvents() {
     const nextMid = Number(targetRow?.getAttribute("data-ws-match-id"));
     if (nextMid && nextMid !== curMid) {
       targetRow.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      loadMatchReport(nextMid, { analyzeNow: true, switchToPostgame: true });
+      loadMatchReport(nextMid, { analyzeNow: false, switchToPostgame: true });
     }
   });
 
@@ -4769,8 +4769,10 @@ function bindEvents() {
       try {
         const res = await fetch(`/api/parse/${encodeURIComponent(state.currentMatchId)}`, {
           method: "POST",
+          headers: getTeamTokenHeaders(),
         });
         const data = await res.json();
+        if (promptTeamTokenOn401(res, data)) return;
         showToast(data.message || "已向 OpenDota 提交录像解析请求");
       } catch (err) {
         showToast(`请求解析失败: ${err.message}`);
@@ -5186,6 +5188,54 @@ function bindEvents() {
       await saveRosterConfig();
     });
   }
+
+  const saveTokenBtn = document.getElementById("btn-save-team-token");
+  if (saveTokenBtn) {
+    saveTokenBtn.addEventListener("click", () => {
+      const tokenVal = document.getElementById("input-team-token")?.value.trim() || "";
+      if (tokenVal) {
+        localStorage.setItem(TEAM_TOKEN_STORAGE_KEY, tokenVal);
+        showToast("🔐 车队口令已保存在本地浏览器");
+      } else {
+        localStorage.removeItem(TEAM_TOKEN_STORAGE_KEY);
+        showToast("已清除本地保存的车队口令");
+      }
+      dialog?.close();
+    });
+  }
+}
+
+const TEAM_TOKEN_STORAGE_KEY = "dota_ledger_team_token";
+
+function getStoredTeamToken() {
+  try {
+    return (localStorage.getItem(TEAM_TOKEN_STORAGE_KEY) || "").trim();
+  } catch {
+    return "";
+  }
+}
+
+function getTeamTokenHeaders(extraHeaders = {}) {
+  const headers = { ...extraHeaders };
+  const token = getStoredTeamToken();
+  if (token) {
+    headers["X-Team-Token"] = token;
+  }
+  return headers;
+}
+
+function promptTeamTokenOn401(res, data = null) {
+  if (res?.status === 401 || data?.need_team_token) {
+    const dlg = document.getElementById("settings-dialog");
+    populateSettingsDialog();
+    dlg?.showModal?.();
+    setTimeout(() => {
+      document.getElementById("input-team-token")?.focus?.();
+    }, 50);
+    showToast(data?.error || "🔒 需要有效的车队口令才能执行此操作，请在设置中输入车队口令", 5000);
+    return true;
+  }
+  return false;
 }
 
 function getEffectiveLlmConfig() {
@@ -5331,7 +5381,7 @@ function renderRecentMatchesStrip(matches) {
         return;
       }
       const mid = Number(btn.getAttribute("data-match-card"));
-      if (mid) await loadMatchReport(mid, { analyzeNow: true, switchToPostgame: true });
+      if (mid) await loadMatchReport(mid, { analyzeNow: false, switchToPostgame: true });
     });
   });
 
@@ -5550,7 +5600,7 @@ function renderHomeWorkspace() {
       }
       const mid = Number(card.getAttribute("data-home-match-id"));
       if (mid) {
-        await loadMatchReport(mid, { analyzeNow: true, switchToPostgame: true });
+        await loadMatchReport(mid, { analyzeNow: false, switchToPostgame: true });
       }
     });
   });
@@ -5721,7 +5771,7 @@ function renderWorkstationSidebarMatches() {
       const mid = Number(btn.getAttribute("data-ws-match-id"));
       if (!mid) return;
       document.getElementById("ws-sidebar")?.classList.remove("mobile-open");
-      await loadMatchReport(mid, { analyzeNow: true, switchToPostgame: true });
+      await loadMatchReport(mid, { analyzeNow: false, switchToPostgame: true });
     });
   });
 }
@@ -5767,14 +5817,19 @@ function toggleOnDemandGate(showGate, matchId = null) {
     if (meta) {
       const heroShort = meta.hero_short_zh || meta.hero_name || "未知英雄";
       const isWin = meta.won !== undefined ? Boolean(meta.won) : meta.result === "胜利";
-      titleEl.textContent = `比赛 #${matchId}（${heroShort} · ${isWin ? "胜利" : "落败"} · KDA ${meta.kda} · ${meta.duration_str || ""}）尚未执行 AI 复盘`;
+      titleEl.textContent = `比赛 #${matchId}（${heroShort} · ${isWin ? "胜利" : "落败"} · KDA ${meta.kda} · ${meta.duration_str || ""}）未复盘`;
     } else {
-      titleEl.textContent = `比赛 #${matchId} 尚未生成 AI 深度复盘报告`;
+      titleEl.textContent = `比赛 #${matchId} 未复盘`;
     }
   }
   if (summaryEl) {
     summaryEl.textContent =
-      "已开启「按需 AI 分析」模式（不自动分析每一局比赛）。当你确认需要复盘这局时，点击下方按钮即可拉取该局录像底层日志、运行十一维战术显微镜，并生成可公开分享给群友的复盘链接。";
+      "本局尚未缓存复盘报告。浏览页面不会自动触发复盘或大模型调用；如需执行复盘，请点击下方按钮（需要车队口令）。";
+  }
+  const confirmBtn = document.getElementById("btn-confirm-analyze-match");
+  if (confirmBtn) {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = "🔐 验证车队口令并执行本局复盘";
   }
 }
 
@@ -5866,7 +5921,9 @@ async function loadMatchReport(
     const url = `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
       state.accountId
     )}${flags}`;
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: analyzeNow || forceRefresh ? getTeamTokenHeaders() : {},
+    });
     if (reqSeq !== state.loadMatchSeq) return; // Ignore stale out-of-order response
     const rawText = await res.text();
     let data = null;
@@ -5875,30 +5932,30 @@ async function loadMatchReport(
     } catch {
       throw new Error(`服务端响应超时或异常 (${res.status})，请稍后重试`);
     }
+    if (promptTeamTokenOn401(res, data)) {
+      const confirmBtn = document.getElementById("btn-confirm-analyze-match");
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "🔐 验证车队口令并执行本局复盘";
+      }
+      toggleOnDemandGate(true, matchId);
+      return;
+    }
     if (!data.ok) throw new Error(data.error || "读取比赛失败");
 
     const confirmBtn = document.getElementById("btn-confirm-analyze-match");
     if (confirmBtn) {
       confirmBtn.disabled = false;
-      confirmBtn.textContent = "⚡ 立即让 AI 深度分析本局并生成公开分享链接";
+      confirmBtn.textContent = "🔐 验证车队口令并执行本局复盘";
     }
 
     if (data.not_analyzed) {
-      const localMap = getLocalAnalyzedMatchesMap();
-      if (!analyzeNow && localMap.has(Number(matchId))) {
-        return await loadMatchReport(matchId, {
-          forceRefresh,
-          analyzeNow: true,
-          switchToPostgame,
-          fromPopState,
-        });
-      }
       highlightSelectedMatchCard(matchId);
       toggleOnDemandGate(true, matchId);
       if (switchToPostgame) {
         syncMatchUrlInAddressBar(matchId, { replace: Boolean(fromPopState) });
       }
-      showToast(`比赛 #${matchId} 尚未分析，点击页面中央按钮即可启动 AI 深度复盘`, 3000);
+      showToast(`比赛 #${matchId} 未复盘，点击按钮并验证车队口令即可执行复盘`, 3000);
       return;
     }
 
@@ -5926,26 +5983,16 @@ async function loadMatchReport(
     renderFullMatchReport(state.currentReport);
     syncMatchUrlInAddressBar(state.currentMatchId, { replace: Boolean(fromPopState) });
 
-    const isParsedNow = Boolean(state.currentReport?.is_parsed);
-    const hasGrokNow = Boolean(state.currentReport?.grok_coaching?.title);
-
-    if (!isParsedNow) {
-      showToast(
-        `⏳ 比赛 #${state.currentMatchId} OpenDota 正在解析 .dem 录像（当前为基础统计），已自动提交解析并为您轮询更新...`,
-        6500
-      );
-      scheduleAutoReplayParsePoll(state.currentMatchId);
-      if ((analyzeNow || forceRefresh) && (!hasGrokNow || forceRefresh) && !state.isGeneratingGrok) {
-        triggerGrokReview({ force: forceRefresh });
+    if (analyzeNow || forceRefresh) {
+      const isParsedNow = Boolean(state.currentReport?.is_parsed);
+      if (!isParsedNow) {
+        showToast(
+          `⏳ 比赛 #${state.currentMatchId} 已生成基础复盘，如需深度判词可手动点击「Grok 判词」按钮`,
+          4500
+        );
+      } else {
+        showToast(`✅ 比赛 #${state.currentMatchId} 录像复盘已生成！如需大模型判词可手动点击「Grok 判词」`);
       }
-    } else if ((analyzeNow || forceRefresh) && (!hasGrokNow || forceRefresh) && !state.isGeneratingGrok) {
-      showToast(
-        `✅ 录像级 12 维拆解已就绪！正在并发调用 Grok 4.7 生成五人深度研判与三幕长段复盘 (约15秒)...`,
-        6000
-      );
-      triggerGrokReview({ force: forceRefresh });
-    } else if (analyzeNow) {
-      showToast(`✅ 比赛 #${state.currentMatchId} AI 完整深度复盘已成功！点击右上角「分享本局链接」即可发群`);
     }
   } catch (err) {
     console.error(err);
@@ -5960,7 +6007,7 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
   if (attempt === 1) {
     fetch("/api/request_parse", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getTeamTokenHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ match_id: matchId }),
     }).catch(() => {});
   }
@@ -5974,7 +6021,8 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
       const res = await fetch(
         `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
           state.accountId
-        )}&refresh=1&analyze=1&skip_llm=1`
+        )}&refresh=1&analyze=1&skip_llm=1`,
+        { headers: getTeamTokenHeaders() }
       );
       const data = await res.json();
       if (data.ok && data.report?.is_parsed) {
@@ -5983,10 +6031,7 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
         }
         state.currentReport = data.report;
         renderFullMatchReport(state.currentReport);
-        showToast(`🎉 OpenDota 录像解析已完成！已自动升级为完整 12 维录像级数据`, 5500);
-        if (!state.currentReport.grok_coaching?.title && !state.isGeneratingGrok) {
-          triggerGrokReview({ force: true });
-        }
+        showToast(`🎉 OpenDota 录像解析已完成！已更新为录像级数据`, 5500);
         return;
       }
     } catch (_e) {
@@ -6010,9 +6055,9 @@ async function triggerGrokReview({ force = true } = {}) {
   showToast(`正在调用 ${llmCfg.provider.toUpperCase()} / ${llmCfg.model} 重新生成深度判词...`, 12000);
 
   try {
-    const res = await fetch("/api/llm_coach", {
+    const res = await fetch("/api/llm_review", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getTeamTokenHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         match_id: state.currentMatchId,
         account_id: state.accountId,
@@ -6027,6 +6072,7 @@ async function triggerGrokReview({ force = true } = {}) {
     } catch {
       throw new Error(`服务端响应超时或异常 (${res.status})，请稍后重试`);
     }
+    if (promptTeamTokenOn401(res, data)) return;
     if (!data.ok) throw new Error(data.error || "大模型调用失败");
     if (data.report) {
       state.currentReport = data.report;
@@ -17070,9 +17116,13 @@ function populateSettingsDialog() {
   const roster = state.roster || {};
   const mainIdInput = document.getElementById("input-main-id");
   const mainNameInput = document.getElementById("input-main-name");
+  const tokenInput = document.getElementById("input-team-token");
   if (mainIdInput) mainIdInput.value = roster.main_account_id || state.accountId || "";
   if (mainNameInput) {
     mainNameInput.value = roster.main_name || roster.main_player_name || "Flame = ez mute";
+  }
+  if (tokenInput) {
+    tokenInput.value = getStoredTeamToken();
   }
 
   const tagsWrap = document.getElementById("roster-tags-list");
@@ -17095,11 +17145,19 @@ async function saveRosterConfig() {
   const friendId = document.getElementById("input-friend-id")?.value.trim() || "";
   const friendName = document.getElementById("input-friend-name")?.value.trim() || "";
   const friendPos = document.getElementById("input-friend-pos")?.value.trim() || "";
+  const tokenVal = document.getElementById("input-team-token")?.value.trim() || "";
+  if (tokenVal) {
+    try {
+      localStorage.setItem(TEAM_TOKEN_STORAGE_KEY, tokenVal);
+    } catch (_e) {
+      // ignore storage error
+    }
+  }
 
   try {
     const res = await fetch("/api/roster", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getTeamTokenHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         main_account_id: mainId,
         main_player_name: mainName,
@@ -17109,6 +17167,7 @@ async function saveRosterConfig() {
       }),
     });
     const data = await res.json();
+    if (promptTeamTokenOn401(res, data)) return;
     if (!data.ok) throw new Error(data.error || "保存失败");
     state.roster = data.roster;
     state.accountId = data.roster.main_account_id || state.accountId;
@@ -18820,10 +18879,11 @@ async function generateNanoBananaPoster({ force = false } = {}) {
 
     const res = await fetch("/api/poster_art", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getTeamTokenHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(payload),
     });
     const data = await res.json();
+    if (promptTeamTokenOn401(res, data)) return;
     if (!data.ok || !data.image_data_url) {
       throw new Error(data.error || "生成海报原画失败");
     }
@@ -19687,7 +19747,7 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
   try {
     const res = await fetch("/api/pregame_plan", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: getTeamTokenHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         own_picks: validOwn,
         enemy_picks: (state.pregameEnemyPicks || []).filter((x) => Number(x.hero_id) > 0),
@@ -19695,6 +19755,7 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
       }),
     });
     const data = await res.json();
+    if (promptTeamTokenOn401(res, data)) return;
     if (!data.ok) throw new Error(data.error || "生成赛前作战方案失败");
     state.pregamePlan = data.plan;
     renderPregamePlanOutput(data.plan);

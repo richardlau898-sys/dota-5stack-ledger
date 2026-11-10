@@ -312,11 +312,11 @@
     <section id="on-demand-analysis-gate" class="on-demand-gate" hidden aria-labelledby="gate-title">
       <div class="gate-inner">
         <div class="gate-badge">🤖 按需 AI 录像级复盘 · 不浪费算力，点哪局算哪局</div>
-        <h2 id="gate-title" class="gate-headline">比赛 #-- 尚未生成 AI 深度复盘报告</h2>
-        <p id="gate-summary" class="gate-desc">点击下方按钮后，系统将拉取该局 OpenDota 录像数据并启动十二维战术显微镜分析，生成永久可公开分享的复盘链接。</p>
+        <h2 id="gate-title" class="gate-headline">比赛 #-- 未复盘</h2>
+        <p id="gate-summary" class="gate-desc">该局尚未复盘。点击下方按钮（需车队口令）即可拉取该局录像数据并生成复盘报告。</p>
         <div class="gate-actions">
           <button type="button" id="btn-confirm-analyze-match" class="button primary gate-primary-btn">
-            ⚡ 立即让 AI 深度分析本局并生成公开分享链接
+            🔐 验证车队口令并执行本局复盘
           </button>
         </div>
       </div>
@@ -689,11 +689,25 @@
   <dialog id="settings-dialog" class="settings-dialog" closedby="any" aria-labelledby="dialog-title">
     <div class="dialog-inner">
       <div class="dialog-header">
-        <h2 id="dialog-title">车队花名册配置</h2>
+        <h2 id="dialog-title">车队花名册 &amp; 车队口令设置</h2>
         <button type="button" id="btn-close-dialog" class="text-button" aria-label="关闭设置窗口">关闭 ✕</button>
       </div>
 
       <div class="dialog-body">
+        <section class="dialog-block" aria-labelledby="team-token-title">
+          <h3 id="team-token-title">🔐 车队口令 (TEAM_TOKEN)</h3>
+          <p class="dialog-hint">执行新比赛复盘、修改花名册、生成 Grok 判词与原画海报时需校验车队口令（保存在本地浏览器）：</p>
+          <div class="form-row-2">
+            <label class="field" style="grid-column: 1 / -1;">
+              <span>车队口令</span>
+              <input id="input-team-token" type="password" placeholder="输入车队口令 (X-Team-Token)" autocomplete="off" />
+            </label>
+          </div>
+          <div class="dialog-form-actions">
+            <button type="button" id="btn-save-team-token" class="button primary">保存车队口令</button>
+          </div>
+        </section>
+
         <section class="dialog-block" aria-labelledby="roster-config-title">
           <h3 id="roster-config-title">主视角账号与常驻五黑队友</h3>
           <form id="roster-form" class="dialog-form">

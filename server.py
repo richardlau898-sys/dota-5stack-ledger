@@ -13,17 +13,19 @@ API 路由:
 """
 
 import datetime
+import hmac
 import json
 import mimetypes
 import os
 import re
 import sys
+import traceback
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 from ai_coach_engine import (
     call_llm_coach_review,
@@ -353,13 +355,72 @@ def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
     return report
 
 
+def check_team_token_auth(
+    provided_token: Optional[str],
+    expected_token: Optional[str] = None,
+    is_vercel: Optional[bool] = None,
+) -> Tuple[bool, int, str]:
+    """
+    校验车队口令 (X-Team-Token)：
+    - 若配置了 TEAM_TOKEN：必须提供且 hmac.compare_digest 相等，否则返回 401；
+    - 若未配置 TEAM_TOKEN：在 Vercel 生产环境一律返回 503，本地开发环境放行 (200)。
+    """
+    expected = (expected_token if expected_token is not None else os.environ.get("TEAM_TOKEN", "")).strip()
+    vercel_env = is_vercel if is_vercel is not None else bool(os.environ.get("VERCEL"))
+    if not expected:
+        if vercel_env:
+            return False, 503, "服务端未配置 TEAM_TOKEN，已拒绝写入与算力操作"
+        return True, 200, ""
+    candidate = (provided_token or "").strip()
+    if not candidate:
+        return False, 401, "需要输入车队口令 (X-Team-Token)"
+    if not hmac.compare_digest(candidate.encode("utf-8"), expected.encode("utf-8")):
+        return False, 401, "车队口令无效，请核对后重试"
+    return True, 200, ""
+
+
+def match_has_roster_player(raw_or_report: Dict[str, Any], roster: Dict[str, Any]) -> bool:
+    """检查比赛的 10 名玩家里是否至少有 1 名在花名册中。"""
+    if not isinstance(raw_or_report, dict) or not isinstance(roster, dict):
+        return False
+    roster_ids = set()
+    main_id = roster.get("main_account_id")
+    if main_id:
+        try:
+            roster_ids.add(int(main_id))
+        except (ValueError, TypeError):
+            pass
+    for map_key in ("players", "teammates"):
+        for k in (roster.get(map_key) or {}).keys():
+            try:
+                roster_ids.add(int(k))
+            except (ValueError, TypeError):
+                pass
+    if not roster_ids:
+        return False
+
+    candidates = list(raw_or_report.get("players") or [])
+    if not candidates:
+        candidates = list(raw_or_report.get("radiant_pos_1_to_5") or []) + list(
+            raw_or_report.get("dire_pos_1_to_5") or []
+        )
+    for p in candidates:
+        if isinstance(p, dict) and p.get("account_id") is not None:
+            try:
+                if int(p["account_id"]) in roster_ids:
+                    return True
+            except (ValueError, TypeError):
+                pass
+    return False
+
+
 def get_or_build_match_report(
     match_id: int,
     focus_account_id: Optional[int] = None,
     force_refresh: bool = False,
     allow_build: bool = True,
     require_ai: bool = False,
-    skip_llm: bool = False,
+    skip_llm: bool = True,
 ) -> Optional[Dict[str, Any]]:
     import time
 
@@ -373,7 +434,7 @@ def get_or_build_match_report(
 
     fallback_unparsed_rep = None
     if not force_refresh:
-        # Check json_cache and tmp_json_cache
+        # Check json_cache and tmp_json_cache (GET never calls LLM; only hydrates from existing cache)
         for jc in (json_cache, tmp_json_cache):
             if jc.exists():
                 try:
@@ -385,10 +446,7 @@ def get_or_build_match_report(
                     ):
                         cached_rep = _ensure_v69_hero_matchup_matrix(cached_rep)
                         cached_rep = _hydrate_grok_from_caches(cached_rep, match_id)
-                        # Only serve immediately if replay is parsed
                         if cached_rep.get("is_parsed"):
-                            if (allow_build or require_ai) and not skip_llm:
-                                cached_rep = _ensure_grok_coaching(cached_rep, match_id, json_cache, tmp_json_cache, force=False)
                             return sanitize_report_mixed_english(cached_rep)
                         fallback_unparsed_rep = cached_rep
                 except Exception:
@@ -400,8 +458,6 @@ def get_or_build_match_report(
             cloud_rep = _ensure_v69_hero_matchup_matrix(cloud_rep)
             cloud_rep = _hydrate_grok_from_caches(cloud_rep, match_id)
             if cloud_rep.get("is_parsed"):
-                if (allow_build or require_ai) and not skip_llm:
-                    cloud_rep = _ensure_grok_coaching(cloud_rep, match_id, json_cache, tmp_json_cache, force=False)
                 return sanitize_report_mixed_english(cloud_rep)
             fallback_unparsed_rep = cloud_rep
 
@@ -426,6 +482,8 @@ def get_or_build_match_report(
     if not raw_match:
         try:
             raw_match = api_get(f"/matches/{match_id}")
+            if raw_match and not match_has_roster_player(raw_match, roster):
+                raise PermissionError("该比赛 10 名玩家均不在车队花名册中，拒绝分析与落库")
             # If the match just ended and OpenDota hasn't parsed the .dem replay yet, auto-request parse and poll briefly!
             if raw_match and not raw_match.get("version"):
                 try:
@@ -450,14 +508,19 @@ def get_or_build_match_report(
                 except OSError:
                     TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                     tmp_raw_cache.write_text(raw_txt, encoding="utf-8")
+        except PermissionError:
+            raise
         except Exception:
             if fallback_unparsed_rep:
                 return sanitize_report_mixed_english(fallback_unparsed_rep)
             raise
 
+    if raw_match and not match_has_roster_player(raw_match, roster):
+        raise PermissionError("该比赛 10 名玩家均不在车队花名册中，拒绝分析与落库")
+
     report = analyze_match_data(raw_match, roster, focus_account_id=aid)
 
-    # Preserve existing deep Grok coaching across replay parse refreshes, otherwise auto-invoke xAI Grok 4.7 LLM review
+    # Preserve existing deep Grok coaching from cache only (GET/build never calls LLM; only POST /api/llm_review does)
     existing_grok = None
     for jc in (tmp_json_cache, json_cache):
         if jc.exists():
@@ -474,20 +537,6 @@ def get_or_build_match_report(
             existing_grok = hydrated["grok_coaching"]
     if existing_grok:
         report["grok_coaching"] = existing_grok
-    elif not skip_llm:
-        try:
-            llm_res = call_llm_coach_review(report)
-            if isinstance(llm_res, dict) and llm_res.get("ok") and isinstance(llm_res.get("structured"), dict):
-                structured = llm_res["structured"]
-                structured["model"] = llm_res.get("model", "grok-4.7")
-                report["grok_coaching"] = structured
-                focus_side = report.get("focus_side", "radiant")
-                try:
-                    cloud_save_coaching(match_id, focus_side, structured)
-                except Exception:
-                    pass
-        except Exception:
-            pass
 
     report = sanitize_report_mixed_english(report)
     md_text = render_markdown_report(report)
@@ -516,7 +565,7 @@ _ICON_B64_CACHE: Dict[str, str] = {}
 
 
 def fetch_match_icons_base64(match_id: int) -> Dict[str, str]:
-    report = get_or_build_match_report(match_id, allow_build=True)
+    report = get_or_build_match_report(match_id, allow_build=False)
     if not report:
         return {}
     players = (report.get("radiant_pos_1_to_5") or []) + (report.get("dire_pos_1_to_5") or [])
@@ -710,7 +759,9 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 mid = int(mid_str)
                 force = (qs.get("refresh") or ["0"])[0] == "1"
                 analyze_now = (qs.get("analyze") or ["0"])[0] == "1"
-                skip_llm = (qs.get("skip_llm") or ["0"])[0] == "1"
+                if force or analyze_now:
+                    if not self._require_team_token():
+                        return
                 aid_str = (qs.get("account_id") or [""])[0].strip()
                 aid = resolve_player_input(aid_str) if aid_str else None
                 report = get_or_build_match_report(
@@ -718,8 +769,8 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     focus_account_id=aid,
                     force_refresh=force,
                     allow_build=(force or analyze_now),
-                    require_ai=(not skip_llm),
-                    skip_llm=skip_llm,
+                    require_ai=False,
+                    skip_llm=True,
                 )
                 roster = load_roster()
                 squad_ledger = build_squad_history_ledger(REPORTS_DIR, roster, [])
@@ -762,13 +813,30 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(content)
 
-        except Exception as e:
-            self._send_json({"ok": False, "error": str(e)}, status=500)
+        except PermissionError as pe:
+            self._send_json({"ok": False, "error": str(pe)}, status=403)
+        except Exception:
+            traceback.print_exc(file=sys.stderr)
+            self._send_json({"ok": False, "error": "服务器内部错误，请稍后重试"}, status=500)
+
+    def _require_team_token(self) -> bool:
+        provided = self.headers.get("X-Team-Token") or ""
+        ok, status, err_msg = check_team_token_auth(provided)
+        if not ok:
+            self._send_json(
+                {"ok": False, "need_team_token": status == 401, "error": err_msg},
+                status=status,
+            )
+            return False
+        return True
 
     def do_POST(self) -> None:
         path, qs = self._resolve_path_and_qs()
 
         try:
+            if not self._require_team_token():
+                return
+
             if path == "/api/pregame_plan":
                 body = self._read_json_body()
                 own_picks = body.get("own_picks") or body.get("our_heroes") or []
@@ -922,8 +990,11 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 return
 
             self._send_json({"ok": False, "error": f"Unknown endpoint: {path}"}, status=404)
-        except Exception as e:
-            self._send_json({"ok": False, "error": str(e)}, status=500)
+        except PermissionError as pe:
+            self._send_json({"ok": False, "error": str(pe)}, status=403)
+        except Exception:
+            traceback.print_exc(file=sys.stderr)
+            self._send_json({"ok": False, "error": "服务器内部错误，请稍后重试"}, status=500)
 
 
 def main() -> None:
