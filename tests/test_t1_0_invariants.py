@@ -43,7 +43,6 @@ class TestT10Invariants(unittest.TestCase):
                         )
         self.assertEqual(violations, [], f"Found buybacks=0 with non-zero buyback_loss: {violations[:5]}")
 
-    @unittest.expectedFailure  # T1-5: 团战开始时已在读秒的选手不在团战缺席列表里
     def test_t1_5_dead_at_teamfight_start_not_marked_absent(self) -> None:
         violations = []
         for mid, report in self.reports.items():

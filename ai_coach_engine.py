@@ -749,41 +749,16 @@ def evaluate_player_deeply(
             f"可将一件纯法系输出装替换为【飓风长戟（大推推）】（既能推开自己拉开切入距离，又能补充射程点人）。",
         )
 
-    # 2) 凤凰 (Phoenix) 「超新星变蛋生灭审计（成功炸出 vs 蛋被打碎）+ 烈日炙烤覆盖」
+    # 2) 凤凰 (Phoenix) 烈日炙烤覆盖审计（不推断变蛋是否被打碎）
     egg_audit = p.get("phoenix_egg_audit") or {}
     if hid_cur == 110 and egg_audit:
         egg_casts = int(egg_audit.get("total_casts") or 0)
         tf_egg_total = int(egg_audit.get("tf_egg_total") or 0)
-        survive_cnt = int(egg_audit.get("survived_cnt") or 0)
-        shatter_cnt = int(egg_audit.get("shattered_cnt") or 0)
-        shatter_rate = float(egg_audit.get("shatter_rate_pct") or 0.0)
-        shattered_waves = egg_audit.get("shattered_waves") or []
-        survived_waves = egg_audit.get("survived_waves") or []
         ray_casts = int(egg_audit.get("sun_ray_casts") or 0)
-        spirits_casts = int(egg_audit.get("fire_spirits_casts") or 0)
-
-        if shatter_cnt >= 3 or (tf_egg_total >= 2 and shatter_cnt > survive_cnt):
-            radar["utility"] = min(radar["utility"], 42)
-            radar["tempo"] = min(radar["tempo"], 45)
-            mvp_score = round(clamp(mvp_score - 6.5, 35.0, 58.0), 1)
-            rating_score = round(clamp(mvp_score / 10.0, 4.0, 5.8), 1)
-            rating_tier = "C 碎蛋背锅" if won else "D 碎蛋战犯"
-            blame_points += 24.0
-            weaknesses.insert(
-                0,
-                f"超新星(变蛋)团战 {tf_egg_total} 放 {shatter_cnt} 碎 + 烈日炙烤严重闲置：全场施放 {egg_casts} 次大招《超新星》，"
-                f"在 {tf_egg_total} 波正面大团战中**仅 {survive_cnt} 次成功炸出眩晕（{', '.join(survived_waves) or '无'}），"
-                f"高达 {shatter_cnt} 次变蛋被敌方集火当场打碎殒命（{', '.join(shattered_waves)}，团战碎蛋率 {shatter_rate:.0f}%）**！"
-                f"变蛋前未能把《烈火精灵》减攻速精准覆盖在敌方高频平A核心头上，且变蛋位置过于贴脸缺乏高台/远距离掩护；"
-                f"同时 {duration_min:.0f} 分钟比赛仅开启 **{ray_casts} 次《烈日炙烤(激光)》**（全队治疗仅 {heal:,} 点），彻底浪费了凤凰百分比灼烧融化前排与远程奶队友的核心机制！",
-            )
-            trash_candidates.append((
-                109,
-                f"@{pname} 凤凰正面团战 {tf_egg_total} 次变蛋碎了 {shatter_cnt} 颗（{', '.join(shattered_waves[:3])} 连环碎蛋，碎蛋率 {shatter_rate:.0f}%），{duration_min:.0f}分钟激光只按了 {ray_casts} 次，你这超新星是专门给对面刷熟练度的吗？",
-            ))
+        if ray_casts < int(duration_min * 0.25) and duration_min >= 20:
             improvements.insert(
                 0,
-                "凤凰团战核心在于「先拉激光消耗 + 烈火精灵糊脸减攻速 + 卡地形边缘变蛋」：开团先站后排拉《烈日炙烤》百分比融化敌方前排并奶住受控队友；准备飞入变蛋前，必须先把 4 颗《烈火精灵》（-140攻速）精准撒在敌方物理核心头上，并等队友先手控制交出或在树林高台边缘变蛋，绝不能贴着满攻速敌核脸裸变蛋。",
+                f"凤凰本局共施放 {egg_casts} 次《超新星》（团战 {tf_egg_total} 次）、{ray_casts} 次《烈日炙烤》（全队治疗 {heal:,} 点），可提高团战中后排《烈日炙烤》开启频率以兼顾消耗与治疗。",
             )
 
     # 3) 斯拉克 (Slark) 与核心位「单带无故被抓 + 拒出魔晶/克制装导致A不过人 + 后期团战隐身零输出」深度博弈审计

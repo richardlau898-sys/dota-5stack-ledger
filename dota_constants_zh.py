@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Dota 2 英雄、全量装备、7.38中立道具与附魔、全英雄技能 100% 纯中文映射及中英文混搭清洗器"""
 
+import json as _json
+import os as _os
 import re
 from typing import Any, Dict
 
@@ -1007,6 +1009,83 @@ HERO_PREFIX_ZH = {
     "axe": "斧王",
     "antimage": "敌法",
 }
+
+
+ACTIVE_SAVE_ITEMS_ZH: dict[str, str] = {
+    "black_king_bar": "BKB黑皇杖",
+    "glimmer_cape": "微光披风",
+    "force_staff": "推推棒",
+    "hurricane_pike": "飓风长戟(大推推)",
+    "ghost": "幽魂权杖(绿杖)",
+    "cyclone": "吹风杖",
+    "wind_waker": "风之杖(大吹风)",
+    "lotus_orb": "清莲宝珠",
+    "manta": "分身斧",
+}
+
+_ITEM_UPGRADE_MAP_CACHE: dict[str, list[str]] | None = None
+
+
+def get_item_upgrade_map() -> dict[str, list[str]]:
+    """从 OpenDota items 常量表的 components 字段构建 配件 -> 升级品 映射表"""
+    global _ITEM_UPGRADE_MAP_CACHE
+    if _ITEM_UPGRADE_MAP_CACHE is not None:
+        return _ITEM_UPGRADE_MAP_CACHE
+    upg_map: dict[str, set[str]] = {
+        "force_staff": {"hurricane_pike", "force_boots"},
+        "cyclone": {"wind_waker"},
+        "ghost": {"ethereal_blade"},
+        "mekansm": {"guardian_greaves"},
+        "pavise": {"solar_crest"},
+        "orchid": {"bloodthorn"},
+        "invis_sword": {"silver_edge"},
+    }
+    try:
+        items_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), ".cache", "items_constants.json")
+        if _os.path.exists(items_path):
+            with open(items_path, "r", encoding="utf-8") as f:
+                items_data = _json.load(f)
+            if isinstance(items_data, dict):
+                for item_key, info in items_data.items():
+                    if not isinstance(info, dict):
+                        continue
+                    comps = info.get("components")
+                    if isinstance(comps, list):
+                        for comp in comps:
+                            if isinstance(comp, str) and comp:
+                                upg_map.setdefault(comp, set()).add(item_key)
+    except Exception:
+        pass
+    _ITEM_UPGRADE_MAP_CACHE = {k: sorted(v) for k, v in upg_map.items()}
+    return _ITEM_UPGRADE_MAP_CACHE
+
+
+def get_held_active_save_items(purchase_log: list, cutoff_sec: int) -> dict[str, int]:
+    """返回在 cutoff_sec 时刻仍持有的主动保命装及其购入时间（排除已升级为高阶物品的配件）"""
+    if not isinstance(purchase_log, list):
+        return {}
+    upg_map = get_item_upgrade_map()
+    bought_times: dict[str, list[int]] = {}
+    for entry in purchase_log:
+        if not isinstance(entry, dict):
+            continue
+        ik = str(entry.get("key") or "")
+        t_buy = int(entry.get("time") or 0)
+        if ik and t_buy <= cutoff_sec:
+            bought_times.setdefault(ik, []).append(t_buy)
+    held: dict[str, int] = {}
+    for ik in ACTIVE_SAVE_ITEMS_ZH:
+        if ik not in bought_times:
+            continue
+        t_first = bought_times[ik][0]
+        upgrades = upg_map.get(ik) or []
+        upgraded_later = any(
+            any(t_u >= t_first for t_u in bought_times.get(upg_k, []))
+            for upg_k in upgrades
+        )
+        if not upgraded_later:
+            held[ik] = t_first
+    return held
 
 
 def get_item_zh(item_key: str, fallback_dname: str = "") -> str:

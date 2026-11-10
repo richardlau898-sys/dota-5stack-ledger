@@ -10,6 +10,7 @@ Dota 2 阵容选择诊断 (BP & Combo 算账) + 分阶段个人/团队深度评�
 """
 
 from typing import Any, Dict, List, Optional, Tuple
+from dota_constants_zh import ACTIVE_SAVE_ITEMS_ZH, get_held_active_save_items
 
 
 # 英雄战术画像：先手(init)、爆发(burst)、团战AOE(tf)、推塔(push)、抓人(pick)、后期(late)、前排肉度(tank)、物理/法系倾向
@@ -1865,43 +1866,9 @@ def build_deep_replay_forensics(
             return "天辉主野区 / 远古三角区"
         return "中路河道 / 野区交界处"
 
-    CRITICAL_SAVE_ITEMS: Dict[str, str] = {
-        "black_king_bar": "黑皇杖(BKB)",
-        "satanic": "撒旦之邪力",
-        "manta": "幻影斧(分身)",
-        "hurricane_pike": "飓风长戟(大推推)",
-        "force_staff": "原力法杖(推推)",
-        "glimmer_cape": "微光披风",
-        "lotus_orb": "清莲宝珠(莲花)",
-        "blade_mail": "刃甲",
-        "shivas_guard": "希瓦的守护",
-        "crimson_guard": "赤红甲",
-        "pipe": "洞察烟斗(笛子)",
-        "guardian_greaves": "卫士胫甲(大鞋)",
-        "mekansm": "梅肯斯姆",
-        "solar_crest": "炎阳纹章",
-        "pavise": "长盾",
-        "cyclone": "Eul的神圣法杖(吹风)",
-        "wind_waker": "风之杖(大吹风)",
-        "ghost": "幽灵权杖(绿杖)",
-        "ethereal_blade": "虚灵之刃",
-        "refresher": "刷新球",
-        "sheepstick": "邪镰(羊刀)",
-        "orchid": "紫怨",
-        "bloodthorn": "血棘",
-        "abyssal_blade": "深渊之刃(大晕锤)",
-    }
-    ITEM_UPGRADE_REPLACES: Dict[str, str] = {
-        "force_staff": "hurricane_pike",
-        "mekansm": "guardian_greaves",
-        "pavise": "solar_crest",
-        "cyclone": "wind_waker",
-        "ghost": "ethereal_blade",
-        "orchid": "bloodthorn",
-        "invis_sword": "silver_edge",
-    }
-    TEAM_SAVE_KEYS = {"glimmer_cape", "force_staff", "lotus_orb", "solar_crest", "pavise", "guardian_greaves", "mekansm", "pipe", "crimson_guard"}
-    SELF_SAVE_KEYS = {"black_king_bar", "satanic", "manta", "hurricane_pike", "blade_mail", "cyclone", "wind_waker", "ghost", "ethereal_blade", "refresher", "shivas_guard"}
+    CRITICAL_SAVE_ITEMS: Dict[str, str] = dict(ACTIVE_SAVE_ITEMS_ZH)
+    TEAM_SAVE_KEYS = {"glimmer_cape", "force_staff", "lotus_orb"}
+    SELF_SAVE_KEYS = set(ACTIVE_SAVE_ITEMS_ZH.keys())
 
     BUILDING_NAME_ZH: Dict[str, str] = {
         "tower1_top": "上路一塔",
@@ -2063,38 +2030,19 @@ def build_deep_replay_forensics(
                 else:
                     dire_initiators.append(init_str)
 
-            # 检查开团前 (time <= start_s - 3) 已购入但本波团 0 次按出的保命/救人装
+            # 只针对团战内的阵亡，检查阵亡时仍持有（未合成升级品）且本波未使用的 9 件主动保命装
             plog = raw_p.get("purchase_log") or []
-            owned_before_tf = {
-                str(entry.get("key"))
-                for entry in plog
-                if isinstance(entry, dict) and int(entry.get("time") or 0) <= start_s - 3
-            }
-            # 处理合成升级替换
-            for base_k, upg_k in ITEM_UPGRADE_REPLACES.items():
-                if base_k in owned_before_tf and upg_k in owned_before_tf:
-                    owned_before_tf.discard(base_k)
+            held_before_tf = get_held_active_save_items(plog, start_s - 3)
 
             unused_self_saves: List[str] = []
             unused_team_saves: List[str] = []
-            for ik in owned_before_tf:
-                if ik not in CRITICAL_SAVE_ITEMS:
-                    continue
-                used_cnt = int(it_uses.get(ik) or 0)
-                # 若合成前后任一键按过也算按出
-                upg_k = ITEM_UPGRADE_REPLACES.get(ik)
-                if upg_k and int(it_uses.get(upg_k) or 0) > 0:
-                    used_cnt += int(it_uses.get(upg_k) or 0)
-                if used_cnt == 0:
-                    if ik in SELF_SAVE_KEYS and d_cnt > 0:
-                        unused_self_saves.append(CRITICAL_SAVE_ITEMS[ik])
-                    elif ik in TEAM_SAVE_KEYS and team_deaths >= 2 and (dmg_v > 0 or d_cnt > 0):
-                        unused_team_saves.append(CRITICAL_SAVE_ITEMS[ik])
+            if d_cnt > 0:
+                for ik in held_before_tf:
+                    if int(it_uses.get(ik) or 0) == 0:
+                        unused_self_saves.append(ACTIVE_SAVE_ITEMS_ZH[ik])
 
-            # 审计核心大招释放与凤凰变蛋
+            # 审计团战大招释放（排除斩杀类、保人类及薄葬/墓碑等非大招技能；不推断冷却与凤凰碎蛋）
             HERO_ULTIMATE_KEYS: Dict[int, Tuple[str, str]] = {
-                1: ("antimage_mana_void", "法力虚空"),
-                2: ("axe_culling_blade", "淘汰之刃"),
                 5: ("crystal_maiden_freezing_field", "极寒领域"),
                 7: ("earthshaker_echo_slam", "回音击"),
                 8: ("juggernaut_omni_slash", "无敌斩"),
@@ -2106,14 +2054,11 @@ def build_deep_replay_forensics(
                 18: ("sven_gods_strength", "神之力量"),
                 22: ("zuus_thundergods_wrath", "雷神之怒"),
                 23: ("kunkka_ghostship", "幽灵船"),
-                25: ("lina_laguna_blade", "神灭斩"),
-                26: ("lion_finger_of_death", "死亡一指"),
                 27: ("shadow_shaman_mass_serpent_ward", "群蛇守卫"),
                 29: ("tidehunter_ravage", "毁灭"),
                 30: ("witch_doctor_death_ward", "死亡守卫"),
                 31: ("lich_chain_frost", "连环霜冻"),
                 33: ("enigma_black_hole", "黑洞"),
-                36: ("necrolyte_reapers_scythe", "死神镰刀"),
                 37: ("warlock_rain_of_chaos", "混乱之雨"),
                 38: ("beastmaster_primal_roar", "原始咆哮"),
                 39: ("queenofpain_sonic_wave", "超声冲击波"),
@@ -2122,10 +2067,8 @@ def build_deep_replay_forensics(
                 43: ("death_prophet_exorcism", "驱使恶灵"),
                 45: ("pugna_life_drain", "生命汲取"),
                 48: ("luna_eclipse", "月蚀"),
-                50: ("dazzle_shallow_grave", "薄葬"),
                 53: ("furion_wrath_of_nature", "自然之怒"),
                 55: ("dark_seer_wall_of_replica", "复制之墙"),
-                57: ("omniknight_guardian_angel", "守护天使"),
                 64: ("jakiro_macropyre", "烈焰焚身"),
                 65: ("batrider_flaming_lasso", "燃烧枷锁"),
                 68: ("ancient_apparition_ice_blast", "冰晶爆轰"),
@@ -2134,18 +2077,13 @@ def build_deep_replay_forensics(
                 76: ("obsidian_destroyer_sanity_eclipse", "神智之蚀"),
                 78: ("brewmaster_primal_split", "元素分离"),
                 83: ("treant_overgrowth", "疯狂生长"),
-                85: ("undying_tombstone", "墓碑"),
                 87: ("disruptor_static_storm", "静态风暴"),
                 89: ("naga_siren_song_of_the_siren", "海妖之歌"),
-                93: ("slark_shadow_dance", "暗影之舞"),
                 94: ("medusa_stone_gaze", "石化凝视"),
-                95: ("troll_warlord_battle_trance", "战斗专注"),
                 96: ("centaur_stampede", "奔袭冲撞"),
                 97: ("magnataur_reverse_polarity", "两极反转"),
                 104: ("legion_commander_duel", "决斗"),
-                109: ("terrorblade_sunder", "魂断"),
                 110: ("phoenix_supernova", "超新星"),
-                111: ("oracle_false_promise", "虚妄之诺"),
                 112: ("winter_wyvern_winters_curse", "寒冬诅咒"),
                 114: ("monkey_king_wukongs_command", "猴子猴孙"),
                 120: ("pangolier_gyroshell", "地雷滚滚"),
@@ -2168,63 +2106,67 @@ def build_deep_replay_forensics(
                 egg_cnt = int(ab_uses.get("phoenix_supernova") or 0)
                 spirits_cnt = int(ab_uses.get("phoenix_fire_spirits") or 0)
                 ray_cnt = int(ab_uses.get("phoenix_sun_ray") or 0)
-                if egg_cnt > 0 and d_cnt > 0:
-                    egg_shattered = True
-                    ult_audit_zh = f"💔 开启【超新星】变蛋当场被打碎！（烈火精灵×{spirits_cnt} / 激光×{ray_cnt}）"
-                elif egg_cnt > 0 and d_cnt == 0:
-                    ult_audit_zh = f"🔥 变蛋【超新星】完美存活眩晕全场！（烈火精灵×{spirits_cnt}）"
-                elif egg_cnt == 0 and d_cnt > 0 and start_s >= 420:
+                if egg_cnt > 0:
+                    ult_audit_zh = f"✓ 已交大招：【超新星×{egg_cnt}】（烈火精灵×{spirits_cnt} / 激光×{ray_cnt}）"
+                elif d_cnt > 0 and start_s >= 420:
                     egg_unpressed = True
-                    ult_audit_zh = "💀 团战连大招【超新星】都没按出来即被秒杀！"
+                    ult_audit_zh = "ℹ️ 本波未释放大招【超新星】"
             elif hid in HERO_ULTIMATE_KEYS and start_s >= 480:
                 u_key, u_zh = HERO_ULTIMATE_KEYS[hid]
                 u_cnt = int(ab_uses.get(u_key) or 0)
-                # 环轨百戏王还常见放逃生暗箱救人
                 if hid == 131:
                     box_cnt = int(ab_uses.get("ringmaster_the_box") or 0)
                     if u_cnt > 0 or box_cnt > 0:
                         ult_audit_zh = f"✓ 关键技能：奇观之轮×{u_cnt} / 逃生暗箱×{box_cnt}"
                     elif d_cnt > 0:
                         ult_unpressed_name = u_zh
-                        ult_audit_zh = f"💀 大招【{u_zh}】与【逃生暗箱】0次释放即阵亡"
+                        ult_audit_zh = f"ℹ️ 本波未释放大招【{u_zh}】"
                 else:
                     if u_cnt > 0:
                         ult_audit_zh = f"✓ 已交大招：【{u_zh}×{u_cnt}】"
                     elif d_cnt > 0:
                         ult_unpressed_name = u_zh
-                        ult_audit_zh = f"💀 憋大暴毙：大招【{u_zh}】0次释放即阵亡"
+                        ult_audit_zh = f"ℹ️ 本波未释放大招【{u_zh}】"
 
-            # 检查是否在队友阵亡 >= 2 人时 0 伤害野区独刷
+            # 检查是否在队友阵亡 >= 2 人时无参战记录且期间有刷钱记录（排除团战开始时已阵亡、有治疗或有技能记录者）
             afk_farm_zh = ""
             is_afk_in_tf = False
-            if team_deaths >= 2 and dmg_v == 0 and d_cnt == 0:
+            was_dead_at_start = any(
+                int(d_ev.get("time") or 0) <= start_s < int(d_ev.get("time") or 0) + int(d_ev.get("time_dead") or 30)
+                for d_ev in (raw_p.get("deaths_log") or [])
+                if isinstance(d_ev, dict)
+            )
+            if (
+                not was_dead_at_start
+                and team_deaths >= 2
+                and dmg_v == 0
+                and d_cnt == 0
+                and heal_v == 0
+                and len(ab_uses) == 0
+            ):
                 lh_arr = raw_p.get("lh_t") or []
                 g_arr = raw_p.get("gold_t") or []
                 m0 = max(0, min(len(lh_arr) - 1, start_s // 60)) if lh_arr else 0
                 m1 = max(0, min(len(lh_arr) - 1, end_s // 60 + 1)) if lh_arr else 0
                 lh_gain_tf = max(0, int(lh_arr[m1] - lh_arr[m0])) if lh_arr and m1 >= m0 else 0
                 g_gain_tf = max(0, int(g_arr[m1] - g_arr[m0])) if g_arr and m1 >= m0 else max(0, g_delta)
-                tp_cnt_tf = int(it_uses.get("tpscroll") or 0)
-                if lh_gain_tf > 0 or g_gain_tf >= 150 or tp_cnt_tf == 0:
+                if lh_gain_tf > 0 or g_gain_tf >= 150:
                     is_afk_in_tf = True
-                    afk_farm_zh = f"🌾 团战0伤害远端独刷（期间补刀 +{lh_gain_tf} 刀 / 进账 +{g_gain_tf} 金 / 0次亮TP支援）"
+                    afk_farm_zh = f"🌾 本波无参战记录（期间补刀 +{lh_gain_tf} 刀 / 进账 +{g_gain_tf} 金）"
 
             # 生成个人本波团定性标签
-            if egg_shattered:
-                v_tag = "💔 当场碎蛋崩盘"
-                v_tone = "bad"
-            elif egg_unpressed:
-                v_tag = "💀 未变蛋即被秒"
-                v_tone = "bad"
+            if egg_unpressed:
+                v_tag = "ℹ️ 本波未放超新星"
+                v_tone = "warn"
             elif unused_self_saves and d_cnt > 0:
-                v_tag = f"💀 憋{unused_self_saves[0].split('(')[0]}暴毙"
-                v_tone = "bad"
+                v_tag = f"ℹ️ 持有{unused_self_saves[0].split('(')[0]}未使用"
+                v_tone = "warn"
             elif is_afk_in_tf:
-                v_tag = "🌾 0伤独刷旁观"
-                v_tone = "bad"
+                v_tag = "🌾 本波无参战记录"
+                v_tone = "warn"
             elif ult_unpressed_name and d_cnt > 0:
-                v_tag = f"💀 憋大({ult_unpressed_name})死"
-                v_tone = "bad"
+                v_tag = f"ℹ️ 本波未放{ult_unpressed_name}"
+                v_tone = "warn"
             elif d_cnt > 0 and dmg_v < 750 and int(fp["pos"]) in (1, 2, 3):
                 v_tag = "💥 核心秒躺断档"
                 v_tone = "bad"
@@ -2334,9 +2276,9 @@ def build_deep_replay_forensics(
         if smoke_activators:
             init_parts.append(f"{'、'.join(smoke_activators)} 开启【诡计之雾】抱团破雾寻战")
         if rad_initiators:
-            init_parts.append(f"天辉先手切入：{'、'.join(rad_initiators[:3])}")
+            init_parts.append(f"天辉本波使用了跳刀/传送：{'、'.join(rad_initiators[:3])}")
         if dire_initiators:
-            init_parts.append(f"夜魇先手切入：{'、'.join(dire_initiators[:3])}")
+            init_parts.append(f"夜魇本波使用了跳刀/传送：{'、'.join(dire_initiators[:3])}")
         trigger_zh = " ｜ ".join(init_parts) if init_parts else f"双方在【{location_zh}】爆发正面遭遇战"
 
         script_events.append({
@@ -2358,14 +2300,12 @@ def build_deep_replay_forensics(
             micro_notes = []
             if de["is_smoke_kill"]:
                 micro_notes.append("🌫️ 破雾突袭第一刀秒杀")
-            if ve.get("egg_shattered"):
-                micro_notes.append("💔 变蛋【超新星】被敌方集火打碎！")
-            elif ve.get("egg_unpressed"):
-                micro_notes.append("💀 连大招【超新星】都未按出即暴毙！")
+            if ve.get("egg_unpressed"):
+                micro_notes.append("ℹ️ 本波未释放大招【超新星】")
             elif ve.get("ult_unpressed_name"):
-                micro_notes.append(f"💀 憋大暴毙：招牌【{ve['ult_unpressed_name']}】0次释放！")
+                micro_notes.append(f"ℹ️ 本波未释放大招【{ve['ult_unpressed_name']}】")
             if ve.get("unused_self_saves_zh"):
-                micro_notes.append(f"💀 包里揣着【{'/'.join(ve['unused_self_saves_zh'])}】却 0 次按出！")
+                micro_notes.append(f"ℹ️ 阵亡时持有【{'/'.join(ve['unused_self_saves_zh'])}】，本波未使用")
             if ve.get("abilities_used_zh"):
                 micro_notes.append(f"生前技能：{'/'.join(ve['abilities_used_zh'][:3])}")
             if ve.get("items_used_zh"):
@@ -2503,23 +2443,19 @@ def build_deep_replay_forensics(
                         f"① 先手破局：开团 {fb_rel} 秒（{fmt_mmss(fb['time_sec'])}）即集火秒掉敌方 {fb['victim_pos']}号位 {fb['victim_hero']}，后续{'乘胜追击扩大战果' if (own_gold_swing >= 0 or enemy_throne_fell or enemy_rax_fell) else '恋战深入被敌方反手大招反包'}。"
                     )
 
-            # ② 大招碎蛋 / 憋大 / 憋BKB救人装犯罪点名
+            # ② 大招与主动保命装本波使用记录
             crime_notes = []
             for pe in own_p_exec:
-                if pe["egg_shattered"]:
-                    crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}开启《超新星》变蛋当场被打碎")
-                elif pe["egg_unpressed"]:
-                    crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}连大招《超新星》都未按出即被秒")
+                if pe["egg_unpressed"]:
+                    crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}本波未释放大招《超新星》")
                 elif pe["ult_unpressed_name"]:
-                    crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}招牌《{pe['ult_unpressed_name']}》0次释放暴毙")
+                    crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}本波未释放大招《{pe['ult_unpressed_name']}》")
                 if pe["unused_self_saves_zh"]:
-                    crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}包里揣着【{'/'.join(pe['unused_self_saves_zh'])}】0次按出暴毙")
-                if pe["unused_team_saves_zh"]:
-                    crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}未按救人装【{'/'.join(pe['unused_team_saves_zh'])}】")
+                    crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}阵亡时持有【{'/'.join(pe['unused_self_saves_zh'])}】，本波未使用")
                 if pe["is_afk_in_tf"]:
                     crime_notes.append(f"{pe['pos']}号位{pe['hero_short_zh']}{pe['afk_farm_zh']}")
             if crime_notes:
-                reasons.append(f"② 关键机制与微操失误：{'；'.join(crime_notes)}！")
+                reasons.append(f"② 关键机制记录：{'；'.join(crime_notes)}。")
             else:
                 top_own = max(own_p_exec, key=lambda x: x["damage"]) if own_p_exec else None
                 if top_own:
@@ -3143,7 +3079,7 @@ def build_squad_history_ledger(
             )
         if st["unpressed_saves_total"] > 0 or st["bad_builds_total"] > 0:
             flaw_parts.append(
-                f"🧤【救命装与憋刀】累计 {st['unpressed_saves_total']} 次身怀BKB/救命装0按出暴毙，{st['bad_builds_total']} 局被抓包头铁出装事故"
+                f"🧤【保命装与出装记录】累计 {st['unpressed_saves_total']} 次阵亡时持有主动保命装本波未使用，{st['bad_builds_total']} 局出装偏离常规"
             )
         if not flaw_parts:
             flaw_parts.append(
@@ -3265,9 +3201,9 @@ def build_squad_history_ledger(
         top_bkb_holder = max(core_members, key=lambda x: x["unpressed_saves_total"])
         if top_bkb_holder["unpressed_saves_total"] > 0:
             guinness_records.append({
-                "title": "💀 憋死 BKB/救命装总冠军",
+                "title": "💀 阵亡持有保命装未按记录",
                 "holder": top_bkb_holder["personaname"],
-                "value": f"累计 {top_bkb_holder['unpressed_saves_total']} 次身怀救命装0按出暴毙",
+                "value": f"累计 {top_bkb_holder['unpressed_saves_total']} 次阵亡时持有保命装本波未使用",
                 "tone": "bad",
             })
         top_pickoff_holder = max(core_members, key=lambda x: x["solo_pickoffs_total"])

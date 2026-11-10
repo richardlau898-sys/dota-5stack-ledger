@@ -12,7 +12,13 @@ Dota 2 录像级深度战术显微镜引擎 (tactical_microscope_engine.py)
 """
 
 from typing import Any, Dict, List, Optional, Tuple
-from dota_constants_zh import GOLD_REASON_KEYS, get_ability_zh, ITEMS_ZH
+from dota_constants_zh import (
+    ACTIVE_SAVE_ITEMS_ZH,
+    GOLD_REASON_KEYS,
+    ITEMS_ZH,
+    get_ability_zh,
+    get_held_active_save_items,
+)
 from hero_profiles_126 import get_hero_profile_126
 
 
@@ -390,8 +396,8 @@ def build_tactical_microscope(
                 c_in_tf = int((tfr["ability_uses"] or {}).get(ab_key, 0))
                 if c_in_tf > 0:
                     tf_casts_waves.append(f"{tfr['time_range']}(×{c_in_tf})")
-                elif tfr["deaths"] > 0 and tfr["start_sec"] >= 420:
-                    # 7分钟后有大招时期在团战阵亡但没放出大招
+                elif tfr["deaths"] > 0 and tfr["start_sec"] >= 420 and cfg.get("type") != "single_nuke_ult":
+                    # 7分钟后有大招时期在团战阵亡但本波未释放大招（排除斩杀类单点大招）
                     tf_held_death_waves.append(tfr["time_range"])
 
             # 拆解该大招打在哪些敌方英雄身上
@@ -431,14 +437,14 @@ def build_tactical_microscope(
                     grade = "warn"
                     verdict_text = (
                         f"大招中规中矩：全场释放 {casts} 次，累计 {hits} {cfg['unit_label']}（场均每大 {avg_hits} {cfg['unit_label']}，伤害 {dmg:,}）"
-                        + (f"；但在 {', '.join(tf_held_death_waves[:3])} 团战中未放出大招即阵亡！" if tf_held_death_waves else "。")
+                        + (f"；在 {', '.join(tf_held_death_waves[:3])} 团战中本波未释放大招。" if tf_held_death_waves else "。")
                     )
                     badge_text = f"{cfg['zh']}: 场均{avg_hits}{cfg['unit_label']}"
                 else:
                     grade = "bad"
                     verdict_text = (
-                        f"⚠️ 大招严重低效/空大频发：全场放了 {casts} 次《{cfg['zh']}》，累计仅命中 {hits} {cfg['unit_label']}（场均每次大招仅 {avg_hits} {cfg['unit_label']}！）"
-                        + (f"，且在 {', '.join(tf_held_death_waves[:3])} 等 {len(tf_held_death_waves)} 波关键团战中没按出大招就躺下读秒！" if tf_held_death_waves else "，多次出现单大或空大脱节！")
+                        f"⚠️ 大招低效：全场放了 {casts} 次《{cfg['zh']}》，累计命中 {hits} {cfg['unit_label']}（场均每次大招 {avg_hits} {cfg['unit_label']}）"
+                        + (f"，且在 {', '.join(tf_held_death_waves[:3])} 等 {len(tf_held_death_waves)} 波关键团战中本波未释放大招。" if tf_held_death_waves else "。")
                     )
                     badge_text = f"🚨 {cfg['zh']}: {casts}大仅{hits}{cfg['unit_label']}(均{avg_hits})"
 
@@ -604,7 +610,7 @@ def build_tactical_microscope(
             special_insights.append(rub_msg)
             headline_badges.append({"text": f"偷技能: {steal_casts}次", "tone": "good" if steal_casts >= 18 else "warn"})
 
-        # 3e. 凤凰 (Phoenix) 超新星变蛋「成功炸出 vs 蛋被打碎殒命」与烈日炙烤(激光)覆盖率审计
+        # 3e. 凤凰 (Phoenix) 超新星变蛋释放统计与烈日炙烤(激光)覆盖率审计（不推断蛋是否被打碎）
         if hid == 110 or au.get("phoenix_supernova", 0) > 0:
             egg_casts = au.get("phoenix_supernova", 0)
             egg_dmg = di.get("phoenix_supernova", 0)
@@ -615,44 +621,32 @@ def build_tactical_microscope(
             dive_casts = au.get("phoenix_icarus_dive", 0)
             total_heal = int(fp.get("hero_healing") or 0)
 
-            egg_survived_waves = []
-            egg_shattered_waves = []
+            egg_tf_waves = []
             egg_held_death_waves = []
             for tfr in tf_list:
                 c_egg = int((tfr["ability_uses"] or {}).get("phoenix_supernova", 0))
                 if c_egg > 0:
-                    if tfr["deaths"] == 0:
-                        egg_survived_waves.append(tfr["time_range"])
-                    else:
-                        egg_shattered_waves.append(tfr["time_range"])
+                    egg_tf_waves.append(tfr["time_range"])
                 elif tfr["deaths"] > 0 and tfr["start_sec"] >= 420:
                     egg_held_death_waves.append(tfr["time_range"])
 
-            tf_egg_total = len(egg_survived_waves) + len(egg_shattered_waves)
-            shatter_cnt = len(egg_shattered_waves)
-            survive_cnt = len(egg_survived_waves)
-            # 非正面大团战（小规模遭遇战）的额外变蛋
-            skirmish_eggs = max(0, egg_casts - tf_egg_total)
-            survive_total_est = survive_cnt + skirmish_eggs
-
-            egg_grade = "bad" if (tf_egg_total >= 2 and shatter_cnt > survive_cnt) else ("good" if survive_cnt >= shatter_cnt and egg_casts >= 4 else "warn")
+            tf_egg_total = len(egg_tf_waves)
+            egg_grade = "good" if egg_casts >= 4 else "warn"
             egg_verdict = (
-                f"🥚《超新星(变蛋)》生灭审判：全场共变蛋 {egg_casts} 次（造成 {egg_dmg:,} 伤害），其中在 {tf_egg_total} 波正面大团战中变蛋："
-                f"仅 {survive_cnt} 次成功炸出眩晕（{', '.join(egg_survived_waves) if egg_survived_waves else '无'}），"
-                f"高达 {shatter_cnt} 次蛋被敌方集火打碎殒命（{', '.join(egg_shattered_waves) if egg_shattered_waves else '无'}，团战碎蛋率 {round(shatter_cnt / max(1, tf_egg_total) * 100)}%）"
-                + (f"，另有 {len(egg_held_death_waves)} 波团战（{', '.join(egg_held_death_waves[:3])}）连蛋都没按出来就被秒！" if egg_held_death_waves else "！")
-                + ("变蛋位置过于贴脸且未提前给敌方物理核挂满《烈火精灵》减攻速，导致超新星沦为活靶子！" if shatter_cnt >= 3 else "")
+                f"🥚《超新星(变蛋)》释放记录：全场共释放 {egg_casts} 次（造成 {egg_dmg:,} 伤害），其中在 {tf_egg_total} 波正面团战中释放"
+                + (f"（{', '.join(egg_tf_waves)}）" if egg_tf_waves else "")
+                + (f"；另有 {len(egg_held_death_waves)} 波团战（{', '.join(egg_held_death_waves[:3])}）本波未释放大招。" if egg_held_death_waves else "。")
             )
             ult_audits.insert(0, {
                 "ability_key": "phoenix_supernova",
                 "ability_zh": "超新星 (凤凰变蛋)",
                 "casts": egg_casts,
-                "hits": survive_total_est,
-                "avg_hits": round(survive_cnt / max(1, tf_egg_total), 2),
-                "unit_label": f"次团战炸出(碎蛋{shatter_cnt}次)",
+                "hits": egg_hits,
+                "avg_hits": round(egg_hits / max(1, egg_casts), 2),
+                "unit_label": "次伤害跳数",
                 "damage": egg_dmg,
                 "tf_casts_count": tf_egg_total,
-                "tf_casts_waves": [f"{w}(成)" for w in egg_survived_waves] + [f"{w}(碎!)" for w in egg_shattered_waves],
+                "tf_casts_waves": egg_tf_waves,
                 "tf_held_death_count": len(egg_held_death_waves),
                 "tf_held_death_waves": egg_held_death_waves,
                 "victim_breakdown": [],
@@ -660,30 +654,29 @@ def build_tactical_microscope(
                 "verdict_text": egg_verdict,
             })
             headline_badges.insert(0, {
-                "text": f"🥚 团战变蛋: {tf_egg_total}放/{survive_cnt}成/{shatter_cnt}碎!",
+                "text": f"🥚 超新星: {egg_casts}次(团战{tf_egg_total}次)",
                 "tone": egg_grade,
             })
             special_insights.insert(0, egg_verdict)
 
-            ray_grade = "good" if ray_casts >= int(duration_min * 0.45) else "bad"
+            ray_grade = "good" if ray_casts >= int(duration_min * 0.45) else "warn"
             ray_msg = (
-                f"☀️《烈日炙烤(激光) & 烈火精灵》机制审计：{duration_min:.0f} 分钟比赛仅开启《烈日炙烤》{ray_casts} 次（造成 {ray_dmg:,} 伤害、全队治疗仅 {total_heal:,} 点），"
+                f"☀️《烈日炙烤(激光) & 烈火精灵》机制审计：{duration_min:.0f} 分钟比赛开启《烈日炙烤》{ray_casts} 次（造成 {ray_dmg:,} 伤害、全队治疗 {total_heal:,} 点），"
                 f"召唤《烈火精灵》{spirits_casts} 次（造成 {di.get('phoenix_fire_spirits', 0):,} 伤害）、《伊卡洛斯之翼》{dive_casts} 次。"
-                + ("⚠️ 凤凰最核心的远程百分比灼烧/奶人神技《烈日炙烤》全场只按了寥寥几次，打团既没在后排拉激光融化前排，变蛋前也没用烈火精灵糊住敌方物理核心攻速！" if ray_grade == "bad" else "")
             )
             headline_badges.insert(1, {
-                "text": f"烈日炙烤: 仅{ray_casts}次(奶{total_heal:,})",
+                "text": f"烈日炙烤: {ray_casts}次(奶{total_heal:,})",
                 "tone": ray_grade,
             })
             special_insights.insert(1, ray_msg)
             fp["phoenix_egg_audit"] = {
                 "total_casts": egg_casts,
                 "tf_egg_total": tf_egg_total,
-                "survived_cnt": survive_cnt,
-                "shattered_cnt": shatter_cnt,
-                "shatter_rate_pct": round(shatter_cnt / max(1, tf_egg_total) * 100, 1),
-                "survived_waves": egg_survived_waves,
-                "shattered_waves": egg_shattered_waves,
+                "survived_cnt": tf_egg_total,
+                "shattered_cnt": 0,
+                "shatter_rate_pct": 0.0,
+                "survived_waves": egg_tf_waves,
+                "shattered_waves": [],
                 "held_death_waves": egg_held_death_waves,
                 "sun_ray_casts": ray_casts,
                 "sun_ray_dmg": ray_dmg,
@@ -1043,10 +1036,10 @@ def build_tactical_microscope(
                             "duration_min": cur_bo["end_min"] - cur_bo["start_min"],
                             "min_obs": cur_bo["min_obs"],
                             "deaths_cnt": len(cur_bo["victims"]),
-                            "victims_str": "、".join(v_uniq[:4]) if v_uniq else "幸未死人",
+                            "victims_str": "、".join(v_uniq[:4]) if v_uniq else "无阵亡",
                             "detail": (
-                                f"🌑 {tr_str}（持续 {cur_bo['end_min'] - cur_bo['start_min']} 分钟全图仅 {cur_bo['min_obs']} 颗假眼黑灯瞎火期）："
-                                + (f"视野断档直接导致本方【{'、'.join(v_uniq[:4])}】累计阵亡 {len(cur_bo['victims'])} 人次！" if v_uniq else "全图黑灯瞎火，所幸未被抓死。")
+                                f"🌑 {tr_str}（持续 {cur_bo['end_min'] - cur_bo['start_min']} 分钟己方场上假眼至多 {cur_bo['min_obs']} 颗）："
+                                + (f"同期本方【{'、'.join(v_uniq[:4])}】累计阵亡 {len(cur_bo['victims'])} 人次。" if v_uniq else "同期我方无英雄阵亡。")
                             ),
                         })
                     cur_bo = None
@@ -1058,10 +1051,10 @@ def build_tactical_microscope(
                 "duration_min": cur_bo["end_min"] - cur_bo["start_min"],
                 "min_obs": cur_bo["min_obs"],
                 "deaths_cnt": len(cur_bo["victims"]),
-                "victims_str": "、".join(v_uniq[:4]) if v_uniq else "幸未死人",
+                "victims_str": "、".join(v_uniq[:4]) if v_uniq else "无阵亡",
                 "detail": (
-                    f"🌑 {tr_str}（持续 {cur_bo['end_min'] - cur_bo['start_min']} 分钟全图仅 {cur_bo['min_obs']} 颗假眼黑灯瞎火期）："
-                    + (f"视野断档直接导致本方【{'、'.join(v_uniq[:4])}】累计阵亡 {len(cur_bo['victims'])} 人次！" if v_uniq else "全图黑灯瞎火，所幸未被抓死。")
+                    f"🌑 {tr_str}（持续 {cur_bo['end_min'] - cur_bo['start_min']} 分钟己方场上假眼至多 {cur_bo['min_obs']} 颗）："
+                    + (f"同期本方【{'、'.join(v_uniq[:4])}】累计阵亡 {len(cur_bo['victims'])} 人次。" if v_uniq else "同期我方无英雄阵亡。")
                 ),
             })
 
@@ -1534,7 +1527,20 @@ def build_tactical_microscope(
         absent_warnings: List[Dict[str, Any]] = []
         teamfight_tp_events: List[Dict[str, Any]] = []
 
-        # 逐波团战检查：谁亮了 TP 参战，谁在我方死人的团战里全程 0 英雄伤害 0 阵亡 0 TP 旁观/刷野
+        # 预先提取每位玩家的阵亡读秒时间窗 (dt, dt + time_dead)
+        death_windows_by_slot: Dict[int, List[Tuple[int, int]]] = {}
+        for fp_w in own_players:
+            ps_w = int(fp_w["player_slot"])
+            rp_w = raw_by_slot.get(ps_w, {})
+            wins_w: List[Tuple[int, int]] = []
+            for d_ev in rp_w.get("deaths_log") or []:
+                if isinstance(d_ev, dict):
+                    dt_v = int(d_ev.get("time") or 0)
+                    td_v = int(d_ev.get("time_dead") or 30)
+                    wins_w.append((dt_v, dt_v + td_v))
+            death_windows_by_slot[ps_w] = wins_w
+
+        # 逐波团战检查：谁使用了 TP，谁在我方死人的团战里全程无参战记录
         for tf_idx, tf in enumerate(raw_tfs):
             tf_pl = tf.get("players") or []
             if len(tf_pl) < 10:
@@ -1560,13 +1566,15 @@ def build_tactical_microscope(
                 tp_obj = tf_pl[i]
                 d_cnt = int(tp_obj.get("deaths") or 0)
                 dmg_val = int(tp_obj.get("damage") or 0)
+                heal_val = int(tp_obj.get("healing") or 0)
                 ab_used = tp_obj.get("ability_uses") or {}
                 it_used = tp_obj.get("item_uses") or {}
                 tp_in_tf = int(it_used.get("tpscroll") or 0) + int(it_used.get("travel_boots") or 0) + int(it_used.get("travel_boots_2") or 0)
+                was_dead_at_start = any(dt <= s_sec < respawn_t for dt, respawn_t in death_windows_by_slot.get(pslot, []))
 
                 if d_cnt > 0:
                     own_deaths_heroes.append(fp["hero_short_zh"])
-                if tp_in_tf > 0 and (dmg_val > 0 or len(ab_used) > 0 or d_cnt > 0):
+                if tp_in_tf > 0 and (dmg_val > 0 or len(ab_used) > 0 or d_cnt > 0 or heal_val > 0):
                     tp_responders.append(f"{fp['hero_short_zh']}({fp['personaname']})")
                     tp_saviors_objs.append({
                         "pos": fp["pos"],
@@ -1574,7 +1582,14 @@ def build_tactical_microscope(
                         "personaname": fp["personaname"],
                         "damage": dmg_val,
                     })
-                elif d_cnt == 0 and dmg_val == 0 and tp_in_tf == 0:
+                elif (
+                    not was_dead_at_start
+                    and d_cnt == 0
+                    and dmg_val == 0
+                    and heal_val == 0
+                    and len(ab_used) == 0
+                    and tp_in_tf == 0
+                ):
                     spectators.append(fp)
                     spectators_objs.append({
                         "pos": fp["pos"],
@@ -1598,17 +1613,18 @@ def build_tactical_microscope(
                     "time_range": t_range,
                     "responders": "、".join(tp_responders),
                     "trade_str": f"打成 {opp_deaths_cnt} 换 {len(own_deaths_heroes)}",
-                    "detail": f"在 {t_range} 交战中，{'、'.join(tp_responders)} 第一时间亮 TP 落地支援参战（该波 {opp_deaths_cnt} 换 {len(own_deaths_heroes)}）。",
+                    "detail": f"在 {t_range} 交战中，{'、'.join(tp_responders)} 本波使用了 TP（该波 {opp_deaths_cnt} 换 {len(own_deaths_heroes)}）。",
                 })
 
-            # 如果本波我方死了至少 2 人，且有队友 0 英雄伤害 0 阵亡 0 TP 旁观/远处刷野
+            # 如果本波我方死了至少 2 人，且有存活队友无伤害/技能/治疗/TP记录
             if len(own_deaths_heroes) >= 2 and spectators and s_sec >= 360:
                 spec_names = "、".join(f"{sp['pos']}号位{sp['hero_short_zh']}" for sp in spectators)
                 absent_warnings.append({
                     "time_range": t_range,
                     "victims": "、".join(own_deaths_heroes),
                     "spectators": spec_names,
-                    "detail": f"⚠️ {t_range} 我方【{'、'.join(own_deaths_heroes)}】遭围剿阵亡时，{spec_names} 全程对敌方英雄 0 伤害、未交 TP 支援（在另一侧带线/刷野未赶到）。",
+                    "evidence": "inferred",
+                    "detail": f"⚠️ {t_range} 我方【{'、'.join(own_deaths_heroes)}】阵亡时，{spec_names} 本波无英雄伤害、无技能/治疗记录且未使用 TP（推断未参战）。",
                 })
 
         zero_buy_heroes = []
@@ -1624,6 +1640,7 @@ def build_tactical_microscope(
                 if x.get("key") == "tpscroll" and int(x.get("time") or 9999) <= 720
             )
             tfs_for_p = tf_records_by_slot.get(pslot, [])
+            p_death_wins = death_windows_by_slot.get(pslot, [])
 
             tf_tp_cnt = 0
             tf_tp_times: List[str] = []
@@ -1633,14 +1650,17 @@ def build_tactical_microscope(
             for tfr in tfs_for_p:
                 own_d = tfr["rad_deaths"] if is_rad else tfr["dire_deaths"]
                 it_u = tfr["item_uses"] or {}
+                ab_u_tf = tfr.get("ability_uses") or {}
+                heal_tf = int(tfr.get("healing") or 0)
                 has_tp = (int(it_u.get("tpscroll") or 0) + int(it_u.get("travel_boots") or 0) + int(it_u.get("travel_boots_2") or 0)) > 0
-                participated = (tfr["damage"] > 0 or tfr["deaths"] > 0 or has_tp)
+                was_dead_tf = any(dt <= tfr["start_sec"] < respawn_t for dt, respawn_t in p_death_wins)
+                participated = (tfr["damage"] > 0 or tfr["deaths"] > 0 or has_tp or heal_tf > 0 or len(ab_u_tf) > 0)
                 if has_tp:
                     tf_tp_cnt += 1
                     tf_tp_times.append(fmt_mmss(tfr["start_sec"]))
                 if participated:
                     tf_joined_cnt += 1
-                elif own_d >= 2 and tfr["start_sec"] >= 360:
+                elif not was_dead_tf and own_d >= 2 and tfr["start_sec"] >= 360:
                     tf_absent_cnt += 1
                     tf_absent_times.append(fmt_mmss(tfr["start_sec"]))
 
@@ -1648,7 +1668,7 @@ def build_tactical_microscope(
             if tp_bought == 0:
                 zero_buy_heroes.append(f"{fp['pos']}号位{fp['hero_short_zh']}")
 
-            # 检测「买TP/用TP后40秒内暴毙（TP飞脸送）」
+            # 检测「买TP后45秒内阵亡」
             tp_buy_times = [int(x.get("time") or 0) for x in (rp.get("purchase_log") or []) if x.get("key") == "tpscroll"]
             tp_feed_times = []
             for de in rp.get("deaths_log") or []:
@@ -1660,27 +1680,27 @@ def build_tactical_microscope(
             deaths_total = int(fp.get("deaths") or 0)
             if tp_used >= 10 and tf_tp_cnt >= 2:
                 grade = "good"
-                verdict = f"支援极快：全场使用 {tp_used} 次 TP，其中 {tf_tp_cnt} 波团战（{'、'.join(tf_tp_times)}）直接亮 TP 落地救人/反打，参团率 {fp.get('kill_participation_pct')}%。"
+                verdict = f"全场使用 {tp_used} 次 TP，其中 {tf_tp_cnt} 波团战（{'、'.join(tf_tp_times)}）本波使用了 TP，参团率 {fp.get('kill_participation_pct')}%。"
             elif tp_used <= max(4, int(duration_min / 6.5)):
                 grade = "bad"
                 verdict = (
-                    f"⚠️ 支援频次偏低：{duration_min:.0f} 分钟仅使用 {tp_used} 次 TP（主动买 {tp_bought} 张，团战亮 TP {tf_tp_cnt} 次），"
-                    + (f"在 {tf_absent_cnt} 波队友阵亡的团战中未能及时赶到！" if tf_absent_cnt > 0 else "跑图大多靠双腿！")
+                    f"⚠️ TP 使用频次偏低：{duration_min:.0f} 分钟使用 {tp_used} 次 TP（主动买 {tp_bought} 张，团战使用 TP {tf_tp_cnt} 次），"
+                    + (f"在 {tf_absent_cnt} 波队友阵亡的团战中无参战记录。" if tf_absent_cnt > 0 else "。")
                 )
             elif tp_bought == 0 and deaths_total >= 6:
                 grade = "warn"
                 verdict = (
-                    f"全靠阵亡赠送的免费抚恤 TP 过日子（全场死 {deaths_total} 次、主动花钱买 TP 0 张，共使用 {tp_used} 次，团战亮 TP {tf_tp_cnt} 次），"
-                    f"连续存活刷钱时注意检查背包是否断 TP！"
+                    f"全场阵亡 {deaths_total} 次、主动购买 TP 0 张（共使用 {tp_used} 次，团战使用 TP {tf_tp_cnt} 次），"
+                    f"连续存活刷钱时注意检查背包是否断 TP。"
                 )
             elif tf_absent_cnt >= 2:
                 grade = "warn"
-                verdict = f"全场使用 {tp_used} 次 TP（团战亮 TP {tf_tp_cnt} 次），但在 {tf_absent_cnt} 波队友多人阵亡的团战（{'、'.join(tf_absent_times)}）中对敌方 0 伤害未亮 TP。"
+                verdict = f"全场使用 {tp_used} 次 TP（团战使用 TP {tf_tp_cnt} 次），在 {tf_absent_cnt} 波队友多人阵亡的团战（{'、'.join(tf_absent_times)}）中无伤害/技能/TP记录。"
             else:
                 grade = "good" if tf_absent_cnt == 0 else "warn"
                 verdict = (
-                    f"全场使用 {tp_used} 次 TP（主动购买 {tp_bought} 张，团战亮 TP {tf_tp_cnt} 次），参战 {tf_joined_cnt}/{len(tfs_for_p)} 波关键团"
-                    + (f"（缺席 {'、'.join(tf_absent_times)}）" if tf_absent_times else "")
+                    f"全场使用 {tp_used} 次 TP（主动购买 {tp_bought} 张，团战使用 TP {tf_tp_cnt} 次），参战 {tf_joined_cnt}/{len(tfs_for_p)} 波关键团"
+                    + (f"（无记录波次 {'、'.join(tf_absent_times)}）" if tf_absent_times else "")
                     + (f"，注意在 {'、'.join(tp_feed_times[:2])} 刚买 TP 后不久即阵亡。" if tp_feed_times else "。")
                 )
 
@@ -1725,29 +1745,8 @@ def build_tactical_microscope(
         }
 
     # =========================================================================
-    # 六、憋死 BKB / 救命装 / 团战 0 技能暴毙尸检 (Died With Cooldown Ready)
+    # 六、团战内主动保命装持有与使用记录 (Active Save Items In Teamfight Deaths)
     # =========================================================================
-    SAVE_ACTIVE_ITEMS: Dict[str, Tuple[str, str]] = {
-        "black_king_bar": ("BKB黑皇杖", "critical"),
-        "satanic": ("撒旦之邪力", "critical"),
-        "manta": ("分身斧", "critical"),
-        "aeon_disk": ("永恒之盘", "critical"),
-        "hurricane_pike": ("飓风长戟(大推推)", "critical"),
-        "force_staff": ("推推棒", "critical"),
-        "glimmer_cape": ("微光披风", "critical"),
-        "ghost": ("幽魂权杖(绿杖)", "critical"),
-        "ethereal_blade": ("虚灵之刃", "critical"),
-        "cyclone": ("吹风杖", "critical"),
-        "wind_waker": ("风之杖(大吹风)", "critical"),
-        "lotus_orb": ("清莲宝珠", "critical"),
-        "cheese": ("奶酪", "critical"),
-        "blade_mail": ("刃甲", "warn"),
-        "shivas_guard": ("希瓦的守护", "warn"),
-        "pipe": ("洞察烟斗(笛子)", "warn"),
-        "crimson_guard": ("赤红甲", "warn"),
-        "magic_wand": ("大魔棒", "warn"),
-    }
-
     def analyze_side_unpressed_saves(side_key: str) -> Dict[str, Any]:
         own_players = radiant_players if side_key == "radiant" else dire_players
         incidents: List[Dict[str, Any]] = []
@@ -1759,12 +1758,7 @@ def build_tactical_microscope(
             pslot = int(fp["player_slot"])
             rp = raw_by_slot.get(pslot, {})
             plog = rp.get("purchase_log") or []
-            owned_save_times: Dict[str, int] = {}
-            for entry in plog:
-                ik = str(entry.get("key") or "")
-                t_buy = int(entry.get("time") or 0)
-                if ik in SAVE_ACTIVE_ITEMS and ik not in owned_save_times:
-                    owned_save_times[ik] = t_buy
+            owned_save_times = get_held_active_save_items(plog, duration_sec + 60)
 
             tfs_for_p = tf_records_by_slot.get(pslot, [])
             tf_deaths = 0
@@ -1784,15 +1778,11 @@ def build_tactical_microscope(
                 ab_u = tfr.get("ability_uses") or {}
                 dmg_val = int(tfr.get("damage") or 0)
 
+                held_at_tf = get_held_active_save_items(plog, s_sec - 3)
                 unpressed_crit_zh: List[str] = []
-                unpressed_warn_zh: List[str] = []
-                for ik, buy_t in owned_save_times.items():
-                    if buy_t + 15 <= s_sec and int(it_u.get(ik) or 0) == 0:
-                        zh_label, sev = SAVE_ACTIVE_ITEMS[ik]
-                        if sev == "critical":
-                            unpressed_crit_zh.append(zh_label)
-                        else:
-                            unpressed_warn_zh.append(zh_label)
+                for ik, buy_t in held_at_tf.items():
+                    if buy_t <= s_sec - 3 and int(it_u.get(ik) or 0) == 0:
+                        unpressed_crit_zh.append(ACTIVE_SAVE_ITEMS_ZH[ik])
 
                 is_zero_spell = (s_sec >= 480 and len(ab_u) == 0)
                 if is_zero_spell:
@@ -1802,19 +1792,15 @@ def build_tactical_microscope(
                 if unpressed_crit_zh:
                     unpressed_core_cnt += 1
                     critical_total += 1
-                elif unpressed_warn_zh:
-                    unpressed_wand_cnt += 1
 
-                if unpressed_crit_zh or is_zero_spell or unpressed_warn_zh:
-                    severity = "critical" if (unpressed_crit_zh or is_zero_spell) else "warn"
+                if unpressed_crit_zh or is_zero_spell:
+                    severity = "warn"
                     parts = []
                     if unpressed_crit_zh:
-                        parts.append(f"身怀【{' / '.join(unpressed_crit_zh)}】却 0 次按下直接阵亡")
-                    elif unpressed_warn_zh:
-                        parts.append(f"背包有【{' / '.join(unpressed_warn_zh)}】未按出即阵亡")
+                        parts.append(f"阵亡时持有【{' / '.join(unpressed_crit_zh)}】，本波未使用")
                     if is_zero_spell:
-                        parts.append(f"整波团战 0 技能释放（仅打出 {dmg_val} 点伤害）秒躺")
-                    desc = "，且".join(parts)
+                        parts.append(f"本波团战无技能释放记录（打出 {dmg_val} 点伤害）")
+                    desc = "；".join(parts)
                     p_incidents.append(f"{fmt_mmss(s_sec)} {desc}")
                     incidents.append({
                         "time_range": t_range,
@@ -1823,44 +1809,34 @@ def build_tactical_microscope(
                         "hero_short_zh": fp["hero_short_zh"],
                         "hero_img": fp["hero_img"],
                         "personaname": fp["personaname"],
-                        "unpressed_items": unpressed_crit_zh + unpressed_warn_zh,
+                        "unpressed_items": unpressed_crit_zh,
                         "zero_abilities": is_zero_spell,
                         "tf_damage": dmg_val,
                         "severity": severity,
-                        "detail": f"[{t_range}] {fp['pos']}号位 {fp['hero_short_zh']}：{desc}。",
+                        "evidence": "inferred",
+                        "detail": f"[{t_range}] {fp['pos']}号位 {fp['hero_short_zh']}：{desc}（推断：无法确认当时冷却与受控状态）。",
                     })
 
             # 统计整局主动保命装总按键次数
             iu_all = rp.get("item_uses") or {}
             owned_summary = []
             for ik, buy_t in owned_save_times.items():
-                zh_label, _ = SAVE_ACTIVE_ITEMS[ik]
+                zh_label = ACTIVE_SAVE_ITEMS_ZH[ik]
                 owned_summary.append(f"{zh_label}({fmt_mmss(buy_t)}出·按{int(iu_all.get(ik) or 0)}次)")
 
-            if unpressed_core_cnt == 0 and zero_spell_cnt == 0 and unpressed_wand_cnt == 0:
+            if unpressed_core_cnt == 0 and zero_spell_cnt == 0:
                 grade = "good"
                 verdict = (
-                    f"✓ 团战反应拉满：本局 {tf_deaths} 次团战阵亡中，所有已合成保命装与核心技能均在死前完整交出，0 次憋死！"
+                    f"✓ 本局 {tf_deaths} 次团战阵亡中，已持有的主动保命装与核心技能均有使用记录。"
                     if tf_deaths > 0
-                    else "✓ 团战零阵亡金身：全局关键团战未发生暴毙憋技能情况！"
+                    else "✓ 全局关键团战无阵亡记录。"
                 )
-            elif unpressed_core_cnt > 0 or zero_spell_cnt > 0:
-                grade = "bad"
-                verdict = (
-                    f"🚨 抓包 {unpressed_core_cnt} 次憋死核心保命装、{zero_spell_cnt} 次团战 0 技能秒躺："
-                    + "；".join(p_incidents[:3])
-                )
-                # 同步挂一条徽章到玩家卡片
-                audit_obj = fp.get("hero_execution_audit")
-                if isinstance(audit_obj, dict):
-                    badges = audit_obj.setdefault("headline_badges", [])
-                    if unpressed_core_cnt > 0:
-                        badges.append({"text": f"💀 憋死救命装 ×{unpressed_core_cnt}次", "tone": "bad"})
-                    elif zero_spell_cnt > 0:
-                        badges.append({"text": f"💀 团战0技能秒躺 ×{zero_spell_cnt}次", "tone": "bad"})
             else:
                 grade = "warn"
-                verdict = f"⚠️ 核心保命装均有按出，但有 {unpressed_wand_cnt} 波团战阵亡前未按出大魔棒/刃甲（{'；'.join(p_incidents[:2])}）。"
+                verdict = (
+                    f"ℹ️ 记录到 {unpressed_core_cnt} 次团战阵亡时持有主动保命装本波未使用、{zero_spell_cnt} 次团战无技能释放记录："
+                    + "；".join(p_incidents[:3])
+                )
 
             player_rows.append({
                 "pos": int(fp["pos"]),
@@ -1873,16 +1849,17 @@ def build_tactical_microscope(
                 "zero_spell_cnt": zero_spell_cnt,
                 "owned_saves_str": " ｜ ".join(owned_summary) if owned_summary else "未合成主动保命装",
                 "grade": grade,
+                "evidence": "inferred",
                 "verdict": verdict,
             })
 
-        incidents.sort(key=lambda x: (0 if x["severity"] == "critical" else 1, x["start_sec"]))
+        incidents.sort(key=lambda x: x["start_sec"])
         if critical_total == 0 and zero_spell_total == 0:
-            side_verdict = "✓ 全队团战技能与救命装释放及格：未出现身怀 BKB/推推/微光/分身斧却在团战暴毙未按出的重大犯罪。"
+            side_verdict = "✓ 全队团战技能与主动保命装均有释放记录。"
         else:
             side_verdict = (
-                f"🚨 团战尸检抓包：全队共发生 {critical_total} 人次【身怀 BKB/分身/推推/绿杖等救命装却 0 次按下暴毙】、"
-                f"{zero_spell_total} 人次【中后期团战 0 技能释放直接秒躺】！"
+                f"ℹ️ 团战记录：全队共 {critical_total} 人次团战阵亡时持有主动保命装本波未使用、"
+                f"{zero_spell_total} 人次中后期团战无技能释放记录（推断，未计入评分与分锅）。"
             )
 
         return {
@@ -1930,19 +1907,19 @@ def build_tactical_microscope(
                     "t_out": t_out,
                 })
 
-        # 收集敌方全队买雾/开雾时间戳，用于区分「被敌方开雾强抓」还是「敌方未开雾·纯不看小地图白给」
-        opp_smoke_times: List[int] = []
+        # 从敌方 kills_log 的 smoke 字段和团战 item_uses.smoke_of_deceit 读取真实破雾击杀记录（不用购买时间推断）
+        opp_smoke_kill_times: List[int] = []
         for op in opp_players:
             orp = raw_by_slot.get(int(op["player_slot"]), {})
-            for pe in orp.get("purchase_log") or []:
-                if pe.get("key") == "smoke_of_deceit":
-                    opp_smoke_times.append(int(pe.get("time") or 0))
+            for ke in orp.get("kills_log") or []:
+                if isinstance(ke, dict) and ke.get("smoke"):
+                    opp_smoke_kill_times.append(int(ke.get("time") or 0))
         for tf in raw_tfs:
             tf_pl = tf.get("players") or []
             opp_range = range(5, 10) if is_rad else range(0, 5)
             for j in opp_range:
                 if j < len(tf_pl) and int((tf_pl[j].get("item_uses") or {}).get("smoke_of_deceit") or 0) > 0:
-                    opp_smoke_times.append(int(tf.get("start") or 0))
+                    opp_smoke_kill_times.append(int(tf.get("start") or 0))
 
         solo_pickoff_events: List[Dict[str, Any]] = []
         player_space_rows: List[Dict[str, Any]] = []
@@ -1988,8 +1965,7 @@ def build_tactical_microscope(
                         break
 
                 is_solo_pickoff = False
-                death_zone_zh = "野区/兵线交界处"
-                is_deep_enemy_half = False
+                death_zone_zh: Optional[str] = None
                 dx_val, dy_val = None, None
 
                 if matched_tf is None:
@@ -2019,10 +1995,8 @@ def build_tactical_microscope(
                         zinfo = classify_ward_map_zone(dx_val, dy_val, side_key)
                         death_zone_zh = zinfo["zone_zh"]
                         if zinfo["posture"] == "aggressive":
-                            is_deep_enemy_half = True
                             p_deep_death_cnt += 1
 
-                    # 如果这波只有他 1 个人死、对面 0 死，且至少 3 个队友 0 伤害（队友根本不在身边，自己落单带线/逛街被抓）
                     if own_d == 1 and opp_d == 0 and zero_dmg_allies >= 3:
                         is_solo_pickoff = True
 
@@ -2031,33 +2005,11 @@ def build_tactical_microscope(
                     total_solo_pickoffs += 1
                     p_solo_gold_fed += gold_fed
 
-                    # 检查当时场上我方存活假眼数量与视野保护
-                    active_wards = [
-                        w for w in own_obs_wards
-                        if w["t_in"] <= t_sec <= w["t_out"]
-                    ]
-                    has_nearby_ward = False
-                    if dx_val is not None and dy_val is not None:
-                        has_nearby_ward = any(
-                            ((w["x"] - dx_val) ** 2 + (w["y"] - dy_val) ** 2) ** 0.5 <= 28.0
-                            for w in active_wards
-                        )
-                    # 检查死前 95 秒内敌方是否有开雾/买雾动作
-                    is_enemy_smoke_gank = any(-5 <= (t_sec - st) <= 95 for st in opp_smoke_times)
-                    if is_enemy_smoke_gank:
-                        gank_nature_tag = "🌫️ 敌方开雾强抓"
-                        vision_tag = f"🌫️ 敌方诡计之雾包夹（场上 {len(active_wards)} 颗眼）"
-                    else:
-                        p_unsmoked_cnt += 1
-                        total_unsmoked_blind_feeds += 1
-                        if has_nearby_ward or len(active_wards) >= 3:
-                            gank_nature_tag = "🚨 敌方未开雾 · 有眼不看小地图白给"
-                            vision_tag = f"🚨 敌方未开雾！场上明明有 {len(active_wards)} 颗假眼却不看小地图退撤"
-                        else:
-                            gank_nature_tag = "🚨 敌方未开雾 · 黑图盲区孤狼贪线"
-                            vision_tag = f"🌑 敌方未开雾！全图仅 {len(active_wards)} 颗假眼仍孤立过河深带"
+                    is_enemy_smoke_gank = any(abs(t_sec - st) <= 15 for st in opp_smoke_kill_times)
+                    gank_nature_tag = "🌫️ 敌方破雾击杀" if is_enemy_smoke_gank else "非团战期单人阵亡"
+                    vision_tag = "🌫️ 敌方诡计之雾击杀" if is_enemy_smoke_gank else ""
 
-                    # 检查死后 70 秒内是否连累团队丢塔/丢肉山
+                    # 死后 70 秒内的地图事件（并列陈述事实，不作因果断言）
                     consequence_list = []
                     for obj in raw_objectives:
                         ot = int(obj.get("time") or 0)
@@ -2067,25 +2019,24 @@ def build_tactical_microscope(
                             if otype == "CHAT_MESSAGE_ROSHAN_KILL":
                                 oteam = int(obj.get("team") or 0)
                                 if (is_rad and oteam == 3) or ((not is_rad) and oteam == 2):
-                                    consequence_list.append(f"{fmt_mmss(ot)} 敌方趁机控下肉山盾")
+                                    consequence_list.append(f"{fmt_mmss(ot)} 敌方控下肉山盾")
                             elif otype == "building_kill":
                                 if (is_rad and "goodguys" in okey) or ((not is_rad) and "badguys" in okey):
                                     b_zh = "高地塔/兵营" if ("3" in okey or "rax" in okey) else "外塔"
-                                    consequence_list.append(f"{fmt_mmss(ot)} 连累本方丢掉{b_zh}")
-
-                    if not consequence_list:
-                        total_pointless_deaths += 1
+                                    consequence_list.append(f"{fmt_mmss(ot)} 本方损失{b_zh}")
 
                     conseq_str = (
-                        f" → 💥 连锁掉点：{'、'.join(consequence_list[:2])}！"
+                        f"；随后 70 秒内：{'、'.join(consequence_list[:2])}。"
                         if consequence_list
-                        else " → 🚫 零战略收益的无聊带线/乱逛白给！"
+                        else "。"
                     )
+                    zone_clause = f"在【{death_zone_zh}】" if death_zone_zh else ""
+                    smoke_clause = f"（{vision_tag}）" if vision_tag else ""
                     detail_txt = (
-                        f"[{fmt_mmss(t_sec)}] {pos_i}号位 {fp['hero_short_zh']} 在【{death_zone_zh}】落单被 {killer_zh} 等人抓死"
-                        f"（{vision_tag} · 读秒 {dead_s}s · 送出 {gold_fed} 金）{conseq_str}"
+                        f"[{fmt_mmss(t_sec)}] {pos_i}号位 {fp['hero_short_zh']} {zone_clause}被 {killer_zh} 击杀{smoke_clause}"
+                        f"（读秒 {dead_s}s · 损失 {gold_fed} 金）{conseq_str}"
                     )
-                    p_pickoff_details.append(f"{fmt_mmss(t_sec)}({death_zone_zh})")
+                    p_pickoff_details.append(f"{fmt_mmss(t_sec)}(被{killer_zh}击杀)")
                     solo_pickoff_events.append({
                         "time_str": fmt_mmss(t_sec),
                         "time_sec": t_sec,
@@ -2100,7 +2051,7 @@ def build_tactical_microscope(
                         "vision_tag": vision_tag,
                         "gold_fed": gold_fed,
                         "time_dead": dead_s,
-                        "consequence": "、".join(consequence_list[:2]) if consequence_list else "无战略收益白给",
+                        "consequence": "、".join(consequence_list[:2]) if consequence_list else "",
                         "detail": detail_txt,
                     })
 
@@ -2197,14 +2148,12 @@ def build_tactical_microscope(
         solo_pickoff_events.sort(key=lambda x: x["time_sec"])
         if total_solo_pickoffs <= 3:
             side_verdict = (
-                f"✓ 团队地图空间纪律严明：9 分钟后全队仅发生 {total_solo_pickoffs} 次落单被抓（其中 {total_unsmoked_blind_feeds} 次敌方未开雾），"
-                f"大哥收线与辅助抱团衔接紧凑，极少给对手白捡落单提款的机会。"
+                f"✓ 团队地图空间记录：9 分钟后全队共发生 {total_solo_pickoffs} 次非团战单人阵亡，"
+                f"收线与抱团衔接较紧凑。"
             )
         else:
             side_verdict = (
-                f"🚨 地图空间警报：9 分钟后全队共发生 {total_solo_pickoffs} 次【脱离团队落单带无聊线 / 盲区乱逛被抓死】"
-                f"（其中高达 {total_unsmoked_blind_feeds} 次敌方根本没开雾，纯属不看小地图贪线白给）！"
-                f"切忌在无假眼保护、无队友蹲后的情况下一个人过河道深带收线。"
+                f"⚠️ 地图空间记录：9 分钟后全队共发生 {total_solo_pickoffs} 次非团战单人阵亡。"
             )
 
         return {
@@ -3314,7 +3263,7 @@ def build_tactical_microscope(
             for op in opp_players
             if int(op.get("hero_id") or 0) in PURGEABLE_SAVE_HERO_IDS
         ]
-        for p_item, p_zh in [("ghost", "幽魂权杖(绿杖)"), ("ethereal_blade", "虚灵之刃"), ("cyclone", "Eul的神圣法杖(吹风)"), ("wind_waker", "风之杖(大吹风)"), ("glimmer_cape", "微光披风"), ("aeon_disk", "永恒之盘")]:
+        for p_item, p_zh in [("ghost", "幽魂权杖(绿杖)"), ("ethereal_blade", "虚灵之刃"), ("cyclone", "Eul的神圣法杖(吹风)"), ("wind_waker", "风之杖(大吹风)"), ("glimmer_cape", "微光披风")]:
             if opp_item_buyers.get(p_item):
                 purge_threats.append(f"{'/'.join(opp_item_buyers[p_item])}({p_zh})")
 

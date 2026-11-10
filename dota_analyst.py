@@ -1559,10 +1559,18 @@ def analyze_match_data(
             ltp = late_by_slot.get(slot, {})
             h_short = tp.get("hero_short_zh")
 
+            raw_p_for_slot = raw_players_by_slot.get(slot, {})
+            slot_death_windows = [
+                (int(de.get("time") or 0), int(de.get("time") or 0) + int(de.get("time_dead") or 30))
+                for de in (raw_p_for_slot.get("deaths_log") or [])
+                if isinstance(de, dict)
+            ]
             tf_afk_cnt = 0
             tf_afk_gold = 0
             low_dmg_tfs = []
             for tf in key_teamfights:
+                s_tf_sec = int(tf.get("start_sec") or 0)
+                was_dead_at_tf_start = any(dt <= s_tf_sec < respawn_t for dt, respawn_t in slot_death_windows)
                 own_deaths = tf.get("rad_deaths", 0) if side_key == "radiant" else tf.get("dire_deaths", 0)
                 own_parts = [pt for pt in (tf.get("participants") or []) if pt.get("side") == side_key]
                 own_active_cnt = sum(1 for pt in own_parts if (pt.get("damage") or 0) > 0 or (pt.get("deaths") or 0) > 0)
@@ -1571,7 +1579,8 @@ def analyze_match_data(
                     my_dmg = (my_pt.get("damage") or 0) if my_pt else 0
                     my_deaths = (my_pt.get("deaths") or 0) if my_pt else 0
                     my_gold = (my_pt.get("gold_delta") or 0) if my_pt else 0
-                    if my_dmg == 0 and my_deaths == 0:
+                    my_ab = (my_pt.get("abilities") or []) if my_pt else []
+                    if not was_dead_at_tf_start and my_dmg == 0 and my_deaths == 0 and not my_ab:
                         tf_afk_cnt += 1
                         if my_gold > 0:
                             tf_afk_gold += my_gold

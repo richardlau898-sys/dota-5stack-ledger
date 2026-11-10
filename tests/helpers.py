@@ -45,7 +45,8 @@ def build_all_sample_reports(force_rebuild: bool = False) -> Dict[int, Dict[str,
     raw_matches = load_all_raw_matches()
     roster = dota_analyst.load_roster()
     main_aid = roster.get("main_account_id")
-    with patch.object(urllib.request, "urlopen", side_effect=_forbid_network):
+    with patch.object(urllib.request, "urlopen", side_effect=_forbid_network), \
+         patch.object(dota_analyst, "load_cached_grok_coaching", return_value=None):
         for mid, raw_data in raw_matches.items():
             report = dota_analyst.analyze_match_data(
                 raw_data,
