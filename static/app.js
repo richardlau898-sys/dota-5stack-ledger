@@ -6046,9 +6046,10 @@ async function loadMatchReport(
   const reqSeq = state.loadMatchSeq;
   const targetMid = Number(matchId);
 
-  // Immediately clear stale previous-match view if switching to a different match
+  // Immediately clear stale previous-match view if switching to a different match,
+  // but do NOT mutate state.currentMatchId until the report actually arrives.
+  state.pendingMatchId = targetMid;
   if (Number(state.currentReport?.match_id) !== targetMid) {
-    state.currentMatchId = targetMid;
     highlightSelectedMatchCard(targetMid);
     const contentEl = document.getElementById("analyzed-report-content");
     const gateEl = document.getElementById("on-demand-analysis-gate");
@@ -6074,6 +6075,12 @@ async function loadMatchReport(
         confirmBtn.textContent = `🤖 正在加载比赛 #${targetMid} 深度复盘...`;
       }
     }
+  } else if (analyzeNow) {
+    const confirmBtn = document.getElementById("btn-confirm-analyze-match");
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = `🤖 正在加载比赛 #${targetMid} 深度复盘...`;
+    }
   }
 
   if (switchToPostgame && state.workspaceMode !== "postgame") {
@@ -6097,6 +6104,7 @@ async function loadMatchReport(
     });
     if (reqSeq !== state.loadMatchSeq) return; // Ignore stale out-of-order response
     const rawText = await res.text();
+    if (reqSeq !== state.loadMatchSeq) return; // Ignore stale out-of-order body read
     let data = null;
     try {
       data = JSON.parse(rawText);
@@ -6166,6 +6174,13 @@ async function loadMatchReport(
       }
     }
   } catch (err) {
+    if (reqSeq === state.loadMatchSeq) {
+      const confirmBtn = document.getElementById("btn-confirm-analyze-match");
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = "🔐 验证车队口令并执行本局复盘";
+      }
+    }
     console.error(err);
     showToast(`拉取比赛 #${matchId} 失败: ${err.message}`);
   }
@@ -6183,7 +6198,13 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
     }).catch(() => {});
   }
   _autoParsePollTimer = setTimeout(async () => {
-    if (Number(state.currentMatchId) !== Number(matchId) || state.currentReport?.is_parsed) return;
+    if (
+      Number(state.currentMatchId) !== Number(matchId) ||
+      state.pendingMatchId ||
+      state.currentReport?.is_parsed
+    ) {
+      return;
+    }
     if (state.isGeneratingGrok) {
       scheduleAutoReplayParsePoll(matchId, attempt);
       return;
@@ -6195,8 +6216,11 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
         )}&refresh=1&analyze=1&skip_llm=1`,
         { headers: getTeamTokenHeaders() }
       );
+      if (Number(state.currentMatchId) !== Number(matchId) || state.pendingMatchId) return;
       const data = await res.json();
+      if (Number(state.currentMatchId) !== Number(matchId) || state.pendingMatchId) return;
       if (data.ok && data.report?.is_parsed) {
+        if (Number(data.report.match_id || matchId) !== Number(state.currentMatchId)) return;
         if (state.currentReport?.grok_coaching?.title && !data.report.grok_coaching?.title) {
           data.report.grok_coaching = state.currentReport.grok_coaching;
         }
@@ -6208,6 +6232,7 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
     } catch (_e) {
       // ignore poll error
     }
+    if (Number(state.currentMatchId) !== Number(matchId) || state.pendingMatchId) return;
     scheduleAutoReplayParsePoll(matchId, attempt + 1);
   }, 8000);
 }
@@ -6215,6 +6240,8 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
 async function triggerGrokReview({ force = true } = {}) {
   if (!state.currentMatchId || state.isGeneratingGrok) return;
   const reqMatchId = Number(state.currentMatchId);
+  state.grokReqSeq = (state.grokReqSeq || 0) + 1;
+  const reqSeq = state.grokReqSeq;
   const grokBtn = document.getElementById("btn-trigger-grok");
   const { side } = getOwnAndOppPlayers(state.currentReport);
   const llmCfg = getEffectiveLlmConfig();
@@ -6237,7 +6264,9 @@ async function triggerGrokReview({ force = true } = {}) {
         force,
       }),
     });
+    if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
     const rawText = await res.text();
+    if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
     let data = null;
     try {
       data = JSON.parse(rawText);
@@ -6251,17 +6280,19 @@ async function triggerGrokReview({ force = true } = {}) {
     if (data.task_id && (data.status === "pending" || data.status === "running")) {
       const taskId = data.task_id;
       for (let attempt = 1; attempt <= 40; attempt += 1) {
-        if (Number(state.currentMatchId) !== reqMatchId) return;
+        if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
         if (grokBtn) {
           grokBtn.textContent = `${getCoachModelDisplayName()} 后台算账中 (${attempt * 2}s)...`;
         }
         await new Promise((r) => setTimeout(r, 2000));
-        if (Number(state.currentMatchId) !== reqMatchId) return;
+        if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
         const pollRes = await fetch(
           `/api/llm_review_status?task_id=${encodeURIComponent(taskId)}`,
           { headers: getTeamTokenHeaders() }
         );
+        if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
         const pollData = await pollRes.json();
+        if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
         if (!pollData.ok) {
           throw new Error(pollData.error || "查询判词任务状态失败");
         }
@@ -6278,8 +6309,9 @@ async function triggerGrokReview({ force = true } = {}) {
       }
     }
 
-    if (Number(state.currentMatchId) !== reqMatchId) return;
+    if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
     if (finalData.report) {
+      if (Number(finalData.report.match_id || reqMatchId) !== reqMatchId) return;
       state.currentReport = finalData.report;
       saveLocalAnalyzedMatch(state.currentReport);
       renderFullMatchReport(state.currentReport);
@@ -6289,10 +6321,12 @@ async function triggerGrokReview({ force = true } = {}) {
     console.error(err);
     showToast(`Grok 算账失败: ${err.message}`);
   } finally {
-    state.isGeneratingGrok = false;
-    if (grokBtn) {
-      grokBtn.disabled = false;
-      grokBtn.textContent = `用 ${getCoachModelDisplayName()} 重算判词`;
+    if (state.grokReqSeq === reqSeq) {
+      state.isGeneratingGrok = false;
+      if (grokBtn) {
+        grokBtn.disabled = false;
+        grokBtn.textContent = `用 ${getCoachModelDisplayName()} 重算判词`;
+      }
     }
   }
 }
@@ -20278,7 +20312,13 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
   const out = document.getElementById("pregame-plan-output");
   if (!out) return;
 
+  state.pregamePlanSeq = (state.pregamePlanSeq || 0) + 1;
+  const reqSeq = state.pregamePlanSeq;
+  const reqMatchId = Number(state.currentMatchId || 0);
+
   const validOwn = (state.pregameOwnPicks || []).filter((x) => Number(x.hero_id) > 0);
+  const validEnemy = (state.pregameEnemyPicks || []).filter((x) => Number(x.hero_id) > 0);
+  const reqPickSig = JSON.stringify({ own: validOwn, enemy: validEnemy });
   if (validOwn.length === 0) {
     out.innerHTML = `<div class="empty-state">请至少在上方点选本方 1~5 号位英雄，作战室将立即生成本局配合连招与前中后期作战纲领。</div>`;
     return;
@@ -20296,11 +20336,22 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
       headers: getTeamTokenHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         own_picks: validOwn,
-        enemy_picks: (state.pregameEnemyPicks || []).filter((x) => Number(x.hero_id) > 0),
+        enemy_picks: validEnemy,
         use_llm: Boolean(useLlm),
       }),
     });
+    if (reqSeq !== state.pregamePlanSeq || Number(state.currentMatchId || 0) !== reqMatchId) return;
     const data = await res.json();
+    const curOwn = (state.pregameOwnPicks || []).filter((x) => Number(x.hero_id) > 0);
+    const curEnemy = (state.pregameEnemyPicks || []).filter((x) => Number(x.hero_id) > 0);
+    const curPickSig = JSON.stringify({ own: curOwn, enemy: curEnemy });
+    if (
+      reqSeq !== state.pregamePlanSeq ||
+      Number(state.currentMatchId || 0) !== reqMatchId ||
+      curPickSig !== reqPickSig
+    ) {
+      return;
+    }
     if (promptTeamTokenOn401(res, data)) return;
     if (!data.ok) throw new Error(data.error || "生成赛前作战方案失败");
     state.pregamePlan = data.plan;
@@ -20315,7 +20366,7 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
   } catch (err) {
     showToast(`赛前作战室推演失败: ${err.message}`);
   } finally {
-    if (useLlm && grokBtn) {
+    if (useLlm && grokBtn && reqSeq === state.pregamePlanSeq) {
       grokBtn.disabled = false;
       grokBtn.textContent = `🧠 呼叫 ${getCoachModelDisplayName()} 深度推演本局战术`;
     }
