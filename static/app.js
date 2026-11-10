@@ -6657,6 +6657,22 @@ function renderWorkstationFactCheckSection(report) {
     });
   }
 
+  const fcAudit = report.grok_coaching?.fact_check_audit || report.fact_check_audit || null;
+  if (fcAudit && typeof fcAudit === "object") {
+    const checkedCnt = Number(fcAudit.checked_sentences ?? 0);
+    const verifiedCnt = Number(fcAudit.verified_count ?? 0);
+    const removedCnt = Number(fcAudit.removed_count ?? 0);
+    factCards.unshift({
+      status: removedCnt > 0 ? "warn" : "verified",
+      badge: "🔍 AI 判词事实核查",
+      title: `核验 ${checkedCnt} 条含时间/数字句子：通过 ${verifiedCnt} 条 · 删掉 ${removedCnt} 条`,
+      detail:
+        removedCnt > 0
+          ? `已将 AI 判词中的 mm:ss 时间点与四位以上数字逐条比对原始比赛数据，自动剔除 ${removedCnt} 条与录像数据不符的句子，保留 ${verifiedCnt} 条已核实描述。`
+          : `已将 AI 判词中的 mm:ss 时间点与四位以上数字逐条比对原始比赛数据，全部 ${verifiedCnt} 条均与比赛真实数据一致。`,
+    });
+  }
+
   sec.innerHTML = `
     <div class="ws-factcheck-grid">
       <div class="ws-fc-panel ws-fc-numbers-panel">
@@ -6688,9 +6704,13 @@ function renderWorkstationFactCheckSection(report) {
         <div class="ws-fc-head">
           <div>
             <span class="ws-fc-kicker">✅ REPLAY FACT-CHECK</span>
-            <h3>录像底层事实核查 (5 项硬核取证)</h3>
+            <h3>录像底层事实核查 (${factCards.length} 项硬核取证)</h3>
           </div>
-          <span class="ws-fc-sub">基于 OpenDota 解析数据自动核对关键指标</span>
+          <span class="ws-fc-sub">${
+            fcAudit
+              ? `AI 判词核验：通过 ${Number(fcAudit.verified_count ?? 0)} 条 / 删掉 ${Number(fcAudit.removed_count ?? 0)} 条`
+              : "基于 OpenDota 解析数据自动核对关键指标"
+          }</span>
         </div>
         <div class="ws-fc-cards-list">
           ${factCards

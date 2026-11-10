@@ -1777,31 +1777,32 @@ def get_llm_status_safe() -> Dict[str, Any]:
 
 def _parse_llm_json_robust(raw_txt: str) -> Optional[Dict[str, Any]]:
     """
-    稳健解析大模型返回的 JSON 字符串：
-    若大模型在中文字符串内部误用了未转义的英文双引号（如 夸他"散失思路对"），
-    自动将其替换为中文直角引号『』后再解析，确保 100% 解析成功。
+    解析大模型返回的 JSON 字符串：
+    - 拒绝截断的 JSON（如大括号/中括号未闭合或字符串未闭合），绝不硬补括号凑数；
+    - 若字符串内部仅误用了未转义的英文双引号且整体结构完整闭合，替换为『』后解析。
     """
-    if not raw_txt:
+    if not raw_txt or not isinstance(raw_txt, str):
         return None
     txt = raw_txt.strip()
     if txt.startswith("```"):
-        txt = txt.strip("`")
+        txt = txt.strip("`").strip()
         if txt.startswith("json"):
             txt = txt[4:].strip()
-    start_idx = txt.find("{")
-    end_idx = txt.rfind("}")
-    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
-        txt = txt[start_idx : end_idx + 1]
+    if not txt.startswith("{") or not txt.endswith("}"):
+        return None
     try:
-        return json.loads(txt)
+        parsed = json.loads(txt)
+        return parsed if isinstance(parsed, dict) else None
     except Exception:
         pass
 
-    # State-machine repair for unescaped inner double quotes or newlines inside JSON string values
+    # State-machine repair ONLY for unescaped inner double quotes inside balanced JSON
     out_chars: List[str] = []
     in_str = False
     esc = False
     open_q = True
+    brace_depth = 0
+    bracket_depth = 0
     n = len(txt)
     for i, ch in enumerate(txt):
         if esc:
@@ -1817,7 +1818,6 @@ def _parse_llm_json_robust(raw_txt: str) -> Optional[Dict[str, Any]]:
                 in_str = True
                 out_chars.append(ch)
             else:
-                # Look ahead to see if this quote closes the JSON key or string value
                 j = i + 1
                 while j < n and txt[j] in (" ", "\t", "\r", "\n"):
                     j += 1
@@ -1829,16 +1829,319 @@ def _parse_llm_json_robust(raw_txt: str) -> Optional[Dict[str, Any]]:
                     out_chars.append("『" if open_q else "』")
                     open_q = not open_q
             continue
+        if not in_str:
+            if ch == "{":
+                brace_depth += 1
+            elif ch == "}":
+                brace_depth -= 1
+            elif ch == "[":
+                bracket_depth += 1
+            elif ch == "]":
+                bracket_depth -= 1
         if in_str and ch in ("\n", "\r"):
             out_chars.append(" ")
             continue
         out_chars.append(ch)
 
+    if in_str or brace_depth != 0 or bracket_depth != 0:
+        return None
+
     repaired = "".join(out_chars)
     try:
-        return json.loads(repaired)
+        parsed = json.loads(repaired)
+        return parsed if isinstance(parsed, dict) else None
     except Exception:
         return None
+
+
+def _is_valid_number_in_range(val: Any, lo: float = 0.0, hi: float = 100.0) -> bool:
+    if isinstance(val, bool) or not isinstance(val, (int, float)):
+        return False
+    return lo <= float(val) <= hi
+
+
+def validate_coaching_schema(
+    structured: Any, partial_mode: Optional[str] = None
+) -> Tuple[bool, str]:
+    """
+    标准库结构校验函数：检查必填字段、类型及分数/占比范围 (0..100)。
+    """
+    if not isinstance(structured, dict):
+        return False, "根对象不是字典"
+
+    if partial_mode == "player":
+        pls = structured.get("players")
+        if isinstance(pls, list) and len(pls) >= 1 and isinstance(pls[0], dict):
+            gp = pls[0]
+        elif structured.get("hero") or structured.get("deep_verdict"):
+            gp = structured
+        else:
+            return False, "个人分片缺少 players 列表"
+        if not isinstance(gp.get("headline"), str) or not gp.get("headline", "").strip():
+            return False, "个人分片缺少非空 headline"
+        dv = gp.get("deep_verdict") or gp.get("assessment")
+        if not isinstance(dv, str) or not dv.strip():
+            return False, "个人分片缺少非空 deep_verdict"
+        if gp.get("grok_score") is not None and not _is_valid_number_in_range(gp.get("grok_score"), 0, 100):
+            return False, f"个人分片 grok_score 超出 0..100 范围: {gp.get('grok_score')}"
+        if gp.get("grok_share_pct") is not None and not _is_valid_number_in_range(gp.get("grok_share_pct"), 0, 100):
+            return False, f"个人分片 grok_share_pct 超出 0..100 范围: {gp.get('grok_share_pct')}"
+        return True, ""
+
+    for req_str_key in ("title", "summary", "verdict", "team_practice"):
+        val = structured.get(req_str_key)
+        if not isinstance(val, str) or not val.strip():
+            return False, f"缺少必填字符串字段: {req_str_key}"
+
+    sr = structured.get("stage_reviews")
+    if not isinstance(sr, dict):
+        return False, "缺少 stage_reviews 字典"
+    for sr_key in ("early_lanes", "mid_tempo", "late_and_roshan", "overall_verdict"):
+        if not isinstance(sr.get(sr_key), str) or not sr.get(sr_key, "").strip():
+            return False, f"stage_reviews.{sr_key} 必须为非空字符串"
+
+    mvp = structured.get("mvp")
+    if not isinstance(mvp, dict) or isinstance(mvp.get("slot"), bool) or not isinstance(mvp.get("slot"), int):
+        return False, "mvp.slot 必须为整数"
+    if not isinstance(mvp.get("reason"), str) or not mvp.get("reason", "").strip():
+        return False, "mvp.reason 必须为非空字符串"
+
+    if partial_mode == "global":
+        rk_list = structured.get("player_rankings") or structured.get("players") or []
+        if isinstance(rk_list, list) and len(rk_list) >= 5:
+            for rk in rk_list[:5]:
+                if not isinstance(rk, dict):
+                    return False, "player_rankings 元素必须为字典"
+                if not _is_valid_number_in_range(rk.get("grok_score"), 0, 100):
+                    return False, f"player_rankings grok_score 超出 0..100: {rk.get('grok_score')}"
+                if not _is_valid_number_in_range(rk.get("grok_share_pct"), 0, 100):
+                    return False, f"player_rankings grok_share_pct 超出 0..100: {rk.get('grok_share_pct')}"
+        return True, ""
+
+    pls = structured.get("players")
+    if not isinstance(pls, list) or len(pls) != 5:
+        return False, "players 必须为包含 5 名选手的数组"
+
+    seen_pos = set()
+    for gp in pls:
+        if not isinstance(gp, dict):
+            return False, "players 元素必须为字典"
+        pos_val = gp.get("pos")
+        if isinstance(pos_val, bool) or not isinstance(pos_val, int) or pos_val not in (1, 2, 3, 4, 5):
+            return False, f"选手 pos 必须为 1..5 整数: {pos_val}"
+        seen_pos.add(pos_val)
+        if not isinstance(gp.get("hero"), str) or not gp.get("hero", "").strip():
+            return False, f"{pos_val}号位缺少非空 hero 字段"
+        if not _is_valid_number_in_range(gp.get("grok_score"), 0, 100):
+            return False, f"{pos_val}号位 grok_score 必须在 0..100 范围内: {gp.get('grok_score')}"
+        if not _is_valid_number_in_range(gp.get("grok_share_pct"), 0, 100):
+            return False, f"{pos_val}号位 grok_share_pct 必须在 0..100 范围内: {gp.get('grok_share_pct')}"
+        if not isinstance(gp.get("headline"), str) or not gp.get("headline", "").strip():
+            return False, f"{pos_val}号位缺少非空 headline"
+        dv = gp.get("deep_verdict") or gp.get("assessment")
+        if not isinstance(dv, str) or not dv.strip():
+            return False, f"{pos_val}号位缺少非空 deep_verdict"
+
+    if len(seen_pos) != 5:
+        return False, f"players 必须完整覆盖 1..5 号位，当前为: {sorted(seen_pos)}"
+
+    return True, ""
+
+
+def _collect_ground_truth_tokens(
+    report: Dict[str, Any], input_payload: Optional[Dict[str, Any]] = None
+) -> Tuple[set, set]:
+    """
+    从比赛报告和输入 payload 中提取全部合法的 mm:ss 时间点（归一化为总秒数集合）与四位以上整数集合。
+    """
+    valid_time_secs: set = set()
+    valid_big_nums: set = set()
+
+    def _add_time(m_int: int, s_int: int) -> None:
+        if 0 <= m_int <= 180 and 0 <= s_int < 60:
+            total_s = m_int * 60 + s_int
+            # Allow ±1s rounding tolerance
+            for delta in (-1, 0, 1):
+                if total_s + delta >= 0:
+                    valid_time_secs.add(total_s + delta)
+
+    def _add_num(n_val: int) -> None:
+        if abs(n_val) >= 1000:
+            valid_big_nums.add(abs(n_val))
+
+    def _walk(obj: Any) -> None:
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k == "grok_coaching":
+                    continue
+                _walk(v)
+        elif isinstance(obj, list):
+            for item in obj:
+                _walk(item)
+        elif isinstance(obj, bool):
+            return
+        elif isinstance(obj, int):
+            _add_num(obj)
+            if 0 <= obj <= 10800:
+                _add_time(obj // 60, obj % 60)
+        elif isinstance(obj, float):
+            _add_num(int(round(obj)))
+            _add_num(int(obj))
+        elif isinstance(obj, str):
+            for m_ts in re.finditer(r"(?<!\d)(\d{1,3}):(\d{2})(?!\d)", obj):
+                _add_time(int(m_ts.group(1)), int(m_ts.group(2)))
+            for m_zh in re.finditer(r"(\d{1,3})分(\d{1,2})秒", obj):
+                _add_time(int(m_zh.group(1)), int(m_zh.group(2)))
+            for m_num in re.finditer(r"(?<![:\d])\b\d{1,3}(?:,\d{3})+\b|(?<![:\d])\b\d{4,}\b", obj):
+                raw_n = m_num.group(0).replace(",", "")
+                if raw_n.isdigit():
+                    _add_num(int(raw_n))
+
+    _walk(report)
+    if input_payload:
+        _walk(input_payload)
+    return valid_time_secs, valid_big_nums
+
+
+def fact_check_coaching_output(
+    structured: Dict[str, Any],
+    report: Dict[str, Any],
+    input_payload: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """
+    抽取判词里的 mm:ss 时间点和四位以上数字，与比赛输入数据比对；
+    对不上的句子删掉，并把核查统计记入 structured['fact_check_audit']。
+    """
+    valid_time_secs, valid_big_nums = _collect_ground_truth_tokens(report, input_payload)
+    verified_count = 0
+    removed_count = 0
+    removed_sentences: List[Dict[str, Any]] = []
+
+    def _check_sentence(sent: str) -> Tuple[bool, bool, List[str]]:
+        """返回 (has_fact_tokens, is_valid, bad_tokens)"""
+        ts_matches = list(re.finditer(r"(?<!\d)(\d{1,3}):(\d{2})(?!\d)", sent))
+        zh_ts_matches = list(re.finditer(r"(\d{1,3})分(\d{1,2})秒", sent))
+        # Mask out timestamps before extracting 4+ digit numbers
+        masked = re.sub(r"(?<!\d)\d{1,3}:\d{2}(?!\d)", " ", sent)
+        masked = re.sub(r"\d{1,3}分\d{1,2}秒", " ", masked)
+        num_matches = list(
+            re.finditer(r"(?<![:\d.])\b\d{1,3}(?:,\d{3})+\b|(?<![:\d.])\b\d{4,}\b", masked)
+        )
+
+        if not ts_matches and not zh_ts_matches and not num_matches:
+            return False, True, []
+
+        bad_tokens: List[str] = []
+        for m in ts_matches:
+            mm, ss = int(m.group(1)), int(m.group(2))
+            if (mm * 60 + ss) not in valid_time_secs:
+                bad_tokens.append(m.group(0))
+        for m in zh_ts_matches:
+            mm, ss = int(m.group(1)), int(m.group(2))
+            if (mm * 60 + ss) not in valid_time_secs:
+                bad_tokens.append(m.group(0))
+        for m in num_matches:
+            raw_n = m.group(0).replace(",", "")
+            if raw_n.isdigit() and int(raw_n) not in valid_big_nums:
+                bad_tokens.append(m.group(0))
+
+        return True, len(bad_tokens) == 0, bad_tokens
+
+    def _filter_text(text: Any, field_label: str) -> str:
+        nonlocal verified_count, removed_count
+        if not isinstance(text, str) or not text.strip():
+            return "" if not isinstance(text, str) else text
+        parts = re.split(r"(?<=[。！？!?；;\n])", text)
+        kept: List[str] = []
+        for part in parts:
+            if not part.strip():
+                continue
+            has_tokens, is_ok, bad_toks = _check_sentence(part)
+            if not has_tokens:
+                kept.append(part)
+            elif is_ok:
+                verified_count += 1
+                kept.append(part)
+            else:
+                removed_count += 1
+                removed_sentences.append({
+                    "field": field_label,
+                    "sentence": part.strip(),
+                    "unmatched": bad_toks,
+                })
+        result = "".join(kept).strip()
+        return result if result else "（相关具体时间或数值未通过事实核查已略去）"
+
+    def _filter_list(items: Any, field_label: str) -> List[str]:
+        nonlocal verified_count, removed_count
+        if not isinstance(items, list):
+            return []
+        out_items: List[str] = []
+        for item in items:
+            if not isinstance(item, str) or not item.strip():
+                continue
+            has_tokens, is_ok, bad_toks = _check_sentence(item)
+            if not has_tokens:
+                out_items.append(item)
+            elif is_ok:
+                verified_count += 1
+                out_items.append(item)
+            else:
+                removed_count += 1
+                removed_sentences.append({
+                    "field": field_label,
+                    "sentence": item.strip(),
+                    "unmatched": bad_toks,
+                })
+        return out_items
+
+    for top_k in ("title", "summary", "verdict", "team_practice"):
+        if isinstance(structured.get(top_k), str):
+            structured[top_k] = _filter_text(structured[top_k], top_k)
+
+    sr = structured.get("stage_reviews")
+    if isinstance(sr, dict):
+        for sr_k in ("early_lanes", "mid_tempo", "late_and_roshan", "overall_verdict"):
+            if isinstance(sr.get(sr_k), str):
+                sr[sr_k] = _filter_text(sr[sr_k], f"stage_reviews.{sr_k}")
+
+    mvp = structured.get("mvp")
+    if isinstance(mvp, dict):
+        for m_k in ("reason", "comparison"):
+            if isinstance(mvp.get(m_k), str):
+                mvp[m_k] = _filter_text(mvp[m_k], f"mvp.{m_k}")
+        if isinstance(mvp.get("evidence"), list):
+            mvp["evidence"] = _filter_list(mvp["evidence"], "mvp.evidence")
+
+    if isinstance(structured.get("windows"), list):
+        for idx_w, win in enumerate(structured["windows"]):
+            if isinstance(win, dict):
+                for w_k in ("title", "detail"):
+                    if isinstance(win.get(w_k), str):
+                        win[w_k] = _filter_text(win[w_k], f"windows[{idx_w}].{w_k}")
+
+    for gp in (structured.get("players") or []):
+        if not isinstance(gp, dict):
+            continue
+        pos_tag = f"pos_{gp.get('pos')}"
+        for p_k in ("headline", "deep_verdict", "early_story", "mid_story", "late_story", "item_and_blink_audit", "practice"):
+            if isinstance(gp.get(p_k), str):
+                gp[p_k] = _filter_text(gp[p_k], f"{pos_tag}.{p_k}")
+        if gp.get("deep_verdict"):
+            gp["assessment"] = gp["deep_verdict"]
+        for l_k in ("good", "bad"):
+            if isinstance(gp.get(l_k), list):
+                gp[l_k] = _filter_list(gp[l_k], f"{pos_tag}.{l_k}")
+
+    audit = {
+        "checked_sentences": verified_count + removed_count,
+        "verified_count": verified_count,
+        "removed_count": removed_count,
+        "removed_sentences": removed_sentences[:20],
+    }
+    structured["fact_check_audit"] = audit
+    report["fact_check_audit"] = audit
+    return audit
 
 
 def _compute_player_role_duty_audit(
@@ -2402,7 +2705,9 @@ def call_llm_coach_review(
                 + payload_json_str
             )
 
-            def _call_xai_chunk(u_prompt: str, max_tok: int) -> Optional[Dict[str, Any]]:
+            def _call_xai_chunk(
+                u_prompt: str, max_tok: int, partial_mode: Optional[str] = None
+            ) -> Optional[Dict[str, Any]]:
                 import time as _t
 
                 p_body = {
@@ -2437,15 +2742,20 @@ def call_llm_coach_review(
                             d_c = json.loads(resp_c.read().decode("utf-8"))
                         txt_c = d_c["choices"][0]["message"]["content"]
                         parsed_c = _parse_llm_json_robust(txt_c)
-                        if isinstance(parsed_c, dict):
-                            return parsed_c
+                        if not isinstance(parsed_c, dict):
+                            raise ValueError("返回的 JSON 截断或无法解析")
+                        if partial_mode:
+                            is_valid_c, err_c = validate_coaching_schema(parsed_c, partial_mode=partial_mode)
+                            if not is_valid_c:
+                                raise ValueError(f"JSON 结构校验失败: {err_c}")
+                        return parsed_c
                     except Exception as e_c:
                         last_err_c = e_c
                 if last_err_c:
                     raise last_err_c
                 return None
 
-            part_global = _call_xai_chunk(user_prompt_global, 2200)
+            part_global = _call_xai_chunk(user_prompt_global, 2200, partial_mode="global")
             if not isinstance(part_global, dict):
                 raise RuntimeError("Grok 全局分片返回格式无效")
 
@@ -2537,7 +2847,7 @@ def call_llm_coach_review(
 
             with ThreadPoolExecutor(max_workers=5) as pool:
                 fut_pos_map = {
-                    pos_i: pool.submit(_call_xai_chunk, _build_pos_prompt(pos_i), 2200)
+                    pos_i: pool.submit(_call_xai_chunk, _build_pos_prompt(pos_i), 2200, "player")
                     for pos_i in (1, 2, 3, 4, 5)
                 }
                 merged_players_by_pos: Dict[int, Dict[str, Any]] = {}
@@ -2602,6 +2912,13 @@ def call_llm_coach_review(
                 top_gp = max(scored_pls, key=lambda x: (float(x.get("grok_score") or 0), float(x.get("grok_share_pct") or 0)))
                 mvp_obj["slot"] = top_gp.get("slot")
         structured["players"] = pls
+
+        is_valid_full, full_err = validate_coaching_schema(structured)
+        if not is_valid_full:
+            raise RuntimeError(f"大模型返回结构校验未通过: {full_err}")
+
+        fact_check_coaching_output(structured, report, compact_payload)
+        out_txt = json.dumps(structured, ensure_ascii=False)
         mid = report.get("match_id")
         if mid:
             try:
