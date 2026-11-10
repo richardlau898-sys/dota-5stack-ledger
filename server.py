@@ -19,10 +19,12 @@ import mimetypes
 import os
 import re
 import sys
+import time
 import traceback
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -35,7 +37,9 @@ from ai_coach_engine import (
 )
 from cloud_store import (
     cloud_fetch_match_report,
+    cloud_load_llm_task,
     cloud_save_coaching,
+    cloud_save_llm_task,
     cloud_save_match_report,
     get_cloud_analyzed_match_ids,
     get_cloud_db_status_safe,
@@ -619,6 +623,109 @@ def fetch_match_icons_base64(match_id: int) -> Dict[str, str]:
     return {u: _ICON_B64_CACHE[u] for u in urls if u in _ICON_B64_CACHE}
 
 
+_LLM_TASK_POOL = ThreadPoolExecutor(max_workers=4)
+
+
+def _execute_llm_review_task(
+    task_id: str,
+    match_id: int,
+    side: str,
+    report: Dict[str, Any],
+) -> Dict[str, Any]:
+    running_state = {
+        "task_id": task_id,
+        "match_id": int(match_id),
+        "side": side,
+        "status": "running",
+        "updated_at": int(time.time()),
+    }
+    cloud_save_llm_task(task_id, running_state)
+    try:
+        res = call_llm_coach_review(report=report)
+        if res.get("ok") and res.get("structured"):
+            res["structured"] = sanitize_report_mixed_english(res["structured"])
+            report["grok_coaching"] = res["structured"]
+            rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
+            try:
+                (REPORTS_DIR / f"match_{int(match_id)}.json").write_text(rep_txt, encoding="utf-8")
+            except OSError:
+                TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                (TMP_REPORTS_DIR / f"match_{int(match_id)}.json").write_text(rep_txt, encoding="utf-8")
+            try:
+                cloud_save_match_report(int(match_id), report)
+            except Exception:
+                pass
+            sanitized_rep = sanitize_report_mixed_english(report)
+            done_state = {
+                "task_id": task_id,
+                "match_id": int(match_id),
+                "side": side,
+                "status": "completed",
+                "structured": res["structured"],
+                "report": sanitized_rep,
+                "model": res.get("model") or res["structured"].get("model"),
+                "provider": res.get("provider") or res["structured"].get("provider"),
+                "updated_at": int(time.time()),
+            }
+            cloud_save_llm_task(task_id, done_state)
+            return done_state
+        else:
+            err_msg = str(res.get("error") or "大模型判词生成失败")
+            fail_state = {
+                "task_id": task_id,
+                "match_id": int(match_id),
+                "side": side,
+                "status": "failed",
+                "error": err_msg,
+                "updated_at": int(time.time()),
+            }
+            cloud_save_llm_task(task_id, fail_state)
+            return fail_state
+    except Exception as exc:
+        fail_state = {
+            "task_id": task_id,
+            "match_id": int(match_id),
+            "side": side,
+            "status": "failed",
+            "error": str(exc) or "判词后台任务执行异常",
+            "updated_at": int(time.time()),
+        }
+        cloud_save_llm_task(task_id, fail_state)
+        return fail_state
+
+
+def start_async_llm_review_task(
+    match_id: int,
+    side: str,
+    report: Dict[str, Any],
+    run_async: bool = True,
+) -> Dict[str, Any]:
+    task_id = f"llm-{int(match_id)}-{side}-{int(time.time() * 1000)}"
+    init_state = {
+        "task_id": task_id,
+        "match_id": int(match_id),
+        "side": side,
+        "status": "pending",
+        "created_at": int(time.time()),
+        "updated_at": int(time.time()),
+    }
+    cloud_save_llm_task(task_id, init_state)
+    if run_async:
+        _LLM_TASK_POOL.submit(_execute_llm_review_task, task_id, int(match_id), side, report)
+        return {
+            "ok": True,
+            "task_id": task_id,
+            "match_id": int(match_id),
+            "side": side,
+            "status": "pending",
+        }
+    final_state = _execute_llm_review_task(task_id, int(match_id), side, report)
+    return {
+        "ok": final_state.get("status") == "completed",
+        **final_state,
+    }
+
+
 class DotaAnalystHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args: Any) -> None:
         sys.stderr.write(f"[DotaLedgerServer] {self.address_string()} - {fmt % args}\n")
@@ -805,6 +912,18 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 self._send_json({"ok": True, "report": report, "squad_ledger": squad_ledger})
                 return
 
+            if path == "/api/llm_review_status":
+                task_id = (qs.get("task_id") or [""])[0].strip()
+                if not task_id:
+                    self._send_json({"ok": False, "error": "缺少 task_id 参数"}, status=400)
+                    return
+                task_data = cloud_load_llm_task(task_id)
+                if not isinstance(task_data, dict):
+                    self._send_json({"ok": False, "error": "未找到对应的判词任务"}, status=404)
+                    return
+                self._send_json({"ok": True, **task_data})
+                return
+
             # 静态文件服务 (支持 /, /pregame, 以及公开分享链接 /match/<id>)
             if path in ("/", "", "/pregame", "/pregame.html") or path.startswith("/match/"):
                 file_path = STATIC_DIR / "index.html"
@@ -953,29 +1072,21 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 if not force and isinstance(report, dict) and _has_complete_grok_coaching(report.get("grok_coaching")):
                     self._send_json({
                         "ok": True,
+                        "task_id": f"cached-{mid}-{side}",
+                        "status": "completed",
                         "cached": True,
                         "structured": report["grok_coaching"],
                         "report": sanitize_report_mixed_english(report),
                     })
                     return
-                res = call_llm_coach_review(report=report)
-                if res.get("ok") and res.get("structured"):
-                    res["structured"] = sanitize_report_mixed_english(res["structured"])
-                    report["grok_coaching"] = res["structured"]
-                    rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
-                    try:
-                        (REPORTS_DIR / f"match_{mid}.json").write_text(rep_txt, encoding="utf-8")
-                    except OSError:
-                        TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-                        (TMP_REPORTS_DIR / f"match_{mid}.json").write_text(rep_txt, encoding="utf-8")
-                    try:
-                        with ThreadPoolExecutor(max_workers=1) as save_pool:
-                            f1 = save_pool.submit(cloud_save_match_report, mid, report)
-                            f1.result(timeout=6)
-                    except Exception:
-                        pass
-                res["report"] = sanitize_report_mixed_english(report)
-                self._send_json(res)
+                run_async = not bool(body.get("sync", False))
+                task_resp = start_async_llm_review_task(
+                    match_id=mid,
+                    side=side,
+                    report=report,
+                    run_async=run_async,
+                )
+                self._send_json(task_resp)
                 return
 
             if path == "/api/poster_art":

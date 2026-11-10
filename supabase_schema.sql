@@ -35,3 +35,21 @@ BEGIN
     END IF;
 END
 $$;
+
+-- A6: 异步 LLM 判词任务状态表
+CREATE TABLE IF NOT EXISTS public.dota_llm_tasks (
+    task_id TEXT PRIMARY KEY,
+    match_id BIGINT NOT NULL,
+    side TEXT NOT NULL DEFAULT 'dire',
+    status TEXT NOT NULL DEFAULT 'pending',
+    error TEXT,
+    task_json JSONB NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_dota_llm_tasks_match_id
+    ON public.dota_llm_tasks (match_id, updated_at DESC);
+
+ALTER TABLE public.dota_llm_tasks ENABLE ROW LEVEL SECURITY;
+

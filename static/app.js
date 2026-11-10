@@ -6085,6 +6085,7 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
 
 async function triggerGrokReview({ force = true } = {}) {
   if (!state.currentMatchId || state.isGeneratingGrok) return;
+  const reqMatchId = Number(state.currentMatchId);
   const grokBtn = document.getElementById("btn-trigger-grok");
   const { side } = getOwnAndOppPlayers(state.currentReport);
   const llmCfg = getEffectiveLlmConfig();
@@ -6092,16 +6093,16 @@ async function triggerGrokReview({ force = true } = {}) {
   state.isGeneratingGrok = true;
   if (grokBtn) {
     grokBtn.disabled = true;
-    grokBtn.textContent = `${getCoachModelDisplayName()} 正在逐帧算账 (约15秒)...`;
+    grokBtn.textContent = `${getCoachModelDisplayName()} 正在提交任务...`;
   }
-  showToast(`正在调用 ${llmCfg.provider.toUpperCase()} / ${llmCfg.model} 重新生成深度判词...`, 12000);
+  showToast(`正在调用 ${llmCfg.provider.toUpperCase()} / ${llmCfg.model} 后台生成深度判词...`, 12000);
 
   try {
     const res = await fetch("/api/llm_review", {
       method: "POST",
       headers: getTeamTokenHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
-        match_id: state.currentMatchId,
+        match_id: reqMatchId,
         account_id: state.accountId,
         side,
         force,
@@ -6116,8 +6117,41 @@ async function triggerGrokReview({ force = true } = {}) {
     }
     if (promptTeamTokenOn401(res, data)) return;
     if (!data.ok) throw new Error(data.error || "大模型调用失败");
-    if (data.report) {
-      state.currentReport = data.report;
+
+    let finalData = data;
+    if (data.task_id && (data.status === "pending" || data.status === "running")) {
+      const taskId = data.task_id;
+      for (let attempt = 1; attempt <= 40; attempt += 1) {
+        if (Number(state.currentMatchId) !== reqMatchId) return;
+        if (grokBtn) {
+          grokBtn.textContent = `${getCoachModelDisplayName()} 后台算账中 (${attempt * 2}s)...`;
+        }
+        await new Promise((r) => setTimeout(r, 2000));
+        if (Number(state.currentMatchId) !== reqMatchId) return;
+        const pollRes = await fetch(
+          `/api/llm_review_status?task_id=${encodeURIComponent(taskId)}`,
+          { headers: getTeamTokenHeaders() }
+        );
+        const pollData = await pollRes.json();
+        if (!pollData.ok) {
+          throw new Error(pollData.error || "查询判词任务状态失败");
+        }
+        if (pollData.status === "completed") {
+          finalData = pollData;
+          break;
+        }
+        if (pollData.status === "failed") {
+          throw new Error(pollData.error || "大模型判词后台生成失败");
+        }
+      }
+      if (finalData.status !== "completed") {
+        throw new Error("判词后台生成超时，请稍后刷新查看");
+      }
+    }
+
+    if (Number(state.currentMatchId) !== reqMatchId) return;
+    if (finalData.report) {
+      state.currentReport = finalData.report;
       saveLocalAnalyzedMatch(state.currentReport);
       renderFullMatchReport(state.currentReport);
       showToast(`✅ ${getCoachModelDisplayName(state.currentReport)} 五人深度研判与三幕长段复盘已生成并持久化缓存！`);

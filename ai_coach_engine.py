@@ -2613,7 +2613,7 @@ def call_llm_coach_review(
                     "User-Agent": "DotaAiAnalyst/2.0",
                 },
             )
-            with urllib.request.urlopen(req, timeout=75) as resp:
+            with urllib.request.urlopen(req, timeout=45) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
             steps = data.get("steps") or []
             texts = []
@@ -3674,7 +3674,7 @@ def _call_xai_grok_image_api(prompt: str, xai_key: str, base_url: str = "https:/
                 "User-Agent": "DotaAiAnalyst/2.0",
             },
         )
-        with urllib.request.urlopen(req, timeout=55) as resp:
+        with urllib.request.urlopen(req, timeout=45) as resp:
             data = json.loads(resp.read().decode("utf-8"))
         items = data.get("data") or []
         if items and isinstance(items[0], dict):

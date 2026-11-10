@@ -425,3 +425,128 @@ def cloud_save_coaching(match_id: int, side: str, coaching_dict: Dict[str, Any])
         if _github_save_file(f"reports/coaching-{int(match_id)}-{side}.json", txt, msg, cfg):
             saved = True
     return saved
+
+
+# =========================================================================
+# 4. Async LLM Review Task State Persistence (Supabase + /tmp cache)
+# =========================================================================
+
+_LLM_TASKS_MEM: Dict[str, Dict[str, Any]] = {}
+
+
+def _supabase_upsert_llm_task(task_id: str, task_obj: Dict[str, Any], cfg: Optional[Dict[str, str]] = None) -> bool:
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+    if not url or not key:
+        return False
+
+    row_payload = {
+        "task_id": str(task_id),
+        "match_id": int(task_obj.get("match_id") or 0),
+        "side": str(task_obj.get("side") or "dire"),
+        "status": str(task_obj.get("status") or "pending"),
+        "error": task_obj.get("error"),
+        "task_json": task_obj,
+        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    try:
+        req = urllib.request.Request(
+            f"{url}/rest/v1/dota_llm_tasks?on_conflict=task_id",
+            data=json.dumps(row_payload, ensure_ascii=False).encode("utf-8"),
+            method="POST",
+            headers=_supabase_headers(key, {"Prefer": "resolution=merge-duplicates,return=minimal"}),
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            if 200 <= resp.status < 300:
+                return True
+    except Exception:
+        pass
+
+    bucket = cfg.get("supabase_bucket") or "dota-reports"
+    try:
+        req = urllib.request.Request(
+            f"{url}/storage/v1/object/{bucket}/tasks/{task_id}.json",
+            data=json.dumps(task_obj, ensure_ascii=False).encode("utf-8"),
+            method="POST",
+            headers=_supabase_headers(key, {"x-upsert": "true"}),
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
+
+
+def _supabase_fetch_llm_task(task_id: str, cfg: Optional[Dict[str, str]] = None) -> Optional[Dict[str, Any]]:
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+    if not url or not key:
+        return None
+
+    try:
+        req = urllib.request.Request(
+            f"{url}/rest/v1/dota_llm_tasks?task_id=eq.{urllib.parse.quote(str(task_id))}&select=task_json",
+            headers=_supabase_headers(key, {"Accept": "application/json"}),
+        )
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            rows = json.loads(resp.read().decode("utf-8"))
+            if isinstance(rows, list) and rows and isinstance(rows[0].get("task_json"), dict):
+                return rows[0]["task_json"]
+    except Exception:
+        pass
+
+    bucket = cfg.get("supabase_bucket") or "dota-reports"
+    try:
+        req = urllib.request.Request(
+            f"{url}/storage/v1/object/{bucket}/tasks/{urllib.parse.quote(str(task_id))}.json",
+            headers=_supabase_headers(key),
+        )
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if isinstance(data, dict) and data.get("task_id"):
+                return data
+    except Exception:
+        pass
+    return None
+
+
+def cloud_save_llm_task(task_id: str, task_obj: Dict[str, Any]) -> bool:
+    if not task_id or not isinstance(task_obj, dict):
+        return False
+    _LLM_TASKS_MEM[task_id] = dict(task_obj)
+    try:
+        tasks_dir = TMP_REPORTS_DIR / "tasks"
+        tasks_dir.mkdir(parents=True, exist_ok=True)
+        (tasks_dir / f"{task_id}.json").write_text(
+            json.dumps(task_obj, ensure_ascii=False), encoding="utf-8"
+        )
+    except Exception:
+        pass
+    cfg = get_cloud_config()
+    return _supabase_upsert_llm_task(task_id, task_obj, cfg)
+
+
+def cloud_load_llm_task(task_id: str) -> Optional[Dict[str, Any]]:
+    if not task_id:
+        return None
+    cfg = get_cloud_config()
+    remote = _supabase_fetch_llm_task(task_id, cfg)
+    if isinstance(remote, dict):
+        _LLM_TASKS_MEM[task_id] = remote
+        return remote
+    if task_id in _LLM_TASKS_MEM:
+        return _LLM_TASKS_MEM[task_id]
+    try:
+        p = TMP_REPORTS_DIR / "tasks" / f"{task_id}.json"
+        if p.exists():
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                _LLM_TASKS_MEM[task_id] = data
+                return data
+    except Exception:
+        pass
+    return None
+
