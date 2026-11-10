@@ -1905,78 +1905,50 @@ def _compute_player_role_duty_audit(
     if pos == 4:
         pos3_name = pos3_ally.get("hero_short_zh") if pos3_ally else "3号位"
         role_contract = (
-            f"4号位（游走辅助）：本职工作是前期协助3号位（{pos3_name}）稳住劣势路、拉野抢莲花控符，"
-            f"中后期做团队节奏发动机与控制/救人支点（围绕3号位和2号位开雾抓人、顶视野、出跳刀/推推/微光/阿托斯/风杖/大骨灰/魔晶等团队装）。"
-            f"4号位可以补输出装，但绝不能不干辅助本职工作、在没钱劣势局裸憋纯大哥装并自己打钱抢核心经济！"
+            f"4号位（游走辅助）：前期协助3号位（{pos3_name}）劣势路对线、拉野控符，"
+            f"中后期围绕3号位和2号位游走控图，评估团队控制与救人装配置。"
         )
-        has_pure_carry_rush = any(k in all_items_str for k in ("净魂之刃", "散失", "点金手", "雷神之锤", "大电锤", "狂战斧", "辉耀", "大炮", "隐刀"))
-        no_save_or_blink = not any(k in all_items_str for k in ("推推", "原力法杖", "微光", "阿托斯", "缚灵索", "风杖", "闪烁匕首", "跳刀", "大骨灰", "魂之灵瓮", "莲花", "羊刀", "魔晶"))
-        if has_pure_carry_rush and no_save_or_blink and (hdmg_share < 20.0 or solo_cnt >= 3):
-            is_toxic_fake_support = True
-            duty_verdict = (
-                f"🚨【4号位严重失职·假辅助真毒瘤抢钱出大哥装】：身为4号位游走辅助，本应带节奏、服务3号位（{pos3_name}）并出团队先手/救人装，"
-                f"但本局在没钱的劣势下竟然裸憋大哥输出/自保装（{', '.join(key_timings)}），全场0跳刀、0推推、0微光、0阿托斯、0风杖、0魔晶！"
-                f"更致命的是10分钟后不去跟3号位抱团带节奏，反而自己占线钻野刷了 {post_10m_lh} 刀（总 {total_lh} 刀）抢核心经济，"
-                f"还在自己打钱收线时连续 {solo_cnt} 次在野区/兵线落单被抓死，参战率仅 {kp_pct}%、英雄伤害占比仅 {hdmg_share}%、建筑伤害 {tdmg}！"
-                f"这是典型的『既不履行4号位辅助职责、又毒瘤抢经济硬出散失/BKB送人头』，必须严厉批判其毒瘤4号位玩法（严禁夸他散失思路对或按大哥标准怪他BKB出得晚）！"
-            )
-        elif no_save_or_blink and solo_cnt >= 4:
-            duty_verdict = (
-                f"⚠️【4号位节奏与保人失职】：作为4号位辅助（搭档3号位{pos3_name}），中后期缺乏跳刀/推推/微光等关键救人先手装，"
-                f"且中期脱离团队独自行动连续 {solo_cnt} 次落单被抓，未能起到4号位游走带动节奏与保护核心的本职作用。"
-            )
-        else:
-            duty_verdict = (
-                f"🟢【4号位履职审计】：前期配合3号位（{pos3_name}），出装（{', '.join(key_timings)}），"
-                f"10m后补刀 +{post_10m_lh} 刀，落单被抓 {solo_cnt} 次，参战率 {kp_pct}%，伤害占比 {hdmg_share}%。"
-            )
+        duty_verdict = (
+            f"【4号位履职数据】：搭档3号位（{pos3_name}），关键出装时间（{', '.join(key_timings)}），"
+            f"团队功能装（{', '.join(built_utility) or '无'}），输出核心装（{', '.join(built_selfish) or '无'}），"
+            f"10m后补刀 +{post_10m_lh} 刀，团战外阵亡 {solo_cnt} 次，参战率 {kp_pct}%，伤害占比 {hdmg_share}%，建筑伤害 {tdmg}。"
+        )
     elif pos == 5:
         pos1_name = pos1_ally.get("hero_short_zh") if pos1_ally else "1号位"
         role_contract = (
-            f"5号位（铁血保核辅助）：本职工作是前期拉野封野顶前排保1号位（{pos1_name}）顺畅补刀，"
-            f"中后期包揽全队视野（真假眼/雾/粉）并第一件做出微光/推推/以太/魔晶/阿托斯等救人控制装，团战肉身掩护核心。"
+            f"5号位（保核辅助）：前期拉野封野保护1号位（{pos1_name}）发育，"
+            f"中后期负责视野铺设与救人控制装。"
         )
-        if "点金手" in all_items_str or "迈达斯之手" in all_items_str:
-            duty_verdict = (
-                f"⚠️【5号位贪点金手审计】：前期保1号位（{pos1_name}）且全场铺设 {obs}假眼/{sen}真眼，但中期裸出点金手（{', '.join(key_timings)}）偏贪，"
-                f"拖慢了微光/推推等第一件团队救人装的成型时间。"
-            )
-        else:
-            duty_verdict = (
-                f"🟢【5号位保核与视野履职】：前期保1号位（{pos1_name}），全场贡献 {obs}假眼/{sen}真眼，10m后仅占 {post_10m_lh} 刀把资源全让核心，"
-                f"出装（{', '.join(key_timings)}），参战率 {kp_pct}%。"
-            )
+        duty_verdict = (
+            f"【5号位履职数据】：搭档1号位（{pos1_name}），全场 {obs}假眼/{sen}真眼，10m后补刀 +{post_10m_lh} 刀，"
+            f"关键出装（{', '.join(key_timings)}），团队功能装（{', '.join(built_utility) or '无'}），参战率 {kp_pct}%。"
+        )
     elif pos == 3:
         pos4_name = pos4_ally.get("hero_short_zh") if pos4_ally else "4号位"
         pa_audit = p.get("playstyle_archetype_audit") or build_player_playstyle_and_build_forensics(p, own_team, opp_team, 35.0, True)
-        is_smart_pivot = bool(pa_audit.get("is_smart_playstyle_pivot"))
         role_contract = (
-            "3号位（劣势路开团与战术支点核）：本职工作是劣势路抗压发育、中期做出跳刀等先手装承担团战先手控制；"
-            "同时必须根据敌方阵容灵活选择『前排光环肉盾流』或『法系A杖远程消耗+刷新双大控场流』（例如面对哈斯卡、齐天大圣等站桩吸血/叠棒克星时，硬顶前排只会沦为充电宝，转型法系A杖巨浪远程减甲消耗+跳刀刷新双大反而是极高智商的破局打法！）。"
+            "3号位（劣势路先手与前排核心）：劣势路抗压发育，中期承担先手控制或团战支点职责。"
         )
         duty_verdict = (
-            f"【3号位流派与履职审计】：搭档4号位（{pos4_name}），流派定性为【{pa_audit.get('archetype_badge')}】，"
-            f"完整出装链（{pa_audit.get('full_item_progression_zh')}），"
-            f"参战率 {kp_pct}%、伤害占比 {hdmg_share}%、推塔 {tdmg}、落单被抓 {solo_cnt} 次。"
-            + (f" 🔥【打法流派高度肯定】：{pa_audit.get('archetype_analysis_zh')} {pa_audit.get('spell_damage_breakdown_zh')} {pa_audit.get('skill_and_talent_audit_zh')} {pa_audit.get('neutral_and_enchantment_audit_zh')}" if is_smart_pivot else "")
-            + (" 注意：本局其4号位搭档前期或中期存在游走缺位，也需结合3号位自身是否有野区落单被抓客观复盘。" if pos4_ally else "")
+            f"【3号位履职数据】：搭档4号位（{pos4_name}），流派【{pa_audit.get('archetype_badge')}】，"
+            f"出装链（{pa_audit.get('full_item_progression_zh')}），"
+            f"参战率 {kp_pct}%、伤害占比 {hdmg_share}%、推塔 {tdmg}、团战外阵亡 {solo_cnt} 次。"
         )
     elif pos == 2:
         role_contract = (
-            "2号位（中单节奏与火力核心）：本职工作是对线稳住或压制敌方中单，中期利用等级与第一件核心装主动带队抓人、控图推塔，团战提供核心爆发或控制。"
+            "2号位（中单节奏与输出核心）：对线稳住或压制敌方中单，中期带队节奏与团战爆发。"
         )
         duty_verdict = (
-            f"【2号位中单节奏审计】：10m补刀 {lh10} 刀，全场参战率 {kp_pct}%、英雄伤害占比 {hdmg_share}%、建筑伤害 {tdmg}，"
-            f"出装（{', '.join(key_timings)}），中期/后期脱离团队落单被抓 {solo_cnt} 次。"
+            f"【2号位履职数据】：10m补刀 {lh10} 刀，全场参战率 {kp_pct}%、英雄伤害占比 {hdmg_share}%、建筑伤害 {tdmg}，"
+            f"出装（{', '.join(key_timings)}），团战外阵亡 {solo_cnt} 次。"
         )
     else:
         role_contract = (
-            "1号位（优势路后期大核）：本职工作是前期高效补刀发育，中期刷出核心装并兼顾关键团收割，后期及肉山团接管比赛打出最高英雄伤害与拆塔转化。"
+            "1号位（优势路后期核心）：前期补刀发育，中后期刷出关键装接管团战与推塔。"
         )
         duty_verdict = (
-            f"【1号位大核兑现审计】：全场总补刀 {total_lh} 刀、GPM {p.get('gpm')}，参战率 {kp_pct}%、英雄伤害占比 {hdmg_share}%、建筑拆塔伤害 {tdmg}，"
-            f"出装（{', '.join(key_timings)}），落单被抓 {solo_cnt} 次。"
-            + ("🚨 警告：吃了全队极高经济却全场建筑伤害极低或团战零收割，未能兑现1号位后期推塔/接管比赛职责！" if (tdmg < 800 and int(p.get("net_worth") or 0) > 13000) else "")
+            f"【1号位履职数据】：总补刀 {total_lh} 刀、GPM {p.get('gpm')}，参战率 {kp_pct}%、英雄伤害占比 {hdmg_share}%、建筑伤害 {tdmg}，"
+            f"出装（{', '.join(key_timings)}），团战外阵亡 {solo_cnt} 次。"
         )
 
     dossier = (
@@ -1989,24 +1961,14 @@ def _compute_player_role_duty_audit(
     return {
         "pos": pos,
         "hero_pos_role_title": dossier.get("pos_role_title"),
-        "hero_unique_traits": dossier.get("hero_traits"),
-        "pos_specific_playstyle": dossier.get("pos_playstyle"),
-        "pos_specific_taboo": dossier.get("pos_taboo"),
-        "pos_specific_item_rule": dossier.get("pos_item_rule"),
-        "best_ally_synergies": dossier.get("best_ally_synergies"),
-        "counters_enemies": dossier.get("counters_enemies"),
-        "countered_by_enemies": dossier.get("countered_by_enemies"),
         "role_contract": role_contract,
         "post_10m_lh_farmed": post_10m_lh,
         "solo_pickoffs_count": solo_cnt,
         "built_team_utility_items": built_utility,
         "built_selfish_core_items": built_selfish,
-        "is_toxic_fake_support": is_toxic_fake_support,
         "duty_verdict": duty_verdict,
         "playstyle_archetype_badge": pa_full.get("archetype_badge"),
         "full_item_progression_zh": pa_full.get("full_item_progression_zh"),
-        "archetype_analysis_zh": pa_full.get("archetype_analysis_zh"),
-        "spell_damage_breakdown_zh": pa_full.get("spell_damage_breakdown_zh"),
         "skill_and_talent_audit_zh": pa_full.get("skill_and_talent_audit_zh"),
         "neutral_and_enchantment_audit_zh": pa_full.get("neutral_and_enchantment_audit_zh"),
     }
@@ -2090,19 +2052,96 @@ def call_llm_coach_review(
             "own_players": p_own,
         })
 
-    compact_payload = {
+    nickname_map: Dict[str, str] = {}
+    for _p_side in (report.get("radiant_pos_1_to_5") or []) + (report.get("dire_pos_1_to_5") or []):
+        if isinstance(_p_side, dict):
+            _pname = (_p_side.get("personaname") or "").strip()
+            if _pname and len(_pname) >= 2:
+                _hzh = _p_side.get("hero_short_zh") or _p_side.get("hero_name") or "选手"
+                _pos = _p_side.get("pos") or ""
+                nickname_map[_pname] = f"{_pos}号位{_hzh}" if _pos else str(_hzh)
+
+    def _sanitize_for_llm(val: Any) -> Any:
+        if isinstance(val, dict):
+            cleaned = {}
+            for k, v in val.items():
+                if k in (
+                    "personaname",
+                    "player",
+                    "player_name",
+                    "name",
+                    "avatar",
+                    "img",
+                    "icon",
+                    "hero_img",
+                    "item_img",
+                    "economy_timeline",
+                    "roshan_and_tower_timeline",
+                    "phoenix_egg_audit",
+                    "slark_mechanism_audit",
+                    "playstyle_archetype_audit",
+                    "hero_mechanism_profile",
+                ):
+                    continue
+                if isinstance(v, str) and ("http://" in v or "https://" in v or "steamstatic.com" in v):
+                    continue
+                sv = _sanitize_for_llm(v)
+                if sv is not None and sv != {} and sv != []:
+                    cleaned[k] = sv
+            return cleaned
+        if isinstance(val, list):
+            return [x for x in (_sanitize_for_llm(item) for item in val) if x is not None and x != {} and x != []]
+        if isinstance(val, str):
+            s = val
+            if "http://" in s or "https://" in s or "steamstatic.com" in s:
+                return None
+            for nick, repl in nickname_map.items():
+                if nick in s:
+                    s = s.replace(nick, repl)
+            return s
+        return val
+
+    raw_lanes = df.get("lane_matchups") or []
+    lanes_compact = []
+    if isinstance(raw_lanes, list):
+        for lm in raw_lanes:
+            if not isinstance(lm, dict):
+                continue
+            lanes_compact.append({
+                "lane": lm.get("lane_zh") or lm.get("lane"),
+                "verdict": lm.get("verdict_zh") or lm.get("winner"),
+                "radiant": [
+                    {"pos": x.get("pos"), "hero": x.get("hero_short_zh") or x.get("hero"), "lh_10": x.get("lh_10m"), "nw_10": x.get("nw_10m")}
+                    for x in (lm.get("radiant_players") or lm.get("radiant") or [])
+                    if isinstance(x, dict)
+                ],
+                "dire": [
+                    {"pos": x.get("pos"), "hero": x.get("hero_short_zh") or x.get("hero"), "lh_10": x.get("lh_10m"), "nw_10": x.get("nw_10m")}
+                    for x in (lm.get("dire_players") or lm.get("dire") or [])
+                    if isinstance(x, dict)
+                ],
+            })
+
+    raw_macro = (df.get("macro_objectives_by_side") or {}).get(focus_side) or {}
+    macro_compact = {
+        k: v
+        for k, v in raw_macro.items()
+        if k in ("roshan_count", "tormentor_count", "towers_destroyed", "barracks_destroyed", "smoke_uses", "observer_wards", "sentry_wards", "dewards", "roshan_events")
+        and v not in (None, [], {})
+    }
+
+    patch_val = report.get("patch_str") or str(report.get("patch") or "7.39")
+
+    compact_payload = _sanitize_for_llm({
         "match_id": report.get("match_id"),
+        "patch": patch_val,
         "mode": report.get("mode_str"),
         "duration": report.get("duration_str"),
         "focus_side": focus_side,
         "user_won": report.get("user_won"),
         "score": f"天辉 {report.get('radiant_score', 0)} : {report.get('dire_score', 0)} 夜魇",
-        "economy_timeline": report.get("economy_timeline"),
-        "lane_matchups": df.get("lane_matchups"),
-        "laning_mechanics": (df.get("laning_mechanics_by_side") or {}).get(focus_side),
-        "macro_objectives": (df.get("macro_objectives_by_side") or {}).get(focus_side),
-        "solo_pickoffs": ((df.get("map_space_by_side") or {}).get(focus_side) or {}).get("solo_pickoff_events"),
-        "roshan_and_tower_timeline": (report.get("economy_timeline") or {}).get("key_events"),
+        "lane_matchups": lanes_compact,
+        "macro_objectives": macro_compact,
         "phases_breakdown": phases_compact,
         "key_teamfights": [
             {
@@ -2112,23 +2151,25 @@ def call_llm_coach_review(
                 "kills_trade": tf.get("kills_trade") or f"{tf.get('radiant_deaths', 0)}:{tf.get('dire_deaths', 0)}",
                 "gold_swing": tf.get("gold_swing") or tf.get("net_gold_swing"),
                 "top_damage_hero": tf.get("top_damage_hero"),
-                "deaths_detail": tf.get("deaths_detail"),
             }
-            for tf in (report.get("key_teamfights") or [])[:6]
+            for tf in (report.get("key_teamfights") or [])[:5]
         ],
         "own_team": [
             {
                 "slot": p.get("player_slot"),
                 "pos": p.get("pos"),
                 "hero": p.get("hero_short_zh"),
-                "player": p.get("personaname"),
                 "kda": p.get("kda"),
                 "kp_pct": p.get("kill_participation_pct"),
                 "gpm": p.get("gpm"),
                 "xpm": p.get("xpm"),
                 "net_worth": p.get("net_worth"),
                 "lh_dn": f"{p.get('last_hits')}/{p.get('denies')}",
-                "laning_10m": p.get("laning_10m"),
+                "laning_10m": {
+                    k: (p.get("laning_10m") or {}).get(k)
+                    for k in ("lane_zh", "lh_10m", "dn_10m", "nw_10m", "lane_efficiency_pct")
+                    if isinstance(p.get("laning_10m"), dict) and (p.get("laning_10m") or {}).get(k) is not None
+                },
                 "hero_damage": p.get("hero_damage"),
                 "hero_damage_share_pct": p.get("hero_damage_share_pct"),
                 "damage_taken": p.get("damage_taken"),
@@ -2137,19 +2178,23 @@ def call_llm_coach_review(
                 "dead_seconds": p.get("dead_seconds"),
                 "death_gold_lost": p.get("death_gold_lost"),
                 "obs_sen": f"{p.get('obs_placed')}/{p.get('sen_placed')}",
-                "key_item_timings": p.get("key_item_timings") or [],
-                "final_items": [it.get("name_zh") or it.get("key") for it in (p.get("items") or [])] or (p.get("final_items") or [])[:8],
+                "key_item_timings": (p.get("key_item_timings") or [])[:8],
+                "final_items": [it.get("name_zh") or it.get("key") for it in (p.get("items") or [])] or (p.get("final_items") or [])[:6],
                 "aghanims_scepter": p.get("aghanims_scepter", False),
                 "aghanims_shard": p.get("aghanims_shard", False),
-                "active_item_uses": {k: v["count"] for k, v in (p.get("active_item_uses") or {}).items()},
-                "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:6]},
-                "damage_by_source_top": (p.get("damage_by_source_rich") or [])[:6],
-                "playstyle_archetype_audit": p.get("playstyle_archetype_audit"),
+                "active_item_uses": {k: v["count"] for k, v in (p.get("active_item_uses") or {}).items() if isinstance(v, dict) and v.get("count")},
+                "ability_uses": {a["zh_name"]: a["count"] for a in (p.get("ability_uses_rich") or [])[:5] if isinstance(a, dict) and a.get("zh_name")},
+                "damage_by_source_top": [
+                    {
+                        "source": d.get("name_zh") or d.get("key"),
+                        "hits": d.get("hits") or d.get("casts"),
+                        "dmg": d.get("damage") or d.get("total_damage"),
+                        "pct": d.get("share_pct") or d.get("pct"),
+                    }
+                    for d in (p.get("damage_by_source_rich") or [])[:4]
+                    if isinstance(d, dict)
+                ],
                 "is_afk_farmer": p.get("is_afk_farmer", False),
-                "hero_mechanism_profile": p.get("hero_mechanism_profile"),
-                "phoenix_egg_audit": p.get("phoenix_egg_audit"),
-                "slark_mechanism_audit": p.get("slark_mechanism_audit"),
-                "phase_telemetry": p.get("phase_telemetry"),
                 "role_duty_audit": _compute_player_role_duty_audit(p, own_team, opp_team, df, focus_side),
             }
             for p in own_team
@@ -2168,86 +2213,69 @@ def call_llm_coach_review(
             }
             for p in opp_team
         ],
-    }
+    })
 
     own_won = bool(
         (focus_side == "radiant" and report.get("radiant_win"))
         or (focus_side == "dire" and not report.get("radiant_win"))
     )
-    afk_heroes = [p.get("hero_short_zh") for p in own_team if p.get("is_afk_farmer")]
     if own_won:
-        afk_rule_str = (
-            "5) 【本局结果：本方获胜（凯旋庆功局）—— AI 独立打分与功勋重排铁律】：\n"
-            "   - 本局本方最终获胜！请由你（Grok 4.7）基于录像全周期证据独立给 5 人打分（`grok_score` 0-100）并分配 100% 胜局功勋贡献占比（`grok_share_pct`，5人之和=100.0%）。\n"
-            "   - 在胜局中，`grok_share_pct` 代表【胜局功勋贡献度%】！必须满足：功劳最大、评分最高（`grok_score` 最高）的头号首功 MVP 拥有全队最高的 `grok_share_pct`（如 26%~35%）；二号功臣次之；而本局表现相对有短板/瑕疵的选手拥有全队最低的 `grok_share_pct`（如 10%~15%）与相对最低的 `grok_score`。\n"
-            "   - 严禁把胜局里的功臣误写成『败方战犯』！例如中单如果是全单体爆发缺AOE清线的英雄（如天怒法师）对阵肉核帕吉，虽然10分钟补刀少但靠消耗单杀打出对线经济优势、中期出阿托斯主动带队抓人，或者5号位蓝胖保大哥无解肥、3号位骨法魔晶推塔，都属于胜局重大功臣，必须给予 80~92+ 的高分与匹配的胜局贡献占比！\n"
-            + (f"   - 注意：本局存在前中期刷钱不参战的毒瘤核心（{'、'.join(afk_heroes)}），不可评为头号MVP。\n" if afk_heroes else "")
+        outcome_rubric = (
+            "   - 本方获胜：`grok_share_pct` 表示胜局贡献占比（5人之和=100%），贡献越大则 `grok_score` 与 `grok_share_pct` 越高。\n"
         )
     else:
-        afk_rule_str = (
-            "5) 【本局结果：本方落败（败局分锅审讯局）—— AI 独立打分与背锅定责重排铁律】：\n"
-            "   - 本局本方最终落败！请由你（Grok 4.7）基于录像全周期证据，彻底抛开简单的 KDA 表象，独立审讯谁是真正的【头号大锅·一级战犯】、【二号次锅】以及【败方孤胆院长 SVP】！\n"
-            "   - 在败局中，`grok_share_pct` 代表【败局背锅定责占比%】（5人之和=100.0%）！必须严格满足反向联动：头号大锅（一级战犯）的 `grok_share_pct` 必须全队最高（如 27%~40%），且其 `grok_score` 必须全队最低（如 25~48 分）；二号次锅的 `grok_share_pct` 全队第二高、`grok_score` 倒数第二；而败方最尽力的孤胆院长（SVP）的 `grok_share_pct` 必须全队最低（如 8%~14%），且其 `grok_score` 必须全队最高（如 65~85 分）！\n"
+        outcome_rubric = (
+            "   - 本方落败：`grok_share_pct` 表示败局责任占比（5人之和=100%），失误与责任越大则 `grok_share_pct` 越高、`grok_score` 越低；若全队表现接近，责任占比应趋于平分。\n"
         )
 
     system_prompt = (
-        "你是懂 Dota 2 全 126 英雄核心机制、1~5号位差异化打法、实战流派分支（如潮汐法系A杖巨浪炮台流 vs 传统肉盾流）、中立道具与7.38附魔词条、10/15/20/25级天赋树、技能伤害占比、队友技能配合与敌我克制出装的顶分局教练兼损友老哥，给车队五人做赛后深度算账复盘。全中文输出（严禁夹杂任何英文变量名），语气犀利接地气、刀塔味十足：\n"
-        "0) 【拒绝千篇一律呆板模板！必须深度剖析每位选手的「本局真实打法流派 + 全链路成装时间轴 + 技能伤害占比 + 加点与天赋树 + 中立道具与7.38附魔」（参考 `playstyle_archetype_audit` 与 `role_duty_audit`）】：\n"
-        "   - 绝不能死板套用刻板印象！如果前排核心面对专打笨重站桩前排的阵容时灵性走【法系A杖远程炮台 + 刷新双大流】，你必须结合本局真实出装时间轴、技能伤害占比、天赋选择与中立道具附魔客观评估其流派合理性，绝不能盲目套用固定模板！\n"
-        "   - 评价任何一位选手时，必须在 `deep_verdict` 与 `item_and_blink_audit` 中细致入微地拆解：① 他的**真实打法流派与全链路成装时间点**；② 他的**核心技能与道具伤害占比**（参考 `damage_by_source_top`，点出哪个技能释放了多少次、打了多少伤害、占比多少）；③ 他的**技能加点与10/15/20/25级天赋树选择**（参考 `skill_and_talent_audit_zh`）是否契合流派；④ 他的**1~5级中立道具与7.38附魔词条选择**（参考 `neutral_and_enchantment_audit_zh`）是否细腻到位！\n"
-        "1) 【前期三路对线与英雄先天强弱评估 (stage_reviews.early_lanes)】：\n"
-        "   - 必须逐一分析上、中、下三条线！客观结合双方英雄先天对线机制与克制关系，重点看10分钟正反补与经济差、1号位打钱是否顺畅、4/5号位有没有顶前排给压力与拉野封野。\n"
-        "2) 【中期资源转化：英雄专属抓人配合与推塔特性 (stage_reviews.mid_tempo)】：\n"
-        "   - 10~25分钟重点考核资源转化率与英雄技能配合：谁做出了第一件节奏装主动带队抓人？谁高效刷出核心质变装？\n"
-        "3) 【后期肉山盾转化率与决胜接管 (stage_reviews.late_and_roshan)】：\n"
-        "   - 结合 macro_objectives 与 roshan_and_tower_timeline，重点判断打了肉山盾之后有没有顺势拔光外塔、攻破高地完成终结，以及后期大核与团战大招在敌我克制博弈下的真实兑现度。\n"
-        "4) 【1~5号位位置本职工作契约与『假辅助真毒瘤抢钱出输出装』严厉审讯铁律】：\n"
-        "   - 必须严格按照该选手所在的【1~5号位位置职责】进行考核，绝不能把4/5号位辅助当成1/2号位大哥来评判！\n"
-        "   - 特别是【4号位（游走辅助）】与【5号位（保核辅助）】：4号位的本职工作是前期协助3号位站稳劣势路、拉野控符，中后期围绕3号位和2号位主动带节奏抓人，并优先做出跳刀、推推棒、微光披风、阿托斯、风杖、大骨灰、莲花、魔晶等【团队控制与救人装】服务3号位和团队！如果一个4号位在没钱的劣势局里，裸憋纯个人大哥装，全场 0 推推、0 微光、0 阿托斯、0 跳刀、0 魔晶，中期不去保3号位带节奏，反而自己占线钻野刷兵抢核心经济，还在打钱收线时连续落单被抓死——这属于【假辅助·真毒瘤抢钱玩法】，必须客观指出！（注意：JSON字符串内部若需使用引号，请一律使用『』或「」，切勿在JSON字符串内部使用英文双引号）\n"
-        "5) 【每个人(1~5号位全员5人)的深度个人研判总报告 (deep_verdict) 与 第一幕/第二幕/第三幕全段落详实复盘 (early_story / mid_story / late_story) 与 出装/天赋/附魔审计 (item_and_blink_audit)】：\n"
-        "   - `deep_verdict`（150~210字深度长段）：必须从【该选手本局实际打法流派 + 核心技能伤害占比 + 天赋与中立附魔选择 + 与队友的技能配合 + 对阵敌方英雄的克制/被克制关系】切入，全面剖析其本局表现、高光与瑕疵，并解释本局评分与定责/贡献占比。\n"
-        "   - `early_story`（第一幕·0–10分钟，110~150字详实复盘）：结合英雄对线机制与敌我克制，复盘其分路、对线装、前10分钟正反补/经济差、拉野封野/抢莲花控符细节、1级中立道具与附魔及具体击杀阵亡时间点。\n"
-        "   - `mid_story`（第二幕·10–25分钟，115~160字详实复盘）：结合该英雄流派转型，复盘其10~25分钟经济进账、关键成装时间点（精确到分秒）、10/15级天赋选择、技能配合兑现度，以及具体阵亡时间点。\n"
-        "   - `late_story`（第三幕·25分钟至终局，115~160字详实复盘）：结合后期神装演进与中立装附魔、20/25级天赋，复盘其后期技能伤害爆发、拆塔伤害、肉山盾与高地攻防、大招与救人装在决胜团的实际兑现度。\n"
-        "   - `item_and_blink_audit`（110~160字专项流派·出装·天赋·中立附魔·技能伤害深度锐评）：必须完整点评其【全链路出装顺序 + 打法流派合理性 + 核心技能伤害占比 + 10/15/20/25级天赋协同 + T1~T4中立道具与7.38附魔词条（如贪婪/永恒/强壮） + 跳刀/BKB/莲花实战转化率】！\n"
-        + afk_rule_str +
-        "请严格返回一个 JSON 对象（不要带 Markdown 代码块围栏），结构如下：\n"
+        "你是 Dota 2 赛后复盘教练。请仅依据提供的比赛事实数据，用中文输出结构化 JSON 复盘报告（不夹杂英文变量名，不使用玩家昵称，一律用位置+英雄名代指）。\n"
+        "一、【事实数据说明】\n"
+        "1) 输入包含比赛补丁版本（patch）、对线分路（lane_matchups）、地图目标（macro_objectives）、三阶段表现（phases_breakdown）、关键团战（key_teamfights）及双方 1~5 号位完整遥测与职责数据（role_duty_audit）。\n"
+        "2) 严禁编造输入数据中不存在的时间点、技能次数、伤害数字或装备记录；无法从数据直接得出的结论必须标为推断并使用中性措辞。\n"
+        "二、【评分标准】\n"
+        "1) 按 1~5 号位各自职责评估：核心位看对线补刀、经济转化率、关键装时间点、参战率、英雄伤害与建筑伤害；辅助位看视野控制、团队救人/先手装、控制时长与阵亡代价。\n"
+        "2) 结合本局实际出装、技能伤害来源、天赋与中立道具附魔以及敌我阵容克制关系客观评判流派合理性。\n"
+        "3) 为本方 5 名选手分别评定 `grok_score`（0~100 整数）与 `grok_share_pct`（浮点数，5人总和为 100.0）：\n"
+        + outcome_rubric +
+        "三、【输出 JSON 结构】\n"
+        "请严格返回一个 JSON 对象（不带 Markdown 围栏），字段结构如下：\n"
         "{\n"
-        '  "title": "一句话点透本局胜负关键、核心流派亮点与出装博弈（22-40字）",\n'
-        '  "summary": "从前期三路对线、中期流派成型与抓人推塔转化到后期控盾平推高地的全局复盘摘要（140-200字）",\n'
-        '  "verdict": "有理有据的1~5号位全员本职工作兑现度、打法流派/天赋/附魔灵性解析与节奏判词（140-200字）",\n'
-        '  "team_practice": "下一局开黑最该统一执行的一个具体位置分工、团队配合与救人装/针对装改进动作（70-110字）",\n'
+        '  "title": "本局胜负关键与阵容博弈总结",\n'
+        '  "summary": "前期对线、中期节奏转化与后期团战控盾的全局复盘摘要",\n'
+        '  "verdict": "本方 1~5 号位职责兑现度与出装流派复盘总结",\n'
+        '  "team_practice": "下一局最需优先改进的一项团队配合或出装分工建议",\n'
         '  "stage_reviews": {\n'
-        '    "early_lanes": "前期(0-10m)上中下三路对位强弱、1号位打钱顺畅度、4/5号位给压力拉野与中路/劣势路表现的AI深度点评（130-190字）",\n'
-        '    "mid_tempo": "中期(10-25m)资源转化、各核心流派关键装（如跳刀/A杖/BKB）成型节奏与抓人推塔的AI深度点评（130-190字）",\n'
-        '    "late_and_roshan": "后期(25m-终局)打盾后是否顺势推外塔破高地完成资源优势转化、大核收割与决胜团换命的AI深度点评（130-190字）",\n'
-        '    "overall_verdict": "全场总账：整局1~5号位本职工作兑现度与流派出装灵性总评（110-160字）"\n'
+        '    "early_lanes": "前期(0-10m)三路对位、补刀经济与游走支援点评",\n'
+        '    "mid_tempo": "中期(10-25m)关键装成型、抓人推塔与资源转化点评",\n'
+        '    "late_and_roshan": "后期(25m-终局)肉山控盾、高地攻防与团战执行点评",\n'
+        '    "overall_verdict": "全场五人职责履行与阵容博弈总评"\n'
         '  },\n'
-        '  "mvp": {"slot": 0, "runner_up_slot": 2, "confidence": "高", "reason": "为何选他当MVP/SVP", "comparison": "对比队友胜在哪里", "evidence": ["数据证据1", "数据证据2"]},\n'
+        '  "mvp": {"slot": "<整数>", "runner_up_slot": "<整数>", "confidence": "高/中/低", "reason": "评选依据", "comparison": "与队友对比", "evidence": ["数据依据1", "数据依据2"]},\n'
         '  "players": [\n'
         '    {\n'
-        '      "slot": 0,\n'
-        '      "pos": 1,\n'
-        '      "hero": "主宰",\n'
-        '      "grok_score": 96,\n'
-        '      "grok_share_pct": 34.0,\n'
-        '      "headline": "一句切中该选手本局打法流派灵魂与出装/节奏要害的判词（22-38字）",\n'
-        '      "deep_verdict": "一整段深度个人研判总报告（150-210字，3~5句话）：全面剖析该选手本局实际打法流派（如潮汐法系A杖巨浪吐水流）、全链路出装逻辑、技能伤害占比、天赋与中立附魔理解、与队友技能配合及敌我克制表现，并解释为何给出该本局评分与定责/贡献占比（纯中文叙述，切勿出现任何英文变量名）",\n'
-        '      "early_story": "第一幕(0-10m)深度长段落复盘（110-160字，3~4句话）：详述对线分路、搭档配合、敌我机制克制、前10m对线装与补刀/经济、1级中立道具与附魔及具体击杀阵亡时间点",\n'
-        '      "mid_story": "第二幕(10-25m)深度长段落复盘（120-170字，3~4句话）：详述中期经济与补刀增量、流派核心成装时间点（如吸血面具/跳刀/A杖）、10/15级天赋与2级中立附魔（如贪婪附魔加速发育）、技能配合兑现度及具体阵亡细节",\n'
-        '      "late_story": "第三幕(25m-终局)深度长段落复盘（120-170字，3~4句话）：详述后期成装演进（如慧光/莲花/夜慧/刷新/真A杖/玲珑心）、20/25级天赋与3/4级中立附魔（如催化剂+永恒附魔）、技能伤害爆发与肉山高地攻防终局定性",\n'
-        '      "item_and_blink_audit": "专项AI流派·出装·天赋·中立附魔·技能伤害深度锐评（110-160字，3~4句话）：细致入微点评其完整出装时间轴、流派选择为何克制敌方、主力技能伤害占比（如巨浪185次13699伤占43.5%）、天赋树与中立道具7.38附魔词条协同度、以及跳刀/莲花/BKB实战转化效果",\n'
-        '      "good": ["具体做得好的地方1（含流派/时间/装备/天赋/附魔/伤害数据）", "具体做得好的地方2"],\n'
-        '      "bad": ["具体做得不好或瑕疵复盘点1（含具体时间点与原因）", "具体改进点2"],\n'
-        '      "practice": "下一局给该位置进一步优化流派细节与视野防抓的具体进阶处方（40-70字）"\n'
+        '      "slot": "<整数>",\n'
+        '      "pos": "<1-5整数>",\n'
+        '      "hero": "<英雄中文名>",\n'
+        '      "grok_score": "<0-100整数>",\n'
+        '      "grok_share_pct": "<占全队百分比浮点数>",\n'
+        '      "headline": "该选手本局表现与出装节奏定性摘要",\n'
+        '      "deep_verdict": "结合本局打法流派、出装时间轴、技能伤害占比、天赋与中立附魔及敌我克制关系的综合复盘",\n'
+        '      "early_story": "前期(0-10m)分路对线、补刀经济与击杀阵亡复盘",\n'
+        '      "mid_story": "中期(10-25m)经济增量、核心装成型时间点与参战复盘",\n'
+        '      "late_story": "后期(25m-终局)成装演进、肉山高地团战与终局表现复盘",\n'
+        '      "item_and_blink_audit": "出装顺序、技能伤害来源、天赋与中立道具附魔及主动装备使用效果评估",\n'
+        '      "good": ["有数据支撑的亮点1", "有数据支撑的亮点2"],\n'
+        '      "bad": ["有数据支撑的不足1", "有数据支撑的不足2"],\n'
+        '      "practice": "针对该位置下一局的具体改进建议"\n'
         '    }\n'
         "  ],\n"
         '  "windows": [\n'
-        '    {"time_label": "团战时间段", "title": "一句刀塔味十足的团战标题", "detail": "65-95字有画面感的团战机制复盘"}\n'
+        '    {"time_label": "团战时间段", "title": "关键团战标题", "detail": "关键团战过程与技能交换复盘"}\n'
         "  ]\n"
         "}"
     )
-    user_prompt = "请为以下比赛完整录像遥测证据生成深度 JSON 复盘（players 数组必须完整包含 own_team 全部 5 名选手，且每个人的 early_story / mid_story / late_story 必须各写满一整段 110~170 字的详实复盘，严禁写成一句话短评）：\n" + json.dumps(compact_payload, ensure_ascii=False)
+    user_prompt = "以下为本局比赛事实数据，请严格按评分标准生成包含本方全部 5 名选手的 JSON 复盘报告：\n" + json.dumps(compact_payload, ensure_ascii=False)
 
     try:
         if prov == "gemini":
@@ -2258,6 +2286,7 @@ def call_llm_coach_review(
                 "model": model,
                 "system_instruction": system_prompt,
                 "input": user_prompt,
+                "temperature": 0,
             }
             req = urllib.request.Request(
                 url,
@@ -2291,6 +2320,7 @@ def call_llm_coach_review(
 
             global_payload = {
                 "match_id": compact_payload.get("match_id"),
+                "patch": compact_payload.get("patch"),
                 "mode": compact_payload.get("mode"),
                 "duration": compact_payload.get("duration"),
                 "is_parsed": bool(report.get("is_parsed", True)),
@@ -2299,14 +2329,12 @@ def call_llm_coach_review(
                 "score": compact_payload.get("score"),
                 "lane_matchups": compact_payload.get("lane_matchups"),
                 "macro_objectives": compact_payload.get("macro_objectives"),
-                "roshan_and_tower_timeline": compact_payload.get("roshan_and_tower_timeline"),
                 "key_teamfights": compact_payload.get("key_teamfights"),
                 "own_team": [
                     {
                         "slot": p.get("slot"),
                         "pos": p.get("pos"),
                         "hero": p.get("hero"),
-                        "player": p.get("player"),
                         "kda": p.get("kda"),
                         "kp_pct": p.get("kp_pct"),
                         "gpm": p.get("gpm"),
@@ -2334,18 +2362,19 @@ def call_llm_coach_review(
 
             user_prompt_global = (
                 "【并发分片 0：全局总评与三幕复盘（无需输出 players 数组）】\n"
-                "请基于以下全队 5 人证据（重点结合每个英雄自身特性、1~5号位分工、队友技能Combo配合与敌我英雄克制关系），只输出全局 JSON 字段：`title`（22~36字）, `summary`（120~160字）, `verdict`（120~160字）, `team_practice`（65~95字）, `stage_reviews`（含 `early_lanes`, `mid_tempo`, `late_and_roshan`, `overall_verdict` 四个精炼长段，每段严格控制在 110~145 字以内，切勿超过 165 字）, `mvp`, `windows`（最多3条），并在顶层放一个空数组 `\"players\": []`（选手个人复盘由其他并发分片生成）：\n"
+                "请基于以下事实数据与评分标准，只输出全局 JSON 字段：`title`, `summary`, `verdict`, `team_practice`, `stage_reviews`（含 `early_lanes`, `mid_tempo`, `late_and_roshan`, `overall_verdict`）, `mvp`, `windows`（最多3条），并在顶层放一个空数组 `\"players\": []`（选手个人复盘由其他并发分片生成）：\n"
                 + payload_json_str
             )
 
             def _build_pos_prompt(target_pos: int) -> str:
                 role_hint = (
-                    "必须重点结合 `role_duty_audit` 深度审讯该辅助/节奏位的：① 英雄自身独特机制（`hero_unique_traits`）；② 在当前4/5号位下的专属打法与禁忌（`pos_specific_playstyle` / `pos_specific_taboo`，如是否服务3号位/1号位带节奏出推推/微光/跳刀/阿托斯/魔晶，还是没钱硬憋散失/BKB自己打钱抢经济送人头）；③ 与本局队友的技能配合（`best_ally_synergies`）；④ 与敌方英雄的克制与被克制关系（`counters_enemies` / `countered_by_enemies`）！"
+                    "请结合 `role_duty_audit` 评估该辅助/节奏位的英雄机制、4/5号位职责履行、团队装与视野贡献、队友配合及敌我克制关系。"
                     if target_pos in (4, 5)
-                    else "必须重点结合 `role_duty_audit` 深度审讯该核心位的：① 英雄自身独特机制（`hero_unique_traits`）；② 在当前1/2/3号位下的专属打法与禁忌（`pos_specific_playstyle` / `pos_specific_taboo`）；③ 与本局队友的技能配合Combo（`best_ally_synergies`）；④ 与敌方英雄的克制与被克制关系及破局出装（`counters_enemies` / `countered_by_enemies`）！"
+                    else "请结合 `role_duty_audit` 评估该核心位的英雄机制、1/2/3号位职责履行、经济转化与关键装时间点、队友配合及敌我克制关系。"
                 )
                 pos_payload = {
                     "match_id": compact_payload.get("match_id"),
+                    "patch": compact_payload.get("patch"),
                     "duration": compact_payload.get("duration"),
                     "is_parsed": bool(report.get("is_parsed", True)),
                     "focus_side": compact_payload.get("focus_side"),
@@ -2386,10 +2415,9 @@ def call_llm_coach_review(
                     "opp_team": compact_payload.get("opp_team"),
                 }
                 return (
-                    f"【并发分片 Pos {target_pos}：{target_pos}号位选手个人深度审讯】\n"
-                    f"请基于以下全队 5 人比分面板与 {target_pos}号位选手完整证据，只返回一个 JSON 对象 `{{\"players\": [ ... ]}}`，其中 `players` 数组**只包含本方 {target_pos}号位（`pos` 为 {target_pos}）这一名选手**的完整复盘对象！\n"
+                    f"【并发分片 Pos {target_pos}：{target_pos}号位选手个人复盘】\n"
+                    f"请基于以下事实数据与评分标准，只返回一个 JSON 对象 `{{\"players\": [ ... ]}}`，其中 `players` 数组只包含本方 {target_pos}号位（`pos` 为 {target_pos}）这一名选手的复盘对象。\n"
                     f"{role_hint}\n"
-                    f"重要字数纪律（防止超出 token 上限截断）：该选手的 `grok_score`（0-100）与 `grok_share_pct` 必须放在全队 5 人整体表现坐标系下客观评定；`deep_verdict` 严格控制在 125~160 字，`early_story` 严格控制在 100~135 字，`mid_story` 严格控制在 100~135 字，`late_story` 严格控制在 100~135 字，`item_and_blink_audit` 严格控制在 80~115 字（单段绝不可超过 165 字，严禁夹杂英文术语）：\n"
                     + json.dumps(pos_payload, ensure_ascii=False)
                 )
 
@@ -2403,6 +2431,7 @@ def call_llm_coach_review(
                         {"role": "user", "content": u_prompt},
                     ],
                     "response_format": {"type": "json_object"},
+                    "temperature": 0,
                     "stream": False,
                     "max_tokens": max_tok,
                 }
@@ -2596,7 +2625,7 @@ def call_llm_pregame_coach(
         return {"ok": False, "error": "未配置大模型密钥"}
 
     own_desc = [
-        f"{p['pos']}号位 {p['hero_short_zh']} (玩家: {p['personaname']})"
+        f"{p['pos']}号位 {p['hero_short_zh']}"
         for p in (plan.get("own_players") or [])
     ]
     enemy_desc = [
@@ -2605,32 +2634,32 @@ def call_llm_pregame_coach(
     ]
 
     sys_prompt = (
-        "你是顶尖 Dota 2 五黑车队教练兼毒舌指挥官。现在车队刚刚选完 1~5 号位英雄，准备进游戏出门。\n"
-        "请用老刀塔黑话（跳刀、BKB、微光、拉比克偷大、开雾、三角区、魔方、肉山盾、先手、接控、买活等），"
-        "语气调谑接地气但战术极其硬核可执行，直接告诉他们这把怎么配合、前中后期干什么、每个人出什么装。\n"
+        "你是 Dota 2 五黑车队教练。现在车队刚刚选完 1~5 号位英雄，准备进游戏出门。\n"
+        "请用简洁准确的中文战术术语（跳刀、BKB、微光、开雾、三角区、魔方、肉山盾、先手、接控、买活等），"
+        "直接给出本局配合要点、前中后期目标及每个位置的核心出装（严禁使用玩家昵称，一律用位置+英雄名代指）。\n"
         "严格返回 JSON 对象，字段如下：\n"
         "{\n"
-        '  "headline": "一句话点破这把阵容的灵魂与爽点（20-40字）",\n'
-        '  "win_condition": "这把唯一的赢法节奏（60-120字）",\n'
-        '  "lose_condition": "这把最容易翻车的犯罪死法（50-100字）",\n'
-        '  "combo_calls": ["核心连招配合1（谁先手谁接技能，怎么喊）", "核心连招配合2"],\n'
-        '  "early_game": "0-10分钟三路对线、抢符、6分钟摇人重点（70-130字）",\n'
-        '  "mid_game": "10-25分钟谁出第一件关键装就开雾、抓谁、推哪座塔、怎么控盾（80-140字）",\n'
-        '  "late_game": "25分钟后团战集火优先级（先秒谁、别管谁）与上高地纪律（70-130字）",\n'
+        '  "headline": "一句话总结本局阵容核心思路",\n'
+        '  "win_condition": "本局获胜的核心节奏条件",\n'
+        '  "lose_condition": "本局最需防范的崩盘风险",\n'
+        '  "combo_calls": ["核心连招配合1（谁先手谁接技能）", "核心连招配合2"],\n'
+        '  "early_game": "0-10分钟三路对线、控符与支援重点",\n'
+        '  "mid_game": "10-25分钟关键装节奏、开雾抓人与控盾推塔安排",\n'
+        '  "late_game": "25分钟后团战集火优先级与上高地纪律",\n'
         '  "role_orders": [\n'
-        '    {"pos": 1, "items": "前三件关键装", "order": "给1号位的一句话死命令"},\n'
-        '    {"pos": 2, "items": "前三件关键装", "order": "给2号位的一句话死命令"},\n'
-        '    {"pos": 3, "items": "前三件关键装", "order": "给3号位的一句话死命令"},\n'
-        '    {"pos": 4, "items": "前三件关键装", "order": "给4号位的一句话死命令"},\n'
-        '    {"pos": 5, "items": "前三件关键装", "order": "给5号位的一句话死命令"}\n'
+        '    {"pos": 1, "items": "前三件关键装", "order": "1号位职责要点"},\n'
+        '    {"pos": 2, "items": "前三件关键装", "order": "2号位职责要点"},\n'
+        '    {"pos": 3, "items": "前三件关键装", "order": "3号位职责要点"},\n'
+        '    {"pos": 4, "items": "前三件关键装", "order": "4号位职责要点"},\n'
+        '    {"pos": 5, "items": "前三件关键装", "order": "5号位职责要点"}\n'
         "  ]\n"
         "}"
     )
 
     usr_prompt = (
         f"本方五黑阵容：{' / '.join(own_desc)}\n"
-        f"敌方阵容：{' / '.join(enemy_desc) if enemy_desc else '暂未完全输入，按常规天梯强势阵容推演'}\n"
-        "请立刻生成赛前作战锦囊 JSON。"
+        f"敌方阵容：{' / '.join(enemy_desc) if enemy_desc else '暂未完全输入，按常规阵容推演'}\n"
+        "请生成赛前作战方案 JSON。"
     )
 
     try:
@@ -2644,6 +2673,7 @@ def call_llm_pregame_coach(
                 {"role": "user", "content": usr_prompt},
             ],
             "response_format": {"type": "json_object"},
+            "temperature": 0,
             "stream": False,
             "max_tokens": 2200,
         }

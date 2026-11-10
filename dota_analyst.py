@@ -38,6 +38,7 @@ from dota_constants_zh import (
     get_item_zh,
     get_mode_and_lobby,
     get_rank_name,
+    resolve_patch_name,
     sanitize_report_mixed_english,
 )
 from ai_coach_engine import (
@@ -1688,6 +1689,8 @@ def analyze_match_data(
     raw_report_out = {
         "_zh_schema_v": 2,
         "match_id": match_id,
+        "patch": match.get("patch"),
+        "patch_str": resolve_patch_name(match.get("patch")),
         "mode_str": get_mode_and_lobby(match.get("game_mode", 0), match.get("lobby_type", 0)),
         "start_time_str": start_dt,
         "duration_str": format_duration(duration),

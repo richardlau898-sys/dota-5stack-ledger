@@ -1278,3 +1278,47 @@ def sanitize_report_mixed_english(obj: Any, parent_key: str = "") -> Any:
     if isinstance(obj, dict):
         return {k: sanitize_report_mixed_english(v, k) for k, v in obj.items()}
     return obj
+
+
+PATCH_ID_MAP = {
+    50: "7.31",
+    51: "7.32",
+    52: "7.33",
+    53: "7.34",
+    54: "7.35",
+    55: "7.36",
+    56: "7.37",
+    57: "7.38",
+    58: "7.39",
+    59: "7.39",
+    60: "7.40",
+}
+
+
+def resolve_patch_name(patch_val: Any) -> Optional[str]:
+    if patch_val is None or patch_val == "":
+        return None
+    if isinstance(patch_val, str) and "." in patch_val:
+        return patch_val
+    try:
+        pid = int(patch_val)
+    except (ValueError, TypeError):
+        return str(patch_val)
+    import json
+    import pathlib
+
+    cache_p = pathlib.Path(__file__).resolve().parent / ".cache" / "patch_constants.json"
+    if cache_p.exists():
+        try:
+            pdata = json.loads(cache_p.read_text(encoding="utf-8"))
+            if isinstance(pdata, list):
+                for entry in pdata:
+                    if isinstance(entry, dict) and entry.get("id") == pid and entry.get("name"):
+                        return str(entry["name"])
+            elif isinstance(pdata, dict) and str(pid) in pdata:
+                val = pdata[str(pid)]
+                return str(val.get("name") if isinstance(val, dict) else val)
+        except Exception:
+            pass
+    return PATCH_ID_MAP.get(pid, str(pid))
+
