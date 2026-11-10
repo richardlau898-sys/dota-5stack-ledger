@@ -1,6 +1,10 @@
 {
   "main_account_id": 86080912,
   "main_name": "Flame = ez mute",
+  "merge_accounts_enabled": true,
+  "account_aliases": {
+    "86542163": 114933560
+  },
   "default_pos_names": {
     "1": "Flame = ez mute",
     "2": "Replica",
@@ -28,9 +32,10 @@
     },
     "114933560": {
       "name": "Mr. Brightside",
-      "with_games": 849,
-      "win_rate_pct": 48.5,
-      "note": "常驻开黑战友"
+      "account_ids": [114933560, 86542163],
+      "with_games": 964,
+      "win_rate_pct": 49.0,
+      "note": "常驻开黑战友（含小号 mr. brightside 86542163）"
     },
     "106255239": {
       "name": "Merl",
@@ -70,9 +75,10 @@
     },
     "86542163": {
       "name": "mr. brightside",
+      "merged_into": 114933560,
       "with_games": 115,
       "win_rate_pct": 53.0,
-      "note": "常驻开黑战友"
+      "note": "已合并至 Mr. Brightside (114933560)"
     }
   }
 }

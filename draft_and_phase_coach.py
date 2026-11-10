@@ -2458,6 +2458,7 @@ def build_squad_history_ledger(
     """
     import json
     from pathlib import Path
+    import dota_analyst
 
     rdir = Path(reports_dir)
     main_aid = int(roster.get("main_account_id") or 0)
@@ -2470,7 +2471,8 @@ def build_squad_history_ledger(
 
     candidate_paths: Dict[str, Path] = {}
     tmp_rdir = Path("/tmp/dota_reports")
-    for scan_dir in (rdir, tmp_rdir):
+    scan_dirs = (rdir, tmp_rdir) if rdir.resolve() == dota_analyst.REPORTS_DIR.resolve() else (rdir,)
+    for scan_dir in scan_dirs:
         if scan_dir.exists():
             for mp in scan_dir.glob("match_*.json"):
                 candidate_paths[mp.name] = mp
@@ -2574,18 +2576,23 @@ def build_squad_history_ledger(
             item_by_pos = {int(r.get("pos") or 0): r for r in item_rows}
 
             for p in own_list:
-                aid = p.get("account_id")
+                raw_aid = p.get("account_id")
+                aid = dota_analyst.resolve_canonical_account_id(raw_aid, roster) if raw_aid is not None else None
                 pname = p.get("personaname") or "匿名玩家"
                 if not aid and pname in ("匿名玩家", "Anonymous"):
                     continue
                 pos_p = int(p.get("pos") or 1)
                 key = str(aid) if aid else pname
+                cfg_entry = roster_players.get(str(aid), {}) if aid else {}
+                cfg_sub_ids = cfg_entry.get("account_ids") if isinstance(cfg_entry, dict) else None
+                init_merged_ids = [int(x) for x in cfg_sub_ids] if isinstance(cfg_sub_ids, list) else ([int(aid)] if aid else [])
                 st = member_stats.setdefault(
                     key,
                     {
                         "key": key,
                         "account_id": aid,
-                        "personaname": roster_players.get(str(aid), {}).get("name") or pname,
+                        "merged_account_ids": list(init_merged_ids),
+                        "personaname": cfg_entry.get("name") or pname,
                         "is_me": bool(aid and int(aid) == main_aid),
                         "is_roster_friend": str(aid) in roster_players,
                         "games": 0,
@@ -2615,6 +2622,8 @@ def build_squad_history_ledger(
                         "heroes": [],
                     },
                 )
+                if raw_aid is not None and int(raw_aid) not in st["merged_account_ids"]:
+                    st["merged_account_ids"].append(int(raw_aid))
                 st["games"] += 1
                 p_sc100 = _eff_score(p)
                 p_sh = _eff_share(p)
@@ -3046,6 +3055,7 @@ def build_squad_history_ledger(
         squad_members_rank.append({
             "personaname": st["personaname"],
             "account_id": st["account_id"],
+            "merged_account_ids": st.get("merged_account_ids") or ([st["account_id"]] if st.get("account_id") else []),
             "is_me": st["is_me"],
             "is_roster_friend": st["is_roster_friend"],
             "games": st["games"],

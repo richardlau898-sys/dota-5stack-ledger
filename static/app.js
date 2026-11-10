@@ -44,6 +44,7 @@ const state = {
   scrubberSpeed: 1,
   scrubberTimer: null,
   perspective: "auto", // "auto" | "dire" | "radiant"
+  toneMode: "coach", // "coach" | "roast" (D1: 默认教练模式，只陈述事实和建议；毒舌模式手动打开，海报功能归在毒舌模式下)
   nwFilter: "cores",   // "cores" | "own" | "all"
   mapMode: "wards_obs", // "wards_obs" | "wards_own" | "wards_all" | "heatmap" | "teamfights"
   selectedTeamfightIndex: null,
@@ -62,6 +63,28 @@ const state = {
   isGeneratingGrok: false,
   posterArtCache: new Map(), // Persistent in-memory + IndexedDB cache for generated Nano Banana AI artworks
 };
+
+function applyToneModeUI() {
+  const isRoast = state.toneMode === "roast";
+  if (typeof document !== "undefined" && document.body && document.body.dataset) {
+    document.body.dataset.toneMode = state.toneMode;
+  }
+  const toneBtn = document.getElementById("btn-toggle-tone-mode");
+  if (toneBtn) {
+    toneBtn.setAttribute("data-tone-mode", state.toneMode);
+    toneBtn.textContent = isRoast ? "🌶️ 毒舌模式" : "🎓 教练模式";
+    toneBtn.classList?.toggle("active", isRoast);
+  }
+  ["btn-open-share-poster", "btn-open-share-poster-2"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.hidden = !isRoast;
+  });
+  document
+    .querySelectorAll("[data-player-poster-slot], [data-habit-poster-idx]")
+    .forEach((btn) => {
+      btn.hidden = !isRoast;
+    });
+}
 
 const POSTER_IDB_NAME = "dota_ai_poster_db_v1";
 const POSTER_IDB_STORE = "posters";
@@ -5307,7 +5330,25 @@ function bindEvents() {
     });
   }
 
-  // Share Poster Dialog bindings
+  // Share Poster Dialog bindings & F10 / D1 Tone Mode Switch
+  const toneBtn = document.getElementById("btn-toggle-tone-mode");
+  if (toneBtn) {
+    toneBtn.addEventListener("click", () => {
+      state.toneMode = state.toneMode === "roast" ? "coach" : "roast";
+      applyToneModeUI();
+      if (state.currentReport) {
+        renderVerdictAndBlameSection(state.currentReport);
+        renderPlayerDossiers(state.currentReport);
+      }
+      showToast(
+        state.toneMode === "roast"
+          ? "🌶️ 已开启毒舌模式：已解锁犀利评语与处刑海报生成"
+          : "🎓 已切换为教练模式：只陈述客观事实与改进建议，隐藏处刑海报"
+      );
+    });
+  }
+  applyToneModeUI();
+
   const posterDialog = document.getElementById("share-poster-dialog");
   const openPosterBtn1 = document.getElementById("btn-open-share-poster");
   const openPosterBtn2 = document.getElementById("btn-open-share-poster-2");
@@ -13683,21 +13724,22 @@ function renderVerdictAndBlameSection(report) {
           ? `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 贡献 ${Number(entry.share).toFixed(1)}%`
           : `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 背锅 ${Number(entry.share).toFixed(1)}%`;
 
+        const isRoast = state.toneMode === "roast";
         const quoteText =
           grokP?.headline ||
           (entry.roleType === "mvp"
             ? p.praise_talk ||
-              `「${heroShort} 这把真神降临砍下 ${sc100}/100 分包揽 ${entry.share}% 胜局贡献，今晚车队全员排队敬茶！」`
+              `「${heroShort} 本局评分 ${sc100}/100 分（贡献 ${entry.share}%）。」`
             : entry.roleType === "svp"
-            ? `「这把要不是 ${heroShort} (${sc100}/100分) 死命顶着局势，早就提前十五分钟敲 GG 了。」`
+            ? `「${heroShort} (${sc100}/100分) 本局败方最高评分。」`
             : entry.roleType === "runnerup"
             ? p.praise_talk ||
-              `「${p.pos}号位 ${heroShort} 砍下 ${sc100}/100 分（贡献 ${entry.share}%），前中后期节奏与出装稳健扎实！」`
+              `「${p.pos}号位 ${heroShort} 评分 ${sc100}/100 分（贡献 ${entry.share}%）。」`
             : entry.roleType === "struggle"
-            ? p.trash_talk ||
-              `「赢球虽然免大锅，但这把 ${heroShort} (${sc100}/100分) 暴露的出装与走位短板必须重点复盘！」`
-            : p.trash_talk ||
-              `「${heroShort} 本局评分 ${sc100}/100 分（分锅 ${entry.share}%），复盘细节见上方红黑清单。」`);
+            ? (isRoast ? p.trash_talk : (p.improvements && p.improvements[0]) || (p.weaknesses && p.weaknesses[0])) ||
+              `「${heroShort} (${sc100}/100分) 存在可优化细节。」`
+            : (isRoast ? p.trash_talk : (p.improvements && p.improvements[0]) || (p.weaknesses && p.weaknesses[0])) ||
+              `「${heroShort} 本局评分 ${sc100}/100 分（分锅 ${entry.share}%），复盘细节见上方客观清单。」`);
 
         const copyText = `【${entry.tabTag} · ${p.pos}号位${heroShort}】${p.personaname} 本局打分 ${sc100}/100 分（${
           won ? `贡献 ${entry.share}%` : `分锅 ${entry.share}%`
@@ -13934,6 +13976,7 @@ function renderVerdictAndBlameSection(report) {
       downloadCachedPosterArtByKey(cacheKey, heroZh);
     });
   });
+  applyToneModeUI();
 }
 
 /**
@@ -17518,6 +17561,7 @@ function renderPlayersForensicsList(report) {
       downloadCachedPosterArtByKey(cacheKey, heroZh);
     });
   });
+  applyToneModeUI();
 }
 
 function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
@@ -18726,6 +18770,7 @@ function renderSquadLedgerSection(squadLedger) {
       }
     });
   });
+  applyToneModeUI();
 }
 
 function openCareerHabitPosterDialog(member, squadLedger) {

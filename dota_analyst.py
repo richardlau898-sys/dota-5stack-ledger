@@ -121,6 +121,47 @@ def save_roster(roster: Dict[str, Any]) -> None:
         TMP_ROSTER_FILE.write_text(payload, encoding="utf-8")
 
 
+def resolve_canonical_account_id(
+    account_id: Any,
+    roster: Optional[Dict[str, Any]] = None,
+) -> Optional[int]:
+    """将小号/别名账号映射到 roster.json 配置的主账号 ID（F10 账号合并）。"""
+    if account_id is None:
+        return None
+    try:
+        aid = normalize_account_id(account_id)
+    except (TypeError, ValueError):
+        return None
+    if not isinstance(roster, dict):
+        return aid
+    if roster.get("merge_accounts_enabled") is False:
+        return aid
+    aliases = roster.get("account_aliases")
+    if isinstance(aliases, dict) and str(aid) in aliases:
+        try:
+            return normalize_account_id(aliases[str(aid)])
+        except (TypeError, ValueError):
+            pass
+    players_cfg = roster.get("players")
+    if isinstance(players_cfg, dict):
+        entry = players_cfg.get(str(aid))
+        if isinstance(entry, dict) and entry.get("merged_into") is not None:
+            try:
+                return normalize_account_id(entry["merged_into"])
+            except (TypeError, ValueError):
+                pass
+        for canon_str, p_info in players_cfg.items():
+            if not isinstance(p_info, dict):
+                continue
+            sub_ids = p_info.get("account_ids")
+            if isinstance(sub_ids, list) and any(str(x) == str(aid) for x in sub_ids):
+                try:
+                    return normalize_account_id(canon_str)
+                except (TypeError, ValueError):
+                    pass
+    return aid
+
+
 def get_hero_constants_map() -> Tuple[Dict[int, Dict[str, Any]], Dict[str, int]]:
     """
     返回:
