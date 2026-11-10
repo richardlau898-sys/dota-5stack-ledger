@@ -7251,7 +7251,146 @@ function renderWorkstationFactCheckSection(report) {
     });
   }
 
+  const top3Fixes =
+    report.next_game_top3_fixes_by_side?.[side] ||
+    report.next_game_top3_fixes ||
+    [];
+  const top3FixesHtml = top3Fixes.length
+    ? `
+      <div id="ws-top3-fixes-container" class="ws-top3-fixes-container ws-fc-panel" style="margin-bottom:14px;">
+        <div class="ws-fc-head">
+          <div>
+            <span class="ws-fc-kicker">🎯 NEXT GAME TOP 3 FIXES · 仅取实测数据 (MEASURED) · 团队优先</span>
+            <h3>下一把要改的 3 件事（${escapeHtml(sideZh)}视角）</h3>
+          </div>
+          <span class="ws-fc-sub">严格过滤推断与模板建议 · 按对胜负影响排序</span>
+        </div>
+        <div class="ws-top3-fixes-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:8px;">
+          ${top3Fixes
+            .map(
+              (item) => `
+            <article class="ws-fc-card is-${item.scope === "team" ? "danger" : "warning"}" data-fix-scope="${escapeHtml(
+                item.scope
+              )}" data-fix-evidence="${escapeHtml(item.evidence)}">
+              <div class="ws-fc-card-top">
+                <span class="ws-fc-badge is-${item.scope === "team" ? "danger" : "warning"}">#${escapeHtml(
+                item.rank
+              )} · ${item.scope === "team" ? "👥 团队层面" : "🎯 个人层面"}</span>
+                <span class="ws-fc-badge is-verified">⏱️ ${escapeHtml(item.timestamp_str)} · 实测</span>
+              </div>
+              <strong class="ws-fc-title" style="display:block;margin:6px 0 4px;">${escapeHtml(item.title)}</strong>
+              <p class="ws-fc-detail" style="margin:0 0 6px;"><b>证据：</b>${escapeHtml(item.fact_evidence)}</p>
+              <p class="ws-fc-detail" style="margin:0;color:#93c5fd;"><b>下一把行动：</b>${escapeHtml(item.action_item)}</p>
+            </article>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    `
+    : `<div id="ws-top3-fixes-container" class="ws-top3-fixes-container"></div>`;
+
+  const tm = report.team_metrics_by_side?.[side] || report.team_metrics || null;
+  const fcMetric = tm?.fight_conversion;
+  const fcText =
+    fcMetric && fcMetric.conversion_rate_pct !== null && fcMetric.conversion_rate_pct !== undefined
+      ? `${fcMetric.converted_count}/${fcMetric.won_fights_count} 波 (${fcMetric.conversion_rate_pct}%)`
+      : fcMetric && fcMetric.available && fcMetric.won_fights_count === 0
+      ? "本局无净胜>=2人团战"
+      : "无数据";
+  const roshMetric = tm?.first_roshan;
+  const roshText = roshMetric ? `${roshMetric.time_str} (${roshMetric.side_zh})` : "无数据";
+  const throwWin = tm?.throw_comeback_audit?.worst_3min_window;
+  const throwText = throwWin
+    ? `${throwWin.window_str} (${Number(throwWin.gold_delta || 0).toLocaleString()}金)${
+        tm?.throw_comeback_audit?.is_10k_throw_loss ? " · 1万+被翻盘" : ""
+      }`
+    : "无数据";
+  const bbdList = tm?.buyback_diebacks;
+  const bbdText = Array.isArray(bbdList) && report.is_parsed
+    ? bbdList.length > 0
+      ? `${bbdList.length} 次 (${bbdList.map((b) => `${b.hero_short_zh} ${b.buyback_time_str}`).join("、")})`
+      : "0 次"
+    : "无数据";
+  const smokeMetric = tm?.smoke_effectiveness;
+  const smokeText =
+    smokeMetric && smokeMetric.own_smokes_used !== null && smokeMetric.own_smokes_used !== undefined
+      ? `${smokeMetric.own_smokes_used} 次（推断）`
+      : "无数据";
+  const laneDuos = tm?.lane_duo_networth_diff;
+  const laneDuosText =
+    Array.isArray(laneDuos) && laneDuos.length > 0
+      ? laneDuos
+          .map(
+            (ld) =>
+              `${ld.lane_zh}(${(ld.allies || []).join("+")}): ${
+                ld.net_worth_diff_10m >= 0 ? "+" : ""
+              }${ld.net_worth_diff_10m}`
+          )
+          .join(" ｜ ")
+      : "无数据";
+
+  const teamMetricsStripHtml = tm
+    ? `
+      <div id="ws-team-metrics-strip" class="ws-fc-panel" style="margin-bottom:14px;">
+        <div class="ws-fc-head">
+          <div>
+            <span class="ws-fc-kicker">📐 TEAM METRICS (F3) · 基于 OpenDota 原始字段精确定义</span>
+            <h3>本局团队核心战术指标（${escapeHtml(sideZh)}）</h3>
+          </div>
+          <span class="ws-fc-sub">缺失或未解析字段统一显示“无数据”</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;">
+          <div class="ws-fc-card is-verified"><strong>赢团90秒转化率</strong><p class="ws-fc-detail">${escapeHtml(fcText)}</p></div>
+          <div class="ws-fc-card is-verified"><strong>首条肉山时间与归属</strong><p class="ws-fc-detail">${escapeHtml(roshText)}</p></div>
+          <div class="ws-fc-card is-warning"><strong>3分钟最大经济跌幅窗口</strong><p class="ws-fc-detail">${escapeHtml(throwText)}</p></div>
+          <div class="ws-fc-card is-warning"><strong>买活后60秒内再死</strong><p class="ws-fc-detail">${escapeHtml(bbdText)}</p></div>
+          <div class="ws-fc-card is-verified"><strong>开雾次数（买雾窗口推断）</strong><p class="ws-fc-detail">${escapeHtml(smokeText)}</p></div>
+          <div class="ws-fc-card is-verified"><strong>分路组合10分钟净值差</strong><p class="ws-fc-detail">${escapeHtml(laneDuosText)}</p></div>
+        </div>
+      </div>
+    `
+    : "";
+
+  const replayMoments = Array.isArray(report.top3_replay_moments) ? report.top3_replay_moments : [];
+  const replayMomentsHtml = replayMoments.length
+    ? `
+      <div id="ws-top3-replay-moments" class="ws-fc-panel" style="margin-bottom:14px;">
+        <div class="ws-fc-head">
+          <div>
+            <span class="ws-fc-kicker">🎬 TOP 3 REPLAY MOMENTS (F7) · 客户端录像复盘定位点</span>
+            <h3>本局经济波动最大的 3 个复盘时刻</h3>
+          </div>
+          <span class="ws-fc-sub">供车队进客户端跳转到对应时间点一起看录像</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:8px;">
+          ${replayMoments
+            .map((rm) => {
+              const jumpMin = Math.max(1, Math.round(Number(rm.start_sec || 60) / 60));
+              return `
+                <article class="ws-fc-card is-verified" data-replay-moment-rank="${escapeHtml(rm.rank)}">
+                  <div class="ws-fc-card-top">
+                    <span class="ws-fc-badge is-verified">时刻 #${escapeHtml(rm.rank)} · ${escapeHtml(
+                rm.timestamp_str
+              )}</span>
+                    <button type="button" class="ws-fc-jump-btn" data-fc-jump-min="${escapeHtml(
+                      jumpMin
+                    )}">⏱️ 跳至 ${escapeHtml(jumpMin)}:00 沙盘 →</button>
+                  </div>
+                  <p class="ws-fc-detail" style="margin-top:6px;">${escapeHtml(rm.neutral_summary)}</p>
+                </article>
+              `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `
+    : "";
+
   sec.innerHTML = `
+    ${top3FixesHtml}
+    ${teamMetricsStripHtml}
+    ${replayMomentsHtml}
     <div class="ws-factcheck-grid">
       <div class="ws-fc-panel ws-fc-numbers-panel">
         <div class="ws-fc-head">

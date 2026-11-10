@@ -1742,6 +1742,27 @@ def analyze_match_data(
         "radiant_pos_1_to_5": radiant_report,
         "dire_pos_1_to_5": dire_report,
     }
+    from squad_growth_metrics import (
+        build_next_game_top3_fixes_by_side,
+        build_team_metrics_by_side,
+        build_top3_replay_moments,
+    )
+
+    team_metrics_by_side = build_team_metrics_by_side(match, raw_report_out)
+    next_game_top3_fixes_by_side = build_next_game_top3_fixes_by_side(
+        match, raw_report_out, team_metrics_by_side=team_metrics_by_side
+    )
+    top3_replay_moments = build_top3_replay_moments(match, raw_report_out)
+    raw_report_out["team_metrics_by_side"] = team_metrics_by_side
+    raw_report_out["team_metrics"] = team_metrics_by_side.get(
+        focus_side_resolved, team_metrics_by_side.get("radiant")
+    )
+    raw_report_out["next_game_top3_fixes_by_side"] = next_game_top3_fixes_by_side
+    raw_report_out["next_game_top3_fixes"] = next_game_top3_fixes_by_side.get(
+        focus_side_resolved, next_game_top3_fixes_by_side.get("radiant")
+    )
+    raw_report_out["top3_replay_moments"] = top3_replay_moments
+
     annotate_report_evidence(raw_report_out)
     sanitized_out = sanitize_report_mixed_english(raw_report_out)
     return strip_report_cdn_urls_to_keys(sanitized_out)
@@ -1894,6 +1915,11 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
         out["mvp"] = report.get("mvp")
         out["match_narrative"] = report.get("match_narrative")
         out["grok_coaching"] = report.get("grok_coaching")
+        out["team_metrics"] = report.get("team_metrics")
+        out["team_metrics_by_side"] = report.get("team_metrics_by_side")
+        out["next_game_top3_fixes"] = report.get("next_game_top3_fixes")
+        out["next_game_top3_fixes_by_side"] = report.get("next_game_top3_fixes_by_side")
+        out["top3_replay_moments"] = report.get("top3_replay_moments")
         out["deep_forensics"] = {
             "available": df.get("available"),
             "evidence": df.get("evidence"),

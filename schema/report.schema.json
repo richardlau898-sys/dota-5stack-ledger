@@ -30,6 +30,11 @@
     "phases_data",
     "mvp",
     "match_narrative",
+    "next_game_top3_fixes",
+    "next_game_top3_fixes_by_side",
+    "team_metrics",
+    "team_metrics_by_side",
+    "top3_replay_moments",
     "radiant_pos_1_to_5",
     "dire_pos_1_to_5"
   ],
@@ -109,6 +114,25 @@
       }
     },
     "match_narrative": { "type": "object" },
+    "next_game_top3_fixes": { "type": "array" },
+    "next_game_top3_fixes_by_side": {
+      "type": "object",
+      "required": ["radiant", "dire"],
+      "properties": {
+        "radiant": { "type": "array" },
+        "dire": { "type": "array" }
+      }
+    },
+    "team_metrics": { "type": "object" },
+    "team_metrics_by_side": {
+      "type": "object",
+      "required": ["radiant", "dire"],
+      "properties": {
+        "radiant": { "type": "object" },
+        "dire": { "type": "object" }
+      }
+    },
+    "top3_replay_moments": { "type": "array" },
     "radiant_pos_1_to_5": {
       "type": "array",
       "items": {
