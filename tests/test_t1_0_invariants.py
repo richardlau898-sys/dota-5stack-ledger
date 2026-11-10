@@ -8,7 +8,6 @@ class TestT10Invariants(unittest.TestCase):
         cls.raw_matches = load_all_raw_matches()
         cls.reports = build_all_sample_reports()
 
-    @unittest.expectedFailure  # T1-6: 命中率按实际含义展示（当前 hit_pct 用伤害次数/施放次数导致 > 100%）
     def test_t1_6_skillshot_hit_pct_at_most_100(self) -> None:
         violations = []
         for mid, report in self.reports.items():

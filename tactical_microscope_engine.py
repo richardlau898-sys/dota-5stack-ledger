@@ -411,42 +411,50 @@ def build_tactical_microscope(
                 if vp and vp["side"] != fp["side"]:
                     victim_breakdown.append(f"{vp['hero_short_zh']}({int(d_val):,}伤)")
 
-            if cfg["type"] == "team_buff_ult":
+            has_ult_dmg = (ab_key in di and dmg > 0)
+            if not has_ult_dmg:
+                grade = "neutral"
+                if casts > 0:
+                    freq_min = round(duration_min / max(1, casts), 1)
+                    verdict_text = (
+                        f"全场施放 {casts} 次《{cfg['zh']}》（平均每 {freq_min} 分钟 1 次，其中 {len(tf_casts_waves)} 波团战施放），无直接伤害记录，不作伤害次数评级。"
+                    )
+                    badge_text = f"{cfg['zh']}: 施放{casts}次"
+                else:
+                    verdict_text = f"整局比赛《{cfg['zh']}》施放记录为 0（无直接伤害记录，不评级）。"
+                    badge_text = f"{cfg['zh']}: 0施放"
+            elif cfg["type"] == "team_buff_ult":
                 # 如白虎群体隐身大、人马奔袭大
                 freq_min = round(duration_min / max(1, casts), 1)
                 grade = "good" if casts >= max(4, int(duration_min / 3.8)) else "warn"
                 verdict_text = (
-                    f"全场释放 {casts} 次（平均每 {freq_min} 分钟开大 1 次），其中 {len(tf_casts_waves)} 波关键团战开启大招掩护/冲阵。"
+                    f"全场施放 {casts} 次（平均每 {freq_min} 分钟开大 1 次，每次施放造成 {avg_hits} 次伤害），其中 {len(tf_casts_waves)} 波关键团战开启大招掩护/冲阵。"
                 )
-                badge_text = f"{cfg['zh']}: {casts}次"
+                badge_text = f"{cfg['zh']}: {casts}次(每次{avg_hits}次伤害)"
             else:
-                if casts == 0:
-                    grade = "bad"
-                    verdict_text = f"整局比赛 {cfg['zh']} 释放记录为 0！"
-                    badge_text = f"{cfg['zh']}: 0释放"
-                elif avg_hits >= cfg["good_avg_hits"]:
+                if avg_hits >= cfg["good_avg_hits"]:
                     grade = "good"
                     verdict_text = (
-                        f"大招质量极高！全场释放 {casts} 次，累计打出 {hits} {cfg['unit_label']}（场均每大 {avg_hits} {cfg['unit_label']}，造成 {dmg:,} 点伤害）"
-                        + (f"，在 {', '.join(tf_casts_waves[:4])} 团战完美兑现" if tf_casts_waves else "")
+                        f"全场施放 {casts} 次《{cfg['zh']}》，每次施放造成 {avg_hits} 次伤害（累计 {hits} 次伤害，造成 {dmg:,} 点伤害）"
+                        + (f"，在 {', '.join(tf_casts_waves[:4])} 团战施放" if tf_casts_waves else "")
                         + (f"；主要灌伤目标：{'、'.join(victim_breakdown[:3])}" if victim_breakdown else "")
                         + "。"
                     )
-                    badge_text = f"{cfg['zh']}: {casts}放/{hits}{cfg['unit_label']}(均{avg_hits})"
+                    badge_text = f"{cfg['zh']}: {casts}放/每次{avg_hits}次伤害"
                 elif avg_hits >= cfg["warn_avg_hits"]:
                     grade = "warn"
                     verdict_text = (
-                        f"大招中规中矩：全场释放 {casts} 次，累计 {hits} {cfg['unit_label']}（场均每大 {avg_hits} {cfg['unit_label']}，伤害 {dmg:,}）"
+                        f"全场施放 {casts} 次《{cfg['zh']}》，每次施放造成 {avg_hits} 次伤害（累计 {hits} 次伤害，伤害 {dmg:,}）"
                         + (f"；在 {', '.join(tf_held_death_waves[:3])} 团战中本波未释放大招。" if tf_held_death_waves else "。")
                     )
-                    badge_text = f"{cfg['zh']}: 场均{avg_hits}{cfg['unit_label']}"
+                    badge_text = f"{cfg['zh']}: 每次{avg_hits}次伤害"
                 else:
                     grade = "bad"
                     verdict_text = (
-                        f"⚠️ 大招低效：全场放了 {casts} 次《{cfg['zh']}》，累计命中 {hits} {cfg['unit_label']}（场均每次大招 {avg_hits} {cfg['unit_label']}）"
+                        f"全场施放 {casts} 次《{cfg['zh']}》，每次施放造成 {avg_hits} 次伤害（累计 {hits} 次伤害，伤害 {dmg:,}）"
                         + (f"，且在 {', '.join(tf_held_death_waves[:3])} 等 {len(tf_held_death_waves)} 波关键团战中本波未释放大招。" if tf_held_death_waves else "。")
                     )
-                    badge_text = f"🚨 {cfg['zh']}: {casts}大仅{hits}{cfg['unit_label']}(均{avg_hits})"
+                    badge_text = f"{cfg['zh']}: {casts}放/每次{avg_hits}次伤害"
 
             ult_audits.append({
                 "ability_key": ab_key,
@@ -454,7 +462,7 @@ def build_tactical_microscope(
                 "casts": casts,
                 "hits": hits,
                 "avg_hits": avg_hits,
-                "unit_label": cfg["unit_label"],
+                "unit_label": "次伤害",
                 "damage": dmg,
                 "tf_casts_count": len(tf_casts_waves),
                 "tf_casts_waves": tf_casts_waves,
@@ -467,17 +475,17 @@ def build_tactical_microscope(
             headline_badges.append({"text": badge_text, "tone": grade})
             special_insights.append(verdict_text)
 
-        # 2) 检查核心非指向性/控制小技能命中率 (如白虎箭、猛犸拱、屠夫钩、人马踩、莱恩刺、骨法棒子等)
+        # 2) 检查核心非指向性/控制小技能每次施放造成伤害次数 (如白虎箭、猛犸拱、屠夫钩、人马踩、莱恩刺、骨法棒子等)
         for ab_key, scfg in SKILLSHOT_CATALOG.items():
             casts = au.get(ab_key, 0)
             if casts <= 0:
                 continue
             hits = hh.get(ab_key, 0)
             dmg = di.get(ab_key, 0)
-            hit_pct = round((hits / max(1, casts)) * 100.0, 1)
+            avg_dmg_hits = round(hits / max(1, casts), 2)
+            has_dmg_record = (ab_key in di and dmg > 0)
 
             if ab_key == "pugna_nether_ward":
-                # 骨法棒子特殊计算：插了几根棒子 -> 电击敌方多少次 -> 分别电了谁多少血
                 target_dmg_map = dt.get(ab_key) or {}
                 zapped = []
                 for npc_k, d_val in sorted(target_dmg_map.items(), key=lambda x: int(x[1] or 0), reverse=True):
@@ -485,37 +493,49 @@ def build_tactical_microscope(
                     vp = fmt_by_hid.get(vhid)
                     if vp and vp["side"] != fp["side"] and int(d_val or 0) > 0:
                         zapped.append(f"{vp['hero_short_zh']}({int(d_val):,}血)")
+                grade = "neutral" if not has_dmg_record else ("good" if dmg >= 5000 else "warn")
                 txt = (
-                    f"《幽冥守卫》阵地威慑拉满：全场插下 {casts} 根法力棒，累计电击敌方施法者 {hits} 次，轰出 {dmg:,} 点反伤"
-                    + (f"（重点电麻：{'、'.join(zapped[:3])}）！" if zapped else "！")
+                    f"《幽冥守卫》全场插下 {casts} 根法力棒，每次施放造成 {avg_dmg_hits} 次伤害（累计电击敌方施法者 {hits} 次，轰出 {dmg:,} 点反伤"
+                    + (f"，重点目标：{'、'.join(zapped[:3])}）。" if zapped else "）。")
                 )
                 skillshot_audits.append({
+                    "ability_key": ab_key,
                     "ability_zh": scfg["zh"],
                     "casts": casts,
                     "hits": hits,
-                    "hit_pct": hit_pct,
-                    "damage": dmg,
-                    "grade": "good" if dmg >= 5000 else "warn",
-                    "detail": txt,
-                })
-                headline_badges.append({"text": f"幽冥棒: {casts}根电{hits}次({dmg:,}伤)", "tone": "good"})
-                special_insights.append(txt)
-            else:
-                grade = "good" if hit_pct >= scfg["good_pct"] else ("warn" if hit_pct >= scfg["warn_pct"] else "bad")
-                txt = (
-                    f"《{scfg['zh']}》全场施放 {casts} 次，命中敌方英雄 {hits} 人次（有效命中比 {hit_pct}%，造成 {dmg:,} 伤害）"
-                    + ("，手感火热！" if grade == "good" else ("，大量技能落空或仅用于清兵逃生。" if grade == "bad" else "。"))
-                )
-                skillshot_audits.append({
-                    "ability_zh": scfg["zh"],
-                    "casts": casts,
-                    "hits": hits,
-                    "hit_pct": hit_pct,
+                    "avg_dmg_hits": avg_dmg_hits,
+                    "hit_pct": None,
                     "damage": dmg,
                     "grade": grade,
                     "detail": txt,
                 })
-                headline_badges.append({"text": f"{scfg['zh'].split(' ')[0]}: {casts}放/{hits}中({hit_pct}%)", "tone": grade})
+                headline_badges.append({"text": f"幽冥棒: {casts}根/每次{avg_dmg_hits}次伤害({dmg:,}伤)", "tone": grade})
+                special_insights.append(txt)
+            else:
+                if not has_dmg_record:
+                    grade = "neutral"
+                    txt = f"《{scfg['zh']}》全场施放 {casts} 次，无直接伤害记录，不作伤害次数评级。"
+                    badge_str = f"{scfg['zh'].split(' ')[0]}: 施放{casts}次"
+                else:
+                    good_avg = scfg["good_pct"] / 100.0
+                    warn_avg = scfg["warn_pct"] / 100.0
+                    grade = "good" if avg_dmg_hits >= good_avg else ("warn" if avg_dmg_hits >= warn_avg else "bad")
+                    txt = (
+                        f"《{scfg['zh']}》全场施放 {casts} 次，每次施放造成 {avg_dmg_hits} 次伤害（累计造成 {hits} 次伤害，共 {dmg:,} 伤害）。"
+                    )
+                    badge_str = f"{scfg['zh'].split(' ')[0]}: {casts}放/每次{avg_dmg_hits}次伤害"
+                skillshot_audits.append({
+                    "ability_key": ab_key,
+                    "ability_zh": scfg["zh"],
+                    "casts": casts,
+                    "hits": hits,
+                    "avg_dmg_hits": avg_dmg_hits,
+                    "hit_pct": None,
+                    "damage": dmg,
+                    "grade": grade,
+                    "detail": txt,
+                })
+                headline_badges.append({"text": badge_str, "tone": grade})
                 special_insights.append(txt)
 
         # 3) 专属英雄机制深度挖掘：
@@ -601,7 +621,7 @@ def build_tactical_microscope(
                 d_ab = di.get(k_ab, 0)
                 stolen_used.append(
                     f"偷《{ab_zh}》放 {cnt_ab} 次"
-                    + (f"(中{h_ab}人/{d_ab:,}伤)" if (h_ab > 0 or d_ab > 0) else "")
+                    + (f"({h_ab}次伤害/{d_ab:,}伤)" if (h_ab > 0 or d_ab > 0) else "")
                 )
             rub_msg = (
                 f"《技能窃取》实战审计：全场大招偷取 {steal_casts} 次，"
@@ -631,7 +651,7 @@ def build_tactical_microscope(
                     egg_held_death_waves.append(tfr["time_range"])
 
             tf_egg_total = len(egg_tf_waves)
-            egg_grade = "good" if egg_casts >= 4 else "warn"
+            egg_grade = "neutral" if ("phoenix_supernova" not in di or egg_dmg <= 0) else ("good" if egg_casts >= 4 else "warn")
             egg_verdict = (
                 f"🥚《超新星(变蛋)》释放记录：全场共释放 {egg_casts} 次（造成 {egg_dmg:,} 伤害），其中在 {tf_egg_total} 波正面团战中释放"
                 + (f"（{', '.join(egg_tf_waves)}）" if egg_tf_waves else "")
@@ -702,7 +722,7 @@ def build_tactical_microscope(
             headline_badges.insert(0, {"text": shard_badge, "tone": shard_tone})
             headline_badges.insert(1, {"text": f"暗影之舞(大招): {dance_casts}次", "tone": "good" if dance_casts >= 10 else "warn"})
             slark_msg = (
-                f"🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》{dance_casts} 次、《黑暗契约》{pact_casts} 次、《突袭》{pounce_casts} 放 {pounce_hits} 中；"
+                f"🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》{dance_casts} 次、《黑暗契约》{pact_casts} 次、《突袭》施放 {pounce_casts} 次（造成 {pounce_hits} 次伤害）；"
                 + (
                     f"🚨 致命机制缺失：比赛打到 {duration_min:.0f} 分钟竟然未购买仅 1,400 金的阿哈利姆魔晶《深海劫掠》（0 次释放）！"
                     f"既少了 3 秒群体黑雾救队友（原本可化解敌方点控留人），自己也少了一团黑雾拉扯叠《能量转移》敏捷层数，导致正面根本 A 不过敌方大哥！"
@@ -761,7 +781,7 @@ def build_tactical_microscope(
         if top_abs:
             parts = [
                 f"《{get_ability_zh(k)}》×{v}"
-                + (f"(中{hh.get(k,0)}人/{di.get(k,0):,}伤)" if (hh.get(k, 0) > 0 or di.get(k, 0) > 0) else "")
+                + (f"({hh.get(k,0)}次伤害/{di.get(k,0):,}伤)" if (hh.get(k, 0) > 0 or di.get(k, 0) > 0) else "")
                 for k, v in top_abs
             ]
             role_tag = (prof126.get("roles") or ["核心机制"])[0]

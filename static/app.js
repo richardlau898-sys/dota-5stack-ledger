@@ -1100,11 +1100,11 @@ function buildStructuredMicroTablesHtml(report, df, side, sideZh, oppSide, oppZh
           const hits = sp.hits ?? sp.hero_hits ?? 0;
           const avg = sp.avg_hits ?? sp.avg_heroes_per_cast ?? 0;
           const dmg = sp.damage ?? sp.total_damage ?? 0;
-          const unit = sp.unit_label || "人次";
-          const gZh = gradeZhMap[sp.grade] || sp.grade || "良";
-          return `<b>${escapeHtml(sp.ability_zh || "关键大招")}</b> (评级:${escapeHtml(
+          const unit = sp.unit_label || "次伤害";
+          const gZh = sp.grade === "neutral" ? "不评级" : (gradeZhMap[sp.grade] || sp.grade || "不评级");
+          return `<b>${escapeHtml(sp.ability_zh || "关键大招")}</b> (${escapeHtml(
             gZh
-          )})：释放 <b>${casts}</b> 次${hits > 0 ? `，命中 <b>${hits}</b> ${escapeHtml(unit)} (均 ${avg})` : ""}${
+          )})：施放 <b>${casts}</b> 次${hits > 0 ? `，每次施放造成 <b>${avg}</b> 次伤害 (共 ${hits} ${escapeHtml(unit)})` : ""}${
             dmg > 0 ? `，伤害 <b>${fmtNum(dmg)}</b>` : ""
           }`;
         })
@@ -1112,9 +1112,9 @@ function buildStructuredMicroTablesHtml(report, df, side, sideZh, oppSide, oppZh
       const skillDesc = (p.skillshot_audits || [])
         .map(
           (sk) =>
-            `${escapeHtml(sk.ability_zh || "")}：${sk.casts ?? 0}放/${sk.hits ?? 0}中 (<b>${
-              sk.hit_pct ?? 0
-            }%</b> · ${fmtNum(sk.damage || 0)}伤)`
+            `${escapeHtml(sk.ability_zh || "")}：施放 ${sk.casts ?? 0} 次，每次施放造成 <b>${
+              sk.avg_dmg_hits ?? 0
+            }</b> 次伤害 (共 ${sk.hits ?? 0} 次伤害 · ${fmtNum(sk.damage || 0)}伤)`
         )
         .join("<br/>");
       const heldWaves = ults.flatMap((sp) => sp.tf_held_death_waves || []);
@@ -3523,13 +3523,13 @@ async function downloadStructuredReportPdf() {
       const ultStr = ults
         .map(
           (sp) =>
-            `${sp.ability_zh || "大招"}(评级:${gradeZhMap[sp.grade] || sp.grade || "良"}): 放${sp.casts ?? 0}次/中${
-              sp.hits ?? sp.hero_hits ?? 0
-            }${sp.unit_label || "人次"}`
+            `${sp.ability_zh || "大招"}(${sp.grade === "neutral" ? "不评级" : (gradeZhMap[sp.grade] || sp.grade || "不评级")}): 施放${sp.casts ?? 0}次/每次施放造成${
+              sp.avg_hits ?? 0
+            }次伤害`
         )
         .join("；");
       const skillStr = (p.skillshot_audits || [])
-        .map((sk) => `${sk.ability_zh}: ${sk.casts ?? 0}放/${sk.hits ?? 0}中(${sk.hit_pct ?? 0}%)`)
+        .map((sk) => `${sk.ability_zh}: 施放${sk.casts ?? 0}次/每次施放造成${sk.avg_dmg_hits ?? 0}次伤害`)
         .join("；");
       const heldWaves = ults.flatMap((sp) => sp.tf_held_death_waves || []);
       const castWaves = ults.flatMap((sp) => sp.tf_casts_waves || []);
@@ -8092,15 +8092,17 @@ function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, othe
             <div class="micro-ult-box">
               <div class="micro-ult-top">
                 <span class="micro-ult-name">💥 大招审计 · ${escapeHtml(sp.ability_zh || "关键技能")}</span>
-                <span class="status-pill ${grade === "S" || grade === "A" ? "connected" : ""}">评级 ${escapeHtml(
-            grade
-          )}</span>
+                ${
+                  grade && grade !== "neutral"
+                    ? `<span class="status-pill ${grade === "S" || grade === "A" || grade === "good" ? "connected" : ""}">评级 ${escapeHtml(grade)}</span>`
+                    : `<span class="status-pill">不评级</span>`
+                }
               </div>
               <div class="micro-ult-stats">
-                <span>释放次数：<b>${casts} 次</b></span>
+                <span>施放次数：<b>${casts} 次</b></span>
                 ${
                   hits > 0
-                    ? `<span>命中统计：<b>${hits} ${escapeHtml(unitLabel)} (场均 ${avgHits} ${escapeHtml(unitLabel)}/次)</b></span>`
+                    ? `<span>伤害次数：<b>每次施放造成 ${avgHits} 次伤害 (累计 ${hits} 次伤害)</b></span>`
                     : casts > 0
                     ? `<span>团战开大：<b>${sp.tf_casts_count ?? tfWaves.length} 波团战</b></span>`
                     : `<span>实战记录：<b>整局 0 释放</b></span>`
@@ -8129,13 +8131,13 @@ function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, othe
           <div class="micro-ult-box" style="border-left: 2px solid var(--gold);">
             <div class="micro-ult-top">
               <span class="micro-ult-name">🎯 非指向核心技能 · ${escapeHtml(sk.ability_zh || "")}</span>
-              <span class="status-pill ${sk.grade === "S" || sk.grade === "A" ? "connected" : ""}">命中率 ${
-            sk.hit_pct ?? 0
-          }% (${sk.grade || "B"})</span>
+              <span class="status-pill ${sk.grade === "S" || sk.grade === "A" || sk.grade === "good" ? "connected" : ""}">每次施放造成 ${
+            sk.avg_dmg_hits ?? 0
+          } 次伤害${sk.grade && sk.grade !== "neutral" ? ` (${sk.grade})` : ""}</span>
             </div>
             <div class="micro-ult-stats">
-              <span>释放次数：<b>${sk.casts ?? 0} 次</b></span>
-              <span>命中英雄：<b>${sk.hits ?? 0} 人次</b></span>
+              <span>施放次数：<b>${sk.casts ?? 0} 次</b></span>
+              <span>伤害次数：<b>${sk.hits ?? 0} 次伤害</b></span>
               ${(sk.damage ?? 0) > 0 ? `<span>技能伤害：<b>${fmtNum(sk.damage)}</b></span>` : ""}
             </div>
             ${
