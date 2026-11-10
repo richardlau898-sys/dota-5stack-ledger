@@ -1724,7 +1724,303 @@ def analyze_match_data(
         "radiant_pos_1_to_5": radiant_report,
         "dire_pos_1_to_5": dire_report,
     }
+    annotate_report_evidence(raw_report_out)
     return sanitize_report_mixed_english(raw_report_out)
+
+
+def classify_text_evidence(text: Any, default_evidence: str = "measured") -> str:
+    """根据结论文本内容与上下文类别，标注来源类型: measured / inferred / template"""
+    s = str(text or "")
+    if "推断" in s or "疑似" in s:
+        return "inferred"
+    if default_evidence in ("measured", "inferred", "template"):
+        return default_evidence
+    return "measured"
+
+
+def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
+    """为报告所有分节的结论对象标注 evidence 字段（measured / inferred / template）"""
+    if not isinstance(report, dict):
+        return report
+
+    # 1. radiant_pos_1_to_5 & dire_pos_1_to_5
+    for side_key in ("radiant_pos_1_to_5", "dire_pos_1_to_5"):
+        for p in report.get(side_key) or []:
+            if not isinstance(p, dict):
+                continue
+            p["evidence"] = "measured"
+            conclusions: List[Dict[str, str]] = []
+            for st in p.get("strengths") or []:
+                st_str = str(st or "").strip()
+                if st_str:
+                    conclusions.append({
+                        "text": st_str,
+                        "kind": "strength",
+                        "evidence": classify_text_evidence(st_str, "measured"),
+                    })
+            for wk in p.get("weaknesses") or []:
+                wk_str = str(wk or "").strip()
+                if wk_str:
+                    conclusions.append({
+                        "text": wk_str,
+                        "kind": "weakness",
+                        "evidence": classify_text_evidence(wk_str, "measured"),
+                    })
+            for imp in p.get("improvements") or []:
+                imp_str = str(imp or "").strip()
+                if imp_str:
+                    conclusions.append({
+                        "text": imp_str,
+                        "kind": "improvement",
+                        "evidence": classify_text_evidence(imp_str, "template"),
+                    })
+            summary_txt = str(p.get("praise_talk") or p.get("trash_talk") or "").strip()
+            if summary_txt:
+                conclusions.append({
+                    "text": summary_txt,
+                    "kind": "summary",
+                    "evidence": classify_text_evidence(summary_txt, "measured"),
+                })
+            if not conclusions:
+                conclusions.append({
+                    "text": f"{p.get('hero_short_zh') or p.get('hero_name') or '选手'} KDA {p.get('kda') or '0/0/0'}",
+                    "kind": "summary",
+                    "evidence": "measured",
+                })
+            p["conclusions"] = conclusions
+
+            dossier = p.get("hero_matchup_dossier")
+            if isinstance(dossier, dict):
+                dossier["evidence"] = "template"
+            h_prof = p.get("hero_mechanism_profile")
+            if isinstance(h_prof, dict):
+                h_prof["evidence"] = "template"
+                if isinstance(h_prof.get("hero_matchup_dossier"), dict):
+                    h_prof["hero_matchup_dossier"]["evidence"] = "template"
+            h_exec = p.get("hero_execution_audit")
+            if isinstance(h_exec, dict):
+                h_exec["evidence"] = classify_text_evidence(h_exec.get("verdict_zh"), "measured")
+
+            coaching = p.get("coaching")
+            if not isinstance(coaching, dict):
+                coaching = {}
+                p["coaching"] = coaching
+            coaching["evidence"] = "measured"
+            coaching["conclusions"] = conclusions
+            if isinstance(dossier, dict):
+                coaching["hero_matchup_dossier"] = dossier
+
+    # 2. mvp section
+    mvp_sec = report.get("mvp")
+    if isinstance(mvp_sec, dict):
+        mvp_sec["evidence"] = "measured"
+        mvp_conclusions: List[Dict[str, str]] = []
+        mvp_obj = mvp_sec.get("mvp")
+        if isinstance(mvp_obj, dict):
+            ev = classify_text_evidence(mvp_obj.get("reason"), "measured")
+            mvp_obj["evidence"] = ev
+            if mvp_obj.get("reason"):
+                mvp_conclusions.append({"text": str(mvp_obj["reason"]), "kind": "mvp_reason", "evidence": ev})
+        cul_obj = mvp_sec.get("culprit")
+        if isinstance(cul_obj, dict):
+            ev = classify_text_evidence(cul_obj.get("reason"), "measured")
+            cul_obj["evidence"] = ev
+            if cul_obj.get("reason"):
+                mvp_conclusions.append({"text": str(cul_obj["reason"]), "kind": "culprit_reason", "evidence": ev})
+            if cul_obj.get("fix"):
+                mvp_conclusions.append({
+                    "text": str(cul_obj["fix"]),
+                    "kind": "culprit_fix",
+                    "evidence": classify_text_evidence(cul_obj["fix"], "template"),
+                })
+        elif mvp_sec.get("no_culprit_reason"):
+            nc_txt = str(mvp_sec["no_culprit_reason"])
+            mvp_conclusions.append({"text": nc_txt, "kind": "no_culprit_reason", "evidence": "measured"})
+        if mvp_sec.get("verdict_headline"):
+            vh_txt = str(mvp_sec["verdict_headline"])
+            mvp_conclusions.append({
+                "text": vh_txt,
+                "kind": "verdict_headline",
+                "evidence": classify_text_evidence(vh_txt, "measured"),
+            })
+        if not mvp_conclusions:
+            mvp_conclusions.append({"text": str(report.get("score") or "比赛结算"), "kind": "summary", "evidence": "measured"})
+        mvp_sec["conclusions"] = mvp_conclusions
+
+    # 3. match_narrative section
+    narrative = report.get("match_narrative")
+    if isinstance(narrative, dict):
+        narrative["evidence"] = "measured"
+        nar_conclusions: List[Dict[str, str]] = []
+        for stg in narrative.get("stages") or []:
+            if isinstance(stg, dict):
+                stg_txt = str(stg.get("summary") or stg.get("detail") or stg.get("headline") or "")
+                ev = classify_text_evidence(stg_txt, "measured")
+                stg["evidence"] = ev
+                if stg_txt:
+                    nar_conclusions.append({"text": stg_txt, "kind": "stage_narrative", "evidence": ev})
+        for key_name, default_ev in (("overall_verdict", "measured"), ("headline", "measured"), ("turning_point", "measured")):
+            val = narrative.get(key_name)
+            if val:
+                nar_conclusions.append({
+                    "text": str(val),
+                    "kind": key_name,
+                    "evidence": classify_text_evidence(val, default_ev),
+                })
+        if not nar_conclusions:
+            nar_conclusions.append({"text": str(report.get("score") or "全场走势"), "kind": "summary", "evidence": "measured"})
+        narrative["conclusions"] = nar_conclusions
+
+    # 4. phases_data section
+    phases = report.get("phases_data")
+    phase_list = phases if isinstance(phases, list) else (list(phases.values()) if isinstance(phases, dict) else [])
+    for ph in phase_list:
+        if not isinstance(ph, dict):
+            continue
+        ph_sum = str(ph.get("summary") or ph.get("label") or "")
+        ph["evidence"] = classify_text_evidence(ph_sum, "measured")
+        ph["conclusions"] = [{
+            "text": ph_sum or "阶段统计",
+            "kind": "phase_summary",
+            "evidence": classify_text_evidence(ph_sum, "measured"),
+        }]
+        for sd_k, sd_v in (ph.get("side_diagnosis") or {}).items():
+            if isinstance(sd_v, dict):
+                sd_v["evidence"] = classify_text_evidence(sd_v.get("summary"), "measured")
+        for pp in ph.get("players") or []:
+            if not isinstance(pp, dict):
+                continue
+            pp["evidence"] = "measured"
+            pp_conclusions: List[Dict[str, str]] = []
+            for g in pp.get("good") or []:
+                g_str = str(g or "").strip()
+                if g_str:
+                    pp_conclusions.append({
+                        "text": g_str,
+                        "kind": "good",
+                        "evidence": classify_text_evidence(g_str, "measured"),
+                    })
+            for b in pp.get("bad") or []:
+                b_str = str(b or "").strip()
+                if b_str:
+                    pp_conclusions.append({
+                        "text": b_str,
+                        "kind": "bad",
+                        "evidence": classify_text_evidence(b_str, "measured"),
+                    })
+            focus_str = str(pp.get("focus") or "").strip()
+            if focus_str:
+                pp_conclusions.append({
+                    "text": focus_str,
+                    "kind": "focus",
+                    "evidence": classify_text_evidence(focus_str, "template"),
+                })
+            if not pp_conclusions:
+                pp_conclusions.append({
+                    "text": f"阶段战绩 {pp.get('kills_count', 0)}/{pp.get('deaths_count', 0)}",
+                    "kind": "stat",
+                    "evidence": "measured",
+                })
+            pp["conclusions"] = pp_conclusions
+
+    # 5. draft_analysis & draft_analysis_by_side
+    da_by_side = report.get("draft_analysis_by_side") or {}
+    for _side_k, da in da_by_side.items():
+        if not isinstance(da, dict):
+            continue
+        da["evidence"] = "measured"
+        da_conclusions: List[Dict[str, str]] = []
+        for k_name, def_ev in (
+            ("win_condition", "template"),
+            ("lose_condition", "template"),
+            ("draft_verdict", "measured"),
+            ("lane_summary", "measured"),
+        ):
+            v_txt = str(da.get(k_name) or "").strip()
+            if v_txt:
+                da_conclusions.append({
+                    "text": v_txt,
+                    "kind": k_name,
+                    "evidence": classify_text_evidence(v_txt, def_ev),
+                })
+        for list_key, def_ev in (
+            ("combos", "template"),
+            ("counters", "template"),
+            ("hero_matchup_matrix", "template"),
+            ("lane_matchups", "measured"),
+            ("ban_eval", "measured"),
+        ):
+            for item in da.get(list_key) or []:
+                if isinstance(item, dict):
+                    item_txt = " ".join(str(v) for v in item.values() if isinstance(v, str))
+                    item["evidence"] = classify_text_evidence(item_txt, def_ev)
+        if not da_conclusions:
+            da_conclusions.append({"text": "阵容与分路分析", "kind": "summary", "evidence": "measured"})
+        da["conclusions"] = da_conclusions
+
+    # 6. deep_forensics (all 13 *_by_side sections + top-level)
+    df = report.get("deep_forensics")
+    if isinstance(df, dict):
+        df["evidence"] = "measured"
+        for mod_key, mod_val in df.items():
+            if not mod_key.endswith("_by_side") or not isinstance(mod_val, dict):
+                continue
+            for side_k in ("dire", "radiant"):
+                side_block = mod_val.get(side_k)
+                if isinstance(side_block, dict):
+                    sv_txt = str(side_block.get("side_verdict") or side_block.get("summary") or "")
+                    side_block["evidence"] = classify_text_evidence(sv_txt, "measured")
+                    sb_conclusions: List[Dict[str, str]] = []
+                    if sv_txt:
+                        sb_conclusions.append({
+                            "text": sv_txt,
+                            "kind": "side_verdict",
+                            "evidence": classify_text_evidence(sv_txt, "measured"),
+                        })
+                    for k_sub, v_sub in side_block.items():
+                        if isinstance(v_sub, list):
+                            for elem in v_sub:
+                                if isinstance(elem, dict):
+                                    elem_txt = " ".join(
+                                        str(elem.get(fk) or "")
+                                        for fk in (
+                                            "verdict",
+                                            "verdict_zh",
+                                            "audit_verdict",
+                                            "craft_verdict",
+                                            "mirror_verdict",
+                                            "space_verdict",
+                                            "save_verdict",
+                                            "tp_verdict",
+                                            "econ_verdict",
+                                            "note",
+                                            "detail",
+                                        )
+                                    )
+                                    ev_elem = classify_text_evidence(elem_txt, "measured")
+                                    elem["evidence"] = ev_elem
+                                    if elem_txt.strip():
+                                        sb_conclusions.append({
+                                            "text": elem_txt.strip(),
+                                            "kind": k_sub,
+                                            "evidence": ev_elem,
+                                        })
+                    if not sb_conclusions:
+                        sb_conclusions.append({"text": mod_key, "kind": "module", "evidence": "measured"})
+                    side_block["conclusions"] = sb_conclusions
+                elif isinstance(side_block, list):
+                    for elem in side_block:
+                        if isinstance(elem, dict):
+                            elem_txt = str(elem.get("verdict_zh") or elem.get("summary") or "")
+                            ev_elem = classify_text_evidence(elem_txt, "measured")
+                            elem["evidence"] = ev_elem
+                            elem["conclusions"] = [{
+                                "text": elem_txt or "英雄微操审计",
+                                "kind": "hero_execution",
+                                "evidence": ev_elem,
+                            }]
+
+    return report
 
 
 def render_markdown_report(report: Dict[str, Any]) -> str:

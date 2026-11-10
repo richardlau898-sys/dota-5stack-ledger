@@ -2382,14 +2382,15 @@ async function downloadStructuredReportPdf() {
     // Helper: Draw 6-Axis Vector Hexagon Radar Chart at (cx, cy, maxR)
     // =========================================================================
     const drawVectorHexRadar = (radarObj, cx, cy, maxR) => {
-      const r = radarObj || {};
+      if (!radarObj) return;
+      const r = radarObj;
       const dims = [
-        { label: "输出", val: Number(r.damage ?? r.fighting ?? 55) },
-        { label: "刷钱", val: Number(r.farm ?? r.farming ?? 55) },
-        { label: "推塔", val: Number(r.push ?? r.pushing ?? 55) },
-        { label: "生存", val: Number(r.survival ?? r.surviving ?? 55) },
-        { label: "视野", val: Number(r.utility ?? r.supporting ?? 55) },
-        { label: "节奏", val: Number(r.tempo ?? r.laning ?? 55) },
+        { label: "输出", val: Number(r.damage ?? r.fighting ?? 0) },
+        { label: "刷钱", val: Number(r.farm ?? r.farming ?? 0) },
+        { label: "推塔", val: Number(r.push ?? r.pushing ?? 0) },
+        { label: "生存", val: Number(r.survival ?? r.surviving ?? 0) },
+        { label: "视野", val: Number(r.utility ?? r.supporting ?? 0) },
+        { label: "节奏", val: Number(r.tempo ?? r.laning ?? 0) },
       ];
       const ptAt = (idx, radius) => {
         const angle = -Math.PI / 2 + (idx * Math.PI * 2) / 6;
@@ -5252,10 +5253,51 @@ function renderHeaderStatus() {
   if (playerBadge && state.profileData?.profile) {
     const p = state.profileData.profile;
     const wl = state.profileData.wl || {};
-    playerBadge.textContent = `主视角：${p.personaname || state.accountId} · ${p.rank_label || "万古流芳 5"} · 近${
-      (state.profileData.recent_matches || []).length || 12
-    }场 ${wl.win_rate ?? 50}% 胜率`;
+    const recentCnt = (state.profileData.recent_matches || []).length;
+    const wrStr = wl.win_rate !== undefined && wl.win_rate !== null ? `${wl.win_rate}% 胜率` : "无数据";
+    playerBadge.textContent = `主视角：${p.personaname || state.accountId} · ${p.rank_label || "无数据"} · 近${recentCnt}场 ${wrStr}`;
   }
+}
+
+function classifyConclusionEvidence(itemOrText, defaultEvidence = "measured") {
+  if (itemOrText && typeof itemOrText === "object" && itemOrText.evidence) {
+    return itemOrText.evidence;
+  }
+  const s = String(typeof itemOrText === "object" ? itemOrText?.text || "" : itemOrText || "");
+  if (s.includes("推断") || s.includes("疑似")) {
+    return "inferred";
+  }
+  return defaultEvidence || "measured";
+}
+
+function renderEvidenceBadge(evidence) {
+  if (evidence === "inferred") {
+    return `<span class="evidence-badge evidence-inferred" title="基于间接指标推断">推断</span> `;
+  }
+  if (evidence === "template") {
+    return `<span class="evidence-badge evidence-template" title="通用英雄/位置知识与建议">通用知识</span> `;
+  }
+  return "";
+}
+
+function renderEvidenceListItemsHtml(items, defaultEvidence = "measured") {
+  const measuredLis = [];
+  const foldedLis = [];
+  (items || []).forEach((item) => {
+    const rawHtml = typeof item === "object" ? item?.text || "" : String(item || "");
+    if (!rawHtml) return;
+    const ev = classifyConclusionEvidence(item, defaultEvidence);
+    if (ev === "measured") {
+      measuredLis.push(`<li>${rawHtml}</li>`);
+    } else {
+      foldedLis.push(`<li>${renderEvidenceBadge(ev)}${rawHtml}</li>`);
+    }
+  });
+  const foldBlock =
+    foldedLis.length > 0
+      ? `<li class="evidence-fold-li"><details class="evidence-fold"><summary>展开推断与通用建议 (${foldedLis.length})</summary><ul>${foldedLis.join("")}</ul></details></li>`
+      : "";
+  return `${measuredLis.join("")}${foldBlock}`;
 }
 
 const LOCAL_ANALYZED_STORAGE_KEY = "dota_analyzed_matches_v1";
@@ -5296,9 +5338,9 @@ function saveLocalAnalyzedMatch(report) {
       score,
       side_zh: sideZh,
       mvp_hero: mvpHero,
-      mvp_contrib_pct: report.mvp?.contrib_share_pct ?? 25,
+      mvp_contrib_pct: report.mvp?.contrib_share_pct ?? null,
       culprit_hero: culpritHero,
-      culprit_blame_pct: report.culprit?.blame_share_pct ?? 28,
+      culprit_blame_pct: report.culprit?.blame_share_pct ?? null,
       saved_at: Date.now(),
     };
     localStorage.setItem(LOCAL_ANALYZED_STORAGE_KEY, JSON.stringify(obj));
@@ -5415,7 +5457,7 @@ function renderHomeWorkspace() {
       </div>
       <div class="home-kpi-card">
         <span class="home-kpi-label">📈 近 ${matches.length} 场战绩与开黑率</span>
-        <strong class="home-kpi-val">${winCount} 胜 ${Math.max(0, matches.length - winCount)} 负 (${wl.win_rate ?? 0}% 胜率)</strong>
+        <strong class="home-kpi-val">${winCount} 胜 ${Math.max(0, matches.length - winCount)} 负 (${wl.win_rate !== undefined && wl.win_rate !== null ? `${wl.win_rate}% 胜率` : "无数据"})</strong>
         <span class="home-kpi-sub">其中五黑/组排开黑 ${partyCount} 局 · 单排 ${Math.max(0, matches.length - partyCount)} 局</span>
       </div>
       <div class="home-kpi-card">
@@ -7222,7 +7264,7 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
           title: "7. 眼位博弈与黑图真空期",
           reason: `出现 ${darkCnt} 段视野断档期，假眼均寿 ${vis.avg_lifespan_sec ?? 0}s。`,
         }
-      : { level: "good", badge: `✓ 均寿${vis.avg_lifespan_sec ?? 280}s`, title: "7. 眼位博弈与黑图真空期", reason: "全场视野覆盖扎实" };
+      : { level: "good", badge: vis.avg_lifespan_sec !== undefined && vis.avg_lifespan_sec !== null ? `✓ 均寿${vis.avg_lifespan_sec}s` : "无数据", title: "7. 眼位博弈与黑图真空期", reason: "全场视野覆盖扎实" };
 
   // 8. stack_smoke
   const ss = df.stacking_and_smoke_by_side?.[targetSide] || {};
@@ -7304,9 +7346,12 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
 
   // 12. role_mirror
   const rm = df.role_mirror_by_side?.[targetSide] || {};
-  const wonCnt = Number(rm.won_overall_cnt ?? 3);
+  const hasWonCnt = rm.won_overall_cnt !== undefined && rm.won_overall_cnt !== null;
+  const wonCnt = hasWonCnt ? Number(rm.won_overall_cnt) : null;
   results.role_mirror =
-    wonCnt <= 1
+    wonCnt === null
+      ? { level: "good", badge: "无数据", title: "12. 同位置1v1宿敌对位", reason: "无数据" }
+      : wonCnt <= 1
       ? {
           level: "critical",
           badge: `🚨 对位仅赢${wonCnt}/5`,
@@ -11689,8 +11734,8 @@ function buildRichFourStageCardsHtml(report) {
     `<span class="stage-key-pill">④ 泉水读秒与同位对位</span> 全队泉水读秒 <b>${ownDeadSec}秒 vs ${oppDeadSec}秒</b>（读秒最多：<b>${escapeHtml(
       mostDeadHero?.hero_short_zh || ""
     )} ${mostDeadHero?.dead_seconds ?? 0}秒</b>）；1~5号位同位置正面对位 <b>${
-      rm.won_overall_cnt ?? 3
-    } / 5 胜出</b>。`,
+      rm.won_overall_cnt !== undefined && rm.won_overall_cnt !== null ? `${rm.won_overall_cnt} / 5 胜出` : "无数据"
+    }</b>。`,
   ];
 
   const grokStages = report.grok_coaching?.stage_reviews || {};
@@ -12327,16 +12372,16 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     );
   const heroRoleMatchupStripHtml = hDossier
     ? `
-      <div style="margin-bottom:9px;padding:9px 12px;background:rgba(15,23,42,0.58);border:1px solid rgba(235,194,117,0.28);border-radius:8px;font-size:12px;line-height:1.55;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:4px;">
-          <strong style="color:var(--gold-light);">🧬 【${escapeHtml(
+      <details class="evidence-fold" style="margin-bottom:9px;padding:9px 12px;background:rgba(15,23,42,0.58);border:1px solid rgba(235,194,117,0.28);border-radius:8px;font-size:12px;line-height:1.55;">
+        <summary style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+          <strong style="color:var(--gold-light);">${renderEvidenceBadge("template")}🧬 【${escapeHtml(
             hDossier.pos_role_title || `${pos}号位·${heroShort}`
           )}】英雄×位置法则 &amp; 敌我克制关系</strong>
           <span style="font-size:11px;color:var(--muted);">强势期：${escapeHtml(
             hDossier.timing_label || "全期支点"
           )}</span>
-        </div>
-        <div style="color:#e2e8f0;"><b style="color:#93c5fd;">位置职责：</b>${escapeHtml(
+        </summary>
+        <div style="margin-top:6px;color:#e2e8f0;"><b style="color:#93c5fd;">位置职责：</b>${escapeHtml(
           hDossier.pos_playstyle || ""
         )} <b style="color:#fca5a5;">｜位置禁忌：</b>${escapeHtml(hDossier.pos_taboo || "")}</div>
         ${
@@ -12378,7 +12423,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
               </div>`
             : ""
         }
-      </div>
+      </details>
     `
     : "";
 
@@ -12403,13 +12448,13 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
         <div class="story-gb-box good">
           <div class="story-gb-title">👍 哪里做得好（高光与细活）</div>
           <ul class="story-gb-list">
-            ${goodPoints.map((g) => `<li>${g}</li>`).join("")}
+            ${renderEvidenceListItemsHtml(goodPoints, "measured")}
           </ul>
         </div>
         <div class="story-gb-box bad">
           <div class="story-gb-title">👎 哪里做得不好（瑕疵与复盘点）</div>
           <ul class="story-gb-list">
-            ${badPoints.map((b) => `<li>${b}</li>`).join("")}
+            ${renderEvidenceListItemsHtml(badPoints, "measured")}
           </ul>
         </div>
       </div>
@@ -16340,7 +16385,7 @@ function renderKeyWindowsSection(report) {
              <span>${injectHeroLogosIntoHtml(escapeHtml(pairedGrokWin.detail || ""), report)}</span>
            </div>`
         : "";
-      const whatIfInlineHtml = `<div style="margin-top:6px;padding:7px 11px;background:rgba(255,255,255,0.03);border:1px dashed rgba(198,164,104,0.35);border-radius:4px;font-size:12.5px;color:var(--text-main);line-height:1.5;">${injectHeroLogosIntoHtml(escapeHtml(whatIfAdvice), report)}</div>`;
+      const whatIfInlineHtml = `<details class="evidence-fold" style="margin-top:6px;padding:7px 11px;background:rgba(255,255,255,0.03);border:1px dashed rgba(198,164,104,0.35);border-radius:4px;font-size:12.5px;color:var(--text-main);line-height:1.5;"><summary style="cursor:pointer;">${renderEvidenceBadge("template")}展开团战建议与逆转推演</summary><div style="margin-top:4px;">${injectHeroLogosIntoHtml(escapeHtml(whatIfAdvice), report)}</div></details>`;
 
       cardsHtml.push(`
         <article class="window-card tf-scene-card ${escapeHtml(outcomeTone)}">
@@ -16834,15 +16879,18 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
     })
     .join("");
 
-  const r = p.radar || {};
-  const radarMiniSummary = [
-    `输出 ${Math.round(Number(r.damage ?? r.fighting ?? 60))}`,
-    `发育 ${Math.round(Number(r.farm ?? r.farming ?? 60))}`,
-    `推进 ${Math.round(Number(r.push ?? r.pushing ?? 60))}`,
-    `生存 ${Math.round(Number(r.survival ?? r.surviving ?? 60))}`,
-    `控制 ${Math.round(Number(r.utility ?? r.supporting ?? 60))}`,
-    `节奏 ${Math.round(Number(r.tempo ?? r.laning ?? 60))}`,
-  ].join(" · ");
+  const r = p.radar;
+  const fmtRadarDim = (val) => (val !== undefined && val !== null ? Math.round(Number(val)) : "无数据");
+  const radarMiniSummary = r
+    ? [
+        `输出 ${fmtRadarDim(r.damage ?? r.fighting)}`,
+        `发育 ${fmtRadarDim(r.farm ?? r.farming)}`,
+        `推进 ${fmtRadarDim(r.push ?? r.pushing)}`,
+        `生存 ${fmtRadarDim(r.survival ?? r.surviving)}`,
+        `控制 ${fmtRadarDim(r.utility ?? r.supporting)}`,
+        `节奏 ${fmtRadarDim(r.tempo ?? r.laning)}`,
+      ].join(" · ")
+    : "无数据";
 
   return `
     <article class="forensic-card ${p.is_me ? "is-me" : ""} ${isTopCulprit ? "is-culprit" : ""}">
@@ -17059,21 +17107,17 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
  * 10. SVG Hexagon Radar Chart for Each Player
  */
 function renderHexRadarSvg(radar) {
-  const r = radar || {
-    damage: 60,
-    farm: 60,
-    push: 60,
-    survival: 60,
-    utility: 60,
-    tempo: 60,
-  };
+  if (!radar) {
+    return `<div class="radar-empty" style="font-size:12px;color:var(--dim);padding:12px;text-align:center;">无数据</div>`;
+  }
+  const r = radar;
   const dims = [
-    { label: "输出转化", val: Number(r.damage ?? r.fighting ?? 55) },
-    { label: "刷钱发育", val: Number(r.farm ?? r.farming ?? 55) },
-    { label: "推塔推进", val: Number(r.push ?? r.pushing ?? 55) },
-    { label: "团战生存", val: Number(r.survival ?? r.surviving ?? 55) },
-    { label: "控制视野", val: Number(r.utility ?? r.supporting ?? 55) },
-    { label: "前中期节奏", val: Number(r.tempo ?? r.laning ?? 55) },
+    { label: "输出转化", val: Number(r.damage ?? r.fighting ?? 0) },
+    { label: "刷钱发育", val: Number(r.farm ?? r.farming ?? 0) },
+    { label: "推塔推进", val: Number(r.push ?? r.pushing ?? 0) },
+    { label: "团战生存", val: Number(r.survival ?? r.surviving ?? 0) },
+    { label: "控制视野", val: Number(r.utility ?? r.supporting ?? 0) },
+    { label: "前中期节奏", val: Number(r.tempo ?? r.laning ?? 0) },
   ];
 
   const cx = 95;
@@ -19869,8 +19913,8 @@ function renderPregamePlanOutput(plan) {
     <!-- 1. 核心赢法 vs 翻车红线 + 团战集火优先级 -->
     <div class="pregame-winloss-grid">
       <article class="pregame-wl-card win">
-        <h3>🏆 本局核心赢法 · 评级 ${escapeHtml(plan.grade || "A")} (${
-          plan.overall_score || 78
+        <h3>🏆 本局核心赢法 · 评级 ${escapeHtml(plan.grade || "无数据")} (${
+          plan.overall_score ?? "无数据"
         }分 · ${escapeHtml(plan.tempo_style || "")})</h3>
         <p>${escapeHtml(grokBrief?.win_condition || plan.win_condition || "")}</p>
         <div style="font-size:12px;color:var(--green-light);padding-top:6px;border-top:1px dashed #2e3429;">

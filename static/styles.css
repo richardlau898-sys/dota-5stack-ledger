@@ -288,6 +288,40 @@ select:hover {
   border-color: #62573e;
 }
 
+.evidence-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.evidence-badge.evidence-inferred {
+  background: rgba(217, 167, 92, 0.18);
+  border: 1px solid rgba(217, 167, 92, 0.45);
+  color: #f3c878;
+}
+
+.evidence-badge.evidence-template {
+  background: rgba(96, 165, 250, 0.16);
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  color: #93c5fd;
+}
+
+.evidence-fold > summary {
+  font-size: 11.5px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.evidence-fold-li {
+  list-style: none;
+  margin-top: 4px;
+}
+
 /* 主容器 */
 .main-container {
   max-width: 1360px;
