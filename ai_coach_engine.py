@@ -918,7 +918,7 @@ def evaluate_player_deeply(
                 strengths.append(
                     f"⚔️ 【英雄机制克制完美兑现（手刃 {matched_eh}×{k_cnt}）】：{ce_txt} 本局精准锁定并击杀 {matched_eh} {k_cnt} 次，彻底打出英雄克制链价值！"
                 )
-            elif not won and matched_eh and k_cnt == 0 and pos in (1, 2, 3, 4) and ("天克" in ce_txt or "克制【" in ce_txt):
+            elif is_parsed and not won and matched_eh and k_cnt == 0 and pos in (1, 2, 3, 4) and ("天克" in ce_txt or "克制【" in ce_txt):
                 weaknesses.append(
                     f"⚠️ 【未发挥先天英雄克制优势（本应克制 {matched_eh}）】：{ce_txt} 但本局全场 0 次击杀 {matched_eh}，未能针对敌方被克制点打开突破口。"
                 )
@@ -1631,6 +1631,25 @@ def build_four_stage_narrative(
     courier_str = ""
     if rad_couriers_lost or dire_couriers_lost:
         courier_str = f" 对线与前中期信使击杀：天辉阵亡 {rad_couriers_lost} 只信使，夜魇阵亡 {dire_couriers_lost} 只信使。"
+
+    is_parsed = bool(match.get("version"))
+    if not is_parsed:
+        my_team = radiant_players if user_team_side == "radiant" else (dire_players if user_team_side == "dire" else dire_players)
+        enemy_team = dire_players if my_team is radiant_players else radiant_players
+        my_side_zh = "天辉" if my_team is radiant_players else "夜魇"
+        my_tdmg = sum(p.get("tower_damage", 0) for p in my_team)
+        en_tdmg = sum(p.get("tower_damage", 0) for p in enemy_team)
+        return {
+            "lane_matchups": [],
+            "roshan_events": [],
+            "couriers_lost": {"radiant": None, "dire": None},
+            "stages": [
+                {"title": "0–10分钟 对线期三路对账", "content": "需要先解析录像以获取对线期三路对账与信使记录。"},
+                {"title": "10–25分钟 中期节奏与装备真空取证", "content": "需要先解析录像以获取中期经济差、开雾记录与装备成型时间。"},
+                {"title": "25分钟至终局 决胜团战与肉山高地博弈", "content": f"最终{'天辉' if radiant_win else '夜魇'}在 {duration_min} 分钟推平遗迹终结比赛（团战与肉山细节需要先解析录像）。"},
+                {"title": "全局五人硬实力与团队执行力对比", "content": f"主视角（{my_side_zh}）车队全局数据对比：建筑伤害 {my_tdmg:,} vs 敌方 {en_tdmg:,}（控制时长、视野开雾、读秒时长需要先解析录像）。"},
+            ],
+        }
 
     stage1 = f"{g10_str}{courier_str}"
     if lane_matchups:

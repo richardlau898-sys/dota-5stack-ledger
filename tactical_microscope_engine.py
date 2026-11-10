@@ -314,6 +314,28 @@ def build_tactical_microscope(
     5. tp_rotation_by_side: TP 救人及时性、团战亮 TP 落地参战、队友阵亡时 0 参战挂机旁观抓包、买 TP 飞脸上连死
     """
     all_formatted = radiant_players + dire_players
+    if not match.get("version"):
+        for p in all_formatted:
+            p["hero_execution_audit"] = {"available": False}
+        unavail = {"available": False, "dire": {"available": False}, "radiant": {"available": False}}
+        return {
+            "available": False,
+            "hero_execution_by_side": dict(unavail),
+            "itemization_audit_by_side": dict(unavail),
+            "damage_quality_and_build_by_side": dict(unavail),
+            "support_vision_by_side": dict(unavail),
+            "stacking_and_smoke_by_side": dict(unavail),
+            "laning_mechanics_by_side": dict(unavail),
+            "tp_rotation_by_side": dict(unavail),
+            "unpressed_saves_by_side": dict(unavail),
+            "map_space_by_side": dict(unavail),
+            "damage_received_by_side": dict(unavail),
+            "economy_and_pings_by_side": dict(unavail),
+            "role_mirror_by_side": dict(unavail),
+            "macro_objectives_by_side": dict(unavail),
+            "minute_snapshots": [],
+        }
+
     fmt_by_slot = {int(p["player_slot"]): p for p in all_formatted}
     fmt_by_hid = {int(p["hero_id"]): p for p in all_formatted}
     raw_players_list = match.get("players") or []

@@ -529,6 +529,7 @@ def compute_team_draft_scores(team_players: List[Dict[str, Any]], opp_players: O
 def build_team_combos(
     own_players: List[Dict[str, Any]],
     opp_players: List[Dict[str, Any]],
+    is_parsed: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     识别本方阵容最具威胁的 3~4 套多英雄配合 (Combo)，并结合本局真实释放次数与数据核验执行效果
@@ -833,6 +834,9 @@ def build_team_combos(
             ),
         })
 
+    if not is_parsed:
+        for cb in combos:
+            cb["execution_audit"] = "需要先解析录像"
     return combos[:4]
 
 
@@ -1077,7 +1081,7 @@ def build_draft_and_combo_analysis(
             "verdict_summary": verdict_summary,
             "strengths": strengths[:4],
             "weaknesses": weaknesses[:4],
-            "combos": build_team_combos(own, opp),
+            "combos": build_team_combos(own, opp, is_parsed=bool(match.get("version"))),
             "hero_matchup_matrix": hero_matchup_matrix,
             "heroes_brief": [
                 {
@@ -1104,6 +1108,7 @@ def enrich_phases_with_evaluations(
     phases_data: List[Dict[str, Any]],
     all_formatted_players: List[Dict[str, Any]],
     grok_coaching: Optional[Dict[str, Any]],
+    is_parsed: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     为前期对线 (0-10m) / 中期运营 (10-25m) / 后期决策 (25m+) 的每一位玩家生成：
@@ -1114,6 +1119,33 @@ def enrich_phases_with_evaluations(
     同时为整个团队生成每个阶段的「团队做得好」「团队病根」「团队怎么进步」作业本！
     如果 Grok 已经生成了 phases 评价，则智能融合 Grok 的洞察与录像硬指标。
     """
+    if not is_parsed:
+        for pd in phases_data:
+            pd["available"] = False
+            for pp in pd.get("players") or []:
+                pp["assessment"] = "需要先解析录像"
+                pp["good"] = []
+                pp["bad"] = []
+                pp["focus"] = "需要先解析录像"
+            pd["team_diagnostics"] = {
+                "radiant": {
+                    "available": False,
+                    "summary": "需要先解析录像",
+                    "turning_point": "",
+                    "team_good": "需要先解析录像",
+                    "team_bad": "需要先解析录像",
+                    "team_action": "",
+                },
+                "dire": {
+                    "available": False,
+                    "summary": "需要先解析录像",
+                    "turning_point": "",
+                    "team_good": "需要先解析录像",
+                    "team_bad": "需要先解析录像",
+                    "team_action": "",
+                },
+            }
+        return phases_data
     # 建立 Grok 阶段评价索引: grok_phase_map[phase_key] = {summary, turning_point, player_by_slot: {slot: {...}}}
     grok_phase_map: Dict[str, Dict[str, Any]] = {}
     if isinstance(grok_coaching, dict):
@@ -1509,6 +1541,34 @@ def build_deep_replay_forensics(
     from dota_constants_zh import get_ability_zh, ITEMS_ZH
 
     all_formatted = radiant_players + dire_players
+    if not match.get("version"):
+        from tactical_microscope_engine import build_tactical_microscope
+        microscope = build_tactical_microscope(
+            match=match,
+            radiant_players=radiant_players,
+            dire_players=dire_players,
+            hero_const_by_id=hero_const_by_id,
+            npc_to_hid=npc_to_hid,
+        )
+        for p in all_formatted:
+            p["pings_count"] = None
+            p["lane_id"] = None
+            p["lane_efficiency_pct"] = None
+            p["benchmarks_list"] = []
+            p["ability_targets_list"] = []
+        return {
+            "available": False,
+            "picks_order": {"available": False},
+            "lane_matchups": {"available": False},
+            "rubick_steal_ledger": {"available": False},
+            "key_spell_targets": {"available": False},
+            "courier_graveyard": {"available": False},
+            "ping_pressure_rank": {"available": False},
+            "focus_fire_matrix": {"available": False, "dire": {"available": False}, "radiant": {"available": False}},
+            "teamfight_forensics": {"available": False},
+            **microscope,
+        }
+
     fmt_by_slot = {int(p["player_slot"]): p for p in all_formatted}
     fmt_by_hid = {int(p["hero_id"]): p for p in all_formatted}
     raw_by_slot = {int(rp.get("player_slot", 0)): rp for rp in (match.get("players") or [])}

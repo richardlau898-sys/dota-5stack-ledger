@@ -1615,22 +1615,23 @@ def analyze_match_data(
             l_hdmg = max(0, lp.get("hero_damage_gain") or 0)
             lt_gold = max(0, ltp.get("gold_gain") or 0)
             lt_hdmg = max(0, ltp.get("hero_damage_gain") or 0)
+            tp[" phase_telemetry_removed_placeholder"] = None
             tp["phase_telemetry"] = {
                 "lane_gold_gain": lp.get("gold_gain") or 0,
                 "lane_hdmg_gain": l_hdmg,
-                "lane_hdmg_share_pct": round(l_hdmg / team_lane_hdmg * 100.0, 1) if is_parsed else 20.0,
+                "lane_hdmg_share_pct": round(l_hdmg / team_lane_hdmg * 100.0, 1) if is_parsed else None,
                 "lane_kills": lp.get("kills_count") or 0,
                 "lane_deaths": lp.get("deaths_count") or 0,
                 "mid_gold_gain": m_gold,
                 "mid_hdmg_gain": m_hdmg,
-                "mid_gold_share_pct": round(m_gold / team_mid_gold * 100.0, 1) if is_parsed else 20.0,
-                "mid_hdmg_share_pct": round(m_hdmg / team_mid_hdmg * 100.0, 1) if is_parsed else 20.0,
+                "mid_gold_share_pct": round(m_gold / team_mid_gold * 100.0, 1) if is_parsed else None,
+                "mid_hdmg_share_pct": round(m_hdmg / team_mid_hdmg * 100.0, 1) if is_parsed else None,
                 "mid_kills": mp.get("kills_count") or 0,
                 "mid_deaths": mp.get("deaths_count") or 0,
                 "late_gold_gain": lt_gold,
                 "late_hdmg_gain": lt_hdmg,
-                "late_gold_share_pct": round(lt_gold / team_late_gold * 100.0, 1) if is_parsed else 20.0,
-                "late_hdmg_share_pct": round(lt_hdmg / team_late_hdmg * 100.0, 1) if is_parsed else 20.0,
+                "late_gold_share_pct": round(lt_gold / team_late_gold * 100.0, 1) if is_parsed else None,
+                "late_hdmg_share_pct": round(lt_hdmg / team_late_hdmg * 100.0, 1) if is_parsed else None,
                 "late_kills": ltp.get("kills_count") or 0,
                 "late_deaths": ltp.get("deaths_count") or 0,
                 "tf_total_count": len(key_teamfights),
@@ -1639,6 +1640,7 @@ def analyze_match_data(
                 "solo_pickoffs": solo_pickoffs,
                 "low_dmg_tfs": low_dmg_tfs,
             }
+            tp.pop(" phase_telemetry_removed_placeholder", None)
 
     is_turbo = (match.get("game_mode") == 23)
     for rp in radiant_report:
@@ -1668,6 +1670,7 @@ def analyze_match_data(
         phases_data=phases_data,
         all_formatted_players=radiant_report + dire_report,
         grok_coaching=grok_coaching,
+        is_parsed=is_parsed,
     )
 
     draft_analysis_by_side = build_draft_and_combo_analysis(

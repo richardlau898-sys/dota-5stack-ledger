@@ -1743,7 +1743,7 @@ function buildStructuredFullReportHtml(report) {
     .join("");
 
   const keyTfs = (report.key_teamfights || []).slice(0, 6);
-  const tfForensicsList = df.teamfight_forensics || [];
+  const tfForensicsList = Array.isArray(df.teamfight_forensics) ? df.teamfight_forensics : [];
   const tfTableRows = keyTfs
     .map((tf, idx) => {
       const matchedTfIdx = tfForensicsList.findIndex((f) => f.time_range === tf.time_range);
@@ -3445,7 +3445,7 @@ async function downloadStructuredReportPdf() {
     );
 
     const keyTfs = (report.key_teamfights || []).slice(0, 6);
-    const tfForensicsList = df.teamfight_forensics || [];
+    const tfForensicsList = Array.isArray(df.teamfight_forensics) ? df.teamfight_forensics : [];
     if (keyTfs.length > 0) {
       drawSubSectionTitle("3.2 全场最高强度关键胜负手团战故事回放与经济拐点明细（AI 刀塔老炮复盘评书）");
       const ch3TfRows = keyTfs.map((tf, idx) => {
@@ -6827,7 +6827,8 @@ function renderDraftAndComboSection(report) {
     })
     .join("");
 
-  const picksOnly = (report.deep_forensics?.picks_order || []).filter((pb) => pb.is_pick);
+  const rawPicksOrder = report.deep_forensics?.picks_order;
+  const picksOnly = (Array.isArray(rawPicksOrder) ? rawPicksOrder : []).filter((pb) => pb.is_pick);
   const picksHtml =
     picksOnly.length > 0
       ? `
@@ -7391,6 +7392,10 @@ function renderTacticalMicroscopeSection(report) {
   if (!bodyEl) return;
 
   const df = report.deep_forensics || {};
+  if (df.available === false || report.is_parsed === false) {
+    bodyEl.innerHTML = `<div class="empty-state compact">需要先解析录像</div>`;
+    return;
+  }
   const { side, sideZh, oppZh } = getOwnAndOppPlayers(report);
   const oppSide = side === "radiant" ? "dire" : "radiant";
   const targetSide = state.microSide === "opp" ? oppSide : side;
@@ -8719,7 +8724,7 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
   const oppLamp = lm.opp_lamp_total ?? lm.lamp_opp_count ?? 0;
 
   // Relocated 3-lane 10m matchup cards so all laning analysis lives cleanly in Tab 4
-  const lanes = df.lane_matchups || [];
+  const lanes = Array.isArray(df.lane_matchups) ? df.lane_matchups : [];
   const lanesHtml =
     lanes.length > 0
       ? `
@@ -10627,7 +10632,7 @@ function analyzePlayerPhaseAndRoleContext(p, report) {
   });
 
   // Find which lane the player was in during 0-10m
-  const lanes = df.lane_matchups || [];
+  const lanes = Array.isArray(df.lane_matchups) ? df.lane_matchups : [];
   const myLane = lanes.find((ln) => {
     const arr = side === "dire" ? ln.dire_heroes : ln.radiant_heroes;
     return (arr || []).some((h) => h.hero_short_zh === p.hero_short_zh || Number(h.pos) === Number(p.pos));
@@ -11378,7 +11383,7 @@ function buildRichFourStageCardsHtml(report) {
   const lm = df.laning_mechanics_by_side?.[side] || {};
   const tp = df.tp_rotation_by_side?.[side] || {};
   const rm = df.role_mirror_by_side?.[side] || {};
-  const lanes = df.lane_matchups || [];
+  const lanes = Array.isArray(df.lane_matchups) ? df.lane_matchups : [];
 
   const laneOverviewBullet = `<span class="stage-key-pill">10m 对线总账</span> 10分钟人头比 <b>${sideZh} ${laneOwnKills} : ${laneOppKills} ${oppZh}</b>，经济差 <b style="color:${
     gold10Diff >= 0 ? "var(--green-light)" : "var(--red-light)"
@@ -13525,7 +13530,8 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
   const direObsNow = activeObsAtMin.filter((w) => w.side === "dire" || w.side === "夜魇").length;
 
   // Find active teamfight in this second window (±45 seconds around [start_sec, end_sec])
-  const tfForensics = report.deep_forensics?.teamfight_forensics || [];
+  const rawTfForensics = report.deep_forensics?.teamfight_forensics;
+  const tfForensics = Array.isArray(rawTfForensics) ? rawTfForensics : [];
   const keyTfs = report.key_teamfights || [];
   const activeTfForensic =
     tfForensics.find((tf) => {
@@ -14463,7 +14469,8 @@ function renderMinimap(report) {
   const visionData = report.vision_and_map_data || {};
   const allWards = visionData.wards || [];
   const heatmaps = visionData.lane_heatmaps || [];
-  const tfForensics = report.deep_forensics?.teamfight_forensics || [];
+  const rawTfForensics = report.deep_forensics?.teamfight_forensics;
+  const tfForensics = Array.isArray(rawTfForensics) ? rawTfForensics : [];
 
   let overlaySvg = "";
 
@@ -14801,7 +14808,7 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
   ]);
 
   if (phaseKey === "lane") {
-    const lanes = df.lane_matchups || [];
+    const lanes = Array.isArray(df.lane_matchups) ? df.lane_matchups : [];
     if (lanes.length === 0) return "";
     // Order lanes: Safe Lane first, Mid Lane second, Offlane third
     const sortedLanes = [...lanes].sort((a, b) => {
@@ -15898,7 +15905,12 @@ function renderKeyWindowsSection(report) {
       ? grok.windows
       : [];
   const tfs = report.key_teamfights || [];
-  const tfForensics = report.deep_forensics?.teamfight_forensics || [];
+  const rawTfForensics = report.deep_forensics?.teamfight_forensics;
+  if (report.deep_forensics?.available === false || rawTfForensics?.available === false || report.is_parsed === false) {
+    grid.innerHTML = `<div class="empty-state compact">需要先解析录像</div>`;
+    return;
+  }
+  const tfForensics = Array.isArray(rawTfForensics) ? rawTfForensics : [];
   const filterMode = state.tfSceneFilter || "top3";
 
   // Bind filter tab buttons once or sync active state

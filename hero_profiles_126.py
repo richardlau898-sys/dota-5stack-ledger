@@ -3040,9 +3040,9 @@ def build_hero_matchup_dossier(
     is_real_match = bool(
         duration_min > 5
         and (
-            p.get("kills_breakdown")
-            or p.get("killed_by_breakdown")
-            or (int(p.get("kills") or 0) + int(p.get("deaths") or 0) + int(p.get("assists") or 0)) > 0
+            (p.get("kills_breakdown") or {}).get("heroes")
+            or (p.get("killed_by_breakdown") or {}).get("heroes")
+            or p.get("ability_uses_rich")
         )
     )
     kills_by_hid, deaths_by_hid, kills_by_zh, deaths_by_zh = _extract_kill_death_maps(p)
