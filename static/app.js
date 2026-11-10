@@ -13800,15 +13800,15 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
               : `<circle cx="${cx}" cy="${cy}" r="14" fill="${strokeColor}" />`
           }
           ${deadOverlaySvg}
-          <title>[${isRad ? "天辉" : "夜魇"}${pSnap.pos}号位] ${escapeHtml(hName)} (${escapeHtml(
+          <title>[${isRad ? "天辉" : "夜魇"}${escapeHtml(pSnap.pos)}号位] ${escapeHtml(hName)} (${escapeHtml(
         pSnap.personaname || ""
-      )}) · ${timeStrNow} 净值 ${fmtNum(pSnap.networth || 0)} 金 · 累计伤害 ${fmtNum(pSnap.hero_damage || 0)}${
+      )}) · ${escapeHtml(timeStrNow)} 净值 ${fmtNum(pSnap.networth || 0)} 金 · 累计伤害 ${fmtNum(pSnap.hero_damage || 0)}${
         pt ? ` · 本波团战伤害 ${fmtNum(pt.damage || 0)}` : ""
       }${
         isDeadHero && deadInfo
-          ? ` · 💀 ${deadInfo.time_str || ""} 被 ${deadInfo.killer_zh || "敌方"} 击杀 (泉水读秒 ${deadInfo.time_dead || 0}s)`
+          ? ` · 💀 ${escapeHtml(deadInfo.time_str || "")} 被 ${escapeHtml(deadInfo.killer_zh || "敌方")} 击杀 (泉水读秒 ${escapeHtml(deadInfo.time_dead || 0)}s)`
           : ""
-      }${unpressedInc ? ` · 🚨 ${unpressedInc.detail || "憋死保命装"}` : ""}</title>
+      }${unpressedInc ? ` · 🚨 ${escapeHtml(unpressedInc.detail || "憋死保命装")}` : ""}</title>
         </g>
       `;
     })
@@ -14810,8 +14810,8 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
         const oppLhDn = (side === "radiant" ? ln.dire_lh_dn : ln.radiant_lh_dn) || "0/0";
         const laneGoldDiff = ownGold10 - oppGold10;
 
-        const ownNames = ownHeroes.map((h) => `${h.pos}号位${h.hero_short_zh}`).join(" + ");
-        const oppNames = oppHeroes.map((h) => `${h.pos}号位${h.hero_short_zh}`).join(" + ");
+        const ownNames = ownHeroes.map((h) => `${escapeHtml(h.pos)}号位${escapeHtml(h.hero_short_zh)}`).join(" + ");
+        const oppNames = oppHeroes.map((h) => `${escapeHtml(h.pos)}号位${escapeHtml(h.hero_short_zh)}`).join(" + ");
         const hasPos1 = ownHeroes.some((h) => Number(h.pos) === 1);
         const hasPos2 = ownHeroes.some((h) => Number(h.pos) === 2);
         const laneRoleLabel = hasPos1
@@ -14839,17 +14839,21 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
         // Analyze hero matchup context objectively (prefer backend v7.0 lane_chemistry_by_side)
         const oppBullies = oppHeroes.filter((h) => LANE_BULLY_HEROES.has(h.hero_short_zh));
         const ownBullies = ownHeroes.filter((h) => LANE_BULLY_HEROES.has(h.hero_short_zh));
-        const backendLaneChem = ln.lane_chemistry_by_side?.[side] || "";
+        const backendLaneChem = ln.lane_chemistry_by_side?.[side] || null;
         let matchupContextHtml = "";
-        if (backendLaneChem) {
-          matchupContextHtml = injectHeroLogosIntoHtml(backendLaneChem, report);
+        if (backendLaneChem && typeof backendLaneChem === "object") {
+          matchupContextHtml = `<b>${escapeHtml(backendLaneChem.header || "英雄对位评估")}：</b>${escapeHtml(
+            backendLaneChem.summary || ""
+          )}`;
+        } else if (typeof backendLaneChem === "string" && backendLaneChem.trim()) {
+          matchupContextHtml = escapeHtml(backendLaneChem.replace(/<[^>]+>/g, ""));
         } else if (hasPos1) {
           const p1 = ownHeroes.find((h) => Number(h.pos) === 1) || ownHeroes[0];
           const p5 = ownHeroes.find((h) => Number(h.pos) >= 4) || ownHeroes[1];
           if (laneGoldDiff >= 800) {
             matchupContextHtml = `<b>英雄对位评估（本方组合占优并完美兑现）：</b>${ownNames} 具备极强的线上换血与斩杀联动，面对敌方 ${oppNames}，${
-              p5 ? `5号位${p5.hero_short_zh}主动顶前排给足压力` : "辅助保线到位"
-            }，让 1号位${p1?.hero_short_zh || ""}在毫无干扰的环境下无解肥正反补并完成线杀碾压。`;
+              p5 ? `5号位${escapeHtml(p5.hero_short_zh)}主动顶前排给足压力` : "辅助保线到位"
+            }，让 1号位${escapeHtml(p1?.hero_short_zh || "")}在毫无干扰的环境下无解肥正反补并完成线杀碾压。`;
           } else if (oppBullies.length > 0 && laneGoldDiff < 0) {
             matchupContextHtml = `<b>英雄对位评估（敌方劣势路强消耗组合施压）：</b>敌方派出了 ${oppNames}（含线上强消耗/恶心机制），本方优势路前期换血压力较大，重心在于拉野控线保1号位基础补刀。`;
           } else {
@@ -14860,28 +14864,28 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
           const opp2 = oppHeroes[0];
           const isSingleTarget = p2 && SINGLE_TARGET_MIDS.has(p2.hero_short_zh);
           if (isSingleTarget && laneGoldDiff >= 0) {
-            matchupContextHtml = `<b>英雄对位评估（单点法系压制 vs 高攻反补肉核）：</b>本方 2号位<b>${
+            matchupContextHtml = `<b>英雄对位评估（单点法系压制 vs 高攻反补肉核）：</b>本方 2号位<b>${escapeHtml(
               p2.hero_short_zh
-            }</b>属于全单体高爆发技能机制、天生缺乏 AOE 推线清兵能力，面对敌方高攻击力/高血量的 <b>${
+            )}</b>属于全单体高爆发技能机制、天生缺乏 AOE 推线清兵能力，面对敌方高攻击力/高血量的 <b>${escapeHtml(
               opp2?.hero_short_zh || "中单"
-            }</b> 拼纯补刀数天然吃亏（${p2.lh10}/${p2.dn10}刀 vs ${opp2?.lh10 || 0}/${
+            )}</b> 拼纯补刀数天然吃亏（${p2.lh10}/${p2.dn10}刀 vs ${opp2?.lh10 || 0}/${
               opp2?.dn10 || 0
-            }刀）；但 ${p2.hero_short_zh} 扬长避短，用高频法术耗血与单杀/游走硬生生在10分钟经济上反超 <b>+${fmtNum(
+            }刀）；但 ${escapeHtml(p2.hero_short_zh)} 扬长避短，用高频法术耗血与单杀/游走硬生生在10分钟经济上反超 <b>+${fmtNum(
               laneGoldDiff
             )} 金</b>！`;
           } else if (oppBullies.length > 0 && laneGoldDiff < -300) {
-            matchupContextHtml = `<b>英雄对位评估（先天对位被克制）：</b>面对敌方线上强势中单 <b>${
+            matchupContextHtml = `<b>英雄对位评估（先天对位被克制）：</b>面对敌方线上强势中单 <b>${escapeHtml(
               opp2?.hero_short_zh || ""
-            }</b>，本方 <b>${p2?.hero_short_zh || ""}</b> 前期换血与控符处于天然劣势，需依靠控水符与双辅助游走破局。`;
+            )}</b>，本方 <b>${escapeHtml(p2?.hero_short_zh || "")}</b> 前期换血与控符处于天然劣势，需依靠控水符与双辅助游走破局。`;
           } else {
-            matchupContextHtml = `<b>英雄对位评估：</b>中路 <b>${p2?.hero_short_zh || ""}</b> 对决 <b>${
+            matchupContextHtml = `<b>英雄对位评估：</b>中路 <b>${escapeHtml(p2?.hero_short_zh || "")}</b> 对决 <b>${escapeHtml(
               opp2?.hero_short_zh || ""
-            }</b>，10分钟对位经济差 <b>${fmtSigned(laneGoldDiff)} 金</b>。`;
+            )}</b>，10分钟对位经济差 <b>${fmtSigned(laneGoldDiff)} 金</b>。`;
           }
         } else {
           // Offlane (Pos 3 + Pos 4 vs Enemy Pos 1 + Pos 5/4)
           if (oppBullies.length > 0) {
-            const bullyNames = oppBullies.map((b) => b.hero_short_zh).join("+");
+            const bullyNames = oppBullies.map((b) => escapeHtml(b.hero_short_zh)).join("+");
             matchupContextHtml = `<b>英雄对位评估（⚠️ 敌方强线霸/高减速消耗组合，先天高压抗压路）：</b>敌方优势路拿出了 <b>${oppNames}</b>（其中 <b>${bullyNames}</b> 线上减速粘人与持续消耗极度恶心，再加敌方中单游走威胁），而本方 <b>${ownNames}</b> 缺乏硬位移逃生，一旦过河道极易被粘死。在此天然劣势对位下，虽然阵亡偏多，但两人靠凶悍换血与拉野抢符硬把10分钟总经济差距咬在 <b>${fmtSigned(
               laneGoldDiff
             )} 金</b>（${fmtNum(ownGold10)} vs ${fmtNum(oppGold10)}）。`;
@@ -14910,9 +14914,13 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
             const wisdomCnt = Number(ctx.interactRow?.wisdom_runes ?? 0);
             const lampCnt = Number(ctx.interactRow?.watcher_lamp ?? 0);
             const killsStr =
-              (lp.kills_events || []).map((ke) => `${ke.time_str}杀${ke.victim_hero}`).join("、") || "0杀";
+              (lp.kills_events || [])
+                .map((ke) => `${escapeHtml(ke.time_str)}杀${escapeHtml(ke.victim_hero)}`)
+                .join("、") || "0杀";
             const deathsStr =
-              (lp.deaths_events || []).map((de) => `${de.time_str}被${de.killer}杀`).join("、") || "0死完美生存";
+              (lp.deaths_events || [])
+                .map((de) => `${escapeHtml(de.time_str)}被${escapeHtml(de.killer)}杀`)
+                .join("、") || "0死完美生存";
 
             let roleAuditText = "";
             if (pos === 1) {

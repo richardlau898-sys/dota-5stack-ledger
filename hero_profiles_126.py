@@ -3332,7 +3332,7 @@ def analyze_lane_matchup_chemistry(
             if rel["opp_counters_own"]:
                 dire_counter_notes.append(f"{dp.get('hero_short_zh')}天生克制{rp.get('hero_short_zh')}")
 
-    def _build_for_perspective(own_side: str) -> str:
+    def _build_for_perspective(own_side: str) -> Dict[str, Any]:
         is_rad = own_side == "radiant"
         own_lp = rad_lp if is_rad else dire_lp
         opp_lp = dire_lp if is_rad else rad_lp
@@ -3351,39 +3351,51 @@ def analyze_lane_matchup_chemistry(
             adv_tag = f"（先天逆风对位：{opp_adv_notes[0]}）"
 
         if lane_num == 2:
+            header = f"英雄对位机制复盘{adv_tag}"
             p_own = own_lp[0] if own_lp else {}
             p_opp = opp_lp[0] if opp_lp else {}
             prof_own = get_hero_profile_126(int(p_own.get("hero_id") or 0), 2, p_own.get("hero_short_zh", ""))
-            prof_opp = get_hero_profile_126(int(p_opp.get("hero_id") or 0), 2, p_opp.get("hero_short_zh", ""))
             rule_own = prof_own.get("early_rule", "稳补刀控符")
             if own_diff >= 600:
-                return (
-                    f"<b>英雄对位机制复盘{adv_tag}：</b>中路 <b>{own_n}</b>（依靠{own_m}；对线准则：{rule_own}）正面对决 <b>{opp_n}</b>（{opp_m}）。"
-                    f"本方成功发挥技能射程与推线控符优势，压制敌方正反补并在10分钟打出 <b>+{own_diff:,} 金</b> 的对位压制！"
+                summary = (
+                    f"中路 {own_n}（依靠{own_m}；对线准则：{rule_own}）正面对决 {opp_n}（{opp_m}）。"
+                    f"本方发挥技能射程与推线控符优势，压制敌方正反补并在10分钟打出 +{own_diff:,} 金 的对位领先。"
                 )
             elif own_diff <= -600:
-                return (
-                    f"<b>英雄对位机制复盘{adv_tag}：</b>中路 <b>{own_n}</b>（{own_m}）对阵 <b>{opp_n}</b>（依靠{opp_m}强压兵线与血量）。"
-                    f"面对{p_opp.get('hero_short_zh','敌方中单')}的线上消耗机制，本方中路换血与控符受制，10分钟落后 <b>{own_diff:,} 金</b>（破局解法：提前运大药仙灵火保状态、推线控2/4分钟水符或呼叫4号位游走灌瓶）。"
+                summary = (
+                    f"中路 {own_n}（{own_m}）对阵 {opp_n}（依靠{opp_m}施压兵线与血量）。"
+                    f"面对{p_opp.get('hero_short_zh','敌方中单')}的线上消耗机制，本方中路换血与控符受制，10分钟落后 {own_diff:,} 金（破局解法：提前运大药仙灵火保状态、推线控2/4分钟水符或呼叫4号位游走灌瓶）。"
                 )
-            return (
-                f"<b>英雄对位机制复盘{adv_tag}：</b>中路 <b>{own_n}</b>（{own_m}）与 <b>{opp_n}</b>（{opp_m}）展开均势换血与水符争夺，10分钟经济差 <b>{own_diff:+d} 金</b>。"
-            )
+            else:
+                summary = (
+                    f"中路 {own_n}（{own_m}）与 {opp_n}（{opp_m}）展开均势换血与水符争夺，10分钟经济差 {own_diff:+d} 金。"
+                )
+        else:
+            header = f"2v2 英雄对线化学反应{adv_tag}"
+            if own_diff >= 600:
+                summary = (
+                    f"本方 {own_n} 依靠【{own_m}】形成先手与消耗连招，面对敌方 {opp_n}（{opp_m}），"
+                    f"10分钟领先 +{own_diff:,} 金。"
+                )
+            elif own_diff <= -600:
+                summary = (
+                    f"敌方 {opp_n} 凭借【{opp_m}】的消耗/控制联动给本方 {own_n}（{own_m}）造成上线压力，"
+                    f"10分钟本路经济落后 {own_diff:,} 金（破局解法：辅助第一时间用真眼封死敌方拉野点、勾兵拉野重置兵线位置，避免在兵线远离本方塔下时硬拼）。"
+                )
+            else:
+                summary = (
+                    f"本方 {own_n}（{own_m}）对阵敌方 {opp_n}（{opp_m}），双方围绕拉野消兵与3/6分钟莲花池展开拉锯，10分钟经济差 {own_diff:+d} 金。"
+                )
 
-        # 边路 2v2 对线化学反应
-        if own_diff >= 600:
-            return (
-                f"<b>2v2 英雄对线化学反应{adv_tag}：</b>本方 <b>{own_n}</b> 依靠【{own_m}】形成强力先手与消耗连招，面对敌方 <b>{opp_n}</b>（{opp_m}），"
-                f"完美打出了英雄组合的2~3级击杀威胁与控线压制，10分钟领先 <b>+{own_diff:,} 金</b>！"
-            )
-        elif own_diff <= -600:
-            return (
-                f"<b>2v2 英雄对线化学反应{adv_tag}：</b>敌方 <b>{opp_n}</b> 凭借【{opp_m}】的高频消耗/控制联动给本方 <b>{own_n}</b>（{own_m}）造成了极大上线压力，"
-                f"导致10分钟本路经济落后 <b>{own_diff:,} 金</b>（破局解法：辅助必须第一时间用真眼封死敌方拉野点、勾兵拉野重置兵线位置，切忌在兵线远离本方塔下时硬拼送双杀）。"
-            )
-        return (
-            f"<b>2v2 英雄对线化学反应{adv_tag}：</b>本方 <b>{own_n}</b>（{own_m}）对阵敌方 <b>{opp_n}</b>（{opp_m}），双方围绕拉野消兵与3/6分钟莲花池展开拉锯，10分钟经济差 <b>{own_diff:+d} 金</b>。"
-        )
+        return {
+            "header": header,
+            "own_names": own_n,
+            "own_mech": own_m,
+            "opp_names": opp_n,
+            "opp_mech": opp_m,
+            "own_diff": int(own_diff),
+            "summary": summary,
+        }
 
     return {
         "radiant": _build_for_perspective("radiant"),

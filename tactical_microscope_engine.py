@@ -1824,7 +1824,7 @@ def build_tactical_microscope(
                         "zero_abilities": is_zero_spell,
                         "tf_damage": dmg_val,
                         "severity": severity,
-                        "detail": f"[{t_range}] {fp['pos']}号位 {fp['hero_short_zh']}({fp['personaname']})：{desc}。",
+                        "detail": f"[{t_range}] {fp['pos']}号位 {fp['hero_short_zh']}：{desc}。",
                     })
 
             # 统计整局主动保命装总按键次数
