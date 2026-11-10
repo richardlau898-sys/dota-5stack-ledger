@@ -1671,14 +1671,14 @@ def analyze_match_data(
     assign_team_blame_percentages(radiant_report)
     assign_team_blame_percentages(dire_report)
 
+    grok_coaching = load_cached_grok_coaching(match_id, focus_side_resolved)
+
     mvp_and_culprit = select_match_mvp_and_culprit(
-        radiant_report, dire_report, radiant_win, user_team_side
+        radiant_report, dire_report, radiant_win, user_team_side, grok_coaching=grok_coaching
     )
     match_narrative = build_four_stage_narrative(
         match, radiant_report, dire_report, economy_timeline, key_teamfights, user_team_side
     )
-
-    grok_coaching = load_cached_grok_coaching(match_id, focus_side_resolved)
 
     phases_data = enrich_phases_with_evaluations(
         phases_data=phases_data,

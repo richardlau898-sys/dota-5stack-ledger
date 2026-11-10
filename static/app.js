@@ -1609,48 +1609,14 @@ function buildStructuredFullReportHtml(report) {
   const grok = report.grok_coaching || {};
   const draft = report.draft_analysis_by_side?.[side] || report.draft_analysis || {};
 
-  // Normalize 100% contribution and 100% blame shares (preferring AI coach grok_share_pct)
-  const rawContribSum =
-    own.reduce((s, p) => {
-      const gp = findGrokPlayerEntry(p, report);
-      const val = ownWon && gp?.grok_share_pct ? Number(gp.grok_share_pct) : Number(p.contrib_share_pct ?? p.mvp_score ?? 20);
-      return s + Math.max(1, val);
-    }, 0) || 100;
-  const contribMap = new Map();
-  own.forEach((p) => {
-    const gp = findGrokPlayerEntry(p, report);
-    const val = ownWon && gp?.grok_share_pct ? Number(gp.grok_share_pct) : Number(p.contrib_share_pct ?? p.mvp_score ?? 20);
-    const pct = Number(((Math.max(1, val) / rawContribSum) * 100).toFixed(1));
-    contribMap.set(Number(p.player_slot), pct);
-  });
-
-  const rawBlameSum =
-    own.reduce((s, p) => {
-      const gp = findGrokPlayerEntry(p, report);
-      const val = !ownWon && gp?.grok_share_pct ? Number(gp.grok_share_pct) : Number(p.blame_share_pct || 20);
-      return s + Math.max(1, val);
-    }, 0) || 100;
-  const blameMap = new Map();
-  own.forEach((p) => {
-    const gp = findGrokPlayerEntry(p, report);
-    const val = !ownWon && gp?.grok_share_pct ? Number(gp.grok_share_pct) : Number(p.blame_share_pct || 20);
-    const pct = Number(((Math.max(1, val) / rawBlameSum) * 100).toFixed(1));
-    blameMap.set(Number(p.player_slot), pct);
-  });
-
-  const sortedByContrib = [...own].sort(
-    (a, b) =>
-      (contribMap.get(Number(b.player_slot)) || 0) - (contribMap.get(Number(a.player_slot)) || 0) ||
-      getHeroScore100(b, report) - getHeroScore100(a, report)
-  );
-  const sortedByBlame = [...own].sort(
-    (a, b) =>
-      (blameMap.get(Number(b.player_slot)) || 0) - (blameMap.get(Number(a.player_slot)) || 0) ||
-      getHeroScore100(a, report) - getHeroScore100(b, report)
-  );
-
-  const topMvp = sortedByContrib[0] || own[0];
-  const topCulprit = sortedByBlame[0] || own[0];
+  const {
+    contribMap,
+    blameMap,
+    contribOrder: sortedByContrib,
+    blameOrder: sortedByBlame,
+    mvpPlayer: topMvp,
+    culpritPlayer: topCulprit,
+  } = getCanonicalSideRanking(report, side);
 
   // Chapter I: 4-Stage Audit Grid
   const stages = report.match_narrative?.stages || [];
@@ -2354,34 +2320,14 @@ async function downloadStructuredReportPdf() {
     const draft = report.draft_analysis_by_side?.[side] || report.draft_analysis || {};
     const rm = df.role_mirror_by_side?.[side] || {};
 
-    // Normalize 100% contribution and blame shares
-    const rawContribSum =
-      own.reduce((s, p) => s + Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)), 0) || 100;
-    const contribMap = new Map();
-    own.forEach((p) => {
-      contribMap.set(
-        Number(p.player_slot),
-        Number(((Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)) / rawContribSum) * 100).toFixed(1))
-      );
-    });
-    const rawBlameSum =
-      own.reduce((s, p) => s + Math.max(1, Number(p.blame_share_pct || 20)), 0) || 100;
-    const blameMap = new Map();
-    own.forEach((p) => {
-      blameMap.set(
-        Number(p.player_slot),
-        Number(((Math.max(1, Number(p.blame_share_pct || 20)) / rawBlameSum) * 100).toFixed(1))
-      );
-    });
-
-    const sortedByContrib = [...own].sort(
-      (a, b) => (contribMap.get(Number(b.player_slot)) || 0) - (contribMap.get(Number(a.player_slot)) || 0)
-    );
-    const sortedByBlame = [...own].sort(
-      (a, b) => (blameMap.get(Number(b.player_slot)) || 0) - (blameMap.get(Number(a.player_slot)) || 0)
-    );
-    const topMvp = sortedByContrib[0] || own[0];
-    const topCulprit = sortedByBlame[0] || own[0];
+    const {
+      contribMap,
+      blameMap,
+      contribOrder: sortedByContrib,
+      blameOrder: sortedByBlame,
+      mvpPlayer: topMvp,
+      culpritPlayer: topCulprit,
+    } = getCanonicalSideRanking(report, side);
 
     // Map pos -> own player and opp player for quick icon lookup in tables
     const ownByPos = new Map(own.map((p) => [Number(p.pos), p]));
@@ -4401,6 +4347,118 @@ function getOwnAndOppPlayers(report) {
     own: [...own].sort((a, b) => (a.pos || 9) - (b.pos || 9)),
     opp: [...opp].sort((a, b) => (a.pos || 9) - (b.pos || 9)),
     all: [...rad, ...dire],
+  };
+}
+
+function getCanonicalSideRanking(report, targetSide = null) {
+  const { side: defaultSide, own: defaultOwn, won: defaultWon } = getOwnAndOppPlayers(report);
+  const side = targetSide === "radiant" || targetSide === "dire" ? targetSide : defaultSide;
+  const radWon = Boolean(report?.radiant_win ?? report?.winner === "天辉");
+  const ownWon = side === "radiant" ? radWon : !radWon;
+  const own =
+    side === defaultSide
+      ? defaultOwn
+      : (side === "radiant" ? report?.radiant_pos_1_to_5 : report?.dire_pos_1_to_5) || [];
+  const bySlot = new Map(own.map((p) => [Number(p.player_slot), p]));
+  const backendRank = report?.mvp?.rankings_by_side?.[side];
+
+  const rawContribVal = (p) => {
+    const gp = findGrokPlayerEntry(p, report);
+    if (ownWon && gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
+    return Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20));
+  };
+  const rawContribSum = own.reduce((s, p) => s + rawContribVal(p), 0) || 100;
+  const contribMap = new Map();
+  own.forEach((p) => {
+    contribMap.set(Number(p.player_slot), Number(((rawContribVal(p) / rawContribSum) * 100).toFixed(1)));
+  });
+
+  const rawBlameVal = (p) => {
+    const gp = findGrokPlayerEntry(p, report);
+    if (!ownWon && gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
+    return Math.max(1, Number(p.blame_share_pct || 20));
+  };
+  const rawBlameSum = own.reduce((s, p) => s + rawBlameVal(p), 0) || 100;
+  const blameMap = new Map();
+  own.forEach((p) => {
+    blameMap.set(Number(p.player_slot), Number(((rawBlameVal(p) / rawBlameSum) * 100).toFixed(1)));
+  });
+
+  let contribOrder = [];
+  if (Array.isArray(backendRank?.contrib_order_slots) && backendRank.contrib_order_slots.length) {
+    contribOrder = backendRank.contrib_order_slots.map((slot) => bySlot.get(Number(slot))).filter(Boolean);
+  }
+  if (contribOrder.length !== own.length) {
+    contribOrder = [...own].sort(
+      (a, b) =>
+        (Number(a.contrib_rank || 0) && Number(b.contrib_rank || 0)
+          ? Number(a.contrib_rank) - Number(b.contrib_rank)
+          : 0) ||
+        (contribMap.get(Number(b.player_slot)) || 0) - (contribMap.get(Number(a.player_slot)) || 0) ||
+        getHeroScore100(b, report) - getHeroScore100(a, report)
+    );
+  }
+
+  let blameOrder = [];
+  if (Array.isArray(backendRank?.blame_order_slots) && backendRank.blame_order_slots.length) {
+    blameOrder = backendRank.blame_order_slots.map((slot) => bySlot.get(Number(slot))).filter(Boolean);
+  }
+  if (blameOrder.length !== own.length) {
+    blameOrder = [...own].sort(
+      (a, b) =>
+        (Number(a.blame_rank || 0) && Number(b.blame_rank || 0)
+          ? Number(a.blame_rank) - Number(b.blame_rank)
+          : 0) ||
+        (blameMap.get(Number(b.player_slot)) || 0) - (blameMap.get(Number(a.player_slot)) || 0) ||
+        getHeroScore100(a, report) - getHeroScore100(b, report)
+    );
+  }
+
+  const mvpPlayer =
+    (backendRank?.mvp_slot !== undefined ? bySlot.get(Number(backendRank.mvp_slot)) : null) ||
+    contribOrder[0] ||
+    own[0] ||
+    null;
+  const runnerUpPlayer =
+    (backendRank?.runner_up_slot !== undefined ? bySlot.get(Number(backendRank.runner_up_slot)) : null) ||
+    contribOrder[1] ||
+    contribOrder[0] ||
+    own[0] ||
+    null;
+  const culpritPlayer =
+    (backendRank?.culprit_slot !== undefined ? bySlot.get(Number(backendRank.culprit_slot)) : null) ||
+    blameOrder[0] ||
+    own[0] ||
+    null;
+  const secondCulpritPlayer =
+    (backendRank?.second_culprit_slot !== undefined
+      ? bySlot.get(Number(backendRank.second_culprit_slot))
+      : null) ||
+    blameOrder[1] ||
+    blameOrder[0] ||
+    own[0] ||
+    null;
+
+  return {
+    side,
+    ownWon,
+    own,
+    contribOrder,
+    blameOrder,
+    contribMap,
+    blameMap,
+    mvpPlayer,
+    runnerUpPlayer,
+    culpritPlayer,
+    secondCulpritPlayer,
+    sortedByContrib: contribOrder.map((p) => ({
+      player: p,
+      contribShare: contribMap.get(Number(p.player_slot)) ?? 20,
+    })),
+    sortedByBlame: blameOrder.map((p) => ({
+      player: p,
+      blameShare: blameMap.get(Number(p.player_slot)) ?? 20,
+    })),
   };
 }
 
@@ -10325,17 +10383,11 @@ function toggleVoiceBroadcast() {
   const grok = report.grok_coaching;
   const df = report.deep_forensics || {};
 
-  const sortedBlame = [...own].sort(
-    (a, b) => (b.blame_share_pct || 0) - (a.blame_share_pct || 0)
-  );
-  const sortedContrib = [...own].sort(
-    (a, b) =>
-      (b.contrib_share_pct ?? b.rating_score ?? 0) -
-      (a.contrib_share_pct ?? a.rating_score ?? 0)
-  );
-  const topCulprit = sortedBlame[0];
-  const mvpPlayer = sortedContrib[0];
-  const runnerUp = sortedContrib[1] || sortedContrib[0];
+  const {
+    culpritPlayer: topCulprit,
+    mvpPlayer,
+    runnerUpPlayer: runnerUp,
+  } = getCanonicalSideRanking(report, side);
 
   const speechParts = [
     `刀塔二五黑战后复盘语音播报。比赛编号 ${report.match_id}，${sideZh}${
@@ -13085,40 +13137,12 @@ function renderVerdictAndBlameSection(report) {
     Array.isArray(grok.players) &&
     grok.players.some((gp) => gp && (Number(gp.grok_score) > 0 || Number(gp.grok_share_pct) > 0));
 
-  const rawContribVal = (p) => {
-    const gp = findGrokPlayerEntry(p, report);
-    if (won && gp && Number(gp.grok_share_pct) > 0) {
-      return Number(gp.grok_share_pct);
-    }
-    return Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20));
-  };
-  const rawContribSum = own.reduce((s, p) => s + rawContribVal(p), 0) || 100;
-  const sortedByContrib = own
-    .map((p) => ({
-      player: p,
-      contribShare: Number(((rawContribVal(p) / rawContribSum) * 100).toFixed(1)),
-    }))
-    .sort((a, b) => b.contribShare - a.contribShare);
-
-  const rawBlameVal = (p) => {
-    const gp = findGrokPlayerEntry(p, report);
-    if (!won && gp && Number(gp.grok_share_pct) > 0) {
-      return Number(gp.grok_share_pct);
-    }
-    return Math.max(1, Number(p.blame_share_pct || 20));
-  };
-  const rawBlameSum = own.reduce((s, p) => s + rawBlameVal(p), 0) || 100;
-  const sortedByBlame = own
-    .map((p) => ({
-      player: p,
-      blameShare: Number(((rawBlameVal(p) / rawBlameSum) * 100).toFixed(1)),
-    }))
-    .sort((a, b) => b.blameShare - a.blameShare);
-
-  // Pick the 3rd card player in a WIN: if Grok scored players, pick the player with the lowest Grok score / contribution;
-  // otherwise fall back to struggle index.
-  const top1 = sortedByContrib[0]?.player;
-  const top2 = sortedByContrib[1]?.player;
+  const {
+    sortedByContrib,
+    sortedByBlame,
+    mvpPlayer: top1,
+    runnerUpPlayer: top2,
+  } = getCanonicalSideRanking(report, side);
   const msSide = df.map_space_by_side?.[side] || {};
   const computeStruggleIndex = (p) => {
     if (!p) return 0;
@@ -13341,17 +13365,16 @@ function renderVerdictAndBlameSection(report) {
       // LOSS mode: #1 Blame, #2 Blame, #1 SVP (highest Grok score / lowest blame), and remaining 2 teammates
       const c1P = sortedByBlame[0]?.player || own[0];
       const c2P = (sortedByBlame[1] || sortedByBlame[0])?.player || own[1] || own[0];
-      const svpCandidate =
-        [...own]
-          .filter(
+      const svpP =
+        sortedByContrib
+          .map((x) => x.player)
+          .find(
             (x) =>
               Number(x.player_slot) !== Number(c1P?.player_slot) &&
               Number(x.player_slot) !== Number(c2P?.player_slot)
-          )
-          .sort((a, b) => getHeroScore100(b, report) - getHeroScore100(a, report))[0] ||
-        sortedByContrib[0]?.player ||
+          ) ||
+        top1 ||
         own[own.length - 1];
-      const svpP = svpCandidate;
       const orderedLossPlayers = [
         c1P,
         c2P,
@@ -17189,24 +17212,27 @@ function renderPlayersForensicsList(report) {
     listToRender = [...own, ...opp];
   }
 
+  const ownRanking = getCanonicalSideRanking(report, side);
+  const oppSide = side === "radiant" ? "dire" : "radiant";
+  const oppRanking = getCanonicalSideRanking(report, oppSide);
   const getPlayerEffectiveShare = (p) => {
-    const gp = findGrokPlayerEntry(p, report);
-    if (gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
-    return p.won ? Number(p.contrib_share_pct || 20) : Number(p.blame_share_pct || 20);
+    const slotNum = Number(p.player_slot);
+    if (ownRanking.contribMap.has(slotNum)) {
+      return ownWon ? ownRanking.contribMap.get(slotNum) : ownRanking.blameMap.get(slotNum);
+    }
+    return oppRanking.ownWon ? oppRanking.contribMap.get(slotNum) || 20 : oppRanking.blameMap.get(slotNum) || 20;
   };
 
-  const maxCulpritSlot = !ownWon
-    ? [...own].sort((a, b) => getPlayerEffectiveShare(b) - getPlayerEffectiveShare(a))[0]?.player_slot
-    : null;
-  const mvpSlot = ownWon
-    ? [...own].sort((a, b) => getPlayerEffectiveShare(b) - getPlayerEffectiveShare(a))[0]?.player_slot
-    : report.mvp?.mvp_player?.player_slot;
+  const maxCulpritSlot = !ownWon ? ownRanking.culpritPlayer?.player_slot : null;
+  const mvpSlot = ownRanking.mvpPlayer?.player_slot;
 
   // Determine the #1 Most Important Player in listToRender for default spotlight
   const defaultFocusPlayer =
-    [...listToRender].sort((a, b) => {
-      return getPlayerEffectiveShare(b) - getPlayerEffectiveShare(a);
-    })[0] || listToRender[0];
+    state.activeTeamTab === "own"
+      ? (ownWon ? ownRanking.mvpPlayer : ownRanking.culpritPlayer) || listToRender[0]
+      : state.activeTeamTab === "opp"
+      ? (oppRanking.ownWon ? oppRanking.mvpPlayer : oppRanking.culpritPlayer) || listToRender[0]
+      : [...listToRender].sort((a, b) => getPlayerEffectiveShare(b) - getPlayerEffectiveShare(a))[0] || listToRender[0];
 
   const defaultFocusSlot = Number(defaultFocusPlayer?.player_slot ?? 0);
   const selectedSlotMode = state.forensicSelectedSlot ?? "focus";
@@ -18841,22 +18867,19 @@ function openSharePosterDialog(report) {
     (side === "radiant" && Boolean(report.radiant_win)) ||
     (side === "dire" && !report.radiant_win);
   const grok = report.grok_coaching;
+  const {
+    contribMap,
+    blameMap,
+    contribOrder: sortedContrib,
+    blameOrder: sortedBlame,
+    culpritPlayer: topCulprit,
+    mvpPlayer,
+    runnerUpPlayer,
+  } = getCanonicalSideRanking(report, side);
   const getEffShare = (p) => {
-    const gp = findGrokPlayerEntry(p, report);
-    if (gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
-    return won ? Number(p.contrib_share_pct ?? 20) : Number(p.blame_share_pct ?? 20);
+    const slotNum = Number(p?.player_slot);
+    return won ? contribMap.get(slotNum) ?? Number(p?.contrib_share_pct ?? 20) : blameMap.get(slotNum) ?? Number(p?.blame_share_pct ?? 20);
   };
-  const sortedBlame = [...own].sort(
-    (a, b) => getEffShare(b) - getEffShare(a) || getHeroScore100(a, report) - getHeroScore100(b, report)
-  );
-  const sortedContrib = [...own].sort(
-    (a, b) => getEffShare(b) - getEffShare(a) || getHeroScore100(b, report) - getHeroScore100(a, report)
-  );
-  const topCulprit = sortedBlame[0];
-  const mvpPlayer = won
-    ? sortedContrib[0]
-    : [...own].sort((a, b) => getHeroScore100(b, report) - getHeroScore100(a, report))[0] || sortedContrib[0];
-  const runnerUpPlayer = sortedContrib[1] || sortedContrib[0];
 
   const df = report.deep_forensics || {};
   const rawExec = df.hero_execution_by_side?.[side];

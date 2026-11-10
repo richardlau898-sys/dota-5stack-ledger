@@ -1297,6 +1297,7 @@ def select_match_mvp_and_culprit(
     dire_players: List[Dict[str, Any]],
     radiant_win: bool,
     user_team_side: Optional[str],
+    grok_coaching: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     评选:
@@ -1305,6 +1306,91 @@ def select_match_mvp_and_culprit(
     3. 败方 SVP (Losing Team Best)
     4. 车队头号大锅 / 一级战犯 (仅在败局重点处刑；胜局展示头号首功 + 破阵二当家 + 100% 胜局贡献榜)
     """
+    grok_side = (grok_coaching or {}).get("side") if isinstance(grok_coaching, dict) else None
+    grok_players = (grok_coaching or {}).get("players") if isinstance(grok_coaching, dict) else None
+
+    def _find_grok_entry(p: Dict[str, Any], side_key: str) -> Optional[Dict[str, Any]]:
+        if not isinstance(grok_players, list) or not grok_players:
+            return None
+        if grok_side and grok_side != side_key:
+            return None
+        slot = p.get("player_slot")
+        pos = p.get("pos")
+        h_short = p.get("hero_short_zh")
+        for gp in grok_players:
+            if not isinstance(gp, dict):
+                continue
+            if slot is not None and gp.get("slot") is not None and int(gp.get("slot")) == int(slot):
+                return gp
+            if pos is not None and gp.get("pos") is not None and int(gp.get("pos")) == int(pos):
+                return gp
+            if h_short and gp.get("hero") == h_short:
+                return gp
+        return None
+
+    rankings_by_side: Dict[str, Dict[str, Any]] = {}
+    for side_key, team_players, side_won in (
+        ("radiant", radiant_players, bool(radiant_win)),
+        ("dire", dire_players, not bool(radiant_win)),
+    ):
+        for p in team_players:
+            gp = _find_grok_entry(p, side_key)
+            raw_sc = (
+                gp.get("grok_score")
+                if gp and gp.get("grok_score") is not None
+                else round(float(p.get("rating_score") or 7.0) * 10)
+            )
+            p["score_100"] = max(15, min(99, int(round(float(raw_sc)))))
+            if gp and gp.get("grok_share_pct") is not None and float(gp.get("grok_share_pct") or 0) > 0:
+                if side_won:
+                    p["contrib_share_pct"] = round(float(gp["grok_share_pct"]), 1)
+                else:
+                    p["blame_share_pct"] = round(float(gp["grok_share_pct"]), 1)
+
+        if side_won:
+            by_contrib = sorted(
+                team_players,
+                key=lambda x: (
+                    float(x.get("contrib_share_pct") or 0),
+                    int(x.get("score_100") or 0),
+                    float(x.get("mvp_score") or 0),
+                ),
+                reverse=True,
+            )
+        else:
+            by_contrib = sorted(
+                team_players,
+                key=lambda x: (
+                    int(x.get("score_100") or 0),
+                    float(x.get("mvp_score") or 0),
+                    float(x.get("contrib_share_pct") or 0),
+                ),
+                reverse=True,
+            )
+        by_blame = sorted(
+            team_players,
+            key=lambda x: (
+                float(x.get("blame_share_pct") or 0),
+                -int(x.get("score_100") or 0),
+            ),
+            reverse=True,
+        )
+        for idx, p in enumerate(by_contrib, start=1):
+            p["contrib_rank"] = idx
+        for idx, p in enumerate(by_blame, start=1):
+            p["blame_rank"] = idx
+
+        c_slots = [int(p["player_slot"]) for p in by_contrib]
+        b_slots = [int(p["player_slot"]) for p in by_blame]
+        rankings_by_side[side_key] = {
+            "mvp_slot": c_slots[0] if c_slots else 0,
+            "runner_up_slot": c_slots[1] if len(c_slots) > 1 else (c_slots[0] if c_slots else 0),
+            "culprit_slot": b_slots[0] if b_slots else 0,
+            "second_culprit_slot": b_slots[1] if len(b_slots) > 1 else (b_slots[0] if b_slots else 0),
+            "contrib_order_slots": c_slots,
+            "blame_order_slots": b_slots,
+        }
+
     winning_team = radiant_players if radiant_win else dire_players
     losing_team = dire_players if radiant_win else radiant_players
     win_side_zh = "天辉" if radiant_win else "夜魇"
@@ -1318,10 +1404,10 @@ def select_match_mvp_and_culprit(
     focus_side_zh = "天辉" if focus_team is radiant_players else "夜魇"
     focus_won = (radiant_win if focus_team is radiant_players else not radiant_win)
 
-    win_sorted = sorted(winning_team, key=lambda x: (x.get("contrib_share_pct", 0), x.get("mvp_score", 0)), reverse=True)
-    lose_sorted = sorted(losing_team, key=lambda x: x.get("mvp_score", 0), reverse=True)
-    focus_by_blame = sorted(focus_team, key=lambda x: x.get("blame_share_pct", 0), reverse=True)
-    focus_by_contrib = sorted(focus_team, key=lambda x: (x.get("contrib_share_pct", 0), x.get("mvp_score", 0)), reverse=True)
+    win_sorted = sorted(winning_team, key=lambda x: int(x.get("contrib_rank") or 99))
+    lose_sorted = sorted(losing_team, key=lambda x: int(x.get("contrib_rank") or 99))
+    focus_by_blame = sorted(focus_team, key=lambda x: int(x.get("blame_rank") or 99))
+    focus_by_contrib = sorted(focus_team, key=lambda x: int(x.get("contrib_rank") or 99))
 
     mvp = win_sorted[0]
     runner_up = win_sorted[1] if len(win_sorted) > 1 else win_sorted[0]
@@ -1360,6 +1446,7 @@ def select_match_mvp_and_culprit(
     return {
         "no_clear_culprit": no_clear_culprit,
         "culprit_label": culprit_label,
+        "rankings_by_side": rankings_by_side,
         "mvp_player": {
             "player_slot": mvp["player_slot"],
             "side": win_side_zh,
