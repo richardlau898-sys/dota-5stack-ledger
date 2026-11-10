@@ -2108,16 +2108,26 @@ def call_llm_coach_review(
             if not isinstance(lm, dict):
                 continue
             lanes_compact.append({
-                "lane": lm.get("lane_zh") or lm.get("lane"),
+                "lane": lm.get("title") or lm.get("lane_zh") or lm.get("lane"),
                 "verdict": lm.get("verdict_zh") or lm.get("winner"),
                 "radiant": [
-                    {"pos": x.get("pos"), "hero": x.get("hero_short_zh") or x.get("hero"), "lh_10": x.get("lh_10m"), "nw_10": x.get("nw_10m")}
-                    for x in (lm.get("radiant_players") or lm.get("radiant") or [])
+                    {
+                        "pos": x.get("pos"),
+                        "hero": x.get("hero_short_zh") or x.get("hero"),
+                        "lh_10": x.get("lh10") if x.get("lh10") is not None else x.get("lh_10m"),
+                        "nw_10": x.get("gold10") if x.get("gold10") is not None else x.get("nw_10m"),
+                    }
+                    for x in (lm.get("radiant_heroes") or lm.get("radiant_players") or lm.get("radiant") or [])
                     if isinstance(x, dict)
                 ],
                 "dire": [
-                    {"pos": x.get("pos"), "hero": x.get("hero_short_zh") or x.get("hero"), "lh_10": x.get("lh_10m"), "nw_10": x.get("nw_10m")}
-                    for x in (lm.get("dire_players") or lm.get("dire") or [])
+                    {
+                        "pos": x.get("pos"),
+                        "hero": x.get("hero_short_zh") or x.get("hero"),
+                        "lh_10": x.get("lh10") if x.get("lh10") is not None else x.get("lh_10m"),
+                        "nw_10": x.get("gold10") if x.get("gold10") is not None else x.get("nw_10m"),
+                    }
+                    for x in (lm.get("dire_heroes") or lm.get("dire_players") or lm.get("dire") or [])
                     if isinstance(x, dict)
                 ],
             })
@@ -2131,6 +2141,7 @@ def call_llm_coach_review(
     }
 
     patch_val = report.get("patch_str") or str(report.get("patch") or "7.39")
+    lane_id_to_zh = {1: "下路", 2: "中路", 3: "上路"}
 
     compact_payload = _sanitize_for_llm({
         "match_id": report.get("match_id"),
@@ -2159,6 +2170,7 @@ def call_llm_coach_review(
                 "slot": p.get("player_slot"),
                 "pos": p.get("pos"),
                 "hero": p.get("hero_short_zh"),
+                "lane": lane_id_to_zh.get(int(p.get("lane_id") or p.get("raw_lane") or 0)) or (p.get("laning_10m") or {}).get("lane_zh"),
                 "kda": p.get("kda"),
                 "kp_pct": p.get("kill_participation_pct"),
                 "gpm": p.get("gpm"),
@@ -2167,7 +2179,7 @@ def call_llm_coach_review(
                 "lh_dn": f"{p.get('last_hits')}/{p.get('denies')}",
                 "laning_10m": {
                     k: (p.get("laning_10m") or {}).get(k)
-                    for k in ("lane_zh", "lh_10m", "dn_10m", "nw_10m", "lane_efficiency_pct")
+                    for k in ("lh10", "dn10", "gold10", "xp10", "lane_zh", "lh_10m", "dn_10m", "nw_10m")
                     if isinstance(p.get("laning_10m"), dict) and (p.get("laning_10m") or {}).get(k) is not None
                 },
                 "hero_damage": p.get("hero_damage"),
@@ -2318,6 +2330,24 @@ def call_llm_coach_review(
             api_model = "grok-4.20-0309-non-reasoning" if (prov == "xai" and model in ("grok-4.7", "grok-4.6", "grok-4")) else model
             model = api_model
 
+            def _canonical_lane(p_dict: Dict[str, Any]) -> str:
+                raw_ln = str(p_dict.get("lane") or ((p_dict.get("laning_10m") or {}).get("lane_zh") or "")).strip()
+                for ln_tok in ("上路", "中路", "下路"):
+                    if ln_tok in raw_ln:
+                        return ln_tok
+                pos_n = int(p_dict.get("pos") or 0)
+                if pos_n == 2:
+                    return "中路"
+                if pos_n in (1, 5):
+                    return "下路" if focus_side == "radiant" else "上路"
+                return "上路" if focus_side == "radiant" else "下路"
+
+            authoritative_lanes: Dict[int, str] = {
+                int(p.get("pos") or 0): _canonical_lane(p)
+                for p in (compact_payload.get("own_team") or [])
+                if isinstance(p, dict) and int(p.get("pos") or 0) in (1, 2, 3, 4, 5)
+            }
+
             global_payload = {
                 "match_id": compact_payload.get("match_id"),
                 "patch": compact_payload.get("patch"),
@@ -2327,6 +2357,10 @@ def call_llm_coach_review(
                 "focus_side": compact_payload.get("focus_side"),
                 "user_won": compact_payload.get("user_won"),
                 "score": compact_payload.get("score"),
+                "authoritative_lanes": {
+                    f"{pos_k}号位_{(next((x.get('hero') for x in (compact_payload.get('own_team') or []) if int(x.get('pos') or 0) == pos_k), ''))}": ln_v
+                    for pos_k, ln_v in sorted(authoritative_lanes.items())
+                },
                 "lane_matchups": compact_payload.get("lane_matchups"),
                 "macro_objectives": compact_payload.get("macro_objectives"),
                 "key_teamfights": compact_payload.get("key_teamfights"),
@@ -2335,6 +2369,7 @@ def call_llm_coach_review(
                         "slot": p.get("slot"),
                         "pos": p.get("pos"),
                         "hero": p.get("hero"),
+                        "lane": authoritative_lanes.get(int(p.get("pos") or 0), "上路"),
                         "kda": p.get("kda"),
                         "kp_pct": p.get("kp_pct"),
                         "gpm": p.get("gpm"),
@@ -2361,65 +2396,11 @@ def call_llm_coach_review(
             payload_json_str = json.dumps(global_payload, ensure_ascii=False)
 
             user_prompt_global = (
-                "【并发分片 0：全局总评与三幕复盘（无需输出 players 数组）】\n"
-                "请基于以下事实数据与评分标准，只输出全局 JSON 字段：`title`, `summary`, `verdict`, `team_practice`, `stage_reviews`（含 `early_lanes`, `mid_tempo`, `late_and_roshan`, `overall_verdict`）, `mvp`, `windows`（最多3条），并在顶层放一个空数组 `\"players\": []`（选手个人复盘由其他并发分片生成）：\n"
+                "【全局定级与三幕复盘（单次调用统一产出 5 人打分、分锅/贡献比例与 MVP）】\n"
+                "请基于以下全部 5 名本方选手的事实数据与评分标准，在本次调用中统一完成全队 5 人的打分（`grok_score`）、分锅/贡献比例（`grok_share_pct`，5人总和=100.0）与 `mvp` 评选（`mvp.slot` 必须等于全队 `grok_score` 最高者的 `slot`），各英雄分路描述必须严格与 `authoritative_lanes` 一致。\n"
+                "请输出 JSON 字段：`title`, `summary`, `verdict`, `team_practice`, `stage_reviews`（含 `early_lanes`, `mid_tempo`, `late_and_roshan`, `overall_verdict`）, `mvp`, `windows`（最多3条），以及包含全队 5 人打分定级的 `player_rankings`: `[{\"slot\": ..., \"pos\": 1..5, \"hero\": \"...\", \"lane\": \"上路/中路/下路\", \"grok_score\": 0..100, \"grok_share_pct\": ...}]`：\n"
                 + payload_json_str
             )
-
-            def _build_pos_prompt(target_pos: int) -> str:
-                role_hint = (
-                    "请结合 `role_duty_audit` 评估该辅助/节奏位的英雄机制、4/5号位职责履行、团队装与视野贡献、队友配合及敌我克制关系。"
-                    if target_pos in (4, 5)
-                    else "请结合 `role_duty_audit` 评估该核心位的英雄机制、1/2/3号位职责履行、经济转化与关键装时间点、队友配合及敌我克制关系。"
-                )
-                pos_payload = {
-                    "match_id": compact_payload.get("match_id"),
-                    "patch": compact_payload.get("patch"),
-                    "duration": compact_payload.get("duration"),
-                    "is_parsed": bool(report.get("is_parsed", True)),
-                    "focus_side": compact_payload.get("focus_side"),
-                    "user_won": compact_payload.get("user_won"),
-                    "score": compact_payload.get("score"),
-                    "lane_matchups": compact_payload.get("lane_matchups"),
-                    "key_teamfights": compact_payload.get("key_teamfights"),
-                    "target_player_phases": [
-                        {
-                            "key": pd.get("key"),
-                            "label": pd.get("label"),
-                            "window": pd.get("window"),
-                            "team_summary": pd.get("team_summary"),
-                            "player_phase": [x for x in (pd.get("own_players") or []) if int(x.get("pos") or 0) == target_pos],
-                        }
-                        for pd in (compact_payload.get("phases_breakdown") or [])
-                    ],
-                    "target_player_full_forensics": [
-                        p for p in (compact_payload.get("own_team") or []) if int(p.get("pos") or 0) == target_pos
-                    ],
-                    "teammates_scoreboard": [
-                        {
-                            "slot": p.get("slot"),
-                            "pos": p.get("pos"),
-                            "hero": p.get("hero"),
-                            "kda": p.get("kda"),
-                            "kp_pct": p.get("kp_pct"),
-                            "gpm": p.get("gpm"),
-                            "net_worth": p.get("net_worth"),
-                            "hero_damage_share_pct": p.get("hero_damage_share_pct"),
-                            "tower_damage": p.get("tower_damage"),
-                            "dead_seconds": p.get("dead_seconds"),
-                            "final_items": p.get("final_items"),
-                            "role_duty_verdict": (p.get("role_duty_audit") or {}).get("duty_verdict"),
-                        }
-                        for p in (compact_payload.get("own_team") or [])
-                    ],
-                    "opp_team": compact_payload.get("opp_team"),
-                }
-                return (
-                    f"【并发分片 Pos {target_pos}：{target_pos}号位选手个人复盘】\n"
-                    f"请基于以下事实数据与评分标准，只返回一个 JSON 对象 `{{\"players\": [ ... ]}}`，其中 `players` 数组只包含本方 {target_pos}号位（`pos` 为 {target_pos}）这一名选手的复盘对象。\n"
-                    f"{role_hint}\n"
-                    + json.dumps(pos_payload, ensure_ascii=False)
-                )
 
             def _call_xai_chunk(u_prompt: str, max_tok: int) -> Optional[Dict[str, Any]]:
                 import time as _t
@@ -2464,15 +2445,101 @@ def call_llm_coach_review(
                     raise last_err_c
                 return None
 
-            with ThreadPoolExecutor(max_workers=6) as pool:
-                fut_global = pool.submit(_call_xai_chunk, user_prompt_global, 2200)
+            part_global = _call_xai_chunk(user_prompt_global, 2200)
+            if not isinstance(part_global, dict):
+                raise RuntimeError("Grok 全局分片返回格式无效")
+
+            global_rank_by_pos: Dict[int, Dict[str, Any]] = {}
+            raw_rank_list = part_global.get("player_rankings") or part_global.get("players") or []
+            if isinstance(raw_rank_list, list):
+                for rk in raw_rank_list:
+                    if isinstance(rk, dict) and int(rk.get("pos") or 0) in (1, 2, 3, 4, 5):
+                        global_rank_by_pos[int(rk["pos"])] = rk
+
+            global_conclusion = {
+                "title": part_global.get("title"),
+                "summary": part_global.get("summary"),
+                "early_lanes": (part_global.get("stage_reviews") or {}).get("early_lanes"),
+                "mvp": part_global.get("mvp"),
+                "player_rankings": [
+                    {
+                        "pos": pos_k,
+                        "lane": authoritative_lanes.get(pos_k),
+                        "grok_score": (global_rank_by_pos.get(pos_k) or {}).get("grok_score"),
+                        "grok_share_pct": (global_rank_by_pos.get(pos_k) or {}).get("grok_share_pct"),
+                    }
+                    for pos_k in (1, 2, 3, 4, 5)
+                ],
+            }
+
+            def _build_pos_prompt(target_pos: int) -> str:
+                role_hint = (
+                    "请结合 `role_duty_audit` 评估该辅助/节奏位的英雄机制、4/5号位职责履行、团队装与视野贡献、队友配合及敌我克制关系。"
+                    if target_pos in (4, 5)
+                    else "请结合 `role_duty_audit` 评估该核心位的英雄机制、1/2/3号位职责履行、经济转化与关键装时间点、队友配合及敌我克制关系。"
+                )
+                assigned_rk = global_rank_by_pos.get(target_pos) or {}
+                target_lane = authoritative_lanes.get(target_pos, "上路")
+                pos_payload = {
+                    "match_id": compact_payload.get("match_id"),
+                    "patch": compact_payload.get("patch"),
+                    "duration": compact_payload.get("duration"),
+                    "is_parsed": bool(report.get("is_parsed", True)),
+                    "focus_side": compact_payload.get("focus_side"),
+                    "user_won": compact_payload.get("user_won"),
+                    "score": compact_payload.get("score"),
+                    "authoritative_lane": target_lane,
+                    "all_authoritative_lanes": authoritative_lanes,
+                    "global_conclusion": global_conclusion,
+                    "assigned_score": assigned_rk.get("grok_score"),
+                    "assigned_share_pct": assigned_rk.get("grok_share_pct"),
+                    "lane_matchups": compact_payload.get("lane_matchups"),
+                    "key_teamfights": compact_payload.get("key_teamfights"),
+                    "target_player_phases": [
+                        {
+                            "key": pd.get("key"),
+                            "label": pd.get("label"),
+                            "window": pd.get("window"),
+                            "team_summary": pd.get("team_summary"),
+                            "player_phase": [x for x in (pd.get("own_players") or []) if int(x.get("pos") or 0) == target_pos],
+                        }
+                        for pd in (compact_payload.get("phases_breakdown") or [])
+                    ],
+                    "target_player_full_forensics": [
+                        p for p in (compact_payload.get("own_team") or []) if int(p.get("pos") or 0) == target_pos
+                    ],
+                    "teammates_scoreboard": [
+                        {
+                            "slot": p.get("slot"),
+                            "pos": p.get("pos"),
+                            "hero": p.get("hero"),
+                            "lane": authoritative_lanes.get(int(p.get("pos") or 0), "上路"),
+                            "kda": p.get("kda"),
+                            "kp_pct": p.get("kp_pct"),
+                            "gpm": p.get("gpm"),
+                            "net_worth": p.get("net_worth"),
+                            "hero_damage_share_pct": p.get("hero_damage_share_pct"),
+                            "tower_damage": p.get("tower_damage"),
+                            "dead_seconds": p.get("dead_seconds"),
+                            "final_items": p.get("final_items"),
+                            "role_duty_verdict": (p.get("role_duty_audit") or {}).get("duty_verdict"),
+                        }
+                        for p in (compact_payload.get("own_team") or [])
+                    ],
+                    "opp_team": compact_payload.get("opp_team"),
+                }
+                return (
+                    f"【并发分片 Pos {target_pos}：{target_pos}号位选手个人复盘】\n"
+                    f"请严格沿用 `global_conclusion` 已确定的全局结论、评分（`assigned_score`）、占比（`assigned_share_pct`）以及唯一分路 `authoritative_lane`（{target_lane}），只返回一个 JSON 对象 `{{\"players\": [ ... ]}}`，其中 `players` 数组只包含本方 {target_pos}号位（`pos` 为 {target_pos}）这一名选手的复盘对象。\n"
+                    f"{role_hint}\n"
+                    + json.dumps(pos_payload, ensure_ascii=False)
+                )
+
+            with ThreadPoolExecutor(max_workers=5) as pool:
                 fut_pos_map = {
                     pos_i: pool.submit(_call_xai_chunk, _build_pos_prompt(pos_i), 2200)
                     for pos_i in (1, 2, 3, 4, 5)
                 }
-                part_global = fut_global.result()
-                if not isinstance(part_global, dict):
-                    raise RuntimeError("Grok 全局分片返回格式无效")
                 merged_players_by_pos: Dict[int, Dict[str, Any]] = {}
                 for pos_i, fut_p in fut_pos_map.items():
                     res_p = fut_p.result()
@@ -2494,6 +2561,13 @@ def call_llm_coach_review(
 
             if len(merged_players_by_pos) < 5:
                 raise RuntimeError("Grok 选手分片未全部成功返回")
+            for pos_i, gp in merged_players_by_pos.items():
+                rk_entry = global_rank_by_pos.get(pos_i) or {}
+                if rk_entry.get("grok_score") is not None:
+                    gp["grok_score"] = rk_entry["grok_score"]
+                if rk_entry.get("grok_share_pct") is not None:
+                    gp["grok_share_pct"] = rk_entry["grok_share_pct"]
+                gp["lane"] = authoritative_lanes.get(pos_i, gp.get("lane") or "上路")
             part_global["players"] = [merged_players_by_pos[k] for k in sorted(merged_players_by_pos.keys())]
             out_txt = json.dumps(part_global, ensure_ascii=False)
 
@@ -2509,67 +2583,25 @@ def call_llm_coach_review(
         own_pos_map = {int(p.get("pos") or 0): p for p in own_team if isinstance(p, dict)}
         pls = [gp for gp in (structured.get("players") or []) if isinstance(gp, dict)]
         for gp in pls:
-            p_orig = own_pos_map.get(int(gp.get("pos") or 0))
+            pos_i = int(gp.get("pos") or 0)
+            p_orig = own_pos_map.get(pos_i)
             if p_orig:
                 gp["slot"] = p_orig.get("player_slot")
                 gp["hero"] = p_orig.get("hero_short_zh") or p_orig.get("hero_name") or gp.get("hero")
-        if len(pls) > 0:
-            total_sh = sum(max(1.0, float(gp.get("grok_share_pct") or 20.0)) for gp in pls) or 100.0
-            norm_shares = sorted(
-                [round((max(1.0, float(gp.get("grok_share_pct") or 20.0)) / total_sh) * 100.0, 1) for gp in pls],
-                reverse=True,
-            )
-            for idx_ns in range(1, len(norm_shares)):
-                if norm_shares[idx_ns] >= norm_shares[idx_ns - 1]:
-                    norm_shares[idx_ns] = max(1.0, round(norm_shares[idx_ns - 1] - 0.3, 1))
-            if norm_shares:
-                drift = round(100.0 - sum(norm_shares), 1)
-                if drift >= 0:
-                    norm_shares[0] = round(norm_shares[0] + drift, 1)
-                else:
-                    norm_shares[-1] = max(1.0, round(norm_shares[-1] + drift, 1))
-            if own_won:
-                pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), float(x.get("grok_share_pct") or 20)), reverse=True)
-                for idx_s in range(1, len(pls_by_rank)):
-                    prev_sc = int(pls_by_rank[idx_s - 1].get("grok_score") or 75)
-                    cur_sc = int(pls_by_rank[idx_s].get("grok_score") or 70)
-                    if cur_sc >= prev_sc:
-                        pls_by_rank[idx_s]["grok_score"] = max(40, prev_sc - 1)
-            else:
-                max_sc = max(int(x.get("grok_score") or 60) for x in pls)
-                for x in pls:
-                    txt_c = f"{x.get('headline', '')} {x.get('deep_verdict', '')}"
-                    if ("孤胆院长" in txt_c or "SVP" in txt_c) and int(x.get("grok_score") or 60) < max_sc:
-                        x["grok_score"] = min(88, max_sc + 3)
-                pls_by_rank = sorted(pls, key=lambda x: (float(x.get("grok_score") or 60), -float(x.get("grok_share_pct") or 20)))
-                for idx_s in range(1, len(pls_by_rank)):
-                    prev_sc = int(pls_by_rank[idx_s - 1].get("grok_score") or 45)
-                    cur_sc = int(pls_by_rank[idx_s].get("grok_score") or 50)
-                    if cur_sc <= prev_sc:
-                        pls_by_rank[idx_s]["grok_score"] = min(95, prev_sc + 1)
-            for idx_r, gp in enumerate(pls_by_rank):
-                gp["grok_share_pct"] = norm_shares[idx_r]
-                dv = str(gp.get("deep_verdict") or "")
-                if dv:
-                    dv = re.sub(r"严格依据\s*(top_weakness|专属技能)", "综合全周期录像证据", dv, flags=re.I)
-                    dv = re.sub(r"grok_score\s*(?:仅\s*)?[:：=]?\s*(\d+)\s*分?", r"本局评分 \1 分", dv, flags=re.I)
-                    dv = re.sub(r"grok_share_pct\s*[:：=]?\s*([\d.]+%?)", r"占比 \1", dv, flags=re.I)
-                    dv = re.sub(r"（与[^）]*并列头号）", "", dv)
-                    if own_won and idx_r == len(pls_by_rank) - 1:
-                        dv = re.sub(r"头号大锅[、·]?一级战犯|头号大锅", "本局胜方短板（复盘改进位）", dv)
-                    dv = re.sub(
-                        r"(?:胜局|败局)?(?:分锅|背锅|贡献|定责)(?:占比)?(?:仅)?\s*\d+(?:\.\d+)?%",
-                        f"{'胜局贡献' if own_won else '败局分锅'} {norm_shares[idx_r]:.1f}%",
-                        dv,
-                    )
-                    dv = re.sub(
-                        r"\d+(?:\.\d+)?%\s*(?:的)?(?:胜局|败局)?(?:功勋|贡献|分锅|背锅)",
-                        f"{norm_shares[idx_r]:.1f}%的{'胜局功勋' if own_won else '败局分锅'}",
-                        dv,
-                    )
-                    gp["deep_verdict"] = dv
-                    gp["assessment"] = dv
-            structured["players"] = pls_by_rank
+            if gp.get("deep_verdict") and not gp.get("assessment"):
+                gp["assessment"] = gp["deep_verdict"]
+        scored_pls = [gp for gp in pls if gp.get("grok_score") is not None]
+        if scored_pls:
+            max_sc = max(float(gp["grok_score"]) for gp in scored_pls)
+            top_slots = {gp.get("slot") for gp in scored_pls if float(gp["grok_score"]) == max_sc}
+            mvp_obj = structured.get("mvp")
+            if not isinstance(mvp_obj, dict):
+                mvp_obj = {}
+                structured["mvp"] = mvp_obj
+            if mvp_obj.get("slot") not in top_slots:
+                top_gp = max(scored_pls, key=lambda x: (float(x.get("grok_score") or 0), float(x.get("grok_share_pct") or 0)))
+                mvp_obj["slot"] = top_gp.get("slot")
+        structured["players"] = pls
         mid = report.get("match_id")
         if mid:
             try:

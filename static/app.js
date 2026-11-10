@@ -12559,10 +12559,6 @@ function renderVerdictAndBlameSection(report) {
     if (shareBtn2) shareBtn2.textContent = "📜 导出群聊处刑书";
   }
 
-  // Sort own team by Contribution Share (descending) and by Blame Share (descending)
-  // Enforce strict monotonicity between `getHeroScore100(p, report)` and `contribShare` / `blameShare`:
-  // - In a WIN: #1 Highest Score = #1 Highest Contribution % (MVP), #5 Lowest Score = #5 Lowest Contribution % (Struggle)
-  // - In a LOSS: #1 Lowest Score = #1 Highest Blame % (#1 Culprit), #2 2nd Lowest Score = #2 Highest Blame % (#2 Culprit), #5 Highest Score = #5 Lowest Blame % (SVP)
   const hasGrokEval =
     grok &&
     (!grok.side || grok.side === side) &&
@@ -12574,48 +12570,30 @@ function renderVerdictAndBlameSection(report) {
     if (won && gp && Number(gp.grok_share_pct) > 0) {
       return Number(gp.grok_share_pct);
     }
-    if (gp && Number(gp.grok_score) > 0) {
-      return Math.max(1, Number(gp.grok_score));
-    }
     return Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20));
   };
   const rawContribSum = own.reduce((s, p) => s + rawContribVal(p), 0) || 100;
-  const contribSharesPool = own
-    .map((p) => Number(((rawContribVal(p) / rawContribSum) * 100).toFixed(1)))
-    .sort((a, b) => b - a);
-  const sortedByScoreDesc = [...own].sort(
-    (a, b) =>
-      getHeroScore100(b, report) - getHeroScore100(a, report) ||
-      rawContribVal(b) - rawContribVal(a)
-  );
-  const sortedByContrib = sortedByScoreDesc.map((p, idx) => ({
-    player: p,
-    contribShare: contribSharesPool[idx] ?? 20.0,
-  }));
+  const sortedByContrib = own
+    .map((p) => ({
+      player: p,
+      contribShare: Number(((rawContribVal(p) / rawContribSum) * 100).toFixed(1)),
+    }))
+    .sort((a, b) => b.contribShare - a.contribShare);
 
   const rawBlameVal = (p) => {
     const gp = findGrokPlayerEntry(p, report);
     if (!won && gp && Number(gp.grok_share_pct) > 0) {
       return Number(gp.grok_share_pct);
     }
-    if (!won && gp && Number(gp.grok_score) > 0) {
-      return Math.max(1, 105 - Number(gp.grok_score));
-    }
     return Math.max(1, Number(p.blame_share_pct || 20));
   };
   const rawBlameSum = own.reduce((s, p) => s + rawBlameVal(p), 0) || 100;
-  const blameSharesPool = own
-    .map((p) => Number(((rawBlameVal(p) / rawBlameSum) * 100).toFixed(1)))
-    .sort((a, b) => b - a);
-  const sortedByScoreAsc = [...own].sort(
-    (a, b) =>
-      getHeroScore100(a, report) - getHeroScore100(b, report) ||
-      rawBlameVal(b) - rawBlameVal(a)
-  );
-  const sortedByBlame = sortedByScoreAsc.map((p, idx) => ({
-    player: p,
-    blameShare: blameSharesPool[idx] ?? 20.0,
-  }));
+  const sortedByBlame = own
+    .map((p) => ({
+      player: p,
+      blameShare: Number(((rawBlameVal(p) / rawBlameSum) * 100).toFixed(1)),
+    }))
+    .sort((a, b) => b.blameShare - a.blameShare);
 
   // Pick the 3rd card player in a WIN: if Grok scored players, pick the player with the lowest Grok score / contribution;
   // otherwise fall back to struggle index.
