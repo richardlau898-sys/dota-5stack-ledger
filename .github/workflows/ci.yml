@@ -26,6 +26,9 @@ jobs:
       - name: Lint template literals
         run: python3 tools/lint_templates.py
 
+      - name: Verify hero Chinese localization
+        run: python3 tools/refresh_constants.py --check
+
       - name: Run unit tests
         run: python3 -m unittest discover -s tests -v
 

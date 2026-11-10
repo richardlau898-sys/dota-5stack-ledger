@@ -1445,7 +1445,7 @@ function buildStructuredMicroTablesHtml(report, df, side, sideZh, oppSide, oppZh
     })
     .join("");
 
-  // 4.10 买活死尸检 · 信使惨案 · 肉山魔晶 & 7.38 中立装备附魔审计表
+  // 4.10 买活死尸检 · 信使惨案 · 肉山魔晶 & 中立装备附魔审计表
   const mo = df.macro_objectives_by_side?.[side] || {};
   const craftRowsHtml = (mo.neutral_craft_rows || [])
     .map((cr) => {
@@ -1576,7 +1576,7 @@ function buildStructuredMicroTablesHtml(report, df, side, sideZh, oppSide, oppZh
         </table>
       </div>
 
-      <h3 class="fs-subtable-title">4.10 买活死 (Dieback) 尸检 · 信使博弈 · 肉山魔晶 &amp; Dota 2 7.38 中立装备附魔表</h3>
+      <h3 class="fs-subtable-title">4.10 买活死 (Dieback) 尸检 · 信使博弈 · 肉山魔晶 &amp; Dota 2 中立装备附魔表</h3>
       <p class="fs-chapter-desc">⚰️ 买活审计：${escapeHtml(bbSummary)} ｜ 🐉 肉山记录：${escapeHtml(
     roshSummary
   )} ｜ 🐔 信使博弈：击杀敌鸡 ${mo.own_couriers_killed ?? 0} 只 / 本方掉鸡 ${
@@ -1588,7 +1588,7 @@ function buildStructuredMicroTablesHtml(report, df, side, sideZh, oppSide, oppZh
             <tr>
               <th>位置 &amp; 选手</th>
               <th>阿哈利姆魔晶时间</th>
-              <th>7.38 中立装备锻造与附魔词条时间轴</th>
+              <th>中立装备锻造与附魔词条时间轴</th>
               <th>词条合规与锻造节奏判词</th>
             </tr>
           </thead>
@@ -2227,7 +2227,7 @@ function buildStructuredFullReportHtml(report) {
       <section class="fs-chapter deferred-chapter">
         <div class="fs-chapter-head">
           <span class="fs-chapter-num">第四章</span>
-          <h2>录像级十一维战术显微镜全量取证账本（大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/买活死&amp;7.38附魔）</h2>
+          <h2>录像级十一维战术显微镜全量取证账本（大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/买活死&amp;中立附魔）</h2>
         </div>
         ${microAllHtml}
       </section>
@@ -3589,7 +3589,7 @@ async function downloadStructuredReportPdf() {
     // =========================================================================
     drawChapterHeader(
       "第四章",
-      "录像级十一维战术显微镜全量取证账本（大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/买活死&7.38附魔）"
+      "录像级十一维战术显微镜全量取证账本（大招/憋死BKB/地图空间/承伤/眼位/堆野开雾/对线/TP/经济/买活死&中立附魔）"
     );
 
     const drawCol0HeroIconHook = (rowsArr) => ({
@@ -3885,13 +3885,13 @@ async function downloadStructuredReportPdf() {
       drawCol0HeroIconHook(epRows)
     );
 
-    // 4.10 买活死尸检 · 信使博弈 · 肉山魔晶 & 7.38 中立装备附魔表
+    // 4.10 买活死尸检 · 信使博弈 · 肉山魔晶 & 中立装备附魔表
     const mo = df.macro_objectives_by_side?.[side] || {};
     const moRows = mo.neutral_craft_rows || [];
     drawSubSectionTitle(
       `4.10 买活死尸检 (${mo.dieback_cnt ?? 0}次) · 信使博弈 (杀敌${mo.own_couriers_killed ?? 0}/掉鸡${
         mo.own_couriers_lost ?? 0
-      }) · 7.38 中立装备附魔审计表`
+      }) · 中立装备附魔审计表`
     );
     const t410Rows = moRows.map((cr) => [
       `${cr.pos}号位 · ${cr.hero_short_zh || ""}\n(${cr.personaname || ""})`,
@@ -3900,7 +3900,7 @@ async function downloadStructuredReportPdf() {
       cr.craft_verdict || "",
     ]);
     runVectorTable(
-      ["位置 & 选手", "阿哈利姆魔晶时间", "7.38 中立装备锻造与附魔词条轨迹", "词条合规与锻造节奏判词"],
+      ["位置 & 选手", "阿哈利姆魔晶时间", "中立装备锻造与附魔词条轨迹", "词条合规与锻造节奏判词"],
       t410Rows,
       {
         0: { cellWidth: 44, fontStyle: "bold", cellPadding: { top: 2, right: 2, bottom: 2, left: 10.8 } },
@@ -7078,7 +7078,7 @@ function renderWorkstationFactCheckSection(report) {
             <thead>
               <tr>
                 <th>位置 / 英雄 / 战绩</th>
-                <th>流派 · 7.38命石 · 叠层</th>
+                <th>流派 · 命石 · 叠层</th>
                 <th>输出 / 参战 / 单发峰值</th>
                 <th>定性评分</th>
               </tr>
@@ -7814,7 +7814,7 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
     tp_save: "🆘 10. TP 救人及时性与缺席抓包",
     econ_pings: "💰 11. 经济来源结构 & 信号/暂停互动",
     role_mirror: "⚔️ 12. 同位置1v1宿敌对位 & 全球百分位",
-    macro_neutrals: "🐉 13. 买活死尸检·掉鸡·肉山魔晶 & 7.38附魔",
+    macro_neutrals: "🐉 13. 买活死尸检·掉鸡·肉山魔晶 & 中立附魔",
   };
 
   document.querySelectorAll("[data-micro-tab]").forEach((btn) => {
@@ -10040,12 +10040,12 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
 }
 
 /**
- * Tab 11: 🐉 买活死 (Dieback) 尸检 · 信使惨案 · 肉山魔晶时间轴 & Dota 2 7.38 中立装备附魔审计
+ * Tab 11: 🐉 买活死 (Dieback) 尸检 · 信使惨案 · 肉山魔晶时间轴 & Dota 2 中立装备附魔审计
  */
 function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
   const mo = df.macro_objectives_by_side?.[targetSide];
   if (!mo) {
-    return `<div class="empty-state compact">当前比赛暂无买活死尸检与 7.38 中立装备附魔数据</div>`;
+    return `<div class="empty-state compact">当前比赛暂无买活死尸检与中立装备附魔数据</div>`;
   }
 
   const diebackCnt = Number(mo.dieback_cnt ?? 0);
@@ -10126,7 +10126,7 @@ function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
     <div class="micro-pane-block">
       <div class="micro-pane-banner">
         <div>
-          <h3>🐉 11. 买活死 (Dieback) 尸检 · 信使掉鸡惨案 · 肉山魔晶 &amp; Dota 2 7.38 中立装备附魔审计 (${escapeHtml(
+          <h3>🐉 11. 买活死 (Dieback) 尸检 · 信使掉鸡惨案 · 肉山魔晶 &amp; Dota 2 中立装备附魔审计 (${escapeHtml(
             targetSideZh
           )})</h3>
           <p>${injectHeroLogosIntoHtml(escapeHtml(mo.side_verdict || ""), report)}</p>
@@ -10169,14 +10169,14 @@ function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
       </div>
 
       <div class="micro-card">
-        <h4>🛠️ Dota 2 7.38 中立装备锻造轨迹 · 附魔词条合规审计（排查核心误选贪婪扣攻击力）&amp; 魔晶时间表</h4>
+        <h4>🛠️ Dota 2 中立装备锻造轨迹 · 附魔词条合规审计（排查核心误选贪婪扣攻击力）&amp; 魔晶时间表</h4>
         <div class="micro-table-wrap">
           <table class="micro-data-table">
             <thead>
               <tr>
                 <th>位置 / 英雄</th>
                 <th>💎 阿哈利姆魔晶时间</th>
-                <th>🛠️ 7.38 中立装备锻造与附魔词条时间轴</th>
+                <th>🛠️ 中立装备锻造与附魔词条时间轴</th>
                 <th>⚖️ 词条合规与锻造节奏判词</th>
               </tr>
             </thead>
@@ -10905,7 +10905,7 @@ function analyzePlayerItemizationIntelligence(p, report) {
   }
 
   // -------------------------------------------------------------------------
-  // 4. Deep Playstyle Archetype + Spell Damage Share + Skill/Talents + Neutral & 7.38 Enchantments
+  // 4. Deep Playstyle Archetype + Spell Damage Share + Skill/Talents + Neutral & Enchantments
   // -------------------------------------------------------------------------
   const paAudit = p.playstyle_archetype_audit || {};
   const df = report.deep_forensics || {};
@@ -10990,7 +10990,7 @@ function analyzePlayerItemizationIntelligence(p, report) {
           )}</b>${cs.ench_zh ? ` + <b>${escapeHtml(cs.ench_zh)}</b>` : ""}】`
       )
       .join(" → ");
-    deepForensicBullets.push(`🎲 <b>中立道具演进与 7.38 附魔词条选择：</b>${cStr}。`);
+    deepForensicBullets.push(`🎲 <b>中立道具演进与附魔词条选择：</b>${cStr}。`);
   }
 
   if (paAudit.perm_buff_audit_zh) {
@@ -12706,7 +12706,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     }
   }
 
-  // Show BOTH AI coach's deep item review AND the 6 granular forensic breakdowns (Playstyle + Spell Damage + Spell×Target Matrix + Talents + Neutral & 7.38 Enchantments + Perm Buffs/Facet)
+  // Show BOTH AI coach's deep item review AND the 6 granular forensic breakdowns (Playstyle + Spell Damage + Spell×Target Matrix + Talents + Neutral & Enchantments + Perm Buffs/Facet)
   const grokItemAuditLine = grokP?.item_and_blink_audit || "";
   const allItemBullets = grokItemAuditLine
     ? [

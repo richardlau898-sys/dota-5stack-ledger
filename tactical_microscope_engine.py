@@ -2884,7 +2884,7 @@ def build_tactical_microscope(
         }
 
     # =========================================================================
-    # 十二、买活死尸检 · 信使惨案 · 肉山盾/魔晶归属 · 7.38 中立装备锻造附魔审计
+    # 十二、买活死尸检 · 信使惨案 · 肉山盾/魔晶归属 · 中立装备锻造附魔审计
     # =========================================================================
     NEUTRAL_ITEMS_ZH: Dict[str, str] = {
         "dormant_curio": "休眠珍品",
@@ -3077,7 +3077,7 @@ def build_tactical_microscope(
                         f"🛡️ {fmt_mmss(ot)} {side_zh_r} {fp_r['pos']}号位 {fp_r['hero_short_zh']}({fp_r['personaname']}) 拾取肉山不朽盾"
                     )
 
-        # 3) 阿哈利姆魔晶时间轴 & 7.38 中立装备锻造附魔审计
+        # 3) 阿哈利姆魔晶时间轴 & 中立装备锻造附魔审计
         neutral_craft_rows: List[Dict[str, Any]] = []
         shard_count = 0
 
@@ -3099,7 +3099,7 @@ def build_tactical_microscope(
             else:
                 shard_str = "未获魔晶"
 
-            # 解析 7.38 neutral_item_history
+            # 解析 neutral_item_history
             nhist = rp.get("neutral_item_history") or []
             craft_steps: List[str] = []
             greedy_on_core = False

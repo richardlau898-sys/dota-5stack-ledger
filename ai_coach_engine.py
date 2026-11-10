@@ -822,7 +822,7 @@ def evaluate_player_deeply(
             elif str(pb_note).startswith("🔥"):
                 strengths.append(pb_note)
 
-    # 6.5) 深度流派识别 + 全量成装时间轴 + 技能/道具伤害占比 + 加点与天赋树 + 中立道具与7.38附魔全维度取证
+    # 6.5) 深度流派识别 + 全量成装时间轴 + 技能/道具伤害占比 + 加点与天赋树 + 中立道具与附魔全维度取证
     playstyle_audit = build_player_playstyle_and_build_forensics(
         p, team_players, enemy_players, duration_min, won
     )
@@ -1026,7 +1026,7 @@ def build_player_playstyle_and_build_forensics(
     won: bool,
 ) -> Dict[str, Any]:
     """
-    为每位选手生成【实际打法流派识别 + 全量成装时间轴 + 技能/道具伤害占比 + 技能加点与10/15/20/25级天赋树 + 中立道具与7.38附魔词条】全维度深度取证：
+    为每位选手生成【实际打法流派识别 + 全量成装时间轴 + 技能/道具伤害占比 + 技能加点与10/15/20/25级天赋树 + 中立道具与附魔词条】全维度深度取证：
     避免只按呆板模板（如认为潮汐只能出笛子赤红甲站桩顶前排）评判选手，精准识别法系A杖巨浪炮台流、刷新双大流、速刷转型流、平A炮台流等灵性流派！
     """
     hid = int(p.get("hero_id") or 0)
@@ -1083,7 +1083,7 @@ def build_player_playstyle_and_build_forensics(
             f"天赋树依次点出【{talents_str}】{talent_synergy_note}。"
         )
 
-    # 3) 中立道具与 7.38 附魔词条选择审计
+    # 3) 中立道具与附魔词条选择审计
     neutral_and_enchantment_audit_zh = ""
     has_greedy_ench = False
     has_timeless_or_mystic_ench = False
@@ -1114,7 +1114,7 @@ def build_player_playstyle_and_build_forensics(
         elif has_timeless_or_mystic_ench:
             ench_reason = " —— 中后期选用【永恒/神秘/高远附魔】精准强化技能爆发与施法距离。"
         neutral_and_enchantment_audit_zh = (
-            f"🎲 【中立道具演进与 7.38 附魔词条审计】：{' → '.join(step_strs)}{ench_reason}"
+            f"🎲 【中立道具演进与附魔词条审计】：{' → '.join(step_strs)}{ench_reason}"
         )
 
     # 4) 实际打法流派定性 (Playstyle Archetype Detection)
