@@ -5107,6 +5107,31 @@ function bindEvents() {
     }
   });
 
+  // Mobile View-Bar Actions Menu toggle
+  const mobileActionsMenu = document.getElementById("ws-mobile-actions-menu");
+  const mobileActionsToggle = document.getElementById("btn-mobile-actions-toggle");
+  const mobileActionsDrawer = document.getElementById("ws-mobile-actions-drawer");
+  if (mobileActionsMenu && mobileActionsToggle && mobileActionsDrawer) {
+    mobileActionsToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const nextOpen = !mobileActionsMenu.classList.contains("is-open");
+      mobileActionsMenu.classList.toggle("is-open", nextOpen);
+      mobileActionsToggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+    });
+    mobileActionsDrawer.querySelectorAll("button").forEach((b) => {
+      b.addEventListener("click", () => {
+        mobileActionsMenu.classList.remove("is-open");
+        mobileActionsToggle.setAttribute("aria-expanded", "false");
+      });
+    });
+    document.addEventListener("click", (e) => {
+      if (!mobileActionsMenu.contains(e.target)) {
+        mobileActionsMenu.classList.remove("is-open");
+        mobileActionsToggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
   // Full-Screen Structured Report Toolbar bindings
   const fsDlg = document.getElementById("fullscreen-report-dialog");
   const btnFsClose = document.getElementById("btn-fs-close");
@@ -14682,7 +14707,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
     contentEl._scrubMatchKey = scrubKey;
     contentEl.innerHTML = `
       <div style="grid-column: 1 / -1;">
-        <div class="scrub-minimap-combat-grid" style="display:grid;grid-template-columns:minmax(430px, 490px) 1fr;gap:16px;margin-bottom:16px;align-items:stretch;">
+        <div class="scrub-minimap-combat-grid">
           <div class="scrub-mini-map-card" style="background:rgba(16,18,15,0.95);border:1px solid rgba(198,164,104,0.32);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;">
             <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
               <div style="display:flex;align-items:center;gap:8px;">
@@ -18036,7 +18061,7 @@ function renderSquadLedgerSection(squadLedger) {
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap:12px;">
+        <div class="habit-member-cards-grid">
           ${finalHabitMembers
             .map((m, idx) => {
               const hd = m.habit_diagnosis || {};
