@@ -21,6 +21,21 @@
   --blue: #7098b8;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --serif: Georgia, "Times New Roman", serif;
+  --ws-canvas: #0d0e10;
+  --ws-sidebar: #141518;
+  --ws-surface: #111216;
+  --ws-surface-raised: #191a1f;
+  --ws-hover: #1e2025;
+  --ws-border: #292b31;
+  --ws-border-soft: #202228;
+  --ws-text: #f2f3f5;
+  --ws-text-secondary: #a7aab2;
+  --ws-text-muted: #727680;
+  --ws-brand: #7b87cf;
+  --ws-brand-soft: rgba(123, 135, 207, 0.14);
+  --ws-gain: #78bf96;
+  --ws-loss: #d47f79;
+  --ws-warning: #caa65f;
 }
 
 * {
@@ -8722,26 +8737,8 @@ body {
 }
 
 /* =========================================================================
-   v9.0 Workstation Design System Upgrade (Master-Detail Sidebar + Sub-View Tabs)
-   Inspired by Richard's Workstation (Design Reset v1 & TranscriptView)
+   Workstation Design System (Master-Detail Sidebar + Sub-View Tabs)
    ========================================================================= */
-:root {
-  --ws-canvas: #0d0e10;
-  --ws-sidebar: #141518;
-  --ws-surface: #111216;
-  --ws-surface-raised: #191a1f;
-  --ws-hover: #1e2025;
-  --ws-border: #292b31;
-  --ws-border-soft: #202228;
-  --ws-text: #f2f3f5;
-  --ws-text-secondary: #a7aab2;
-  --ws-text-muted: #727680;
-  --ws-brand: #7b87cf;
-  --ws-brand-soft: rgba(123, 135, 207, 0.14);
-  --ws-gain: #78bf96;
-  --ws-loss: #d47f79;
-  --ws-warning: #caa65f;
-}
 
 html,
 body {
