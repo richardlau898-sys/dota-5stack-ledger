@@ -5072,15 +5072,31 @@ function bindEvents() {
 
   // Second-by-Second & Minute Timeline Scrubber bindings
   const scrubRange = document.getElementById("minute-scrubber-range");
+  let _scrubRafId = null;
   if (scrubRange) {
     scrubRange.addEventListener("input", () => {
       stopScrubberAutoplay();
-      const rawVal = Number(scrubRange.value || 0);
-      const maxVal = Number(scrubRange.max || 0);
-      if (maxVal > 100) {
-        setScrubberSecond(rawVal);
-      } else {
-        setScrubberMinute(rawVal);
+      if (_scrubRafId !== null) return;
+      const scheduleRaf =
+        typeof window.requestAnimationFrame === "function"
+          ? window.requestAnimationFrame
+          : (cb) => setTimeout(cb, 16);
+      _scrubRafId = scheduleRaf(() => {
+        _scrubRafId = null;
+        const rawVal = Number(scrubRange.value || 0);
+        const maxVal = Number(scrubRange.max || 0);
+        if (maxVal > 100) {
+          setScrubberSecond(rawVal);
+        } else {
+          setScrubberMinute(rawVal);
+        }
+      });
+    });
+  }
+  if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden || document.visibilityState === "hidden") {
+        stopScrubberAutoplay();
       }
     });
   }
@@ -6619,6 +6635,9 @@ function renderMatchOverview(report) {
 function applyPostgameSubTab(tabName, { scrollTop = true } = {}) {
   const validTabs = ["summary", "timeline", "phases", "microscope", "players", "all"];
   const tab = validTabs.includes(tabName) ? tabName : "summary";
+  if (tab !== "timeline" && tab !== "all" && state.scrubberPlaying) {
+    stopScrubberAutoplay();
+  }
   state.wsPostgameTab = tab;
 
   document.querySelectorAll("[data-postgame-tab]").forEach((btn) => {
@@ -13650,7 +13669,7 @@ function setScrubberSecond(secVal) {
   const maxMin = snaps.length - 1;
   const maxSec = maxMin * 60;
   const clampedSec = Math.max(0, Math.min(maxSec, Math.round(Number(secVal || 0))));
-  const clampedMin = Math.max(0, Math.min(maxMin, Math.round(clampedSec / 60)));
+  const clampedMin = Math.max(0, Math.min(maxMin, Math.floor(clampedSec / 60)));
   state.scrubberSecond = clampedSec;
   state.scrubberMinute = clampedMin;
   const rangeEl = document.getElementById("minute-scrubber-range");
@@ -13838,7 +13857,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
   const minFloor = Math.max(0, Math.min(maxMin, Math.floor(secNow / 60)));
   const minCeil = Math.max(0, Math.min(maxMin, minFloor + 1));
   const alpha = minCeil > minFloor ? Math.max(0, Math.min(1, (secNow - minFloor * 60) / 60)) : 0;
-  const idx = Math.round(secNow / 60);
+  const idx = Math.floor(secNow / 60);
 
   const snapFloor = snaps[minFloor] || snaps[idx];
   const snapCeil = snaps[minCeil] || snapFloor;
@@ -14249,153 +14268,106 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
         </div>`
       : "";
 
-  const interactiveMinimapHtml = `
-    <div class="scrub-minimap-combat-grid" style="display:grid;grid-template-columns:minmax(430px, 490px) 1fr;gap:16px;margin-bottom:16px;align-items:stretch;">
-      <div class="scrub-mini-map-card" style="background:rgba(16,18,15,0.95);border:1px solid rgba(198,164,104,0.32);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;">
-        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <strong style="font-size:13.5px;color:var(--gold-light);font-variant-numeric:tabular-nums;">🗺️ ${escapeHtml(
-              timeStrNow
-            )} 小地图（示意位置，非真实走位）</strong>
-            <button type="button" id="btn-scrub-map-play" class="button primary" style="padding:2px 10px;font-size:11.5px;font-weight:700;">${
-              state.scrubberPlaying ? "⏸ 暂停" : "▶ 播放团战"
-            }</button>
-          </div>
-          <span style="font-size:11px;color:var(--muted);">实心=真实点 ｜ 半透明=示意位置，非真实走位</span>
-        </div>
-        <svg viewBox="0 0 420 420" style="width:100%;max-width:468px;aspect-ratio:1/1;border-radius:10px;background:radial-gradient(circle at 50% 50%, #1e2820 0%, #101511 100%);border:1px solid #333b30;box-shadow:0 6px 20px rgba(0,0,0,0.45);">
-          <!-- River & Lanes -->
-          <path d="M 22 26 Q 198 204 396 394" fill="none" stroke="rgba(56, 189, 248, 0.22)" stroke-width="28" stroke-linecap="round" />
-          <polyline points="34,386 34,42 386,42" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="10" stroke-linejoin="round" />
-          <polyline points="34,386 386,386 386,42" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="10" stroke-linejoin="round" />
-          <line x1="34" y1="386" x2="386" y2="42" stroke="rgba(148, 163, 184, 0.18)" stroke-width="10" />
-          <!-- Radiant & Dire Bases + Roshan Pit -->
-          <rect x="18" y="356" width="46" height="46" rx="8" fill="rgba(34, 197, 94, 0.16)" stroke="#22c55e" stroke-width="1.5" />
-          <text x="41" y="383" fill="#86efac" font-size="11" font-weight="700" text-anchor="middle">天辉</text>
-          <rect x="356" y="18" width="46" height="46" rx="8" fill="rgba(239, 68, 68, 0.16)" stroke="#ef4444" stroke-width="1.5" />
-          <text x="379" y="45" fill="#fca5a5" font-size="11" font-weight="700" text-anchor="middle">夜魇</text>
-          <circle cx="155" cy="155" r="14" fill="rgba(245, 158, 11, 0.14)" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="3,2" />
-          <text x="155" y="159" fill="#fcd34d" font-size="9.5" font-weight="700" text-anchor="middle">肉山</text>
-          ${wardNodesSvg}
-          ${clashRingSvg}
-          ${heroAvatarNodesSvg}
-        </svg>
-      </div>
-      <div class="scrub-combat-log-card" style="background:rgba(16,18,15,0.92);border:1px solid rgba(198,164,104,0.28);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
-            <strong style="font-size:13px;color:var(--gold-light);">📜 ${escapeHtml(
-              timeStrNow
-            )} 实时战斗记录 &amp; 🛡️ BKB/保命装按键验尸</strong>
-            <span style="font-size:11px;color:${
-              activeTfForensic || activeKeyTf ? "#fca5a5" : "var(--muted)"
-            };font-weight:600;">
-              ${
-                activeTfForensic || activeKeyTf
-                  ? `🔥 正在发生大规模团战 (${escapeHtml(
-                      activeTfForensic?.time_range || activeKeyTf?.time_range || ""
-                    )} · ${escapeHtml(activeTfForensic?.location_zh || "正面战场")} · 人头交换 ${escapeHtml(
-                      activeKeyTf?.kills_trade || `${activeTfForensic?.rad_kills ?? 0}:${activeTfForensic?.dire_kills ?? 0}`
-                    )} · 经济波动 ${escapeHtml(String(activeKeyTf?.gold_swing || activeTfForensic?.gold_swing_rad || ""))})`
-                  : "⏱️ 拖动上方时间轴滑块到任意团战秒数，查看小地图示意位置（非真实走位）、技能释放与BKB按键记录"
+  const mapDynamicSvg = `${wardNodesSvg}${clashRingSvg}${heroAvatarNodesSvg}`;
+  const combatStatusColor = activeTfForensic || activeKeyTf ? "#fca5a5" : "var(--muted)";
+  const combatStatusText =
+    activeTfForensic || activeKeyTf
+      ? `🔥 正在发生大规模团战 (${
+          activeTfForensic?.time_range || activeKeyTf?.time_range || ""
+        } · ${activeTfForensic?.location_zh || "正面战场"} · 人头交换 ${
+          activeKeyTf?.kills_trade || `${activeTfForensic?.rad_kills ?? 0}:${activeTfForensic?.dire_kills ?? 0}`
+        } · 经济波动 ${String(activeKeyTf?.gold_swing || activeTfForensic?.gold_swing_rad || "")})`
+      : "⏱️ 拖动上方时间轴滑块到任意团战秒数，查看小地图示意位置（非真实走位）、技能释放与BKB按键记录";
+
+  const combatRowsHtml =
+    rawParts.length > 0
+      ? `
+        <div style="max-height:275px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px;">
+          ${rawParts
+            .filter((pt) => Number(pt.damage || 0) > 0 || Number(pt.deaths || 0) > 0 || Number(pt.healing || 0) > 0)
+            .sort((a, b) => Number(b.damage || 0) - Number(a.damage || 0))
+            .map((pt) => {
+              const hName = pt.hero_short_zh || "";
+              const fp = fullPlayerByHero.get(hName) || {};
+              const pSnap = players.find((x) => x.hero_short_zh === hName) || {};
+              const hasBkbNow = (pSnap.items || []).some((it) =>
+                /黑皇杖|black_king_bar/i.test(it.zh || it.key || "")
+              );
+              const unusedSelf = Array.isArray(pt.unused_self_saves_zh) ? pt.unused_self_saves_zh : [];
+              const unpressed =
+                activeUnpressedByHero.get(hName) ||
+                (unusedSelf.length > 0 ? { detail: `憋死未开 ${unusedSelf.join("/")}` } : null);
+              const rawSpells =
+                pt.abilities_used_zh || pt.abilities || pt.ability_uses || pt.abilities_used || [];
+              const spellsStr = rawSpells
+                .slice(0, 4)
+                .map((a) => (typeof a === "string" ? a : `${a.zh || a.key}×${a.count || 1}`))
+                .join("、");
+              const rawItems = pt.items_used_zh || pt.items || pt.item_uses || pt.items_used || [];
+              const itemsUsedStr = rawItems
+                .slice(0, 4)
+                .map((it) => (typeof it === "string" ? it : `${it.zh || it.key}×${it.count || 1}`))
+                .join("、");
+              const bkbPressed = /黑皇杖|black_king_bar|BKB/i.test(itemsUsedStr) || Boolean(pt.bkb_used);
+              let bkbBadgeHtml = "";
+              if (unpressed) {
+                bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 ${escapeHtml(
+                  unpressed.detail || "阵亡前未按BKB/救命装"
+                )}</span>`;
+              } else if (pt.ult_unpressed_name) {
+                bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">💀 憋大暴毙(${escapeHtml(
+                  pt.ult_unpressed_name
+                )})</span>`;
+              } else if (bkbPressed) {
+                bkbBadgeHtml = `<span style="background:rgba(217,119,6,0.22);color:#fde68a;border:1px solid #f59e0b;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🛡️ 已开启 BKB</span>`;
+              } else if (hasBkbNow && Number(pt.deaths || 0) > 0) {
+                bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 身怀BKB阵亡未开！</span>`;
+              } else if (hasBkbNow) {
+                bkbBadgeHtml = `<span style="background:rgba(59,130,246,0.18);color:#bfdbfe;padding:1px 6px;border-radius:4px;font-size:10.5px;">🎒 持有BKB(未按·存活)</span>`;
+              } else if (pt.verdict_tag) {
+                bkbBadgeHtml = `<span style="background:rgba(255,255,255,0.06);color:var(--muted);padding:1px 6px;border-radius:4px;font-size:10.5px;">${escapeHtml(
+                  pt.verdict_tag
+                )}</span>`;
               }
-            </span>
-          </div>
-          ${tfScriptHtml}
-          ${
-            rawParts.length > 0
-              ? `
-                <div style="max-height:275px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px;">
-                  ${rawParts
-                    .filter((pt) => Number(pt.damage || 0) > 0 || Number(pt.deaths || 0) > 0 || Number(pt.healing || 0) > 0)
-                    .sort((a, b) => Number(b.damage || 0) - Number(a.damage || 0))
-                    .map((pt) => {
-                      const hName = pt.hero_short_zh || "";
-                      const fp = fullPlayerByHero.get(hName) || {};
-                      const pSnap = players.find((x) => x.hero_short_zh === hName) || {};
-                      const hasBkbNow = (pSnap.items || []).some((it) =>
-                        /黑皇杖|black_king_bar/i.test(it.zh || it.key || "")
-                      );
-                      const unusedSelf = Array.isArray(pt.unused_self_saves_zh) ? pt.unused_self_saves_zh : [];
-                      const unpressed =
-                        activeUnpressedByHero.get(hName) ||
-                        (unusedSelf.length > 0 ? { detail: `憋死未开 ${unusedSelf.join("/")}` } : null);
-                      const rawSpells =
-                        pt.abilities_used_zh || pt.abilities || pt.ability_uses || pt.abilities_used || [];
-                      const spellsStr = rawSpells
-                        .slice(0, 4)
-                        .map((a) => (typeof a === "string" ? a : `${a.zh || a.key}×${a.count || 1}`))
-                        .join("、");
-                      const rawItems = pt.items_used_zh || pt.items || pt.item_uses || pt.items_used || [];
-                      const itemsUsedStr = rawItems
-                        .slice(0, 4)
-                        .map((it) => (typeof it === "string" ? it : `${it.zh || it.key}×${it.count || 1}`))
-                        .join("、");
-                      const bkbPressed = /黑皇杖|black_king_bar|BKB/i.test(itemsUsedStr) || Boolean(pt.bkb_used);
-                      let bkbBadgeHtml = "";
-                      if (unpressed) {
-                        bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 ${escapeHtml(
-                          unpressed.detail || "阵亡前未按BKB/救命装"
-                        )}</span>`;
-                      } else if (pt.ult_unpressed_name) {
-                        bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">💀 憋大暴毙(${escapeHtml(
-                          pt.ult_unpressed_name
-                        )})</span>`;
-                      } else if (bkbPressed) {
-                        bkbBadgeHtml = `<span style="background:rgba(217,119,6,0.22);color:#fde68a;border:1px solid #f59e0b;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🛡️ 已开启 BKB</span>`;
-                      } else if (hasBkbNow && Number(pt.deaths || 0) > 0) {
-                        bkbBadgeHtml = `<span style="background:rgba(220,38,38,0.22);color:#fca5a5;border:1px solid #ef4444;padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;">🚨 身怀BKB阵亡未开！</span>`;
-                      } else if (hasBkbNow) {
-                        bkbBadgeHtml = `<span style="background:rgba(59,130,246,0.18);color:#bfdbfe;padding:1px 6px;border-radius:4px;font-size:10.5px;">🎒 持有BKB(未按·存活)</span>`;
-                      } else if (pt.verdict_tag) {
-                        bkbBadgeHtml = `<span style="background:rgba(255,255,255,0.06);color:var(--muted);padding:1px 6px;border-radius:4px;font-size:10.5px;">${escapeHtml(
-                          pt.verdict_tag
-                        )}</span>`;
-                      }
-                      const isRadPt = (pt.side || fp.side) === "radiant" || (pt.side || fp.side) === "天辉";
-                      const killSecForHero = tfKillTimeByHero.get(hName) ?? -1;
-                      const diedByNow =
-                        killSecForHero >= 0 ? secNow >= killSecForHero : Number(pt.deaths || 0) > 0;
-                      return `
-                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border-left:3px solid ${
-                          isRadPt ? "#4ade80" : "#f87171"
-                        };font-size:11.5px;flex-wrap:wrap;">
-                          <div style="display:flex;align-items:center;gap:6px;min-width:145px;">
-                            ${
-                              fp.hero_img || pt.hero_img
-                                ? `<img src="${escapeHtml(fp.hero_img || pt.hero_img)}" alt="" width="28" height="16" style="border-radius:3px;" />`
-                                : ""
-                            }
-                            <b>[${isRadPt ? "天辉" : "夜魇"}${pt.pos || fp.pos || ""}] ${escapeHtml(hName)}</b>
-                            <span style="color:${diedByNow ? "#f87171" : "#4ade80"};font-weight:700;">${
-                        diedByNow ? "💀阵亡" : "🟢存活"
-                      }</span>
-                          </div>
-                          <div style="flex:1;color:var(--text);font-size:11px;">
-                            💥 伤害 <b>${fmtNum(pt.damage || 0)}</b>
-                            ${spellsStr ? ` ｜ ⚡ 技能：${escapeHtml(spellsStr)}` : ""}
-                            ${itemsUsedStr ? ` ｜ 🎒 按键：<b>${escapeHtml(itemsUsedStr)}</b>` : ""}
-                          </div>
-                          <div>${bkbBadgeHtml}</div>
-                        </div>
-                      `;
-                    })
-                    .join("")}
+              const isRadPt = (pt.side || fp.side) === "radiant" || (pt.side || fp.side) === "天辉";
+              const killSecForHero = tfKillTimeByHero.get(hName) ?? -1;
+              const diedByNow =
+                killSecForHero >= 0 ? secNow >= killSecForHero : Number(pt.deaths || 0) > 0;
+              return `
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border-left:3px solid ${
+                  isRadPt ? "#4ade80" : "#f87171"
+                };font-size:11.5px;flex-wrap:wrap;">
+                  <div style="display:flex;align-items:center;gap:6px;min-width:145px;">
+                    ${
+                      fp.hero_img || pt.hero_img
+                        ? `<img src="${escapeHtml(fp.hero_img || pt.hero_img)}" alt="" width="28" height="16" style="border-radius:3px;" />`
+                        : ""
+                    }
+                    <b>[${isRadPt ? "天辉" : "夜魇"}${pt.pos || fp.pos || ""}] ${escapeHtml(hName)}</b>
+                    <span style="color:${diedByNow ? "#f87171" : "#4ade80"};font-weight:700;">${
+                diedByNow ? "💀阵亡" : "🟢存活"
+              }</span>
+                  </div>
+                  <div style="flex:1;color:var(--text);font-size:11px;">
+                    💥 伤害 <b>${fmtNum(pt.damage || 0)}</b>
+                    ${spellsStr ? ` ｜ ⚡ 技能：${escapeHtml(spellsStr)}` : ""}
+                    ${itemsUsedStr ? ` ｜ 🎒 按键：<b>${escapeHtml(itemsUsedStr)}</b>` : ""}
+                  </div>
+                  <div>${bkbBadgeHtml}</div>
                 </div>
-              `
-              : `<ul class="micro-insights-list" style="margin:0;">${eventsHtml}</ul>`
-          }
+              `;
+            })
+            .join("")}
         </div>
-        ${
-          rawParts.length > 0 && eventsList.length > 0
-            ? `<div style="margin-top:8px;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.1);font-size:11px;color:var(--muted);">📌 <b>本分钟击杀/推塔流水：</b>${eventsList
-                .map((e) => escapeHtml(e))
-                .join(" ； ")}</div>`
-            : ""
-        }
-      </div>
-    </div>
-  `;
+      `
+      : `<ul class="micro-insights-list" style="margin:0;">${eventsHtml}</ul>`;
+
+  const combatFooterHtml =
+    rawParts.length > 0 && eventsList.length > 0
+      ? `<div style="margin-top:8px;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.1);font-size:11px;color:var(--muted);">📌 <b>本分钟击杀/推塔流水：</b>${eventsList
+          .map((e) => escapeHtml(e))
+          .join(" ； ")}</div>`
+      : "";
 
   const barsHtml = players
     .map((p, rankIdx) => {
@@ -14506,90 +14478,210 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
     })
     .join("");
 
-  contentEl.innerHTML = `
-    <div style="grid-column: 1 / -1;">
-      ${interactiveMinimapHtml}
-    </div>
-    <div class="scrub-left-col">
-      <div class="scrub-col-title">
-        <strong>🏆 ${escapeHtml(timeStrNow)} 时刻 · 十人实时净资产与最近购买排位</strong>
-        <span>正补/反补与最近购买（近 6 次购买记录）</span>
-      </div>
-      <div class="scrub-players-list">${barsHtml}</div>
-    </div>
-    <div class="scrub-right-col">
-      <div class="scrub-kpi-grid">
-        <div class="scrub-kpi-card">
-          <span>💰 ${escapeHtml(timeStrNow)} 经济差</span>
-          <strong style="color:${
-            radGoldAdv === 0
-              ? "var(--text)"
-              : (radGoldAdv > 0 && side === "radiant") || (radGoldAdv < 0 && side === "dire")
-              ? "var(--green-light)"
-              : "var(--red-light)"
-          }">${goldLeadTeam} ${radGoldAdv === 0 ? "0" : `+${fmtNum(Math.abs(radGoldAdv))}`}</strong>
-        </div>
-        <div class="scrub-kpi-card">
-          <span>📚 ${escapeHtml(timeStrNow)} 经验差</span>
-          <strong>${xpLeadTeam} ${radXpAdv === 0 ? "0" : `+${fmtNum(Math.abs(radXpAdv))}`}</strong>
-        </div>
-        <div class="scrub-kpi-card">
-          <span>👁️ 场上存活假眼</span>
-          <strong>天辉 ${radObsNow} / 夜魇 ${direObsNow}</strong>
-        </div>
-      </div>
+  const goldKpiColor =
+    radGoldAdv === 0
+      ? "var(--text)"
+      : (radGoldAdv > 0 && side === "radiant") || (radGoldAdv < 0 && side === "dire")
+      ? "var(--green-light)"
+      : "var(--red-light)";
+  const goldKpiVal = `${goldLeadTeam} ${radGoldAdv === 0 ? "0" : `+${fmtNum(Math.abs(radGoldAdv))}`}`;
+  const xpKpiVal = `${xpLeadTeam} ${radXpAdv === 0 ? "0" : `+${fmtNum(Math.abs(radXpAdv))}`}`;
+  const obsKpiVal = `天辉 ${radObsNow} / 夜魇 ${direObsNow}`;
+  const eventsTitleTxt = `⚔️ 本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 关键交火与推塔战报`;
+  const compareTitleTxt = `⚖️ ${timeStrNow} 时刻 · 双方团队与 1~5 号位对位净值横评`;
+  const compareSubTxt = `天辉 ${fmtNum(radTotalNw)} 金 (${radNwSharePct}%) vs 夜魇 ${fmtNum(direTotalNw)} 金 (${100 - radNwSharePct}%)`;
+  const coresNwTxt = `天辉 ${fmtNum(radCoresNw)} vs 夜魇 ${fmtNum(direCoresNw)}`;
+  const supsNwTxt = `天辉 ${fmtNum(radSupsNw)} vs 夜魇 ${fmtNum(direSupsNw)}`;
+  const lhdnTxt = `天辉 ${radTotalLh}/${radTotalDn} vs 夜魇 ${direTotalLh}/${direTotalDn}`;
 
-      <div class="scrub-events-box">
-        <h4>⚔️ 本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 关键交火与推塔战报</h4>
-        <ul class="micro-insights-list">${eventsHtml}</ul>
+  const scrubKey = `${report.match_id || 0}:${side}`;
+  if (contentEl._scrubMatchKey !== scrubKey) {
+    contentEl._scrubMatchKey = scrubKey;
+    contentEl.innerHTML = `
+      <div style="grid-column: 1 / -1;">
+        <div class="scrub-minimap-combat-grid" style="display:grid;grid-template-columns:minmax(430px, 490px) 1fr;gap:16px;margin-bottom:16px;align-items:stretch;">
+          <div class="scrub-mini-map-card" style="background:rgba(16,18,15,0.95);border:1px solid rgba(198,164,104,0.32);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;">
+            <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <strong id="scrub-map-title" style="font-size:13.5px;color:var(--gold-light);font-variant-numeric:tabular-nums;">🗺️ ${escapeHtml(
+                  timeStrNow
+                )} 小地图（示意位置，非真实走位）</strong>
+                <button type="button" id="btn-scrub-map-play" class="button primary" style="padding:2px 10px;font-size:11.5px;font-weight:700;">${
+                  state.scrubberPlaying ? "⏸ 暂停" : "▶ 播放团战"
+                }</button>
+              </div>
+              <span style="font-size:11px;color:var(--muted);">实心=真实点 ｜ 半透明=示意位置，非真实走位</span>
+            </div>
+            <svg viewBox="0 0 420 420" style="width:100%;max-width:468px;aspect-ratio:1/1;border-radius:10px;background:radial-gradient(circle at 50% 50%, #1e2820 0%, #101511 100%);border:1px solid #333b30;box-shadow:0 6px 20px rgba(0,0,0,0.45);">
+              <path d="M 22 26 Q 198 204 396 394" fill="none" stroke="rgba(56, 189, 248, 0.22)" stroke-width="28" stroke-linecap="round" />
+              <polyline points="34,386 34,42 386,42" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="10" stroke-linejoin="round" />
+              <polyline points="34,386 386,386 386,42" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="10" stroke-linejoin="round" />
+              <line x1="34" y1="386" x2="386" y2="42" stroke="rgba(148, 163, 184, 0.18)" stroke-width="10" />
+              <rect x="18" y="356" width="46" height="46" rx="8" fill="rgba(34, 197, 94, 0.16)" stroke="#22c55e" stroke-width="1.5" />
+              <text x="41" y="383" fill="#86efac" font-size="11" font-weight="700" text-anchor="middle">天辉</text>
+              <rect x="356" y="18" width="46" height="46" rx="8" fill="rgba(239, 68, 68, 0.16)" stroke="#ef4444" stroke-width="1.5" />
+              <text x="379" y="45" fill="#fca5a5" font-size="11" font-weight="700" text-anchor="middle">夜魇</text>
+              <circle cx="155" cy="155" r="14" fill="rgba(245, 158, 11, 0.14)" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="3,2" />
+              <text x="155" y="159" fill="#fcd34d" font-size="9.5" font-weight="700" text-anchor="middle">肉山</text>
+              <g id="scrub-map-svg-dynamic">${mapDynamicSvg}</g>
+            </svg>
+          </div>
+          <div class="scrub-combat-log-card" style="background:rgba(16,18,15,0.92);border:1px solid rgba(198,164,104,0.28);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+                <strong id="scrub-combat-title" style="font-size:13px;color:var(--gold-light);">📜 ${escapeHtml(
+                  timeStrNow
+                )} 实时战斗记录 &amp; 🛡️ BKB/保命装按键验尸</strong>
+                <span id="scrub-combat-status" style="font-size:11px;color:${combatStatusColor};font-weight:600;">${escapeHtml(
+                  combatStatusText
+                )}</span>
+              </div>
+              <div id="scrub-combat-script-box">${tfScriptHtml}</div>
+              <div id="scrub-combat-body">${combatRowsHtml}</div>
+            </div>
+            <div id="scrub-combat-footer">${combatFooterHtml}</div>
+          </div>
+        </div>
       </div>
+      <div class="scrub-left-col">
+        <div class="scrub-col-title">
+          <strong id="scrub-left-title">🏆 ${escapeHtml(timeStrNow)} 时刻 · 十人实时净资产与最近购买排位</strong>
+          <span>正补/反补与最近购买（近 6 次购买记录）</span>
+        </div>
+        <div id="scrub-players-list" class="scrub-players-list">${barsHtml}</div>
+      </div>
+      <div class="scrub-right-col">
+        <div class="scrub-kpi-grid">
+          <div class="scrub-kpi-card">
+            <span id="scrub-kpi-gold-label">💰 ${escapeHtml(timeStrNow)} 经济差</span>
+            <strong id="scrub-kpi-gold-val" style="color:${goldKpiColor}">${escapeHtml(goldKpiVal)}</strong>
+          </div>
+          <div class="scrub-kpi-card">
+            <span id="scrub-kpi-xp-label">📚 ${escapeHtml(timeStrNow)} 经验差</span>
+            <strong id="scrub-kpi-xp-val">${escapeHtml(xpKpiVal)}</strong>
+          </div>
+          <div class="scrub-kpi-card">
+            <span>👁️ 场上存活假眼</span>
+            <strong id="scrub-kpi-obs-val">${escapeHtml(obsKpiVal)}</strong>
+          </div>
+        </div>
 
-      <div class="scrub-team-compare-box">
-        <div class="scrub-compare-head">
-          <h4>⚖️ ${escapeHtml(timeStrNow)} 时刻 · 双方团队与 1~5 号位对位净值横评</h4>
-          <span>天辉 ${fmtNum(radTotalNw)} 金 (${radNwSharePct}%) vs 夜魇 ${fmtNum(direTotalNw)} 金 (${100 - radNwSharePct}%)</span>
+        <div class="scrub-events-box">
+          <h4 id="scrub-events-title">${escapeHtml(eventsTitleTxt)}</h4>
+          <ul id="scrub-events-list" class="micro-insights-list">${eventsHtml}</ul>
         </div>
-        <div class="scrub-tug-bar">
-          <div class="scrub-tug-rad" style="width:${radNwSharePct}%"></div>
-          <div class="scrub-tug-dire" style="width:${100 - radNwSharePct}%"></div>
-        </div>
-        <div class="scrub-team-metrics-grid">
-          <div class="scrub-tm-pill">
-            <span>三大哥(1-3号位)总经济</span>
-            <strong>天辉 ${fmtNum(radCoresNw)} vs 夜魇 ${fmtNum(direCoresNw)}</strong>
+
+        <div class="scrub-team-compare-box">
+          <div class="scrub-compare-head">
+            <h4 id="scrub-compare-title">${escapeHtml(compareTitleTxt)}</h4>
+            <span id="scrub-compare-sub">${escapeHtml(compareSubTxt)}</span>
           </div>
-          <div class="scrub-tm-pill">
-            <span>双辅助(4-5号位)总经济</span>
-            <strong>天辉 ${fmtNum(radSupsNw)} vs 夜魇 ${fmtNum(direSupsNw)}</strong>
+          <div class="scrub-tug-bar">
+            <div id="scrub-tug-rad" class="scrub-tug-rad" style="width:${radNwSharePct}%"></div>
+            <div id="scrub-tug-dire" class="scrub-tug-dire" style="width:${100 - radNwSharePct}%"></div>
           </div>
-          <div class="scrub-tm-pill">
-            <span>全队累计正补 / 反补</span>
-            <strong>天辉 ${radTotalLh}/${radTotalDn} vs 夜魇 ${direTotalLh}/${direTotalDn}</strong>
+          <div class="scrub-team-metrics-grid">
+            <div class="scrub-tm-pill">
+              <span>三大哥(1-3号位)总经济</span>
+              <strong id="scrub-tm-cores">${escapeHtml(coresNwTxt)}</strong>
+            </div>
+            <div class="scrub-tm-pill">
+              <span>双辅助(4-5号位)总经济</span>
+              <strong id="scrub-tm-sups">${escapeHtml(supsNwTxt)}</strong>
+            </div>
+            <div class="scrub-tm-pill">
+              <span>全队累计正补 / 反补</span>
+              <strong id="scrub-tm-lhdn">${escapeHtml(lhdnTxt)}</strong>
+            </div>
           </div>
-        </div>
-        <div class="scrub-pos-vs-list">
-          ${posDeltaRowsHtml}
+          <div id="scrub-pos-vs-list" class="scrub-pos-vs-list">
+            ${posDeltaRowsHtml}
+          </div>
         </div>
       </div>
-    </div>
-  `;
+    `;
 
-  // Bind minimap inline play button and clickable combat log second rows
-  const mapPlayBtn = document.getElementById("btn-scrub-map-play");
-  if (mapPlayBtn) {
-    mapPlayBtn.addEventListener("click", () => {
-      toggleScrubberAutoplay();
-    });
+    const mapPlayBtn = document.getElementById("btn-scrub-map-play");
+    if (mapPlayBtn) {
+      mapPlayBtn.addEventListener("click", () => {
+        toggleScrubberAutoplay();
+      });
+    }
+    if (!contentEl._scrubDelegated) {
+      contentEl._scrubDelegated = true;
+      contentEl.addEventListener("click", (e) => {
+        const row = e.target?.closest?.("[data-scrub-sec]");
+        if (!row) return;
+        const targetSec = Number(row.getAttribute("data-scrub-sec"));
+        if (!Number.isNaN(targetSec) && targetSec >= 0) {
+          stopScrubberAutoplay();
+          setScrubberSecond(targetSec);
+        }
+      });
+    }
+    return;
   }
-  contentEl.querySelectorAll("[data-scrub-sec]").forEach((row) => {
-    row.addEventListener("click", () => {
-      const targetSec = Number(row.getAttribute("data-scrub-sec"));
-      if (!Number.isNaN(targetSec) && targetSec >= 0) {
-        stopScrubberAutoplay();
-        setScrubberSecond(targetSec);
-      }
-    });
-  });
+
+  // Incremental in-place node updates on playback / scrub ticks (zero full-container innerHTML rebuild!)
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && el._lastTxt !== val) {
+      el._lastTxt = val;
+      el.textContent = val;
+    }
+  };
+  const setHtml = (id, html) => {
+    const el = document.getElementById(id);
+    if (el && el._lastHtml !== html) {
+      el._lastHtml = html;
+      el.innerHTML = html;
+    }
+  };
+
+  setTxt("scrub-map-title", `🗺️ ${timeStrNow} 小地图（示意位置，非真实走位）`);
+  setHtml("scrub-map-svg-dynamic", mapDynamicSvg);
+  setTxt("scrub-combat-title", `📜 ${timeStrNow} 实时战斗记录 & 🛡️ BKB/保命装按键验尸`);
+  const statusEl = document.getElementById("scrub-combat-status");
+  if (statusEl) {
+    if (statusEl._lastTxt !== combatStatusText) {
+      statusEl._lastTxt = combatStatusText;
+      statusEl.textContent = combatStatusText;
+    }
+    statusEl.style.color = combatStatusColor;
+  }
+  setHtml("scrub-combat-script-box", tfScriptHtml);
+  setHtml("scrub-combat-body", combatRowsHtml);
+  setHtml("scrub-combat-footer", combatFooterHtml);
+
+  setTxt("scrub-left-title", `🏆 ${timeStrNow} 时刻 · 十人实时净资产与最近购买排位`);
+  setHtml("scrub-players-list", barsHtml);
+
+  setTxt("scrub-kpi-gold-label", `💰 ${timeStrNow} 经济差`);
+  const goldValEl = document.getElementById("scrub-kpi-gold-val");
+  if (goldValEl) {
+    if (goldValEl._lastTxt !== goldKpiVal) {
+      goldValEl._lastTxt = goldKpiVal;
+      goldValEl.textContent = goldKpiVal;
+    }
+    goldValEl.style.color = goldKpiColor;
+  }
+  setTxt("scrub-kpi-xp-label", `📚 ${timeStrNow} 经验差`);
+  setTxt("scrub-kpi-xp-val", xpKpiVal);
+  setTxt("scrub-kpi-obs-val", obsKpiVal);
+
+  setTxt("scrub-events-title", eventsTitleTxt);
+  setHtml("scrub-events-list", eventsHtml);
+
+  setTxt("scrub-compare-title", compareTitleTxt);
+  setTxt("scrub-compare-sub", compareSubTxt);
+  const radTugEl = document.getElementById("scrub-tug-rad");
+  if (radTugEl) radTugEl.style.width = `${radNwSharePct}%`;
+  const direTugEl = document.getElementById("scrub-tug-dire");
+  if (direTugEl) direTugEl.style.width = `${100 - radNwSharePct}%`;
+  setTxt("scrub-tm-cores", coresNwTxt);
+  setTxt("scrub-tm-sups", supsNwTxt);
+  setTxt("scrub-tm-lhdn", lhdnTxt);
+  setHtml("scrub-pos-vs-list", posDeltaRowsHtml);
 }
 
 /**
@@ -19691,6 +19783,9 @@ function drawNanoBananaIllustratedPosterCanvas(ctxInfo, artData, loadedImg) {
 function switchWorkspaceMode(mode, { pushUrl = true, animate = true } = {}) {
   const validMode =
     mode === "pregame" ? "pregame" : mode === "postgame" ? "postgame" : "home";
+  if (state.scrubberPlaying) {
+    stopScrubberAutoplay();
+  }
   const prevMode = state.workspaceMode;
   state.workspaceMode = validMode;
 
