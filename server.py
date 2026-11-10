@@ -783,6 +783,19 @@ def start_async_llm_review_task(
     }
 
 
+CSP_REPORT_ONLY_VALUE = (
+    "default-src 'self'; "
+    "script-src 'self' https://cdnjs.cloudflare.com; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data: blob: https:; "
+    "connect-src 'self'; "
+    "font-src 'self' data:; "
+    "object-src 'none'; "
+    "base-uri 'self'; "
+    "frame-ancestors 'none'"
+)
+
+
 class DotaAnalystHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args: Any) -> None:
         sys.stderr.write(f"[DotaLedgerServer] {self.address_string()} - {fmt % args}\n")
@@ -794,6 +807,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Robots-Tag", "noindex")
+        self.send_header("Content-Security-Policy-Report-Only", CSP_REPORT_ONLY_VALUE)
         self.end_headers()
         self.wfile.write(body)
 
@@ -1026,6 +1040,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 self.send_header("Cache-Control", cache_ctrl)
                 self.send_header("ETag", etag)
                 self.send_header("X-Robots-Tag", "noindex")
+                self.send_header("Content-Security-Policy-Report-Only", CSP_REPORT_ONLY_VALUE)
                 self.end_headers()
                 return
 
@@ -1035,6 +1050,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             self.send_header("Cache-Control", cache_ctrl)
             self.send_header("ETag", etag)
             self.send_header("X-Robots-Tag", "noindex")
+            self.send_header("Content-Security-Policy-Report-Only", CSP_REPORT_ONLY_VALUE)
             self.end_headers()
             self.wfile.write(content)
 

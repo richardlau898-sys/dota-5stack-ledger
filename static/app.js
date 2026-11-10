@@ -656,6 +656,10 @@ async function ensurePdfExportLibsLoaded() {
       for (const lib of PDF_CDN_LIBS) {
         if (lib.check()) continue;
         await new Promise((resolve, reject) => {
+          if (!lib.integrity) {
+            reject(new Error(`拒绝加载缺少 SRI integrity 的外部脚本: ${lib.url}`));
+            return;
+          }
           if (typeof document === "undefined" || !document.createElement) {
             resolve();
             return;
@@ -664,11 +668,9 @@ async function ensurePdfExportLibsLoaded() {
           scriptEl.src = lib.url;
           scriptEl.defer = true;
           scriptEl.crossOrigin = "anonymous";
-          if (lib.integrity) {
-            scriptEl.integrity = lib.integrity;
-          }
+          scriptEl.integrity = lib.integrity;
           scriptEl.onload = () => resolve();
-          scriptEl.onerror = () => reject(new Error(`PDF 导出库加载失败: ${lib.url}`));
+          scriptEl.onerror = () => reject(new Error(`PDF 导出库加载失败或 SRI 校验不通过: ${lib.url}`));
           (document.head || document.body || document.documentElement).appendChild(scriptEl);
         });
       }
@@ -4766,14 +4768,16 @@ function bindEvents() {
       switchWorkspaceMode("pregame", { pushUrl: true });
     });
   }
-  const btnHomeScrollLedger = document.getElementById("btn-home-scroll-ledger");
-  if (btnHomeScrollLedger) {
-    btnHomeScrollLedger.addEventListener("click", () => {
-      const det = document.getElementById("squad-ledger-details");
-      if (det) det.open = true;
-      document.getElementById("squad-ledger-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
+  ["btn-home-scroll-ledger", "btn-home-filter-scroll-ledger"].forEach((id) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener("click", () => {
+        const det = document.getElementById("squad-ledger-details");
+        if (det) det.open = true;
+        document.getElementById("squad-ledger-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  });
 
   // Home Match Filter tabs
   document.querySelectorAll("[data-home-filter]").forEach((btn) => {
