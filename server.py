@@ -13,6 +13,7 @@ API 路由:
 """
 
 import datetime
+import hashlib
 import hmac
 import json
 import mimetypes
@@ -983,10 +984,20 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 return
 
             # 静态文件服务 (支持 /, /pregame, 以及公开分享链接 /match/<id>)
-            if path in ("/", "", "/pregame", "/pregame.html") or path.startswith("/match/"):
+            is_html_route = path in ("/", "", "/pregame", "/pregame.html") or path.startswith("/match/")
+            is_hashed_asset = False
+            if is_html_route:
                 file_path = STATIC_DIR / "index.html"
             else:
                 rel = path.lstrip("/")
+                if rel.startswith("static/"):
+                    rel = rel[len("static/"):]
+                if re.fullmatch(r"app\.[0-9a-f]{8,}\.js", rel):
+                    rel = "app.js"
+                    is_hashed_asset = True
+                elif re.fullmatch(r"styles\.[0-9a-f]{8,}\.css", rel):
+                    rel = "styles.css"
+                    is_hashed_asset = True
                 file_path = (STATIC_DIR / rel).resolve()
                 if not str(file_path).startswith(str(STATIC_DIR.resolve())):
                     self._send_json({"ok": False, "error": "Forbidden"}, status=403)
@@ -1003,10 +1014,24 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 ctype += "; charset=utf-8"
 
             content = file_path.read_bytes()
+            etag = f'"{hashlib.sha256(content).hexdigest()[:16]}"'
+            is_static_bundle = file_path.suffix.lower() in (".js", ".css") and (is_hashed_asset or bool(qs.get("v")))
+            cache_ctrl = "public, max-age=31536000, immutable" if is_static_bundle else "no-cache"
+
+            inm = (self.headers.get("If-None-Match") or "").strip() if hasattr(self, "headers") and self.headers else ""
+            if inm and inm == etag:
+                self.send_response(304)
+                self.send_header("Cache-Control", cache_ctrl)
+                self.send_header("ETag", etag)
+                self.send_header("X-Robots-Tag", "noindex")
+                self.end_headers()
+                return
+
             self.send_response(200)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(content)))
-            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Cache-Control", cache_ctrl)
+            self.send_header("ETag", etag)
             self.send_header("X-Robots-Tag", "noindex")
             self.end_headers()
             self.wfile.write(content)

@@ -587,6 +587,59 @@ async function exportMatchPdfReport(targetMatchId = null, { autoDownloadPdf = fa
   }
 }
 
+const PDF_CDN_LIBS = [
+  {
+    url: "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+    integrity: "sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==",
+    check: () => Boolean(window.jspdf?.jsPDF || window.jsPDF),
+  },
+  {
+    url: "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js",
+    integrity: "sha512-2/YdOMV+YNpanLCF5MdQwaoFRVbTmrJ4u4EpqS/jebSiWat+mvCyI9zK8ebN2vcb0J3Vgp3lCA4R8M7K18nE+A==",
+    check: () => Boolean(window.jspdf?.jsPDF?.API?.autoTable || window.jsPDF?.API?.autoTable),
+  },
+  {
+    url: "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js",
+    integrity: "sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==",
+    check: () => typeof window.html2pdf === "function",
+  },
+];
+let _pdfLibsLoadPromise = null;
+
+async function ensurePdfExportLibsLoaded() {
+  if (PDF_CDN_LIBS.every((lib) => lib.check())) {
+    return true;
+  }
+  if (!_pdfLibsLoadPromise) {
+    _pdfLibsLoadPromise = (async () => {
+      for (const lib of PDF_CDN_LIBS) {
+        if (lib.check()) continue;
+        await new Promise((resolve, reject) => {
+          if (typeof document === "undefined" || !document.createElement) {
+            resolve();
+            return;
+          }
+          const scriptEl = document.createElement("script");
+          scriptEl.src = lib.url;
+          scriptEl.defer = true;
+          scriptEl.crossOrigin = "anonymous";
+          if (lib.integrity) {
+            scriptEl.integrity = lib.integrity;
+          }
+          scriptEl.onload = () => resolve();
+          scriptEl.onerror = () => reject(new Error(`PDF 导出库加载失败: ${lib.url}`));
+          (document.head || document.body || document.documentElement).appendChild(scriptEl);
+        });
+      }
+      return true;
+    })().catch((err) => {
+      _pdfLibsLoadPromise = null;
+      throw err;
+    });
+  }
+  return _pdfLibsLoadPromise;
+}
+
 const NOTO_SANS_SC_TTF_URL =
   "https://fonts.gstatic.com/s/notosanssc/v41/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_FnYxNavzT.ttf";
 let _cjkFontLoadPromise = null;
@@ -680,10 +733,6 @@ function openFullscreenStructuredReport(report = state.currentReport) {
   const topTitle = document.getElementById("fs-report-top-title");
   const fsPerspSelect = document.getElementById("fs-perspective-select");
   if (!dlg || !paper) return;
-
-  // Pre-warm the CJK vector font AND all hero/item base64 icons in the background so clicking "直接下载 PDF" is instantaneous
-  ensureCjkVectorFontBase64().catch(() => {});
-  ensureMatchIconsMap(report.match_id).catch(() => {});
 
   const { side, sideZh } = getOwnAndOppPlayers(report);
   const ownWon =
@@ -2211,19 +2260,29 @@ async function downloadStructuredReportPdf() {
     (side === "dire" && !Boolean(report.radiant_win));
   const filename = `Dota2_原生矢量复盘报告_Match_${report.match_id}_${sideZh}视角.pdf`;
 
+  const origText = btn ? btn.textContent : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⏳ 正在装载 PDF 引擎、中文字体与英雄/装备图标...";
+  }
+  showToast(`⏳ 正在按需加载 PDF 导出库与中文字体《${filename}》...`, 5000);
+
+  try {
+    await ensurePdfExportLibsLoaded();
+  } catch (_loadErr) {
+    // fallback handled below if JsPDFCtor is unavailable
+  }
+
   const JsPDFCtor = window.jspdf?.jsPDF || window.jsPDF;
   if (typeof JsPDFCtor !== "function") {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = origText || "⬇️ 直接下载 PDF 报告 (.pdf)";
+    }
     showToast("正在加载矢量 PDF 引擎，已先为您下载独立全屏 HTML 报告");
     downloadStructuredReportHtml();
     return;
   }
-
-  const origText = btn ? btn.textContent : "";
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "⏳ 正在装载中文字体与英雄/装备图标并绘制矢量图表...";
-  }
-  showToast(`⏳ 正在生成含全套矢量图表与英雄/装备图标的原生 PDF《${filename}》...`, 5000);
 
   try {
     const [fontBase64, iconsMap] = await Promise.all([
@@ -4111,6 +4170,7 @@ async function downloadStructuredReportPng() {
   paper.classList.add("capturing-export");
 
   try {
+    await ensurePdfExportLibsLoaded().catch(() => {});
     if (typeof window.html2canvas === "function") {
       const canvas = await window.html2canvas(paper, {
         scale: 1.6,
@@ -4168,7 +4228,11 @@ async function downloadStructuredReportHtml() {
 
   let cssText = "";
   try {
-    const res = await fetch("/styles.css?v=4.6");
+    const cssHref =
+      (typeof document !== "undefined" &&
+        document.querySelector('link[rel="stylesheet"]')?.getAttribute("href")) ||
+      "/styles.css";
+    const res = await fetch(cssHref);
     if (res.ok) cssText = await res.text();
   } catch {
     // fallback if offline

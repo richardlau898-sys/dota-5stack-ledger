@@ -3,13 +3,73 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
-      "includeFiles": "{static/**,.cache/**,roster.json,*.py}"
+      "includeFiles": "{.cache/**,roster.json,*.py}"
     }
   },
-  "rewrites": [
+  "headers": [
+    {
+      "source": "/(app\\.[0-9a-f]+\\.js|styles\\.[0-9a-f]+\\.css|static/.*\\.(?:js|css))",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
-      "destination": "/api/index.py?__vercel_path=/$1"
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py?__vercel_path=/api/$1"
+    },
+    {
+      "source": "/app.:hash.js",
+      "destination": "/static/app.js"
+    },
+    {
+      "source": "/styles.:hash.css",
+      "destination": "/static/styles.css"
+    },
+    {
+      "source": "/app.js",
+      "destination": "/static/app.js"
+    },
+    {
+      "source": "/styles.css",
+      "destination": "/static/styles.css"
+    },
+    {
+      "source": "/static/(.*)",
+      "destination": "/static/$1"
+    },
+    {
+      "source": "/match/(.*)",
+      "destination": "/static/index.html"
+    },
+    {
+      "source": "/pregame",
+      "destination": "/static/index.html"
+    },
+    {
+      "source": "/pregame.html",
+      "destination": "/static/index.html"
+    },
+    {
+      "source": "/",
+      "destination": "/static/index.html"
     }
   ]
 }
