@@ -92,3 +92,38 @@ CREATE INDEX IF NOT EXISTS idx_dota_llm_tasks_match_id
     ON public.dota_llm_tasks (match_id, updated_at DESC);
 
 ALTER TABLE public.dota_llm_tasks ENABLE ROW LEVEL SECURITY;
+
+-- F1: 全量历史对局表 (OpenDota /players/{account_id}/matches 增量同步，无需解析录像)
+CREATE TABLE IF NOT EXISTS public.player_matches (
+    account_id BIGINT NOT NULL,
+    match_id BIGINT NOT NULL,
+    player_slot SMALLINT NOT NULL DEFAULT 0,
+    radiant_win BOOLEAN NOT NULL DEFAULT false,
+    won BOOLEAN NOT NULL DEFAULT false,
+    hero_id INTEGER NOT NULL DEFAULT 0,
+    hero_short_zh TEXT NOT NULL DEFAULT '',
+    pos SMALLINT NOT NULL DEFAULT 0,
+    lane_role SMALLINT NOT NULL DEFAULT 0,
+    kills INTEGER NOT NULL DEFAULT 0,
+    deaths INTEGER NOT NULL DEFAULT 0,
+    assists INTEGER NOT NULL DEFAULT 0,
+    duration INTEGER NOT NULL DEFAULT 0,
+    start_time BIGINT NOT NULL DEFAULT 0,
+    game_mode SMALLINT NOT NULL DEFAULT 0,
+    lobby_type SMALLINT NOT NULL DEFAULT 0,
+    party_size SMALLINT NOT NULL DEFAULT 1,
+    included_roster_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+    synced_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (account_id, match_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_player_matches_account_start
+    ON public.player_matches (account_id, start_time DESC);
+
+CREATE INDEX IF NOT EXISTS idx_player_matches_match_id
+    ON public.player_matches (match_id);
+
+CREATE INDEX IF NOT EXISTS idx_player_matches_hero_id
+    ON public.player_matches (account_id, hero_id, won);
+
+ALTER TABLE public.player_matches ENABLE ROW LEVEL SECURITY;

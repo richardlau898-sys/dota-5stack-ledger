@@ -538,3 +538,40 @@ def cloud_load_llm_task(task_id: str) -> Optional[Dict[str, Any]]:
     except Exception:
         pass
     return None
+
+
+def cloud_upsert_player_matches(rows: List[Dict[str, Any]], cfg: Optional[Dict[str, str]] = None) -> bool:
+    """F1: 批量写入或更新 public.player_matches 表"""
+    if not rows:
+        return True
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+    if not url or not key:
+        return False
+    headers = _supabase_headers(
+        key,
+        {
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates,return=minimal",
+        },
+    )
+    ok_all = True
+    for idx in range(0, len(rows), 500):
+        batch = rows[idx : idx + 500]
+        try:
+            body = json.dumps(batch, ensure_ascii=False).encode("utf-8")
+            req = urllib.request.Request(
+                f"{url}/rest/v1/player_matches?on_conflict=account_id,match_id",
+                data=body,
+                headers=headers,
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                if resp.status not in (200, 201, 204):
+                    ok_all = False
+        except Exception:
+            ok_all = False
+    return ok_all
+
