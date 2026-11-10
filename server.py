@@ -58,7 +58,12 @@ from dota_analyst import (
     save_roster,
 )
 from dota_constants_zh import get_hero_name, get_mode_and_lobby, sanitize_report_mixed_english
-from draft_and_phase_coach import build_pregame_strategy_plan, build_squad_history_ledger
+from draft_and_phase_coach import (
+    build_pregame_strategy_plan,
+    build_squad_history_ledger,
+    load_or_build_squad_ledger,
+    refresh_persisted_squad_ledger,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -578,6 +583,10 @@ def get_or_build_match_report(
         cloud_save_match_report(match_id, report)
     except Exception:
         pass
+    try:
+        refresh_persisted_squad_ledger(REPORTS_DIR, roster, [])
+    except Exception:
+        pass
     return report
 
 
@@ -653,6 +662,10 @@ def _execute_llm_review_task(
                 (TMP_REPORTS_DIR / f"match_{int(match_id)}.json").write_text(rep_txt, encoding="utf-8")
             try:
                 cloud_save_match_report(int(match_id), report)
+            except Exception:
+                pass
+            try:
+                refresh_persisted_squad_ledger(REPORTS_DIR, load_roster(), [])
             except Exception:
                 pass
             sanitized_rep = sanitize_report_mixed_english(report)
@@ -825,7 +838,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     "wl": {"win": wins, "lose": losses, "win_rate": win_rate},
                     "recent_matches": recent,
                 }
-                squad_ledger = build_squad_history_ledger(REPORTS_DIR, roster, recent)
+                squad_ledger = load_or_build_squad_ledger(REPORTS_DIR, roster, recent)
                 hero_map, _ = get_hero_constants_map()
                 heroes_catalog = sorted(hero_map.values(), key=lambda x: x["id"])
                 self._send_json({
@@ -837,7 +850,6 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     "recent_matches": recent,
                     "squad_ledger": squad_ledger,
                     "heroes_catalog": heroes_catalog,
-                    "latest_report": latest_report,
                     "latest_match_report": latest_report,
                 })
                 return
@@ -867,7 +879,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     "wl": {"win": wins, "lose": losses, "win_rate": win_rate},
                     "recent_matches": recent,
                 }
-                squad_ledger = build_squad_history_ledger(REPORTS_DIR, roster, recent)
+                squad_ledger = load_or_build_squad_ledger(REPORTS_DIR, roster, recent)
                 self._send_json({
                     "ok": True,
                     "account_id": aid,
@@ -899,17 +911,14 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     require_ai=False,
                     skip_llm=True,
                 )
-                roster = load_roster()
-                squad_ledger = build_squad_history_ledger(REPORTS_DIR, roster, [])
                 if report is None:
                     self._send_json({
                         "ok": True,
                         "not_analyzed": True,
                         "match_id": mid,
-                        "squad_ledger": squad_ledger,
                     })
                     return
-                self._send_json({"ok": True, "report": report, "squad_ledger": squad_ledger})
+                self._send_json({"ok": True, "report": report})
                 return
 
             if path == "/api/llm_review_status":

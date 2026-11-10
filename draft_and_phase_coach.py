@@ -2629,6 +2629,7 @@ def build_squad_history_ledger(
 
     analyzed_matches_summary = []
     member_stats: Dict[str, Dict[str, Any]] = {}
+    duo_buckets: Dict[str, Dict[str, Any]] = {}
 
     candidate_paths: Dict[str, Path] = {}
     tmp_rdir = Path("/tmp/dota_reports")
@@ -2880,62 +2881,50 @@ def build_squad_history_ledger(
                     "won": won,
                 })
 
-    # 统计边路双人搭档与中野联动化学反应 (1+5 优势路 / 3+4 劣势路 / 2+4 中游联动)
-    duo_buckets: Dict[str, Dict[str, Any]] = {}
-    if rdir.exists():
-        for mpath in sorted(rdir.glob("match_*.json"), reverse=True):
-            try:
-                rep = json.loads(mpath.read_text(encoding="utf-8"))
-            except Exception:
-                continue
-            f_side = rep.get("focus_side") or "dire"
-            own_list = rep.get("radiant_pos_1_to_5") if f_side == "radiant" else rep.get("dire_pos_1_to_5")
-            if not own_list or len(own_list) < 5:
-                continue
-            won = (f_side == "radiant" and bool(rep.get("radiant_win"))) or (
-                f_side == "dire" and not bool(rep.get("radiant_win"))
-            )
-            by_pos = {int(p.get("pos") or 0): p for p in own_list}
-            for p_a, p_b, lane_label in [(1, 5, "优势路 1+5"), (3, 4, "劣势路 3+4"), (2, 4, "中野联动 2+4")]:
-                pa = by_pos.get(p_a)
-                pb = by_pos.get(p_b)
-                if not pa or not pb:
-                    continue
-                na = roster_players.get(str(pa.get("account_id")), {}).get("name") or pa.get("personaname") or ""
-                nb = roster_players.get(str(pb.get("account_id")), {}).get("name") or pb.get("personaname") or ""
-                if na in ("匿名玩家", "Anonymous", "") or nb in ("匿名玩家", "Anonymous", ""):
-                    continue
-                dkey = f"{lane_label}:{na}+{nb}"
-                db = duo_buckets.setdefault(
-                    dkey,
-                    {
-                        "lane_label": lane_label,
-                        "player_a": na,
-                        "player_b": nb,
-                        "games": 0,
-                        "wins": 0,
-                        "total_rating": 0.0,
-                        "hero_pairs": [],
-                    },
-                )
-                db["games"] += 1
-                if won:
-                    db["wins"] += 1
-                def _to_score_100(pl_obj: Dict[str, Any]) -> float:
-                    raw_val = float(
-                        pl_obj.get("mvp_score")
-                        or pl_obj.get("rating_score_100")
-                        or pl_obj.get("rating_score")
-                        or 60.0
+            # 在同一次循环中统计边路双人搭档与中野联动化学反应 (不再二次读取解析 match_*.json)
+            if len(own_list) >= 5:
+                by_pos = {int(p.get("pos") or 0): p for p in own_list}
+                for p_a, p_b, lane_label in [(1, 5, "优势路 1+5"), (3, 4, "劣势路 3+4"), (2, 4, "中野联动 2+4")]:
+                    pa = by_pos.get(p_a)
+                    pb = by_pos.get(p_b)
+                    if not pa or not pb:
+                        continue
+                    na = roster_players.get(str(pa.get("account_id")), {}).get("name") or pa.get("personaname") or ""
+                    nb = roster_players.get(str(pb.get("account_id")), {}).get("name") or pb.get("personaname") or ""
+                    if na in ("匿名玩家", "Anonymous", "") or nb in ("匿名玩家", "Anonymous", ""):
+                        continue
+                    dkey = f"{lane_label}:{na}+{nb}"
+                    db = duo_buckets.setdefault(
+                        dkey,
+                        {
+                            "lane_label": lane_label,
+                            "player_a": na,
+                            "player_b": nb,
+                            "games": 0,
+                            "wins": 0,
+                            "total_rating": 0.0,
+                            "hero_pairs": [],
+                        },
                     )
-                    return raw_val * 10.0 if raw_val <= 10.5 else raw_val
+                    db["games"] += 1
+                    if won:
+                        db["wins"] += 1
 
-                avg_r_pair = (_to_score_100(pa) + _to_score_100(pb)) / 2.0
-                db["total_rating"] += avg_r_pair
-                db["hero_pairs"].append({
-                    "pair_zh": f"{pa.get('hero_short_zh')}+{pb.get('hero_short_zh')}",
-                    "won": won,
-                })
+                    def _to_score_100(pl_obj: Dict[str, Any]) -> float:
+                        raw_val = float(
+                            pl_obj.get("mvp_score")
+                            or pl_obj.get("rating_score_100")
+                            or pl_obj.get("rating_score")
+                            or 60.0
+                        )
+                        return raw_val * 10.0 if raw_val <= 10.5 else raw_val
+
+                    avg_r_pair = (_to_score_100(pa) + _to_score_100(pb)) / 2.0
+                    db["total_rating"] += avg_r_pair
+                    db["hero_pairs"].append({
+                        "pair_zh": f"{pa.get('hero_short_zh')}+{pb.get('hero_short_zh')}",
+                        "won": won,
+                    })
 
     lane_duo_chemistry = []
     for db in duo_buckets.values():
@@ -3319,14 +3308,32 @@ def build_squad_history_ledger(
             "tone": "warn",
         })
 
-    # 4. 近期 12 场英雄池与组排红黑榜
-    party_games = [m for m in recent_matches if int(m.get("party_size") or 1) >= 2]
-    solo_games = [m for m in recent_matches if int(m.get("party_size") or 1) < 2]
+    recent_hero_pool, party_summary = _compute_recent_pool_and_party_summary(recent_matches)
+
+    return {
+        "analyzed_matches": analyzed_matches_summary,
+        "squad_members_rank": squad_members_rank,
+        "guinness_records": guinness_records,
+        "lane_duo_chemistry": lane_duo_chemistry[:8],
+        "recent_hero_pool": recent_hero_pool,
+        "party_summary": party_summary,
+    }
+
+
+_LEDGER_MEM_CACHE: Dict[str, Dict[str, Any]] = {}
+
+
+def _compute_recent_pool_and_party_summary(
+    recent_matches: Optional[List[Dict[str, Any]]],
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    rm_list = recent_matches or []
+    party_games = [m for m in rm_list if int(m.get("party_size") or 1) >= 2]
+    solo_games = [m for m in rm_list if int(m.get("party_size") or 1) < 2]
     party_wins = sum(1 for m in party_games if m.get("won"))
     solo_wins = sum(1 for m in solo_games if m.get("won"))
 
     hero_buckets: Dict[str, Dict[str, Any]] = {}
-    for m in recent_matches:
+    for m in rm_list:
         hname = m.get("hero_short_zh") or m.get("hero_name") or "未知"
         hb = hero_buckets.setdefault(
             hname,
@@ -3373,21 +3380,106 @@ def build_squad_history_ledger(
             "verdict": h_verdict,
         })
     recent_hero_pool.sort(key=lambda x: (x["games"], x["win_rate"]), reverse=True)
+    party_summary = {
+        "party_games": len(party_games),
+        "party_wins": party_wins,
+        "party_win_rate": round((party_wins / max(1, len(party_games))) * 100, 1) if party_games else 0.0,
+        "solo_games": len(solo_games),
+        "solo_wins": solo_wins,
+        "solo_win_rate": round((solo_wins / max(1, len(solo_games))) * 100, 1) if solo_games else 0.0,
+    }
+    return recent_hero_pool, party_summary
 
+
+def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
+    from pathlib import Path
+
+    rdir = Path(reports_dir)
+    tmp_rdir = Path("/tmp/dota_reports")
+    files = []
+    for scan_dir in (rdir, tmp_rdir):
+        if scan_dir.exists():
+            for mp in scan_dir.glob("match_*.json"):
+                try:
+                    st = mp.stat()
+                    files.append((mp.name, int(st.st_mtime_ns), int(st.st_size)))
+                except OSError:
+                    pass
+    files.sort()
+    main_aid = int((roster or {}).get("main_account_id") or 0)
+    players_cnt = len((roster or {}).get("players") or {})
+    return f"{rdir.resolve()}|{main_aid}|{players_cnt}|{len(files)}|{hash(tuple(files))}"
+
+
+def _ledger_cache_file_path(reports_dir: Any) -> Any:
+    from pathlib import Path
+
+    rdir = Path(reports_dir).resolve()
+    repo_reports = (Path(__file__).resolve().parent / "reports").resolve()
+    if rdir == repo_reports:
+        return Path("/tmp/dota_reports/squad_ledger.json")
+    return rdir / "squad_ledger.json"
+
+
+def refresh_persisted_squad_ledger(
+    reports_dir: Any,
+    roster: Dict[str, Any],
+    recent_matches: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """在报告入库或花名册变更时计算一次总账并持久化缓存。"""
+    import json
+
+    ledger = build_squad_history_ledger(reports_dir, roster, recent_matches or [])
+    sig = _ledger_dir_signature(reports_dir, roster)
+    core_payload = {
+        "_sig": sig,
+        "analyzed_matches": ledger.get("analyzed_matches") or [],
+        "squad_members_rank": ledger.get("squad_members_rank") or [],
+        "guinness_records": ledger.get("guinness_records") or [],
+        "lane_duo_chemistry": ledger.get("lane_duo_chemistry") or [],
+    }
+    _LEDGER_MEM_CACHE[str(reports_dir)] = core_payload
+    cpath = _ledger_cache_file_path(reports_dir)
+    try:
+        cpath.parent.mkdir(parents=True, exist_ok=True)
+        cpath.write_text(json.dumps(core_payload, ensure_ascii=False), encoding="utf-8")
+    except OSError:
+        pass
+    return ledger
+
+
+def load_or_build_squad_ledger(
+    reports_dir: Any,
+    roster: Dict[str, Any],
+    recent_matches: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """请求时直接读取预计算好的总账缓存，不重复解析全部 match_*.json。"""
+    import json
+
+    sig = _ledger_dir_signature(reports_dir, roster)
+    cached_core = _LEDGER_MEM_CACHE.get(str(reports_dir))
+    if not isinstance(cached_core, dict) or cached_core.get("_sig") != sig:
+        cpath = _ledger_cache_file_path(reports_dir)
+        if cpath.exists():
+            try:
+                disk_core = json.loads(cpath.read_text(encoding="utf-8"))
+                if isinstance(disk_core, dict) and disk_core.get("_sig") == sig:
+                    cached_core = disk_core
+                    _LEDGER_MEM_CACHE[str(reports_dir)] = cached_core
+            except Exception:
+                cached_core = None
+
+    if not isinstance(cached_core, dict) or cached_core.get("_sig") != sig:
+        return refresh_persisted_squad_ledger(reports_dir, roster, recent_matches)
+
+    recent_hero_pool, party_summary = _compute_recent_pool_and_party_summary(recent_matches)
     return {
-        "analyzed_matches": analyzed_matches_summary,
-        "squad_members_rank": squad_members_rank,
-        "guinness_records": guinness_records,
-        "lane_duo_chemistry": lane_duo_chemistry[:8],
+        "analyzed_matches": cached_core.get("analyzed_matches") or [],
+        "squad_members_rank": cached_core.get("squad_members_rank") or [],
+        "guinness_records": cached_core.get("guinness_records") or [],
+        "lane_duo_chemistry": cached_core.get("lane_duo_chemistry") or [],
         "recent_hero_pool": recent_hero_pool,
-        "party_summary": {
-            "party_games": len(party_games),
-            "party_wins": party_wins,
-            "party_win_rate": round((party_wins / max(1, len(party_games))) * 100, 1) if party_games else 0.0,
-            "solo_games": len(solo_games),
-            "solo_wins": solo_wins,
-            "solo_win_rate": round((solo_wins / max(1, len(solo_games))) * 100, 1) if solo_games else 0.0,
-        },
+        "party_summary": party_summary,
     }
 
 

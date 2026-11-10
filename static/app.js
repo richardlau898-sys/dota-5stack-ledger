@@ -4396,7 +4396,7 @@ async function initApp() {
       player_name: slot.player_name || getSquadPlayerNameForPos(slot.pos),
     }));
 
-    const firstReport = data.latest_match_report || data.latest_report;
+    const firstReport = data.latest_match_report;
     if (!directMatchLoaded && !state.userSelectedMatch && firstReport) {
       state.currentMatchId = firstReport.match_id;
       state.currentReport = firstReport;
