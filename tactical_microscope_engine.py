@@ -12,7 +12,7 @@ Dota 2 录像级深度战术显微镜引擎 (tactical_microscope_engine.py)
 """
 
 from typing import Any, Dict, List, Optional, Tuple
-from dota_constants_zh import get_ability_zh, ITEMS_ZH
+from dota_constants_zh import GOLD_REASON_KEYS, get_ability_zh, ITEMS_ZH
 from hero_profiles_126 import get_hero_profile_126
 
 
@@ -2340,13 +2340,20 @@ def build_tactical_microscope(
             pslot = int(fp["player_slot"])
             rp = raw_by_slot.get(pslot, {})
             gr = rp.get("gold_reasons") or {}
-            lane_g = max(0, int(gr.get("12") or 0))
-            jungle_g = max(0, int(gr.get("13") or 0))
-            kill_g = max(0, int(gr.get("11") or 0))
-            obj_g = max(0, int(gr.get("6") or 0)) + max(0, int(gr.get("14") or 0))
-            bounty_ward_g = max(0, int(gr.get("16") or 0)) + max(0, int(gr.get("20") or 0)) + max(0, int(gr.get("15") or 0))
-            death_loss = abs(int(gr.get("0") or 0))
-            buyback_loss = abs(min(0, int(gr.get("1") or 0)))
+            lane_g = max(0, int(gr.get(GOLD_REASON_KEYS["lane_creep"]) or 0))
+            jungle_g = max(0, int(gr.get(GOLD_REASON_KEYS["neutral_creep"]) or 0))
+            kill_g = max(0, int(gr.get(GOLD_REASON_KEYS["hero_kill"]) or 0))
+            obj_g = (
+                max(0, int(gr.get(GOLD_REASON_KEYS["building"]) or 0))
+                + max(0, int(gr.get(GOLD_REASON_KEYS["roshan"]) or 0))
+            )
+            bounty_ward_g = (
+                max(0, int(gr.get(GOLD_REASON_KEYS["courier"]) or 0))
+                + max(0, int(gr.get(GOLD_REASON_KEYS["bounty_rune"]) or 0))
+                + max(0, int(gr.get(GOLD_REASON_KEYS["ward_kill"]) or 0))
+            )
+            death_loss = abs(int(gr.get(GOLD_REASON_KEYS["death_loss"]) or 0))
+            buyback_loss = abs(min(0, int(gr.get(GOLD_REASON_KEYS["buyback"]) or 0)))
 
             pos_earned = max(1, lane_g + jungle_g + kill_g + obj_g + bounty_ward_g)
             lane_pct = round(lane_g * 100.0 / pos_earned, 1)

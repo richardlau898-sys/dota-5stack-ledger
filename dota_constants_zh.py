@@ -2,7 +2,23 @@
 """Dota 2 英雄、全量装备、7.38中立道具与附魔、全英雄技能 100% 纯中文映射及中英文混搭清洗器"""
 
 import re
-from typing import Any
+from typing import Any, Dict
+
+# Dota 2 / OpenDota gold_reasons 唯一标准枚举表
+GOLD_REASON_KEYS: Dict[str, str] = {
+    "other": "0",          # 其他 / 出门装与自然增长调整
+    "death_loss": "1",     # 死亡扣钱
+    "buyback": "2",        # 买活消耗
+    "sell_item": "6",      # 变卖装备
+    "building": "11",      # 摧毁建筑
+    "hero_kill": "12",     # 英雄击杀与助攻
+    "lane_creep": "13",    # 线上小兵
+    "neutral_creep": "14", # 野怪与远古
+    "roshan": "15",        # 肉山
+    "courier": "16",       # 击杀信使
+    "bounty_rune": "17",   # 赏金神符
+    "ward_kill": "20",     # 排眼奖励
+}
 
 # hero_id -> (中文名, 常用中文简称, 默认位置优先级 (1~5))
 HEROES_ZH = {

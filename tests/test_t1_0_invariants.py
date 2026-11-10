@@ -26,7 +26,6 @@ class TestT10Invariants(unittest.TestCase):
                             )
         self.assertEqual(violations, [], f"Found skillshot hit_pct > 100%: {violations[:5]}")
 
-    @unittest.expectedFailure  # T1-1: 修正金钱来源枚举（当前把 gold_reasons['1'] 死亡扣钱当成了买活消耗）
     def test_t1_1_zero_buybacks_means_zero_buyback_loss(self) -> None:
         violations = []
         for mid, report in self.reports.items():

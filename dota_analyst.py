@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dota_constants_zh import (
+    GOLD_REASON_KEYS,
     HEROES_ZH,
     ITEMS_ZH,
     LANE_ROLE_ZH,
@@ -1113,7 +1114,7 @@ def analyze_match_data(
 
             dead_seconds = int(p.get("life_state_dead") or 0)
             gold_reasons = p.get("gold_reasons") or {}
-            death_gold_lost = abs(int(gold_reasons.get("1") or 0))
+            death_gold_lost = abs(int(gold_reasons.get(GOLD_REASON_KEYS["death_loss"]) or 0))
             buybacks = int(p.get("buyback_count") or len(p.get("buyback_log") or []))
 
             killed_by_raw = p.get("killed_by") or {}
