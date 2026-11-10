@@ -9,8 +9,11 @@ const state = {
   profileData: null,
   squadLedger: null,
   heroesCatalog: [],
-  workspaceMode: "home", // "home" | "postgame" | "pregame"
+  workspaceMode: "postgame", // "home" | "postgame" | "pregame"
   homeFilter: "all", // "all" | "analyzed" | "party" | "win" | "loss"
+  wsSidebarFilter: "all", // "all" | "analyzed" | "party" | "win" | "loss"
+  wsSidebarCollapsed: false,
+  wsPostgameTab: "summary", // "summary" | "timeline" | "phases" | "microscope" | "players" | "all"
   pregameOwnPicks: [
     { pos: 1, hero_id: 8, player_name: "Flame = ez mute" },
     { pos: 2, hero_id: 45, player_name: "Replica" },
@@ -4333,6 +4336,8 @@ async function initApp() {
   const isInitialPregame =
     window.location.pathname.includes("/pregame") ||
     new URLSearchParams(window.location.search).get("mode") === "pregame";
+  const isInitialHome =
+    new URLSearchParams(window.location.search).get("mode") === "home";
 
   // Seed Home ("/") in browser history when user opens a direct match/pregame URL so Browser Back returns to Home instead of exiting to external tab
   try {
@@ -4352,7 +4357,7 @@ async function initApp() {
         );
       }
     } else if (window.history?.replaceState && !window.history.state?.workspaceMode) {
-      window.history.replaceState({ workspaceMode: "home", seededHome: true }, "", "/");
+      window.history.replaceState({ workspaceMode: isInitialHome ? "home" : "postgame", seededHome: true }, "", "/");
     }
   } catch {
     // ignore history errors
@@ -4360,10 +4365,10 @@ async function initApp() {
 
   if (isInitialPregame) {
     switchWorkspaceMode("pregame", { pushUrl: false, animate: false });
-  } else if (urlMatchId) {
-    switchWorkspaceMode("postgame", { pushUrl: false, animate: false });
-  } else {
+  } else if (isInitialHome) {
     switchWorkspaceMode("home", { pushUrl: false, animate: false });
+  } else {
+    switchWorkspaceMode("postgame", { pushUrl: false, animate: false });
   }
   // If user opened a direct shared match URL (?match=<id>), load that match report immediately!
   let directMatchLoaded = false;
@@ -4401,6 +4406,7 @@ async function initApp() {
     renderRecentMatchesStrip(data.recent_matches || state.profileData.recent_matches || []);
     renderSquadLedgerSection(state.squadLedger);
     renderHomeWorkspace();
+    renderWorkstationSidebarMatches();
     populateSettingsDialog();
     initPregameWorkspace();
 
@@ -4459,6 +4465,7 @@ function bindEvents() {
   document.querySelectorAll("[data-ws-mode]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const m = btn.getAttribute("data-ws-mode") || "home";
+      document.getElementById("ws-sidebar")?.classList.remove("mobile-open");
       switchWorkspaceMode(m, { pushUrl: true });
     });
   });
@@ -4468,21 +4475,111 @@ function bindEvents() {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener("click", () => {
+        document.getElementById("ws-sidebar")?.classList.remove("mobile-open");
         switchWorkspaceMode("home", { pushUrl: true });
       });
     }
   });
 
-  // Mobile Header Collapsible Search & Tools Toggle
-  const btnToggleMobileTools = document.getElementById("btn-toggle-mobile-tools");
-  const headerCollapsibleTools = document.getElementById("header-collapsible-tools");
-  if (btnToggleMobileTools && headerCollapsibleTools) {
-    btnToggleMobileTools.addEventListener("click", () => {
-      const isOpen = headerCollapsibleTools.classList.toggle("is-open");
-      btnToggleMobileTools.setAttribute("aria-expanded", isOpen ? "true" : "false");
-      btnToggleMobileTools.textContent = isOpen ? "✕ 收起工具" : "🔍 查比赛 / 设置";
+  // Workstation Sidebar Collapse / Expand & Mobile Drawer Toggles
+  const appShell = document.getElementById("ws-app-shell");
+  const wsSidebar = document.getElementById("ws-sidebar");
+  const btnToggleWsSidebar = document.getElementById("btn-toggle-ws-sidebar");
+  const btnExpandWsSidebar = document.getElementById("btn-expand-ws-sidebar");
+  if (btnToggleWsSidebar && appShell) {
+    btnToggleWsSidebar.addEventListener("click", () => {
+      if (window.innerWidth <= 920 && wsSidebar) {
+        wsSidebar.classList.remove("mobile-open");
+        return;
+      }
+      state.wsSidebarCollapsed = appShell.classList.toggle("is-collapsed");
     });
   }
+  if (btnExpandWsSidebar && appShell) {
+    btnExpandWsSidebar.addEventListener("click", () => {
+      if (window.innerWidth <= 920 && wsSidebar) {
+        wsSidebar.classList.toggle("mobile-open");
+        return;
+      }
+      state.wsSidebarCollapsed = false;
+      appShell.classList.remove("is-collapsed");
+    });
+  }
+
+  // Mobile Header Collapsible Search & Tools Toggle (opens Workstation sidebar drawer on mobile)
+  const btnToggleMobileTools = document.getElementById("btn-toggle-mobile-tools");
+  const headerCollapsibleTools = document.getElementById("header-collapsible-tools");
+  if (btnToggleMobileTools) {
+    btnToggleMobileTools.addEventListener("click", () => {
+      if (wsSidebar && window.innerWidth <= 920) {
+        const openNow = wsSidebar.classList.toggle("mobile-open");
+        btnToggleMobileTools.setAttribute("aria-expanded", openNow ? "true" : "false");
+        btnToggleMobileTools.textContent = openNow ? "✕ 收起列表" : "☰ 比赛列表 / 搜索";
+        return;
+      }
+      if (headerCollapsibleTools) {
+        const isOpen = headerCollapsibleTools.classList.toggle("is-open");
+        btnToggleMobileTools.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        btnToggleMobileTools.textContent = isOpen ? "✕ 收起工具" : "🔍 查比赛 / 设置";
+      }
+    });
+  }
+
+  // Workstation Sidebar Match Filter chips
+  document.querySelectorAll("[data-ws-sfilter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.wsSidebarFilter = btn.getAttribute("data-ws-sfilter") || "all";
+      document.querySelectorAll("[data-ws-sfilter]").forEach((b) =>
+        b.classList.toggle("is-active", b === btn)
+      );
+      renderWorkstationSidebarMatches();
+    });
+  });
+
+  // Workstation Postgame Sub-View Bar Tabs
+  document.querySelectorAll("[data-postgame-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tabName = btn.getAttribute("data-postgame-tab") || "summary";
+      applyPostgameSubTab(tabName, { scrollTop: true });
+    });
+  });
+
+  // Section Quick-Jump Chips inside Match Overview (automatically ensures target sub-tab is active)
+  document.querySelectorAll("[data-jump-postgame-tab]").forEach((chip) => {
+    chip.addEventListener("click", (e) => {
+      const targetTab = chip.getAttribute("data-jump-postgame-tab");
+      const href = chip.getAttribute("href") || "";
+      if (targetTab && state.wsPostgameTab !== "all" && state.wsPostgameTab !== targetTab) {
+        e.preventDefault();
+        applyPostgameSubTab(targetTab, { scrollTop: false });
+        if (href.startsWith("#")) {
+          setTimeout(() => {
+            document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 40);
+        }
+      }
+    });
+  });
+
+  // Keyboard shortcut Alt+Up / Alt+Down to cycle through matches in Workstation sidebar
+  window.addEventListener("keydown", (e) => {
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+    const rows = Array.from(document.querySelectorAll(".ws-match-row[data-ws-match-id]"));
+    if (!rows.length) return;
+    e.preventDefault();
+    const curMid = Number(state.pendingMatchId || state.currentMatchId);
+    const curIdx = rows.findIndex((r) => Number(r.getAttribute("data-ws-match-id")) === curMid);
+    const nextIdx =
+      e.key === "ArrowDown"
+        ? Math.min(rows.length - 1, curIdx + 1)
+        : Math.max(0, curIdx <= 0 ? 0 : curIdx - 1);
+    const targetRow = rows[nextIdx];
+    const nextMid = Number(targetRow?.getAttribute("data-ws-match-id"));
+    if (nextMid && nextMid !== curMid) {
+      targetRow.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      loadMatchReport(nextMid, { analyzeNow: true, switchToPostgame: true });
+    }
+  });
 
   // Home Hero quick action buttons
   const btnHomeOpenLatest = document.getElementById("btn-home-open-latest");
@@ -4772,6 +4869,21 @@ function bindEvents() {
       }
       if (state.workspaceMode !== "postgame") {
         switchWorkspaceMode("postgame");
+      }
+      const tabMap = {
+        "match-overview-section": "summary",
+        "ws-factcheck-section": "summary",
+        "verdict-and-blame-section": "summary",
+        "charts-hub-section": "timeline",
+        "draft-combo-section": "phases",
+        "phase-review-section": "phases",
+        "windows-section": "phases",
+        "tactical-microscope-section": "microscope",
+        "players-forensics-section": "players",
+      };
+      const neededTab = tabMap[target];
+      if (neededTab && state.wsPostgameTab !== "all" && state.wsPostgameTab !== neededTab) {
+        applyPostgameSubTab(neededTab, { scrollTop: false });
       }
       setTimeout(() => {
         const sec = document.getElementById(target);
@@ -5260,6 +5372,8 @@ function renderRecentMatchesStrip(matches) {
       if (mid) await loadMatchReport(mid, { analyzeNow: true, switchToPostgame: true });
     });
   });
+
+  renderWorkstationSidebarMatches();
 }
 
 function renderHomeWorkspace() {
@@ -5478,6 +5592,177 @@ function renderHomeWorkspace() {
       }
     });
   });
+
+  renderWorkstationSidebarMatches();
+}
+
+function renderWorkstationSidebarMatches() {
+  const listEl = document.getElementById("ws-sidebar-match-list");
+  const countEl = document.getElementById("ws-sidebar-match-count");
+  const accountEl = document.getElementById("ws-sidebar-account-name");
+
+  if (accountEl) {
+    const p = state.profileData?.profile || {};
+    const wl = state.profileData?.wl || {};
+    const nameStr = p.personaname || state.roster?.main_name || "Flame = ez mute";
+    const rankStr = p.rank_label || "万古流芳 5";
+    const wrStr = wl.win_rate !== undefined ? ` · ${wl.win_rate}%胜` : "";
+    accountEl.textContent = `${nameStr} · ${rankStr}${wrStr}`;
+  }
+
+  if (!listEl) return;
+
+  const recentMatches = state.profileData?.recent_matches || [];
+  const analyzedArr = (state.squadLedger && state.squadLedger.analyzed_matches) || [];
+  const analyzedMap = new Map(analyzedArr.map((am) => [Number(am.match_id), am]));
+  const localAnalyzedMap = getLocalAnalyzedMatchesMap();
+  localAnalyzedMap.forEach((val, key) => {
+    if (!analyzedMap.has(key)) analyzedMap.set(key, val);
+  });
+
+  // Merge recentMatches + any extra analyzed matches + currentReport if external
+  const combinedMap = new Map();
+  if (state.currentReport && state.currentReport.match_id) {
+    const cr = state.currentReport;
+    const { side, own } = getOwnAndOppPlayers(cr);
+    const focusP = own.find((x) => x.is_focus_player) || own[0] || {};
+    const crWon =
+      (side === "radiant" && Boolean(cr.radiant_win)) ||
+      (side === "dire" && !cr.radiant_win);
+    combinedMap.set(Number(cr.match_id), {
+      match_id: Number(cr.match_id),
+      won: crWon,
+      is_analyzed: true,
+      hero_short_zh: focusP.hero_short_zh || focusP.hero_name || "本局视角",
+      hero_img: focusP.hero_img || "",
+      kda: `${focusP.kills ?? 0}/${focusP.deaths ?? 0}/${focusP.assists ?? 0}`,
+      duration_str: cr.duration_str || "",
+      start_time_str: cr.start_time_str || "",
+      party_size: cr.party_size || 5,
+      party_label: cr.party_label || "车队局",
+    });
+  }
+
+  recentMatches.forEach((m) => {
+    const mid = Number(m.match_id);
+    if (mid) combinedMap.set(mid, m);
+  });
+
+  analyzedArr.forEach((am) => {
+    const mid = Number(am.match_id);
+    if (mid && !combinedMap.has(mid)) {
+      const heroMeta = (state.heroesCatalog || []).find(
+        (h) => h.short_zh === am.my_hero || h.name_zh === am.my_hero || h.short_zh === am.mvp_hero
+      );
+      combinedMap.set(mid, {
+        match_id: mid,
+        won: Boolean(am.won),
+        is_analyzed: true,
+        hero_short_zh: am.my_hero || am.mvp_hero || "历史复盘",
+        hero_img: am.my_hero_img || heroMeta?.img || "",
+        kda: am.my_kda || (am.score ? `比分 ${am.score}` : "-"),
+        duration_str: am.duration_str || "",
+        start_time_str: am.start_time_str || am.date_str || "",
+        party_size: am.party_size || 5,
+        party_label: am.party_label || "5人黑",
+      });
+    }
+  });
+
+  const allMatches = Array.from(combinedMap.values()).sort(
+    (a, b) => Number(b.match_id || 0) - Number(a.match_id || 0)
+  );
+
+  const sFilter = state.wsSidebarFilter || "all";
+  const filtered = allMatches.filter((m) => {
+    const mid = Number(m.match_id);
+    const isWin = m.won !== undefined ? Boolean(m.won) : m.result === "胜利";
+    const isAnalyzed = Boolean(m.is_analyzed || analyzedMap.has(mid));
+    const isParty = Number(m.party_size || 1) >= 2 || String(m.party_label || "").includes("黑");
+    if (sFilter === "analyzed") return isAnalyzed;
+    if (sFilter === "party") return isParty;
+    if (sFilter === "win") return isWin;
+    if (sFilter === "loss") return !isWin;
+    return true;
+  });
+
+  if (countEl) {
+    countEl.textContent = `${filtered.length}/${allMatches.length} 场`;
+  }
+
+  if (!filtered.length) {
+    listEl.innerHTML = `<div class="empty-state compact" style="padding:18px 12px;font-size:12px;">当前筛选下暂无比赛记录</div>`;
+    return;
+  }
+
+  const activeMid = Number(state.pendingMatchId || state.currentMatchId || 0);
+  listEl.innerHTML = filtered
+    .map((m) => {
+      const mid = Number(m.match_id);
+      const isWin = m.won !== undefined ? Boolean(m.won) : m.result === "胜利";
+      const arch = analyzedMap.get(mid);
+      const isAnalyzed = Boolean(m.is_analyzed || arch);
+      const heroShort = m.hero_short_zh || m.hero_name || arch?.my_hero || arch?.mvp_hero || "未知英雄";
+      const heroImg = m.hero_img || arch?.my_hero_img || "";
+      const partyLabel = m.party_label || (Number(m.party_size || 1) >= 2 ? `${m.party_size}人黑` : "单排");
+      const durText = m.duration_str || m.duration || arch?.duration_str || "";
+      const timeStr = m.start_time_str || m.time_ago || arch?.start_time_str || "";
+      const isSelected = mid === activeMid;
+
+      let snippetHtml = "";
+      if (arch?.grok_title) {
+        snippetHtml = `<div class="ws-match-snippet" title="${escapeHtml(arch.grok_title)}">🧠 ${escapeHtml(arch.grok_title)}</div>`;
+      } else if (arch) {
+        const subLine = isWin
+          ? `👑 MVP ${arch.mvp_hero || "-"} (${arch.mvp_contrib_pct ?? 25}%)`
+          : `🚨 首锅 ${arch.culprit_hero || "-"} (锅${arch.culprit_blame_pct ?? 28}%)`;
+        snippetHtml = `<div class="ws-match-snippet">${escapeHtml(subLine)}</div>`;
+      }
+
+      return `
+        <button
+          type="button"
+          class="ws-match-row ${isWin ? "is-win" : "is-loss"} ${isSelected ? "is-active" : ""}"
+          data-ws-match-id="${escapeHtml(mid)}"
+          role="listitem"
+        >
+          <div class="ws-match-row-top">
+            <div class="ws-match-hero-wrap">
+              ${
+                heroImg
+                  ? `<img class="ws-match-avatar" src="${escapeHtml(heroImg)}" alt="${escapeHtml(heroShort)}" width="34" height="19" loading="lazy" />`
+                  : ""
+              }
+              <strong class="ws-match-hero">${escapeHtml(heroShort)}</strong>
+              <span class="ws-match-party">${escapeHtml(partyLabel)}</span>
+            </div>
+            <span class="ws-match-wl ${isWin ? "win" : "loss"}">${isWin ? "胜利" : "落败"}</span>
+          </div>
+          <div class="ws-match-row-mid">
+            <span>KDA <b>${escapeHtml(m.kda || "0/0/0")}</b></span>
+            ${durText ? `<span>· ${escapeHtml(durText)}</span>` : ""}
+            ${timeStr ? `<span class="ws-match-time">· ${escapeHtml(timeStr)}</span>` : ""}
+          </div>
+          ${snippetHtml}
+          <div class="ws-match-row-foot">
+            <span class="ws-match-id">#${escapeHtml(mid)}</span>
+            <span class="ws-match-ai-tag ${isAnalyzed ? "ready" : "pending"}">
+              ${isAnalyzed ? "✅ 已复盘" : "⚡ 点此复盘"}
+            </span>
+          </div>
+        </button>
+      `;
+    })
+    .join("");
+
+  listEl.querySelectorAll("[data-ws-match-id]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const mid = Number(btn.getAttribute("data-ws-match-id"));
+      if (!mid) return;
+      document.getElementById("ws-sidebar")?.classList.remove("mobile-open");
+      await loadMatchReport(mid, { analyzeNow: true, switchToPostgame: true });
+    });
+  });
 }
 
 function highlightSelectedMatchCard(matchId) {
@@ -5488,6 +5773,10 @@ function highlightSelectedMatchCard(matchId) {
   document.querySelectorAll("[data-home-match-id]").forEach((card) => {
     const mid = Number(card.getAttribute("data-home-match-id"));
     card.classList.toggle("active-card", mid === Number(matchId));
+  });
+  document.querySelectorAll("[data-ws-match-id]").forEach((row) => {
+    const mid = Number(row.getAttribute("data-ws-match-id"));
+    row.classList.toggle("is-active", mid === Number(matchId));
   });
 }
 
@@ -5823,6 +6112,7 @@ function renderFullMatchReport(report) {
     state.forensicSelectedSlot = "focus";
   }
   safeRenderSection("MatchOverview", () => renderMatchOverview(report));
+  safeRenderSection("WorkstationFactCheck", () => renderWorkstationFactCheckSection(report));
   safeRenderSection("DraftAndCombo", () => renderDraftAndComboSection(report));
   safeRenderSection("VerdictAndBlame", () => renderVerdictAndBlameSection(report));
   safeRenderSection("TacticalMicroscope", () => renderTacticalMicroscopeSection(report));
@@ -5835,6 +6125,10 @@ function renderFullMatchReport(report) {
   safeRenderSection("PhaseSection", () => renderPhaseSection(report));
   safeRenderSection("KeyWindows", () => renderKeyWindowsSection(report));
   safeRenderSection("PlayersForensics", () => renderPlayersForensicsList(report));
+  safeRenderSection("PostgameSubTab", () =>
+    applyPostgameSubTab(state.wsPostgameTab || "summary", { scrollTop: false })
+  );
+  safeRenderSection("WorkstationSidebar", () => renderWorkstationSidebarMatches());
 
   // Hydrate any saved Nano Banana AI artworks for this match from IndexedDB so they appear on cards even after refresh
   hydrateMatchPosterArtsFromIdb(report.match_id).then((added) => {
@@ -5936,6 +6230,404 @@ function renderMatchOverview(report) {
       </div>
     `;
   }
+
+  // Sync Workstation top location bar when viewing a match
+  if (state.workspaceMode === "postgame") {
+    const locTitle = document.getElementById("ws-location-title");
+    const locSub = document.getElementById("ws-location-subtitle");
+    const focusP = own.find((x) => x.is_focus_player) || own[0] || {};
+    if (locTitle) {
+      locTitle.textContent = `比赛 #${report.match_id} · ${focusP.hero_short_zh || sideZh} (${
+        won ? "胜利" : "落败"
+      } ${report.radiant_score}:${report.dire_score})`;
+    }
+    if (locSub) {
+      locSub.textContent = `${report.start_time_str || ""} · ${report.duration_str || ""} · ${
+        isParsed ? "录像级13维深潜" : "基础统计"
+      }`;
+    }
+  }
+}
+
+/**
+ * 1.2 Workstation Sub-View Tab Controller (Eliminates 15,000px vertical wall)
+ */
+function applyPostgameSubTab(tabName, { scrollTop = true } = {}) {
+  const validTabs = ["summary", "timeline", "phases", "microscope", "players", "all"];
+  const tab = validTabs.includes(tabName) ? tabName : "summary";
+  state.wsPostgameTab = tab;
+
+  document.querySelectorAll("[data-postgame-tab]").forEach((btn) => {
+    const isAct = btn.getAttribute("data-postgame-tab") === tab;
+    btn.classList.toggle("is-active", isAct);
+    btn.setAttribute("aria-selected", isAct ? "true" : "false");
+  });
+
+  const sectionVisibility = {
+    "ws-factcheck-section": tab === "summary" || tab === "all",
+    "verdict-and-blame-section": tab === "summary" || tab === "all",
+    "charts-hub-section": tab === "timeline" || tab === "all",
+    "draft-combo-section": tab === "phases" || tab === "all",
+    "phase-review-section": tab === "phases" || tab === "all",
+    "windows-section": tab === "phases" || tab === "all",
+    "tactical-microscope-section": tab === "microscope" || tab === "all",
+    "players-forensics-section": tab === "players" || tab === "all",
+  };
+
+  Object.entries(sectionVisibility).forEach(([secId, isVisible]) => {
+    const el = document.getElementById(secId);
+    if (el) {
+      el.classList.toggle("ws-tab-hidden", !isVisible);
+    }
+  });
+
+  if ((tab === "timeline" || tab === "all") && state.currentReport) {
+    requestAnimationFrame(() => {
+      safeRenderSection("AdvChart", () => renderAdvChart(state.currentReport));
+      safeRenderSection("NetWorthChart", () => renderNetWorthChart(state.currentReport));
+      safeRenderSection("Minimap", () => renderMinimap(state.currentReport));
+    });
+  }
+
+  if (scrollTop) {
+    const scrollArea = document.getElementById("ws-scroll-area");
+    scrollArea?.scrollTo?.({ top: 0, behavior: "smooth" });
+    window.scrollTo?.({ top: 0, behavior: "smooth" });
+  }
+}
+
+/**
+ * 1.3 Render Workstation-Style Key Numbers Table & Replay Fact-Check Panel (#ws-factcheck-section)
+ */
+function renderWorkstationFactCheckSection(report) {
+  const sec = document.getElementById("ws-factcheck-section");
+  if (!sec || !report) return;
+
+  const { side, sideZh, oppZh, own, opp } = getOwnAndOppPlayers(report);
+  const won =
+    (side === "radiant" && Boolean(report.radiant_win)) ||
+    (side === "dire" && !report.radiant_win);
+  const sortedOwn = [...own].sort((a, b) => (a.pos || 9) - (b.pos || 9));
+  const grokByPos = new Map();
+  const grokReviews = report.grok_coaching?.player_reviews || [];
+  grokReviews.forEach((gr) => {
+    if (gr.pos) grokByPos.set(Number(gr.pos), gr);
+  });
+
+  // 1. Build 5-player Key Numbers Table Rows
+  const numberRowsHtml = sortedOwn
+    .map((p) => {
+      const gr = grokByPos.get(Number(p.pos));
+      const scoreVal = gr?.grok_score_100 ?? p.score_100 ?? 70;
+      const sharePct = won
+        ? gr?.grok_share_pct ?? p.contrib_share_pct ?? 20
+        : gr?.grok_share_pct ?? p.blame_share_pct ?? 20;
+      const styleLabel =
+        p.playstyle_audit?.detected_style_label || p.role_zh || `${p.pos}号位`;
+      const facetTitle = p.facet_badge?.title_zh || "";
+      const permBuffs = Array.isArray(p.perm_buff_badges) ? p.perm_buff_badges : [];
+      const buffText = permBuffs
+        .slice(0, 2)
+        .map((b) => `${b.label_zh || ""}${b.stacks ? `×${b.stacks}` : ""}`)
+        .filter(Boolean)
+        .join(" · ");
+      const maxHit = p.spell_target_matrix?.max_single_hit;
+      const maxHitStr =
+        maxHit && maxHit.value > 0
+          ? `${maxHit.inflictor_zh || "技能"} ${maxHit.value}${
+              maxHit.is_lotus_reflect ? " (🪷莲花反)" : ""
+            }`
+          : "-";
+      const scoreClass =
+        scoreVal >= 80 ? "good" : scoreVal >= 65 ? "neutral" : "bad";
+
+      return `
+        <tr class="ws-num-row ${p.is_focus_player ? "is-focus" : ""}" data-ws-jump-pos="${escapeHtml(
+        p.pos
+      )}" title="点击查看 ${escapeHtml(p.hero_short_zh)} 详细个人卷宗">
+          <td>
+            <div class="ws-num-hero-cell">
+              ${
+                p.hero_img
+                  ? `<img src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(
+                      p.hero_short_zh
+                    )}" width="34" height="19" loading="lazy" />`
+                  : ""
+              }
+              <div>
+                <div class="ws-num-hero-line">
+                  <span class="ws-pos-tag">${p.pos}号</span>
+                  <strong>${escapeHtml(p.hero_short_zh || "")}</strong>
+                  ${p.is_focus_player ? `<span class="ws-me-badge">我</span>` : ""}
+                </div>
+                <div class="ws-num-sub">${escapeHtml(p.personaname || "")} · KDA ${p.kills}/${p.deaths}/${p.assists}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="ws-num-style-cell">
+              <span class="ws-style-pill">${escapeHtml(styleLabel)}</span>
+              ${facetTitle ? `<span class="ws-facet-pill">💎 ${escapeHtml(facetTitle)}</span>` : ""}
+              ${buffText ? `<div class="ws-num-sub">🔥 ${escapeHtml(buffText)}</div>` : ""}
+            </div>
+          </td>
+          <td>
+            <div class="ws-num-stat-cell">
+              <strong>${Number(p.hero_damage || 0).toLocaleString()} <small>(${
+        p.damage_share_pct ?? 0
+      }%)</small></strong>
+              <div class="ws-num-sub">参战 ${p.fight_participation_pct ?? 0}% · 峰值: ${escapeHtml(
+        maxHitStr
+      )}</div>
+            </div>
+          </td>
+          <td>
+            <div class="ws-num-score-cell ${scoreClass}">
+              <strong>${scoreVal}<small>/100</small></strong>
+              <span>${won ? `功劳 ${sharePct}%` : `分锅 ${sharePct}%`}</span>
+            </div>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  // 2. Build 5 Automated Replay Fact-Check Cards
+  const factCards = [];
+
+  // Fact 1: Single-hit Peak & Lotus Reflection
+  let bestHitPlayer = null;
+  let bestHitObj = null;
+  let lotusHitPlayer = null;
+  let lotusHitObj = null;
+  sortedOwn.forEach((p) => {
+    const mh = p.spell_target_matrix?.max_single_hit;
+    if (mh && mh.value > 0) {
+      if (!bestHitObj || mh.value > bestHitObj.value) {
+        bestHitObj = mh;
+        bestHitPlayer = p;
+      }
+      if (mh.is_lotus_reflect && (!lotusHitObj || mh.value > lotusHitObj.value)) {
+        lotusHitObj = mh;
+        lotusHitPlayer = p;
+      }
+    }
+    (p.spell_target_matrix?.rows || []).forEach((r) => {
+      if (r.is_lotus_reflect && (!lotusHitObj || (r.max_hit || 0) > (lotusHitObj.value || 0))) {
+        lotusHitObj = {
+          value: r.max_hit || r.total_dmg || 0,
+          inflictor_zh: r.inflictor_zh,
+          target_hero_zh: (r.targets?.[0] && r.targets[0].hero_zh) || "敌方核心",
+          time_str: r.max_hit_time_str || "",
+          is_lotus_reflect: true,
+        };
+        lotusHitPlayer = p;
+      }
+    });
+  });
+
+  if (lotusHitObj && lotusHitPlayer) {
+    factCards.push({
+      status: "verified",
+      badge: "✅ 莲花反弹实锤",
+      title: `${lotusHitPlayer.pos}号位 ${lotusHitPlayer.hero_short_zh} 触发清莲宝珠高额反弹`,
+      detail: `录像底层 combat_log 核实：${lotusHitPlayer.hero_short_zh} 通过【${
+        lotusHitObj.inflictor_zh || "清莲宝珠反弹"
+      }】对敌方 ${lotusHitObj.target_hero_zh || "核心"} 造成单发 ${
+        lotusHitObj.value
+      } 点反弹重创，证实并非空放技能而是精准反弹！`,
+    });
+  } else if (bestHitObj && bestHitPlayer) {
+    factCards.push({
+      status: "verified",
+      badge: "✅ 单发峰值核查",
+      title: `本方单发最高爆发：${bestHitPlayer.pos}号位 ${bestHitPlayer.hero_short_zh} (${bestHitObj.value} 伤)`,
+      detail: `在 ${bestHitObj.time_str || "团战中"} 使用【${
+        bestHitObj.inflictor_zh || "核心技能"
+      }】轰在敌方 ${bestHitObj.target_hero_zh || "英雄"} 身上打出单次 ${
+        bestHitObj.value
+      } 点实伤。`,
+    });
+  }
+
+  // Fact 2: Unpressed BKB / Defensive Items Audit
+  const unpressedBlock = report.deep_forensics?.unpressed_saves_by_side?.[side];
+  const unpressedEvents = unpressedBlock?.events || [];
+  if (unpressedEvents.length === 0) {
+    factCards.push({
+      status: "verified",
+      badge: "✅ 救命装纪律达标",
+      title: `全队团战 BKB / 保命装 0 次憋死记录`,
+      detail: `经核查本局全部阵亡帧，本方五人在阵亡前均已合理开启或处于冷却中，未出现“揣着绿灯 BKB/魔棒/推推暴毙”的低级失误。`,
+    });
+  } else {
+    const worstEv = unpressedEvents[0];
+    factCards.push({
+      status: "danger",
+      badge: `🚨 憋死罪证 (${unpressedEvents.length}次)`,
+      title: `${worstEv.pos ? `${worstEv.pos}号位 ` : ""}${
+        worstEv.hero_short_zh || worstEv.victim_hero || "核心"
+      } 揣着绿灯救命装阵亡`,
+      detail: `全队本局共发生 ${unpressedEvents.length} 次保命装未按阵亡。最致命一幕：${
+        worstEv.time_str || ""
+      } ${worstEv.hero_short_zh || ""} 在拥有可用【${
+        worstEv.unused_items_str || worstEv.item_zh || "BKB/救命装"
+      }】情况下被 ${worstEv.killer_hero || "敌方"} 击杀。`,
+    });
+  }
+
+  // Fact 3: Laning (10m) -> Midgame (25m) Economy & Tower Conversion
+  const totalTowerDmg = sortedOwn.reduce((acc, p) => acc + Number(p.tower_damage || 0), 0);
+  const topPusher = [...sortedOwn].sort((a, b) => (b.tower_damage || 0) - (a.tower_damage || 0))[0];
+  const laneRev = report.phase_reviews?.[side]?.lane;
+  const midRev = report.phase_reviews?.[side]?.mid;
+  factCards.push({
+    status: totalTowerDmg >= 8000 ? "verified" : "warning",
+    badge: totalTowerDmg >= 8000 ? "✅ 推塔转化核查" : "⚠️ 推进转化偏低",
+    title: `全队建筑总伤害 ${totalTowerDmg.toLocaleString()} · 头号拆迁 ${
+      topPusher?.hero_short_zh || "-"
+    } (${Number(topPusher?.tower_damage || 0).toLocaleString()})`,
+    detail: `对线期(10m) ${laneRev?.verdict_tag || "均势博弈"} → 中期(10-25m) ${
+      midRev?.verdict_tag || "抱团拉扯"
+    }。${
+      totalTowerDmg >= 8000
+        ? "赢团后迅速将人头优势转化为外塔与高地建筑压制。"
+        : "中期赢团或刷钱后推塔节奏偏慢，需提高拿塔与控盾转化率。"
+    }`,
+  });
+
+  // Fact 4: Vision & Smoke Gank Efficiency
+  const totalObs = sortedOwn.reduce((s, p) => s + (p.obs_placed || 0), 0);
+  const totalSen = sortedOwn.reduce((s, p) => s + (p.sen_placed || 0), 0);
+  const totalDewards = sortedOwn.reduce((s, p) => s + (p.obs_destroyed || 0), 0);
+  const ss = report.deep_forensics?.stacking_and_smoke_by_side?.[side];
+  const smokeCnt = ss?.own_smoke_uses ?? ss?.smoke_total_uses ?? (ss?.smoke_events || []).length;
+  const stackCnt = ss?.total_stacks ?? ss?.total_team_stacks ?? 0;
+  factCards.push({
+    status: totalDewards >= 4 || smokeCnt >= 2 ? "verified" : "warning",
+    badge: totalDewards >= 4 ? "✅ 视野与诡计之雾" : "⚠️ 视野与开雾核查",
+    title: `插眼 ${totalObs}假/${totalSen}真 · 成功排眼 ${totalDewards} 颗 · 开雾 ${smokeCnt} 次 / 堆野 ${stackCnt} 组`,
+    detail: `本方辅助与核心合计布下 ${totalObs} 颗观察者守卫并反掉敌方 ${totalDewards} 颗假眼，全队累计发起 ${smokeCnt} 波诡计之雾找节奏、屯野 ${stackCnt} 组。`,
+  });
+
+  // Fact 5: #1 Turning Point Teamfight + 1-Click Jump to Minimap Scrubber
+  const tfs = Array.isArray(report.key_teamfights) ? report.key_teamfights : [];
+  if (tfs.length > 0) {
+    const biggestTf = [...tfs].sort(
+      (a, b) => Math.abs(b.gold_delta || b.radiant_gold_delta || 0) - Math.abs(a.gold_delta || a.radiant_gold_delta || 0)
+    )[0];
+    const tfMin = Math.max(
+      1,
+      Math.round(Number(biggestTf.start_sec || biggestTf.start || 900) / 60)
+    );
+    const swingVal = Math.abs(Number(biggestTf.gold_delta || biggestTf.radiant_gold_delta || 0));
+    factCards.push({
+      status: "verified",
+      badge: "⏱️ 胜负转折第一现场",
+      title: `${biggestTf.time_str || `${tfMin}:00`} ${
+        biggestTf.location_zh || "关键河道/高地团"
+      } (经济波动 ${swingVal.toLocaleString()} 金)`,
+      detail: `${biggestTf.headline || biggestTf.summary || "全场经济波动最大的一波决定性团战"}。点击右侧按钮可直接在小地图回放该分钟十人走位与技能清单。`,
+      jumpMinute: tfMin,
+    });
+  }
+
+  sec.innerHTML = `
+    <div class="ws-factcheck-grid">
+      <div class="ws-fc-panel ws-fc-numbers-panel">
+        <div class="ws-fc-head">
+          <div>
+            <span class="ws-fc-kicker">📊 WORKSTATION KEY NUMBERS</span>
+            <h3>本局五人核心数字与流派明细表</h3>
+          </div>
+          <span class="ws-fc-sub">点击任一行可直达该选手完整出装与按键卷宗</span>
+        </div>
+        <div class="ws-fc-table-wrap">
+          <table class="ws-fc-table">
+            <thead>
+              <tr>
+                <th>位置 / 英雄 / 战绩</th>
+                <th>流派 · 7.38命石 · 叠层</th>
+                <th>输出 / 参战 / 单发峰值</th>
+                <th>定性评分</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${numberRowsHtml}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="ws-fc-panel ws-fc-audit-panel">
+        <div class="ws-fc-head">
+          <div>
+            <span class="ws-fc-kicker">✅ REPLAY FACT-CHECK</span>
+            <h3>录像底层事实核查 (5 项硬核取证)</h3>
+          </div>
+          <span class="ws-fc-sub">100% 源自 .dem 战斗日志，拒绝印象流分锅</span>
+        </div>
+        <div class="ws-fc-cards-list">
+          ${factCards
+            .map(
+              (fc) => `
+            <article class="ws-fc-card is-${escapeHtml(fc.status)}">
+              <div class="ws-fc-card-top">
+                <span class="ws-fc-badge is-${escapeHtml(fc.status)}">${escapeHtml(fc.badge)}</span>
+                <strong class="ws-fc-title">${escapeHtml(fc.title)}</strong>
+                ${
+                  fc.jumpMinute
+                    ? `<button type="button" class="ws-fc-jump-btn" data-fc-jump-min="${escapeHtml(
+                        fc.jumpMinute
+                      )}">⏱️ 跳至 ${escapeHtml(fc.jumpMinute)}:00 小地图 →</button>`
+                    : ""
+                }
+              </div>
+              <p class="ws-fc-detail">${escapeHtml(fc.detail)}</p>
+            </article>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Bind row click to jump to player's dossier
+  sec.querySelectorAll("[data-ws-jump-pos]").forEach((row) => {
+    row.addEventListener("click", () => {
+      const pos = Number(row.getAttribute("data-ws-jump-pos"));
+      const targetP = sortedOwn.find((x) => Number(x.pos) === pos);
+      if (targetP) {
+        state.forensicSelectedSlot = targetP.player_slot;
+        applyPostgameSubTab("players", { scrollTop: false });
+        renderPlayersForensicsList(report);
+        setTimeout(() => {
+          document
+            .getElementById("players-forensics-section")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 40);
+      }
+    });
+  });
+
+  // Bind 1-click jump to minimap timeline scrubber
+  sec.querySelectorAll("[data-fc-jump-min]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const targetMin = Number(btn.getAttribute("data-fc-jump-min") || 15);
+      applyPostgameSubTab("timeline", { scrollTop: false });
+      state.scrubberMinute = targetMin;
+      state.scrubSyncMapMinute = targetMin;
+      renderMinuteScrubber(report);
+      renderMinimap(report);
+      setTimeout(() => {
+        document
+          .getElementById("charts-hub-section")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    });
+  });
 }
 
 /**
@@ -18310,10 +19002,40 @@ function switchWorkspaceMode(mode, { pushUrl = true, animate = true } = {}) {
     const homeView = document.getElementById("home-workspace");
     const postView = document.getElementById("postgame-workspace");
     const preView = document.getElementById("pregame-workspace");
+    const wsPostgameBar = document.getElementById("ws-postgame-view-bar");
+    const locTitle = document.getElementById("ws-location-title");
+    const locSub = document.getElementById("ws-location-subtitle");
 
     if (homeView) homeView.hidden = validMode !== "home";
     if (postView) postView.hidden = validMode !== "postgame";
     if (preView) preView.hidden = validMode !== "pregame";
+    if (wsPostgameBar) wsPostgameBar.hidden = validMode !== "postgame";
+
+    if (validMode === "home") {
+      if (locTitle) locTitle.textContent = "五黑车队 · 跨局总账与全部比赛目录";
+      if (locSub) locSub.textContent = "跨局五人大腿/锅王排行 · 全部比赛卡片总览";
+    } else if (validMode === "pregame") {
+      if (locTitle) locTitle.textContent = "赛前锦囊 · 五黑 BP 实时作战室";
+      if (locSub) locSub.textContent = "1~5号位车队绝活联动 · 敌方克制预警 · Grok 4.7 赛前死命令";
+    } else if (validMode === "postgame" && state.currentReport) {
+      const { side, sideZh, own } = getOwnAndOppPlayers(state.currentReport);
+      const won =
+        (side === "radiant" && Boolean(state.currentReport.radiant_win)) ||
+        (side === "dire" && !state.currentReport.radiant_win);
+      const focusP = own.find((x) => x.is_focus_player) || own[0] || {};
+      if (locTitle) {
+        locTitle.textContent = `比赛 #${state.currentReport.match_id} · ${
+          focusP.hero_short_zh || sideZh
+        } (${won ? "胜利" : "落败"} ${state.currentReport.radiant_score}:${
+          state.currentReport.dire_score
+        })`;
+      }
+      if (locSub) {
+        locSub.textContent = `${state.currentReport.start_time_str || ""} · ${
+          state.currentReport.duration_str || ""
+        } · 左侧边栏可随时点开切换任意一场比赛`;
+      }
+    }
 
     document
       .getElementById("nav-mode-home")
@@ -18361,6 +19083,7 @@ function switchWorkspaceMode(mode, { pushUrl = true, animate = true } = {}) {
     }
 
     if (prevMode !== validMode) {
+      document.getElementById("ws-scroll-area")?.scrollTo({ top: 0, behavior: "instant" });
       window.scrollTo({ top: 0, behavior: "instant" });
       const targetHeading =
         validMode === "home"

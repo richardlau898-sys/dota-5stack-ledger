@@ -134,6 +134,7 @@ function makeEl(id = "") {
     showModal: function() { this.open = true; },
     close: function() { this.open = false; },
     scrollIntoView: () => {},
+    scrollTo: () => {},
     focus: () => {},
     click: () => {},
   };
@@ -184,6 +185,8 @@ const sandbox = {
   navigator: { clipboard: { writeText: () => Promise.resolve() } },
   location: { search: "", pathname: "/", href: "http://localhost/", origin: "http://localhost", hash: "" },
   history: { pushState: () => {}, replaceState: () => {}, state: {} },
+  scrollTo: () => {},
+  innerWidth: 1440,
   matchMedia: () => ({ matches: false, addEventListener: () => {} }),
   fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) }),
   document: {
@@ -236,6 +239,12 @@ for (const file of reportFiles) {
     }
     sandbox.openFullscreenStructuredReport(report);
     totalChecks++;
+    for (const pgTab of ["summary", "timeline", "phases", "microscope", "players", "all"]) {
+      sandbox.applyPostgameSubTab(pgTab, { scrollTop: true });
+      totalChecks++;
+    }
+    sandbox.renderWorkstationFactCheckSection(report);
+    totalChecks++;
     sandbox.toggleScrubberAutoplay();
     sandbox.stopScrubberAutoplay();
     totalChecks++;
@@ -257,6 +266,16 @@ if (fs.existsSync("/tmp/dota_healthcheck_ledger.json")) {
 }
 sandbox.renderHomeWorkspace();
 totalChecks++;
+for (const sf of ["all", "analyzed", "party", "win", "loss"]) {
+  sandbox.__state.wsSidebarFilter = sf;
+  sandbox.renderWorkstationSidebarMatches();
+  totalChecks++;
+}
+for (const reqId of ["ws-app-shell", "ws-sidebar", "ws-sidebar-match-list", "ws-postgame-view-bar", "ws-factcheck-section"]) {
+  if (!htmlIds.has(reqId)) {
+    safeRenderErrors.push("Missing required Workstation DOM ID: " + reqId);
+  }
+}
 
 if (safeRenderErrors.length > 0) {
   console.error("Failed with SafeRender / console.error exceptions:", safeRenderErrors);

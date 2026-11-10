@@ -1,72 +1,178 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>战后算账 · Dota 2 录像级复盘与车队分锅账本</title>
-  <link rel="stylesheet" href="/styles.css?v=8.2.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>Workstation · 战后算账 &amp; Dota 2 录像级复盘工作台</title>
+  <link rel="stylesheet" href="/styles.css?v=9.0.0" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="header-top-bar">
-        <div class="brand-group" id="brand-home-trigger" role="button" tabindex="0" title="点击返回战后算账首页（全部比赛记录大厅）">
-          <span class="brand-mark" aria-hidden="true">刀</span>
-          <div>
-            <h1 class="brand-title">战后算账 &amp; 赛前锦囊</h1>
-            <p class="brand-subtitle">五黑车队录像级复盘 · 十三维战术显微镜与赛前作战室</p>
+  <div id="ws-app-shell" class="ws-app-shell">
+    <!-- =========================================================================
+         Workstation 左侧常驻战局边栏：每一场比赛随时点开即看 + 模式切换 + 搜索过滤
+         ========================================================================= -->
+    <aside id="ws-sidebar" class="ws-sidebar" aria-label="Workstation 战局列表与导航">
+      <div class="ws-brand-row">
+        <div class="brand-group" id="brand-home-trigger" role="button" tabindex="0" title="点击查看跨局车队大账本与全部战局">
+          <span class="ws-logo brand-mark" aria-hidden="true">刀</span>
+          <div class="ws-brand-copy">
+            <h1 class="ws-brand-name brand-title">Workstation · 战后算账</h1>
+            <p class="ws-brand-sub brand-subtitle">Dota 2 录像级复盘工作台</p>
           </div>
         </div>
-
-        <!-- 手机端一键展开/收起查比赛与设置工具栏按钮（桌面端自动隐藏） -->
         <button
           type="button"
-          id="btn-toggle-mobile-tools"
-          class="button secondary mobile-tools-toggle"
-          aria-expanded="false"
-          aria-controls="header-collapsible-tools"
+          id="btn-toggle-ws-sidebar"
+          class="ws-icon-btn ws-collapse-btn"
+          title="收起/展开侧边栏 (快捷键 [ )"
+          aria-label="收起侧边栏"
         >
-          🔍 查比赛 / 设置
+          ◀
         </button>
       </div>
 
-      <!-- 顶部三工作台切换：首页比赛列表 vs 单局算账复盘 vs 赛前五黑BP锦囊 -->
-      <nav class="workspace-nav" aria-label="核心功能切换">
-        <button type="button" id="nav-mode-home" class="ws-nav-btn active" data-ws-mode="home">
-          🏠 首页 · 比赛列表
+      <!-- 核心工作台切换 -->
+      <nav class="ws-sidebar-primary workspace-nav" aria-label="核心功能切换">
+        <button type="button" id="nav-mode-postgame" class="ws-nav-btn active" data-ws-mode="postgame" title="单局录像级深度复盘">
+          <span class="ws-nav-icon">📊</span>
+          <span class="ws-nav-label">单局复盘 · 笔记阅读</span>
         </button>
-        <button type="button" id="nav-mode-postgame" class="ws-nav-btn" data-ws-mode="postgame">
-          📊 单局复盘详情
+        <button type="button" id="nav-mode-home" class="ws-nav-btn" data-ws-mode="home" title="五黑跨局英雄池体检与惯犯总账">
+          <span class="ws-nav-icon">🏆</span>
+          <span class="ws-nav-label">五黑车队 · 跨局总账</span>
         </button>
-        <button type="button" id="nav-mode-pregame" class="ws-nav-btn" data-ws-mode="pregame">
-          ⚔️ 赛前五黑BP锦囊
+        <button type="button" id="nav-mode-pregame" class="ws-nav-btn" data-ws-mode="pregame" title="赛前五黑 BP 锦囊与连招推演">
+          <span class="ws-nav-icon">⚔️</span>
+          <span class="ws-nav-label">赛前锦囊 · BP 作战室</span>
         </button>
       </nav>
 
-      <div id="header-collapsible-tools" class="header-collapsible-tools">
-        <search class="header-search" id="header-search-box" aria-label="查询比赛或玩家">
-          <form id="quick-search-form" class="search-form">
+      <!-- 侧边栏搜索与比赛ID直达 -->
+      <div id="header-collapsible-tools" class="ws-sidebar-tools header-collapsible-tools">
+        <search class="ws-sidebar-search header-search" id="header-search-box" aria-label="查询比赛或玩家">
+          <form id="quick-search-form" class="ws-search-form search-form">
             <label for="search-input" class="sr-only">输入比赛编号 Match ID、好友 ID 或 Steam 链接</label>
             <input
               id="search-input"
               type="search"
-              placeholder="输入比赛编号 (如 9048059832) 或好友 ID..."
+              placeholder="输入比赛编号或好友 ID..."
               autocomplete="off"
             />
-            <button type="submit" id="btn-analyze-search" class="button primary">查询战绩</button>
-            <button type="button" id="btn-Refresh-match" class="button secondary" title="强制从 OpenDota 重新拉取并重算">重新分析</button>
+            <div class="ws-search-btn-row">
+              <button type="submit" id="btn-analyze-search" class="ws-cmd-btn primary">查询</button>
+              <button type="button" id="btn-Refresh-match" class="ws-cmd-btn" title="强制从 OpenDota 重新拉取并重算">重算</button>
+            </div>
           </form>
         </search>
 
-        <div class="header-right">
-          <div id="llm-status-pill" class="model-status connected">已接入 XAI / grok-4.7</div>
-          <button type="button" id="btn-open-settings" class="button secondary">⚙️ 车队与模型设置</button>
+        <div class="ws-sidebar-filter-bar" role="tablist" aria-label="侧边栏战局筛选">
+          <button type="button" class="ws-sfilter-chip is-active" data-ws-sfilter="all">全部</button>
+          <button type="button" class="ws-sfilter-chip" data-ws-sfilter="analyzed">✅ 已复盘</button>
+          <button type="button" class="ws-sfilter-chip" data-ws-sfilter="party">👥 五黑</button>
+          <button type="button" class="ws-sfilter-chip" data-ws-sfilter="win">胜</button>
+          <button type="button" class="ws-sfilter-chip" data-ws-sfilter="loss">负</button>
         </div>
       </div>
-    </div>
-  </header>
 
-  <main class="main-container">
+      <div class="ws-sidebar-section-label">
+        <span>最近比赛记录 (点击即看)</span>
+        <span id="ws-sidebar-match-count" class="ws-sidebar-count">加载中</span>
+      </div>
+
+      <!-- 每一场比赛列表：Workstation 笔记式行列表 -->
+      <div id="ws-sidebar-match-list" class="ws-sidebar-notes" role="listbox" aria-label="最近比赛记录列表">
+        <div class="ws-sidebar-empty">正在同步最近比赛记录...</div>
+      </div>
+
+      <!-- 侧边栏底部账号与模型状态栏 -->
+      <div class="ws-account">
+        <div class="ws-avatar">刀</div>
+        <div class="ws-account-copy">
+          <div id="ws-sidebar-account-name" class="ws-account-name">Flame = ez mute</div>
+          <div id="llm-status-pill" class="model-status connected ws-account-email">已接入 XAI / grok-4.7</div>
+        </div>
+        <button type="button" id="btn-open-settings" class="ws-icon-btn" title="车队花名册与大模型设置">⚙️</button>
+      </div>
+    </aside>
+
+    <!-- =========================================================================
+         Workstation 右侧主阅读工作区：顶部位置栏 + 视图切换栏 + 独立滚动阅读舱
+         ========================================================================= -->
+    <div id="ws-main-shell" class="ws-main-shell">
+      <header class="ws-location-bar site-header">
+        <button
+          type="button"
+          id="btn-expand-ws-sidebar"
+          class="ws-icon-btn ws-expand-btn"
+          title="展开侧边栏"
+          aria-label="展开侧边栏"
+        >
+          ☰
+        </button>
+        <button
+          type="button"
+          id="btn-toggle-mobile-tools"
+          class="ws-cmd-btn mobile-tools-toggle"
+          aria-expanded="false"
+          aria-controls="ws-sidebar"
+        >
+          ☰ 比赛列表
+        </button>
+        <div class="ws-location-copy">
+          <div id="ws-location-title" class="ws-location-title">单局录像级复盘 · 阅读与审判</div>
+          <div id="ws-location-subtitle" class="ws-location-subtitle">点击左侧边栏任意一场比赛即可秒切复盘报告（快捷键 Alt+↑ / Alt+↓ 切换上下场）</div>
+        </div>
+        <div class="ws-location-right">
+          <span id="current-player-badge" class="ws-local-badge status-pill connected">主视角加载中...</span>
+          <button type="button" id="btn-back-to-home" class="ws-cmd-btn back-home-btn" title="打开五黑车队跨局总账与英雄池体检">
+            🏆 跨局总账
+          </button>
+        </div>
+      </header>
+
+      <!-- Workstation 风格视图切换栏 (仅在单局复盘模式下显示，彻底告别万字杂乱堆叠) -->
+      <div id="ws-postgame-view-bar" class="ws-view-bar" role="tablist" aria-label="单局复盘子视图切换">
+        <div class="ws-view-tabs">
+          <button type="button" class="ws-view-tab is-active" data-postgame-tab="summary" role="tab" aria-selected="true">
+            ■ 内容核心总结 &amp; 个人卷宗
+          </button>
+          <button type="button" class="ws-view-tab" data-postgame-tab="timeline" role="tab" aria-selected="false">
+            ⏱️ 实时小地图 &amp; 时间轴沙盘
+          </button>
+          <button type="button" class="ws-view-tab" data-postgame-tab="phases" role="tab" aria-selected="false">
+            ⚔️ 阵容 BP · 三阶段 · 生死团现场
+          </button>
+          <button type="button" class="ws-view-tab" data-postgame-tab="microscope" role="tab" aria-selected="false">
+            🔬 十三维战术显微镜
+          </button>
+          <button type="button" class="ws-view-tab" data-postgame-tab="players" role="tab" aria-selected="false">
+            🗂️ 十人装备按键与六维雷达
+          </button>
+          <button type="button" class="ws-view-tab" data-postgame-tab="all" role="tab" aria-selected="false">
+            📜 全卷同屏
+          </button>
+        </div>
+        <div class="ws-view-actions">
+          <label class="ws-perspective-inline" title="切换主审视阵营">
+            <span>视角</span>
+            <select id="perspective-select">
+              <option value="auto">按我的车队</option>
+              <option value="dire">夜魇阵营</option>
+              <option value="radiant">天辉阵营</option>
+            </select>
+          </label>
+          <button type="button" id="btn-request-parse" class="ws-cmd-btn" hidden>请求录像解析</button>
+          <button type="button" id="btn-voice-broadcast" class="ws-cmd-btn" title="中文语音播报本局复盘">🔊 播报</button>
+          <button type="button" id="btn-export-pdf" class="ws-cmd-btn" title="全屏结构化报告 &amp; 下载 PDF">📄 PDF报告</button>
+          <button type="button" id="btn-hero-share-link" class="ws-cmd-btn" title="复制本局公开分享链接">🔗 分享</button>
+          <button type="button" id="btn-open-share-poster-2" class="ws-cmd-btn" title="导出群聊庆功/处刑海报">🖼️ 海报</button>
+          <button type="button" id="btn-trigger-grok" class="ws-cmd-btn primary" title="呼叫 Grok 4.7 生成深度判词">🧠 Grok 判词</button>
+        </div>
+      </div>
+
+      <div id="ws-scroll-area" class="ws-scroll-area reading-pane">
+        <main class="main-container">
     <!-- =========================================================================
          工作台 0 (默认首页)：清爽比赛记录大厅 (点击任意比赛卡片进入单局深度复盘)
          ========================================================================= -->
@@ -199,17 +305,9 @@
     </div>
 
     <!-- =========================================================================
-         工作台 A：单局录像级复盘与车队分锅账本 (点击某局比赛或打开分享链接后直接展示该局，不含最近战绩列表)
+         工作台 A：单局录像级复盘与车队分锅账本 (Workstation 主阅读区)
          ========================================================================= -->
     <div id="postgame-workspace" hidden>
-    <!-- 单局顶部极简导航条：只保留返回首页按钮与主视角状态，不放任何最近战局列表 -->
-    <div class="postgame-top-nav-bar">
-      <button type="button" id="btn-back-to-home" class="button secondary back-home-btn">
-        ← 返回首页 · 全部比赛记录
-      </button>
-      <span id="current-player-badge" class="status-pill connected">主视角加载中...</span>
-    </div>
-
     <!-- 按需 AI 分析门控面板：当用户点击一局尚未分析的比赛时呈现，只有用户点击按钮才执行 AI 复盘分析 -->
     <section id="on-demand-analysis-gate" class="on-demand-gate" hidden aria-labelledby="gate-title">
       <div class="gate-inner">
@@ -225,45 +323,32 @@
     </section>
 
     <div id="analyzed-report-content">
-    <!-- 比赛总览横幅 + 6大无重叠复盘模块快速跳转栏 -->
+    <!-- 比赛总览横幅 (Workstation 文档头风格) -->
     <section id="match-overview-section" class="match-overview" aria-labelledby="match-overview-title">
       <div class="overview-top-row">
         <div>
-          <div id="match-meta-line" class="match-meta">加载中...</div>
-          <h2 id="match-overview-title" class="match-headline" tabindex="-1">正在读取比赛数据...</h2>
-        </div>
-        <div class="overview-actions">
-          <label class="team-perspective-field">
-            <span>看哪边视角</span>
-            <select id="perspective-select">
-              <option value="auto">按我的车队阵营</option>
-              <option value="dire">夜魇阵营</option>
-              <option value="radiant">天辉阵营</option>
-            </select>
-          </label>
-          <button type="button" id="btn-request-parse" class="button secondary" hidden>请求录像解析</button>
-          <button type="button" id="btn-voice-broadcast" class="button secondary" title="用中文语音大声朗读本局胜负庆功/分锅、对位差距与显微镜铁证">🔊 语音播报复盘</button>
-          <button type="button" id="btn-export-pdf" class="button secondary" title="全屏展示结构化复盘报告，并支持直接下载 PDF / 独立网页 / 长图文件">📊 全屏结构化报告 &amp; 下载PDF</button>
-          <button type="button" id="btn-hero-share-link" class="button secondary" title="复制本局公开分享链接发到微信/Discord群">🔗 复制本局分享链接</button>
-          <button type="button" id="btn-open-share-poster-2" class="button secondary">📜 导出群聊战报</button>
-          <button type="button" id="btn-trigger-grok" class="button primary">🧠 让 Grok 4.7 生成深度判词</button>
+          <div id="match-meta-line" class="match-meta ws-document-kicker">加载中...</div>
+          <h2 id="match-overview-title" class="match-headline ws-document-title" tabindex="-1">正在读取比赛数据...</h2>
         </div>
       </div>
 
-      <div id="match-kpi-strip" class="match-stats"></div>
+      <div id="match-kpi-strip" class="match-stats ws-signal-strip"></div>
 
-      <!-- 六大去重核心模块电梯导航 -->
+      <!-- 六大去重核心模块电梯导航 (当处于全卷同屏模式或快速跳转时联动子视图) -->
       <nav class="postgame-jump-nav" aria-label="赛后复盘模块快速跳转">
-        <span class="jump-nav-label">复盘目录 (已全面去重)：</span>
-        <a href="#draft-combo-section" class="jump-chip">① 阵容BP与配合</a>
-        <a href="#verdict-and-blame-section" id="jump-chip-verdict" class="jump-chip">② 胜局庆功 / 败局分锅</a>
-        <a href="#phase-review-section" class="jump-chip">③ 前·中·后期三阶段</a>
-        <a href="#windows-section" class="jump-chip highlight">⚔️ 三大生死团秒级第一现场</a>
-        <a href="#tactical-microscope-section" class="jump-chip">④ 🔬 十二维战术显微镜 (大招/出装处刑台/憋死BKB/单带侦探社/眼位沙盘/1v1对位等)</a>
-        <a href="#charts-hub-section" class="jump-chip">⑤ ⏱️ 逐分钟时间轴沙盘 &amp; 集火矩阵</a>
-        <a href="#players-forensics-section" class="jump-chip">⑥ 1~5号位个人卷宗 (0-100评分)</a>
+        <span class="jump-nav-label">快速跳转视图：</span>
+        <a href="#verdict-and-blame-section" id="jump-chip-verdict" class="jump-chip" data-jump-postgame-tab="summary">■ 核心总结 &amp; 1~5号位个人卷宗</a>
+        <a href="#charts-hub-section" class="jump-chip" data-jump-postgame-tab="timeline">⏱️ 实时小地图 &amp; 时间轴沙盘</a>
+        <a href="#draft-combo-section" class="jump-chip" data-jump-postgame-tab="phases">① 阵容BP与配合</a>
+        <a href="#phase-review-section" class="jump-chip" data-jump-postgame-tab="phases">③ 前·中·后期三阶段</a>
+        <a href="#windows-section" class="jump-chip highlight" data-jump-postgame-tab="phases">⚔️ 三大生死团秒级第一现场</a>
+        <a href="#tactical-microscope-section" class="jump-chip" data-jump-postgame-tab="microscope">🔬 十三维战术显微镜</a>
+        <a href="#players-forensics-section" class="jump-chip" data-jump-postgame-tab="players">🗂️ 十人装备按键与六维雷达</a>
       </nav>
     </section>
+
+    <!-- Workstation 招牌模块：📊 核心数字明细表 & ✅ 录像事实核查 -->
+    <section id="ws-factcheck-section" class="ws-factcheck-section" aria-label="核心数字与录像事实核查"></section>
 
     <!-- 模块一：阵容选择与核心配合算账 (纯粹聚焦 BP 成色、克制与 Combo 兑现，移除重复的基础经济表) -->
     <section id="draft-combo-section" class="draft-combo-section" aria-labelledby="draft-combo-heading">
@@ -590,7 +675,10 @@
     </section>
     </div>
     </div>
-  </main>
+        </main>
+      </div>
+    </div>
+  </div>
 
   <!-- 车队花名册与大模型 API 配置弹窗 (<dialog closedby="any"> 符合现代 Web 规范) -->
   <dialog id="settings-dialog" class="settings-dialog" closedby="any" aria-labelledby="dialog-title">
@@ -838,6 +926,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=8.2.0" defer></script>
+  <script src="/app.js?v=9.0.0" defer></script>
 </body>
 </html>
