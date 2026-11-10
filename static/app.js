@@ -38,6 +38,7 @@ const state = {
   pendingMatchId: null,
   pendingMatchMeta: null,
   scrubberMinute: 15,
+  scrubberSecond: 900,
   scrubSyncMapMinute: null,
   scrubberPlaying: false,
   scrubberSpeed: 1,
@@ -5002,18 +5003,17 @@ function bindEvents() {
     });
   }
 
-  // Minute-by-Minute Timeline Scrubber bindings
+  // Second-by-Second & Minute Timeline Scrubber bindings
   const scrubRange = document.getElementById("minute-scrubber-range");
   if (scrubRange) {
     scrubRange.addEventListener("input", () => {
       stopScrubberAutoplay();
-      state.scrubberMinute = Number(scrubRange.value || 0);
-      if (state.currentReport) {
-        renderMinuteScrubberSnapshot(state.currentReport, state.scrubberMinute);
-        if (state.scrubSyncMapMinute !== null) {
-          state.scrubSyncMapMinute = state.scrubberMinute;
-          renderMinimap(state.currentReport);
-        }
+      const rawVal = Number(scrubRange.value || 0);
+      const maxVal = Number(scrubRange.max || 0);
+      if (maxVal > 100) {
+        setScrubberSecond(rawVal);
+      } else {
+        setScrubberMinute(rawVal);
       }
     });
   }
@@ -5023,11 +5023,18 @@ function bindEvents() {
       toggleScrubberAutoplay();
     });
   }
+  const scrubInlinePlayBtn = document.getElementById("btn-scrub-play-inline");
+  if (scrubInlinePlayBtn) {
+    scrubInlinePlayBtn.addEventListener("click", () => {
+      toggleScrubberAutoplay();
+    });
+  }
   const scrubSpeedBtn = document.getElementById("btn-scrub-speed");
   if (scrubSpeedBtn) {
     scrubSpeedBtn.addEventListener("click", () => {
-      state.scrubberSpeed = state.scrubberSpeed === 1 ? 2 : 1;
-      scrubSpeedBtn.textContent = `${state.scrubberSpeed}x 倍速`;
+      state.scrubberSpeed = state.scrubberSpeed === 1 ? 2 : state.scrubberSpeed === 2 ? 5 : 1;
+      scrubSpeedBtn.textContent =
+        state.scrubberSpeed === 1 ? "1x 逐秒" : state.scrubberSpeed === 2 ? "2x 倍速" : "5x 快进";
       if (state.scrubberPlaying) {
         stopScrubberAutoplay();
         toggleScrubberAutoplay();
@@ -5035,30 +5042,36 @@ function bindEvents() {
       showToast(`时间轴回放倍速已切换为 ${state.scrubberSpeed}x`);
     });
   }
+  const stepScrubberBySeconds = (deltaSec) => {
+    stopScrubberAutoplay();
+    if (!state.currentReport) return;
+    const curSec =
+      typeof state.scrubberSecond === "number" ? state.scrubberSecond : (state.scrubberMinute || 0) * 60;
+    setScrubberSecond(curSec + deltaSec);
+  };
   const scrubPrev = document.getElementById("btn-scrub-prev");
   if (scrubPrev) {
-    scrubPrev.addEventListener("click", () => {
-      stopScrubberAutoplay();
-      if (!state.currentReport) return;
-      const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
-      const nextM = Math.max(0, (state.scrubberMinute || 0) - 1);
-      if (snaps.length > 0) {
-        setScrubberMinute(nextM);
-      }
-    });
+    scrubPrev.addEventListener("click", () => stepScrubberBySeconds(-60));
   }
   const scrubNext = document.getElementById("btn-scrub-next");
   if (scrubNext) {
-    scrubNext.addEventListener("click", () => {
-      stopScrubberAutoplay();
-      if (!state.currentReport) return;
-      const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
-      const maxM = Math.max(0, snaps.length - 1);
-      const nextM = Math.min(maxM, (state.scrubberMinute || 0) + 1);
-      if (snaps.length > 0) {
-        setScrubberMinute(nextM);
-      }
-    });
+    scrubNext.addEventListener("click", () => stepScrubberBySeconds(60));
+  }
+  const scrubPrev15s = document.getElementById("btn-scrub-prev-15s");
+  if (scrubPrev15s) {
+    scrubPrev15s.addEventListener("click", () => stepScrubberBySeconds(-15));
+  }
+  const scrubNext15s = document.getElementById("btn-scrub-next-15s");
+  if (scrubNext15s) {
+    scrubNext15s.addEventListener("click", () => stepScrubberBySeconds(15));
+  }
+  const scrubPrev5s = document.getElementById("btn-scrub-prev-5s");
+  if (scrubPrev5s) {
+    scrubPrev5s.addEventListener("click", () => stepScrubberBySeconds(-5));
+  }
+  const scrubNext5s = document.getElementById("btn-scrub-next-5s");
+  if (scrubNext5s) {
+    scrubNext5s.addEventListener("click", () => stepScrubberBySeconds(5));
   }
   const scrubSyncMapBtn = document.getElementById("btn-scrub-sync-map");
   if (scrubSyncMapBtn) {
@@ -5076,8 +5089,8 @@ function bindEvents() {
           b.classList.toggle("active", b.getAttribute("data-map-mode") === "wards_all")
         );
         scrubSyncMapBtn.classList.add("active");
-        scrubSyncMapBtn.textContent = `🗺️ 已锁定 ${String(state.scrubberMinute).padStart(2, "0")}:00 场上存活眼位 (再点取消)`;
-        showToast(`下方 2D 小地图已同步过滤为 ${String(state.scrubberMinute).padStart(2, "0")}:00 时刻场上存活的真假眼`);
+        scrubSyncMapBtn.textContent = `🗺️ 已锁定 ${formatSecToMmSs(state.scrubberSecond || state.scrubberMinute * 60)} 场上存活眼位 (再点取消)`;
+        showToast(`下方 2D 小地图已同步过滤为 ${formatSecToMmSs(state.scrubberSecond || state.scrubberMinute * 60)} 时刻场上存活的真假眼`);
       }
       renderMinimap(state.currentReport);
     });
@@ -6696,6 +6709,7 @@ function renderWorkstationFactCheckSection(report) {
       const targetMin = Number(btn.getAttribute("data-fc-jump-min") || 15);
       applyPostgameSubTab("timeline", { scrollTop: false });
       state.scrubberMinute = targetMin;
+      state.scrubberSecond = targetMin * 60;
       state.scrubSyncMapMinute = targetMin;
       renderMinuteScrubber(report);
       renderMinimap(report);
@@ -13181,20 +13195,46 @@ function renderVerdictAndBlameSection(report) {
 }
 
 /**
- * 2.8 Interactive Minute-by-Minute Timeline Scrubber (00:00 -> End)
+ * 2.8 Interactive Second-by-Second & Minute Timeline Scrubber (00:00 -> End)
  */
+function formatSecToMmSs(sec) {
+  const s = Math.max(0, Math.round(Number(sec || 0)));
+  const mm = Math.floor(s / 60);
+  const ss = s % 60;
+  return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+}
+
+function parseMmSsToSec(str) {
+  const m = String(str || "").match(/(\d+):(\d+)/);
+  return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : -1;
+}
+
+function syncScrubberPlayButtonsUI() {
+  const playing = Boolean(state.scrubberPlaying);
+  const playBtn = document.getElementById("btn-scrub-autoplay");
+  if (playBtn) {
+    playBtn.textContent = playing ? "⏸ 暂停回放" : "▶ 播放回放";
+    playBtn.style.background = playing ? "rgba(198,164,104,0.22)" : "";
+    playBtn.style.color = playing ? "var(--gold-light)" : "";
+  }
+  const inlineBtn = document.getElementById("btn-scrub-play-inline");
+  if (inlineBtn) {
+    inlineBtn.textContent = playing ? "⏸ 暂停" : "▶ 播放";
+    inlineBtn.classList.toggle("is-playing", playing);
+  }
+  const mapPlayBtn = document.getElementById("btn-scrub-map-play");
+  if (mapPlayBtn) {
+    mapPlayBtn.textContent = playing ? "⏸ 暂停" : "▶ 播放团战";
+  }
+}
+
 function stopScrubberAutoplay() {
   if (state.scrubberTimer) {
     clearInterval(state.scrubberTimer);
     state.scrubberTimer = null;
   }
   state.scrubberPlaying = false;
-  const playBtn = document.getElementById("btn-scrub-autoplay");
-  if (playBtn) {
-    playBtn.textContent = "▶ 自动播放";
-    playBtn.style.background = "";
-    playBtn.style.color = "";
-  }
+  syncScrubberPlayButtonsUI();
 }
 
 function toggleScrubberAutoplay() {
@@ -13206,30 +13246,58 @@ function toggleScrubberAutoplay() {
   const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
   if (!snaps.length) return;
   const maxMin = snaps.length - 1;
-  if (state.scrubberMinute >= maxMin) {
-    setScrubberMinute(0);
+  const maxSec = maxMin * 60;
+  if ((state.scrubberSecond || 0) >= maxSec) {
+    setScrubberSecond(0);
   }
   state.scrubberPlaying = true;
-  const playBtn = document.getElementById("btn-scrub-autoplay");
-  if (playBtn) {
-    playBtn.textContent = "⏸ 暂停回放";
-    playBtn.style.background = "rgba(198,164,104,0.22)";
-    playBtn.style.color = "var(--gold-light)";
-  }
-  const intervalMs = state.scrubberSpeed === 2 ? 650 : 1250;
+  syncScrubberPlayButtonsUI();
+
+  const spd = Number(state.scrubberSpeed || 1);
+  const stepSec = spd === 5 ? 5 : spd === 2 ? 2 : 1;
+  const intervalMs = spd === 5 ? 180 : spd === 2 ? 200 : 220;
   state.scrubberTimer = setInterval(() => {
     if (!state.currentReport) {
       stopScrubberAutoplay();
       return;
     }
     const curSnaps = state.currentReport.deep_forensics?.minute_snapshots || [];
-    const curMax = curSnaps.length - 1;
-    if (state.scrubberMinute >= curMax) {
+    const curMaxSec = Math.max(0, (curSnaps.length - 1) * 60);
+    if ((state.scrubberSecond || 0) >= curMaxSec) {
       stopScrubberAutoplay();
       return;
     }
-    setScrubberMinute((state.scrubberMinute || 0) + 1);
+    setScrubberSecond((state.scrubberSecond || 0) + stepSec);
   }, intervalMs);
+}
+
+function setScrubberSecond(secVal) {
+  if (!state.currentReport) return;
+  const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+  if (!snaps.length) return;
+  const maxMin = snaps.length - 1;
+  const maxSec = maxMin * 60;
+  const clampedSec = Math.max(0, Math.min(maxSec, Math.round(Number(secVal || 0))));
+  const clampedMin = Math.max(0, Math.min(maxMin, Math.round(clampedSec / 60)));
+  state.scrubberSecond = clampedSec;
+  state.scrubberMinute = clampedMin;
+  const rangeEl = document.getElementById("minute-scrubber-range");
+  if (rangeEl) {
+    rangeEl.value = Number(rangeEl.max || 0) > 100 ? String(clampedSec) : String(clampedMin);
+  }
+  const curLabelEl = document.getElementById("scrubber-cur-label");
+  if (curLabelEl) {
+    curLabelEl.textContent = formatSecToMmSs(clampedSec);
+  }
+  renderMinuteScrubberSnapshot(state.currentReport, clampedSec, true);
+  if (state.scrubSyncMapMinute !== null) {
+    state.scrubSyncMapMinute = clampedMin;
+    const syncBtn = document.getElementById("btn-scrub-sync-map");
+    if (syncBtn) {
+      syncBtn.textContent = `🗺️ 已锁定 ${formatSecToMmSs(clampedSec)} 场上存活眼位 (再点取消)`;
+    }
+    renderMinimap(state.currentReport);
+  }
 }
 
 function setScrubberMinute(minuteIdx) {
@@ -13237,24 +13305,45 @@ function setScrubberMinute(minuteIdx) {
   const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
   if (!snaps.length) return;
   const clamped = Math.max(0, Math.min(snaps.length - 1, Number(minuteIdx || 0)));
-  state.scrubberMinute = clamped;
-  const rangeEl = document.getElementById("minute-scrubber-range");
-  if (rangeEl) rangeEl.value = String(clamped);
-  renderMinuteScrubberSnapshot(state.currentReport, clamped);
-  if (state.scrubSyncMapMinute !== null) {
-    state.scrubSyncMapMinute = clamped;
-    const syncBtn = document.getElementById("btn-scrub-sync-map");
-    if (syncBtn) {
-      syncBtn.textContent = `🗺️ 已锁定 ${String(clamped).padStart(2, "0")}:00 场上存活眼位 (再点取消)`;
+  setScrubberSecond(Math.round(clamped * 60));
+}
+
+function declusterMinimapNodes(nodes, minDist = 35, minBound = 24, maxBound = 396) {
+  for (let pass = 0; pass < 14; pass++) {
+    let moved = false;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        let dx = nodes[j].cx - nodes[i].cx;
+        let dy = nodes[j].cy - nodes[i].cy;
+        let dist = Math.hypot(dx, dy);
+        if (dist < minDist) {
+          if (dist < 0.1) {
+            const ang = ((i * 3 + j) * Math.PI) / 5;
+            dx = Math.cos(ang);
+            dy = Math.sin(ang);
+            dist = 1;
+          }
+          const push = (minDist - dist) * 0.52;
+          const ux = dx / dist;
+          const uy = dy / dist;
+          nodes[i].cx = Math.max(minBound, Math.min(maxBound, nodes[i].cx - ux * push));
+          nodes[i].cy = Math.max(minBound, Math.min(maxBound, nodes[i].cy - uy * push));
+          nodes[j].cx = Math.max(minBound, Math.min(maxBound, nodes[j].cx + ux * push));
+          nodes[j].cy = Math.max(minBound, Math.min(maxBound, nodes[j].cy + uy * push));
+          moved = true;
+        }
+      }
     }
-    renderMinimap(state.currentReport);
+    if (!moved) break;
   }
+  return nodes;
 }
 
 function renderMinuteScrubber(report) {
   stopScrubberAutoplay();
   const box = document.getElementById("minute-scrubber-box");
   const rangeEl = document.getElementById("minute-scrubber-range");
+  const curLabelEl = document.getElementById("scrubber-cur-label");
   const maxLabelEl = document.getElementById("scrubber-max-label");
   const jumpsEl = document.getElementById("scrubber-quick-jumps");
   const contentEl = document.getElementById("minute-scrubber-content");
@@ -13267,54 +13356,67 @@ function renderMinuteScrubber(report) {
   }
 
   const maxMin = snaps.length - 1;
+  const maxSec = maxMin * 60;
   if (state.scrubberMinute > maxMin || state.scrubberMinute < 0) {
     state.scrubberMinute = Math.min(15, maxMin);
+    state.scrubberSecond = state.scrubberMinute * 60;
+  }
+  if (typeof state.scrubberSecond !== "number" || state.scrubberSecond < 0 || state.scrubberSecond > maxSec) {
+    state.scrubberSecond = Math.min(maxSec, (state.scrubberMinute || 15) * 60);
   }
   if (rangeEl) {
     rangeEl.min = "0";
-    rangeEl.max = String(maxMin);
-    rangeEl.value = String(state.scrubberMinute);
+    rangeEl.max = String(maxSec);
+    rangeEl.step = "1";
+    rangeEl.value = String(state.scrubberSecond);
+  }
+  if (curLabelEl) {
+    curLabelEl.textContent = formatSecToMmSs(state.scrubberSecond);
   }
   if (maxLabelEl) {
-    maxLabelEl.textContent = snaps[maxMin]?.time_str || `${maxMin}:00`;
+    maxLabelEl.textContent = snaps[maxMin]?.time_str || formatSecToMmSs(maxSec);
   }
 
-  // Build quick-jump pills for key moments (10m Laning End, 20m Mid, Key Teamfights, Roshan/Highground markers, Final)
+  // Build quick-jump pills for key moments with exact second precision
   if (jumpsEl) {
     const jumpTargets = [
-      { m: Math.min(10, maxMin), label: "10:00 对线期交卷" },
-      { m: Math.min(20, maxMin), label: "20:00 中期团战节点" },
+      { sec: Math.min(600, maxSec), m: Math.min(10, maxMin), label: "10:00 对线期交卷" },
+      { sec: Math.min(1200, maxSec), m: Math.min(20, maxMin), label: "20:00 中期团战节点" },
     ];
     (report.key_teamfights || []).slice(0, 5).forEach((tf, idxTf) => {
-      const mVal = Math.min(maxMin, Math.max(1, Math.round(Number(tf.start_sec || 0) / 60)));
+      const sVal = Math.min(maxSec, Math.max(30, Math.round(Number(tf.start_sec || 0))));
+      const mVal = Math.min(maxMin, Math.max(1, Math.round(sVal / 60)));
       jumpTargets.push({
+        sec: sVal,
         m: mVal,
-        label: `⚔️ ${String(mVal).padStart(2, "0")}:00 团战#${idxTf + 1}(${tf.kills_trade || ""})`,
+        label: `⚔️ ${formatSecToMmSs(sVal)} 团战#${idxTf + 1}(${tf.kills_trade || ""})`,
       });
     });
     (report.objective_markers || []).slice(0, 4).forEach((mk) => {
-      const mVal = Math.min(maxMin, Math.max(1, Math.round(Number(mk.time_sec || 0) / 60)));
+      const sVal = Math.min(maxSec, Math.max(30, Math.round(Number(mk.time_sec || 0))));
+      const mVal = Math.min(maxMin, Math.max(1, Math.round(sVal / 60)));
       jumpTargets.push({
+        sec: sVal,
         m: mVal,
-        label: `${String(mVal).padStart(2, "0")}:00 ${mk.label || "关键节点"}`,
+        label: `${formatSecToMmSs(sVal)} ${mk.label || "关键节点"}`,
       });
     });
-    jumpTargets.push({ m: maxMin, label: `${snaps[maxMin]?.time_str || ""} 终局定格` });
+    jumpTargets.push({ sec: maxSec, m: maxMin, label: `${snaps[maxMin]?.time_str || ""} 终局定格` });
 
-    const seenMins = new Set();
+    const seenSecs = new Set();
     const uniqueJumps = jumpTargets.filter((jt) => {
-      const key = `${jt.m}`;
-      if (seenMins.has(key)) return false;
-      seenMins.add(key);
+      const key = `${Math.round(jt.sec / 15)}`;
+      if (seenSecs.has(key)) return false;
+      seenSecs.add(key);
       return true;
     });
 
     jumpsEl.innerHTML =
-      `<span style="font-size:11px;color:var(--muted);margin-right:4px;">⚡ 一键跳至团战/关键帧：</span>` +
+      `<span style="font-size:11px;color:var(--muted);margin-right:4px;">⚡ 一键跳至团战/关键秒：</span>` +
       uniqueJumps
         .map(
           (jt) =>
-            `<button type="button" class="cp-pill scrub-jump-pill" data-scrub-jump="${jt.m}" style="cursor:pointer;">${escapeHtml(
+            `<button type="button" class="cp-pill scrub-jump-pill" data-scrub-jump="${jt.m}" data-scrub-jump-sec="${jt.sec}" style="cursor:pointer;">${escapeHtml(
               jt.label
             )}</button>`
         )
@@ -13322,43 +13424,88 @@ function renderMinuteScrubber(report) {
 
     jumpsEl.querySelectorAll("[data-scrub-jump]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const mTarget = Number(btn.getAttribute("data-scrub-jump") || 0);
-        setScrubberMinute(mTarget);
+        stopScrubberAutoplay();
+        const secAttr = btn.getAttribute("data-scrub-jump-sec");
+        if (secAttr !== null) {
+          setScrubberSecond(Number(secAttr || 0));
+        } else {
+          const mTarget = Number(btn.getAttribute("data-scrub-jump") || 0);
+          setScrubberMinute(mTarget);
+        }
       });
     });
   }
 
-  renderMinuteScrubberSnapshot(report, state.scrubberMinute);
+  renderMinuteScrubberSnapshot(report, state.scrubberSecond, true);
 }
 
-function renderMinuteScrubberSnapshot(report, minuteIdx) {
+function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
   const contentEl = document.getElementById("minute-scrubber-content");
   const badgeEl = document.getElementById("scrubber-time-badge");
+  const curLabelEl = document.getElementById("scrubber-cur-label");
   if (!contentEl) return;
 
   const snaps = report.deep_forensics?.minute_snapshots || [];
   if (!snaps.length) return;
-  const idx = Math.max(0, Math.min(snaps.length - 1, Number(minuteIdx || 0)));
-  const snap = snaps[idx];
-  if (!snap) return;
+  const maxMin = snaps.length - 1;
+  const maxSec = maxMin * 60;
 
+  const rawNum = Number(valOrMin || 0);
+  const secNow =
+    isSecMode || rawNum > maxMin
+      ? Math.max(0, Math.min(maxSec, Math.round(rawNum)))
+      : Math.max(0, Math.min(maxSec, Math.round(rawNum * 60)));
+
+  const minFloor = Math.max(0, Math.min(maxMin, Math.floor(secNow / 60)));
+  const minCeil = Math.max(0, Math.min(maxMin, minFloor + 1));
+  const alpha = minCeil > minFloor ? Math.max(0, Math.min(1, (secNow - minFloor * 60) / 60)) : 0;
+  const idx = Math.round(secNow / 60);
+
+  const snapFloor = snaps[minFloor] || snaps[idx];
+  const snapCeil = snaps[minCeil] || snapFloor;
+  const snap = snaps[idx] || snapFloor;
+  if (!snapFloor) return;
+
+  const timeStrNow = formatSecToMmSs(secNow);
   if (badgeEl) {
-    badgeEl.textContent = `⏱️ 第 ${snap.time_str || `${idx}:00`} 分钟`;
+    badgeEl.textContent = `⏱️ ${timeStrNow}`;
+  }
+  if (curLabelEl) {
+    curLabelEl.textContent = timeStrNow;
   }
 
   const { side } = getOwnAndOppPlayers(report);
-  const players = snap.players || [];
+
+  // Interpolate player metrics smoothly between minFloor and minCeil for sub-minute accuracy
+  const ceilPlayerByHero = new Map((snapCeil?.players || []).map((p) => [p.hero_short_zh, p]));
+  const lerpNum = (a, b) => Math.round(Number(a || 0) + (Number(b || a || 0) - Number(a || 0)) * alpha);
+
+  const players = (snapFloor.players || [])
+    .map((pFloor) => {
+      const pCeil = ceilPlayerByHero.get(pFloor.hero_short_zh) || pFloor;
+      return {
+        ...pFloor,
+        networth: lerpNum(pFloor.networth, pCeil.networth),
+        lh: lerpNum(pFloor.lh, pCeil.lh),
+        dn: lerpNum(pFloor.dn, pCeil.dn),
+        hero_damage: lerpNum(pFloor.hero_damage, pCeil.hero_damage),
+        tower_damage: lerpNum(pFloor.tower_damage, pCeil.tower_damage),
+        items: alpha >= 0.5 ? pCeil.items || pFloor.items : pFloor.items,
+        dead_status: alpha >= 0.5 ? pCeil.dead_status || pFloor.dead_status : pFloor.dead_status,
+      };
+    })
+    .sort((a, b) => Number(b.networth || 0) - Number(a.networth || 0));
+
   const maxNw = Math.max(1000, ...players.map((p) => Number(p.networth || 0)));
 
-  const radGoldAdv = Number(snap.radiant_gold_adv || 0);
-  const radXpAdv = Number(snap.radiant_xp_adv || 0);
+  const radGoldAdv = lerpNum(snapFloor.radiant_gold_adv, snapCeil?.radiant_gold_adv);
+  const radXpAdv = lerpNum(snapFloor.radiant_xp_adv, snapCeil?.radiant_xp_adv);
   const goldLeadTeam = radGoldAdv > 0 ? "天辉" : radGoldAdv < 0 ? "夜魇" : "双方均势";
   const xpLeadTeam = radXpAdv > 0 ? "天辉" : radXpAdv < 0 ? "夜魇" : "双方均势";
 
-  // Count active wards on map at this exact minute
+  // Count active wards on map at this exact second
   const allWards = report.vision_and_map_data?.wards || [];
   const heatmaps = report.vision_and_map_data?.lane_heatmaps || [];
-  const secNow = idx * 60;
   const activeObsAtMin = allWards.filter(
     (w) =>
       w.type === "obs" &&
@@ -13374,20 +13521,20 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
   const radObsNow = activeObsAtMin.filter((w) => w.side === "radiant" || w.side === "天辉").length;
   const direObsNow = activeObsAtMin.filter((w) => w.side === "dire" || w.side === "夜魇").length;
 
-  // Find active teamfight in this minute window (±70 seconds around secNow)
+  // Find active teamfight in this second window (±45 seconds around [start_sec, end_sec])
   const tfForensics = report.deep_forensics?.teamfight_forensics || [];
   const keyTfs = report.key_teamfights || [];
   const activeTfForensic =
     tfForensics.find((tf) => {
       const s = Number(tf.start_sec ?? 0);
       const e = Number(tf.end_sec ?? s + 40);
-      return secNow >= s - 55 && secNow <= e + 55;
+      return secNow >= s - 45 && secNow <= e + 45;
     }) || null;
   const activeKeyTf =
     keyTfs.find((tf) => {
       const s = Number(tf.start_sec ?? 0);
       const e = Number(tf.end_sec ?? s + 40);
-      return secNow >= s - 55 && secNow <= e + 55;
+      return secNow >= s - 45 && secNow <= e + 45;
     }) || null;
 
   // Check unpressed BKB / save incidents in this time window
@@ -13395,21 +13542,33 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
     ...(report.deep_forensics?.unpressed_saves_by_side?.radiant?.incidents || []),
     ...(report.deep_forensics?.unpressed_saves_by_side?.dire?.incidents || []),
   ];
-  const parseRangeStartSec = (tr) => {
-    const m = String(tr || "").match(/(\d+):(\d+)/);
-    return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : -999;
-  };
   const activeUnpressedByHero = new Map();
   allUnpressedIncidents.forEach((inc) => {
-    const incSec = parseRangeStartSec(inc.time_range);
-    if (Math.abs(incSec - secNow) <= 75 && inc.hero_short_zh) {
+    const incSec = parseMmSsToSec(inc.time_range);
+    if (incSec >= 0 && Math.abs(incSec - secNow) <= 65 && inc.hero_short_zh) {
       activeUnpressedByHero.set(inc.hero_short_zh, inc);
     }
   });
 
-  // Determine 2D Minimap coordinates (0..100%) for all 10 heroes at minute `idx`
+  // Determine 2D Minimap coordinates (0..100%) for all 10 heroes at exact second `secNow`
   const allFullPlayers = [...(report.radiant_pos_1_to_5 || []), ...(report.dire_pos_1_to_5 || [])];
   const fullPlayerByHero = new Map(allFullPlayers.map((fp) => [fp.hero_short_zh, fp]));
+
+  // Parse exact death timestamps inside active teamfight so heroes die at their exact second!
+  const tfKillTimeByHero = new Map();
+  const tfScriptArr = activeTfForensic?.second_by_second_script || [];
+  tfScriptArr.forEach((sc) => {
+    const evSec = Number(sc.time_sec ?? parseMmSsToSec(sc.time_str));
+    const txt = `${sc.headline || ""} ${sc.detail || ""}`;
+    if (evSec >= 0 && /击杀/.test(txt)) {
+      allFullPlayers.forEach((fp) => {
+        const hName = fp.hero_short_zh;
+        if (hName && txt.includes(`击杀`) && txt.split("击杀")[1]?.includes(hName)) {
+          tfKillTimeByHero.set(hName, evSec);
+        }
+      });
+    }
+  });
 
   // Compute clash center if a teamfight is happening
   let clashCenter = null;
@@ -13417,7 +13576,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
   if (Array.isArray(tfDeathsArr) && tfDeathsArr.length > 0) {
     const avgX = tfDeathsArr.reduce((acc, d) => acc + Number(d.nx || 50), 0) / tfDeathsArr.length;
     const avgY = tfDeathsArr.reduce((acc, d) => acc + Number(d.ny || 50), 0) / tfDeathsArr.length;
-    clashCenter = { nx: Math.max(12, Math.min(88, avgX)), ny: Math.max(12, Math.min(88, avgY)) };
+    clashCenter = { nx: Math.max(14, Math.min(86, avgX)), ny: Math.max(14, Math.min(86, avgY)) };
   } else if (activeKeyTf || activeTfForensic) {
     clashCenter = idx <= 15 ? { nx: 50, ny: 50 } : idx <= 28 ? { nx: 44, ny: 44 } : { nx: 62, ny: 38 };
   }
@@ -13438,66 +13597,99 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
     const posNum = Number(pSnap.pos || (pIdx % 5) + 1);
     const fullP = fullPlayerByHero.get(hName) || {};
     const deadInfo = pSnap.dead_status || null;
-    const isDeadNow = Boolean(deadInfo?.is_dead);
-    const inFountainNow = Boolean(deadInfo?.in_fountain_now);
+    const deadEventSec = deadInfo?.time_str ? parseMmSsToSec(deadInfo.time_str) : -1;
+    const tfDeathSec = tfKillTimeByHero.get(hName) ?? -1;
+    const effectiveDeathSec = tfDeathSec >= 0 ? tfDeathSec : deadEventSec;
+    const respawnDur = Number(deadInfo?.time_dead || Math.min(95, 12 + Math.round(secNow / 35)));
 
-    // 1. If in active teamfight and has exact death position, or participated in fight
+    // Exact second-level death check: alive BEFORE death second, dead AFTER death second during respawn window
+    const diedAtThisSec =
+      effectiveDeathSec >= 0
+        ? secNow >= effectiveDeathSec && secNow <= effectiveDeathSec + respawnDur
+        : Boolean(deadInfo?.is_dead) && alpha > 0.7;
+
+    // 1. If in active teamfight and has exact death position or participated in fight
+    const tfStartSec = Number(activeTfForensic?.start_sec ?? activeKeyTf?.start_sec ?? secNow);
+    const fightRelSec = secNow - tfStartSec;
+    const approachFactor = Math.max(0, Math.min(1, (fightRelSec + 25) / 30));
+
     if (Array.isArray(tfDeathsArr) && tfDeathsArr.length > 0) {
       const exactDeath = tfDeathsArr.find((d) => d.hero_short_zh === hName);
       if (exactDeath && exactDeath.nx && exactDeath.ny) {
-        return { nx: Number(exactDeath.nx), ny: Number(exactDeath.ny), inFight: true, diedNow: true };
+        const targetNx = Number(exactDeath.nx);
+        const targetNy = Number(exactDeath.ny);
+        if (!diedAtThisSec) {
+          const offsetAng = (posNum * 1.3 + (isRad ? 2.2 : -0.8)) + secNow * 0.08;
+          const offsetR = (1 - approachFactor) * 9 + 3.2;
+          return {
+            nx: Math.max(8, Math.min(92, targetNx + Math.cos(offsetAng) * offsetR)),
+            ny: Math.max(8, Math.min(92, targetNy + Math.sin(offsetAng) * offsetR)),
+            inFight: true,
+            diedNow: false,
+          };
+        }
+        return { nx: targetNx, ny: targetNy, inFight: true, diedNow: true };
       }
     }
     const pt = tfParticipantsMap.get(hName);
     if (clashCenter && pt && (Number(pt.damage || 0) > 0 || Number(pt.deaths || 0) > 0 || Number(pt.healing || 0) > 0)) {
-      const angle = ((posNum - 1) / 5) * Math.PI * 1.4 + (isRad ? 2.1 : -0.9);
-      const radius = 5.5 + (posNum % 2) * 2.5;
-      const nx = Math.max(8, Math.min(92, clashCenter.nx + Math.cos(angle) * radius));
-      const ny = Math.max(8, Math.min(92, clashCenter.ny + Math.sin(angle) * radius));
-      return { nx, ny, inFight: true, diedNow: Number(pt.deaths || 0) > 0 || isDeadNow };
+      const baseAngle = ((posNum - 1) / 5) * Math.PI * 1.5 + (isRad ? 2.15 : -0.95);
+      const orbitAngle = diedAtThisSec ? baseAngle : baseAngle + Math.sin(secNow * 0.14 + posNum) * 0.35;
+      const radius = (diedAtThisSec ? 5.5 : 7.5 + (1 - approachFactor) * 7) + (posNum % 2) * 2.8;
+      const nx = Math.max(8, Math.min(92, clashCenter.nx + Math.cos(orbitAngle) * radius));
+      const ny = Math.max(8, Math.min(92, clashCenter.ny + Math.sin(orbitAngle) * radius));
+      return { nx, ny, inFight: true, diedNow: diedAtThisSec };
     }
 
-    // 1b. If currently respawning in fountain at this exact minute, place in fountain respawn box
-    if (inFountainNow) {
+    // 1b. If currently respawning in fountain at this exact second, place in fountain respawn area
+    if (diedAtThisSec && Boolean(deadInfo?.in_fountain_now)) {
       return isRad
-        ? { nx: 7.5 + posNum * 1.3, ny: 92.5 - posNum * 1.3, inFight: false, diedNow: true, inFountain: true }
-        : { nx: 92.5 - posNum * 1.3, ny: 7.5 + posNum * 1.3, inFight: false, diedNow: true, inFountain: true };
+        ? { nx: 8 + posNum * 1.6, ny: 92 - posNum * 1.6, inFight: false, diedNow: true, inFountain: true }
+        : { nx: 92 - posNum * 1.6, ny: 8 + posNum * 1.6, inFight: false, diedNow: true, inFountain: true };
     }
 
-    // 2. Laning phase (0 - 10m): use real lane_heatmaps centroid or raw_lane coordinates
-    if (idx <= 10) {
+    // 2. Laning phase (0 - 600s): use real lane_heatmaps centroid or raw_lane coordinates with continuous micro-movement
+    if (secNow <= 600) {
+      const waveOscX = Math.sin(secNow * 0.09 + posNum * 1.7) * 2.2;
+      const waveOscY = Math.cos(secNow * 0.08 + posNum * 2.1) * 2.2;
       const myHeat = heatmaps.filter((h) => h.hero_short_zh === hName);
       if (myHeat.length > 0) {
         const wSum = myHeat.reduce((s, h) => s + Number(h.weight || 1), 0) || 1;
         const hx = myHeat.reduce((s, h) => s + Number(h.nx || 50) * Number(h.weight || 1), 0) / wSum;
         const hy = myHeat.reduce((s, h) => s + Number(h.ny || 50) * Number(h.weight || 1), 0) / wSum;
-        return { nx: Math.round(hx * 10) / 10, ny: Math.round(hy * 10) / 10, inFight: false, diedNow: isDeadNow };
+        return {
+          nx: Math.max(8, Math.min(92, hx + waveOscX)),
+          ny: Math.max(8, Math.min(92, hy + waveOscY)),
+          inFight: false,
+          diedNow: diedAtThisSec,
+        };
       }
       const laneId = Number(fullP.raw_lane || (posNum === 2 ? 2 : isRad ? (posNum === 1 || posNum === 5 ? 1 : 3) : posNum === 1 || posNum === 5 ? 3 : 1));
       if (laneId === 3) {
         return isRad
-          ? { nx: 17 + posNum * 1.5, ny: 26 + posNum * 1.8, inFight: false, diedNow: isDeadNow }
-          : { nx: 23 + posNum * 1.5, ny: 18 + posNum * 1.5, inFight: false, diedNow: isDeadNow };
+          ? { nx: 17 + posNum * 1.6 + waveOscX, ny: 26 + posNum * 1.8 + waveOscY, inFight: false, diedNow: diedAtThisSec }
+          : { nx: 23 + posNum * 1.6 + waveOscX, ny: 18 + posNum * 1.6 + waveOscY, inFight: false, diedNow: diedAtThisSec };
       }
       if (laneId === 2) {
         return isRad
-          ? { nx: 45, ny: 55, inFight: false, diedNow: isDeadNow }
-          : { nx: 55, ny: 45, inFight: false, diedNow: isDeadNow };
+          ? { nx: 45 + waveOscX, ny: 55 + waveOscY, inFight: false, diedNow: diedAtThisSec }
+          : { nx: 55 + waveOscX, ny: 45 + waveOscY, inFight: false, diedNow: diedAtThisSec };
       }
       return isRad
-        ? { nx: 76 + (posNum % 2) * 3, ny: 80 - (posNum % 2) * 3, inFight: false, diedNow: isDeadNow }
-        : { nx: 83 - (posNum % 2) * 3, ny: 71 + (posNum % 2) * 3, inFight: false, diedNow: isDeadNow };
+        ? { nx: 76 + (posNum % 2) * 3 + waveOscX, ny: 80 - (posNum % 2) * 3 + waveOscY, inFight: false, diedNow: diedAtThisSec }
+        : { nx: 83 - (posNum % 2) * 3 + waveOscX, ny: 71 + (posNum % 2) * 3 + waveOscY, inFight: false, diedNow: diedAtThisSec };
     }
 
-    // 3. Mid / Late game map distribution along active vision / lanes / jungle
-    const progress = Math.min(1, Math.max(0, (idx - 10) / Math.max(15, snaps.length - 10)));
+    // 3. Mid / Late game continuous second-by-second movement along active vision / lanes / jungle
+    const minCont = secNow / 60;
+    const progress = Math.min(1, Math.max(0, (minCont - 10) / Math.max(15, snaps.length - 10)));
     const advShift = Math.max(-18, Math.min(18, (radGoldAdv / 15000) * 14));
     const laneAnchorsRad = [
-      { nx: 34 + advShift, ny: 64 - advShift }, // Pos 1 farming/pushing
-      { nx: 48 + advShift, ny: 52 - advShift }, // Pos 2 mid/roam
-      { nx: 28 + advShift, ny: 34 - advShift * 0.6 }, // Pos 3 offlane/front
-      { nx: 42 + advShift, ny: 46 - advShift }, // Pos 4 roam
-      { nx: 38 + advShift, ny: 58 - advShift }, // Pos 5 ward/babysit
+      { nx: 34 + advShift, ny: 64 - advShift }, // Pos 1
+      { nx: 48 + advShift, ny: 52 - advShift }, // Pos 2
+      { nx: 28 + advShift, ny: 34 - advShift * 0.6 }, // Pos 3
+      { nx: 42 + advShift, ny: 46 - advShift }, // Pos 4
+      { nx: 38 + advShift, ny: 58 - advShift }, // Pos 5
     ];
     const laneAnchorsDire = [
       { nx: 66 + advShift, ny: 36 - advShift }, // Pos 1
@@ -13507,54 +13699,71 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       { nx: 62 + advShift, ny: 38 - advShift }, // Pos 5
     ];
     const baseAnchor = (isRad ? laneAnchorsRad : laneAnchorsDire)[Math.min(4, Math.max(0, posNum - 1))];
-    const jitterX = Math.sin(idx * 1.3 + posNum * 2.1) * (4 + progress * 3);
-    const jitterY = Math.cos(idx * 1.7 + posNum * 1.9) * (4 + progress * 3);
+    const jitterX = Math.sin(minCont * 1.3 + posNum * 2.1) * (4.5 + progress * 3.5);
+    const jitterY = Math.cos(minCont * 1.7 + posNum * 1.9) * (4.5 + progress * 3.5);
     return {
-      nx: Math.max(10, Math.min(90, Math.round((baseAnchor.nx + jitterX) * 10) / 10)),
-      ny: Math.max(10, Math.min(90, Math.round((baseAnchor.ny + jitterY) * 10) / 10)),
+      nx: Math.max(10, Math.min(90, baseAnchor.nx + jitterX)),
+      ny: Math.max(10, Math.min(90, baseAnchor.ny + jitterY)),
       inFight: false,
-      diedNow: isDeadNow,
+      diedNow: diedAtThisSec,
     };
   };
 
-  // Build SVG Minimap with 10 Hero Avatars + Wards + Clash Ring
+  // Build SVG Minimap on a large 420x420 coordinate canvas (scale factor 4.2)
+  const MAP_SCALE = 4.2;
   const wardNodesSvg = [
     ...activeObsAtMin.map(
       (w) =>
-        `<circle cx="${w.nx * 3.2}" cy="${w.ny * 3.2}" r="5" fill="${
+        `<circle cx="${(w.nx * MAP_SCALE).toFixed(1)}" cy="${(w.ny * MAP_SCALE).toFixed(1)}" r="6" fill="${
           w.side === "radiant" || w.side === "天辉" ? "#fbbf24" : "#f59e0b"
-        }" stroke="#111" stroke-width="1.2" opacity="0.9"><title>👁️ ${escapeHtml(
+        }" stroke="#111" stroke-width="1.4" opacity="0.92"><title>👁️ ${escapeHtml(
           w.hero_short_zh || ""
         )} 假眼 (${escapeHtml(w.time_str || "")})</title></circle>`
     ),
     ...activeSenAtMin.map(
       (w) =>
-        `<circle cx="${w.nx * 3.2}" cy="${w.ny * 3.2}" r="3.8" fill="#60a5fa" stroke="#111" stroke-width="1" opacity="0.85"><title>🔵 ${escapeHtml(
+        `<circle cx="${(w.nx * MAP_SCALE).toFixed(1)}" cy="${(w.ny * MAP_SCALE).toFixed(1)}" r="4.5" fill="#60a5fa" stroke="#111" stroke-width="1.2" opacity="0.88"><title>🔵 ${escapeHtml(
           w.hero_short_zh || ""
         )} 真眼 (${escapeHtml(w.time_str || "")})</title></circle>`
     ),
   ].join("");
 
+  const clashCx = clashCenter ? clashCenter.nx * MAP_SCALE : 210;
+  const clashCy = clashCenter ? clashCenter.ny * MAP_SCALE : 210;
+  const clashLabelX = Math.max(105, Math.min(315, clashCx));
+  const clashLabelY = clashCy > 78 ? clashCy - 54 : clashCy + 64;
   const clashRingSvg = clashCenter
     ? `
-      <circle cx="${clashCenter.nx * 3.2}" cy="${clashCenter.ny * 3.2}" r="38" fill="rgba(239, 68, 68, 0.16)" stroke="#ef4444" stroke-width="1.8" stroke-dasharray="5,3" />
-      <circle cx="${clashCenter.nx * 3.2}" cy="${clashCenter.ny * 3.2}" r="22" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="1.2" />
-      <text x="${clashCenter.nx * 3.2}" y="${Math.max(16, clashCenter.ny * 3.2 - 42)}" fill="#fca5a5" font-size="10.5" font-weight="700" text-anchor="middle">⚔️ 团战交火中心 (${escapeHtml(
-        activeTfForensic?.time_range || activeKeyTf?.time_range || snap.time_str || ""
+      <circle cx="${clashCx.toFixed(1)}" cy="${clashCy.toFixed(1)}" r="48" fill="rgba(239, 68, 68, 0.14)" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,4" />
+      <circle cx="${clashCx.toFixed(1)}" cy="${clashCy.toFixed(1)}" r="26" fill="rgba(245, 158, 11, 0.18)" stroke="#f59e0b" stroke-width="1.4" />
+      <text x="${clashLabelX.toFixed(1)}" y="${clashLabelY.toFixed(1)}" fill="#fca5a5" font-size="11.5" font-weight="700" text-anchor="middle" style="paint-order:stroke;stroke:#0d100d;stroke-width:3px;">⚔️ 团战交火中心 (${escapeHtml(
+        activeTfForensic?.time_range || activeKeyTf?.time_range || timeStrNow
       )})</text>
     `
     : "";
 
-  const heroAvatarNodesSvg = players
-    .map((pSnap, i) => {
+  // Compute raw coordinates for all 10 heroes and run force-directed anti-collision so avatars never overlap
+  const rawHeroNodes = players.map((pSnap, i) => {
+    const coords = getHeroMinimapCoords(pSnap, i);
+    return {
+      pSnap,
+      i,
+      coords,
+      cx: coords.nx * MAP_SCALE,
+      cy: coords.ny * MAP_SCALE,
+    };
+  });
+  declusterMinimapNodes(rawHeroNodes, 35, 24, 396);
+
+  const heroAvatarNodesSvg = rawHeroNodes
+    .map(({ pSnap, i, coords, cx: rawCx, cy: rawCy }) => {
       const hName = pSnap.hero_short_zh || "";
       const fullP = fullPlayerByHero.get(hName) || {};
       const iconUrl = fullP.hero_icon || pSnap.hero_img || fullP.hero_img || "";
-      const coords = getHeroMinimapCoords(pSnap, i);
-      const cx = (coords.nx * 3.2).toFixed(1);
-      const cy = (coords.ny * 3.2).toFixed(1);
+      const cx = rawCx.toFixed(1);
+      const cy = rawCy.toFixed(1);
       const isRad = pSnap.side === "radiant";
-      const strokeColor = isRad ? "#4ade80" : "#f87171";
+      const strokeColor = isRad ? "#22c55e" : "#ef4444";
       const pt = tfParticipantsMap.get(hName);
       const hasBkbInBag = (pSnap.items || []).some((it) => /黑皇杖|black_king_bar/i.test(it.zh || it.key || ""));
       const ptItemsArr = pt?.items_used_zh || pt?.items || pt?.item_uses || pt?.items_used || [];
@@ -13567,55 +13776,46 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
         (Array.isArray(pt?.unused_self_saves_zh) && pt.unused_self_saves_zh.length > 0
           ? { detail: `憋死未开 ${pt.unused_self_saves_zh.join("/")}` }
           : null);
-      const clipId = `scrub-hero-clip-${idx}-${i}`;
+      const clipId = `scrub-hero-clip-${secNow}-${i}`;
       const deadInfo = pSnap.dead_status || null;
-      const deadTimerSec = deadInfo?.remaining_sec || deadInfo?.time_dead || 0;
+      const isDeadHero = Boolean(coords.diedNow);
 
-      let statusBadgeSvg = "";
-      if (unpressedInc) {
-        statusBadgeSvg = `<rect x="${Number(cx) - 18}" y="${Number(cy) - 23}" width="36" height="11" rx="3" fill="#dc2626" stroke="#fff" stroke-width="0.7" /><text x="${cx}" y="${Number(cy) - 15}" fill="#fff" font-size="7.5" font-weight="700" text-anchor="middle">🚨憋BKB</text>`;
-      } else if (bkbUsedInTf) {
-        statusBadgeSvg = `<rect x="${Number(cx) - 16}" y="${Number(cy) - 23}" width="32" height="11" rx="3" fill="#d97706" stroke="#fde68a" stroke-width="0.7" /><text x="${cx}" y="${Number(cy) - 15}" fill="#fff" font-size="7.5" font-weight="700" text-anchor="middle">🛡️BKB</text>`;
-      } else if (coords.diedNow || deadInfo?.is_dead) {
-        statusBadgeSvg = deadTimerSec
-          ? `<rect x="${Number(cx) - 17}" y="${Number(cy) - 23}" width="34" height="11" rx="3" fill="#7f1d1d" stroke="#f87171" stroke-width="0.7" /><text x="${cx}" y="${Number(cy) - 15}" fill="#fecaca" font-size="7.5" font-weight="700" text-anchor="middle">💀${deadTimerSec}s</text>`
-          : `<text x="${Number(cx) + 10}" y="${Number(cy) - 8}" font-size="11" text-anchor="middle">💀</text>`;
-      } else if (hasBkbInBag) {
-        statusBadgeSvg = `<circle cx="${Number(cx) + 9}" cy="${Number(cy) - 9}" r="4" fill="#fbbf24" stroke="#111" stroke-width="0.8"><title>已持有黑皇杖(BKB)</title></circle>`;
-      }
+      // Clean visual ring & subtle corner indicator ONLY (no overlapping text labels on the minimap!)
+      const outerRingColor = bkbUsedInTf && !isDeadHero ? "#fbbf24" : isDeadHero ? "#991b1b" : strokeColor;
+      const deadOverlaySvg = isDeadHero
+        ? `<line x1="${(rawCx - 8).toFixed(1)}" y1="${(rawCy - 8).toFixed(1)}" x2="${(rawCx + 8).toFixed(1)}" y2="${(rawCy + 8).toFixed(1)}" stroke="#ef4444" stroke-width="2.4" stroke-linecap="round" />
+           <line x1="${(rawCx + 8).toFixed(1)}" y1="${(rawCy - 8).toFixed(1)}" x2="${(rawCx - 8).toFixed(1)}" y2="${(rawCy + 8).toFixed(1)}" stroke="#ef4444" stroke-width="2.4" stroke-linecap="round" />`
+        : hasBkbInBag
+        ? `<circle cx="${(rawCx + 11.5).toFixed(1)}" cy="${(rawCy - 11.5).toFixed(1)}" r="4.5" fill="#fbbf24" stroke="#111" stroke-width="1.1" />`
+        : "";
 
       return `
         <g class="scrub-map-hero-node" style="cursor:pointer;">
           <defs>
             <clipPath id="${clipId}">
-              <circle cx="${cx}" cy="${cy}" r="11" />
+              <circle cx="${cx}" cy="${cy}" r="15" />
             </clipPath>
           </defs>
-          <circle cx="${cx}" cy="${cy}" r="12.5" fill="#141613" stroke="${
-        coords.diedNow ? "#ef4444" : strokeColor
-      }" stroke-width="${coords.inFight ? "2.6" : "2"}" />
+          <circle cx="${cx}" cy="${cy}" r="17" fill="#10130f" stroke="${outerRingColor}" stroke-width="${
+        coords.inFight ? "3.2" : "2.5"
+      }" />
           ${
             iconUrl
-              ? `<image href="${escapeHtml(iconUrl)}" x="${Number(cx) - 11}" y="${
-                  Number(cy) - 11
-                }" width="22" height="22" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})" opacity="${
-                  coords.diedNow ? "0.45" : "1"
+              ? `<image href="${escapeHtml(iconUrl)}" x="${(rawCx - 15).toFixed(1)}" y="${(
+                  rawCy - 15
+                ).toFixed(1)}" width="30" height="30" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})" opacity="${
+                  isDeadHero ? "0.36" : "1"
                 }" />`
-              : `<circle cx="${cx}" cy="${cy}" r="10" fill="${strokeColor}" />`
+              : `<circle cx="${cx}" cy="${cy}" r="14" fill="${strokeColor}" />`
           }
-          ${statusBadgeSvg}
-          <text x="${cx}" y="${Number(cy) + 20}" fill="${
-        isRad ? "#bbf7d0" : "#fecaca"
-      }" font-size="8.5" font-weight="700" text-anchor="middle" style="paint-order:stroke;stroke:#0c0e0c;stroke-width:2.5px;">${
-        pSnap.pos ?? ""
-      }${escapeHtml(hName.slice(0, 3))}</text>
+          ${deadOverlaySvg}
           <title>[${isRad ? "天辉" : "夜魇"}${pSnap.pos}号位] ${escapeHtml(hName)} (${escapeHtml(
         pSnap.personaname || ""
-      )}) · 净值 ${fmtNum(pSnap.networth || 0)} 金 · 累计伤害 ${fmtNum(pSnap.hero_damage || 0)}${
+      )}) · ${timeStrNow} 净值 ${fmtNum(pSnap.networth || 0)} 金 · 累计伤害 ${fmtNum(pSnap.hero_damage || 0)}${
         pt ? ` · 本波团战伤害 ${fmtNum(pt.damage || 0)}` : ""
       }${
-        deadInfo?.is_dead
-          ? ` · 💀 ${deadInfo.time_str} 被 ${deadInfo.killer_zh || "敌方"} 击杀 (泉水读秒 ${deadInfo.time_dead}s · 掉 ${deadInfo.gold_lost} 金)`
+        isDeadHero && deadInfo
+          ? ` · 💀 ${deadInfo.time_str || ""} 被 ${deadInfo.killer_zh || "敌方"} 击杀 (泉水读秒 ${deadInfo.time_dead || 0}s)`
           : ""
       }${unpressedInc ? ` · 🚨 ${unpressedInc.detail || "憋死保命装"}` : ""}</title>
         </g>
@@ -13629,48 +13829,63 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       ? eventsList.map((ev) => `<li>${escapeHtml(ev)}</li>`).join("")
       : `<li>本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 双方平稳对线/刷钱发育，无英雄击杀或建筑摧毁</li>`;
 
-  const tfScriptArr = activeTfForensic?.second_by_second_script || [];
   const tfScriptHtml =
     tfScriptArr.length > 0
-      ? `<div style="margin-bottom:8px;padding:6px 8px;border-radius:6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);max-height:110px;overflow-y:auto;font-size:11px;line-height:1.5;">
-          <div style="font-weight:700;color:var(--gold-light);margin-bottom:3px;">⏱️ 团战秒级战斗流水 (${escapeHtml(
-            activeTfForensic?.location_zh || activeTfForensic?.time_range || ""
-          )})：</div>
+      ? `<div style="margin-bottom:8px;padding:7px 10px;border-radius:7px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.28);max-height:135px;overflow-y:auto;font-size:11.5px;line-height:1.55;">
+          <div style="font-weight:700;color:var(--gold-light);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+            <span>⏱️ 团战秒级战斗流水 (${escapeHtml(
+              activeTfForensic?.location_zh || activeTfForensic?.time_range || ""
+            )})：</span>
+            <span style="font-size:10.5px;color:var(--muted);font-weight:400;">💡 点击任意一行可直接跳至该秒</span>
+          </div>
           ${tfScriptArr
-            .map(
-              (sc) =>
-                `<div style="margin-bottom:2px;"><span style="color:#fbbf24;font-family:monospace;">[${escapeHtml(
-                  sc.time_str || sc.rel_str || ""
-                )}]</span> <b>${escapeHtml(sc.badge || "")}</b> ${escapeHtml(sc.headline || "")} <span style="color:var(--muted);">— ${escapeHtml(
-                  sc.detail || ""
-                )}</span></div>`
-            )
+            .map((sc) => {
+              const evSec = Number(sc.time_sec ?? parseMmSsToSec(sc.time_str));
+              const isReached = evSec >= 0 && secNow >= evSec;
+              const isCurrentSec = evSec >= 0 && Math.abs(secNow - evSec) <= 2;
+              return `<div data-scrub-sec="${evSec >= 0 ? evSec : ""}" style="margin-bottom:3px;padding:2px 5px;border-radius:4px;cursor:pointer;background:${
+                isCurrentSec
+                  ? "rgba(251,191,36,0.22)"
+                  : isReached
+                  ? "rgba(255,255,255,0.03)"
+                  : "transparent"
+              };opacity:${evSec >= 0 && !isReached ? "0.58" : "1"};"><span style="color:#fbbf24;font-family:monospace;font-weight:700;">[${escapeHtml(
+                sc.time_str || sc.rel_str || ""
+              )}]</span> <b>${escapeHtml(sc.badge || "")}</b> ${escapeHtml(sc.headline || "")} <span style="color:var(--muted);">— ${escapeHtml(
+                sc.detail || ""
+              )}</span></div>`;
+            })
             .join("")}
         </div>`
       : "";
 
   const interactiveMinimapHtml = `
-    <div class="scrub-minimap-combat-grid" style="display:grid;grid-template-columns:minmax(250px, 310px) 1fr;gap:14px;margin-bottom:14px;align-items:stretch;">
-      <div class="scrub-mini-map-card" style="background:rgba(16,18,15,0.92);border:1px solid rgba(198,164,104,0.28);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;">
-        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <strong style="font-size:12.5px;color:var(--gold-light);">🗺️ ${escapeHtml(
-            snap.time_str || ""
-          )} 实时小地图英雄头像</strong>
-          <span style="font-size:10.5px;color:var(--muted);">🟢天辉 🔴夜魇 🛡️BKB 💀阵亡</span>
+    <div class="scrub-minimap-combat-grid" style="display:grid;grid-template-columns:minmax(430px, 490px) 1fr;gap:16px;margin-bottom:16px;align-items:stretch;">
+      <div class="scrub-mini-map-card" style="background:rgba(16,18,15,0.95);border:1px solid rgba(198,164,104,0.32);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;">
+        <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <strong style="font-size:13.5px;color:var(--gold-light);font-variant-numeric:tabular-nums;">🗺️ ${escapeHtml(
+              timeStrNow
+            )} 实时小地图</strong>
+            <button type="button" id="btn-scrub-map-play" class="button primary" style="padding:2px 10px;font-size:11.5px;font-weight:700;">${
+              state.scrubberPlaying ? "⏸ 暂停" : "▶ 播放团战"
+            }</button>
+          </div>
+          <span style="font-size:11px;color:var(--muted);">🟢天辉 🔴夜魇 🟡BKB ✕阵亡</span>
         </div>
-        <svg viewBox="0 0 320 320" style="width:100%;max-width:290px;aspect-ratio:1/1;border-radius:8px;background:radial-gradient(circle at 50% 50%, #1d261f 0%, #111612 100%);border:1px solid #2e352c;">
+        <svg viewBox="0 0 420 420" style="width:100%;max-width:468px;aspect-ratio:1/1;border-radius:10px;background:radial-gradient(circle at 50% 50%, #1e2820 0%, #101511 100%);border:1px solid #333b30;box-shadow:0 6px 20px rgba(0,0,0,0.45);">
           <!-- River & Lanes -->
-          <path d="M 18 20 Q 150 155 302 300" fill="none" stroke="rgba(56, 189, 248, 0.22)" stroke-width="22" stroke-linecap="round" />
-          <polyline points="26,294 26,34 294,34" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="8" stroke-linejoin="round" />
-          <polyline points="26,294 294,294 294,34" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="8" stroke-linejoin="round" />
-          <line x1="26" y1="294" x2="294" y2="34" stroke="rgba(148, 163, 184, 0.18)" stroke-width="8" />
+          <path d="M 22 26 Q 198 204 396 394" fill="none" stroke="rgba(56, 189, 248, 0.22)" stroke-width="28" stroke-linecap="round" />
+          <polyline points="34,386 34,42 386,42" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="10" stroke-linejoin="round" />
+          <polyline points="34,386 386,386 386,42" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="10" stroke-linejoin="round" />
+          <line x1="34" y1="386" x2="386" y2="42" stroke="rgba(148, 163, 184, 0.18)" stroke-width="10" />
           <!-- Radiant & Dire Bases + Roshan Pit -->
-          <rect x="14" y="272" width="34" height="34" rx="6" fill="rgba(74, 222, 128, 0.15)" stroke="#4ade80" stroke-width="1.2" />
-          <text x="31" y="293" fill="#86efac" font-size="9" font-weight="700" text-anchor="middle">天辉</text>
-          <rect x="272" y="14" width="34" height="34" rx="6" fill="rgba(248, 113, 113, 0.15)" stroke="#f87171" stroke-width="1.2" />
-          <text x="289" y="35" fill="#fca5a5" font-size="9" font-weight="700" text-anchor="middle">夜魇</text>
-          <circle cx="118" cy="118" r="10" fill="rgba(245, 158, 11, 0.14)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2,2" />
-          <text x="118" y="121" fill="#fcd34d" font-size="7.5" text-anchor="middle">肉山</text>
+          <rect x="18" y="356" width="46" height="46" rx="8" fill="rgba(34, 197, 94, 0.16)" stroke="#22c55e" stroke-width="1.5" />
+          <text x="41" y="383" fill="#86efac" font-size="11" font-weight="700" text-anchor="middle">天辉</text>
+          <rect x="356" y="18" width="46" height="46" rx="8" fill="rgba(239, 68, 68, 0.16)" stroke="#ef4444" stroke-width="1.5" />
+          <text x="379" y="45" fill="#fca5a5" font-size="11" font-weight="700" text-anchor="middle">夜魇</text>
+          <circle cx="155" cy="155" r="14" fill="rgba(245, 158, 11, 0.14)" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="3,2" />
+          <text x="155" y="159" fill="#fcd34d" font-size="9.5" font-weight="700" text-anchor="middle">肉山</text>
           ${wardNodesSvg}
           ${clashRingSvg}
           ${heroAvatarNodesSvg}
@@ -13680,7 +13895,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
             <strong style="font-size:13px;color:var(--gold-light);">📜 ${escapeHtml(
-              snap.time_str || ""
+              timeStrNow
             )} 实时战斗记录 &amp; 🛡️ BKB/保命装按键验尸</strong>
             <span style="font-size:11px;color:${
               activeTfForensic || activeKeyTf ? "#fca5a5" : "var(--muted)"
@@ -13692,7 +13907,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
                     )} · ${escapeHtml(activeTfForensic?.location_zh || "正面战场")} · 人头交换 ${escapeHtml(
                       activeKeyTf?.kills_trade || `${activeTfForensic?.rad_kills ?? 0}:${activeTfForensic?.dire_kills ?? 0}`
                     )} · 经济波动 ${escapeHtml(String(activeKeyTf?.gold_swing || activeTfForensic?.gold_swing_rad || ""))})`
-                  : "⏱️ 拖动上方时间轴滑块到任意团战分钟，即可查看十人实时站位、技能释放与BKB按键记录"
+                  : "⏱️ 拖动上方时间轴滑块到任意团战秒数，即可逐秒回放十人走位、技能释放与BKB按键记录"
               }
             </span>
           </div>
@@ -13700,7 +13915,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
           ${
             rawParts.length > 0
               ? `
-                <div style="max-height:195px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px;">
+                <div style="max-height:275px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding-right:4px;">
                   ${rawParts
                     .filter((pt) => Number(pt.damage || 0) > 0 || Number(pt.deaths || 0) > 0 || Number(pt.healing || 0) > 0)
                     .sort((a, b) => Number(b.damage || 0) - Number(a.damage || 0))
@@ -13748,6 +13963,9 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
                         )}</span>`;
                       }
                       const isRadPt = (pt.side || fp.side) === "radiant" || (pt.side || fp.side) === "天辉";
+                      const killSecForHero = tfKillTimeByHero.get(hName) ?? -1;
+                      const diedByNow =
+                        killSecForHero >= 0 ? secNow >= killSecForHero : Number(pt.deaths || 0) > 0;
                       return `
                         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border-left:3px solid ${
                           isRadPt ? "#4ade80" : "#f87171"
@@ -13759,8 +13977,8 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
                                 : ""
                             }
                             <b>[${isRadPt ? "天辉" : "夜魇"}${pt.pos || fp.pos || ""}] ${escapeHtml(hName)}</b>
-                            <span style="color:${Number(pt.deaths || 0) > 0 ? "#f87171" : "#4ade80"};font-weight:700;">${
-                        Number(pt.deaths || 0) > 0 ? "💀阵亡" : "🟢存活"
+                            <span style="color:${diedByNow ? "#f87171" : "#4ade80"};font-weight:700;">${
+                        diedByNow ? "💀阵亡" : "🟢存活"
                       }</span>
                           </div>
                           <div style="flex:1;color:var(--text);font-size:11px;">
@@ -13874,7 +14092,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
   const radTotalDn = sumBy(radPlayers, (p) => p.dn);
   const direTotalDn = sumBy(direPlayers, (p) => p.dn);
 
-  // Positional 1-5 head-to-head net worth delta at this exact minute
+  // Positional 1-5 head-to-head net worth delta at this exact second
   const posDeltaRowsHtml = [1, 2, 3, 4, 5]
     .map((posNum) => {
       const rp = radPlayers.find((p) => Number(p.pos) === posNum);
@@ -13904,15 +14122,15 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
     </div>
     <div class="scrub-left-col">
       <div class="scrub-col-title">
-        <strong>🏆 ${escapeHtml(snap.time_str || "")} 时刻 · 十人实时净资产与已出核心装排位</strong>
-        <span>正补/反补与装备栏同步定格</span>
+        <strong>🏆 ${escapeHtml(timeStrNow)} 时刻 · 十人实时净资产与已出核心装排位</strong>
+        <span>正补/反补与装备栏按秒同步插值定格</span>
       </div>
       <div class="scrub-players-list">${barsHtml}</div>
     </div>
     <div class="scrub-right-col">
       <div class="scrub-kpi-grid">
         <div class="scrub-kpi-card">
-          <span>💰 ${escapeHtml(snap.time_str || "")} 经济差</span>
+          <span>💰 ${escapeHtml(timeStrNow)} 经济差</span>
           <strong style="color:${
             radGoldAdv === 0
               ? "var(--text)"
@@ -13922,7 +14140,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
           }">${goldLeadTeam} ${radGoldAdv === 0 ? "0" : `+${fmtNum(Math.abs(radGoldAdv))}`}</strong>
         </div>
         <div class="scrub-kpi-card">
-          <span>📚 ${escapeHtml(snap.time_str || "")} 经验差</span>
+          <span>📚 ${escapeHtml(timeStrNow)} 经验差</span>
           <strong>${xpLeadTeam} ${radXpAdv === 0 ? "0" : `+${fmtNum(Math.abs(radXpAdv))}`}</strong>
         </div>
         <div class="scrub-kpi-card">
@@ -13938,7 +14156,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
 
       <div class="scrub-team-compare-box">
         <div class="scrub-compare-head">
-          <h4>⚖️ ${escapeHtml(snap.time_str || "")} 时刻 · 双方团队与 1~5 号位对位净值横评</h4>
+          <h4>⚖️ ${escapeHtml(timeStrNow)} 时刻 · 双方团队与 1~5 号位对位净值横评</h4>
           <span>天辉 ${fmtNum(radTotalNw)} 金 (${radNwSharePct}%) vs 夜魇 ${fmtNum(direTotalNw)} 金 (${100 - radNwSharePct}%)</span>
         </div>
         <div class="scrub-tug-bar">
@@ -13965,6 +14183,23 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       </div>
     </div>
   `;
+
+  // Bind minimap inline play button and clickable combat log second rows
+  const mapPlayBtn = document.getElementById("btn-scrub-map-play");
+  if (mapPlayBtn) {
+    mapPlayBtn.addEventListener("click", () => {
+      toggleScrubberAutoplay();
+    });
+  }
+  contentEl.querySelectorAll("[data-scrub-sec]").forEach((row) => {
+    row.addEventListener("click", () => {
+      const targetSec = Number(row.getAttribute("data-scrub-sec"));
+      if (!Number.isNaN(targetSec) && targetSec >= 0) {
+        stopScrubberAutoplay();
+        setScrubberSecond(targetSec);
+      }
+    });
+  });
 }
 
 /**

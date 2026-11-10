@@ -237,6 +237,10 @@ for (const file of reportFiles) {
       sandbox.setScrubberMinute(m);
       totalChecks++;
     }
+    for (const secSample of [45, 315, 605, 1185, 1203, 1208, 1227]) {
+      sandbox.setScrubberSecond(secSample);
+      totalChecks++;
+    }
     sandbox.openFullscreenStructuredReport(report);
     totalChecks++;
     for (const pgTab of ["summary", "timeline", "phases", "microscope", "players", "all"]) {

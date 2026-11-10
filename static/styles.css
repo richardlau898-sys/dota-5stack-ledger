@@ -4339,25 +4339,89 @@ select:hover {
 .scrubber-slider-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin: 8px 0 12px;
-  padding: 8px 12px;
-  background: #141612;
-  border: 1px solid #2f3329;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #181c17 0%, #111410 100%);
+  border: 1px solid rgba(198, 164, 104, 0.35);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.scrub-inline-play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 84px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.14s ease, filter 0.14s ease, background 0.14s ease;
+  flex-shrink: 0;
+}
+
+.scrub-inline-play-btn:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+.scrub-inline-play-btn.is-playing {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  border-color: rgba(251, 191, 36, 0.65);
+}
+
+.scrub-step-sec-btn {
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid rgba(198, 164, 104, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.scrub-step-sec-btn:hover {
+  background: rgba(198, 164, 104, 0.16);
+  color: var(--gold-light);
 }
 
 .scrubber-slider-row input[type="range"] {
   flex: 1;
   accent-color: var(--gold);
   cursor: pointer;
-  height: 6px;
+  height: 8px;
 }
 
 .scrub-bound-label {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--gold-light);
   font-variant-numeric: tabular-nums;
+  min-width: 42px;
+  text-align: center;
+}
+
+.scrub-map-hero-node {
+  transition: filter 0.12s ease;
+}
+
+.scrub-map-hero-node:hover {
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.85)) brightness(1.12);
+}
+
+@media (max-width: 980px) {
+  .scrub-minimap-combat-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .scrubber-content-grid {
