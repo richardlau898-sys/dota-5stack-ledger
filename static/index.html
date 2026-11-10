@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark" />
   <title>Workstation · 战后算账 &amp; Dota 2 录像级复盘工作台</title>
-  <link rel="stylesheet" href="/styles.css?v=9.0.0" />
+  <link rel="stylesheet" href="/styles.css?v=9.1.0" />
 </head>
 <body>
   <div id="ws-app-shell" class="ws-app-shell">
@@ -53,13 +53,13 @@
         <search class="ws-sidebar-search header-search" id="header-search-box" aria-label="查询比赛或玩家">
           <form id="quick-search-form" class="ws-search-form search-form">
             <label for="search-input" class="sr-only">输入比赛编号 Match ID、好友 ID 或 Steam 链接</label>
-            <input
-              id="search-input"
-              type="search"
-              placeholder="输入比赛编号或好友 ID..."
-              autocomplete="off"
-            />
-            <div class="ws-search-btn-row">
+            <div class="ws-search-inline-row">
+              <input
+                id="search-input"
+                type="search"
+                placeholder="比赛ID 或 好友ID..."
+                autocomplete="off"
+              />
               <button type="submit" id="btn-analyze-search" class="ws-cmd-btn primary">查询</button>
               <button type="button" id="btn-Refresh-match" class="ws-cmd-btn" title="强制从 OpenDota 重新拉取并重算">重算</button>
             </div>
@@ -926,6 +926,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
-  <script src="/app.js?v=9.0.0" defer></script>
+  <script src="/app.js?v=9.1.0" defer></script>
 </body>
 </html>

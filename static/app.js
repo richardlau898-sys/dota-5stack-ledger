@@ -5711,11 +5711,11 @@ function renderWorkstationSidebarMatches() {
 
       let snippetHtml = "";
       if (arch?.grok_title) {
-        snippetHtml = `<div class="ws-match-snippet" title="${escapeHtml(arch.grok_title)}">🧠 ${escapeHtml(arch.grok_title)}</div>`;
+        snippetHtml = `<div class="ws-match-snippet" title="${escapeHtml(arch.grok_title)}">${escapeHtml(arch.grok_title)}</div>`;
       } else if (arch) {
         const subLine = isWin
-          ? `👑 MVP ${arch.mvp_hero || "-"} (${arch.mvp_contrib_pct ?? 25}%)`
-          : `🚨 首锅 ${arch.culprit_hero || "-"} (锅${arch.culprit_blame_pct ?? 28}%)`;
+          ? `MVP: ${arch.mvp_hero || "-"} (${arch.mvp_contrib_pct ?? 25}%)`
+          : `首锅: ${arch.culprit_hero || "-"} (锅${arch.culprit_blame_pct ?? 28}%)`;
         snippetHtml = `<div class="ws-match-snippet">${escapeHtml(subLine)}</div>`;
       }
 
@@ -5730,26 +5730,25 @@ function renderWorkstationSidebarMatches() {
             <div class="ws-match-hero-wrap">
               ${
                 heroImg
-                  ? `<img class="ws-match-avatar" src="${escapeHtml(heroImg)}" alt="${escapeHtml(heroShort)}" width="34" height="19" loading="lazy" />`
+                  ? `<img class="ws-match-avatar" src="${escapeHtml(heroImg)}" alt="${escapeHtml(heroShort)}" width="38" height="21" loading="lazy" />`
                   : ""
               }
               <strong class="ws-match-hero">${escapeHtml(heroShort)}</strong>
               <span class="ws-match-party">${escapeHtml(partyLabel)}</span>
             </div>
-            <span class="ws-match-wl ${isWin ? "win" : "loss"}">${isWin ? "胜利" : "落败"}</span>
+            <div class="ws-match-top-right">
+              <span class="ws-match-ai-dot ${isAnalyzed ? "ready" : "pending"}" title="${
+        isAnalyzed ? "已生成 AI 深度复盘" : "点击按需启动 AI 复盘"
+      }">●</span>
+              <span class="ws-match-wl ${isWin ? "win" : "loss"}">${isWin ? "胜利" : "落败"}</span>
+            </div>
           </div>
           <div class="ws-match-row-mid">
-            <span>KDA <b>${escapeHtml(m.kda || "0/0/0")}</b></span>
+            <span class="ws-match-kda-text">KDA <b>${escapeHtml(m.kda || "0/0/0")}</b></span>
             ${durText ? `<span>· ${escapeHtml(durText)}</span>` : ""}
             ${timeStr ? `<span class="ws-match-time">· ${escapeHtml(timeStr)}</span>` : ""}
           </div>
           ${snippetHtml}
-          <div class="ws-match-row-foot">
-            <span class="ws-match-id">#${escapeHtml(mid)}</span>
-            <span class="ws-match-ai-tag ${isAnalyzed ? "ready" : "pending"}">
-              ${isAnalyzed ? "✅ 已复盘" : "⚡ 点此复盘"}
-            </span>
-          </div>
         </button>
       `;
     })
@@ -6217,8 +6216,8 @@ function renderMatchOverview(report) {
         <span>本方插眼总数 · 排掉敌方 ${totalDewards} 颗假眼</span>
       </div>
       <div class="stat-block">
-        <strong>合计阵亡 ${totalDeaths} 次 (${Math.floor(totalDeadSec / 60)}分${totalDeadSec % 60}秒)</strong>
-        <span>本方泉水读秒总计 · 交出买活 ${totalBuybacks} 次</span>
+        <strong>合计阵亡 ${totalDeaths} 次</strong>
+        <span>泉水读秒 ${Math.floor(totalDeadSec / 60)}分${totalDeadSec % 60}秒 · 买活 ${totalBuybacks} 次</span>
       </div>
       <div class="stat-block">
         <strong>外部录像核验</strong>
@@ -6309,82 +6308,144 @@ function renderWorkstationFactCheckSection(report) {
     (side === "dire" && !report.radiant_win);
   const sortedOwn = [...own].sort((a, b) => (a.pos || 9) - (b.pos || 9));
   const grokByPos = new Map();
-  const grokReviews = report.grok_coaching?.player_reviews || [];
+  const grokReviews =
+    report.grok_coaching?.players || report.grok_coaching?.player_reviews || [];
   grokReviews.forEach((gr) => {
     if (gr.pos) grokByPos.set(Number(gr.pos), gr);
   });
 
-  // 1. Build 5-player Key Numbers Table Rows
+  // 1. Build 5-player Key Numbers Table Rows (with accurate field mapping + item icons + skill build)
   const numberRowsHtml = sortedOwn
     .map((p) => {
       const gr = grokByPos.get(Number(p.pos));
-      const scoreVal = gr?.grok_score_100 ?? p.score_100 ?? 70;
+      const rawScore =
+        gr?.grok_score ??
+        gr?.grok_score_100 ??
+        p.score_100 ??
+        (p.rating_score !== undefined ? Math.round(Number(p.rating_score) * 10) : null) ??
+        (p.mvp_score !== undefined ? Math.round(Number(p.mvp_score)) : 70);
+      const scoreVal = Math.max(15, Math.min(99, Number(rawScore || 70)));
       const sharePct = won
         ? gr?.grok_share_pct ?? p.contrib_share_pct ?? 20
         : gr?.grok_share_pct ?? p.blame_share_pct ?? 20;
+
+      const pa = p.playstyle_archetype_audit || p.playstyle_audit || {};
+      const dba = p.damage_and_build_audit || {};
       const styleLabel =
-        p.playstyle_audit?.detected_style_label || p.role_zh || `${p.pos}号位`;
-      const facetTitle = p.facet_badge?.title_zh || "";
-      const permBuffs = Array.isArray(p.perm_buff_badges) ? p.perm_buff_badges : [];
+        pa.archetype_badge ||
+        pa.detected_style_label ||
+        dba.dmg_quality_badge ||
+        p.pos_label ||
+        `${p.pos}号位`;
+      const skillRoute = pa.skill_route_summary_zh || dba.skill_route_summary_zh || "";
+      const facetTitle = p.facet_badge?.title_zh || dba.facet_badge?.title_zh || "";
+      const permBuffs = Array.isArray(p.perm_buff_badges)
+        ? p.perm_buff_badges
+        : Array.isArray(dba.perm_buff_badges)
+        ? dba.perm_buff_badges
+        : [];
       const buffText = permBuffs
         .slice(0, 2)
-        .map((b) => `${b.label_zh || ""}${b.stacks ? `×${b.stacks}` : ""}`)
+        .map((b) =>
+          typeof b === "string"
+            ? b
+            : `${b.label_zh || ""}${b.stacks ? `×${b.stacks}` : ""}`
+        )
         .filter(Boolean)
         .join(" · ");
-      const maxHit = p.spell_target_matrix?.max_single_hit;
-      const maxHitStr =
-        maxHit && maxHit.value > 0
-          ? `${maxHit.inflictor_zh || "技能"} ${maxHit.value}${
-              maxHit.is_lotus_reflect ? " (🪷莲花反)" : ""
-            }`
-          : "-";
+
+      const itemsRich = Array.isArray(p.final_items_rich) ? p.final_items_rich.slice(0, 5) : [];
+      const itemsStripHtml = itemsRich.length
+        ? `<div class="ws-num-items-strip">${itemsRich
+            .map((it) =>
+              it.img
+                ? `<img src="${escapeHtml(it.img)}" alt="${escapeHtml(
+                    it.zh_name || ""
+                  )}" title="${escapeHtml(it.zh_name || "")}${
+                    it.purchase_time_str ? ` (${escapeHtml(it.purchase_time_str)})` : ""
+                  }" width="26" height="19" loading="lazy" />`
+                : `<span class="ws-mini-item-txt">${escapeHtml(it.zh_name || "")}</span>`
+            )
+            .join("")}</div>`
+        : "";
+
+      const dmgShare = p.hero_damage_share_pct ?? p.damage_share_pct ?? 0;
+      const kpPct = p.kill_participation_pct ?? p.fight_participation_pct ?? 0;
+      const maxHit = p.spell_target_matrix?.max_single_hit || dba.spell_target_matrix?.max_single_hit;
+      const topSource = Array.isArray(p.damage_by_source_rich) ? p.damage_by_source_rich[0] : null;
+      let maxHitStr = "";
+      if (maxHit && maxHit.value > 0) {
+        maxHitStr = `${maxHit.inflictor_zh || "技能"} ${maxHit.value}${
+          maxHit.is_lotus_reflect ? " (🪷莲花反)" : ""
+        }`;
+      } else if (dba.max_hit_summary_zh) {
+        maxHitStr = String(dba.max_hit_summary_zh)
+          .replace(/^\d{1,2}:\d{2}\s*/, "")
+          .replace(/用【([^】]+)】对\s*(\S+)\s*单发打出\s*(\d+)\s*点伤害/, "$1 → $2 ($3伤)");
+      } else if (topSource && topSource.zh_name) {
+        maxHitStr = `主力: ${topSource.zh_name} (${topSource.share_pct ?? 0}%)`;
+      } else {
+        maxHitStr = `建筑伤害 ${Number(p.tower_damage || 0).toLocaleString()}`;
+      }
+
       const scoreClass =
-        scoreVal >= 80 ? "good" : scoreVal >= 65 ? "neutral" : "bad";
+        scoreVal >= 78 ? "good" : scoreVal >= 60 ? "neutral" : "bad";
+      const tierTag = p.rating_tier || (won ? p.contrib_tier : "") || "";
 
       return `
-        <tr class="ws-num-row ${p.is_focus_player ? "is-focus" : ""}" data-ws-jump-pos="${escapeHtml(
+        <tr class="ws-num-row ${p.is_focus_player || p.is_me ? "is-focus" : ""}" data-ws-jump-pos="${escapeHtml(
         p.pos
-      )}" title="点击查看 ${escapeHtml(p.hero_short_zh)} 详细个人卷宗">
+      )}" title="点击查看 ${escapeHtml(p.hero_short_zh)} 完整出装与按键卷宗">
           <td>
             <div class="ws-num-hero-cell">
               ${
                 p.hero_img
-                  ? `<img src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(
+                  ? `<img class="ws-num-hero-avatar" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(
                       p.hero_short_zh
-                    )}" width="34" height="19" loading="lazy" />`
+                    )}" width="44" height="25" loading="lazy" />`
                   : ""
               }
-              <div>
+              <div class="ws-num-hero-meta">
                 <div class="ws-num-hero-line">
                   <span class="ws-pos-tag">${p.pos}号</span>
                   <strong>${escapeHtml(p.hero_short_zh || "")}</strong>
-                  ${p.is_focus_player ? `<span class="ws-me-badge">我</span>` : ""}
+                  ${p.is_focus_player || p.is_me ? `<span class="ws-me-badge">我</span>` : ""}
                 </div>
-                <div class="ws-num-sub">${escapeHtml(p.personaname || "")} · KDA ${p.kills}/${p.deaths}/${p.assists}</div>
+                <div class="ws-num-sub">${escapeHtml(p.personaname || "")} · KDA <b>${p.kills}/${p.deaths}/${p.assists}</b></div>
               </div>
             </div>
           </td>
           <td>
             <div class="ws-num-style-cell">
-              <span class="ws-style-pill">${escapeHtml(styleLabel)}</span>
-              ${facetTitle ? `<span class="ws-facet-pill">💎 ${escapeHtml(facetTitle)}</span>` : ""}
-              ${buffText ? `<div class="ws-num-sub">🔥 ${escapeHtml(buffText)}</div>` : ""}
+              <div class="ws-num-badges-row">
+                <span class="ws-style-pill">${escapeHtml(styleLabel)}</span>
+                ${facetTitle ? `<span class="ws-facet-pill">💎 ${escapeHtml(facetTitle)}</span>` : ""}
+              </div>
+              ${itemsStripHtml}
+              ${
+                skillRoute || buffText
+                  ? `<div class="ws-num-sub">${escapeHtml(
+                      [skillRoute, buffText].filter(Boolean).join(" · ")
+                    )}</div>`
+                  : ""
+              }
             </div>
           </td>
           <td>
             <div class="ws-num-stat-cell">
-              <strong>${Number(p.hero_damage || 0).toLocaleString()} <small>(${
-        p.damage_share_pct ?? 0
-      }%)</small></strong>
-              <div class="ws-num-sub">参战 ${p.fight_participation_pct ?? 0}% · 峰值: ${escapeHtml(
-        maxHitStr
-      )}</div>
+              <div class="ws-num-dmg-line">
+                <strong>${Number(p.hero_damage || 0).toLocaleString()}</strong>
+                <span class="ws-num-share-pill">${dmgShare}% 伤害</span>
+                <span class="ws-num-kp-pill">参战 ${kpPct}%</span>
+              </div>
+              <div class="ws-num-sub">${escapeHtml(maxHitStr)}</div>
             </div>
           </td>
           <td>
             <div class="ws-num-score-cell ${scoreClass}">
               <strong>${scoreVal}<small>/100</small></strong>
               <span>${won ? `功劳 ${sharePct}%` : `分锅 ${sharePct}%`}</span>
+              ${tierTag ? `<em class="ws-num-tier-tag">${escapeHtml(tierTag)}</em>` : ""}
             </div>
           </td>
         </tr>
@@ -6397,22 +6458,32 @@ function renderWorkstationFactCheckSection(report) {
 
   // Fact 1: Single-hit Peak & Lotus Reflection
   let bestHitPlayer = null;
-  let bestHitObj = null;
+  let bestHitSummary = "";
+  let bestHitVal = 0;
   let lotusHitPlayer = null;
   let lotusHitObj = null;
   sortedOwn.forEach((p) => {
-    const mh = p.spell_target_matrix?.max_single_hit;
+    const dba = p.damage_and_build_audit || {};
+    const stm = p.spell_target_matrix || dba.spell_target_matrix || {};
+    const mh = stm.max_single_hit;
     if (mh && mh.value > 0) {
-      if (!bestHitObj || mh.value > bestHitObj.value) {
-        bestHitObj = mh;
+      if (mh.value > bestHitVal) {
+        bestHitVal = mh.value;
         bestHitPlayer = p;
+        bestHitSummary = `${mh.time_str || "团战中"} 使用【${mh.inflictor_zh || "技能"}】对敌方 ${
+          mh.target_hero_zh || "英雄"
+        } 造成单发 ${mh.value} 点实伤`;
       }
       if (mh.is_lotus_reflect && (!lotusHitObj || mh.value > lotusHitObj.value)) {
         lotusHitObj = mh;
         lotusHitPlayer = p;
       }
+    } else if ((dba.max_hit_val || 0) > bestHitVal) {
+      bestHitVal = Number(dba.max_hit_val || 0);
+      bestHitPlayer = p;
+      bestHitSummary = dba.max_hit_summary_zh || "";
     }
-    (p.spell_target_matrix?.rows || []).forEach((r) => {
+    (stm.rows || []).forEach((r) => {
       if (r.is_lotus_reflect && (!lotusHitObj || (r.max_hit || 0) > (lotusHitObj.value || 0))) {
         lotusHitObj = {
           value: r.max_hit || r.total_dmg || 0,
@@ -6437,28 +6508,26 @@ function renderWorkstationFactCheckSection(report) {
         lotusHitObj.value
       } 点反弹重创，证实并非空放技能而是精准反弹！`,
     });
-  } else if (bestHitObj && bestHitPlayer) {
+  } else if (bestHitPlayer && bestHitVal > 0) {
     factCards.push({
       status: "verified",
       badge: "✅ 单发峰值核查",
-      title: `本方单发最高爆发：${bestHitPlayer.pos}号位 ${bestHitPlayer.hero_short_zh} (${bestHitObj.value} 伤)`,
-      detail: `在 ${bestHitObj.time_str || "团战中"} 使用【${
-        bestHitObj.inflictor_zh || "核心技能"
-      }】轰在敌方 ${bestHitObj.target_hero_zh || "英雄"} 身上打出单次 ${
-        bestHitObj.value
-      } 点实伤。`,
+      title: `本方单次最高爆发：${bestHitPlayer.pos}号位 ${bestHitPlayer.hero_short_zh} (${bestHitVal} 伤)`,
+      detail: `${bestHitSummary || `单次技能命中打出 ${bestHitVal} 点峰值伤害`}。本局全队输出榜首为 ${
+        [...sortedOwn].sort((a, b) => (b.hero_damage || 0) - (a.hero_damage || 0))[0]?.hero_short_zh || "-"
+      }。`,
     });
   }
 
   // Fact 2: Unpressed BKB / Defensive Items Audit
   const unpressedBlock = report.deep_forensics?.unpressed_saves_by_side?.[side];
-  const unpressedEvents = unpressedBlock?.events || [];
+  const unpressedEvents = unpressedBlock?.events || unpressedBlock?.deaths_with_unused_saves || [];
   if (unpressedEvents.length === 0) {
     factCards.push({
       status: "verified",
       badge: "✅ 救命装纪律达标",
       title: `全队团战 BKB / 保命装 0 次憋死记录`,
-      detail: `经核查本局全部阵亡帧，本方五人在阵亡前均已合理开启或处于冷却中，未出现“揣着绿灯 BKB/魔棒/推推暴毙”的低级失误。`,
+      detail: `经核查本局全部阵亡帧，本方五人在阵亡前均已合理开启保命装或处于冷却中，未出现“揣着绿灯 BKB/魔棒/推推暴毙”的低级失误。`,
     });
   } else {
     const worstEv = unpressedEvents[0];
@@ -6482,15 +6551,15 @@ function renderWorkstationFactCheckSection(report) {
   const laneRev = report.phase_reviews?.[side]?.lane;
   const midRev = report.phase_reviews?.[side]?.mid;
   factCards.push({
-    status: totalTowerDmg >= 8000 ? "verified" : "warning",
-    badge: totalTowerDmg >= 8000 ? "✅ 推塔转化核查" : "⚠️ 推进转化偏低",
+    status: totalTowerDmg >= 6500 ? "verified" : "warning",
+    badge: totalTowerDmg >= 6500 ? "✅ 推塔转化核查" : "⚠️ 推进转化偏低",
     title: `全队建筑总伤害 ${totalTowerDmg.toLocaleString()} · 头号拆迁 ${
       topPusher?.hero_short_zh || "-"
     } (${Number(topPusher?.tower_damage || 0).toLocaleString()})`,
     detail: `对线期(10m) ${laneRev?.verdict_tag || "均势博弈"} → 中期(10-25m) ${
       midRev?.verdict_tag || "抱团拉扯"
     }。${
-      totalTowerDmg >= 8000
+      totalTowerDmg >= 6500
         ? "赢团后迅速将人头优势转化为外塔与高地建筑压制。"
         : "中期赢团或刷钱后推塔节奏偏慢，需提高拿塔与控盾转化率。"
     }`,
@@ -6506,7 +6575,7 @@ function renderWorkstationFactCheckSection(report) {
   factCards.push({
     status: totalDewards >= 4 || smokeCnt >= 2 ? "verified" : "warning",
     badge: totalDewards >= 4 ? "✅ 视野与诡计之雾" : "⚠️ 视野与开雾核查",
-    title: `插眼 ${totalObs}假/${totalSen}真 · 成功排眼 ${totalDewards} 颗 · 开雾 ${smokeCnt} 次 / 堆野 ${stackCnt} 组`,
+    title: `插眼 ${totalObs}假 / ${totalSen}真 · 排眼 ${totalDewards} 颗 · 开雾 ${smokeCnt} 次 / 堆野 ${stackCnt} 组`,
     detail: `本方辅助与核心合计布下 ${totalObs} 颗观察者守卫并反掉敌方 ${totalDewards} 颗假眼，全队累计发起 ${smokeCnt} 波诡计之雾找节奏、屯野 ${stackCnt} 组。`,
   });
 
@@ -6514,20 +6583,29 @@ function renderWorkstationFactCheckSection(report) {
   const tfs = Array.isArray(report.key_teamfights) ? report.key_teamfights : [];
   if (tfs.length > 0) {
     const biggestTf = [...tfs].sort(
-      (a, b) => Math.abs(b.gold_delta || b.radiant_gold_delta || 0) - Math.abs(a.gold_delta || a.radiant_gold_delta || 0)
+      (a, b) =>
+        Math.abs(b.net_swing_radiant ?? b.gold_delta ?? b.radiant_gold_delta ?? 0) -
+        Math.abs(a.net_swing_radiant ?? a.gold_delta ?? a.radiant_gold_delta ?? 0)
     )[0];
     const tfMin = Math.max(
       1,
-      Math.round(Number(biggestTf.start_sec || biggestTf.start || 900) / 60)
+      Math.round(Number(biggestTf.start_sec || biggestTf.start || (biggestTf.minute || 15) * 60) / 60)
     );
-    const swingVal = Math.abs(Number(biggestTf.gold_delta || biggestTf.radiant_gold_delta || 0));
+    const swingNum = Math.abs(
+      Number(biggestTf.net_swing_radiant ?? biggestTf.gold_delta ?? biggestTf.radiant_gold_delta ?? 0)
+    );
+    const swingLabel =
+      biggestTf.gold_swing || (swingNum > 0 ? `经济波动 ${swingNum.toLocaleString()} 金` : "关键胜负手团战");
+    const timeLabel = biggestTf.time_range || biggestTf.time_str || `${tfMin}:00`;
+    const tradeLabel = biggestTf.kills_trade || biggestTf.location_zh || "正面遭遇战";
+    const topDmgHero = biggestTf.top_damage_hero ? `全场最高输出：${biggestTf.top_damage_hero}。` : "";
     factCards.push({
       status: "verified",
       badge: "⏱️ 胜负转折第一现场",
-      title: `${biggestTf.time_str || `${tfMin}:00`} ${
-        biggestTf.location_zh || "关键河道/高地团"
-      } (经济波动 ${swingVal.toLocaleString()} 金)`,
-      detail: `${biggestTf.headline || biggestTf.summary || "全场经济波动最大的一波决定性团战"}。点击右侧按钮可直接在小地图回放该分钟十人走位与技能清单。`,
+      title: `${timeLabel} · ${tradeLabel} (${swingLabel})`,
+      detail: `${
+        biggestTf.headline || biggestTf.summary || `${topDmgHero}这是本局经济天平倾斜最剧烈的决定性团战。`
+      } 点击右侧按钮可直接在小地图回放该分钟十人走位与技能清单。`,
       jumpMinute: tfMin,
     });
   }
