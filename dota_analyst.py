@@ -52,6 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
+ENGINE_VERSION = "2026.11.p3"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -1700,6 +1701,7 @@ def analyze_match_data(
 
     raw_report_out = {
         "_zh_schema_v": 2,
+        "engine_version": ENGINE_VERSION,
         "match_id": match_id,
         "patch": match.get("patch"),
         "patch_str": resolve_patch_name(match.get("patch")),
@@ -1815,6 +1817,7 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
     part_norm = str(part or "").strip().lower()
     base_keys = (
         "_zh_schema_v",
+        "engine_version",
         "match_id",
         "patch",
         "patch_str",

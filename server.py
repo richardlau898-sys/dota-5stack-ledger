@@ -37,14 +37,17 @@ from ai_coach_engine import (
 )
 from cloud_store import (
     cloud_fetch_match_report,
+    cloud_fetch_raw_match,
     cloud_load_llm_task,
     cloud_save_coaching,
     cloud_save_llm_task,
     cloud_save_match_report,
+    cloud_save_raw_match,
     get_cloud_analyzed_match_ids,
     get_cloud_db_status_safe,
 )
 from dota_analyst import (
+    ENGINE_VERSION,
     REPORTS_DIR,
     STEAM64_OFFSET,
     analyze_match_data,
@@ -463,6 +466,7 @@ def get_or_build_match_report(
     tmp_raw_cache = TMP_REPORTS_DIR / f"raw_{match_id}.json"
 
     fallback_unparsed_rep = None
+    stale_cached_rep = None
     if not force_refresh:
         # Check json_cache and tmp_json_cache (GET never calls LLM; only hydrates from existing cache)
         for jc in (json_cache, tmp_json_cache):
@@ -476,30 +480,45 @@ def get_or_build_match_report(
                     ):
                         cached_rep = _ensure_v69_hero_matchup_matrix(cached_rep)
                         cached_rep = _hydrate_grok_from_caches(cached_rep, match_id)
-                        if cached_rep.get("is_parsed"):
-                            return sanitize_report_mixed_english(cached_rep)
-                        fallback_unparsed_rep = cached_rep
+                        if cached_rep.get("engine_version") == ENGINE_VERSION:
+                            if cached_rep.get("is_parsed"):
+                                return sanitize_report_mixed_english(cached_rep)
+                            fallback_unparsed_rep = cached_rep
+                        else:
+                            stale_cached_rep = cached_rep
                 except Exception:
                     pass
 
-        # Read-through from Cloud DB (Supabase / GitHub Cloud) when container /tmp was wiped
+        # Read-through from Cloud DB (Supabase) when container /tmp was wiped
         cloud_rep = cloud_fetch_match_report(match_id)
         if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
             cloud_rep = _ensure_v69_hero_matchup_matrix(cloud_rep)
             cloud_rep = _hydrate_grok_from_caches(cloud_rep, match_id)
-            if cloud_rep.get("is_parsed"):
-                return sanitize_report_mixed_english(cloud_rep)
-            fallback_unparsed_rep = cloud_rep
+            if cloud_rep.get("engine_version") == ENGINE_VERSION:
+                if cloud_rep.get("is_parsed"):
+                    return sanitize_report_mixed_english(cloud_rep)
+                fallback_unparsed_rep = cloud_rep
+            elif stale_cached_rep is None:
+                stale_cached_rep = cloud_rep
 
-    if not allow_build and fallback_unparsed_rep is None and not json_cache.exists() and not tmp_json_cache.exists():
+    if (
+        not allow_build
+        and fallback_unparsed_rep is None
+        and stale_cached_rep is None
+        and not json_cache.exists()
+        and not tmp_json_cache.exists()
+    ):
         return None
+    if not allow_build and stale_cached_rep is not None and not raw_cache.exists() and not tmp_raw_cache.exists():
+        return sanitize_report_mixed_english(stale_cached_rep)
 
     roster = load_roster()
     aid = focus_account_id or roster.get("main_account_id")
 
     raw_match = None
+    fixture_raw_cache = BASE_DIR / "tests" / "fixtures" / f"raw_{match_id}.json"
     if not force_refresh:
-        for rc in (raw_cache, tmp_raw_cache):
+        for rc in (raw_cache, tmp_raw_cache, fixture_raw_cache):
             if rc.exists():
                 try:
                     candidate_raw = json.loads(rc.read_text(encoding="utf-8"))
@@ -508,6 +527,13 @@ def get_or_build_match_report(
                         break
                 except Exception:
                     raw_match = None
+        if not raw_match:
+            try:
+                cloud_raw = cloud_fetch_raw_match(match_id)
+                if isinstance(cloud_raw, dict) and cloud_raw.get("match_id"):
+                    raw_match = cloud_raw
+            except Exception:
+                pass
 
     if not raw_match:
         try:
@@ -529,20 +555,26 @@ def get_or_build_match_report(
                     pass
                 if not raw_match.get("version") and fallback_unparsed_rep and not force_refresh:
                     return sanitize_report_mixed_english(fallback_unparsed_rep)
-            # Only cache raw_match on disk if it is parsed (version is not None)
+            # Only cache raw_match on disk/Storage if it is parsed (version is not None)
             if raw_match and raw_match.get("version"):
-                raw_txt = json.dumps(raw_match, ensure_ascii=False)
+                raw_txt = json.dumps(raw_match, ensure_ascii=False, separators=(",", ":"))
                 try:
                     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                     raw_cache.write_text(raw_txt, encoding="utf-8")
                 except OSError:
                     TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                     tmp_raw_cache.write_text(raw_txt, encoding="utf-8")
+                try:
+                    cloud_save_raw_match(match_id, raw_match)
+                except Exception:
+                    pass
         except PermissionError:
             raise
         except Exception:
             if fallback_unparsed_rep:
                 return sanitize_report_mixed_english(fallback_unparsed_rep)
+            if stale_cached_rep:
+                return sanitize_report_mixed_english(stale_cached_rep)
             raise
 
     if raw_match and not match_has_roster_player(raw_match, roster):
