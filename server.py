@@ -62,28 +62,46 @@ STATIC_DIR = BASE_DIR / "static"
 
 def resolve_player_input(raw_input: str) -> int:
     """
-    支持用户输入:
-    1. Dota 2 好友 ID (Steam32, 如 86080912)
-    2. Steam64 ID (如 76561198046346640)
-    3. Steam 个人主页 URL (如 https://steamcommunity.com/id/richardlau898/ 或 /profiles/76561198...)
+    支持用户输入（严格限制防 SSRF）:
+    1. 纯数字 ID（Steam32 如 86080912 或 Steam64 如 76561198046346640）
+    2. 主机名严格等于 steamcommunity.com 的 https 链接（/id/<short> 或 /profiles/<digits>）
+    3. 匹配 ^[A-Za-z0-9_-]{2,32}$ 的自定义短名
+    其余一律抛出 ValueError（由 HTTP 层返回 400）。
     """
-    s = raw_input.strip()
-    if "steamcommunity.com/profiles/" in s:
-        m = re.search(r"steamcommunity\.com/profiles/(\d+)", s)
-        if m:
-            return normalize_account_id(m.group(1))
-    if "steamcommunity.com/id/" in s or not s.isdigit():
-        url = s if s.startswith("http") else f"https://steamcommunity.com/id/{s.strip('/')}"
-        xml_url = url.split("?")[0].rstrip("/") + "/?xml=1"
-        req = urllib.request.Request(xml_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            xml_data = resp.read().decode("utf-8", errors="ignore")
-        root = ET.fromstring(xml_data)
-        steam64_txt = root.findtext("steamID64")
-        if not steam64_txt:
-            raise ValueError(f"无法从 Steam 链接解析出 steamID64: {raw_input}")
-        return normalize_account_id(steam64_txt)
-    return normalize_account_id(s)
+    s = (raw_input or "").strip()
+    if not s:
+        raise ValueError("玩家输入不能为空")
+
+    if re.fullmatch(r"\d+", s):
+        return normalize_account_id(s)
+
+    vanity = None
+    if "://" in s or s.startswith("http") or "/" in s:
+        parsed = urllib.parse.urlparse(s)
+        hostname = (parsed.hostname or "").lower()
+        if parsed.scheme != "https" or hostname != "steamcommunity.com" or parsed.port is not None:
+            raise ValueError("仅支持 https://steamcommunity.com 域名的 Steam 主页链接")
+        m_prof = re.fullmatch(r"/profiles/(\d+)/?", parsed.path or "")
+        if m_prof:
+            return normalize_account_id(m_prof.group(1))
+        m_id = re.fullmatch(r"/id/([A-Za-z0-9_-]{2,32})/?", parsed.path or "")
+        if not m_id:
+            raise ValueError("Steam 主页链接路径格式无效")
+        vanity = m_id.group(1)
+    elif re.fullmatch(r"[A-Za-z0-9_-]{2,32}", s):
+        vanity = s
+    else:
+        raise ValueError("无效的玩家 ID、Steam 链接或自定义短名")
+
+    xml_url = f"https://steamcommunity.com/id/{vanity}/?xml=1"
+    req = urllib.request.Request(xml_url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        xml_data = resp.read().decode("utf-8", errors="ignore")
+    root = ET.fromstring(xml_data)
+    steam64_txt = root.findtext("steamID64")
+    if not steam64_txt or not re.fullmatch(r"\d+", steam64_txt.strip()):
+        raise ValueError("无法从 Steam 主页解析出有效的 steamID64")
+    return normalize_account_id(steam64_txt.strip())
 
 
 TMP_REPORTS_DIR = Path("/tmp/dota_reports")
@@ -813,6 +831,8 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(content)
 
+        except ValueError as ve:
+            self._send_json({"ok": False, "error": str(ve)}, status=400)
         except PermissionError as pe:
             self._send_json({"ok": False, "error": str(pe)}, status=403)
         except Exception:
@@ -990,6 +1010,8 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 return
 
             self._send_json({"ok": False, "error": f"Unknown endpoint: {path}"}, status=404)
+        except ValueError as ve:
+            self._send_json({"ok": False, "error": str(ve)}, status=400)
         except PermissionError as pe:
             self._send_json({"ok": False, "error": str(pe)}, status=403)
         except Exception:
