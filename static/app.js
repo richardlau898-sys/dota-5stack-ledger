@@ -18400,6 +18400,133 @@ function renderSquadLedgerSection(squadLedger) {
     `
       : "";
 
+  const trendsMap = squadLedger?.personal_trends_and_goals?.players || {};
+  const trendPlayers = coreHabitMembers
+    .map((m) => trendsMap[String(m.account_id)] || null)
+    .filter(Boolean);
+  const personalTrendsHtml =
+    trendPlayers.length > 0
+      ? `
+      <div id="squad-personal-trends-goals" class="squad-card" style="margin-bottom: 14px;">
+        <div class="squad-card-head">
+          <h3>📈 个人随比赛变化趋势曲线 &amp; 每周目标进度 (F4)</h3>
+          <span>追踪：10m后团战外阵亡数 · 对真实对位10m净值差 · 辅助每分钟插眼数 · 关键装时间相对本人中位数偏差</span>
+        </div>
+        <div class="habit-member-cards-grid" style="margin-top:8px;">
+          ${trendPlayers
+            .map((tp) => {
+              const wg = tp.weekly_goal || {};
+              const pts = (tp.series || []).slice(-6);
+              const fmtSeriesVals = (key, suffix = "", signed = false) => {
+                const vals = pts.map((pt) => {
+                  const v = pt[key];
+                  if (v === null || v === undefined) return "无数据";
+                  const num = Number(v);
+                  return `${signed && num > 0 ? "+" : ""}${num}${suffix}`;
+                });
+                return vals.length ? vals.join(" → ") : "无数据";
+              };
+              const progText =
+                wg.current_avg !== null && wg.current_avg !== undefined
+                  ? `当前近 ${wg.sample_games || 0} 局均值 ${wg.current_avg} / 目标 ${wg.target} (${
+                      wg.achieved ? "✅ 已达标" : `${wg.progress_pct ?? 0}%`
+                    })`
+                  : "无数据";
+              return `
+                <article style="padding:10px 12px;border-radius:8px;background:rgba(15,17,14,0.92);border:1px solid rgba(255,255,255,0.1);font-size:12px;line-height:1.55;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">
+                    <strong style="color:#f5f2eb;font-size:14px;">${escapeHtml(tp.personaname)} (${tp.games_count}局)</strong>
+                    <span class="status-pill ${wg.achieved ? "connected" : ""}" style="font-size:11px;">🎯 ${escapeHtml(
+                wg.label_zh || ""
+              )} · ${escapeHtml(progText)}</span>
+                  </div>
+                  <div><b>10m后团战外阵亡：</b>${escapeHtml(fmtSeriesVals("non_teamfight_deaths_after_10m", "次"))}</div>
+                  <div><b>对真实对位10m净值差：</b>${escapeHtml(fmtSeriesVals("lane_nw_diff_10m", "", true))}</div>
+                  <div><b>辅助每分钟插眼数：</b>${escapeHtml(fmtSeriesVals("support_wards_per_min", "/m"))}</div>
+                  <div><b>关键装相对本人中位数偏差：</b>${escapeHtml(fmtSeriesVals("key_item_timing_delta_sec", "s", true))}</div>
+                </article>
+              `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `
+      : `<div id="squad-personal-trends-goals" hidden></div>`;
+
+  const wardSpots = Array.isArray(squadLedger?.high_risk_ward_spots) ? squadLedger.high_risk_ward_spots : [];
+  const highRiskWardsHtml = `
+    <div id="squad-high-risk-wards" class="squad-card" style="margin-bottom: 14px;">
+      <div class="squad-card-head">
+        <h3>👁️ 跨局高危短命眼位预警 (F3 · 存活中位数 &lt; 120秒)</h3>
+        <span>聚合 obs_log 与 obs_left_log，识别插下后极易被秒排的固定坐标</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+        ${
+          wardSpots.length > 0
+            ? wardSpots
+                .slice(0, 8)
+                .map(
+                  (ws) => `
+                <span class="squad-pill" style="border-color:rgba(239,68,68,0.45);color:#fca5a5;">
+                  坐标 (${ws.x}, ${ws.y}) · 样本 ${ws.sample_count} 颗 · 存活中位数 ${ws.median_lifespan_sec}s
+                </span>
+              `
+                )
+                .join("")
+            : `<span style="font-size:12px;color:var(--muted);">当前样本下暂无重复插眼且存活中位数 &lt; 120 秒的高危固定眼位</span>`
+        }
+      </div>
+    </div>
+  `;
+
+  const tiltData = squadLedger?.duration_and_session_tilt || {};
+  const durBuckets = Array.isArray(tiltData.duration_buckets) ? tiltData.duration_buckets : [];
+  const sessBuckets = Array.isArray(tiltData.session_game_buckets) ? tiltData.session_game_buckets : [];
+  const durationAndTiltHtml = `
+    <div id="squad-duration-session-tilt" class="squad-card" style="margin-bottom: 14px;">
+      <div class="squad-card-head">
+        <h3>⏳ 时长画像与当晚连打疲劳曲线 (F6 · 遵守 T1-9 最小样本量 &gt;=10局)</h3>
+        <span>两局间隔 &lt; 90 分钟记为同一晚连打 · 样本不足 10 局仅展示场次不给胜率定性</span>
+      </div>
+      <div class="squad-grid-2col" style="margin-top:8px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">⏱️ 比赛时长分桶胜率：</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+            ${durBuckets
+              .map(
+                (b) => `
+              <div style="padding:7px 9px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;">
+                <strong>${escapeHtml(b.label_zh)}</strong>
+                <div style="color:var(--muted);margin-top:2px;">${b.games}局 (${b.wins}胜${b.losses}负) · <b>${
+                  b.win_rate !== null && b.win_rate !== undefined ? `${b.win_rate}%` : "样本不足（无数据）"
+                }</b></div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">🌙 当晚第几局连打胜率（间隔&lt;90m）：</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+            ${sessBuckets
+              .map(
+                (b) => `
+              <div style="padding:7px 9px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;">
+                <strong>${escapeHtml(b.label_zh)}</strong>
+                <div style="color:var(--muted);margin-top:2px;">${b.games}局 (${b.wins}胜${b.losses}负) · <b>${
+                  b.win_rate !== null && b.win_rate !== undefined ? `${b.win_rate}%` : "样本不足（无数据）"
+                }</b></div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
   container.innerHTML = `
     <div class="squad-summary-banner">
       <div class="squad-summary-text">
@@ -18423,6 +18550,12 @@ function renderSquadLedgerSection(squadLedger) {
     ${guinnessCardsHtml}
 
     ${habitDiagnosisSectionHtml}
+
+    ${personalTrendsHtml}
+
+    ${durationAndTiltHtml}
+
+    ${highRiskWardsHtml}
 
     <div class="squad-grid-2col">
       <article class="squad-card">
