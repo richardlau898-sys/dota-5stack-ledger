@@ -2817,34 +2817,26 @@ def build_squad_history_ledger(
                 pm["share_sum"] += p_sh
                 pm["heroes"].append(p.get("hero_short_zh") or "")
 
-                # Support duty / greedy itemization audit vs Core choke audit
-                combined_grok_txt = " ".join([
-                    str(gp_cur.get("verdict_tag") or ""),
-                    str(gp_cur.get("headline") or ""),
-                    str(gp_cur.get("deep_verdict") or ""),
-                    str(gp_cur.get("item_and_blink_audit") or ""),
-                ])
-                early_txt = str(gp_cur.get("early_story") or "")
+                # Support duty / greedy itemization audit vs Core choke audit (structured fields only)
                 raw_lh10 = (p.get("laning_10m") or {}).get("lh10")
                 lh10_val = int(raw_lh10) if isinstance(raw_lh10, (int, float)) else None
-                if any(kw in early_txt for kw in ("崩盘", "被打穿", "坐牢", "被压", "连续暴毙", "提款")) or (
-                    pos_p in (1, 2, 3) and lh10_val is not None and lh10_val > 0 and lh10_val < 32
-                ):
+                if pos_p in (1, 2, 3) and lh10_val is not None and lh10_val > 0 and lh10_val < 32:
                     st["lane_loss_count"] += 1
 
                 h_short = p.get("hero_short_zh") or ""
                 if pos_p in (4, 5):
                     st["support_games"] += 1
-                    clean_grok_txt = combined_grok_txt
-                    for neg_pat in ("零毒瘤", "非毒瘤", "不毒瘤", "无毒瘤", "绝非毒瘤", "拒绝毒瘤", "没有毒瘤"):
-                        clean_grok_txt = clean_grok_txt.replace(neg_pat, "")
-                    grief_kws = ("散失", "抢经济", "抢钱", "抢核心", "毒瘤", "失职", "零保人", "不买眼", "当大哥", "不出救命")
-                    matched_kw = next((kw for kw in grief_kws if kw in clean_grok_txt), "")
-                    # Only flag support grief if score <= 72 when keyword matched, or score <= 58, or item audit grade is bad
-                    if (matched_kw and p_sc100 <= 72.0) or p_sc100 <= 58.0 or it_r.get("grade") == "bad":
+                    playstyle_audit = p.get("playstyle_archetype_audit") or {}
+                    built_selfish = bool(playstyle_audit.get("built_selfish_core_items"))
+                    obs_sen = int(p.get("obs_placed") or 0) + int(p.get("sen_placed") or 0)
+                    dur_m = float(rep.get("duration_min") or 30.0)
+                    low_wards = bool(rep.get("is_parsed", True) and dur_m >= 25.0 and obs_sen < 4)
+                    if built_selfish or it_r.get("grade") == "bad" or low_wards or p_sc100 <= 58.0:
                         st["support_grief_count"] += 1
-                        reason_tag = f"Grok抓包「{matched_kw}」" if (matched_kw and p_sc100 <= 72.0) else (
-                            "毒瘤/违规出装" if it_r.get("grade") == "bad" else f"本职失职({int(round(p_sc100))}分)"
+                        reason_tag = (
+                            "核心输出装偏移"
+                            if built_selfish or it_r.get("grade") == "bad"
+                            else ("视野偏少" if low_wards else f"评分偏低({int(round(p_sc100))}分)")
                         )
                         if len(st["support_grief_examples"]) < 3:
                             st["support_grief_examples"].append(
@@ -2852,7 +2844,12 @@ def build_squad_history_ledger(
                             )
                 else:
                     st["core_games"] += 1
-                    if p_sc100 <= 56.0 or ((not won) and int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2))):
+                    is_clear_culprit = (
+                        (not won)
+                        and not bool(culprit_p.get("no_clear_culprit"))
+                        and int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2))
+                    )
+                    if p_sc100 <= 56.0 or is_clear_culprit:
                         st["core_choke_count"] += 1
                         if len(st["core_choke_examples"]) < 3:
                             st["core_choke_examples"].append(
@@ -2945,11 +2942,14 @@ def build_squad_history_ledger(
         g = max(1, db["games"])
         wr = round(db["wins"] * 100.0 / g, 1)
         avg_r = round(db["total_rating"] / g, 1)
-        if wr >= 60.0 or avg_r >= 72.0:
-            chem_tag = "🔥 黄金搭档 · 默契拉满"
+        if g < 10:
+            chem_tag = f"样本不足（{g}局）"
+            chem_tone = "warn"
+        elif wr >= 60.0 or avg_r >= 72.0:
+            chem_tag = "🔥 高胜率搭档 · 建议优先组合" if g >= 20 else "🔥 高胜率搭档"
             chem_tone = "good"
         elif wr <= 25.0 and avg_r < 64.0:
-            chem_tag = "💣 灾难组合 · 建议拆伙"
+            chem_tag = "💣 低胜率组合 · 建议调整搭配" if g >= 20 else "📉 低胜率组合"
             chem_tone = "bad"
         else:
             chem_tag = "⚖️ 常规磨合组合"
@@ -2960,6 +2960,7 @@ def build_squad_history_ledger(
             "games": db["games"],
             "wins": db["wins"],
             "win_rate": wr,
+            "win_rate_zh": f"{wr}% ({g}局)",
             "avg_rating": avg_r,
             "hero_pairs": db["hero_pairs"][:4],
             "chemistry_tag": chem_tag,
@@ -2976,8 +2977,13 @@ def build_squad_history_ledger(
         win_rate = round((st["wins"] / g) * 100, 1)
         avg_deaths = round(st["total_deaths"] / g, 1)
         avg_dead_sec = int(round(st["total_dead_sec"] / g))
+        avg_mvp_rate = round(st["mvp_count"] / g, 2)
+        avg_unpressed_saves = round(st["unpressed_saves_total"] / g, 2)
+        avg_solo_pickoffs = round(st["solo_pickoffs_total"] / g, 2)
+        avg_unsmoked_blind = round(st["unsmoked_blind_total"] / g, 2)
+        avg_bad_builds = round(st["bad_builds_total"] / g, 2)
 
-        # 汇总该队员的个人绝活英雄与冥币英雄 (优先统计 >=2 局的多场代表作，防止单场偶然胜负掩盖主力英雄池)
+        # 汇总该队员的英雄统计（最小样本量门槛：<10局注明样本不足，不做绝活/低胜率定性；>=20局才给建议）
         h_map: Dict[str, Dict[str, Any]] = {}
         for h_item in st["heroes"]:
             hz = h_item["hero_short_zh"]
@@ -3011,15 +3017,16 @@ def build_squad_history_ledger(
                 "wins": hm["wins"],
                 "losses": hm["games"] - hm["wins"],
                 "win_rate": h_wr,
+                "win_rate_zh": f"{h_wr}% ({hg}局)",
                 "avg_rating": h_avg_r,
                 "main_pos": main_pos,
+                "sample_status": "样本不足" if hg < 10 else ("可评估" if hg < 20 else "可给建议"),
             })
 
-        # 真命绝活排序：优先 >=2 局且胜率/评分双高，其次高评分胜场
         sig_sorted = sorted(
             h_summary,
             key=lambda x: (
-                1 if (x["games"] >= 2 and (x["win_rate"] >= 50.0 or x["avg_rating"] >= 73.0)) else 0,
+                1 if x["games"] >= 10 else 0,
                 x["wins"],
                 x["avg_rating"],
                 x["win_rate"],
@@ -3027,35 +3034,30 @@ def build_squad_history_ledger(
             reverse=True,
         )
         signature_heroes = [
-            x for x in sig_sorted if (x["wins"] >= 1 and x["avg_rating"] >= 66.0) or x["avg_rating"] >= 78.0
+            x
+            for x in sig_sorted
+            if x["games"] >= 10 and (x["win_rate"] >= 50.0 or x["avg_rating"] >= 72.0)
         ][:3]
-        if not signature_heroes and sig_sorted:
-            signature_heroes = sig_sorted[:1]
 
-        # 永久封印冥币英雄排序：优先多局连败 (losses >= 2 且 win_rate <= 35%) 或低评分败局
         cursed_candidates = [
             x
             for x in h_summary
-            if (x["losses"] >= 2 and x["win_rate"] <= 35.0)
-            or (x["wins"] == 0 and x["avg_rating"] < 62.0)
-            or (x["games"] >= 2 and x["avg_rating"] < 60.0)
+            if x["games"] >= 10 and (x["win_rate"] <= 40.0 or x["avg_rating"] < 62.0)
         ]
         cursed_candidates.sort(
             key=lambda x: (
-                1 if (x["games"] >= 2 and x["win_rate"] <= 35.0) else 0,
                 x["losses"],
                 -x["avg_rating"],
             ),
             reverse=True,
         )
-        # 避免把已在 signature_heroes 首位的主力英雄误判为冥币
         sig_names = {s["hero_short_zh"] for s in signature_heroes[:1]}
         cursed_heroes = [x for x in cursed_candidates if x["hero_short_zh"] not in sig_names][:3]
 
-        best_hero = signature_heroes[0] if signature_heroes else (sig_sorted[0] if sig_sorted else None)
+        best_hero = signature_heroes[0] if signature_heroes else None
         worst_hero = cursed_heroes[0] if cursed_heroes else None
 
-        # 1-5号位适岗矩阵
+        # 1-5号位分位置统计（<10局仅显示数字并标注样本不足）
         pos_breakdown = []
         for p_num, pm in sorted(st.get("pos_map", {}).items(), key=lambda kv: kv[1]["games"], reverse=True):
             pg = max(1, pm["games"])
@@ -3068,32 +3070,33 @@ def build_squad_history_ledger(
                 "games": pm["games"],
                 "wins": pm["wins"],
                 "win_rate": p_wr,
+                "win_rate_zh": f"{p_wr}% ({pg}局)",
                 "avg_rating": p_ar,
                 "top_hero": top_h,
+                "sample_status": "样本不足" if pg < 10 else ("可评估" if pg < 20 else "可给建议"),
             })
 
-        multi_game_pos = [x for x in pos_breakdown if x["games"] >= 2 and x["avg_rating"] >= 65.0]
-        pos_pool_for_best = multi_game_pos if multi_game_pos else pos_breakdown
+        qualified_pos = [x for x in pos_breakdown if x["games"] >= 10]
         best_pos = (
             max(
-                pos_pool_for_best,
+                qualified_pos,
                 key=lambda x: (
-                    x["win_rate"] * 0.40 + x["avg_rating"] * 0.60 + min(x["games"], 5) * 4.0
+                    x["win_rate"] * 0.40 + x["avg_rating"] * 0.60 + min(x["games"], 15) * 2.0
                 ),
             )
-            if pos_pool_for_best
+            if qualified_pos
             else None
         )
         worst_pos_candidates = [
             x
-            for x in pos_breakdown
-            if (x["avg_rating"] < 66.0 or (x["games"] >= 2 and x["win_rate"] <= 35.0))
+            for x in qualified_pos
+            if (x["avg_rating"] < 66.0 or x["win_rate"] <= 40.0)
             and (not best_pos or x["pos"] != best_pos["pos"])
         ]
         worst_pos = (
             min(
                 worst_pos_candidates,
-                key=lambda x: (x["win_rate"] * 0.45 + x["avg_rating"] * 0.55 - x["games"] * 3.0),
+                key=lambda x: (x["win_rate"] * 0.45 + x["avg_rating"] * 0.55 - x["games"] * 1.5),
             )
             if worst_pos_candidates
             else None
@@ -3108,89 +3111,108 @@ def build_squad_history_ledger(
         lane_loss_c = int(st.get("lane_loss_count") or 0)
         lane_loss_rate = round((lane_loss_c / g) * 100, 1)
 
-        # 生成跨局《五黑个人习性诊断书 & BP 处方》
         pname_cur = st["personaname"]
-        if best_pos and worst_pos:
+        pos_stats_str = "；".join(
+            f"{pb['pos_label']} 胜率 {pb['win_rate']}%（{pb['games']}局{' · 样本不足' if pb['games'] < 10 else ''}）· 场均 {pb['avg_rating']}分"
+            for pb in pos_breakdown
+        )
+        if g < 10 or not best_pos:
             pos_verdict = (
-                f"最稳本命位置为【{best_pos['pos_label']}】（{best_pos['games']}局 {best_pos['win_rate']}%胜率 · 场均Grok {best_pos['avg_rating']}分，代表英雄：{best_pos['top_hero']}）；"
-                f"高危重灾区为【{worst_pos['pos_label']}】（{worst_pos['games']}局仅 {worst_pos['win_rate']}%胜率 · 场均 {worst_pos['avg_rating']}分，代表：{worst_pos['top_hero']}），换位掉分显著。"
+                f"跨 {g} 局胜率 {win_rate}%（{g}局 · 样本不足），场均 {avg_rating}/100 分。"
+                + (f"各位置数据：{pos_stats_str}。" if pos_stats_str else "")
             )
-        elif best_pos:
+        elif best_pos and worst_pos:
             pos_verdict = (
-                f"常驻主力位置为【{best_pos['pos_label']}】（{best_pos['games']}局 {best_pos['win_rate']}%胜率 · 场均Grok {best_pos['avg_rating']}分，代表英雄：{best_pos['top_hero']}），位置专注度高。"
+                f"高胜率位置为【{best_pos['pos_label']}】（胜率 {best_pos['win_rate']}% ({best_pos['games']}局) · 场均 {best_pos['avg_rating']}分，常选：{best_pos['top_hero']}）；"
+                f"低胜率位置为【{worst_pos['pos_label']}】（胜率 {worst_pos['win_rate']}% ({worst_pos['games']}局) · 场均 {worst_pos['avg_rating']}分，常选：{worst_pos['top_hero']}）。"
             )
         else:
-            pos_verdict = f"跨 {g} 局场均 Grok 评分 {avg_rating}/100 分，胜率 {win_rate}%。"
+            pos_verdict = (
+                f"常驻主力位置为【{best_pos['pos_label']}】（胜率 {best_pos['win_rate']}% ({best_pos['games']}局) · 场均 {best_pos['avg_rating']}分，常选：{best_pos['top_hero']}）。"
+            )
 
         flaw_parts = []
         if sup_grief > 0:
             ex_str = "、".join(st.get("support_grief_examples") or [])
             flaw_parts.append(
-                f"💸【辅助位本职审计】打4/5号位共 {sup_g} 局中有 {sup_grief} 局（{sup_grief_rate}%）触发毒瘤/抢经济/视野保人失职警报（实锤：{ex_str}）"
+                f"💸【辅助位本职记录】打4/5号位共 {sup_g} 局中有 {sup_grief} 局（{sup_grief_rate}%）出现出装偏移或视野偏少（记录：{ex_str}）"
             )
         if core_choke > 0:
             ex_c = "、".join(st.get("core_choke_examples") or [])
             flaw_parts.append(
-                f"📉【核心位抗压审计】打1-3号位共 {core_g} 局中有 {core_choke} 局（{core_choke_rate}%）出现崩盘或背首锅（实锤：{ex_c}）"
+                f"📉【核心位低分记录】打1-3号位共 {core_g} 局中有 {core_choke} 局（{core_choke_rate}%）出现低分或背首锅（记录：{ex_c}）"
             )
         if st["solo_pickoffs_total"] > 0:
             flaw_parts.append(
-                f"🗺️【孤狼单带迷路】跨 {g} 局累计 {st['solo_pickoffs_total']} 次落单被抓（含 {st['unsmoked_blind_total']} 次无视野/破雾白给，场均 {st['solo_pickoffs_total']/g:.1f} 次）"
+                f"🗺️【落单阵亡统计】跨 {g} 局场均 {avg_solo_pickoffs:.2f} 次落单被抓（场均 {avg_unsmoked_blind:.2f} 次未开雾危险区阵亡）"
             )
         if st["unpressed_saves_total"] > 0 or st["bad_builds_total"] > 0:
             flaw_parts.append(
-                f"🧤【保命装与出装记录】累计 {st['unpressed_saves_total']} 次阵亡时持有主动保命装本波未使用，{st['bad_builds_total']} 局出装偏离常规"
+                f"🧤【保命装与出装记录】场均 {avg_unpressed_saves:.2f} 次阵亡时持有主动保命装本波未使用，场均 {avg_bad_builds:.2f} 局出装偏离常规"
             )
         if not flaw_parts:
             flaw_parts.append(
-                f"🛡️【纪律性极佳】跨 {g} 局几乎零毒瘤出装与低级憋刀事故，场均阵亡读秒 {avg_dead_sec} 秒。"
+                f"🛡️【基础数据统计】跨 {g} 局场均阵亡读秒 {avg_dead_sec} 秒。"
             )
         habit_flaws_summary = "；".join(flaw_parts) + "。"
 
         sig_txt = (
             "、".join(
-                f"{h['hero_short_zh']}({h['games']}局{h['win_rate']}%胜·{h['avg_rating']}分)"
+                f"{h['hero_short_zh']}(胜率{h['win_rate']}% · {h['games']}局 · {h['avg_rating']}分)"
                 for h in signature_heroes
             )
             if signature_heroes
-            else "暂无明显绝活"
+            else ""
         )
         cursed_txt = (
             "、".join(
-                f"{h['hero_short_zh']}({h['games']}局{h['win_rate']}%胜·{h['avg_rating']}分)"
+                f"{h['hero_short_zh']}(胜率{h['win_rate']}% · {h['games']}局 · {h['avg_rating']}分)"
                 for h in cursed_heroes
             )
             if cursed_heroes
             else ""
         )
-        bp_mandate = (
-            f"BP死命令：优先为 {pname_cur} 抢下【{sig_txt}】锁死 {best_pos['pos_label'] if best_pos else '主力位'}；"
-            + (
-                f"队长务必口头禁选其【{cursed_txt}】"
-                + (f"及高危 {worst_pos['pos_label']}！" if worst_pos else "！")
-                if cursed_txt
-                else (
-                    f"尽量避免让其客串高危 {worst_pos['pos_label']}（场均仅{worst_pos['avg_rating']}分）！"
-                    if worst_pos
-                    else "继续保持当前英雄池舒适区！"
+        if g < 10:
+            bp_mandate = f"当前样本 {g} 局（样本不足），胜率 {win_rate}%（{g}局），场均 {avg_rating} 分。"
+        elif g < 20:
+            bp_mandate = (
+                f"当前样本 {g} 局，胜率 {win_rate}%（{g}局），场均 {avg_rating} 分"
+                + (f"，满 10 局代表英雄：{sig_txt}" if sig_txt else "")
+                + "（未满 20 局暂不生成选人指引）。"
+            )
+        else:
+            bp_mandate = (
+                f"跨 {g} 局选人建议（胜率 {win_rate}% · {g}局）："
+                + (f"建议优先选用【{sig_txt}】固定 {best_pos['pos_label'] if best_pos else '主力位'}；" if sig_txt else f"建议固定 {best_pos['pos_label'] if best_pos else '主力位'}；")
+                + (
+                    f"低胜率英雄【{cursed_txt}】建议少选。"
+                    if cursed_txt
+                    else (
+                        f"位置 {worst_pos['pos_label']}（胜率 {worst_pos['win_rate']}% · {worst_pos['games']}局）建议少客串。"
+                        if worst_pos
+                        else "保持当前主力位置轮换。"
+                    )
                 )
             )
-        )
 
-        if st["mvp_count"] >= 2 and avg_rating >= 75.0:
-            role_tag = "👑 车队真大腿 · 核心定海神针"
+        most_played_pos_label = pos_breakdown[0]["pos_label"] if pos_breakdown else "多位置"
+        if g < 10:
+            role_tag = f"📊 样本不足（{g}局 · 常打{most_played_pos_label}）"
+            tag_cls = "neutral"
+        elif st["mvp_count"] >= 2 and avg_rating >= 75.0:
+            role_tag = f"👑 车队高分主力 · {most_played_pos_label}"
             tag_cls = "carry"
-        elif best_pos and best_pos["pos"] in (4, 5) and best_pos["avg_rating"] >= 75.0 and core_choke >= 2:
-            role_tag = "🎯 游走四号位绝活 · 核心位慎选"
-            tag_cls = "warn"
-        elif st["culprit_count"] >= 2 or avg_rating < 66.5:
-            role_tag = "🚨 重点整改对象 · 摇摆位事故高发"
+        elif best_pos and best_pos["pos"] in (4, 5) and best_pos["avg_rating"] >= 75.0:
+            role_tag = f"🎯 {best_pos['pos_label']}主力"
+            tag_cls = "carry"
+        elif st["culprit_count"] >= 3 or avg_rating < 66.5:
+            role_tag = f"⚠️ {most_played_pos_label}待提升"
             tag_cls = "culprit"
         elif avg_rating >= 74.0:
-            role_tag = "🛡️ 车队铁血支柱 · 稳定高分保障"
+            role_tag = f"🛡️ {most_played_pos_label}稳定主力"
             tag_cls = "carry"
         else:
-            role_tag = "⚖️ 三号位开团中坚 · 顺逆风摇摆手"
+            role_tag = f"⚖️ {most_played_pos_label}常客 · 团队轮换"
             tag_cls = "neutral"
 
         squad_members_rank.append({
@@ -3201,17 +3223,24 @@ def build_squad_history_ledger(
             "games": st["games"],
             "wins": st["wins"],
             "win_rate": win_rate,
+            "win_rate_zh": f"{win_rate}% ({g}局)",
+            "sample_status": "样本不足" if g < 10 else ("可评估" if g < 20 else "可给建议"),
             "avg_blame_pct": avg_blame,
             "avg_contrib_pct": avg_contrib,
             "avg_rating": avg_rating,
             "mvp_count": st["mvp_count"],
+            "avg_mvp_rate": avg_mvp_rate,
             "culprit_count": st["culprit_count"],
             "avg_kda": f"{st['total_kills']/g:.1f}/{avg_deaths:.1f}/{st['total_assists']/g:.1f}",
             "avg_dead_sec": avg_dead_sec,
             "unpressed_saves_total": st["unpressed_saves_total"],
+            "avg_unpressed_saves": avg_unpressed_saves,
             "solo_pickoffs_total": st["solo_pickoffs_total"],
+            "avg_solo_pickoffs": avg_solo_pickoffs,
             "unsmoked_blind_total": st["unsmoked_blind_total"],
+            "avg_unsmoked_blind": avg_unsmoked_blind,
             "bad_builds_total": st["bad_builds_total"],
+            "avg_bad_builds": avg_bad_builds,
             "support_games": sup_g,
             "support_grief_count": sup_grief,
             "support_grief_rate": sup_grief_rate,
@@ -3247,46 +3276,46 @@ def build_squad_history_ledger(
         reverse=True,
     )
 
-    # 3. 车队历史吉尼斯之最 (Guinness Records)
+    # 3. 车队历史场均纪录 (Per-game averages, never cumulative totals)
     core_members = [m for m in squad_members_rank if m["games"] >= 2] or squad_members_rank
     guinness_records = []
     if core_members:
-        top_carry = max(core_members, key=lambda x: (x["avg_rating"], x["mvp_count"]))
+        top_carry = max(core_members, key=lambda x: (x["avg_rating"], x["avg_mvp_rate"]))
         guinness_records.append({
             "title": "👑 车队定海神针 (最高场均分)",
             "holder": top_carry["personaname"],
-            "value": f"场均 {top_carry['avg_rating']} 分 · {top_carry['mvp_count']} 次首功/MVP",
+            "value": f"场均 {top_carry['avg_rating']} 分 · 场均 {top_carry['avg_mvp_rate']:.2f} 次MVP（{top_carry['games']}局）",
             "tone": "good",
         })
-        top_bkb_holder = max(core_members, key=lambda x: x["unpressed_saves_total"])
-        if top_bkb_holder["unpressed_saves_total"] > 0:
+        top_bkb_holder = max(core_members, key=lambda x: x["avg_unpressed_saves"])
+        if top_bkb_holder["avg_unpressed_saves"] > 0:
             guinness_records.append({
-                "title": "💀 阵亡持有保命装未按记录",
+                "title": "💀 场均阵亡持有保命装未按",
                 "holder": top_bkb_holder["personaname"],
-                "value": f"累计 {top_bkb_holder['unpressed_saves_total']} 次阵亡时持有保命装本波未使用",
+                "value": f"场均 {top_bkb_holder['avg_unpressed_saves']:.2f} 次阵亡时持有保命装本波未使用（{top_bkb_holder['games']}局）",
                 "tone": "bad",
             })
-        top_pickoff_holder = max(core_members, key=lambda x: x["solo_pickoffs_total"])
-        if top_pickoff_holder["solo_pickoffs_total"] > 0:
+        top_pickoff_holder = max(core_members, key=lambda x: x["avg_solo_pickoffs"])
+        if top_pickoff_holder["avg_solo_pickoffs"] > 0:
             guinness_records.append({
-                "title": "🗺️ 孤狼单带迷路被抓王",
+                "title": "🗺️ 场均落单被抓",
                 "holder": top_pickoff_holder["personaname"],
-                "value": f"累计 {top_pickoff_holder['solo_pickoffs_total']} 次落单被抓 (含 {top_pickoff_holder['unsmoked_blind_total']} 次未开雾白给)",
+                "value": f"场均 {top_pickoff_holder['avg_solo_pickoffs']:.2f} 次落单被抓 (场均 {top_pickoff_holder['avg_unsmoked_blind']:.2f} 次未开雾危险区阵亡 · {top_pickoff_holder['games']}局)",
                 "tone": "bad",
             })
-        top_build_holder = max(core_members, key=lambda x: x["bad_builds_total"])
-        if top_build_holder["bad_builds_total"] > 0:
+        top_build_holder = max(core_members, key=lambda x: x["avg_bad_builds"])
+        if top_build_holder["avg_bad_builds"] > 0:
             guinness_records.append({
-                "title": "🎒 头铁出装事故王",
+                "title": "🎒 场均出装偏离常规",
                 "holder": top_build_holder["personaname"],
-                "value": f"累计 {top_build_holder['bad_builds_total']} 局漏出命脉装/克制装",
+                "value": f"场均 {top_build_holder['avg_bad_builds']:.2f} 局漏出关键装/克制装（{top_build_holder['games']}局）",
                 "tone": "warn",
             })
         top_dead_holder = max(core_members, key=lambda x: x["avg_dead_sec"])
         guinness_records.append({
-            "title": "⏳ 泉水观光读秒王",
+            "title": "⏳ 场均泉水读秒时长",
             "holder": top_dead_holder["personaname"],
-            "value": f"场均黑屏读秒 {top_dead_holder['avg_dead_sec']} 秒 ({top_dead_holder['avg_kda']})",
+            "value": f"场均黑屏读秒 {top_dead_holder['avg_dead_sec']} 秒 ({top_dead_holder['avg_kda']} · {top_dead_holder['games']}局)",
             "tone": "warn",
         })
 
@@ -3327,14 +3356,21 @@ def build_squad_history_ledger(
     for hb in hero_buckets.values():
         g = max(1, hb["games"])
         wr = round((hb["wins"] / g) * 100, 1)
+        if g < 10:
+            h_verdict = f"样本不足 ({g}局)"
+        elif g < 20:
+            h_verdict = "高胜率" if wr >= 60 else ("胜率合格" if wr >= 50 else "胜率偏低")
+        else:
+            h_verdict = "建议优先选用" if wr >= 60 else ("胜率合格" if wr >= 50 else "建议少选")
         recent_hero_pool.append({
             "hero_short_zh": hb["hero_short_zh"],
             "hero_img": hb["hero_img"],
             "games": hb["games"],
             "wins": hb["wins"],
             "win_rate": wr,
+            "win_rate_zh": f"{wr}% ({g}局)",
             "avg_kda": f"{hb['kills']/g:.1f}/{hb['deaths']/g:.1f}/{hb['assists']/g:.1f}",
-            "verdict": "上分绝活" if wr >= 60 else ("胜率合格" if wr >= 50 else "掉分慎选"),
+            "verdict": h_verdict,
         })
     recent_hero_pool.sort(key=lambda x: (x["games"], x["win_rate"]), reverse=True)
 

@@ -17377,8 +17377,8 @@ function renderSquadLedgerSection(squadLedger) {
               const posList = m.pos_breakdown || [];
               const bestPosNum = m.best_pos?.pos;
               const worstPosNum = m.worst_pos?.pos;
-              const sigHeroes = m.signature_heroes || (m.best_hero ? [m.best_hero] : []);
-              const cursedHeroes = m.cursed_heroes || (m.worst_hero ? [m.worst_hero] : []);
+              const sigHeroes = m.signature_heroes || [];
+              const cursedHeroes = m.cursed_heroes || [];
               const borderCol =
                 m.tag_cls === "carry"
                   ? "rgba(110,196,120,0.42)"
@@ -17388,17 +17388,18 @@ function renderSquadLedgerSection(squadLedger) {
 
               const posPillsHtml = posList
                 .map((pb) => {
-                  const isBest = pb.pos === bestPosNum;
-                  const isWorst = pb.pos === worstPosNum;
+                  const isBest = pb.games >= 10 && pb.pos === bestPosNum;
+                  const isWorst = pb.games >= 10 && pb.pos === worstPosNum;
                   const pillStyle = isBest
                     ? "background:rgba(46,96,54,0.38);border:1px solid #58b368;color:#a8f0b0;"
                     : isWorst
                     ? "background:rgba(110,36,30,0.42);border:1px solid #d96552;color:#ff9e8e;"
                     : "background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:var(--text);";
-                  const prefix = isBest ? "🌟本命 " : isWorst ? "🚨重灾 " : "";
+                  const prefix = isBest ? "🌟主力 " : isWorst ? "⚠️低胜率 " : "";
+                  const sampleNote = pb.games < 10 ? " · 样本不足" : "";
                   return `
                     <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11.5px;${pillStyle}">
-                      <b>${prefix}${escapeHtml(pb.pos_label)}</b>: ${pb.games}局 ${pb.win_rate}%胜 · 均分<b>${pb.avg_rating}</b> (${escapeHtml(
+                      <b>${prefix}${escapeHtml(pb.pos_label)}</b>: ${pb.win_rate}% (${pb.games}局${sampleNote}) · 均分<b>${pb.avg_rating}</b> (${escapeHtml(
                     pb.top_hero || "-"
                   )})
                     </span>
@@ -17417,14 +17418,12 @@ function renderSquadLedgerSection(squadLedger) {
                               ? `<img src="${escapeHtml(h.hero_img)}" width="28" height="16" alt="" style="border-radius:2px;" />`
                               : ""
                           }
-                          <span style="font-size:11.5px;color:#d6f5d9;"><b>${escapeHtml(h.hero_short_zh)}</b> (${h.games}局 ${
-                          h.win_rate
-                        }%胜 · <b>${h.avg_rating}分</b>)</span>
+                          <span style="font-size:11.5px;color:#d6f5d9;"><b>${escapeHtml(h.hero_short_zh)}</b> (${h.win_rate}% · ${h.games}局 · <b>${h.avg_rating}分</b>)</span>
                         </div>
                       `
                       )
                       .join("")
-                  : `<span style="font-size:11.5px;color:var(--muted);">暂无多局高分绝活样本</span>`;
+                  : `<span style="font-size:11.5px;color:var(--muted);">样本不足（单英雄需满10局）</span>`;
 
               const cursedHtml =
                 cursedHeroes.length > 0
@@ -17437,23 +17436,21 @@ function renderSquadLedgerSection(squadLedger) {
                               ? `<img src="${escapeHtml(h.hero_img)}" width="28" height="16" alt="" style="border-radius:2px;" />`
                               : ""
                           }
-                          <span style="font-size:11.5px;color:#ffb4a8;"><b>${escapeHtml(h.hero_short_zh)}</b> (${h.games}局 ${
-                          h.win_rate
-                        }%胜 · <b>${h.avg_rating}分</b>)</span>
+                          <span style="font-size:11.5px;color:#ffb4a8;"><b>${escapeHtml(h.hero_short_zh)}</b> (${h.win_rate}% · ${h.games}局 · <b>${h.avg_rating}分</b>)</span>
                         </div>
                       `
                       )
                       .join("")
-                  : `<span style="font-size:11.5px;color:#8fd196;">✅ 英雄池健康，无明显连败冥币英雄</span>`;
+                  : `<span style="font-size:11.5px;color:#8fd196;">样本不足或无满10局低胜率英雄</span>`;
 
               const copyDiagText = [
-                `📜 【五黑跨局生涯体检 & 毒瘤习性诊断书】${m.personaname}`,
-                `🏷️ 历史定位：${m.role_tag} ｜ 出勤：${m.games}局 (${m.win_rate}%胜率) ｜ Grok场均：${m.avg_rating}/100分 (${m.mvp_count}次MVP / ${m.culprit_count}次首锅)`,
-                `🧭 位置适岗结论：${hd.pos_verdict || ""}`,
-                `🏆 真命绝活英雄：${sigHeroes.map((h) => `${h.hero_short_zh}(${h.games}局${h.win_rate}%胜·${h.avg_rating}分)`).join("、") || "无"}`,
-                `🪦 建议永久Ban冥币：${cursedHeroes.map((h) => `${h.hero_short_zh}(${h.games}局${h.win_rate}%胜·${h.avg_rating}分)`).join("、") || "无"}`,
-                `🔬 跨局毒瘤与失误实锤：${hd.habit_flaws_summary || ""}`,
-                `🚨 下把BP与选位死命令：${hd.bp_and_team_mandate || ""}`,
+                `📜 【五黑跨局生涯体检】${m.personaname}`,
+                `🏷️ 历史定位：${m.role_tag} ｜ 胜率：${m.win_rate}% (${m.games}局) ｜ 场均：${m.avg_rating}/100分 (${m.mvp_count}次MVP / ${m.culprit_count}次首锅)`,
+                `🧭 位置统计：${hd.pos_verdict || ""}`,
+                `🏆 高胜率英雄（≥10局）：${sigHeroes.map((h) => `${h.hero_short_zh}(${h.win_rate}%·${h.games}局·${h.avg_rating}分)`).join("、") || "样本不足"}`,
+                `📉 低胜率英雄（≥10局）：${cursedHeroes.map((h) => `${h.hero_short_zh}(${h.win_rate}%·${h.games}局·${h.avg_rating}分)`).join("、") || "样本不足"}`,
+                `🔬 跨局场均统计：${hd.habit_flaws_summary || ""}`,
+                `📌 选人说明：${hd.bp_and_team_mandate || ""}`,
               ].join("\n");
 
               return `
