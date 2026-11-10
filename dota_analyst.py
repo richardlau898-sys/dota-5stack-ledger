@@ -1017,7 +1017,7 @@ def build_three_phases_breakdown(
                 "obs_placed": obs_cnt,
                 "sen_placed": sen_cnt,
                 "buybacks": bb_cnt,
-                "items_bought": items_in_phase,
+                "items_bought": items_in_phase[:8],
             })
 
         phases_out.append({
@@ -1266,8 +1266,9 @@ def analyze_match_data(
                             "ny": ny,
                         })
 
-            # 提取对线期走位热力点
+            # 提取对线期走位热力点（每位英雄保留权重最高的前 15 个高密度热力格）
             lane_pos = p.get("lane_pos") or {}
+            hero_heat_cells = []
             if isinstance(lane_pos, dict):
                 for lx_str, y_dict in lane_pos.items():
                     if not isinstance(y_dict, dict):
@@ -1285,7 +1286,7 @@ def analyze_match_data(
                         if w_val >= 2:
                             nx = round(max(2.0, min(98.0, (lx - 64.0) / 128.0 * 100.0)), 1)
                             ny = round(max(2.0, min(98.0, (1.0 - (ly - 64.0) / 128.0) * 100.0)), 1)
-                            all_lane_heatmaps.append({
+                            hero_heat_cells.append({
                                 "side": side_key,
                                 "pos": p.get("inferred_pos"),
                                 "personaname": persona,
@@ -1294,6 +1295,8 @@ def analyze_match_data(
                                 "ny": ny,
                                 "weight": w_val,
                             })
+            hero_heat_cells.sort(key=lambda c: c["weight"], reverse=True)
+            all_lane_heatmaps.extend(hero_heat_cells[:15])
 
             out.append({
                 "player_slot": slot,
@@ -1655,6 +1658,15 @@ def analyze_match_data(
         )
         dp.update(eval_res)
 
+    # 移除与 deep_forensics 重复的大体积字段，前端加载时从 deep_forensics 重新关联
+    for tp in radiant_report + dire_report:
+        tp.pop("damage_and_build_audit", None)
+        tp.pop("neutral_craft_audit", None)
+        if isinstance(tp.get("playstyle_archetype_audit"), dict):
+            tp["playstyle_archetype_audit"].pop("spell_target_matrix", None)
+        if isinstance(tp.get("hero_mechanism_profile"), dict):
+            tp["hero_mechanism_profile"].pop("hero_matchup_dossier", None)
+
     assign_team_blame_percentages(radiant_report)
     assign_team_blame_percentages(dire_report)
 
@@ -1728,7 +1740,189 @@ def analyze_match_data(
         "dire_pos_1_to_5": dire_report,
     }
     annotate_report_evidence(raw_report_out)
-    return sanitize_report_mixed_english(raw_report_out)
+    sanitized_out = sanitize_report_mixed_english(raw_report_out)
+    return strip_report_cdn_urls_to_keys(sanitized_out)
+
+
+_STEAM_CDN_MARKER = "cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/"
+
+
+def strip_report_cdn_urls_to_keys(node: Any) -> Any:
+    """将报告中重复的 Steam CDN 图片 URL 替换为紧凑的英雄/物品/技能 key，由前端按 key 拼接图片地址"""
+    if isinstance(node, list):
+        for elem in node:
+            strip_report_cdn_urls_to_keys(elem)
+        return node
+    if not isinstance(node, dict):
+        return node
+
+    for k, v in list(node.items()):
+        if isinstance(v, str) and _STEAM_CDN_MARKER in v:
+            rel = v.split(_STEAM_CDN_MARKER, 1)[-1]
+            slug = rel.rsplit("/", 1)[-1].split(".png")[0].split("?")[0]
+            if rel.startswith("heroes/icons/"):
+                if k == "hero_icon":
+                    node.setdefault("hero_key", slug)
+                elif k.endswith("_icon"):
+                    prefix = k[: -len("_icon")]
+                    node.setdefault(f"{prefix}_hero_key", slug)
+                else:
+                    node.setdefault("hero_key", slug)
+                node.pop(k, None)
+            elif rel.startswith("heroes/"):
+                if k in ("hero_img", "img"):
+                    node.setdefault("hero_key", slug)
+                elif k.endswith("_hero_img"):
+                    prefix = k[: -len("_hero_img")]
+                    node.setdefault(f"{prefix}_hero_key", slug)
+                elif k.endswith("_img"):
+                    prefix = k[: -len("_img")]
+                    node.setdefault(f"{prefix}_hero_key", slug)
+                else:
+                    node.setdefault(f"{k}_hero_key", slug)
+                node.pop(k, None)
+            elif rel.startswith("items/"):
+                if k == "img":
+                    node.setdefault("key", slug)
+                    node.setdefault("item_key", slug)
+                elif k.endswith("_img"):
+                    prefix = k[: -len("_img")]
+                    node.setdefault(f"{prefix}_item_key", slug)
+                else:
+                    node.setdefault(f"{k}_item_key", slug)
+                node.pop(k, None)
+            elif rel.startswith("abilities/"):
+                if k == "img":
+                    node.setdefault("key", slug)
+                    node.setdefault("ability_key", slug)
+                elif k.endswith("_img"):
+                    prefix = k[: -len("_img")]
+                    node.setdefault(f"{prefix}_ability_key", slug)
+                else:
+                    node.setdefault(f"{k}_ability_key", slug)
+                node.pop(k, None)
+            else:
+                node.pop(k, None)
+        elif isinstance(v, (dict, list)):
+            strip_report_cdn_urls_to_keys(v)
+    return node
+
+
+def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
+    """按前端标签页拆分返回报告子集：summary (<150KB) | timeline | microscope"""
+    if not isinstance(report, dict):
+        return {}
+    part_norm = str(part or "").strip().lower()
+    base_keys = (
+        "_zh_schema_v",
+        "match_id",
+        "patch",
+        "patch_str",
+        "mode_str",
+        "start_time_str",
+        "duration_str",
+        "duration_min",
+        "is_parsed",
+        "winner",
+        "radiant_win",
+        "radiant_score",
+        "dire_score",
+        "score",
+        "user_team_side",
+        "focus_side",
+        "user_won",
+    )
+    out: Dict[str, Any] = {k: report.get(k) for k in base_keys if k in report}
+    df = report.get("deep_forensics") if isinstance(report.get("deep_forensics"), dict) else {}
+
+    if part_norm == "summary":
+        heavy_player_keys = {
+            "networth_t",
+            "lh_t",
+            "ability_uses_rich",
+            "damage_by_source_rich",
+            "hero_matchup_dossier",
+            "hero_mechanism_profile",
+            "benchmarks",
+            "raw_benchmarks",
+            "killed_by_breakdown",
+            "kills_breakdown",
+            "phase_telemetry",
+            "active_item_uses",
+            "key_item_timings",
+            "key_item_timings_rich",
+            "backpack_items_rich",
+            "hero_execution_audit",
+        }
+        focus_side_val = str(report.get("focus_side") or report.get("user_team_side") or "radiant")
+        for side_k in ("radiant_pos_1_to_5", "dire_pos_1_to_5"):
+            is_focus_team = (side_k == "radiant_pos_1_to_5" and focus_side_val == "radiant") or (
+                side_k == "dire_pos_1_to_5" and focus_side_val == "dire"
+            )
+            slim_players = []
+            for p in report.get(side_k) or []:
+                if not isinstance(p, dict):
+                    continue
+                sp = {pk: pv for pk, pv in p.items() if pk not in heavy_player_keys}
+                if isinstance(sp.get("playstyle_archetype_audit"), dict):
+                    pa = sp["playstyle_archetype_audit"]
+                    sp["playstyle_archetype_audit"] = {
+                        "archetype_badge": pa.get("archetype_badge"),
+                        "detected_style_label": pa.get("detected_style_label"),
+                        "skill_route_summary_zh": pa.get("skill_route_summary_zh"),
+                    }
+                if not is_focus_team:
+                    for extra_k in ("strengths", "weaknesses", "improvements", "praise_talk", "trash_talk", "conclusions"):
+                        sp.pop(extra_k, None)
+                else:
+                    for list_k in ("strengths", "weaknesses", "improvements"):
+                        if isinstance(sp.get(list_k), list):
+                            sp[list_k] = sp[list_k][:2]
+                slim_players.append(sp)
+            out[side_k] = slim_players
+        out["economy_timeline"] = report.get("economy_timeline")
+        out["key_teamfights"] = [
+            {k: v for k, v in tf.items() if k != "participants"}
+            for tf in (report.get("key_teamfights") or [])
+            if isinstance(tf, dict)
+        ]
+        out["mvp"] = report.get("mvp")
+        out["match_narrative"] = report.get("match_narrative")
+        out["grok_coaching"] = report.get("grok_coaching")
+        out["deep_forensics"] = {
+            "available": df.get("available"),
+            "evidence": df.get("evidence"),
+            "unpressed_saves_by_side": df.get("unpressed_saves_by_side"),
+            "stacking_and_smoke_by_side": df.get("stacking_and_smoke_by_side"),
+        }
+        return out
+
+    if part_norm == "timeline":
+        out["radiant_gold_adv"] = report.get("radiant_gold_adv")
+        out["radiant_xp_adv"] = report.get("radiant_xp_adv")
+        out["objective_markers"] = report.get("objective_markers")
+        out["vision_and_map_data"] = report.get("vision_and_map_data")
+        out["economy_timeline"] = report.get("economy_timeline")
+        out["key_teamfights"] = report.get("key_teamfights")
+        out["deep_forensics"] = {
+            "available": df.get("available"),
+            "evidence": df.get("evidence"),
+            "minute_snapshots": df.get("minute_snapshots"),
+            "teamfight_forensics": df.get("teamfight_forensics"),
+            "unpressed_saves_by_side": df.get("unpressed_saves_by_side"),
+        }
+        return out
+
+    if part_norm == "microscope":
+        out["draft_analysis"] = report.get("draft_analysis")
+        out["draft_analysis_by_side"] = report.get("draft_analysis_by_side")
+        out["phases_data"] = report.get("phases_data")
+        out["radiant_pos_1_to_5"] = report.get("radiant_pos_1_to_5")
+        out["dire_pos_1_to_5"] = report.get("dire_pos_1_to_5")
+        out["deep_forensics"] = {k: v for k, v in df.items() if k != "minute_snapshots"}
+        return out
+
+    return report
 
 
 def classify_text_evidence(text: Any, default_evidence: str = "measured") -> str:
@@ -1753,7 +1947,7 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                 continue
             p["evidence"] = "measured"
             conclusions: List[Dict[str, str]] = []
-            for st in p.get("strengths") or []:
+            for st in (p.get("strengths") or [])[:1]:
                 st_str = str(st or "").strip()
                 if st_str:
                     conclusions.append({
@@ -1761,7 +1955,7 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                         "kind": "strength",
                         "evidence": classify_text_evidence(st_str, "measured"),
                     })
-            for wk in p.get("weaknesses") or []:
+            for wk in (p.get("weaknesses") or [])[:1]:
                 wk_str = str(wk or "").strip()
                 if wk_str:
                     conclusions.append({
@@ -1769,7 +1963,7 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                         "kind": "weakness",
                         "evidence": classify_text_evidence(wk_str, "measured"),
                     })
-            for imp in p.get("improvements") or []:
+            for imp in (p.get("improvements") or [])[:1]:
                 imp_str = str(imp or "").strip()
                 if imp_str:
                     conclusions.append({
@@ -1777,13 +1971,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                         "kind": "improvement",
                         "evidence": classify_text_evidence(imp_str, "template"),
                     })
-            summary_txt = str(p.get("praise_talk") or p.get("trash_talk") or "").strip()
-            if summary_txt:
-                conclusions.append({
-                    "text": summary_txt,
-                    "kind": "summary",
-                    "evidence": classify_text_evidence(summary_txt, "measured"),
-                })
             if not conclusions:
                 conclusions.append({
                     "text": f"{p.get('hero_short_zh') or p.get('hero_name') or '选手'} KDA {p.get('kda') or '0/0/0'}",
@@ -1809,9 +1996,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                 coaching = {}
                 p["coaching"] = coaching
             coaching["evidence"] = "measured"
-            coaching["conclusions"] = conclusions
-            if isinstance(dossier, dict):
-                coaching["hero_matchup_dossier"] = dossier
 
     # 2. mvp section
     mvp_sec = report.get("mvp")
@@ -1895,7 +2079,7 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                 continue
             pp["evidence"] = "measured"
             pp_conclusions: List[Dict[str, str]] = []
-            for g in pp.get("good") or []:
+            for g in (pp.get("good") or [])[:1]:
                 g_str = str(g or "").strip()
                 if g_str:
                     pp_conclusions.append({
@@ -1903,7 +2087,7 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                         "kind": "good",
                         "evidence": classify_text_evidence(g_str, "measured"),
                     })
-            for b in pp.get("bad") or []:
+            for b in (pp.get("bad") or [])[:1]:
                 b_str = str(b or "").strip()
                 if b_str:
                     pp_conclusions.append({
@@ -1911,13 +2095,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                         "kind": "bad",
                         "evidence": classify_text_evidence(b_str, "measured"),
                     })
-            focus_str = str(pp.get("focus") or "").strip()
-            if focus_str:
-                pp_conclusions.append({
-                    "text": focus_str,
-                    "kind": "focus",
-                    "evidence": classify_text_evidence(focus_str, "template"),
-                })
             if not pp_conclusions:
                 pp_conclusions.append({
                     "text": f"阶段战绩 {pp.get('kills_count', 0)}/{pp.get('deaths_count', 0)}",
@@ -2002,12 +2179,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                                     )
                                     ev_elem = classify_text_evidence(elem_txt, "measured")
                                     elem["evidence"] = ev_elem
-                                    if elem_txt.strip():
-                                        sb_conclusions.append({
-                                            "text": elem_txt.strip(),
-                                            "kind": k_sub,
-                                            "evidence": ev_elem,
-                                        })
                     if not sb_conclusions:
                         sb_conclusions.append({"text": mod_key, "kind": "module", "evidence": "measured"})
                     side_block["conclusions"] = sb_conclusions
@@ -2152,7 +2323,7 @@ def cmd_analyze(args: argparse.Namespace) -> None:
     md_path = REPORTS_DIR / f"match_{match_id}.md"
     json_path = REPORTS_DIR / f"match_{match_id}.json"
     md_path.write_text(md_text, encoding="utf-8")
-    json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    json_path.write_text(json.dumps(report, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"报告已生成: {json_path}")
 
 

@@ -2584,6 +2584,13 @@ def build_deep_replay_forensics(
     # 标记全场胜负转折权重最高的 Top 3 生死团 (decisive_rank = 1, 2, 3)
     for rank_i, tf_item in enumerate(sorted(tf_forensics, key=lambda x: x["decisive_score"], reverse=True)[:3]):
         tf_item["decisive_rank"] = rank_i + 1
+    if len(tf_forensics) > 8:
+        tf_forensics = sorted(
+            sorted(tf_forensics, key=lambda x: x["decisive_score"], reverse=True)[:8],
+            key=lambda x: x["start_sec"],
+        )
+        for idx_i, tf_item in enumerate(tf_forensics):
+            tf_item["tf_index"] = idx_i + 1
 
     from tactical_microscope_engine import build_tactical_microscope
     microscope = build_tactical_microscope(

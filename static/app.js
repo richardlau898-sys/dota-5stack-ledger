@@ -6176,11 +6176,231 @@ function safeRenderSection(sectionName, fn) {
   }
 }
 
+const STEAM_CDN_ROOT = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react";
+
+function hydrateCdnUrlsInObject(node, seen = new Set()) {
+  if (!node || typeof node !== "object" || seen.has(node)) return;
+  seen.add(node);
+  if (Array.isArray(node)) {
+    for (let i = 0; i < node.length; i++) hydrateCdnUrlsInObject(node[i], seen);
+    return;
+  }
+  if (typeof node.hero_key === "string" && node.hero_key) {
+    if (!node.hero_img) node.hero_img = `${STEAM_CDN_ROOT}/heroes/${node.hero_key}.png`;
+    if (!node.hero_icon) node.hero_icon = `${STEAM_CDN_ROOT}/heroes/icons/${node.hero_key}.png`;
+  }
+  if (typeof node.item_key === "string" && node.item_key && !node.img) {
+    node.img = `${STEAM_CDN_ROOT}/items/${node.item_key}.png`;
+  } else if (typeof node.ability_key === "string" && node.ability_key && !node.img) {
+    node.img = `${STEAM_CDN_ROOT}/abilities/${node.ability_key}.png`;
+  } else if (
+    typeof node.key === "string" &&
+    node.key &&
+    !node.img &&
+    (node.zh !== undefined ||
+      node.zh_name !== undefined ||
+      node.cost !== undefined ||
+      node.purchase_time_str !== undefined)
+  ) {
+    node.img = `${STEAM_CDN_ROOT}/items/${node.key}.png`;
+  }
+  for (const k of Object.keys(node)) {
+    const v = node[k];
+    if (typeof v === "string" && v) {
+      if (k.endsWith("_hero_key") && k !== "hero_key") {
+        const prefix = k.slice(0, -"_hero_key".length);
+        const imgKey = prefix.endsWith("_img") || prefix.endsWith("_icon") ? prefix : `${prefix}_hero_img`;
+        if (!node[imgKey]) {
+          node[imgKey] = prefix.endsWith("_icon")
+            ? `${STEAM_CDN_ROOT}/heroes/icons/${v}.png`
+            : `${STEAM_CDN_ROOT}/heroes/${v}.png`;
+        }
+      } else if (k.endsWith("_item_key") && k !== "item_key") {
+        const prefix = k.slice(0, -"_item_key".length);
+        const imgKey = prefix.endsWith("_img") ? prefix : `${prefix}_img`;
+        if (!node[imgKey]) node[imgKey] = `${STEAM_CDN_ROOT}/items/${v}.png`;
+      } else if (k.endsWith("_ability_key") && k !== "ability_key") {
+        const prefix = k.slice(0, -"_ability_key".length);
+        const imgKey = prefix.endsWith("_img") ? prefix : `${prefix}_img`;
+        if (!node[imgKey]) node[imgKey] = `${STEAM_CDN_ROOT}/abilities/${v}.png`;
+      }
+    } else if (v && typeof v === "object") {
+      hydrateCdnUrlsInObject(v, seen);
+    }
+  }
+}
+
+function hydrateReportData(report) {
+  if (!report || typeof report !== "object") return report;
+  hydrateCdnUrlsInObject(report);
+
+  const df = report.deep_forensics;
+  if (df && typeof df === "object") {
+    const ms = df.minute_snapshots;
+    if (ms && !Array.isArray(ms) && ms.format === "columnar_v1") {
+      const minutes = Array.isArray(ms.minutes) ? ms.minutes : [];
+      const gAdvArr = Array.isArray(ms.radiant_gold_adv) ? ms.radiant_gold_adv : [];
+      const xAdvArr = Array.isArray(ms.radiant_xp_adv) ? ms.radiant_xp_adv : [];
+      const eventsArr = Array.isArray(ms.events) ? ms.events : [];
+      const itemZhMap = ms.item_zh_map || {};
+      const pCols = Array.isArray(ms.players) ? ms.players : [];
+      const expanded = minutes.map((m, idx) => {
+        const secCutoff = m * 60;
+        const pList = pCols.map((pc) => {
+          const hKey = pc.hero_key || "";
+          const hImg = pc.hero_img || (hKey ? `${STEAM_CDN_ROOT}/heroes/${hKey}.png` : "");
+          const rawRecAll = Array.isArray(pc.recent_purchases) ? pc.recent_purchases : [];
+          let rawRec = [];
+          if (rawRecAll.length > 0 && Array.isArray(rawRecAll[0])) {
+            rawRec = rawRecAll[idx] || [];
+          } else {
+            rawRec = rawRecAll.filter((it) => Number(it?.t ?? it?.time ?? 0) <= secCutoff).slice(-6);
+          }
+          const recList = rawRec.map((rk) => {
+            if (typeof rk === "string") {
+              return {
+                key: rk,
+                zh: itemZhMap[rk] || rk,
+                img: `${STEAM_CDN_ROOT}/items/${rk}.png`,
+              };
+            }
+            const ik = rk.key || rk.item_key || "";
+            return {
+              key: ik,
+              zh: rk.zh || itemZhMap[ik] || ik,
+              img: rk.img || (ik ? `${STEAM_CDN_ROOT}/items/${ik}.png` : ""),
+            };
+          });
+          let deadObj = null;
+          const rawDead = Array.isArray(pc.dead_status) ? pc.dead_status : [];
+          if (rawDead.length > 0 && Array.isArray(rawDead[0])) {
+            const matchDead = rawDead.find((d) => Number(d[0]) === m);
+            if (matchDead) {
+              deadObj = {
+                is_dead: true,
+                in_fountain_now: Boolean(matchDead[1]),
+                time_str: matchDead[2],
+                time_dead: matchDead[3],
+                remaining_sec: matchDead[4],
+                gold_lost: matchDead[5],
+                gold_fed: matchDead[6],
+                killer_zh: matchDead[7],
+              };
+            }
+          } else {
+            deadObj = rawDead[idx] ?? null;
+          }
+          return {
+            slot: pc.slot,
+            side: pc.side,
+            pos: pc.pos,
+            hero_key: hKey,
+            hero_short_zh: pc.hero_short_zh,
+            hero_img: hImg,
+            personaname: pc.personaname,
+            networth: pc.networth?.[idx] ?? 0,
+            lh: pc.lh?.[idx] ?? 0,
+            dn: pc.dn?.[idx] ?? 0,
+            xp: pc.xp?.[idx] ?? 0,
+            hero_damage: pc.hero_damage?.[idx] ?? 0,
+            tower_damage: pc.tower_damage?.[idx] ?? 0,
+            dead_status: deadObj,
+            recent_purchases: recList,
+            items: recList,
+          };
+        });
+        pList.sort((a, b) => Number(b.networth || 0) - Number(a.networth || 0));
+        return {
+          minute: m,
+          time_str: `${String(m).padStart(2, "0")}:00`,
+          radiant_gold_adv: gAdvArr[idx] ?? 0,
+          radiant_xp_adv: xAdvArr[idx] ?? 0,
+          players: pList,
+          events: eventsArr[idx] || [],
+        };
+      });
+      df.minute_snapshots_columnar = ms;
+      df.minute_snapshots = expanded;
+    }
+
+    for (const [sideKey, listKey] of [
+      ["radiant", "radiant_pos_1_to_5"],
+      ["dire", "dire_pos_1_to_5"],
+    ]) {
+      const dqRows = df.damage_quality_and_build_by_side?.[sideKey]?.player_rows || [];
+      const ncRows = df.macro_objectives_by_side?.[sideKey]?.neutral_craft_rows || [];
+      const dqByPos = new Map(dqRows.map((r) => [Number(r.pos || 0), r]));
+      const ncByPos = new Map(ncRows.map((r) => [Number(r.pos || 0), r]));
+      for (const p of report[listKey] || []) {
+        if (!p || typeof p !== "object") continue;
+        const posNum = Number(p.pos || 0);
+        if (!p.damage_and_build_audit && dqByPos.has(posNum)) {
+          p.damage_and_build_audit = dqByPos.get(posNum);
+        }
+        if (!p.neutral_craft_audit && ncByPos.has(posNum)) {
+          p.neutral_craft_audit = ncByPos.get(posNum);
+        }
+        if (
+          p.playstyle_archetype_audit &&
+          !p.playstyle_archetype_audit.spell_target_matrix &&
+          p.damage_and_build_audit?.spell_target_matrix
+        ) {
+          p.playstyle_archetype_audit.spell_target_matrix = p.damage_and_build_audit.spell_target_matrix;
+        }
+        if (
+          p.hero_mechanism_profile &&
+          !p.hero_mechanism_profile.hero_matchup_dossier &&
+          p.hero_matchup_dossier
+        ) {
+          p.hero_mechanism_profile.hero_matchup_dossier = p.hero_matchup_dossier;
+        }
+      }
+    }
+  }
+
+  if (!report.draft_analysis && report.draft_analysis_by_side) {
+    const fSide = report.focus_side || report.user_team_side || "radiant";
+    report.draft_analysis =
+      report.draft_analysis_by_side[fSide] || report.draft_analysis_by_side.radiant || report.draft_analysis_by_side.dire;
+  }
+  return report;
+}
+
+async function ensureReportPartLoaded(partName) {
+  const rep = state.currentReport;
+  if (!rep || !rep.match_id) return;
+  if (partName === "timeline" && rep.deep_forensics?.minute_snapshots !== undefined) return;
+  if (partName === "microscope" && rep.phases_data !== undefined) return;
+  const reqMid = Number(rep.match_id);
+  try {
+    const res = await fetch(
+      `/api/match/${encodeURIComponent(reqMid)}?part=${encodeURIComponent(partName)}&account_id=${encodeURIComponent(
+        state.accountId || ""
+      )}`
+    );
+    const data = await res.json();
+    if (!data.ok || !data.report || Number(state.currentMatchId) !== reqMid) return;
+    const partRep = data.report;
+    for (const [k, v] of Object.entries(partRep)) {
+      if (k === "deep_forensics" && v && typeof v === "object") {
+        rep.deep_forensics = { ...(rep.deep_forensics || {}), ...v };
+      } else if (v !== undefined) {
+        rep[k] = v;
+      }
+    }
+    hydrateReportData(rep);
+    renderFullMatchReport(rep);
+  } catch (err) {
+    console.error(`[PartLoader] Failed loading part=${partName}:`, err);
+  }
+}
+
 /**
  * Master Render Function for the entire Match Forensics Dashboard
  */
 function renderFullMatchReport(report) {
   if (!report) return;
+  hydrateReportData(report);
   if (state._lastRenderedMatchId !== report.match_id) {
     state._lastRenderedMatchId = report.match_id;
     state.verdictActiveCard = "focus";
@@ -6362,11 +6582,14 @@ function applyPostgameSubTab(tabName, { scrollTop = true } = {}) {
   });
 
   if ((tab === "timeline" || tab === "all") && state.currentReport) {
+    ensureReportPartLoaded("timeline");
     requestAnimationFrame(() => {
       safeRenderSection("AdvChart", () => renderAdvChart(state.currentReport));
       safeRenderSection("NetWorthChart", () => renderNetWorthChart(state.currentReport));
       safeRenderSection("Minimap", () => renderMinimap(state.currentReport));
     });
+  } else if ((tab === "phases" || tab === "microscope" || tab === "players") && state.currentReport) {
+    ensureReportPartLoaded("microscope");
   }
 
   if (scrollTop) {

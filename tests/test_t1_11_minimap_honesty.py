@@ -56,7 +56,11 @@ class TestT111MinimapHonesty(unittest.TestCase):
                 continue
             snaps = (report.get("deep_forensics") or {}).get("minute_snapshots") or []
             self.assertGreater(len(snaps), 0, f"Parsed match {mid} missing minute_snapshots")
-            first_players = snaps[0].get("players") or []
+            first_players = (
+                snaps.get("players")
+                if isinstance(snaps, dict)
+                else (snaps[0].get("players") if snaps else [])
+            ) or []
             self.assertGreater(len(first_players), 0)
             for p_snap in first_players:
                 self.assertIn("recent_purchases", p_snap)

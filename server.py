@@ -50,12 +50,14 @@ from dota_analyst import (
     analyze_match_data,
     api_get,
     api_post,
+    extract_report_part,
     format_duration,
     get_hero_constants_map,
     load_roster,
     normalize_account_id,
     render_markdown_report,
     save_roster,
+    strip_report_cdn_urls_to_keys,
 )
 from dota_constants_zh import get_hero_name, get_mode_and_lobby, sanitize_report_mixed_english
 from draft_and_phase_coach import (
@@ -312,7 +314,7 @@ def _ensure_grok_coaching(
             if llm_res.get("model"):
                 structured["model"] = llm_res["model"]
             report["grok_coaching"] = structured
-            rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
+            rep_txt = json.dumps(report, ensure_ascii=False, separators=(",", ":"))
             try:
                 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                 json_cache.write_text(rep_txt, encoding="utf-8")
@@ -566,9 +568,9 @@ def get_or_build_match_report(
     if existing_grok:
         report["grok_coaching"] = existing_grok
 
-    report = sanitize_report_mixed_english(report)
+    report = strip_report_cdn_urls_to_keys(sanitize_report_mixed_english(report))
     md_text = render_markdown_report(report)
-    rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
+    rep_txt = json.dumps(report, ensure_ascii=False, separators=(",", ":"))
     try:
         REPORTS_DIR.mkdir(parents=True, exist_ok=True)
         json_cache.write_text(rep_txt, encoding="utf-8")
@@ -601,15 +603,22 @@ def fetch_match_icons_base64(match_id: int) -> Dict[str, str]:
     if not report:
         return {}
     players = (report.get("radiant_pos_1_to_5") or []) + (report.get("dire_pos_1_to_5") or [])
+    steam_base = "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react"
     urls = set()
     for p in players:
-        if p.get("hero_img"):
-            urls.add(p["hero_img"])
+        h_url = p.get("hero_img") or (f"{steam_base}/heroes/{p['hero_key']}.png" if p.get("hero_key") else "")
+        if h_url:
+            urls.add(h_url)
         for it in (p.get("final_items_rich") or []):
-            if it.get("img"):
-                urls.add(it["img"])
-        if (p.get("neutral_item_rich") or {}).get("img"):
-            urls.add(p["neutral_item_rich"]["img"])
+            it_key = it.get("item_key") or it.get("key")
+            it_url = it.get("img") or (f"{steam_base}/items/{it_key}.png" if it_key else "")
+            if it_url:
+                urls.add(it_url)
+        n_it = p.get("neutral_item_rich") or {}
+        n_key = n_it.get("item_key") or n_it.get("key")
+        n_url = n_it.get("img") or (f"{steam_base}/items/{n_key}.png" if n_key else "")
+        if n_url:
+            urls.add(n_url)
 
     missing = [u for u in urls if u and u not in _ICON_B64_CACHE]
     if missing:
@@ -654,7 +663,7 @@ def _execute_llm_review_task(
         if res.get("ok") and res.get("structured"):
             res["structured"] = sanitize_report_mixed_english(res["structured"])
             report["grok_coaching"] = res["structured"]
-            rep_txt = json.dumps(report, ensure_ascii=False, indent=2)
+            rep_txt = json.dumps(report, ensure_ascii=False, separators=(",", ":"))
             try:
                 (REPORTS_DIR / f"match_{int(match_id)}.json").write_text(rep_txt, encoding="utf-8")
             except OSError:
@@ -916,6 +925,14 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                         "ok": True,
                         "not_analyzed": True,
                         "match_id": mid,
+                    })
+                    return
+                part_param = (qs.get("part") or [""])[0].strip().lower()
+                if part_param in ("summary", "timeline", "microscope"):
+                    self._send_json({
+                        "ok": True,
+                        "part": part_param,
+                        "report": extract_report_part(report, part_param),
                     })
                     return
                 self._send_json({"ok": True, "report": report})

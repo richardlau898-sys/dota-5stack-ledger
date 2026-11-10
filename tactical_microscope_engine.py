@@ -333,7 +333,15 @@ def build_tactical_microscope(
             "economy_and_pings_by_side": dict(unavail),
             "role_mirror_by_side": dict(unavail),
             "macro_objectives_by_side": dict(unavail),
-            "minute_snapshots": [],
+            "minute_snapshots": {
+                "format": "columnar_v1",
+                "minutes": [],
+                "radiant_gold_adv": [],
+                "radiant_xp_adv": [],
+                "events": [],
+                "item_zh_map": {},
+                "players": [],
+            },
         }
 
     fmt_by_slot = {int(p["player_slot"]): p for p in all_formatted}
@@ -2426,7 +2434,7 @@ def build_tactical_microscope(
     # =========================================================================
     # 十、0:00 ~ 终局逐分钟时空回放器快照 (Minute-by-Minute Interactive Scrubber)
     # =========================================================================
-    def build_minute_snapshots() -> List[Dict[str, Any]]:
+    def build_minute_snapshots() -> Dict[str, Any]:
         r_gold_adv = match.get("radiant_gold_adv") or []
         r_xp_adv = match.get("radiant_xp_adv") or []
         max_idx = len(r_gold_adv)
@@ -2436,7 +2444,15 @@ def build_tactical_microscope(
                 if len(t_arr) > max_idx:
                     max_idx = len(t_arr)
         if max_idx == 0:
-            return []
+            return {
+                "format": "columnar_v1",
+                "minutes": [],
+                "radiant_gold_adv": [],
+                "radiant_xp_adv": [],
+                "events": [],
+                "item_zh_map": {},
+                "players": [],
+            }
 
         # 预先整理每位玩家的最近购买记录（最近 6 次购买，非消耗品）
         SKIP_CONSUMABLES = {
@@ -2445,6 +2461,7 @@ def build_tactical_microscope(
             "branches", "magic_stick", "sobi_mask", "ring_of_protection", "quelling_blade",
         }
         player_core_purchases: Dict[int, List[Dict[str, Any]]] = {}
+        item_zh_map: Dict[str, str] = {}
         for fp in all_formatted:
             pslot = int(fp["player_slot"])
             rp = raw_by_slot.get(pslot, {})
@@ -2460,34 +2477,54 @@ def build_tactical_microscope(
                 if ik in seen_items:
                     continue
                 seen_items.add(ik)
+                zh_val = ITEMS_ZH.get(ik, ik)
+                item_zh_map[ik] = zh_val
                 core_list.append({
                     "key": ik,
-                    "zh": ITEMS_ZH.get(ik, ik),
+                    "zh": zh_val,
                     "time": int(entry.get("time") or 0),
-                    "img": f"https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/{ik}.png",
                 })
             player_core_purchases[pslot] = core_list
 
-        snapshots: List[Dict[str, Any]] = []
-        for m in range(max_idx):
-            sec_cutoff = m * 60
-            sec_prev = (m - 1) * 60
-            g_adv = int(r_gold_adv[m]) if m < len(r_gold_adv) else 0
-            x_adv = int(r_xp_adv[m]) if m < len(r_xp_adv) else 0
+        minutes_col = list(range(max_idx))
+        g_adv_col = [int(r_gold_adv[m]) if m < len(r_gold_adv) else 0 for m in range(max_idx)]
+        x_adv_col = [int(r_xp_adv[m]) if m < len(r_xp_adv) else 0 for m in range(max_idx)]
+        events_col: List[List[str]] = [[] for _ in range(max_idx)]
 
-            p_snap_list = []
-            events_in_min: List[str] = []
+        players_col: List[Dict[str, Any]] = []
+        for fp in all_formatted:
+            pslot = int(fp["player_slot"])
+            rp = raw_by_slot.get(pslot, {})
+            nw_arr = rp.get("networth_t") or rp.get("gold_t") or []
+            lh_arr = rp.get("lh_t") or []
+            dn_arr = rp.get("dn_t") or []
+            xp_arr = rp.get("xp_t") or []
+            hdmg_arr = rp.get("hero_damage_t") or []
+            tdmg_arr = rp.get("tower_damage_t") or []
 
-            for fp in all_formatted:
-                pslot = int(fp["player_slot"])
-                rp = raw_by_slot.get(pslot, {})
-                nw_arr = rp.get("networth_t") or rp.get("gold_t") or []
-                lh_arr = rp.get("lh_t") or []
-                dn_arr = rp.get("dn_t") or []
-                xp_arr = rp.get("xp_t") or []
-                hdmg_arr = rp.get("hero_damage_t") or []
-                tdmg_arr = rp.get("tower_damage_t") or []
+            h_img = str(fp.get("hero_img") or "")
+            h_key = str(fp.get("hero_key") or "")
+            if not h_key and "/heroes/" in h_img:
+                h_key = h_img.rsplit("/heroes/", 1)[-1].replace("icons/", "").split(".png")[0]
 
+            nw_series: List[int] = []
+            lh_series: List[int] = []
+            dn_series: List[int] = []
+            xp_series: List[int] = []
+            hdmg_series: List[int] = []
+            tdmg_series: List[int] = []
+            dead_series: List[Any] = []
+            rec_purchases_compact = [
+                {"key": it["key"], "t": it["time"]}
+                for it in player_core_purchases.get(pslot, [])
+            ]
+
+            p_deaths_log = rp.get("deaths_log") or []
+            p_kills_log = rp.get("kills_log") or []
+
+            for m in range(max_idx):
+                sec_cutoff = m * 60
+                sec_prev = (m - 1) * 60
                 nw_val = int(nw_arr[m]) if m < len(nw_arr) else int(fp.get("net_worth") or 0)
                 lh_val = int(lh_arr[m]) if m < len(lh_arr) else int(fp.get("last_hits") or 0)
                 dn_val = int(dn_arr[m]) if m < len(dn_arr) else int(fp.get("denies") or 0)
@@ -2495,9 +2532,7 @@ def build_tactical_microscope(
                 hdmg_val = int(hdmg_arr[m]) if m < len(hdmg_arr) else (int(fp.get("hero_damage") or 0) if m == max_idx - 1 else 0)
                 tdmg_val = int(tdmg_arr[m]) if m < len(tdmg_arr) else (int(fp.get("tower_damage") or 0) if m == max_idx - 1 else 0)
 
-                # 检查该分钟玩家是否处于阵亡读秒状态或在本分钟内阵亡 (deaths_log)
-                dead_status = None
-                for d_ev in rp.get("deaths_log") or []:
+                for d_ev in p_deaths_log:
                     dt = int(d_ev.get("time") or 0)
                     t_dead = int(d_ev.get("time_dead") or 25)
                     if (dt <= sec_cutoff <= dt + t_dead) or (m > 0 and sec_prev < dt <= sec_cutoff):
@@ -2505,73 +2540,73 @@ def build_tactical_microscope(
                         k_fp = fmt_by_hid.get(k_hid)
                         k_zh = k_fp["hero_short_zh"] if k_fp else str(d_ev.get("key") or "").replace("npc_dota_hero_", "")
                         rem_s = max(0, (dt + t_dead) - sec_cutoff) if dt <= sec_cutoff <= dt + t_dead else t_dead
-                        dead_status = {
-                            "is_dead": True,
-                            "in_fountain_now": bool(dt <= sec_cutoff <= dt + t_dead),
-                            "time_str": fmt_mmss(dt),
-                            "time_dead": t_dead,
-                            "remaining_sec": rem_s,
-                            "gold_lost": int(d_ev.get("gold_lost") or 0),
-                            "gold_fed": int(d_ev.get("gold_fed") or 0),
-                            "killer_zh": k_zh or "敌方",
-                        }
+                        dead_series.append([
+                            m,
+                            1 if (dt <= sec_cutoff <= dt + t_dead) else 0,
+                            fmt_mmss(dt),
+                            t_dead,
+                            rem_s,
+                            int(d_ev.get("gold_lost") or 0),
+                            int(d_ev.get("gold_fed") or 0),
+                            k_zh or "敌方",
+                        ])
                         break
 
-                recent_purchases = [
-                    {"key": it["key"], "zh": it["zh"], "img": it["img"]}
-                    for it in player_core_purchases.get(pslot, [])
-                    if it["time"] <= sec_cutoff
-                ][-6:]
+                nw_series.append(nw_val)
+                lh_series.append(lh_val)
+                dn_series.append(dn_val)
+                xp_series.append(xp_val)
+                hdmg_series.append(hdmg_val)
+                tdmg_series.append(tdmg_val)
 
-                p_snap_list.append({
-                    "slot": pslot,
-                    "side": "radiant" if pslot < 128 else "dire",
-                    "pos": int(fp["pos"]),
-                    "hero_short_zh": fp["hero_short_zh"],
-                    "hero_img": fp["hero_img"],
-                    "personaname": fp["personaname"],
-                    "networth": nw_val,
-                    "lh": lh_val,
-                    "dn": dn_val,
-                    "xp": xp_val,
-                    "hero_damage": hdmg_val,
-                    "tower_damage": tdmg_val,
-                    "dead_status": dead_status,
-                    "recent_purchases": recent_purchases,
-                    "items": recent_purchases,
-                })
-
-                # 收集这一分钟内该玩家的击杀事件
                 if m > 0:
-                    for k_ev in rp.get("kills_log") or []:
+                    for k_ev in p_kills_log:
                         kt = int(k_ev.get("time") or 0)
                         if sec_prev < kt <= sec_cutoff:
                             v_hid = npc_to_hid.get(str(k_ev.get("key") or ""), 0)
                             v_fp = fmt_by_hid.get(v_hid)
                             v_zh = v_fp["hero_short_zh"] if v_fp else "敌方英雄"
-                            events_in_min.append(f"⚔️ {fmt_mmss(kt)} {fp['hero_short_zh']} 击杀 {v_zh}")
+                            if len(events_col[m]) < 6:
+                                events_col[m].append(f"⚔️ {fmt_mmss(kt)} {fp['hero_short_zh']} 击杀 {v_zh}")
 
-            if m > 0:
-                for obj in raw_objectives:
-                    ot = int(obj.get("time") or 0)
-                    if sec_prev < ot <= sec_cutoff:
-                        otype = str(obj.get("type") or "")
-                        if otype == "CHAT_MESSAGE_ROSHAN_KILL":
-                            events_in_min.append(f"🐉 {fmt_mmss(ot)} 肉山被击杀")
-                        elif otype == "building_kill":
-                            events_in_min.append(f"🏰 {fmt_mmss(ot)} 建筑被摧毁")
-
-            p_snap_list.sort(key=lambda x: x["networth"], reverse=True)
-            snapshots.append({
-                "minute": m,
-                "time_str": f"{m:02d}:00",
-                "radiant_gold_adv": g_adv,
-                "radiant_xp_adv": x_adv,
-                "players": p_snap_list,
-                "events": events_in_min[:6],
+            players_col.append({
+                "slot": pslot,
+                "side": "radiant" if pslot < 128 else "dire",
+                "pos": int(fp["pos"]),
+                "hero_key": h_key,
+                "hero_short_zh": fp["hero_short_zh"],
+                "personaname": fp["personaname"],
+                "networth": nw_series,
+                "lh": lh_series,
+                "dn": dn_series,
+                "xp": xp_series,
+                "hero_damage": hdmg_series,
+                "tower_damage": tdmg_series,
+                "dead_status": dead_series,
+                "recent_purchases": rec_purchases_compact,
             })
 
-        return snapshots
+        for m in range(1, max_idx):
+            sec_cutoff = m * 60
+            sec_prev = (m - 1) * 60
+            for obj in raw_objectives:
+                ot = int(obj.get("time") or 0)
+                if sec_prev < ot <= sec_cutoff and len(events_col[m]) < 6:
+                    otype = str(obj.get("type") or "")
+                    if otype == "CHAT_MESSAGE_ROSHAN_KILL":
+                        events_col[m].append(f"🐉 {fmt_mmss(ot)} 肉山被击杀")
+                    elif otype == "building_kill":
+                        events_col[m].append(f"🏰 {fmt_mmss(ot)} 建筑被摧毁")
+
+        return {
+            "format": "columnar_v1",
+            "minutes": minutes_col,
+            "radiant_gold_adv": g_adv_col,
+            "radiant_xp_adv": x_adv_col,
+            "events": events_col,
+            "item_zh_map": item_zh_map,
+            "players": players_col,
+        }
 
     # =========================================================================
     # 十一、1~5 号位同位置宿敌 1v1 正面对位审判 & OpenDota 全球同英雄百分位标尺
@@ -4060,7 +4095,7 @@ def build_tactical_microscope(
                 "max_hit_val": max_hit_val,
                 "max_hit_summary_zh": max_hit_summary_zh,
                 "target_breakdown": target_breakdown,
-                "spell_target_matrix": spell_target_matrix,
+                "spell_target_matrix": spell_target_matrix[:5],
                 "dmg_quality_badge": dmg_quality_badge,
                 "dmg_audit_notes": dmg_audit_notes,
                 "skill_route_summary_zh": skill_route_summary_zh,
