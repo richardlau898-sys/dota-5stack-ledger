@@ -359,19 +359,33 @@ def build_team_metrics_by_side(match: Dict[str, Any], report_dict: Dict[str, Any
                 })
 
         # (F) 分路组合 10 分钟净值差（按真实同路队友与真实对位）
+        def _p_lane(pl: Dict[str, Any]) -> int:
+            return int(pl.get("raw_lane") or pl.get("lane_id") or pl.get("lane") or 0)
+
+        def _p_nw10(pl: Dict[str, Any]) -> Optional[int]:
+            if pl.get("net_worth_10m") is not None:
+                return int(pl["net_worth_10m"])
+            l10 = pl.get("laning_10m")
+            if isinstance(l10, dict) and l10.get("gold10") is not None:
+                return int(l10["gold10"])
+            nwt = pl.get("networth_t")
+            if isinstance(nwt, list) and len(nwt) > 10 and nwt[10] is not None:
+                return int(nwt[10])
+            return None
+
         lane_duos: List[Dict[str, Any]] = []
         if is_parsed:
             for lane_id, lane_zh in ((1, "下路"), (2, "中路"), (3, "上路")):
                 allies_in_lane = [
-                    p for p in own_players if int(p.get("lane") or 0) == lane_id and p.get("net_worth_10m") is not None
+                    p for p in own_players if _p_lane(p) == lane_id and _p_nw10(p) is not None
                 ]
                 opps_in_lane = [
-                    p for p in opp_players if int(p.get("lane") or 0) == lane_id and p.get("net_worth_10m") is not None
+                    p for p in opp_players if _p_lane(p) == lane_id and _p_nw10(p) is not None
                 ]
                 if not allies_in_lane or not opps_in_lane:
                     continue
-                our_nw10 = sum(int(p.get("net_worth_10m") or 0) for p in allies_in_lane)
-                opp_nw10 = sum(int(p.get("net_worth_10m") or 0) for p in opps_in_lane)
+                our_nw10 = sum(int(_p_nw10(p) or 0) for p in allies_in_lane)
+                opp_nw10 = sum(int(_p_nw10(p) or 0) for p in opps_in_lane)
                 lane_duos.append({
                     "lane": lane_id,
                     "lane_zh": lane_zh,
@@ -408,6 +422,18 @@ def aggregate_high_risk_ward_spots(
     spot_lifespans: Dict[Tuple[int, int], List[int]] = {}
     for m in raw_matches or []:
         if not isinstance(m, dict):
+            continue
+        # 支持从已生成的报告 vision_and_map_data.wards 聚合，或从原始录像 players[].obs_log/obs_left_log 聚合
+        v_wards = (m.get("vision_and_map_data") or {}).get("wards")
+        if isinstance(v_wards, list) and v_wards:
+            for w in v_wards:
+                if not isinstance(w, dict) or w.get("type") != "obs":
+                    continue
+                if w.get("x") is None or w.get("y") is None or w.get("lifespan_sec") is None:
+                    continue
+                gx = int(round(float(w["x"]) / 4.0) * 4)
+                gy = int(round(float(w["y"]) / 4.0) * 4)
+                spot_lifespans.setdefault((gx, gy), []).append(max(0, int(w["lifespan_sec"])))
             continue
         for p in m.get("players") or []:
             if not isinstance(p, dict):
@@ -744,25 +770,38 @@ def build_personal_trends_and_goals(
                     continue
                 aid = int(p["account_id"])
                 pos = int(p.get("pos") or 0)
-                lane = int(p.get("lane") or 0)
+                lane = int(p.get("raw_lane") or p.get("lane_id") or p.get("lane") or 0)
 
                 # (1) 10 分钟后团战外阵亡数
                 pt = p.get("phase_telemetry") or {}
                 pickoffs = pt.get("solo_pickoffs")
                 if is_parsed and isinstance(pickoffs, list):
                     non_tf_deaths_10m = sum(
-                        1 for sp in pickoffs if isinstance(sp, dict) and int(sp.get("time_sec") or 601) >= 600
+                        1
+                        for sp in pickoffs
+                        if isinstance(sp, dict) and int(sp.get("time_sec") or sp.get("time") or 601) >= 600
                     )
                 else:
                     non_tf_deaths_10m = None
 
                 # (2) 对真实对位的 10 分钟净值差
-                nw10 = p.get("net_worth_10m")
+                def _get_nw10(pl_item: Dict[str, Any]) -> Optional[float]:
+                    if pl_item.get("net_worth_10m") is not None:
+                        return float(pl_item["net_worth_10m"])
+                    l10_obj = pl_item.get("laning_10m")
+                    if isinstance(l10_obj, dict) and l10_obj.get("gold10") is not None:
+                        return float(l10_obj["gold10"])
+                    return None
+
+                nw10 = _get_nw10(p)
                 opp_same_lane = [
-                    op for op in opp_list if int(op.get("lane") or 0) == lane and op.get("net_worth_10m") is not None
+                    op
+                    for op in opp_list
+                    if int(op.get("raw_lane") or op.get("lane_id") or op.get("lane") or 0) == lane
+                    and _get_nw10(op) is not None
                 ]
                 if is_parsed and nw10 is not None and opp_same_lane:
-                    opp_avg_nw10 = sum(float(op["net_worth_10m"]) for op in opp_same_lane) / len(opp_same_lane)
+                    opp_avg_nw10 = sum(float(_get_nw10(op) or 0.0) for op in opp_same_lane) / len(opp_same_lane)
                     lane_nw_diff = round(float(nw10) - opp_avg_nw10, 1)
                 else:
                     lane_nw_diff = None

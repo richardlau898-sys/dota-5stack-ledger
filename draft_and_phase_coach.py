@@ -2635,6 +2635,7 @@ def build_squad_history_ledger(
     roster_players = roster.get("players") or {}
 
     analyzed_matches_summary = []
+    loaded_reports_for_growth: List[Dict[str, Any]] = []
     member_stats: Dict[str, Dict[str, Any]] = {}
     duo_buckets: Dict[str, Dict[str, Any]] = {}
 
@@ -2654,6 +2655,7 @@ def build_squad_history_ledger(
             mid = rep.get("match_id")
             if not mid:
                 continue
+            loaded_reports_for_growth.append(rep)
             f_side = rep.get("focus_side") or "dire"
             own_list = rep.get("radiant_pos_1_to_5") if f_side == "radiant" else rep.get("dire_pos_1_to_5")
             if not own_list:
@@ -3318,11 +3320,45 @@ def build_squad_history_ledger(
 
     recent_hero_pool, party_summary = _compute_recent_pool_and_party_summary(recent_matches)
 
+    from squad_growth_metrics import (
+        aggregate_high_risk_ward_spots,
+        build_personal_trends_and_goals,
+        compute_duration_and_session_tilt_buckets,
+    )
+
+    high_risk_ward_spots = aggregate_high_risk_ward_spots(loaded_reports_for_growth)
+    personal_trends_and_goals = build_personal_trends_and_goals(loaded_reports_for_growth, roster=roster)
+
+    tilt_rows: List[Dict[str, Any]] = []
+    for rm in recent_matches or []:
+        if isinstance(rm, dict) and rm.get("match_id"):
+            tilt_rows.append({
+                "match_id": int(rm["match_id"]),
+                "start_time": int(rm.get("start_time") or 0),
+                "duration": int(rm.get("duration") or int(float(rm.get("duration_min") or 0) * 60)),
+                "won": bool(rm.get("won")),
+            })
+    for rep_item in loaded_reports_for_growth:
+        f_side_i = rep_item.get("focus_side") or "dire"
+        won_i = (f_side_i == "radiant" and bool(rep_item.get("radiant_win"))) or (
+            f_side_i == "dire" and not bool(rep_item.get("radiant_win"))
+        )
+        tilt_rows.append({
+            "match_id": int(rep_item["match_id"]),
+            "start_time": int(rep_item.get("start_time") or 0),
+            "duration": int(round(float(rep_item.get("duration_min") or 0) * 60)),
+            "won": won_i,
+        })
+    duration_and_session_tilt = compute_duration_and_session_tilt_buckets(tilt_rows)
+
     return {
         "analyzed_matches": analyzed_matches_summary,
         "squad_members_rank": squad_members_rank,
         "guinness_records": guinness_records,
         "lane_duo_chemistry": lane_duo_chemistry[:8],
+        "high_risk_ward_spots": high_risk_ward_spots,
+        "personal_trends_and_goals": personal_trends_and_goals,
+        "duration_and_session_tilt": duration_and_session_tilt,
         "recent_hero_pool": recent_hero_pool,
         "party_summary": party_summary,
     }
@@ -3445,6 +3481,9 @@ def refresh_persisted_squad_ledger(
         "squad_members_rank": ledger.get("squad_members_rank") or [],
         "guinness_records": ledger.get("guinness_records") or [],
         "lane_duo_chemistry": ledger.get("lane_duo_chemistry") or [],
+        "high_risk_ward_spots": ledger.get("high_risk_ward_spots") or [],
+        "personal_trends_and_goals": ledger.get("personal_trends_and_goals") or {"players": {}},
+        "duration_and_session_tilt": ledger.get("duration_and_session_tilt") or {},
     }
     _LEDGER_MEM_CACHE[str(reports_dir)] = core_payload
     cpath = _ledger_cache_file_path(reports_dir)
@@ -3486,6 +3525,9 @@ def load_or_build_squad_ledger(
         "squad_members_rank": cached_core.get("squad_members_rank") or [],
         "guinness_records": cached_core.get("guinness_records") or [],
         "lane_duo_chemistry": cached_core.get("lane_duo_chemistry") or [],
+        "high_risk_ward_spots": cached_core.get("high_risk_ward_spots") or [],
+        "personal_trends_and_goals": cached_core.get("personal_trends_and_goals") or {"players": {}},
+        "duration_and_session_tilt": cached_core.get("duration_and_session_tilt") or {},
         "recent_hero_pool": recent_hero_pool,
         "party_summary": party_summary,
     }
