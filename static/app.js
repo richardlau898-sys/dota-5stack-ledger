@@ -36,6 +36,9 @@ const state = {
   pendingMatchMeta: null,
   scrubberMinute: 15,
   scrubSyncMapMinute: null,
+  scrubberPlaying: false,
+  scrubberSpeed: 1,
+  scrubberTimer: null,
   perspective: "auto", // "auto" | "dire" | "radiant"
   nwFilter: "cores",   // "cores" | "own" | "all"
   mapMode: "wards_obs", // "wards_obs" | "wards_own" | "wards_all" | "heatmap" | "teamfights"
@@ -4891,6 +4894,7 @@ function bindEvents() {
   const scrubRange = document.getElementById("minute-scrubber-range");
   if (scrubRange) {
     scrubRange.addEventListener("input", () => {
+      stopScrubberAutoplay();
       state.scrubberMinute = Number(scrubRange.value || 0);
       if (state.currentReport) {
         renderMinuteScrubberSnapshot(state.currentReport, state.scrubberMinute);
@@ -4901,9 +4905,28 @@ function bindEvents() {
       }
     });
   }
+  const scrubAutoplayBtn = document.getElementById("btn-scrub-autoplay");
+  if (scrubAutoplayBtn) {
+    scrubAutoplayBtn.addEventListener("click", () => {
+      toggleScrubberAutoplay();
+    });
+  }
+  const scrubSpeedBtn = document.getElementById("btn-scrub-speed");
+  if (scrubSpeedBtn) {
+    scrubSpeedBtn.addEventListener("click", () => {
+      state.scrubberSpeed = state.scrubberSpeed === 1 ? 2 : 1;
+      scrubSpeedBtn.textContent = `${state.scrubberSpeed}x 倍速`;
+      if (state.scrubberPlaying) {
+        stopScrubberAutoplay();
+        toggleScrubberAutoplay();
+      }
+      showToast(`时间轴回放倍速已切换为 ${state.scrubberSpeed}x`);
+    });
+  }
   const scrubPrev = document.getElementById("btn-scrub-prev");
   if (scrubPrev) {
     scrubPrev.addEventListener("click", () => {
+      stopScrubberAutoplay();
       if (!state.currentReport) return;
       const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
       const nextM = Math.max(0, (state.scrubberMinute || 0) - 1);
@@ -4915,6 +4938,7 @@ function bindEvents() {
   const scrubNext = document.getElementById("btn-scrub-next");
   if (scrubNext) {
     scrubNext.addEventListener("click", () => {
+      stopScrubberAutoplay();
       if (!state.currentReport) return;
       const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
       const maxM = Math.max(0, snaps.length - 1);
@@ -6794,6 +6818,26 @@ function renderMicroDamageQualityAndBuildPane(report, df, targetSide, targetSide
             <div style="font-size:12px; color:var(--gold-light); font-weight:600; margin-bottom:4px;">
               💥 单发最高峰值：${injectHeroLogosIntoHtml(escapeHtml(r.max_hit_summary_zh || ""), report)}
             </div>
+            ${
+              Array.isArray(r.spell_target_matrix) && r.spell_target_matrix.length > 0
+                ? `<div style="font-size:11.5px; color:#c4b5fd; margin-bottom:5px; line-height:1.5; padding:4px 7px; border-radius:5px; background:rgba(139,92,246,0.1); border-left:2px solid #a78bfa;">
+                    <b>🎯 技能×敌方目标精准命中账本：</b>${r.spell_target_matrix
+                      .slice(0, 3)
+                      .map((st) => {
+                        const tStr = (st.targets || [])
+                          .slice(0, 3)
+                          .map((t) => {
+                            const dTxt = t.damage > 0 ? `${fmtNum(t.damage)}伤` : "";
+                            const hTxt = t.hits > 0 ? `(${t.hits}次)` : "";
+                            return `${escapeHtml(t.hero_short_zh)} ${dTxt}${hTxt}`.trim();
+                          })
+                          .join("、");
+                        return `《<b>${escapeHtml(st.ability_zh)}</b>》[${tStr}]`;
+                      })
+                      .join(" ｜ ")}
+                  </div>`
+                : ""
+            }
             <ul class="micro-insights-list" style="margin:0;">${notesHtml}</ul>
           </td>
         </tr>
@@ -9641,6 +9685,13 @@ function analyzePlayerItemizationIntelligence(p, report) {
   if (paAudit.archetype_badge && !badges.some((b) => b.includes(paAudit.archetype_badge))) {
     badges.unshift(paAudit.archetype_badge);
   }
+  if (Array.isArray(paAudit.perm_buff_badges) && paAudit.perm_buff_badges.length > 0) {
+    paAudit.perm_buff_badges.slice(0, 2).forEach((pb) => {
+      if (pb && !badges.some((b) => b.includes(pb))) {
+        badges.push(pb);
+      }
+    });
+  }
 
   const deepForensicBullets = [];
   if (paAudit.archetype_analysis_zh) {
@@ -9663,6 +9714,12 @@ function analyzePlayerItemizationIntelligence(p, report) {
       )
       .join(" ｜ ");
     deepForensicBullets.push(`💥 <b>核心技能与道具伤害占比拆解：</b>${topSrcStr}。`);
+  }
+
+  if (paAudit.spell_target_audit_zh) {
+    deepForensicBullets.push(
+      `<span style="color:#fed7aa;">${escapeHtml(paAudit.spell_target_audit_zh)}</span>`
+    );
   }
 
   if (paAudit.skill_and_talent_audit_zh) {
@@ -9692,6 +9749,12 @@ function analyzePlayerItemizationIntelligence(p, report) {
       )
       .join(" → ");
     deepForensicBullets.push(`🎲 <b>中立道具演进与 7.38 附魔词条选择：</b>${cStr}。`);
+  }
+
+  if (paAudit.perm_buff_audit_zh) {
+    deepForensicBullets.push(
+      `<span style="color:#bbf7d0;">${escapeHtml(paAudit.perm_buff_audit_zh)}</span>`
+    );
   }
 
   highlights.unshift(...deepForensicBullets);
@@ -11397,14 +11460,14 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     }
   }
 
-  // Show BOTH Grok 4.7's deep item review AND the 4 granular forensic breakdowns (Playstyle + Spell Damage + Talents + Neutral & 7.38 Enchantments)
+  // Show BOTH Grok 4.7's deep item review AND the 6 granular forensic breakdowns (Playstyle + Spell Damage + Spell×Target Matrix + Talents + Neutral & 7.38 Enchantments + Perm Buffs/Facet)
   const grokItemAuditLine = grokP?.item_and_blink_audit || "";
   const allItemBullets = grokItemAuditLine
     ? [
         `<span style="color:#ddd6fe;"><b>🤖 XAI / GROK-4.7 深度 AI 流派·出装·天赋·附魔·跳刀锐评：</b>${escapeHtml(
           grokItemAuditLine
         )}</span>`,
-        ...itemIntel.highlights.slice(0, 4),
+        ...itemIntel.highlights.slice(0, 8),
       ]
     : [...itemIntel.highlights, ...itemIntel.warnings];
   const itemIntelBoxHtml =
@@ -12350,6 +12413,55 @@ function renderVerdictAndBlameSection(report) {
 /**
  * 2.8 Interactive Minute-by-Minute Timeline Scrubber (00:00 -> End)
  */
+function stopScrubberAutoplay() {
+  if (state.scrubberTimer) {
+    clearInterval(state.scrubberTimer);
+    state.scrubberTimer = null;
+  }
+  state.scrubberPlaying = false;
+  const playBtn = document.getElementById("btn-scrub-autoplay");
+  if (playBtn) {
+    playBtn.textContent = "▶ 自动播放";
+    playBtn.style.background = "";
+    playBtn.style.color = "";
+  }
+}
+
+function toggleScrubberAutoplay() {
+  if (state.scrubberPlaying) {
+    stopScrubberAutoplay();
+    return;
+  }
+  if (!state.currentReport) return;
+  const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+  if (!snaps.length) return;
+  const maxMin = snaps.length - 1;
+  if (state.scrubberMinute >= maxMin) {
+    setScrubberMinute(0);
+  }
+  state.scrubberPlaying = true;
+  const playBtn = document.getElementById("btn-scrub-autoplay");
+  if (playBtn) {
+    playBtn.textContent = "⏸ 暂停回放";
+    playBtn.style.background = "rgba(198,164,104,0.22)";
+    playBtn.style.color = "var(--gold-light)";
+  }
+  const intervalMs = state.scrubberSpeed === 2 ? 650 : 1250;
+  state.scrubberTimer = setInterval(() => {
+    if (!state.currentReport) {
+      stopScrubberAutoplay();
+      return;
+    }
+    const curSnaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+    const curMax = curSnaps.length - 1;
+    if (state.scrubberMinute >= curMax) {
+      stopScrubberAutoplay();
+      return;
+    }
+    setScrubberMinute((state.scrubberMinute || 0) + 1);
+  }, intervalMs);
+}
+
 function setScrubberMinute(minuteIdx) {
   if (!state.currentReport) return;
   const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
@@ -12370,6 +12482,7 @@ function setScrubberMinute(minuteIdx) {
 }
 
 function renderMinuteScrubber(report) {
+  stopScrubberAutoplay();
   const box = document.getElementById("minute-scrubber-box");
   const rangeEl = document.getElementById("minute-scrubber-range");
   const maxLabelEl = document.getElementById("scrubber-max-label");
@@ -12554,6 +12667,9 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
     const isRad = pSnap.side === "radiant";
     const posNum = Number(pSnap.pos || (pIdx % 5) + 1);
     const fullP = fullPlayerByHero.get(hName) || {};
+    const deadInfo = pSnap.dead_status || null;
+    const isDeadNow = Boolean(deadInfo?.is_dead);
+    const inFountainNow = Boolean(deadInfo?.in_fountain_now);
 
     // 1. If in active teamfight and has exact death position, or participated in fight
     if (Array.isArray(tfDeathsArr) && tfDeathsArr.length > 0) {
@@ -12568,7 +12684,14 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       const radius = 5.5 + (posNum % 2) * 2.5;
       const nx = Math.max(8, Math.min(92, clashCenter.nx + Math.cos(angle) * radius));
       const ny = Math.max(8, Math.min(92, clashCenter.ny + Math.sin(angle) * radius));
-      return { nx, ny, inFight: true, diedNow: Number(pt.deaths || 0) > 0 };
+      return { nx, ny, inFight: true, diedNow: Number(pt.deaths || 0) > 0 || isDeadNow };
+    }
+
+    // 1b. If currently respawning in fountain at this exact minute, place in fountain respawn box
+    if (inFountainNow) {
+      return isRad
+        ? { nx: 7.5 + posNum * 1.3, ny: 92.5 - posNum * 1.3, inFight: false, diedNow: true, inFountain: true }
+        : { nx: 92.5 - posNum * 1.3, ny: 7.5 + posNum * 1.3, inFight: false, diedNow: true, inFountain: true };
     }
 
     // 2. Laning phase (0 - 10m): use real lane_heatmaps centroid or raw_lane coordinates
@@ -12578,22 +12701,22 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
         const wSum = myHeat.reduce((s, h) => s + Number(h.weight || 1), 0) || 1;
         const hx = myHeat.reduce((s, h) => s + Number(h.nx || 50) * Number(h.weight || 1), 0) / wSum;
         const hy = myHeat.reduce((s, h) => s + Number(h.ny || 50) * Number(h.weight || 1), 0) / wSum;
-        return { nx: Math.round(hx * 10) / 10, ny: Math.round(hy * 10) / 10, inFight: false, diedNow: false };
+        return { nx: Math.round(hx * 10) / 10, ny: Math.round(hy * 10) / 10, inFight: false, diedNow: isDeadNow };
       }
       const laneId = Number(fullP.raw_lane || (posNum === 2 ? 2 : isRad ? (posNum === 1 || posNum === 5 ? 1 : 3) : posNum === 1 || posNum === 5 ? 3 : 1));
       if (laneId === 3) {
         return isRad
-          ? { nx: 17 + posNum * 1.5, ny: 26 + posNum * 1.8, inFight: false, diedNow: false }
-          : { nx: 23 + posNum * 1.5, ny: 18 + posNum * 1.5, inFight: false, diedNow: false };
+          ? { nx: 17 + posNum * 1.5, ny: 26 + posNum * 1.8, inFight: false, diedNow: isDeadNow }
+          : { nx: 23 + posNum * 1.5, ny: 18 + posNum * 1.5, inFight: false, diedNow: isDeadNow };
       }
       if (laneId === 2) {
         return isRad
-          ? { nx: 45, ny: 55, inFight: false, diedNow: false }
-          : { nx: 55, ny: 45, inFight: false, diedNow: false };
+          ? { nx: 45, ny: 55, inFight: false, diedNow: isDeadNow }
+          : { nx: 55, ny: 45, inFight: false, diedNow: isDeadNow };
       }
       return isRad
-        ? { nx: 76 + (posNum % 2) * 3, ny: 80 - (posNum % 2) * 3, inFight: false, diedNow: false }
-        : { nx: 83 - (posNum % 2) * 3, ny: 71 + (posNum % 2) * 3, inFight: false, diedNow: false };
+        ? { nx: 76 + (posNum % 2) * 3, ny: 80 - (posNum % 2) * 3, inFight: false, diedNow: isDeadNow }
+        : { nx: 83 - (posNum % 2) * 3, ny: 71 + (posNum % 2) * 3, inFight: false, diedNow: isDeadNow };
     }
 
     // 3. Mid / Late game map distribution along active vision / lanes / jungle
@@ -12620,7 +12743,7 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       nx: Math.max(10, Math.min(90, Math.round((baseAnchor.nx + jitterX) * 10) / 10)),
       ny: Math.max(10, Math.min(90, Math.round((baseAnchor.ny + jitterY) * 10) / 10)),
       inFight: false,
-      diedNow: false,
+      diedNow: isDeadNow,
     };
   };
 
@@ -12675,14 +12798,18 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
           ? { detail: `憋死未开 ${pt.unused_self_saves_zh.join("/")}` }
           : null);
       const clipId = `scrub-hero-clip-${idx}-${i}`;
+      const deadInfo = pSnap.dead_status || null;
+      const deadTimerSec = deadInfo?.remaining_sec || deadInfo?.time_dead || 0;
 
       let statusBadgeSvg = "";
       if (unpressedInc) {
         statusBadgeSvg = `<rect x="${Number(cx) - 18}" y="${Number(cy) - 23}" width="36" height="11" rx="3" fill="#dc2626" stroke="#fff" stroke-width="0.7" /><text x="${cx}" y="${Number(cy) - 15}" fill="#fff" font-size="7.5" font-weight="700" text-anchor="middle">🚨憋BKB</text>`;
       } else if (bkbUsedInTf) {
         statusBadgeSvg = `<rect x="${Number(cx) - 16}" y="${Number(cy) - 23}" width="32" height="11" rx="3" fill="#d97706" stroke="#fde68a" stroke-width="0.7" /><text x="${cx}" y="${Number(cy) - 15}" fill="#fff" font-size="7.5" font-weight="700" text-anchor="middle">🛡️BKB</text>`;
-      } else if (coords.diedNow) {
-        statusBadgeSvg = `<text x="${Number(cx) + 10}" y="${Number(cy) - 8}" font-size="11" text-anchor="middle">💀</text>`;
+      } else if (coords.diedNow || deadInfo?.is_dead) {
+        statusBadgeSvg = deadTimerSec
+          ? `<rect x="${Number(cx) - 17}" y="${Number(cy) - 23}" width="34" height="11" rx="3" fill="#7f1d1d" stroke="#f87171" stroke-width="0.7" /><text x="${cx}" y="${Number(cy) - 15}" fill="#fecaca" font-size="7.5" font-weight="700" text-anchor="middle">💀${deadTimerSec}s</text>`
+          : `<text x="${Number(cx) + 10}" y="${Number(cy) - 8}" font-size="11" text-anchor="middle">💀</text>`;
       } else if (hasBkbInBag) {
         statusBadgeSvg = `<circle cx="${Number(cx) + 9}" cy="${Number(cy) - 9}" r="4" fill="#fbbf24" stroke="#111" stroke-width="0.8"><title>已持有黑皇杖(BKB)</title></circle>`;
       }
@@ -12714,8 +12841,12 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       }${escapeHtml(hName.slice(0, 3))}</text>
           <title>[${isRad ? "天辉" : "夜魇"}${pSnap.pos}号位] ${escapeHtml(hName)} (${escapeHtml(
         pSnap.personaname || ""
-      )}) · 净值 ${fmtNum(pSnap.networth || 0)} 金${
+      )}) · 净值 ${fmtNum(pSnap.networth || 0)} 金 · 累计伤害 ${fmtNum(pSnap.hero_damage || 0)}${
         pt ? ` · 本波团战伤害 ${fmtNum(pt.damage || 0)}` : ""
+      }${
+        deadInfo?.is_dead
+          ? ` · 💀 ${deadInfo.time_str} 被 ${deadInfo.killer_zh || "敌方"} 击杀 (泉水读秒 ${deadInfo.time_dead}s · 掉 ${deadInfo.gold_lost} 金)`
+          : ""
       }${unpressedInc ? ` · 🚨 ${unpressedInc.detail || "憋死保命装"}` : ""}</title>
         </g>
       `;
@@ -12893,6 +13024,14 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
       const pct = Math.max(4, Math.round((Number(p.networth || 0) / maxNw) * 100));
       const isOwn = p.side === side;
       const sideLabel = p.side === "radiant" ? "天辉" : "夜魇";
+      const deadInfo = p.dead_status || null;
+      const deadBadgeHtml = deadInfo?.is_dead
+        ? `<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(220,38,38,0.22);border:1px solid rgba(239,68,68,0.5);color:#fca5a5;margin-left:5px;">💀 ${escapeHtml(
+            deadInfo.time_str || ""
+          )} 被${escapeHtml(deadInfo.killer_zh || "敌方")}杀 · 读秒${deadInfo.time_dead || 0}s (-${
+            deadInfo.gold_lost || 0
+          }金)</span>`
+        : "";
       const itemsHtml = (p.items || [])
         .map(
           (it) =>
@@ -12921,11 +13060,13 @@ function renderMinuteScrubberSnapshot(report, minuteIdx) {
             <div class="scrub-bar-track">
               <div class="scrub-bar-fill ${p.side === "radiant" ? "rad" : "dire"}" style="width:${pct}%"></div>
             </div>
-            <div class="scrub-items-strip">${itemsHtml || `<span class="scrub-no-item">散件过渡期</span>`}</div>
+            <div class="scrub-items-strip">${itemsHtml || `<span class="scrub-no-item">散件过渡期</span>`}${deadBadgeHtml}</div>
           </div>
           <div class="scrub-stat-cell">
             <strong>${fmtNum(p.networth || 0)} 金</strong>
-            <span>补刀 ${p.lh ?? 0}/${p.dn ?? 0}</span>
+            <span>补刀 ${p.lh ?? 0}/${p.dn ?? 0}${
+        Number(p.hero_damage || 0) > 0 ? ` · 💥伤 ${fmtNum(p.hero_damage)}` : ""
+      }${Number(p.tower_damage || 0) > 0 ? ` · 🏰塔 ${fmtNum(p.tower_damage)}` : ""}</span>
           </div>
         </div>
       `;
@@ -18268,6 +18409,21 @@ function getSquadPlayerNameForPos(pos) {
   return defaultMap[pos] || `${pos}号位队友`;
 }
 
+function findSquadMemberForName(playerName) {
+  if (!playerName) return null;
+  const members = state.squadLedger?.squad_members_rank || [];
+  if (!members.length) return null;
+  const cleanTarget = String(playerName).replace(/\s*\[我\]\s*/g, "").trim().toLowerCase();
+  return (
+    members.find((m) => {
+      const mName = String(m.name || "").replace(/\s*\[我\]\s*/g, "").trim().toLowerCase();
+      if (mName === cleanTarget || mName.includes(cleanTarget) || cleanTarget.includes(mName)) return true;
+      const aliases = Array.isArray(m.aliases) ? m.aliases : [];
+      return aliases.some((al) => String(al || "").toLowerCase().includes(cleanTarget));
+    }) || null
+  );
+}
+
 function renderPregameSlots() {
   const ownWrap = document.getElementById("pregame-own-slots");
   const enemyWrap = document.getElementById("pregame-enemy-slots");
@@ -18283,13 +18439,53 @@ function renderPregameSlots() {
 
   if (ownWrap) {
     const slots = [1, 2, 3, 4, 5].map((pos) => {
+      const pName = getSquadPlayerNameForPos(pos);
       const entry = (state.pregameOwnPicks || []).find((x) => Number(x.pos) === pos) || {
         pos,
         hero_id: 0,
-        player_name: getSquadPlayerNameForPos(pos),
+        player_name: pName,
       };
       const hero = getHeroMetaById(entry.hero_id);
       const isActive = state.pregameActiveSide === "own" && Number(state.pregameActivePos) === pos;
+      const member = findSquadMemberForName(entry.player_name || pName);
+      const sigList = member?.signature_heroes || [];
+      const cursedList = member?.cursed_heroes || [];
+      const matchedSig = hero
+        ? sigList.find((s) => Number(s.hero_id) === Number(hero.id) || s.hero_short_zh === hero.short_zh)
+        : null;
+      const matchedCursed = hero
+        ? cursedList.find((c) => Number(c.hero_id) === Number(hero.id) || c.hero_short_zh === hero.short_zh)
+        : null;
+      const posStat = (member?.pos_breakdown || []).find((pb) => Number(pb.pos) === pos) || null;
+
+      let poolAuditHtml = "";
+      if (matchedSig) {
+        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#86efac;background:rgba(34,197,94,0.14);border:1px solid rgba(74,222,128,0.35);padding:2px 5px;border-radius:4px;">👑 本人绝活招牌 (${matchedSig.games}局 ${matchedSig.win_rate}%胜 · 均分${matchedSig.avg_score})</div>`;
+      } else if (matchedCursed) {
+        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#fca5a5;background:rgba(220,38,38,0.18);border:1px solid rgba(248,113,113,0.45);padding:2px 5px;border-radius:4px;">🚨 科研陷阱警告 (${matchedCursed.games}局仅 ${matchedCursed.win_rate}%胜 · 均分${matchedCursed.avg_score})</div>`;
+      } else if (!hero && sigList.length > 0) {
+        poolAuditHtml = `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;">
+          <span style="font-size:9.5px;color:var(--gold-light);">👑绝活秒选:</span>
+          ${sigList
+            .slice(0, 2)
+            .map(
+              (s) =>
+                `<button type="button" class="cp-pill" data-pg-quick-sig="${pos}:${s.hero_id || 0}:${escapeHtml(
+                  s.hero_short_zh || ""
+                )}" style="font-size:9.5px;padding:1px 5px;cursor:pointer;border-color:rgba(74,222,128,0.4);color:#bbf7d0;" title="一键为 ${escapeHtml(
+                  entry.player_name || pName
+                )} 锁定绝活 ${escapeHtml(s.hero_short_zh)} (${s.games}局 ${s.win_rate}%胜)">${escapeHtml(
+                  s.hero_short_zh
+                )} ${s.win_rate}%</button>`
+            )
+            .join("")}
+        </div>`;
+      }
+
+      const posBadgeStr = posStat
+        ? ` · ${pos}号位${posStat.win_rate}%胜(${posStat.games}局)`
+        : "";
+
       return `
         <div class="pregame-slot-card ${isActive ? "active-slot" : ""}" data-pg-slot="own:${pos}">
           <div class="pregame-slot-pos">
@@ -18310,8 +18506,9 @@ function renderPregameSlots() {
             }
           </div>
           <div class="pregame-slot-player">👤 ${escapeHtml(
-            entry.player_name || getSquadPlayerNameForPos(pos)
-          )}</div>
+            entry.player_name || pName
+          )}<span style="color:var(--muted);font-size:10px;">${escapeHtml(posBadgeStr)}</span></div>
+          ${poolAuditHtml}
         </div>
       `;
     });
@@ -18361,11 +18558,41 @@ function renderPregameSlots() {
 
   document.querySelectorAll("[data-pg-slot]").forEach((el) => {
     el.addEventListener("click", (e) => {
-      if (e.target.closest("[data-pg-clear]")) return;
+      if (e.target.closest("[data-pg-clear]") || e.target.closest("[data-pg-quick-sig]")) return;
       const [side, posStr] = (el.getAttribute("data-pg-slot") || "own:1").split(":");
       state.pregameActiveSide = side;
       state.pregameActivePos = Number(posStr || 1);
       renderPregameSlots();
+      renderPregameHeroGrid();
+    });
+  });
+
+  document.querySelectorAll("[data-pg-quick-sig]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const [posStr, hidStr, heroShortZh] = (btn.getAttribute("data-pg-quick-sig") || "").split(":");
+      const pos = Number(posStr || 1);
+      let hid = Number(hidStr || 0);
+      if (!hid && heroShortZh) {
+        const foundH = (state.heroesCatalog || []).find((h) => h.short_zh === heroShortZh);
+        if (foundH) hid = Number(foundH.id);
+      }
+      if (!hid) return;
+      state.pregameOwnPicks = (state.pregameOwnPicks || []).filter(
+        (x) => Number(x.hero_id) !== hid && Number(x.pos) !== pos
+      );
+      state.pregameEnemyPicks = (state.pregameEnemyPicks || []).filter((x) => Number(x.hero_id) !== hid);
+      state.pregameOwnPicks.push({
+        pos,
+        hero_id: hid,
+        player_name: getSquadPlayerNameForPos(pos),
+      });
+      state.pregameOwnPicks.sort((a, b) => a.pos - b.pos);
+      state.pregameActiveSide = "own";
+      state.pregameActivePos = pos < 5 ? pos + 1 : pos;
+      renderPregameSlots();
+      renderPregameHeroGrid();
+      requestAndRenderPregamePlan({ useLlm: false });
     });
   });
 
@@ -18402,6 +18629,13 @@ function renderPregameHeroGrid() {
     ...(state.pregameEnemyPicks || []).map((x) => Number(x.hero_id)).filter(Boolean),
   ]);
 
+  const activeMember =
+    state.pregameActiveSide === "own"
+      ? findSquadMemberForName(getSquadPlayerNameForPos(Number(state.pregameActivePos || 1)))
+      : null;
+  const sigNames = new Set((activeMember?.signature_heroes || []).map((s) => s.hero_short_zh));
+  const cursedNames = new Set((activeMember?.cursed_heroes || []).map((c) => c.hero_short_zh));
+
   const filtered = (state.heroesCatalog || []).filter((h) => {
     if (!q) return true;
     const hay = `${h.short_zh || ""} ${h.full_zh || ""} ${h.en_name || ""} ${
@@ -18414,16 +18648,28 @@ function renderPregameHeroGrid() {
     .map((h) => {
       const hid = Number(h.id);
       const isPicked = pickedIds.has(hid);
+      const isSig = sigNames.has(h.short_zh);
+      const isCursed = cursedNames.has(h.short_zh);
+      const extraStyle = isSig
+        ? "border-color:rgba(74,222,128,0.65);box-shadow:0 0 6px rgba(74,222,128,0.22);"
+        : isCursed
+        ? "border-color:rgba(248,113,113,0.6);"
+        : "";
+      const tagBadge = isSig
+        ? `<span style="font-size:9px;color:#86efac;margin-left:2px;">👑</span>`
+        : isCursed
+        ? `<span style="font-size:9px;color:#fca5a5;margin-left:2px;">🪦</span>`
+        : "";
       return `
         <button type="button" class="pregame-hero-btn ${
           isPicked ? "picked" : ""
-        }" data-pick-hero="${hid}" title="${escapeHtml(h.short_zh)} (${escapeHtml(
+        }" style="${extraStyle}" data-pick-hero="${hid}" title="${escapeHtml(h.short_zh)} (${escapeHtml(
           h.en_name || ""
-        )})">
+        )})${isSig ? " · 👑当前槽位队友绝活招牌" : isCursed ? " · 🚨当前槽位队友低胜率科研陷阱" : ""}">
           <img src="${escapeHtml(h.img)}" width="28" height="16" alt="${escapeHtml(
             h.short_zh
           )}" loading="lazy" />
-          <span>${escapeHtml(h.short_zh)}</span>
+          <span>${escapeHtml(h.short_zh)}${tagBadge}</span>
         </button>
       `;
     })
@@ -18705,6 +18951,42 @@ function renderPregamePlanOutput(plan) {
             const grokRoleTip = (grokBrief?.role_tips || {})[String(rg.pos)] || "";
             const counters = Array.isArray(rg.counters_enemies) ? rg.counters_enemies : [];
             const counteredBy = Array.isArray(rg.countered_by_enemies) ? rg.countered_by_enemies : [];
+            const member = findSquadMemberForName(rg.player_name || getSquadPlayerNameForPos(Number(rg.pos)));
+            const sigMatch = (member?.signature_heroes || []).find(
+              (s) => s.hero_short_zh === rg.hero_short_zh
+            );
+            const cursedMatch = (member?.cursed_heroes || []).find(
+              (c) => c.hero_short_zh === rg.hero_short_zh
+            );
+            const posStat = (member?.pos_breakdown || []).find(
+              (pb) => Number(pb.pos) === Number(rg.pos)
+            );
+            const habitFix = member?.habit_diagnosis?.fix_action || "";
+            let squadPoolStripHtml = "";
+            if (member) {
+              const statusTxt = sigMatch
+                ? `👑 本人绝活招牌 (${sigMatch.games}局 ${sigMatch.win_rate}%胜 · 均分${sigMatch.avg_score})`
+                : cursedMatch
+                ? `🚨 历史低胜率科研陷阱 (${cursedMatch.games}局仅 ${cursedMatch.win_rate}%胜 · 均分${cursedMatch.avg_score}，建议慎选或严格跟团)`
+                : posStat
+                ? `📊 该玩家 ${rg.pos}号位历史 ${posStat.games}局 ${posStat.win_rate}%胜 (均分${posStat.avg_score})`
+                : `📊 车队总场次 ${member.games || 0}局 (${member.win_rate || 0}%胜 · 均分${member.avg_score || 0})`;
+              squadPoolStripHtml = `<div style="font-size:10.5px;color:${
+                cursedMatch ? "#fca5a5" : sigMatch ? "#86efac" : "#fde68a"
+              };background:${
+                cursedMatch
+                  ? "rgba(220,38,38,0.16)"
+                  : sigMatch
+                  ? "rgba(34,197,94,0.14)"
+                  : "rgba(198,164,104,0.1)"
+              };padding:4px 7px;border-radius:4px;border-left:2px solid ${
+                cursedMatch ? "#ef4444" : sigMatch ? "#4ade80" : "var(--gold)"
+              };line-height:1.45;">
+                <b>${escapeHtml(statusTxt)}</b>${
+                habitFix ? `<br/><span style="color:var(--muted);">💊 个人防毒瘤军规：${escapeHtml(habitFix)}</span>` : ""
+              }
+              </div>`;
+            }
             return `
               <article class="pregame-role-card">
                 <div class="pregame-role-head">
@@ -18724,6 +19006,7 @@ function renderPregamePlanOutput(plan) {
                     </div>
                   </div>
                 </div>
+                ${squadPoolStripHtml}
                 ${
                   rg.pos_playstyle
                     ? `<div style="font-size:11px;color:#d6e4f0;line-height:1.55;background:rgba(15,23,42,0.45);padding:5px 7px;border-radius:4px;border-left:2px solid #60a5fa;">

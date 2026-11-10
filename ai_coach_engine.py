@@ -1207,6 +1207,25 @@ def build_player_playstyle_and_build_forensics(
             + (f"，头号伤害来源为《{top_spell_name}》（释放 {top_spell_casts} 次造成 {top_spell_dmg:,} 伤害，占 {top_spell_pct:.1f}%）。" if top_spell else "。")
         )
 
+    # 5) 技能×敌方目标精准命中账本 & 单发最高名场面 (spell_target_matrix + max_hit_summary_zh)
+    st_matrix = dq_audit.get("spell_target_matrix") or []
+    max_hit_str = str(dq_audit.get("max_hit_summary_zh") or "")
+    st_summaries = [str(row.get("summary_zh") or "") for row in st_matrix[:5] if row.get("summary_zh")]
+    spell_target_audit_zh = ""
+    if st_summaries or (max_hit_str and "无单发" not in max_hit_str):
+        mh_prefix = f"🔥 【单发最高名场面】：{max_hit_str} ｜ " if (max_hit_str and "无单发" not in max_hit_str) else ""
+        spell_target_audit_zh = f"🎯 【技能×敌方目标精准命中账本】：{mh_prefix}{' ｜ '.join(st_summaries)}"
+
+    # 6) 永久 Buff 叠层与 7.38 命石审计 (perm_buff_badges + perm_buff_notes)
+    pb_badges = [str(b) for b in (dq_audit.get("perm_buff_badges") or []) if b]
+    pb_notes = [str(n) for n in (dq_audit.get("perm_buff_notes") or []) if n]
+    perm_buff_audit_zh = ""
+    if pb_badges or pb_notes:
+        perm_buff_audit_zh = (
+            f"♾️ 【永久 Buff 叠层 & 7.38 命石审计】：{' · '.join(pb_badges)}"
+            + (f" —— {' '.join(pb_notes)}" if pb_notes else "")
+        )
+
     return {
         "archetype_badge": archetype_badge,
         "is_smart_playstyle_pivot": is_smart_playstyle_pivot,
@@ -1215,6 +1234,12 @@ def build_player_playstyle_and_build_forensics(
         "spell_damage_breakdown_zh": spell_damage_breakdown_zh,
         "skill_and_talent_audit_zh": skill_and_talent_audit_zh,
         "neutral_and_enchantment_audit_zh": neutral_and_enchantment_audit_zh,
+        "spell_target_audit_zh": spell_target_audit_zh,
+        "perm_buff_audit_zh": perm_buff_audit_zh,
+        "max_hit_summary_zh": max_hit_str,
+        "spell_target_matrix": st_matrix,
+        "perm_buff_badges": pb_badges,
+        "perm_buff_notes": pb_notes,
         "talents_chosen": talents,
         "skill_route_summary_zh": skill_route,
         "neutral_craft_steps": craft_steps,

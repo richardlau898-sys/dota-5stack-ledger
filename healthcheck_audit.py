@@ -18,7 +18,8 @@ import py_compile
 import subprocess
 import sys
 
-from dota_analyst import analyze_match_data
+from dota_analyst import analyze_match_data, get_hero_constants_map
+from draft_and_phase_coach import build_pregame_strategy_plan, build_squad_history_ledger
 
 
 def run_step(title: str):
@@ -62,7 +63,16 @@ def main() -> int:
         rep_unparsed = analyze_match_data(stripped, roster)
         with open("/tmp/dota_healthcheck_unparsed.json", "w", encoding="utf-8") as f:
             json.dump(rep_unparsed, f, ensure_ascii=False)
-    print(f"  ✅ Backend verified across {len(raw_files)} raw matches + unparsed edge case.")
+    ledger = build_squad_history_ledger("reports", roster, [])
+    pregame_sample = build_pregame_strategy_plan(
+        [{"pos": 1, "hero_id": 11, "player_name": "Flame = ez mute"}, {"pos": 3, "hero_id": 29, "player_name": "Make Your Choice"}],
+        [{"pos": 1, "hero_id": 114}, {"pos": 2, "hero_id": 59}],
+        roster,
+        get_hero_constants_map()[0],
+    )
+    with open("/tmp/dota_healthcheck_ledger.json", "w", encoding="utf-8") as f:
+        json.dump({"ledger": ledger, "pregame": pregame_sample}, f, ensure_ascii=False)
+    print(f"  ✅ Backend verified across {len(raw_files)} raw matches + unparsed edge case + squad ledger & pregame plan.")
 
     # 3. Node syntax check
     run_step("3/4 Checking static/app.js syntax (node --check)")
@@ -226,12 +236,24 @@ for (const file of reportFiles) {
     }
     sandbox.openFullscreenStructuredReport(report);
     totalChecks++;
+    sandbox.toggleScrubberAutoplay();
+    sandbox.stopScrubberAutoplay();
+    totalChecks++;
     const allP = [...(report.radiant_pos_1_to_5 || []), ...(report.dire_pos_1_to_5 || [])];
     for (const p of allP.slice(0, 2)) {
       sandbox.openSinglePlayerPosterDialog(report, p.player_slot, "MVP", { autoGenerateAiArt: false });
       totalChecks++;
     }
   }
+}
+if (fs.existsSync("/tmp/dota_healthcheck_ledger.json")) {
+  const extra = JSON.parse(fs.readFileSync("/tmp/dota_healthcheck_ledger.json", "utf8"));
+  sandbox.__state.squadLedger = extra.ledger;
+  sandbox.__state.pregameOwnPicks = [{ pos: 1, hero_id: 11, player_name: "Flame = ez mute" }, { pos: 3, hero_id: 29, player_name: "Make Your Choice" }];
+  sandbox.renderPregameSlots();
+  sandbox.renderPregameHeroGrid();
+  sandbox.renderPregamePlanOutput(extra.pregame);
+  totalChecks += 3;
 }
 sandbox.renderHomeWorkspace();
 totalChecks++;

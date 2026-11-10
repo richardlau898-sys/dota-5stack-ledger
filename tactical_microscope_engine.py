@@ -2484,11 +2484,37 @@ def build_tactical_microscope(
                 lh_arr = rp.get("lh_t") or []
                 dn_arr = rp.get("dn_t") or []
                 xp_arr = rp.get("xp_t") or []
+                hdmg_arr = rp.get("hero_damage_t") or []
+                tdmg_arr = rp.get("tower_damage_t") or []
 
                 nw_val = int(nw_arr[m]) if m < len(nw_arr) else int(fp.get("net_worth") or 0)
                 lh_val = int(lh_arr[m]) if m < len(lh_arr) else int(fp.get("last_hits") or 0)
                 dn_val = int(dn_arr[m]) if m < len(dn_arr) else int(fp.get("denies") or 0)
                 xp_val = int(xp_arr[m]) if m < len(xp_arr) else 0
+                hdmg_val = int(hdmg_arr[m]) if m < len(hdmg_arr) else (int(fp.get("hero_damage") or 0) if m == max_idx - 1 else 0)
+                tdmg_val = int(tdmg_arr[m]) if m < len(tdmg_arr) else (int(fp.get("tower_damage") or 0) if m == max_idx - 1 else 0)
+
+                # 检查该分钟玩家是否处于阵亡读秒状态或在本分钟内阵亡 (deaths_log)
+                dead_status = None
+                for d_ev in rp.get("deaths_log") or []:
+                    dt = int(d_ev.get("time") or 0)
+                    t_dead = int(d_ev.get("time_dead") or 25)
+                    if (dt <= sec_cutoff <= dt + t_dead) or (m > 0 and sec_prev < dt <= sec_cutoff):
+                        k_hid = npc_to_hid.get(str(d_ev.get("key") or ""), 0)
+                        k_fp = fmt_by_hid.get(k_hid)
+                        k_zh = k_fp["hero_short_zh"] if k_fp else str(d_ev.get("key") or "").replace("npc_dota_hero_", "")
+                        rem_s = max(0, (dt + t_dead) - sec_cutoff) if dt <= sec_cutoff <= dt + t_dead else t_dead
+                        dead_status = {
+                            "is_dead": True,
+                            "in_fountain_now": bool(dt <= sec_cutoff <= dt + t_dead),
+                            "time_str": fmt_mmss(dt),
+                            "time_dead": t_dead,
+                            "remaining_sec": rem_s,
+                            "gold_lost": int(d_ev.get("gold_lost") or 0),
+                            "gold_fed": int(d_ev.get("gold_fed") or 0),
+                            "killer_zh": k_zh or "敌方",
+                        }
+                        break
 
                 items_now = [
                     {"key": it["key"], "zh": it["zh"], "img": it["img"]}
@@ -2507,6 +2533,9 @@ def build_tactical_microscope(
                     "lh": lh_val,
                     "dn": dn_val,
                     "xp": xp_val,
+                    "hero_damage": hdmg_val,
+                    "tower_damage": tdmg_val,
+                    "dead_status": dead_status,
                     "items": items_now,
                 })
 
@@ -3632,24 +3661,118 @@ def build_tactical_microscope(
             effective_non_tank_pct = round(max(0.0, 100.0 - tank_sponge_pct), 1)
             dmg_per_kill = int(round(total_hero_dmg / max(1, total_kills))) if total_kills > 0 else total_hero_dmg
 
-            # 单发最高爆发峰值 (max_hero_hit)
+            # 单发最高爆发峰值 (max_hero_hit) + 清莲宝珠反弹/反伤智能识别
             mhh = raw_p.get("max_hero_hit") or {}
             max_hit_val = int(mhh.get("value") or 0)
             max_hit_time = fmt_mmss(mhh.get("time") or 0) if mhh.get("time") is not None else "--:--"
             max_hit_target_npc = str(mhh.get("key") or "")
             max_hit_target_zh = (opp_by_npc.get(max_hit_target_npc) or {}).get("hero_short_zh") or max_hit_target_npc.replace("npc_dota_hero_", "")
             max_hit_inflictor = str(mhh.get("inflictor") or "")
+            p_all_items_str = " ".join(str(x) for x in (p.get("key_item_timings") or []) + (p.get("items") or []))
+            has_lotus_orb = ("清莲宝珠" in p_all_items_str) or ("lotus_orb" in str(raw_p.get("item_uses") or {}))
             if max_hit_inflictor in ("", "null", "None"):
                 max_hit_source_zh = "普攻暴击/平A"
             elif max_hit_inflictor in ITEMS_ZH:
                 max_hit_source_zh = ITEMS_ZH[max_hit_inflictor]
+            elif max_hit_inflictor in NEUTRAL_ITEMS_ZH:
+                max_hit_source_zh = NEUTRAL_ITEMS_ZH[max_hit_inflictor]
             else:
-                max_hit_source_zh = get_ability_zh(max_hit_inflictor)
+                raw_ab_zh = get_ability_zh(max_hit_inflictor)
+                is_foreign_spell = (
+                    h_key
+                    and (not max_hit_inflictor.startswith(h_key))
+                    and h_key not in ("rubick", "morphling")
+                    and any(max_hit_inflictor.startswith(op_n.replace("npc_dota_hero_", "")) for op_n in opp_by_npc)
+                )
+                if is_foreign_spell and has_lotus_orb:
+                    max_hit_source_zh = f"🪷 清莲宝珠反弹·{raw_ab_zh}"
+                elif is_foreign_spell:
+                    max_hit_source_zh = f"🔄 技能反弹·{raw_ab_zh}"
+                else:
+                    max_hit_source_zh = raw_ab_zh
             max_hit_summary_zh = (
-                f"{max_hit_time} 用【{max_hit_source_zh}】对 {max_hit_target_zh} 单发打出 {max_hit_val} 点伤害"
+                f"{max_hit_time} 用【{max_hit_source_zh}】对 {max_hit_target_zh} 单发打出 {max_hit_val:,} 点伤害"
                 if max_hit_val > 0
                 else "无单发高爆发记录"
             )
+
+            # 1.5) 技能 × 敌方目标精准命中与伤害矩阵 (ability_targets + damage_targets)
+            raw_ab_targets = raw_p.get("ability_targets") or {}
+            raw_dmg_targets = raw_p.get("damage_targets") or {}
+            all_spell_keys = list(dict.fromkeys(list(raw_dmg_targets.keys()) + list(raw_ab_targets.keys())))
+            spell_target_matrix = []
+            for sk in all_spell_keys:
+                if not sk or sk in ("soul_ring",):
+                    continue
+                t_dmg_map = raw_dmg_targets.get(sk) or {}
+                t_cast_map = raw_ab_targets.get(sk) or {}
+                if not isinstance(t_dmg_map, dict):
+                    t_dmg_map = {}
+                if not isinstance(t_cast_map, dict):
+                    t_cast_map = {}
+                enemy_hits = []
+                tot_sk_dmg = 0
+                tot_sk_casts = 0
+                for op_npc, op_obj in opp_by_npc.items():
+                    d_v = int(t_dmg_map.get(op_npc) or 0)
+                    c_v = int(t_cast_map.get(op_npc) or 0)
+                    if d_v <= 0 and c_v <= 0:
+                        continue
+                    tot_sk_dmg += d_v
+                    tot_sk_casts += c_v
+                    enemy_hits.append({
+                        "hero_short_zh": op_obj.get("hero_short_zh") or op_npc.replace("npc_dota_hero_", ""),
+                        "pos": int(op_obj.get("pos") or 3),
+                        "dmg": d_v,
+                        "casts": c_v,
+                    })
+                if not enemy_hits:
+                    continue
+                enemy_hits.sort(key=lambda x: (x["dmg"], x["casts"]), reverse=True)
+                if sk in ("null", "None", "attack"):
+                    sk_zh = "🗡️ 普通攻击(平A)"
+                    sk_type = "attack"
+                elif sk in ITEMS_ZH:
+                    sk_zh = f"🎒 {ITEMS_ZH[sk]}"
+                    sk_type = "item"
+                elif sk in NEUTRAL_ITEMS_ZH:
+                    sk_zh = f"🎲 {NEUTRAL_ITEMS_ZH[sk]}"
+                    sk_type = "item"
+                else:
+                    base_ab_zh = get_ability_zh(sk)
+                    is_foreign = (
+                        h_key
+                        and (not sk.startswith(h_key))
+                        and h_key not in ("rubick", "morphling")
+                        and any(sk.startswith(op_n.replace("npc_dota_hero_", "")) for op_n in opp_by_npc)
+                    )
+                    if is_foreign and has_lotus_orb:
+                        sk_zh = f"🪷 清莲宝珠反弹·{base_ab_zh}"
+                        sk_type = "reflect"
+                    elif is_foreign:
+                        sk_zh = f"🔄 反弹·{base_ab_zh}"
+                        sk_type = "reflect"
+                    else:
+                        sk_zh = f"⚡ {base_ab_zh}"
+                        sk_type = "ability"
+                target_parts = []
+                for eh in enemy_hits[:4]:
+                    if eh["dmg"] > 0 and eh["casts"] > 0:
+                        target_parts.append(f"{eh['pos']}号位{eh['hero_short_zh']} {eh['dmg']:,}伤({eh['casts']}次)")
+                    elif eh["dmg"] > 0:
+                        target_parts.append(f"{eh['pos']}号位{eh['hero_short_zh']} {eh['dmg']:,}伤")
+                    else:
+                        target_parts.append(f"命中{eh['pos']}号位{eh['hero_short_zh']} {eh['casts']}次")
+                spell_target_matrix.append({
+                    "key": sk,
+                    "zh_name": sk_zh,
+                    "type": sk_type,
+                    "total_dmg": tot_sk_dmg,
+                    "total_casts": tot_sk_casts,
+                    "targets": enemy_hits,
+                    "summary_zh": f"{sk_zh}（{'共 ' + format(tot_sk_dmg, ',') + ' 伤' if tot_sk_dmg > 0 else f'共命中 {tot_sk_casts} 次'}）：{' · '.join(target_parts)}",
+                })
+            spell_target_matrix.sort(key=lambda x: (1 if x["type"] != "attack" else 0, x["total_dmg"], x["total_casts"]), reverse=True)
 
             # 判定伤害含金量等级
             dmg_audit_notes = []
@@ -3826,11 +3949,15 @@ def build_tactical_microscope(
             if not skill_build_flags:
                 skill_build_flags.append(f"✓ 加点路线合理（{skill_route_summary_zh}，三技能衔接顺畅）。")
 
-            # 3) 永久 Buff 与英雄成长叠层审计 (permanent_buffs)
+            # 3) 永久 Buff 与英雄成长叠层审计 (permanent_buffs + 7.38 命石 hero_variant)
             raw_pbuffs = raw_p.get("permanent_buffs") or []
             perm_buff_badges = []
             perm_buff_notes = []
             found_buff_ids = {}
+            h_variant = raw_p.get("hero_variant")
+            if h_variant is not None:
+                v_idx = int(h_variant) + 1 if int(h_variant) == 0 else int(h_variant)
+                perm_buff_badges.append(f"🪨 7.38 命石 #{v_idx}")
 
             for pb in raw_pbuffs:
                 bid = int(pb.get("permanent_buff") or 0)
@@ -3894,6 +4021,7 @@ def build_tactical_microscope(
                 "max_hit_val": max_hit_val,
                 "max_hit_summary_zh": max_hit_summary_zh,
                 "target_breakdown": target_breakdown,
+                "spell_target_matrix": spell_target_matrix,
                 "dmg_quality_badge": dmg_quality_badge,
                 "dmg_audit_notes": dmg_audit_notes,
                 "skill_route_summary_zh": skill_route_summary_zh,
