@@ -25,17 +25,18 @@ _REPO_ROOT = Path(__file__).resolve().parent
 _HERO_STATS_CACHE: Optional[Dict[int, Dict[str, Any]]] = None
 
 
-def load_hero_stats_by_id() -> Dict[int, Dict[str, Any]]:
-    """从 .cache/hero_stats.json（及 .cache/heroes_constants.json 兜底）加载 OpenDota /heroStats 真实分段位数据。"""
+def load_hero_stats_by_id(hs_path: Optional[Path] = None) -> Dict[int, Dict[str, Any]]:
+    """从 .cache/hero_stats.json 加载 OpenDota /heroStats 真实分段位数据；文件不存在时返回空字典（绝不兜底伪造）。"""
     global _HERO_STATS_CACHE
-    if _HERO_STATS_CACHE is not None:
+    if hs_path is None and _HERO_STATS_CACHE is not None:
         return _HERO_STATS_CACHE
 
+    target_path = hs_path if hs_path is not None else (_REPO_ROOT / ".cache" / "hero_stats.json")
     by_id: Dict[int, Dict[str, Any]] = {}
-    hs_path = _REPO_ROOT / ".cache" / "hero_stats.json"
-    if hs_path.exists():
+    if target_path.exists():
         try:
-            raw_list = json.loads(hs_path.read_text(encoding="utf-8"))
+            raw_obj = json.loads(target_path.read_text(encoding="utf-8"))
+            raw_list = raw_obj.get("heroes") if isinstance(raw_obj, dict) else raw_obj
             if isinstance(raw_list, list):
                 for item in raw_list:
                     if isinstance(item, dict) and "id" in item:
@@ -43,18 +44,8 @@ def load_hero_stats_by_id() -> Dict[int, Dict[str, Any]]:
         except Exception:
             pass
 
-    if not by_id:
-        hc_path = _REPO_ROOT / ".cache" / "heroes_constants.json"
-        if hc_path.exists():
-            try:
-                raw_dict = json.loads(hc_path.read_text(encoding="utf-8"))
-                for _, item in (raw_dict or {}).items():
-                    if isinstance(item, dict) and "id" in item:
-                        by_id[int(item["id"])] = item
-            except Exception:
-                pass
-
-    _HERO_STATS_CACHE = by_id
+    if hs_path is None:
+        _HERO_STATS_CACHE = by_id
     return by_id
 
 

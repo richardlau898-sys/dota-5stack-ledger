@@ -115,6 +115,8 @@ class TestP7ConstantsAndPatch(unittest.TestCase):
             payload = {"1": {"id": 1, "name": "npc_dota_hero_antimage", "localized_name": "Anti-Mage"}}
             if url.endswith("/patch"):
                 payload = [{"id": 57, "name": "7." + "38"}, {"id": 58, "name": "7.39"}]
+            elif url.endswith("/heroStats"):
+                payload = [{"id": 1, "name": "npc_dota_hero_antimage", "6_pick": 100, "6_win": 52, "pub_pick": 1000, "pub_win": 510}]
             resp = MagicMock()
             resp.read.return_value = json.dumps(payload).encode("utf-8")
             resp.__enter__.return_value = resp

@@ -41,10 +41,13 @@ class TestF5BpRealData(unittest.TestCase):
         self.assertNotIn("if 45 in own_hids and 8 in own_hids:", src)
 
     def test_hero_stats_cache_and_refresh_constants_support(self):
-        """验证 .cache/hero_stats.json 存在且包含分段位选取与胜率字段"""
+        """验证 .cache/hero_stats.json 存在且包含下载时间与真实分段位选取/胜率字段"""
         hero_stats_path = REPO_ROOT / ".cache" / "hero_stats.json"
         self.assertTrue(hero_stats_path.exists(), "缺少 .cache/hero_stats.json")
-        data = json.loads(hero_stats_path.read_text(encoding="utf-8"))
+        doc = json.loads(hero_stats_path.read_text(encoding="utf-8"))
+        self.assertIsInstance(doc, dict)
+        self.assertIn("downloaded_at", doc)
+        data = doc.get("heroes")
         self.assertIsInstance(data, list)
         self.assertGreaterEqual(len(data), 120)
         first = data[0]
