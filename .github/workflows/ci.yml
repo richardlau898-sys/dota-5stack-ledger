@@ -29,6 +29,9 @@ jobs:
       - name: Verify hero Chinese localization
         run: python3 tools/refresh_constants.py --check
 
+      - name: Verify static asset hashes
+        run: python3 tools/build_static_hashes.py --check
+
       - name: Run unit tests
         run: python3 -m unittest discover -s tests -v
 
