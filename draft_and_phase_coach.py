@@ -3280,6 +3280,8 @@ def _compute_recent_pool_and_party_summary(
 
 
 def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
+    import hashlib
+    import json
     from pathlib import Path
 
     rdir = Path(reports_dir)
@@ -3296,7 +3298,8 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
     files.sort()
     main_aid = int((roster or {}).get("main_account_id") or 0)
     players_cnt = len((roster or {}).get("players") or {})
-    return f"{rdir.resolve()}|{main_aid}|{players_cnt}|{len(files)}|{hash(tuple(files))}"
+    digest = hashlib.sha256(json.dumps(files, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return f"{rdir.resolve()}|{main_aid}|{players_cnt}|{len(files)}|{digest}"
 
 
 def _ledger_cache_file_path(reports_dir: Any) -> Any:
