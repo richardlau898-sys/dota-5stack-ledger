@@ -273,7 +273,57 @@ def _supabase_list_analyzed_ids(cfg: Dict[str, str]) -> Set[int]:
                         ids.add(int(r["match_id"]))
     except Exception:
         pass
+
+    if not ids:
+        try:
+            req_mp = urllib.request.Request(
+                f"{url}/rest/v1/match_players?select=match_id&limit=1000",
+                headers=_supabase_headers(key, {"Accept": "application/json"}),
+            )
+            with urllib.request.urlopen(req_mp, timeout=6) as resp_mp:
+                rows_mp = json.loads(resp_mp.read().decode("utf-8"))
+                if isinstance(rows_mp, list):
+                    for r in rows_mp:
+                        if r.get("match_id"):
+                            ids.add(int(r["match_id"]))
+        except Exception:
+            pass
     return ids
+
+
+def cloud_fetch_match_players(
+    account_id: Optional[int] = None,
+    limit: int = 2000,
+    cfg: Optional[Dict[str, str]] = None,
+) -> List[Dict[str, Any]]:
+    """R1-8: 从 Supabase match_players 表读取结构化玩家对局记录（用于比赛列表与总账）"""
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+    if not url or not key:
+        return []
+
+    qs = f"select=*&order=match_id.desc&limit={max(1, int(limit))}"
+    if account_id is not None and int(account_id) > 0:
+        qs += f"&account_id=eq.{int(account_id)}"
+    try:
+        req = urllib.request.Request(
+            f"{url}/rest/v1/match_players?{qs}",
+            headers=_supabase_headers(key, {"Accept": "application/json"}),
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            rows = json.loads(resp.read().decode("utf-8"))
+            if isinstance(rows, list):
+                valid = [r for r in rows if isinstance(r, dict) and r.get("match_id")]
+                if valid:
+                    _CLOUD_IDS_CACHE["url"] = url
+                    _CLOUD_IDS_CACHE["ts"] = time.time()
+                    _CLOUD_IDS_CACHE["ids"].update(int(r["match_id"]) for r in valid)
+                return valid
+    except Exception:
+        pass
+    return []
 
 
 def cloud_save_raw_match(match_id: int, raw_match: Dict[str, Any]) -> bool:
@@ -330,20 +380,27 @@ def cloud_fetch_raw_match(match_id: int) -> Optional[Dict[str, Any]]:
     return None
 
 
-_CLOUD_IDS_CACHE: Dict[str, Any] = {"ts": 0.0, "ids": set()}
+_CLOUD_IDS_CACHE: Dict[str, Any] = {"url": "", "ts": 0.0, "ids": set()}
 
 
 def get_cloud_analyzed_match_ids(ttl_sec: int = 45) -> Set[int]:
+    cfg = get_cloud_config()
+    cur_url = cfg["supabase_url"]
     now = time.time()
-    if now - _CLOUD_IDS_CACHE["ts"] < ttl_sec and _CLOUD_IDS_CACHE["ids"]:
+    if (
+        cur_url
+        and _CLOUD_IDS_CACHE.get("url") == cur_url
+        and now - _CLOUD_IDS_CACHE["ts"] < ttl_sec
+        and _CLOUD_IDS_CACHE["ids"]
+    ):
         return set(_CLOUD_IDS_CACHE["ids"])
 
-    cfg = get_cloud_config()
     ids: Set[int] = set()
-    if cfg["supabase_url"] and cfg["supabase_key"]:
+    if cur_url and cfg["supabase_key"]:
         ids.update(_supabase_list_analyzed_ids(cfg))
 
     if ids:
+        _CLOUD_IDS_CACHE["url"] = cur_url
         _CLOUD_IDS_CACHE["ts"] = now
         _CLOUD_IDS_CACHE["ids"] = set(ids)
     return ids

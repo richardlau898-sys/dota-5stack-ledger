@@ -37,6 +37,7 @@ from ai_coach_engine import (
     get_llm_status_safe,
 )
 from cloud_store import (
+    cloud_fetch_match_players,
     cloud_fetch_match_report,
     cloud_fetch_raw_match,
     cloud_load_llm_task,
@@ -215,7 +216,75 @@ def fetch_recent_matches_formatted(
         })
 
     if not out:
-        # Synthesize fallback list from local analyzed match_*.json files so /api/init never fails
+        # R1-8: 从 Supabase match_players 表读取比赛列表（不依赖本地 reports/ 目录）
+        mp_rows = cloud_fetch_match_players(limit=max(120, limit * 12))
+        if mp_rows:
+            roster = load_roster()
+            roster_members = iter_roster_accounts(roster)
+            target_aids = {int(account_id)} if account_id else set()
+            all_roster_aids = set()
+            for m in roster_members:
+                aids_set = set(m["account_ids"])
+                all_roster_aids.update(aids_set)
+                if int(account_id) in aids_set:
+                    target_aids.update(aids_set)
+
+            by_mid: Dict[int, list] = {}
+            for r in mp_rows:
+                mid_val = int(r.get("match_id") or 0)
+                if mid_val > 0:
+                    by_mid.setdefault(mid_val, []).append(r)
+
+            for mid in sorted(by_mid.keys(), reverse=True)[:limit]:
+                m_rows = by_mid[mid]
+                me_r = (
+                    next((r for r in m_rows if r.get("account_id") in target_aids), None)
+                    or next((r for r in m_rows if r.get("account_id") in all_roster_aids), None)
+                    or m_rows[0]
+                )
+                hid = int(me_r.get("hero_id") or 0)
+                hinfo = hero_map.get(hid) or {}
+                won = bool(me_r.get("won"))
+                k = int(me_r.get("kills") or 0)
+                d = int(me_r.get("deaths") or 0)
+                a = int(me_r.get("assists") or 0)
+                dur_sec = int(round(float(me_r.get("duration_min") or 0.0) * 60))
+                dur_str = format_duration(dur_sec)
+                psize = max(
+                    1,
+                    sum(
+                        1
+                        for r in m_rows
+                        if r.get("side") == me_r.get("side") and r.get("account_id") in all_roster_aids
+                    ),
+                )
+                out.append({
+                    "match_id": mid,
+                    "start_time": None,
+                    "won": won,
+                    "result": "胜利" if won else "失败",
+                    "hero_id": hid,
+                    "hero_name": get_hero_name(hid),
+                    "hero_short_zh": me_r.get("hero_short_zh") or hinfo.get("short_zh") or get_hero_name(hid),
+                    "hero_img": hinfo.get("img") or "",
+                    "hero_icon": hinfo.get("icon") or "",
+                    "kills": k,
+                    "deaths": d,
+                    "assists": a,
+                    "kda": f"{k}/{d}/{a}",
+                    "gpm": int(me_r.get("gpm") or 0),
+                    "xpm": int(me_r.get("xpm") or 0),
+                    "duration": dur_str,
+                    "duration_str": dur_str,
+                    "party_size": psize,
+                    "party_label": f"{psize}人黑" if psize > 1 else "单排",
+                    "is_parsed": True,
+                    "is_analyzed": True,
+                    "mode_str": "全英雄选择",
+                })
+
+    if not out and REPORTS_DIR.exists():
+        # Synthesize fallback list from local analyzed match_*.json files when Supabase is unconfigured
         for mf in sorted(REPORTS_DIR.glob("match_*.json"), reverse=True)[:limit]:
             try:
                 rep = json.loads(mf.read_text(encoding="utf-8"))
@@ -549,9 +618,8 @@ def get_or_build_match_report(
     aid = focus_account_id or roster.get("main_account_id")
 
     raw_match = None
-    fixture_raw_cache = BASE_DIR / "tests" / "fixtures" / f"raw_{match_id}.json"
     if not force_refresh:
-        for rc in (raw_cache, tmp_raw_cache, fixture_raw_cache):
+        for rc in (raw_cache, tmp_raw_cache):
             if rc.exists():
                 try:
                     candidate_raw = json.loads(rc.read_text(encoding="utf-8"))
