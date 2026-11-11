@@ -73,36 +73,28 @@ def select_top3_measured_fixes(candidates: List[Dict[str, Any]]) -> List[Dict[st
 
 def _collect_hero_death_timestamps(match: Dict[str, Any]) -> Dict[int, List[int]]:
     """
-    从敌方 players[].kills_log 与 teamfights 提取每个 player_slot 的精确阵亡秒数列表（升序去重）。
+    从敌方 players[].kills_log 提取每个 player_slot 的精确阵亡秒数列表（升序去重）。
     """
+    from dota_analyst import get_hero_constants_map
+
     players = match.get("players") or []
     hero_key_to_slot: Dict[str, int] = {}
-    slot_by_idx: Dict[int, int] = {}
+    hmap, _ = get_hero_constants_map()
+
     for idx, p in enumerate(players):
         slot = int(p.get("player_slot") if p.get("player_slot") is not None else idx)
-        slot_by_idx[idx] = slot
-        # OpenDota kills_log.key 形如 npc_dota_hero_antimage
         h_name = str(p.get("hero_name") or "")
+        if not h_name.startswith("npc_dota_hero_"):
+            hid = int(p.get("hero_id") or 0)
+            c_entry = hmap.get(hid) or {}
+            h_name = str(c_entry.get("npc") or c_entry.get("name") or "")
         if h_name.startswith("npc_dota_hero_"):
             hero_key_to_slot[h_name] = slot
 
-    # 若 raw match 的 player 没有 hero_name，则从 constants 映射
-    if len(hero_key_to_slot) < len(players):
-        try:
-            from dota_analyst import get_hero_constants_map
-
-            hmap = get_hero_constants_map()
-            for p in players:
-                slot = int(p.get("player_slot") or 0)
-                hid = int(p.get("hero_id") or 0)
-                c_entry = hmap.get(str(hid)) or hmap.get(hid) or {}
-                cname = str(c_entry.get("name") or "")
-                if cname.startswith("npc_dota_hero_"):
-                    hero_key_to_slot[cname] = slot
-        except Exception:
-            pass
-
-    deaths_by_slot: Dict[int, set] = {int(p.get("player_slot") or 0): set() for p in players}
+    deaths_by_slot: Dict[int, set] = {
+        int(p.get("player_slot") if p.get("player_slot") is not None else idx): set()
+        for idx, p in enumerate(players)
+    }
     for p in players:
         for kl in p.get("kills_log") or []:
             if not isinstance(kl, dict):
@@ -111,17 +103,6 @@ def _collect_hero_death_timestamps(match: Dict[str, Any]) -> Dict[int, List[int]
             t_sec = kl.get("time")
             if target_key in hero_key_to_slot and t_sec is not None:
                 deaths_by_slot.setdefault(hero_key_to_slot[target_key], set()).add(int(t_sec))
-
-    for tf in match.get("teamfights") or []:
-        tf_end = int(tf.get("end") or tf.get("start") or 0)
-        for idx, tf_p in enumerate(tf.get("players") or []):
-            if int(tf_p.get("deaths") or 0) > 0 and idx in slot_by_idx:
-                slot = slot_by_idx[idx]
-                # 若 kills_log 已有 [start-5, end+5] 内的精确时间则不重复加粗略时间
-                existing = deaths_by_slot.setdefault(slot, set())
-                tf_start = int(tf.get("start") or 0)
-                if not any(tf_start - 5 <= d <= tf_end + 5 for d in existing):
-                    existing.add(tf_end)
 
     return {slot: sorted(times) for slot, times in deaths_by_slot.items()}
 
@@ -334,18 +315,53 @@ def build_team_metrics_by_side(match: Dict[str, Any], report_dict: Dict[str, Any
                             "source_fields": ["players[].buyback_log", "players[].kills_log"],
                         })
 
-        # (D) 开雾效果（关联 deep_forensics.stacking_and_smoke_by_side，保留 T1-5 说明）
+        # (D) 开雾效果（仅读取团战记录中的 item_uses.smoke_of_deceit，按 R2-1 规则绝不按购买时间窗口推断）
         df_ss = (
             ((report_dict.get("deep_forensics") or {}).get("stacking_and_smoke_by_side") or {})
             .get(side, {})
         )
-        smoke_windows = [
-            {**sw, "evidence": "inferred"} if isinstance(sw, dict) else sw
-            for sw in (df_ss.get("smoke_events") or [])
-        ]
+        if df_ss:
+            smoke_windows = [
+                {**sw, "evidence": "inferred"} if isinstance(sw, dict) else sw
+                for sw in (df_ss.get("smoke_events") or [])
+            ]
+            own_smokes_used_val = df_ss.get("own_smoke_uses") if is_parsed else None
+        else:
+            smoke_windows = []
+            own_idx_range = range(0, 5) if side == "radiant" else range(5, 10)
+            opp_idx_range = range(5, 10) if side == "radiant" else range(0, 5)
+            own_smokes_used_val = (
+                sum(
+                    int(((raw_players_by_slot.get(int(p.get("player_slot") or 0)) or {}).get("item_uses") or {}).get("smoke_of_deceit") or 0)
+                    for p in own_players
+                )
+                if is_parsed
+                else None
+            )
+            if is_parsed:
+                for tf in raw_tfs:
+                    tf_pl = tf.get("players") or []
+                    tf_smokes = sum(
+                        int((tf_pl[j].get("item_uses") or {}).get("smoke_of_deceit") or 0)
+                        for j in own_idx_range
+                        if j < len(tf_pl)
+                    )
+                    if tf_smokes > 0:
+                        t0 = int(tf.get("start") or 0)
+                        t_end = int(tf.get("end") or t0)
+                        own_d = sum(int(tf_pl[j].get("deaths") or 0) for j in own_idx_range if j < len(tf_pl))
+                        opp_d = sum(int(tf_pl[j].get("deaths") or 0) for j in opp_idx_range if j < len(tf_pl))
+                        smoke_windows.append({
+                            "time_sec": t0,
+                            "time_str": _fmt_mmss(t0),
+                            "end_sec": t_end,
+                            "our_deaths": own_d,
+                            "opp_deaths": opp_d,
+                            "evidence": "inferred",
+                        })
         smoke_effectiveness = {
             "available": is_parsed,
-            "own_smokes_used": df_ss.get("own_smoke_uses") if is_parsed else None,
+            "own_smokes_used": own_smokes_used_val,
             "smoke_windows": smoke_windows,
             "note": "基于团战记录中的 item_uses.smoke_of_deceit 推断，非精确施放时间",
             "evidence": "inferred",
@@ -364,6 +380,8 @@ def build_team_metrics_by_side(match: Dict[str, Any], report_dict: Dict[str, Any
                     "y": w.get("y"),
                     "lifespan_sec": int(life),
                     "was_dewarded": bool(w.get("was_dewarded")),
+                    "evidence": "measured",
+                    "source_fields": ["players[].obs_log", "players[].obs_left_log"],
                 })
 
         # (F) 分路组合 10 分钟净值差（按真实同路队友与真实对位）
@@ -493,6 +511,7 @@ def aggregate_high_risk_ward_spots(
                 "min_lifespan_sec": min(lives),
                 "max_lifespan_sec": max(lives),
                 "evidence": "measured",
+                "source_fields": ["players[].obs_log", "players[].obs_left_log"],
             })
     results.sort(key=lambda r: (r["median_lifespan_sec"], -r["sample_count"]))
     return results
