@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 F8 · 赛后自动推送（D5 Webhook）
-定时检查花名册成员的新比赛，请求 OpenDota 解析，解析完成后生成报告，
+检查花名册成员的新比赛，请求 OpenDota 解析，解析完成后生成报告，
 并将赛后摘要（比分、时长、下一把要改的 3 件事、3 个复盘时刻、报告链接）推送到群 Webhook。
 """
 import argparse
@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
@@ -18,7 +19,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+import cloud_store  # noqa: E402
 import dota_analyst  # noqa: E402
+
+DEFAULT_PUBLIC_APP_URL = "https://dota-ai-analyst.vercel.app"
 
 
 def _default_fetch_recent(account_id: int) -> List[Dict[str, Any]]:
@@ -32,7 +36,8 @@ def _default_fetch_match(match_id: int) -> Dict[str, Any]:
 
 
 def _default_request_parse(match_id: int) -> Dict[str, Any]:
-    return dota_analyst.request_opendota_parse(int(match_id))
+    data = dota_analyst.api_post(f"/request/{int(match_id)}")
+    return data if isinstance(data, dict) else {}
 
 
 def _default_send_webhook(webhook_url: str, payload: Dict[str, Any]) -> bool:
@@ -44,7 +49,7 @@ def _default_send_webhook(webhook_url: str, payload: Dict[str, Any]) -> bool:
         data=body,
         headers={
             "Content-Type": "application/json; charset=utf-8",
-            "User-Agent": "dota-5stack-ledger-webhook/1.0",
+            "User-Agent": "dota-ai-analyst-webhook/1.0",
         },
         method="POST",
     )
@@ -52,25 +57,37 @@ def _default_send_webhook(webhook_url: str, payload: Dict[str, Any]) -> bool:
         return 200 <= int(getattr(resp, "status", 200)) < 300
 
 
-def load_notified_state(state_path: Path) -> Dict[str, Any]:
-    if state_path.exists():
+def load_notified_state(state_path: Optional[Path] = None) -> Dict[str, Any]:
+    ids = set(cloud_store.cloud_load_notified_match_ids())
+    if state_path and state_path.exists():
         try:
             data = json.loads(state_path.read_text(encoding="utf-8"))
             if isinstance(data, dict):
-                return data
+                for x in data.get("notified_match_ids") or []:
+                    if str(x).isdigit():
+                        ids.add(int(x))
         except Exception:
             pass
-    return {"notified_match_ids": []}
+    return {"notified_match_ids": sorted(ids)}
 
 
-def save_notified_state(state_path: Path, state: Dict[str, Any]) -> None:
-    state_path.parent.mkdir(parents=True, exist_ok=True)
-    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+def save_notified_state(state_path: Optional[Path], state: Dict[str, Any]) -> None:
+    ids = {int(x) for x in (state.get("notified_match_ids") or []) if str(x).isdigit()}
+    cloud_store.cloud_save_notified_match_ids(ids)
+    if state_path:
+        try:
+            state_path.parent.mkdir(parents=True, exist_ok=True)
+            state_path.write_text(
+                json.dumps({"notified_match_ids": sorted(ids)}, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        except OSError:
+            pass
 
 
 def build_postgame_webhook_payload(report: Dict[str, Any], base_app_url: str) -> Dict[str, Any]:
     mid = int(report.get("match_id") or 0)
-    base_clean = (base_app_url or "http://localhost:8787").rstrip("/")
+    base_clean = (base_app_url or DEFAULT_PUBLIC_APP_URL).rstrip("/")
     report_url = f"{base_clean}/?match={mid}"
 
     score_str = f"天辉 {report.get('radiant_score', 0)} : {report.get('dire_score', 0)} 夜魇"
@@ -128,10 +145,17 @@ def run_postgame_notification_cycle(
     poll_wait_sec: float = 2.0,
     max_matches_per_cycle: int = 3,
 ) -> Dict[str, Any]:
+    webhook_clean = (webhook_url if webhook_url is not None else os.environ.get("POSTGAME_WEBHOOK_URL", "")).strip()
+    if not webhook_clean:
+        return {
+            "skipped_no_webhook": True,
+            "checked_candidates": 0,
+            "notified_count": 0,
+            "notified_match_ids": [],
+        }
+
     roster = roster or dota_analyst.load_roster()
-    webhook_url = webhook_url if webhook_url is not None else os.environ.get("POSTGAME_WEBHOOK_URL", "")
-    base_app_url = base_app_url or os.environ.get("PUBLIC_APP_URL", "https://dota-5stack-ledger.vercel.app")
-    state_path = state_path or (REPO_ROOT / ".cache" / "postgame_notified_matches.json")
+    base_app_url = (base_app_url or os.environ.get("PUBLIC_APP_URL") or DEFAULT_PUBLIC_APP_URL).strip()
     reports_dir = reports_dir or (REPO_ROOT / "reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
 
@@ -139,7 +163,10 @@ def run_postgame_notification_cycle(
     notified_set = {int(x) for x in (state.get("notified_match_ids") or []) if str(x).isdigit()}
 
     roster_members = dota_analyst.iter_roster_accounts(roster)
-    main_aid = next((int(m["canonical_id"]) for m in roster_members if m.get("is_main")), int(roster.get("main_account_id") or 0))
+    main_aid = next(
+        (int(m["canonical_id"]) for m in roster_members if m.get("is_main")),
+        int(roster.get("main_account_id") or 0),
+    )
     account_ids: List[int] = []
     for m in roster_members:
         for aid in m["account_ids"]:
@@ -150,7 +177,8 @@ def run_postgame_notification_cycle(
     for aid in account_ids:
         try:
             recent = fetch_recent_fn(aid) or []
-        except Exception:
+        except Exception as exc:
+            sys.stderr.write(f"[postgame_webhook] fetch_recent failed for {aid}: {exc}\n")
             recent = []
         for m in recent[:5]:
             mid = int(m.get("match_id") or 0)
@@ -165,8 +193,8 @@ def run_postgame_notification_cycle(
         if not raw_match.get("version"):
             try:
                 request_parse_fn(mid)
-            except Exception:
-                pass
+            except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                sys.stderr.write(f"[postgame_webhook] request_parse network error for {mid}: {exc}\n")
             if poll_wait_sec > 0:
                 time.sleep(poll_wait_sec)
             refetched = fetch_match_fn(mid)
@@ -183,7 +211,7 @@ def run_postgame_notification_cycle(
             pass
 
         payload = build_postgame_webhook_payload(report, base_app_url)
-        sent_ok = send_webhook_fn(webhook_url, payload) if webhook_url else True
+        sent_ok = send_webhook_fn(webhook_clean, payload)
         if sent_ok:
             notified_set.add(mid)
             notified_now.append(mid)
@@ -205,7 +233,7 @@ def main() -> int:
 
     result = run_postgame_notification_cycle(
         webhook_url=args.webhook_url,
-        base_app_url=args.base_url or "https://dota-5stack-ledger.vercel.app",
+        base_app_url=args.base_url or DEFAULT_PUBLIC_APP_URL,
     )
     print(json.dumps(result, ensure_ascii=False))
     return 0

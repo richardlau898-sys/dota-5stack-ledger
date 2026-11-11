@@ -21,8 +21,8 @@ class TestF8PostgameWebhook(unittest.TestCase):
         wf_path = REPO_ROOT / ".github" / "workflows" / "postgame_notify.yml"
         self.assertTrue(wf_path.exists(), "缺少 .github/workflows/postgame_notify.yml")
         wf_text = wf_path.read_text(encoding="utf-8")
-        self.assertIn("schedule:", wf_text)
-        self.assertIn("cron:", wf_text)
+        self.assertIn("workflow_dispatch:", wf_text)
+        self.assertNotIn("schedule:", wf_text)
         self.assertIn("postgame_webhook_notifier.py", wf_text)
 
     def test_postgame_webhook_notifier_flow_with_mocks(self):

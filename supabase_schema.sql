@@ -127,3 +127,12 @@ CREATE INDEX IF NOT EXISTS idx_player_matches_hero_id
     ON public.player_matches (account_id, hero_id, won);
 
 ALTER TABLE public.player_matches ENABLE ROW LEVEL SECURITY;
+
+-- F8 / R1-5: 赛后自动推送已通知比赛去重状态表
+CREATE TABLE IF NOT EXISTS public.postgame_notified_matches (
+    match_id BIGINT PRIMARY KEY,
+    notified_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.postgame_notified_matches ENABLE ROW LEVEL SECURITY;
+
