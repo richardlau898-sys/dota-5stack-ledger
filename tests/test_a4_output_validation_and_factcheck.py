@@ -149,7 +149,8 @@ class TestA4OutputValidationAndFactCheck(unittest.TestCase):
             ).encode("utf-8")
             return mock_resp
 
-        try:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(
                 ai_coach_engine,
                 "load_env_llm_config",
@@ -159,7 +160,8 @@ class TestA4OutputValidationAndFactCheck(unittest.TestCase):
                     "model_name": "grok-4.20-0309-non-reasoning",
                     "base_url": "https://api.x.ai/v1",
                 },
-            ), patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            ), patch.dict(ai_coach_engine.__dict__, {"REPORTS_DIR": tmpdir}), \
+                 patch("urllib.request.urlopen", side_effect=fake_urlopen):
                 res = ai_coach_engine.call_llm_coach_review(report)
 
             self.assertTrue(res.get("ok"), f"Expected ok=True, got {res}")
@@ -187,9 +189,6 @@ class TestA4OutputValidationAndFactCheck(unittest.TestCase):
                 fc.get("checked_sentences"),
                 fc.get("verified_count", 0) + fc.get("removed_count", 0),
             )
-        finally:
-            for p in glob.glob(os.path.join(REPO_ROOT, "reports", "coaching-9999990401-*.json")):
-                os.remove(p)
 
     def test_3_frontend_factcheck_panel_displays_real_audit_counts(self):
         """界面上的'事实核查'卡片展示这次核查的真实结果（通过了几条、删掉了几条）"""

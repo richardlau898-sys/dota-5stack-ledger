@@ -75,15 +75,20 @@ class TestP1InitSpeed(unittest.TestCase):
             "draft_and_phase_coach must provide refresh_persisted_squad_ledger",
         )
         roster = server.load_roster()
-        draft_and_phase_coach.refresh_persisted_squad_ledger(server.REPORTS_DIR, roster, [])
-        with patch.object(
-            draft_and_phase_coach,
-            "build_squad_history_ledger",
-            side_effect=AssertionError("Should read persisted ledger cache instead of rebuilding"),
-        ):
-            ledger = draft_and_phase_coach.load_or_build_squad_ledger(server.REPORTS_DIR, roster, [])
-            self.assertIn("squad_members_rank", ledger)
-            self.assertIn("lane_duo_chemistry", ledger)
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_file = Path(tmpdir) / "squad_ledger.json"
+            with patch.object(draft_and_phase_coach, "_ledger_cache_file_path", return_value=cache_file):
+                draft_and_phase_coach.refresh_persisted_squad_ledger(server.REPORTS_DIR, roster, [])
+                with patch.object(
+                    draft_and_phase_coach,
+                    "build_squad_history_ledger",
+                    side_effect=AssertionError("Should read persisted ledger cache instead of rebuilding"),
+                ):
+                    ledger = draft_and_phase_coach.load_or_build_squad_ledger(server.REPORTS_DIR, roster, [])
+                    self.assertIn("squad_members_rank", ledger)
+                    self.assertIn("lane_duo_chemistry", ledger)
 
 
 if __name__ == "__main__":

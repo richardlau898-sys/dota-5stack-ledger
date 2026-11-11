@@ -778,7 +778,7 @@ def build_personal_trends_and_goals(
         mid = int(rep["match_id"])
         dur_min = float(rep.get("duration_min") or 0.0)
         is_parsed = bool(rep.get("is_parsed"))
-        start_str = str(rep.get("start_time_str") or "")
+        start_time = rep.get("start_time")
         for side_key, list_key in (("radiant", "radiant_pos_1_to_5"), ("dire", "dire_pos_1_to_5")):
             opp_list = (
                 rep.get("dire_pos_1_to_5") if side_key == "radiant" else rep.get("radiant_pos_1_to_5")
@@ -851,7 +851,7 @@ def build_personal_trends_and_goals(
 
                 raw_series_by_acc.setdefault(aid, []).append({
                     "match_id": mid,
-                    "start_time_str": start_str,
+                    "start_time": start_time,
                     "pos": pos,
                     "hero_short_zh": p.get("hero_short_zh") or "",
                     "non_teamfight_deaths_after_10m": non_tf_deaths_10m,
@@ -870,7 +870,7 @@ def build_personal_trends_and_goals(
             delta_sec = round(float(raw_sec) - median_item_sec, 1) if (raw_sec is not None and median_item_sec is not None) else None
             points_out.append({
                 "match_id": pt["match_id"],
-                "start_time_str": pt["start_time_str"],
+                "start_time": pt["start_time"],
                 "pos": pt["pos"],
                 "hero_short_zh": pt["hero_short_zh"],
                 "non_teamfight_deaths_after_10m": pt["non_teamfight_deaths_after_10m"],

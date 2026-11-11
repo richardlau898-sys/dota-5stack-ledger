@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import tempfile
 import time
 import unittest
 from pathlib import Path
@@ -42,10 +43,15 @@ class TestP6BrowserTimezone(unittest.TestCase):
             }
         ]
         server._RECENT_MATCHES_CACHE.clear()
-        with patch.object(server, "api_get", return_value=fake_recent):
-            items = server.fetch_recent_matches_formatted(125383759, limit=1)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            with patch.object(server, "REPORTS_DIR", tmp_path), \
+                 patch.object(server, "TMP_REPORTS_DIR", tmp_path / "tmp"), \
+                 patch.object(server, "api_get", return_value=fake_recent):
+                items = server.fetch_recent_matches_formatted(125383759, limit=1)
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0].get("start_time"), expected_ts)
+        self.assertNotIn("start_time_str", items[0])
 
     def test_2_same_match_displays_identical_start_time_across_server_timezones(self):
         """同一场比赛在 UTC 服务端（线上）和 Asia/Shanghai 服务端（本地）生成后，在浏览器端显示完全相同的开始时间"""

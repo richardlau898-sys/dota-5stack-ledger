@@ -3009,7 +3009,7 @@ def call_llm_coach_review(
         mid = report.get("match_id")
         if mid:
             try:
-                reports_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
+                reports_dir = str(globals().get("REPORTS_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports"))
                 os.makedirs(reports_dir, exist_ok=True)
                 cache_path = os.path.join(reports_dir, f"coaching-{mid}-{focus_side}.json")
                 with open(cache_path, "w", encoding="utf-8") as cf:
