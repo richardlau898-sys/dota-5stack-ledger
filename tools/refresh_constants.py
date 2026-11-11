@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-从 OpenDota /constants/ 拉取 heroes、items、abilities、hero_abilities、patch 到 .cache/，
-并提供 --check 模式供 CI 离线检查常量表里的每个英雄是否都有中文名。
+从 OpenDota /constants/ 与 /heroStats 拉取真实数据到 .cache/，
+并提供 --check 模式供 CI 离线检查常量表里的每个英雄是否都有中文名（--check 不写任何文件）。
 """
 import argparse
 import json
 import sys
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -32,7 +33,10 @@ def fetch_constant_resource(resource: str, timeout: int = 20) -> Any:
         },
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+        data = json.loads(resp.read().decode("utf-8"))
+    if not data:
+        raise RuntimeError(f"OpenDota /constants/{resource} returned empty payload")
+    return data
 
 
 def fetch_hero_stats(timeout: int = 20) -> List[Dict[str, Any]]:
@@ -47,7 +51,9 @@ def fetch_hero_stats(timeout: int = 20) -> List[Dict[str, Any]]:
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         data = json.loads(resp.read().decode("utf-8"))
-        return data if isinstance(data, list) else []
+    if not isinstance(data, list) or not data:
+        raise RuntimeError("OpenDota /api/heroStats returned invalid or empty payload")
+    return data
 
 
 def fetch_player_heroes_against(account_id: int, timeout: int = 20) -> List[Dict[str, Any]]:
@@ -62,108 +68,58 @@ def fetch_player_heroes_against(account_id: int, timeout: int = 20) -> List[Dict
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         data = json.loads(resp.read().decode("utf-8"))
-        return data if isinstance(data, list) else []
+    if not isinstance(data, list):
+        raise RuntimeError(f"OpenDota /players/{account_id}/heroes returned invalid payload")
+    return data
 
 
-def build_offline_hero_stats_from_constants_and_reports(cache_dir: Path | None = None) -> List[Dict[str, Any]]:
-    """当离线环境尚无 hero_stats.json 时，基于 heroes_constants.json 与本地样本实测统计生成结构兼容的 hero_stats.json。"""
+def build_hero_stats_document(hs_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    downloaded_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return {
+        "downloaded_at": downloaded_at,
+        "source_url": f"{OPENDOTA_API_BASE}/heroStats",
+        "heroes": hs_data,
+    }
+
+
+def refresh_hero_stats_only(cache_dir: Optional[Path] = None) -> Dict[str, Any]:
     target_dir = cache_dir or (REPO_ROOT / ".cache")
-    heroes_path = target_dir / "heroes_constants.json"
-    heroes_data = json.loads(heroes_path.read_text(encoding="utf-8")) if heroes_path.exists() else {}
-
-    # 汇总本地 reports 实测英雄出场与胜场作为真实样本叠加
-    obs_picks: Dict[int, int] = {}
-    obs_wins: Dict[int, int] = {}
-    reports_dir = REPO_ROOT / "reports"
-    if reports_dir.exists():
-        for raw_p in sorted(reports_dir.glob("raw_*.json")):
-            try:
-                raw_m = json.loads(raw_p.read_text(encoding="utf-8"))
-            except Exception:
-                continue
-            rad_win = bool(raw_m.get("radiant_win"))
-            for pl in raw_m.get("players") or []:
-                hid = int(pl.get("hero_id") or 0)
-                if hid <= 0:
-                    continue
-                slot = int(pl.get("player_slot") or 0)
-                won = rad_win if slot < 128 else (not rad_win)
-                obs_picks[hid] = obs_picks.get(hid, 0) + 1
-                if won:
-                    obs_wins[hid] = obs_wins.get(hid, 0) + 1
-
-    out_list: List[Dict[str, Any]] = []
-    for _, h in sorted((heroes_data or {}).items(), key=lambda kv: int(kv[1].get("id", 0)) if isinstance(kv[1], dict) else 0):
-        if not isinstance(h, dict) or "id" not in h:
-            continue
-        hid = int(h["id"])
-        sample_p = obs_picks.get(hid, 0)
-        sample_w = obs_wins.get(hid, 0)
-        # 基准分段场次（保持 schema 与 OpenDota /api/heroStats 一致）
-        base_b6_p = 1000 + sample_p * 25
-        base_b6_w = 500 + sample_w * 25
-        base_b7_p = 600 + sample_p * 15
-        base_b7_w = 300 + sample_w * 15
-        pub_p = base_b6_p + base_b7_p
-        pub_w = base_b6_w + base_b7_w
-        entry = dict(h)
-        entry.update({
-            "1_pick": 200, "1_win": 100,
-            "2_pick": 400, "2_win": 200,
-            "3_pick": 600, "3_win": 300,
-            "4_pick": 800, "4_win": 400,
-            "5_pick": 900, "5_win": 450,
-            "6_pick": base_b6_p, "6_win": base_b6_w,
-            "7_pick": base_b7_p, "7_win": base_b7_w,
-            "8_pick": 250 + sample_p * 5, "8_win": 125 + sample_w * 5,
-            "pub_pick": pub_p,
-            "pub_win": pub_w,
-            "pro_pick": sample_p,
-            "pro_win": sample_w,
-            "pro_ban": 0,
-        })
-        out_list.append(entry)
-    return out_list
-
-
-def ensure_hero_stats_cache(cache_dir: Path | None = None) -> Path:
-    target_dir = cache_dir or (REPO_ROOT / ".cache")
+    hs_data = fetch_hero_stats()
+    doc = build_hero_stats_document(hs_data)
     target_dir.mkdir(parents=True, exist_ok=True)
-    hs_path = target_dir / "hero_stats.json"
-    if not hs_path.exists():
-        hs_data = build_offline_hero_stats_from_constants_and_reports(target_dir)
-        hs_path.write_text(json.dumps(hs_data, ensure_ascii=False, indent=2), encoding="utf-8")
-    return hs_path
+    (target_dir / "hero_stats.json").write_text(
+        json.dumps(doc, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    return doc
 
 
-def refresh_all_constants(cache_dir: Path | None = None) -> Dict[str, Any]:
+def refresh_all_constants(cache_dir: Optional[Path] = None) -> Dict[str, Any]:
     target_dir = cache_dir or (REPO_ROOT / ".cache")
-    target_dir.mkdir(parents=True, exist_ok=True)
-    out: Dict[str, Any] = {}
+    staged_constants: Dict[str, Any] = {}
     for res in CONSTANT_RESOURCES:
-        data = fetch_constant_resource(res)
-        out[res] = data
+        staged_constants[res] = fetch_constant_resource(res)
+    hs_data = fetch_hero_stats()
+    hs_doc = build_hero_stats_document(hs_data)
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for res, data in staged_constants.items():
         out_file = target_dir / f"{res}_constants.json"
         out_file.write_text(
             json.dumps(data, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
-    try:
-        hs_data = fetch_hero_stats()
-        if hs_data:
-            out["hero_stats"] = hs_data
-            (target_dir / "hero_stats.json").write_text(
-                json.dumps(hs_data, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-    except Exception:
-        ensure_hero_stats_cache(target_dir)
+    (target_dir / "hero_stats.json").write_text(
+        json.dumps(hs_doc, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    out = dict(staged_constants)
+    out["hero_stats"] = hs_doc
     return out
 
 
-def check_constants_localization(cache_dir: Path | None = None) -> List[str]:
+def check_constants_localization(cache_dir: Optional[Path] = None) -> List[str]:
     target_dir = cache_dir or (REPO_ROOT / ".cache")
-    ensure_hero_stats_cache(target_dir)
     errors: List[str] = []
 
     heroes_path = target_dir / "heroes_constants.json"
@@ -172,7 +128,7 @@ def check_constants_localization(cache_dir: Path | None = None) -> List[str]:
         return errors
 
     heroes_data = json.loads(heroes_path.read_text(encoding="utf-8"))
-    for k, val in (heroes_data or {}).items():
+    for _k, val in (heroes_data or {}).items():
         if not isinstance(val, dict) or "id" not in val:
             continue
         hid = int(val["id"])
@@ -192,16 +148,28 @@ def check_constants_localization(cache_dir: Path | None = None) -> List[str]:
     return errors
 
 
-def main() -> int:
+def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Refresh or check OpenDota constants cache.")
-    parser.add_argument("--check", action="store_true", help="Offline check that all heroes have Chinese names.")
-    args = parser.parse_args()
+    parser.add_argument("--check", action="store_true", help="Offline check that all heroes have Chinese names (writes no files).")
+    parser.add_argument("--hero-stats-only", action="store_true", help="Only fetch /api/heroStats into hero_stats.json.")
+    parser.add_argument("--cache-dir", default=None, help="Override target .cache directory.")
+    args = parser.parse_args(argv)
+
+    target_dir = Path(args.cache_dir) if args.cache_dir else None
 
     if not args.check:
-        refreshed = refresh_all_constants()
-        print(f"Refreshed {len(refreshed)} constant tables into .cache/")
+        try:
+            if args.hero_stats_only:
+                doc = refresh_hero_stats_only(target_dir)
+                print(f"Refreshed hero_stats.json ({len(doc['heroes'])} heroes, downloaded_at={doc['downloaded_at']})")
+                return 0
+            refreshed = refresh_all_constants(target_dir)
+            print(f"Refreshed {len(refreshed)} resources into {target_dir or (REPO_ROOT / '.cache')}")
+        except Exception as exc:
+            print(f"ERROR: Failed to refresh OpenDota constants/heroStats: {exc}", file=sys.stderr)
+            return 1
 
-    errs = check_constants_localization()
+    errs = check_constants_localization(target_dir)
     if errs:
         for e in errs:
             print(f"ERROR: {e}", file=sys.stderr)
