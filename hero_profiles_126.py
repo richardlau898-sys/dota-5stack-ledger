@@ -1554,10 +1554,10 @@ def audit_hero_mechanism_and_timing(
     mechanism_summary = ""
     early_phase_note = prof["early_rule"]
     mid_phase_note = prof["mid_rule"]
-    late_phase_note = prof["late_rule"]
+    late_phase_note = prof["late_rule"] if duration_min >= 30 else ""
 
     if curve == "late_hyper_carry" and pos in (1, 2):
-        # 大后期刷钱核：前中期（10-25m）低参战刷钱是合理的！关键看 25m+ 是否完成收割
+        # 大后期刷钱核：前中期（10-25m）低参战刷钱是合理的！关键看 25m+（且后期至少 5 分钟，即整局 >=30m）是否完成收割
         if (mid_gold_share is not None and mid_gold >= 5800) or gpm >= 520:
             early_farm_reasonable = True
             mid_econ_clause = (
@@ -1569,7 +1569,7 @@ def audit_hero_mechanism_and_timing(
                 f"【符合{hero_name}大核特性的避战刷钱】{hero_name}前期作战弱、极度依赖核心装成型，"
                 f"{mid_econ_clause}在策略上完全合理，核心看 25m+ 出山能否收割。"
             )
-        if duration_min >= 25 and late_gold_share is not None and late_hdmg_share is not None:
+        if duration_min >= 30 and late_gold_share is not None and late_hdmg_share is not None:
             if late_hdmg_share >= 23.0 or (won and (late_hdmg_share >= 19.0 or tdmg >= 4500)):
                 late_harvest_fulfilled = True
                 verdict_tag = "大核出山收割"
@@ -3277,7 +3277,10 @@ def build_hero_matchup_dossier(
         f"关键技能释放【{ab_str}】，终局出装【{items_final}】。"
     )
     if pos in (1, 2) and tdmg < 600 and not won:
-        exec_verdict += f" ⚠️ 未能兑现{pos}号位{short}的后期推进与切后排接管职责（建筑伤害仅 {tdmg}）！"
+        if duration_min >= 30:
+            exec_verdict += f" ⚠️ 未能兑现{pos}号位{short}的后期推进与切后排接管职责（建筑伤害仅 {tdmg}）！"
+        else:
+            exec_verdict += f" ⚠️ 未能推进建筑与打开正面突破口（建筑伤害仅 {tdmg}）！"
     elif pos in (4, 5) and int(p.get("last_hits") or 0) >= 100 and not any(k in items_final for k in ("跳刀", "闪烁", "推推", "原力", "微光", "阿托斯", "莲花", "梅肯")):
         exec_verdict += f" 🚨 违背{pos}号位辅助本职：刷了 {p.get('last_hits')} 刀却未出跳刀/推推/微光等核心团队装！"
     elif won and (kp_pct >= 60.0 or hdmg_pct >= 22.0 or tdmg >= 4000):
