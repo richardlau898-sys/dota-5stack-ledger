@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r3.1"
+ENGINE_VERSION = "2026.11.r0.6"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -1461,6 +1461,7 @@ def analyze_match_data(
                 "pos_source": p.get("pos_source", "inferred"),
                 "pos_label": p.get("pos_label"),
                 "account_id": aid,
+                "canonical_account_id": roster_member["canonical_id"] if roster_member else aid_int,
                 "personaname": persona,
                 "friend_tag": friend_tag,
                 "is_me": is_me,
