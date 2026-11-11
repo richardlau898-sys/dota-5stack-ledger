@@ -424,14 +424,9 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 f"建议 4/5 号位在 6~18 分钟控符与插眼路过三角区时多帮主C屯远古与大野。"
             )
 
-        # 2) 开雾找节奏审计 (smoke_of_deceit purchase_log + item_uses + 90s 战果关联)
-        raw_smoke_buys: List[Dict[str, Any]] = []
+        # 2) 开雾记录统计（仅读取团战数据中的 item_uses.smoke_of_deceit，不按买雾时间推断）
         own_smoke_uses_total = 0
         per_player_smokes: List[Dict[str, Any]] = []
-
-        # 收集全队击杀与阵亡时间戳用于关联开雾战果
-        team_kills_timeline: List[Dict[str, Any]] = []
-        team_deaths_timeline: List[Dict[str, Any]] = []
         for fp in own_players:
             rp = raw_by_slot.get(int(fp["player_slot"]), {})
             s_used = int((rp.get("item_uses") or {}).get("smoke_of_deceit") or 0)
@@ -445,101 +440,90 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     "bought": s_bought,
                     "used": s_used,
                 })
-            for pe in rp.get("purchase_log") or []:
-                if pe.get("key") == "smoke_of_deceit":
-                    raw_smoke_buys.append({
-                        "time_sec": int(pe.get("time") or 0),
-                        "hero_short_zh": fp["hero_short_zh"],
-                        "personaname": fp["personaname"],
-                        "pos": fp["pos"],
-                    })
-            for ke in rp.get("kills_log") or []:
-                vhid = npc_to_hid.get(str(ke.get("key") or ""), 0)
-                vfp = fmt_by_hid.get(vhid)
-                team_kills_timeline.append({
-                    "time_sec": int(ke.get("time") or 0),
-                    "killer": fp["hero_short_zh"],
-                    "victim": vfp["hero_short_zh"] if vfp else "敌方英雄",
-                })
-            for de in rp.get("deaths_log") or []:
-                team_deaths_timeline.append({
-                    "time_sec": int(de.get("time") or 0),
-                    "victim": fp["hero_short_zh"],
-                })
 
         opp_smoke_uses_total = sum(
             int((raw_by_slot.get(int(op["player_slot"]), {}).get("item_uses") or {}).get("smoke_of_deceit") or 0)
             for op in opp_players
         )
 
-        # 合并相近 30 秒内的买雾事件并追踪随后 105 秒战果
-        raw_smoke_buys.sort(key=lambda x: x["time_sec"])
+        raw_tfs = match.get("teamfights") or []
+        raw_players_list = match.get("players") or []
+        own_idx_range = range(0, 5) if side_key == "radiant" else range(5, 10)
+        opp_idx_range = range(5, 10) if side_key == "radiant" else range(0, 5)
+
         smoke_events: List[Dict[str, Any]] = []
-        for sb in raw_smoke_buys:
-            t0 = sb["time_sec"]
-            if smoke_events and abs(t0 - smoke_events[-1]["time_sec"]) <= 35:
+        for tf in raw_tfs:
+            tf_pl = tf.get("players") or []
+            smoke_users_in_tf: List[Dict[str, Any]] = []
+            for j in own_idx_range:
+                if j < len(tf_pl):
+                    tf_s_used = int((tf_pl[j].get("item_uses") or {}).get("smoke_of_deceit") or 0)
+                    if tf_s_used > 0:
+                        rp_j = raw_players_list[j] if j < len(raw_players_list) else {}
+                        fp_j = fmt_by_hid.get(int(rp_j.get("hero_id") or 0))
+                        smoke_users_in_tf.append({
+                            "hero_short_zh": fp_j["hero_short_zh"] if fp_j else "本方英雄",
+                            "personaname": fp_j["personaname"] if fp_j else "",
+                            "pos": fp_j["pos"] if fp_j else 5,
+                            "count": tf_s_used,
+                        })
+            if not smoke_users_in_tf:
                 continue
-            window_end = t0 + 105
-            k_after = [k for k in team_kills_timeline if max(0, t0) <= k["time_sec"] <= window_end]
-            d_after = [d for d in team_deaths_timeline if max(0, t0) <= d["time_sec"] <= window_end]
 
-            if t0 < 0:
-                phase_tag = "出门一级团雾"
-            elif t0 < 600:
-                phase_tag = "对线期游走雾"
+            t0 = int(tf.get("start") or 0)
+            t_end = int(tf.get("end") or t0)
+            own_d = sum(int(tf_pl[j].get("deaths") or 0) for j in own_idx_range if j < len(tf_pl))
+            opp_d = sum(int(tf_pl[j].get("deaths") or 0) for j in opp_idx_range if j < len(tf_pl))
+
+            if t0 < 600:
+                phase_tag = "对线期团战雾"
             elif t0 < 1500:
-                phase_tag = "中期抓人/推进雾"
+                phase_tag = "中期团战雾"
             else:
-                phase_tag = "后期决胜/控盾雾"
+                phase_tag = "后期团战雾"
 
-            if len(k_after) > len(d_after) and len(k_after) >= 1:
-                victims_str = "、".join(f"{ fmt_mmss(k['time_sec']) } 抓死{k['victim']}" for k in k_after[:3])
+            initiator = smoke_users_in_tf[0]
+            if opp_d > own_d:
                 outcome = "success"
-                outcome_label = f"🟢 破雾奏效 ({len(k_after)}换{len(d_after)})"
-                detail = f"买雾/开雾后迅速打开节奏：{victims_str}。"
-            elif len(d_after) > len(k_after) and len(d_after) >= 1:
-                dead_str = "、".join(d["victim"] for d in d_after[:3])
-                outcome = "backfire"
-                outcome_label = f"🔴 开雾撞墙 ({len(k_after)}换{len(d_after)})"
-                detail = f"开雾切入后反遭敌方反打，导致我方 {dead_str} 阵亡。"
-            elif len(k_after) > 0 and len(k_after) == len(d_after):
+                outcome_label = f"🟢 团战占优 ({opp_d}换{own_d})"
+                detail = f"团战期间（{fmt_mmss(t0)}–{fmt_mmss(t_end)}）使用诡计之雾，敌方阵亡 {opp_d} 人、本方阵亡 {own_d} 人。"
+            elif own_d > opp_d:
+                outcome = "loss"
+                outcome_label = f"🔴 团战阵亡偏多 ({opp_d}换{own_d})"
+                detail = f"团战期间（{fmt_mmss(t0)}–{fmt_mmss(t_end)}）使用诡计之雾，本方阵亡 {own_d} 人、敌方阵亡 {opp_d} 人。"
+            elif opp_d > 0:
                 outcome = "trade"
-                outcome_label = f"⚖️ 破雾互换 ({len(k_after)}换{len(d_after)})"
-                detail = f"开雾遭遇战双方打出 {len(k_after)} 换 {len(d_after)} 人头互换。"
+                outcome_label = f"⚖️ 团战互换 ({opp_d}换{own_d})"
+                detail = f"团战期间（{fmt_mmss(t0)}–{fmt_mmss(t_end)}）使用诡计之雾，双方各阵亡 {own_d} 人。"
             else:
                 outcome = "dry"
-                outcome_label = "🟡 哑火空雾 (0击杀)"
-                detail = "买雾/屯雾后 100 秒内未产生任何击杀（蹲人落空或仅用于安全做视野）。"
+                outcome_label = "🟡 团战未产生阵亡 (0换0)"
+                detail = f"团战期间（{fmt_mmss(t0)}–{fmt_mmss(t_end)}）使用诡计之雾，未产生阵亡。"
 
             smoke_events.append({
                 "time_sec": t0,
                 "time_str": fmt_mmss(t0),
                 "phase_tag": phase_tag,
-                "initiator_hero": sb["hero_short_zh"],
-                "initiator_player": sb["personaname"],
-                "initiator_pos": sb["pos"],
+                "initiator_hero": initiator["hero_short_zh"],
+                "initiator_player": initiator["personaname"],
+                "initiator_pos": initiator["pos"],
                 "outcome": outcome,
                 "outcome_label": outcome_label,
                 "detail": detail,
             })
 
-        mid_smokes = sum(1 for e in smoke_events if 600 <= e["time_sec"] <= 1500)
         succ_smokes = sum(1 for e in smoke_events if e["outcome"] == "success")
-
-        if own_smoke_uses_total <= 1:
+        if own_smoke_uses_total == 0:
+            smoke_verdict = f"本方全场使用诡计之雾 0 次（敌方使用 {opp_smoke_uses_total} 次）。"
+        elif not smoke_events:
             smoke_verdict = (
-                f"🚨 全场几乎不开雾找节奏：本方 {duration_min:.0f} 分钟累计仅开雾 {own_smoke_uses_total} 次（敌方开雾 {opp_smoke_uses_total} 次）！"
-                f"10~25 分钟中期节奏期极度缺乏主动买雾抓单与控盾意识，全靠走明牌视野硬撞。"
-            )
-        elif mid_smokes == 0:
-            smoke_verdict = (
-                f"⚠️ 中期（10–25m）零开雾真空：本方全场共开雾 {own_smoke_uses_total} 次（敌方 {opp_smoke_uses_total} 次），"
-                f"但最关键的 10~25 分钟跳刀/大招节奏期竟然没有组织起有效的买雾抓人！"
+                f"本方全场累计使用诡计之雾 {own_smoke_uses_total} 次（敌方 {opp_smoke_uses_total} 次），"
+                f"团战记录中未包含诡计之雾施放事件。"
             )
         else:
             smoke_verdict = (
-                f"本方全场累计激活诡计之雾 {own_smoke_uses_total} 次（敌方 {opp_smoke_uses_total} 次），"
-                f"共捕获 {len(smoke_events)} 波买雾节奏，其中 {succ_smokes} 波在 100 秒内直接转化为击杀破局。"
+                f"本方全场累计使用诡计之雾 {own_smoke_uses_total} 次（敌方 {opp_smoke_uses_total} 次），"
+                f"其中 {len(smoke_events)} 次出现在团战记录中（团战占优 {succ_smokes} 波）。"
             )
 
         return {
