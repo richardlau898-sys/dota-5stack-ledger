@@ -316,23 +316,44 @@ def build_tactical_microscope(
     all_formatted = radiant_players + dire_players
     if not match.get("version"):
         for p in all_formatted:
-            p["hero_execution_audit"] = {"available": False}
-        unavail = {"available": False, "dire": {"available": False}, "radiant": {"available": False}}
+            p["hero_execution_audit"] = {
+                "available": False,
+                "evidence": "measured",
+                "source_fields": ["version"],
+                "conclusions": [],
+            }
+
+        def _unavail_by_side(ev: str = "measured") -> Dict[str, Any]:
+            side_obj: Dict[str, Any] = {
+                "available": False,
+                "evidence": ev,
+                "conclusions": [],
+            }
+            if ev == "measured":
+                side_obj["source_fields"] = ["version"]
+            return {
+                "available": False,
+                "dire": dict(side_obj),
+                "radiant": dict(side_obj),
+            }
+
         return {
             "available": False,
-            "hero_execution_by_side": dict(unavail),
-            "itemization_audit_by_side": dict(unavail),
-            "damage_quality_and_build_by_side": dict(unavail),
-            "support_vision_by_side": dict(unavail),
-            "stacking_and_smoke_by_side": dict(unavail),
-            "laning_mechanics_by_side": dict(unavail),
-            "tp_rotation_by_side": dict(unavail),
-            "unpressed_saves_by_side": dict(unavail),
-            "map_space_by_side": dict(unavail),
-            "damage_received_by_side": dict(unavail),
-            "economy_and_pings_by_side": dict(unavail),
-            "role_mirror_by_side": dict(unavail),
-            "macro_objectives_by_side": dict(unavail),
+            "evidence": "measured",
+            "source_fields": ["version"],
+            "hero_execution_by_side": _unavail_by_side(),
+            "itemization_audit_by_side": _unavail_by_side("inferred"),
+            "damage_quality_and_build_by_side": _unavail_by_side("inferred"),
+            "support_vision_by_side": _unavail_by_side("inferred"),
+            "stacking_and_smoke_by_side": _unavail_by_side("inferred"),
+            "laning_mechanics_by_side": _unavail_by_side(),
+            "tp_rotation_by_side": _unavail_by_side("inferred"),
+            "unpressed_saves_by_side": _unavail_by_side("inferred"),
+            "map_space_by_side": _unavail_by_side("inferred"),
+            "damage_received_by_side": _unavail_by_side(),
+            "economy_and_pings_by_side": _unavail_by_side(),
+            "role_mirror_by_side": _unavail_by_side("inferred"),
+            "macro_objectives_by_side": _unavail_by_side("inferred"),
             "minute_snapshots": {
                 "format": "columnar_v1",
                 "minutes": [],
@@ -417,6 +438,7 @@ def build_tactical_microscope(
     s_snap = build_snapshots_matchups_objectives_sections(ctx)
 
     return {
+        "evidence": "inferred",
         **s_hero,
         **s_item,
         **s_vis,

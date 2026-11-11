@@ -129,6 +129,8 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                             "coords": f"({ox:.0f},{oy:.0f})",
                             "lifespan_sec": lifespan,
                             "dewarded_by": killer_zh,
+                            "evidence": "measured",
+                            "source_fields": ["players[].obs_log", "players[].obs_left_log"],
                         })
 
                 obs_records.append({
@@ -145,6 +147,8 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     "lifespan_sec": lifespan,
                     "was_dewarded": was_dewarded,
                     "killer_zh": killer_zh,
+                    "evidence": "measured",
+                    "source_fields": ["players[].obs_log", "players[].obs_left_log"],
                 })
 
             for s in s_log:
@@ -193,6 +197,7 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     "avg_lifespan_sec": int(avg_life),
                     "dewarded_cnt": p_dewarded_cnt,
                     "style_note": style_note,
+                    "evidence": "inferred",
                 })
 
         # 聚类检测「同高台头铁连插」(半径 4.5 内插了 >= 3 颗守卫)
@@ -227,6 +232,7 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     "planters": " / ".join(planters),
                     "times_str": times_s,
                     "comment": f"在【{c['zone_zh']} ({c['cx']:.0f},{c['cy']:.0f})】同一个眼位重复插了 {len(c['items'])} 颗眼（{obs_c}假/{sen_c}真，时间：{times_s}），属于典型的固定高台死磕！",
+                    "evidence": "inferred",
                 })
 
         # 提取「✨ 满时长封神眼 (god_tier_wards)」与「🌑 全图黑灯瞎火真空期 (blackout_windows)」
@@ -240,6 +246,8 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     "zone_zh": r["zone_zh"],
                     "posture_zh": r["posture_zh"],
                     "lifespan_sec": r["lifespan_sec"],
+                    "evidence": "measured",
+                    "source_fields": ["players[].obs_log", "players[].obs_left_log"],
                 })
 
         blackout_windows: List[Dict[str, Any]] = []
@@ -284,6 +292,7 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                                 f"🌑 {tr_str}（持续 {cur_bo['end_min'] - cur_bo['start_min']} 分钟己方场上假眼至多 {cur_bo['min_obs']} 颗）："
                                 + (f"同期本方【{'、'.join(v_uniq[:4])}】累计阵亡 {len(cur_bo['victims'])} 人次。" if v_uniq else "同期我方无英雄阵亡。")
                             ),
+                            "evidence": "inferred",
                         })
                     cur_bo = None
         if cur_bo is not None and (len(cur_bo["victims"]) >= 1 or (cur_bo["end_min"] - cur_bo["start_min"]) >= 2):
@@ -299,6 +308,7 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     f"🌑 {tr_str}（持续 {cur_bo['end_min'] - cur_bo['start_min']} 分钟己方场上假眼至多 {cur_bo['min_obs']} 颗）："
                     + (f"同期本方【{'、'.join(v_uniq[:4])}】累计阵亡 {len(cur_bo['victims'])} 人次。" if v_uniq else "同期我方无英雄阵亡。")
                 ),
+                "evidence": "inferred",
             })
 
         total_obs = max(1, len(obs_records))
@@ -332,6 +342,8 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "side": side_key,
             "side_zh": side_zh,
+            "evidence": "inferred",
+            "conclusions": [{"text": posture_verdict, "kind": "posture_verdict", "evidence": "inferred"}],
             "total_obs": len(obs_records),
             "total_sen": len(sen_records),
             "dewarded_total": dewarded_total,
@@ -395,6 +407,8 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "creeps_stacked": cr_stacked,
                 "stack_mins": stack_mins,
                 "role_tag": "辅助本职" if pos_i in (4, 5) else "大哥自力更生",
+                "evidence": "measured",
+                "source_fields": ["players[].camps_stacked", "players[].creeps_stacked", "players[].camps_stacked_t"],
             })
 
         opp_total_stacks = sum(
@@ -439,6 +453,7 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     "personaname": fp["personaname"],
                     "bought": s_bought,
                     "used": s_used,
+                    "evidence": "inferred",
                 })
 
         opp_smoke_uses_total = sum(
@@ -510,6 +525,7 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "outcome": outcome,
                 "outcome_label": outcome_label,
                 "detail": detail,
+                "evidence": "inferred",
             })
 
         succ_smokes = sum(1 for e in smoke_events if e["outcome"] == "success")
@@ -528,6 +544,11 @@ def build_vision_stack_smoke_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
 
         return {
             "side": side_key,
+            "evidence": "inferred",
+            "conclusions": [
+                {"text": stack_verdict, "kind": "stack_verdict", "evidence": "inferred"},
+                {"text": smoke_verdict, "kind": "smoke_verdict", "evidence": "inferred"},
+            ],
             "total_stacks": total_stacks,
             "total_creeps_stacked": total_creeps,
             "support_stacks": sup_stacks,

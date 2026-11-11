@@ -55,6 +55,8 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "hero_short_zh": fp["hero_short_zh"],
                 "hero_img": fp["hero_img"],
                 "personaname": fp["personaname"],
+                "evidence": "measured",
+                "source_fields": ["players[].runes_log"],
             }
             if rkey == "8":
                 all_wisdom_runes.append(entry)
@@ -124,6 +126,7 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "early_sentries": early_sen,
                 "status_tag": status_tag,
                 "comment": comment,
+                "evidence": "inferred",
             })
 
         # 2) 疗伤莲花 (Lotus: famango / great_famango / greater_famango) 争夺
@@ -200,6 +203,8 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "water_runes": water_cnt,
                 "bounty_runes": bounty_cnt,
                 "power_runes": power_cnt,
+                "evidence": "measured",
+                "source_fields": ["players[].ability_uses", "players[].item_uses", "players[].runes_log"],
             })
 
         for op in opp_players:
@@ -216,8 +221,28 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
         else:
             wisdom_verdict = f"⚠️ 智慧经验符落后：本方仅吃到 {own_wisdom_cnt} 颗经验符 vs 敌方吃到 {opp_wisdom_cnt} 颗！7分钟与14分钟必须提前 15 秒去劣势路祭坛蹲守经验符。"
 
+        lotus_conclusion: Dict[str, Any] = (
+            {
+                "text": lotus_verdict,
+                "kind": "lotus_verdict",
+                "evidence": "measured",
+                "source_fields": ["players[].item_uses"],
+            }
+            if own_lotus_total == opp_lotus_total
+            else {
+                "text": lotus_verdict,
+                "kind": "lotus_verdict",
+                "evidence": "inferred",
+            }
+        )
+
         return {
             "side": side_key,
+            "evidence": "inferred",
+            "conclusions": [
+                lotus_conclusion,
+                {"text": wisdom_verdict, "kind": "wisdom_verdict", "evidence": "inferred"},
+            ],
             "pulling_rows": pulling_rows,
             "own_lotus_total": own_lotus_total,
             "opp_lotus_total": opp_lotus_total,
@@ -325,6 +350,7 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     "opp_kills": opp_deaths_cnt,
                     "tp_saviors": tp_saviors_objs,
                     "spectators": spectators_objs if len(own_deaths_heroes) >= 2 else [],
+                    "evidence": "inferred",
                 })
 
             if tp_responders and (len(own_deaths_heroes) + opp_deaths_cnt >= 2):
@@ -333,6 +359,7 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     "responders": "、".join(tp_responders),
                     "trade_str": f"打成 {opp_deaths_cnt} 换 {len(own_deaths_heroes)}",
                     "detail": f"在 {t_range} 交战中，{'、'.join(tp_responders)} 本波使用了 TP（该波 {opp_deaths_cnt} 换 {len(own_deaths_heroes)}）。",
+                    "evidence": "inferred",
                 })
 
             # 如果本波我方死了至少 2 人，且有存活队友无伤害/技能/治疗/TP记录
@@ -440,6 +467,7 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "tp_feed_times": tp_feed_times,
                 "grade": grade,
                 "verdict": verdict,
+                "evidence": "inferred",
             })
 
         tp_verdict_parts = [
@@ -453,10 +481,13 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
             tp_verdict_parts.append(
                 f"🚨 抓包 {len(absent_warnings)} 波团战在队友成片阵亡时有人全程 0 英雄伤害且未亮 TP 支援！"
             )
+        tp_verdict_str = " ".join(tp_verdict_parts)
 
         return {
             "side": side_key,
-            "tp_verdict": " ".join(tp_verdict_parts),
+            "evidence": "inferred",
+            "tp_verdict": tp_verdict_str,
+            "conclusions": [{"text": tp_verdict_str, "kind": "tp_verdict", "evidence": "inferred"}],
             "player_tp_rows": player_tp_rows,
             "rotation_highlights": rotation_highlights[:6],
             "absent_warnings": absent_warnings[:6],
@@ -583,7 +614,9 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
 
         return {
             "side": side_key,
+            "evidence": "inferred",
             "side_verdict": side_verdict,
+            "conclusions": [{"text": side_verdict, "kind": "side_verdict", "evidence": "inferred"}],
             "critical_total": critical_total,
             "zero_spell_total": zero_spell_total,
             "incidents": incidents[:10],

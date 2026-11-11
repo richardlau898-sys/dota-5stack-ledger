@@ -184,6 +184,7 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                         "time_dead": dead_s,
                         "consequence": "",
                         "detail": detail_txt,
+                        "evidence": "inferred",
                     })
 
             # 判定该选手的「地图空间与兵线野区分配统计」（结合英雄强势期曲线 timing_curve，中性描述）
@@ -263,6 +264,7 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "space_style_badge": style_badge,
                 "grade": grade,
                 "verdict": verdict,
+                "evidence": "inferred",
             })
 
         solo_pickoff_events.sort(key=lambda x: x["time_sec"])
@@ -278,7 +280,9 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
 
         return {
             "side": side_key,
+            "evidence": "inferred",
             "side_verdict": side_verdict,
+            "conclusions": [{"text": side_verdict, "kind": "side_verdict", "evidence": "inferred"}],
             "total_solo_pickoffs": total_solo_pickoffs,
             "solo_pickoff_events": solo_pickoff_events[:12],
             "player_space_rows": player_space_rows,
@@ -377,6 +381,7 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "def_items_owned": (magic_def_owned + phys_def_owned)[:4],
                 "grade": grade,
                 "verdict": verdict,
+                "evidence": "inferred",
             })
 
         tot_team = max(1, team_auto_dmg + team_spell_dmg)
@@ -388,7 +393,17 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
         )
         return {
             "side": side_key,
+            "evidence": "measured",
+            "source_fields": ["players[].damage_inflictor_received"],
             "side_verdict": side_verdict,
+            "conclusions": [
+                {
+                    "text": side_verdict,
+                    "kind": "side_verdict",
+                    "evidence": "measured",
+                    "source_fields": ["players[].damage_inflictor_received"],
+                }
+            ],
             "team_spell_pct": t_spell_pct,
             "team_auto_pct": t_auto_pct,
             "rows": rows,
@@ -497,6 +512,7 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "pings": pings_cnt,
                 "chatwheel_cnt": chatwheel_cnt,
                 "econ_tag": econ_tag,
+                "evidence": "inferred",
             })
 
         total_pause_sec = sum(int(p.get("duration") or 0) for p in raw_pauses)
@@ -515,10 +531,21 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
             if (comeback_val or stomp_val)
             else ""
         )
+        econ_side_verdict = " ｜ ".join(x for x in [ping_king_str, pause_str, swing_str] if x)
 
         return {
             "side": side_key,
-            "side_verdict": " ｜ ".join(x for x in [ping_king_str, pause_str, swing_str] if x),
+            "evidence": "measured",
+            "source_fields": ["players[].pings", "pauses", "comeback", "stomp"],
+            "side_verdict": econ_side_verdict,
+            "conclusions": [
+                {
+                    "text": econ_side_verdict,
+                    "kind": "side_verdict",
+                    "evidence": "measured",
+                    "source_fields": ["players[].pings", "pauses", "comeback", "stomp"],
+                }
+            ] if econ_side_verdict else [],
             "pause_count": len(raw_pauses),
             "pause_total_sec": total_pause_sec,
             "comeback": comeback_val,

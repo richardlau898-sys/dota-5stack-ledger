@@ -235,6 +235,21 @@ def evaluate_player_deeply(
     strengths: List[str] = []
     weaknesses: List[str] = []
     improvements: List[str] = []
+    conclusion_meta: Dict[str, Tuple[str, Optional[List[str]]]] = {}
+
+    def _add_conclusion(
+        bucket: List[str],
+        txt: str,
+        ev: str,
+        source_fields: Optional[List[str]] = None,
+        prepend: bool = False,
+    ) -> None:
+        conclusion_meta[txt] = (ev, list(source_fields) if (ev == "measured" and source_fields) else None)
+        if prepend:
+            bucket.insert(0, txt)
+        else:
+            bucket.append(txt)
+
     trash_candidates: List[Tuple[int, str]] = []
     blame_points = max(4.0, 102.0 - mvp_score)
 
@@ -256,26 +271,35 @@ def evaluate_player_deeply(
                 target_lh = int(target_lh * 0.8)
             if lh10 >= target_lh:
                 diff_txt = f"，10分钟净压对位 {opp_hero} {gold_diff_10} 金" if gold_diff_10 > 250 else ""
-                strengths.append(
-                    f"对线基本功扎实：前10分钟交出 {lh10}正/{dn10}反（10m经济 {gold10:,}，效率 {lane_eff or '-'}%）{diff_txt}，撑起了前中期基础节奏。"
+                _add_conclusion(
+                    strengths,
+                    f"对线基本功扎实：前10分钟交出 {lh10}正/{dn10}反（10m经济 {gold10:,}，效率 {lane_eff or '-'}%）{diff_txt}，撑起了前中期基础节奏。",
+                    "measured",
+                    ["players[].lh_t", "players[].dn_t", "players[].gold_t", "players[].lane_efficiency_pct"],
                 )
             elif lh10 <= (36 if pos in (1, 2) else 28) and not is_turbo:
                 blame_points += 14.0
                 diff_txt = f"，被对位 {opp_hero}（10m {opp_lh10}刀/{opp_gold10:,}金）拉开了 {abs(gold_diff_10):,} 经济差" if gold_diff_10 < -300 else ""
-                weaknesses.append(
-                    f"对线期直接崩盘：10分钟仅补了 {lh10} 刀（经济 {gold10:,}，对线效率 {lane_eff or '-'}%）{diff_txt}，塔下补刀和换血细节全部拉胯。"
+                _add_conclusion(
+                    weaknesses,
+                    f"对线期直接崩盘：10分钟仅补了 {lh10} 刀（经济 {gold10:,}，对线效率 {lane_eff or '-'}%）{diff_txt}，塔下补刀和换血细节全部拉胯。",
+                    "inferred",
                 )
                 trash_candidates.append((
                     85,
                     f"@{pname} 10分钟补{lh10}刀，你在线上是跟对面小兵拜了把子舍不得下手吗？对面{opp_hero}刷得像在打人机！",
                 ))
-                improvements.append(
-                    f"{pos}号位 {hero_name} 线上劣势时，前5分钟补不到刀就果断拉双野或摇辅助进野区收屯野，别在线上硬着头皮既漏刀又白送状态。"
+                _add_conclusion(
+                    improvements,
+                    f"{pos}号位 {hero_name} 线上劣势时，前5分钟补不到刀就果断拉双野或摇辅助进野区收屯野，别在线上硬着头皮既漏刀又白送状态。",
+                    "template",
                 )
             elif gold_diff_10 <= -600:
                 blame_points += 10.0
-                weaknesses.append(
-                    f"对线期被对位压制：10分钟经济 {gold10:,}，比对位 {opp_hero}（{opp_gold10:,}金）落后 {abs(gold_diff_10):,} 金，放任对面核心无压力出山。"
+                _add_conclusion(
+                    weaknesses,
+                    f"对线期被对位压制：10分钟经济 {gold10:,}，比对位 {opp_hero}（{opp_gold10:,}金）落后 {abs(gold_diff_10):,} 金，放任对面核心无压力出山。",
+                    "inferred",
                 )
                 trash_candidates.append((
                     76,
@@ -302,64 +326,90 @@ def evaluate_player_deeply(
                 cp_lh10 = core_partner["laning_10m"]["lh10"]
                 cp_hero = core_partner.get("hero_short_zh") or core_partner["hero_name"]
                 if cp_lh10 and cp_lh10 >= 50:
-                    strengths.append(
-                        f"保人拉野到位：对线期把同路核心 {cp_hero} 保出了 10分钟 {cp_lh10} 刀 / {cp_g10:,} 经济的顺畅开局。"
+                    _add_conclusion(
+                        strengths,
+                        f"保人拉野到位：对线期把同路核心 {cp_hero} 保出了 10分钟 {cp_lh10} 刀 / {cp_g10:,} 经济的顺畅开局。",
+                        "inferred",
                     )
                 elif cp_lh10 and cp_lh10 <= 32 and not is_turbo:
                     blame_points += 10.0
-                    weaknesses.append(
-                        f"线上保人失职：同路 {cp_hero} 10分钟才补了 {cp_lh10} 刀（{cp_g10:,}金），前5分钟封野、拉野消兵和消耗都没打出来。"
+                    _add_conclusion(
+                        weaknesses,
+                        f"线上保人失职：同路 {cp_hero} 10分钟才补了 {cp_lh10} 刀（{cp_g10:,}金），前5分钟封野、拉野消兵和消耗都没打出来。",
+                        "inferred",
                     )
 
     # --- (B) 经济转化率、GPM 与伤害承伤比审计 ---
     if pos in (1, 2):
         if gpm_pct >= 0.80:
-            strengths.append(
-                f"刷钱效率拉满：GPM {gpm} / XPM {xpm}（全场补刀 {lh}），发育速度超越了全网 {gpm_pct*100:.0f}% 的同英雄玩家。"
+            _add_conclusion(
+                strengths,
+                f"刷钱效率拉满：GPM {gpm} / XPM {xpm}（全场补刀 {lh}），发育速度超越了全网 {gpm_pct*100:.0f}% 的同英雄玩家。",
+                "measured",
+                ["players[].gold_per_min", "players[].xp_per_min", "players[].last_hits", "players[].benchmarks.gold_per_min"],
             )
         elif gpm_pct <= 0.35 and not is_turbo:
             blame_points += 18.0
-            weaknesses.append(
-                f"核心发育严重滞后：{pos}号位 {hero_name} 全场 GPM 仅有 {gpm}（补刀 {lh}，仅超越 {gpm_pct*100:.0f}% 同英雄），中期刷钱路线完全断档。"
+            _add_conclusion(
+                weaknesses,
+                f"核心发育严重滞后：{pos}号位 {hero_name} 全场 GPM 仅有 {gpm}（补刀 {lh}，仅超越 {gpm_pct*100:.0f}% 同英雄），中期刷钱路线完全断档。",
+                "inferred",
             )
             trash_candidates.append((
                 88,
                 f"@{pname} 打个{pos}号位GPM才{gpm}，野怪见了你都得递根烟问你今天怎么不来收租？",
             ))
-            improvements.append(
-                f"{pos}号位在 12~24 分钟大招冷却或关键装未齐时，少在河道跟辅助抱团干瞪眼，先把危险线推过河道再回头收远古，保证 GPM 稳定在 600+。"
+            _add_conclusion(
+                improvements,
+                f"{pos}号位在 12~24 分钟大招冷却或关键装未齐时，少在河道跟辅助抱团干瞪眼，先把危险线推过河道再回头收远古，保证 GPM 稳定在 600+。",
+                "template",
             )
 
         if hdmg_share >= 28.0 or dmg_pct >= 0.80:
-            strengths.append(
-                f"输出转化率极高：吃下全队 {nw_share:.1f}% 经济（{nw:,}金），狂轰 {hdmg:,} 英雄伤害（占全队 {hdmg_share:.1f}%，超越全网 {dmg_pct*100:.0f}% 同英雄）。"
+            _add_conclusion(
+                strengths,
+                f"输出转化率极高：吃下全队 {nw_share:.1f}% 经济（{nw:,}金），狂轰 {hdmg:,} 英雄伤害（占全队 {hdmg_share:.1f}%，超越全网 {dmg_pct*100:.0f}% 同英雄）。",
+                "measured",
+                ["players[].net_worth", "players[].hero_damage", "players[].benchmarks.hero_damage_per_min"],
             )
         elif hdmg_share < 19.0 and duration_min >= 22:
             blame_points += 22.0
-            weaknesses.append(
-                f"典型高占经低产出：拿了全队 {nw_share:.1f}% 的总经济（{nw:,}金），全场却只打出 {hdmg:,} 伤害（仅占全队 {hdmg_share:.1f}%），每1块钱经济只换来 {hdmg/max(1,nw):.2f} 点伤害。"
+            _add_conclusion(
+                weaknesses,
+                f"典型高占经低产出：拿了全队 {nw_share:.1f}% 的总经济（{nw:,}金），全场却只打出 {hdmg:,} 伤害（仅占全队 {hdmg_share:.1f}%），每1块钱经济只换来 {hdmg/max(1,nw):.2f} 点伤害。",
+                "measured",
+                ["players[].net_worth", "players[].hero_damage"],
             )
             trash_candidates.append((
                 95,
                 f"@{pname} 独占全队{nw_share:.0f}%的钱就打了{hdmg_share:.0f}%的伤害，这{nw:,}金币哪怕直接撒在泉水里听个响都比在你身上响！",
             ))
-            improvements.append(
-                f"{hero_name} 做出核心装的第一波强势期必须主动跟雾找节奏，别等队友正面4打5溃败了再去边缘OB蹭两下伤害。"
+            _add_conclusion(
+                improvements,
+                f"{hero_name} 做出核心装的第一波强势期必须主动跟雾找节奏，别等队友正面4打5溃败了再去边缘OB蹭两下伤害。",
+                "template",
             )
     elif pos == 3:
         if kp >= 64.0 and (stuns >= 30.0 or dmg_taken_share >= 24.0):
-            strengths.append(
-                f"前排支点作用显著：参战率高达 {kp:.1f}%（KDA {kills}/{deaths}/{assists}），提供 {stuns:.1f} 秒控制并扛下 {dmg_taken:,} 伤害（占全队承伤 {dmg_taken_share:.1f}%）。"
+            _add_conclusion(
+                strengths,
+                f"前排支点作用显著：参战率高达 {kp:.1f}%（KDA {kills}/{deaths}/{assists}），提供 {stuns:.1f} 秒控制并扛下 {dmg_taken:,} 伤害（占全队承伤 {dmg_taken_share:.1f}%）。",
+                "measured",
+                ["players[].kills", "players[].deaths", "players[].assists", "players[].stuns", "players[].damage_inflictor_received"],
             )
         if hdmg_share < 13.0 and nw_share > 16.0:
             blame_points += 14.0
-            weaknesses.append(
-                f"三号位正面威胁匮乏：拿了 {nw:,} 经济（全队 {nw_share:.1f}%），全场英雄伤害却只有 {hdmg:,}（仅占全队 {hdmg_share:.1f}%），团战几乎没有杀伤力。"
+            _add_conclusion(
+                weaknesses,
+                f"三号位正面威胁匮乏：拿了 {nw:,} 经济（全队 {nw_share:.1f}%），全场英雄伤害却只有 {hdmg:,}（仅占全队 {hdmg_share:.1f}%），团战几乎没有杀伤力。",
+                "inferred",
             )
         if kp < 48.0:
             blame_points += 15.0
-            weaknesses.append(
-                f"三号位严重脱节：参战率低至 {kp:.1f}%，中期长时间游离于团队正面战场之外。"
+            _add_conclusion(
+                weaknesses,
+                f"三号位严重脱节：参战率低至 {kp:.1f}%，中期长时间游离于团队正面战场之外。",
+                "inferred",
             )
             trash_candidates.append((
                 82,
@@ -368,20 +418,27 @@ def evaluate_player_deeply(
 
     # --- (C) 推进与建筑伤害审计 (败局且全队未破外塔/高地时不机械苛责拆塔量) ---
     if tdmg >= 6500 or (pos in (1, 2) and tdmg_share >= 45.0 and tdmg >= 3500):
-        strengths.append(
-            f"推进终结能力极强：单人打出 {tdmg:,} 建筑伤害（包揽全队 {tdmg_share:.0f}% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。"
+        _add_conclusion(
+            strengths,
+            f"推进终结能力极强：单人打出 {tdmg:,} 建筑伤害（包揽全队 {tdmg_share:.0f}% 拆塔量），赢下团战后能迅速将人头优势转化为塔数。",
+            "measured",
+            ["players[].tower_damage"],
         )
     elif pos == 1 and tdmg < 1200 and duration_min >= 25 and (won or team_tdmg >= 2500):
         blame_points += 14.0
-        weaknesses.append(
-            f"推塔效率极其低下：1号位打了 {duration_min:.0f} 分钟，建筑伤害仅有 {tdmg}（占全队 {tdmg_share:.1f}%），赢团后严重缺乏逼塔拿盾意识。"
+        _add_conclusion(
+            weaknesses,
+            f"推塔效率极其低下：1号位打了 {duration_min:.0f} 分钟，建筑伤害仅有 {tdmg}（占全队 {tdmg_share:.1f}%），赢团后严重缺乏逼塔拿盾意识。",
+            "inferred",
         )
         trash_candidates.append((
             84,
             f"@{pname} 1号位全场建筑伤害{tdmg}，打赢团掉头就钻野区，对面防御塔跟你是有亲戚关系舍不得A吗？",
         ))
-        improvements.append(
-            "团战减员敌方核心后，第一优先级永远是推线拆塔或控肉山，切忌全员回头刷自家野区白白浪费赢团窗口。"
+        _add_conclusion(
+            improvements,
+            "团战减员敌方核心后，第一优先级永远是推线拆塔或控肉山，切忌全员回头刷自家野区白白浪费赢团窗口。",
+            "template",
         )
 
     # --- (D) 录像级：出装时间轴 + 主动道具按键次数审计 (item_uses) ---
@@ -402,25 +459,33 @@ def evaluate_player_deeply(
 
     if pos in (1, 2, 3) and bkb_timing_min is not None:
         if bkb_timing_min <= 24 and bkb_uses >= 3:
-            strengths.append(
-                f"BKB 节点与使用果断：{bkb_timing_str} 准时做出黑皇杖，全场有效开启 {bkb_uses} 次顶住敌方第一波控制链。"
+            _add_conclusion(
+                strengths,
+                f"BKB 节点与使用果断：{bkb_timing_str} 准时做出黑皇杖，全场有效开启 {bkb_uses} 次顶住敌方第一波控制链。",
+                "inferred",
             )
         elif bkb_timing_min >= 30 and not is_turbo:
             blame_points += 18.0
-            weaknesses.append(
-                f"BKB 严重难产 + 团战空放/少按：面对敌方合计 {enemy_total_stuns:.0f} 秒控制，拖到 {bkb_timing_str} 才摸出 BKB，且整局只按出了 {bkb_uses} 次（全场却死了 {deaths} 次），中期团战全在肉身接技能。"
+            _add_conclusion(
+                weaknesses,
+                f"BKB 严重难产 + 团战空放/少按：面对敌方合计 {enemy_total_stuns:.0f} 秒控制，拖到 {bkb_timing_str} 才摸出 BKB，且整局只按出了 {bkb_uses} 次（全场却死了 {deaths} 次），中期团战全在肉身接技能。",
+                "inferred",
             )
             trash_candidates.append((
                 91,
                 f"@{pname} 对面一身硬控你拖到 {bkb_timing_str} 才出 BKB，整局就按了 {bkb_uses} 次，买个黄棍放包里当传家宝辟邪是吧？",
             ))
-            improvements.append(
-                f"面对高控制阵容，{pos}号位 {hero_name} 必须在第2或第3大件（23~26分钟前）准时做出 BKB，且第一波切入前提前开启，切忌省BKB被瞬秒。"
+            _add_conclusion(
+                improvements,
+                f"面对高控制阵容，{pos}号位 {hero_name} 必须在第2或第3大件（23~26分钟前）准时做出 BKB，且第一波切入前提前开启，切忌省BKB被瞬秒。",
+                "template",
             )
         elif bkb_uses <= 1 and duration_min - bkb_timing_min >= 5:
             blame_points += 12.0
-            weaknesses.append(
-                f"BKB 沦为摆设：{bkb_timing_str} 做出黑皇杖后，直到比赛结束居然只按了 {bkb_uses} 次！"
+            _add_conclusion(
+                weaknesses,
+                f"BKB 沦为摆设：{bkb_timing_str} 做出黑皇杖后，直到比赛结束居然只按了 {bkb_uses} 次！",
+                "inferred",
             )
     elif pos in (1, 2, 3):
         hid_cur = int(p.get("hero_id") or 0)
@@ -430,8 +495,10 @@ def evaluate_player_deeply(
         )
         if deaths >= 7 and enemy_total_stuns >= 70 and not has_innate_or_non_bkb_kit:
             blame_points += 20.0
-            weaknesses.append(
-                f"头铁拒出 BKB：面对敌方 {enemy_total_stuns:.0f} 秒强控，全场阵亡 {deaths} 次直到终局都没出黑皇杖，团战容错率极低。"
+            _add_conclusion(
+                weaknesses,
+                f"头铁拒出 BKB：面对敌方 {enemy_total_stuns:.0f} 秒强控，全场阵亡 {deaths} 次直到终局都没出黑皇杖，团战容错率极低。",
+                "inferred",
             )
             trash_candidates.append((
                 92,
@@ -446,12 +513,17 @@ def evaluate_player_deeply(
         treads_uses = (active_uses.get("power_treads") or {}).get("count", 0)
         if treads_uses <= 6:
             blame_points += 5.0
-            weaknesses.append(
-                f"假腿焊死细节缺失：整场 {duration_min:.0f} 分钟比赛里，假腿属性总共只切换了 {treads_uses} 次，刷野放技能从不切智力省蓝、挨打也不切力量撑血。"
+            _add_conclusion(
+                weaknesses,
+                f"假腿焊死细节缺失：整场 {duration_min:.0f} 分钟比赛里，假腿属性总共只切换了 {treads_uses} 次，刷野放技能从不切智力省蓝、挨打也不切力量撑血。",
+                "inferred",
             )
         elif treads_uses >= 35:
-            strengths.append(
-                f"操作细节拉满：全场高频切假腿 {treads_uses} 次（APM {apm}），属性转换极其细腻。"
+            _add_conclusion(
+                strengths,
+                f"操作细节拉满：全场高频切假腿 {treads_uses} 次（APM {apm}），属性转换极其细腻。",
+                "measured",
+                ["players[].item_uses", "players[].actions_per_min"],
             )
 
     # 3) 辅助/核心主动救人装与切入装按键审计 (微光/推推/跳刀/莲花/魔晶)
@@ -471,16 +543,20 @@ def evaluate_player_deeply(
                 held_mins = duration_min - (bought_tm["time_sec"] / 60.0 if bought_tm else duration_min * 0.6)
                 if held_mins >= 8 and cnt <= 3:
                     blame_points += 11.0
-                    weaknesses.append(
-                        f"主动救人装严重漏按：{t_str} 做出 {item_label}，拿在手里 {held_mins:.0f} 分钟总共只按了 {cnt} 次，团战队友被集火时反应慢半拍。"
+                    _add_conclusion(
+                        weaknesses,
+                        f"主动救人装严重漏按：{t_str} 做出 {item_label}，拿在手里 {held_mins:.0f} 分钟总共只按了 {cnt} 次，团战队友被集火时反应慢半拍。",
+                        "inferred",
                     )
                     trash_candidates.append((
                         86,
                         f"@{pname} {t_str}出的{item_label}整局就按了{cnt}次，这装备键位是不是扣下来送人了？",
                     ))
                 elif cnt >= 8:
-                    strengths.append(
-                        f"救人装高频救场：{item_label} 全场精准开启 {cnt} 次，多次在关键团战帮队友死里逃生。"
+                    _add_conclusion(
+                        strengths,
+                        f"救人装高频救场：{item_label} 全场精准开启 {cnt} 次，多次在关键团战帮队友死里逃生。",
+                        "inferred",
                     )
 
         # 跳刀使用频率审计
@@ -491,8 +567,11 @@ def evaluate_player_deeply(
                 for k in ("blink", "overwhelming_blink", "swift_blink", "arcane_blink")
             )
             if blink_cnt >= 25:
-                strengths.append(
-                    f"切入发动机：{blink_tm['time_str']} 摸出跳刀后全场高频切入 {blink_cnt} 次，把控先手节奏。"
+                _add_conclusion(
+                    strengths,
+                    f"切入发动机：{blink_tm['time_str']} 摸出跳刀后全场高频切入 {blink_cnt} 次，把控先手节奏。",
+                    "measured",
+                    ["players[].purchase_log", "players[].item_uses"],
                 )
 
     # 4) 两件关键装之间断档过久审计
@@ -503,15 +582,19 @@ def evaluate_player_deeply(
             gap = t2 - t1
             if gap >= 14 and t1 >= 9:
                 blame_points += 16.0
-                weaknesses.append(
-                    f"中期装备严重断档 {gap} 分钟：从 {timings_rich[i]['time_str']} {timings_rich[i]['zh_name']} 到 {timings_rich[i+1]['time_str']} {timings_rich[i+1]['zh_name']} 之间整整真空了 {gap} 分钟，期间频繁阵亡掉存款导致强势期彻底断掉。"
+                _add_conclusion(
+                    weaknesses,
+                    f"中期装备严重断档 {gap} 分钟：从 {timings_rich[i]['time_str']} {timings_rich[i]['zh_name']} 到 {timings_rich[i+1]['time_str']} {timings_rich[i+1]['zh_name']} 之间整整真空了 {gap} 分钟，期间频繁阵亡掉存款导致强势期彻底断掉。",
+                    "inferred",
                 )
                 trash_candidates.append((
                     89,
                     f"@{pname} 从 {timings_rich[i]['time_str']} {timings_rich[i]['zh_name']} 到 {timings_rich[i+1]['time_str']} {timings_rich[i+1]['zh_name']} 憋了整整 {gap} 分钟，这 {gap} 分钟你是在野区冬眠吗？",
                 ))
-                improvements.append(
-                    f"第一件节奏装（如 {timings_rich[i]['zh_name']}）出炉后若正面团战屡屡受挫，切忌继续盲目冲脸送连死，应立刻补小件（魔棒/护腕/微光/推推）或带线把第二件核心装刷出来。"
+                _add_conclusion(
+                    improvements,
+                    f"第一件节奏装（如 {timings_rich[i]['zh_name']}）出炉后若正面团战屡屡受挫，切忌继续盲目冲脸送连死，应立刻补小件（魔棒/护腕/微光/推推）或带线把第二件核心装刷出来。",
+                    "template",
                 )
                 break
 
@@ -525,23 +608,34 @@ def evaluate_player_deeply(
             zh = ab["zh_name"]
             if ak == "magnataur_empower" and duration_min >= 25 and cnt < duration_min * 0.7:
                 blame_points += 14.0
-                weaknesses.append(
-                    f"猛犸挂分裂严重失职：{duration_min:.0f} 分钟比赛里【{zh}】一共只放了 {cnt} 次（场均每 {duration_min/max(1,cnt):.1f} 分钟才想起来给一次 Buff），一号位刷钱时经常断分裂！"
+                _add_conclusion(
+                    weaknesses,
+                    f"猛犸挂分裂严重失职：{duration_min:.0f} 分钟比赛里【{zh}】一共只放了 {cnt} 次（场均每 {duration_min/max(1,cnt):.1f} 分钟才想起来给一次 Buff），一号位刷钱时经常断分裂！",
+                    "inferred",
                 )
                 trash_candidates.append((
                     93,
                     f"@{pname} {duration_min:.0f}分钟猛犸一共就给过 {cnt} 次授予力量，找你讨个分裂Buff比跟银行办贷款还难！",
                 ))
-                improvements.append(
-                    "玩马格纳斯必须养成肌肉记忆：每 40 秒盯一眼一号位身上的授予力量图标，大哥进野区前提前续满。"
+                _add_conclusion(
+                    improvements,
+                    "玩马格纳斯必须养成肌肉记忆：每 40 秒盯一眼一号位身上的授予力量图标，大哥进野区前提前续满。",
+                    "template",
                 )
             elif ak in ("magnataur_reverse_polarity", "tidehunter_ravage", "faceless_void_chronosphere", "enigma_black_hole", "dark_seer_wall_of_replica") and duration_min >= 28 and cnt <= 5:
                 blame_points += 10.0
-                weaknesses.append(
-                    f"团战大招憋到发霉：{duration_min:.0f} 分钟里大招【{zh}】仅释放了 {cnt} 次，过于追求完美大招导致大量时间大招空转。"
+                _add_conclusion(
+                    weaknesses,
+                    f"团战大招憋到发霉：{duration_min:.0f} 分钟里大招【{zh}】仅释放了 {cnt} 次，过于追求完美大招导致大量时间大招空转。",
+                    "inferred",
                 )
         # 将完整技能统计写入高光或说明
-        strengths.append(f"全场核心技能施放统计：{ab_summary}（操作频率 {apm} APM）。")
+        _add_conclusion(
+            strengths,
+            f"全场核心技能施放统计：{ab_summary}（操作频率 {apm} APM）。",
+            "measured",
+            ["players[].ability_uses", "players[].actions_per_min"],
+        )
 
     # --- (F) 4/5号位视野、反隐、买雾与拆眼审计 ---
     if pos in (4, 5):
@@ -549,31 +643,50 @@ def evaluate_player_deeply(
         sen_killed = kills_info.get("sen_destroyed", 0)
         if wards_total >= 18:
             deward_txt = f"，并成功排掉敌方 {obs_killed} 颗假眼 / {sen_killed} 颗真眼" if (obs_killed + sen_killed) > 0 else ""
-            strengths.append(
+            _add_conclusion(
+                strengths,
                 f"视野铺设尽职：全场插下 {obs} 假眼 + {sen} 真眼（共 {wards_total} 颗）{deward_txt}"
-                + (f"，顺手囤野 {stacked} 波。" if stacked > 0 else "。")
+                + (f"，顺手囤野 {stacked} 波。" if stacked > 0 else "。"),
+                "measured",
+                ["players[].obs_placed", "players[].sen_placed", "players[].observer_kills", "players[].sentry_kills", "players[].camps_stacked"],
             )
         elif is_parsed and wards_total <= 8 and duration_min >= 25:
             blame_points += 18.0
-            weaknesses.append(
-                f"视野严重断供：身为 {pos}号位 {duration_min:.0f} 分钟仅插了 {obs} 假眼 / {sen} 真眼，导致全队中后期在野区毫无视野掩护。"
+            _add_conclusion(
+                weaknesses,
+                f"视野严重断供：身为 {pos}号位 {duration_min:.0f} 分钟仅插了 {obs} 假眼 / {sen} 真眼，导致全队中后期在野区毫无视野掩护。",
+                "inferred",
             )
             trash_candidates.append((
                 89,
                 f"@{pname} 打个{pos}号位全场就插了{wards_total}个眼，我们五个人全靠心眼看地图是吧？",
             ))
-            improvements.append(
-                "辅助位必须保证商店观察者守卫不积压，进攻期将眼位推进至敌方主野区高台与肉山坑口。"
+            _add_conclusion(
+                improvements,
+                "辅助位必须保证商店观察者守卫不积压，进攻期将眼位推进至敌方主野区高台与肉山坑口。",
+                "template",
             )
 
         team_smokes = sum(int(tp.get("smokes_bought") or 0) for tp in team_players)
         team_dusts = sum(int(tp.get("dusts_bought") or 0) for tp in team_players)
 
         if smokes >= 3:
-            strengths.append(f"进攻节奏组织者：全场主动购买 {smokes} 颗诡计之雾带动抓人节奏。")
+            _add_conclusion(
+                strengths,
+                f"进攻节奏组织者：全场主动购买 {smokes} 颗诡计之雾带动抓人节奏。",
+                "inferred",
+            )
         elif is_parsed and team_smokes == 0 and duration_min >= 25:
-            weaknesses.append("全队零买雾：本方五人全场购买诡计之雾总次数为 0，缺乏开雾抓单组织。")
-            improvements.append("核心摸出跳刀或BKB的第一时间，全队应及时买雾发信号召集队友抓敌方落单打钱核。")
+            _add_conclusion(
+                weaknesses,
+                "全队零买雾：本方五人全场购买诡计之雾总次数为 0，缺乏开雾抓单组织。",
+                "inferred",
+            )
+            _add_conclusion(
+                improvements,
+                "核心摸出跳刀或BKB的第一时间，全队应及时买雾发信号召集队友抓敌方落单打钱核。",
+                "template",
+            )
 
         enemy_has_invis = any(
             ("微光" in " ".join(ep.get("final_items") or []))
@@ -582,8 +695,10 @@ def evaluate_player_deeply(
             for ep in enemy_players
         )
         if is_parsed and enemy_has_invis and team_dusts == 0:
-            weaknesses.append(
-                "全队零买粉：面对敌方微光披风/隐身单位，本方五人显影之尘总购买次数为 0。"
+            _add_conclusion(
+                weaknesses,
+                "全队零买粉：面对敌方微光披风/隐身单位，本方五人显影之尘总购买次数为 0。",
+                "inferred",
             )
 
     # --- (G) 录像级：黑白电视时长、阵亡扣钱、天敌提款机与野怪/塔杀取证 ---
@@ -601,8 +716,10 @@ def evaluate_player_deeply(
 
     if neutral_deaths > 0:
         blame_points += 6.0 * neutral_deaths
-        weaknesses.append(
-            f"野区冥场面认证：本局出现 **{neutral_deaths} 次被中立野怪击杀** 的离谱操作，刷野不看血量直接送回泉水。"
+        _add_conclusion(
+            weaknesses,
+            f"野区冥场面认证：本局出现 **{neutral_deaths} 次被中立野怪击杀** 的离谱操作，刷野不看血量直接送回泉水。",
+            "inferred",
         )
         trash_candidates.append((
             90,
@@ -610,11 +727,18 @@ def evaluate_player_deeply(
         ))
     if tower_deaths > 0:
         blame_points += 5.0 * tower_deaths
-        weaknesses.append(
-            f"越塔阵亡记录：本局有 **{tower_deaths} 次直接死于敌方防御塔攻击**，冲塔上头未能计算防御塔仇恨与伤害。"
+        _add_conclusion(
+            weaknesses,
+            f"越塔阵亡记录：本局有 **{tower_deaths} 次直接死于敌方防御塔攻击**，冲塔上头未能计算防御塔仇恨与伤害。",
+            "inferred",
         )
     if fountain_deaths > 0:
-        strengths.append(f"终局虐泉打卡：比赛结束前冲进敌方泉水被激光击杀 {fountain_deaths} 次。")
+        _add_conclusion(
+            strengths,
+            f"终局虐泉打卡：比赛结束前冲进敌方泉水被激光击杀 {fountain_deaths} 次。",
+            "measured",
+            ["players[].killed_by", "players[].deaths_log"],
+        )
 
     # --- (H) 录像级：结合英雄内置强势期曲线 (timing_curve) 区分「大核合理避战刷钱->后期收割」与「毒瘤独刷不参战」 ---
     hmp = audit_hero_mechanism_and_timing(p, team_players, enemy_players, duration_min, won)
@@ -667,26 +791,32 @@ def evaluate_player_deeply(
         )
         if is_parsed and mid_gold > 0:
             afk_tail = "才混到后期出山收割面板！" if duration_min >= 30 else "，与团队正面节奏严重脱节！"
-            weaknesses.insert(
-                0,
+            _add_conclusion(
+                weaknesses,
                 f"前中期毒瘤独刷不参战：全场参战率仅 **{kp:.1f}%（全队倒数第一，{kills}/{deaths}/{assists} 全场仅 {assists} 个助攻）**！"
                 f"前10分钟仅打出 **{lane_hdmg:,} 英雄伤害**，10–25m 中期狂刷 **+{mid_gold:,} 金（占全队中期经济 {mid_gold_share:.1f}%）** "
                 f"却只打出 **{mid_hdmg:,} 伤害（仅占全队中期伤害 {mid_hdmg_share:.1f}%，连双辅助都不如）**{tf_afk_clause}，"
                 f"全靠四个队友前中期 4 打 5 血战撑住局势{afk_tail}",
+                "inferred",
+                prepend=True,
             )
         else:
-            weaknesses.insert(
-                0,
+            _add_conclusion(
+                weaknesses,
                 f"全程独刷脱节不参战：身为 {pos}号位 {hero_name} 全场参战率低至 **{kp:.1f}%（全队倒数第一，{kills}/{deaths}/{assists} 全场仅 {assists} 个助攻）**，"
                 f"前中期长时间游离于团队正面战场之外闷头刷钱，全靠四个队友 4 打 5 硬撑局势！",
+                "inferred",
+                prepend=True,
             )
         trash_candidates.append((
             99,
             f"@{pname} 玩个{pos}号位{hero_name}前25分钟打钱不参战（参战率{kp:.1f}%全队垫底、全场仅{assists}个助攻），队友正面4打5流血你钻野区收租，最后出山K几个头真当自己是MVP了？",
         ))
-        improvements.insert(
-            0,
+        _add_conclusion(
+            improvements,
             f"身为 {pos}号位切忌前中期把四个队友当肉盾吸血独刷：10~25分钟做出第一件节奏装后必须带队接团或TP反打，而不是全程0参战闷头刷野。",
+            "template",
+            prepend=True,
         )
     elif pos == 1 and tdmg_share >= 48.0 and tdmg >= 9000 and kp >= 50.0:
         mvp_score = round(clamp(mvp_score + 4.5, 35.0, 99.0), 1)
@@ -734,26 +864,32 @@ def evaluate_player_deeply(
             else ""
         )
         stun_turret_clause = f"外加 {stuns:.1f} 秒硬控" if (is_parsed and stuns > 0) else ""
-        strengths.insert(
-            0,
+        _add_conclusion(
+            strengths,
             f"炮台火力彻底兑现（哪怕阵亡也把输出灌满）：{lane_lead_clause}作为无位移脆皮高爆发核心，全场狂甩 {ab_top_str}，"
             f"轰出 **{hdmg:,} 点英雄伤害（占全队 {hdmg_share:.1f}%，平均每次阵亡前倾泻 {int(dmg_per_death):,} 点高额伤害{late_turret_clause}）**{stun_turret_clause}！"
             f"在团队前排与救人匮乏的逆境下，真正做到了倒下前把每一滴输出倾泻干净。",
+            "inferred",
+            prepend=True,
         )
         weaknesses = [w for w in weaknesses if "BKB 严重难产" not in w]
-        weaknesses.insert(
-            0,
+        _add_conclusion(
+            weaknesses,
             f"绝境生存与留人反制博弈：作为己方唯一能威胁敌方后排的高爆发炮台，被敌方切入与点控重点针对阵亡 {deaths} 次{nemesis_str}；"
             f"在队友缺乏魔晶救人与前排支点的局面下，单靠 BKB 结束后仍容易被敌方框人/留人技能链限制走位。",
+            "inferred",
+            prepend=True,
         )
         trash_candidates.append((
             108,
             f"@{pname} 这把{hero_name}对线压爆中路、全场狂灌 {hdmg:,} 伤害（每死换 {int(dmg_per_death):,} 伤），已经把炮台火力彻底拉满了！",
         ))
-        improvements.insert(
-            0,
+        _add_conclusion(
+            improvements,
             f"{hero_name} 本局输出职责已超额完成（场均每死换 {int(dmg_per_death):,} 伤害）；若从团队可能性出发进一步提升残局容错，面对敌方强留人/框人控制时，"
             f"可将一件纯法系输出装替换为【飓风长戟（大推推）】（既能推开自己拉开切入距离，又能补充射程点人）。",
+            "template",
+            prepend=True,
         )
 
     # 2) 凤凰 (Phoenix) 烈日炙烤覆盖审计（不推断变蛋是否被打碎）
@@ -763,9 +899,11 @@ def evaluate_player_deeply(
         tf_egg_total = int(egg_audit.get("tf_egg_total") or 0)
         ray_casts = int(egg_audit.get("sun_ray_casts") or 0)
         if ray_casts < int(duration_min * 0.25) and duration_min >= 20:
-            improvements.insert(
-                0,
+            _add_conclusion(
+                improvements,
                 f"凤凰本局共施放 {egg_casts} 次《超新星》（团战 {tf_egg_total} 次）、{ray_casts} 次《烈日炙烤》（全队治疗 {heal:,} 点），可提高团战中后排《烈日炙烤》开启频率以兼顾消耗与治疗。",
+                "template",
+                prepend=True,
             )
 
     # 3) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」审计（推断类团战外阵亡不计入分锅；后期空值或不足5分钟跳过）
@@ -778,10 +916,10 @@ def evaluate_player_deeply(
         and duration_min >= 30
     ):
         if hmp.get("late_harvest_fulfilled") and not is_afk_farmer:
-            strengths.insert(0, hmp["late_phase_note"])
+            _add_conclusion(strengths, hmp["late_phase_note"], "inferred", prepend=True)
         elif hmp.get("late_harvest_failed"):
             blame_points += 20.0
-            weaknesses.insert(0, hmp["late_phase_note"])
+            _add_conclusion(weaknesses, hmp["late_phase_note"], "inferred", prepend=True)
             trash_candidates.append((
                 104,
                 f"@{pname} 玩个{hero_name}前中期全队给你让资源避战刷钱完全合理，结果25分钟出山期你吃下全队{late_gold_share:.0f}%经济却只打了{late_hdmg_share:.0f}%后期伤害，刷最肥的钱打最低的输出，后期收割呢？",
@@ -790,17 +928,19 @@ def evaluate_player_deeply(
     # 5) 针对全 126 英雄的「节奏核闷头刷错失强势期」「先手肉核敢死开团功臣」「救人辅助保核兑现」「必出命脉魔晶缺失」审计
     if hmp.get("mid_tempo_wasted") and not is_afk_farmer:
         blame_points += 14.0
-        weaknesses.insert(0, hmp["mid_phase_note"])
+        _add_conclusion(weaknesses, hmp["mid_phase_note"], "inferred", prepend=True)
     if hmp.get("sacrificial_initiator_fulfilled"):
         blame_points = max(8.0, blame_points - 18.0)
-        strengths.insert(0, hmp["mechanism_summary"])
+        _add_conclusion(strengths, hmp["mechanism_summary"], "inferred", prepend=True)
     if hmp.get("save_support_fulfilled"):
-        strengths.insert(0, hmp["mechanism_summary"])
+        _add_conclusion(strengths, hmp["mechanism_summary"], "inferred", prepend=True)
     if hmp.get("missing_mandatory_shard"):
         blame_points += 12.0
-        weaknesses.insert(
-            0,
+        _add_conclusion(
+            weaknesses,
             f"核心命脉魔晶缺失：比赛打到 {duration_min:.0f} 分钟仍未购买 {hero_name} 仅售 1,400 金的质变魔晶【{hmp['shard_desc']}】，导致英雄核心团战机制残缺！",
+            "inferred",
+            prepend=True,
         )
 
     # 6) 伤害含金量（刮肉盾假伤害 vs 真切核）、1~18级奇葩加点与永久Buff叠层证据挂载
@@ -810,25 +950,25 @@ def evaluate_player_deeply(
         dq_notes = dq_audit.get("dmg_audit_notes") or []
         if dq_badge.startswith("🚨") and dq_notes:
             blame_points += 10.0
-            weaknesses.append(dq_notes[0])
+            _add_conclusion(weaknesses, dq_notes[0], "inferred")
         elif dq_badge.startswith("⚠️") and dq_notes:
-            weaknesses.append(dq_notes[0])
+            _add_conclusion(weaknesses, dq_notes[0], "inferred")
         elif dq_badge.startswith("🔥") and dq_notes:
-            strengths.append(dq_notes[0])
+            _add_conclusion(strengths, dq_notes[0], "inferred")
 
         for sflag in (dq_audit.get("skill_build_flags") or []):
             if str(sflag).startswith("🚨"):
                 blame_points += 9.0
-                weaknesses.append(sflag)
+                _add_conclusion(weaknesses, sflag, "inferred")
             elif str(sflag).startswith("⚠️"):
                 blame_points += 5.0
-                weaknesses.append(sflag)
+                _add_conclusion(weaknesses, sflag, "inferred")
 
         for pb_note in (dq_audit.get("perm_buff_notes") or []):
             if str(pb_note).startswith("🚨") or str(pb_note).startswith("⚠️"):
-                weaknesses.append(pb_note)
+                _add_conclusion(weaknesses, pb_note, "inferred")
             elif str(pb_note).startswith("🔥"):
-                strengths.append(pb_note)
+                _add_conclusion(strengths, pb_note, "inferred")
 
     # 6.5) 深度流派识别 + 全量成装时间轴 + 技能/道具伤害占比 + 加点与天赋树 + 中立道具与附魔全维度取证
     playstyle_audit = build_player_playstyle_and_build_forensics(
@@ -840,20 +980,29 @@ def evaluate_player_deeply(
             blame_points = max(8.0, blame_points - 14.0)
             mvp_score = round(clamp(mvp_score + 6.0, 45.0, 96.0), 1)
             rating_score = round(clamp(mvp_score / 10.0, 4.5, 9.6), 1)
-            strengths.insert(0, playstyle_audit["archetype_analysis_zh"])
+            _add_conclusion(strengths, playstyle_audit["archetype_analysis_zh"], "inferred", prepend=True)
         elif playstyle_audit.get("archetype_analysis_zh"):
-            strengths.append(playstyle_audit["archetype_analysis_zh"])
+            _add_conclusion(strengths, playstyle_audit["archetype_analysis_zh"], "inferred")
         if playstyle_audit.get("spell_damage_breakdown_zh"):
-            strengths.append(playstyle_audit["spell_damage_breakdown_zh"])
+            _add_conclusion(
+                strengths,
+                playstyle_audit["spell_damage_breakdown_zh"],
+                "measured",
+                ["players[].damage_inflictor", "players[].ability_uses"],
+            )
         if playstyle_audit.get("skill_and_talent_audit_zh"):
-            strengths.append(playstyle_audit["skill_and_talent_audit_zh"])
+            _add_conclusion(strengths, playstyle_audit["skill_and_talent_audit_zh"], "inferred")
         if playstyle_audit.get("neutral_and_enchantment_audit_zh"):
-            strengths.append(playstyle_audit["neutral_and_enchantment_audit_zh"])
+            _add_conclusion(strengths, playstyle_audit["neutral_and_enchantment_audit_zh"], "inferred")
 
     # 7) 逐英雄独特机制 × 1~5号位差异化打法 × 队友技能配合 × 敌我克制关系深度取证 (hero_matchup_dossier)
     dossier = hmp.get("hero_matchup_dossier") or build_hero_matchup_dossier(
         p, team_players, enemy_players, duration_min, won
     )
+    if isinstance(dossier, dict):
+        dossier["evidence"] = "template"
+    if isinstance(hmp, dict):
+        hmp["evidence"] = "template"
     p["hero_matchup_dossier"] = dossier
     if dossier:
         c_enemies = dossier.get("counters_enemies") or []
@@ -877,12 +1026,16 @@ def evaluate_player_deeply(
             matched_eh = next((ep.get("hero_short_zh", "") for ep in enemy_players if ep.get("hero_short_zh") and ep.get("hero_short_zh") in ce_txt), "")
             k_cnt = _lookup_hero_count(kills_info, matched_eh) if matched_eh else 0
             if matched_eh and k_cnt >= 2:
-                strengths.append(
-                    f"⚔️ 【英雄机制克制完美兑现（手刃 {matched_eh}×{k_cnt}）】：{ce_txt} 本局精准锁定并击杀 {matched_eh} {k_cnt} 次，彻底打出英雄克制链价值！"
+                _add_conclusion(
+                    strengths,
+                    f"⚔️ 【英雄机制克制完美兑现（手刃 {matched_eh}×{k_cnt}）】：{ce_txt} 本局精准锁定并击杀 {matched_eh} {k_cnt} 次，彻底打出英雄克制链价值！",
+                    "inferred",
                 )
             elif is_parsed and not won and matched_eh and k_cnt == 0 and pos in (1, 2, 3, 4) and ("天克" in ce_txt or "克制【" in ce_txt):
-                weaknesses.append(
-                    f"⚠️ 【未发挥先天英雄克制优势（本应克制 {matched_eh}）】：{ce_txt} 但本局全场 0 次击杀 {matched_eh}，未能针对敌方被克制点打开突破口。"
+                _add_conclusion(
+                    weaknesses,
+                    f"⚠️ 【未发挥先天英雄克制优势（本应克制 {matched_eh}）】：{ce_txt} 但本局全场 0 次击杀 {matched_eh}，未能针对敌方被克制点打开突破口。",
+                    "inferred",
                 )
 
         # 检查是否被敌方天敌英雄机制针对提款，并给出专属破局出装
@@ -891,18 +1044,24 @@ def evaluate_player_deeply(
             matched_eh = next((ep.get("hero_short_zh", "") for ep in enemy_players if ep.get("hero_short_zh") and ep.get("hero_short_zh") in cbe_txt), "")
             d_cnt = _lookup_hero_count(killed_by_info, matched_eh) if matched_eh else 0
             if matched_eh and d_cnt >= 2:
-                weaknesses.append(
-                    f"🚨 【惨遭敌方天敌机制克制（被 {matched_eh} 击杀 {d_cnt} 次）】：{cbe_txt}"
+                _add_conclusion(
+                    weaknesses,
+                    f"🚨 【惨遭敌方天敌机制克制（被 {matched_eh} 击杀 {d_cnt} 次）】：{cbe_txt}",
+                    "inferred",
                 )
-                improvements.insert(
-                    0,
+                _add_conclusion(
+                    improvements,
                     f"🛡️ 【反制天敌 {matched_eh} 破局方案】：{cbe_txt}",
+                    "template",
+                    prepend=True,
                 )
 
         # 注入该英雄在当前位置 (1~5号位) 的专属打法、禁忌与队友配合化学反应处方
         syn_hint = f" | 最佳队友配合：{synergies[0]}" if synergies else ""
-        improvements.append(
-            f"🎯 【{pos_role_title} · 英雄×位置专属法则】：{dossier.get('pos_playstyle')} 禁忌：{dossier.get('pos_taboo')}（出装铁律：{dossier.get('pos_item_rule')}{syn_hint}）"
+        _add_conclusion(
+            improvements,
+            f"🎯 【{pos_role_title} · 英雄×位置专属法则】：{dossier.get('pos_playstyle')} 禁忌：{dossier.get('pos_taboo')}（出装铁律：{dossier.get('pos_item_rule')}{syn_hint}）",
+            "template",
         )
 
     deaths_per_10m = deaths / max(1.0, duration_min / 10.0)
@@ -915,8 +1074,10 @@ def evaluate_player_deeply(
             if (is_parsed and dead_sec > 0)
             else ""
         )
-        strengths.append(
-            f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次{dead_ok_clause}，团战站位拉扯极佳。"
+        _add_conclusion(
+            strengths,
+            f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次{dead_ok_clause}，团战站位拉扯极佳。",
+            "inferred",
         )
     elif deaths >= 6 and deaths_per_10m >= death_rate_threshold and not is_turret_fulfilled and not hmp.get("sacrificial_initiator_fulfilled"):
         blame_points += (deaths_per_10m - death_rate_threshold + 0.5) * death_rate_weight
@@ -926,8 +1087,11 @@ def evaluate_player_deeply(
             if (is_parsed and dead_sec > 0)
             else ""
         )
-        weaknesses.append(
-            f"高频阵亡提款机：全场阵亡 **{deaths} 次**（每10分钟 {deaths_per_10m:.1f} 死）{nemesis_str}{dead_bad_clause}{gold_lost_txt}！"
+        _add_conclusion(
+            weaknesses,
+            f"高频阵亡提款机：全场阵亡 **{deaths} 次**（每10分钟 {deaths_per_10m:.1f} 死）{nemesis_str}{dead_bad_clause}{gold_lost_txt}！",
+            "measured",
+            ["players[].deaths", "players[].killed_by", "players[].deaths_log", "players[].gold_reasons"],
         )
         roast_dead_txt = f"，看了整整 {dead_min}分{dead_rem_s}秒 黑白电视" if (is_parsed and dead_sec > 0) else ""
         roast_gold_txt = f"，光死就扣了 {death_gold_lost} 块钱" if (is_parsed and death_gold_lost > 0) else ""
@@ -936,27 +1100,38 @@ def evaluate_player_deeply(
             f"@{pname} 一局死 {deaths} 次{roast_dead_txt}{nemesis_str}{roast_gold_txt}，对面大哥给你磕一个不过分吧？",
         ))
         if pos in (4, 5):
-            improvements.append(
-                f"脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 {nemesis_list[0]['hero_short_zh'] if nemesis_list else '敌方切入'} 无限提款。"
+            _add_conclusion(
+                improvements,
+                f"脆皮辅助切忌第一排脸探视野，团战站在核心侧后方阴影里交完技能立刻拉开，尽早做出保命装避免被 {nemesis_list[0]['hero_short_zh'] if nemesis_list else '敌方切入'} 无限提款。",
+                "template",
             )
         else:
-            improvements.append(
-                f"核心位阵亡 {deaths} 次严重拖垮发育节奏：当敌方 {nemesis_list[0]['hero_short_zh'] if nemesis_list else '抓人核心'} 在小地图消失时，立刻放弃无视野兵线退回安全区。"
+            _add_conclusion(
+                improvements,
+                f"核心位阵亡 {deaths} 次严重拖垮发育节奏：当敌方 {nemesis_list[0]['hero_short_zh'] if nemesis_list else '抓人核心'} 在小地图消失时，立刻放弃无视野兵线退回安全区。",
+                "template",
             )
 
     # 兜底补充
     if not strengths:
-        strengths.append(
-            f"基础数据合格：交出 {kills}/{deaths}/{assists}（参战率 {kp:.1f}%，英雄伤害 {hdmg:,}），完成了该位置基础任务。"
+        _add_conclusion(
+            strengths,
+            f"基础数据合格：交出 {kills}/{deaths}/{assists}（参战率 {kp:.1f}%，英雄伤害 {hdmg:,}），完成了该位置基础任务。",
+            "measured",
+            ["players[].kills", "players[].deaths", "players[].assists", "players[].hero_damage"],
         )
     if not weaknesses:
         steady_dead_clause = f"（读秒 {dead_min}分{dead_rem_s:02d}秒）" if (is_parsed and dead_sec > 0) else ""
-        weaknesses.append(
-            f"整体发挥稳健：全场仅阵亡 {deaths} 次{steady_dead_clause}，非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+        _add_conclusion(
+            weaknesses,
+            f"整体发挥稳健：全场仅阵亡 {deaths} 次{steady_dead_clause}，非要挑刺就是优势期拿盾推高的节奏可以再果断一点。",
+            "template",
         )
     if not improvements:
-        improvements.append(
-            f"保持当前 {hero_name} 的刷钱与参战节奏（推荐核心出装：{hmp.get('core_item_hint') or '关键保命/输出装'}），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。"
+        _add_conclusion(
+            improvements,
+            f"保持当前 {hero_name} 的刷钱与参战节奏（推荐核心出装：{hmp.get('core_item_hint') or '关键保命/输出装'}），继续卡死 7/14 分钟经验符和 20 分钟痛苦魔方节点。",
+            "template",
         )
 
     # 计算胜局贡献点数 (raw_contrib_points) 与凯旋庆功贺词 (praise_talk)
@@ -1025,7 +1200,27 @@ def evaluate_player_deeply(
         else:
             trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 标准打卡下班，背锅占比 {blame_points:.0f} 点，逆风局未能站出来破局！"
 
+    conclusions_out: List[Dict[str, Any]] = []
+    for kind_name, seq in (("strength", strengths[:1]), ("weakness", weaknesses[:1]), ("improvement", improvements[:1])):
+        for item_txt in seq:
+            s_clean = str(item_txt or "").strip()
+            if not s_clean:
+                continue
+            ev_decl, sf_decl = conclusion_meta.get(s_clean, ("template" if kind_name == "improvement" else "inferred", None))
+            c_entry: Dict[str, Any] = {
+                "text": s_clean,
+                "kind": kind_name,
+                "evidence": ev_decl,
+            }
+            if ev_decl == "measured" and sf_decl:
+                c_entry["source_fields"] = sf_decl
+            conclusions_out.append(c_entry)
+
     return {
+        "evidence": "measured",
+        "source_fields": ["players[].kills", "players[].deaths", "players[].assists", "players[].hero_damage", "players[].net_worth"],
+        "coaching": {"evidence": "inferred"},
+        "conclusions": conclusions_out,
         "is_afk_farmer": is_afk_farmer,
         "hero_mechanism_profile": hmp,
         "hero_matchup_dossier": dossier,
@@ -1474,11 +1669,18 @@ def select_match_mvp_and_culprit(
     culprit = focus_by_blame[0]
     second_culprit = focus_by_blame[1] if len(focus_by_blame) > 1 else culprit
 
+    def _fmt_pct(v: Any) -> str:
+        return f"{v}%" if v is not None else "无数据"
+
+    mvp_c_str = _fmt_pct(mvp.get("contrib_share_pct"))
+    ru_c_str = _fmt_pct(runner_up.get("contrib_share_pct"))
+    cul_c_str = _fmt_pct(culprit.get("contrib_share_pct"))
+
     mvp_reasons = [
-        f"全场头号首功 ({mvp['rating_score']}分 · 胜局贡献 {mvp.get('contrib_share_pct', 25)}%)：{win_side_zh} {mvp['pos']}号位 {mvp['hero_short_zh']}（{mvp['personaname']}）交出 {mvp['kda']}（参战率 {mvp['kill_participation_pct']}%）。",
+        f"全场头号首功 ({mvp['rating_score']}分 · 胜局贡献 {mvp_c_str})：{win_side_zh} {mvp['pos']}号位 {mvp['hero_short_zh']}（{mvp['personaname']}）交出 {mvp['kda']}（参战率 {mvp['kill_participation_pct']}%）。",
         f"核心统治力数据：单人打出 {mvp['hero_damage']:,} 英雄伤害（占全队 {mvp['hero_damage_share_pct']}%）+ {mvp['tower_damage']:,} 建筑伤害，总经济 {mvp['net_worth']:,}（GPM {mvp['gpm']} / XPM {mvp['xpm']}）。",
         f"制胜关键：{mvp['strengths'][0]}",
-        f"胜方二当家（胜局贡献 {runner_up.get('contrib_share_pct', 22)}%）：{runner_up['pos']}号位 {runner_up['hero_short_zh']}（{runner_up['personaname']}，评分 {runner_up['rating_score']}）贡献 {runner_up['kda']}（参战率 {runner_up['kill_participation_pct']}%，伤害 {runner_up['hero_damage']:,}）。",
+        f"胜方二当家（胜局贡献 {ru_c_str}）：{runner_up['pos']}号位 {runner_up['hero_short_zh']}（{runner_up['personaname']}，评分 {runner_up['rating_score']}）贡献 {runner_up['kda']}（参战率 {runner_up['kill_participation_pct']}%，伤害 {runner_up['hero_damage']:,}）。",
         f"败方孤胆院长 (SVP)：{lose_side_zh} {svp['pos']}号位 {svp['hero_short_zh']}（{svp['personaname']}，评分 {svp['rating_score']}）交出 {svp['kda']}（伤害 {svp['hero_damage']:,}），一神带四坑实在带不动。",
     ]
 
@@ -1492,8 +1694,8 @@ def select_match_mvp_and_culprit(
         culprit_label = "无明显责任人" if no_clear_culprit else "主要问题焦点"
         if focus_won:
             culprit_verdict = (
-                f"凯旋庆功总结：{focus_side_zh}头号首功 {mvp['hero_short_zh']}（{mvp['personaname']}，贡献 {mvp.get('contrib_share_pct', 25)}%）与二当家 {runner_up['hero_short_zh']}（{runner_up['personaname']}，贡献 {runner_up.get('contrib_share_pct', 22)}%）携手带飞！"
-                f" 本局复盘短板位：{culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，贡献 {culprit.get('contrib_share_pct', 14)}%）。"
+                f"凯旋庆功总结：{focus_side_zh}头号首功 {mvp['hero_short_zh']}（{mvp['personaname']}，贡献 {mvp_c_str}）与二当家 {runner_up['hero_short_zh']}（{runner_up['personaname']}，贡献 {ru_c_str}）携手带飞！"
+                f" 本局复盘短板位：{culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，贡献 {cul_c_str}）。"
             )
         elif no_clear_culprit:
             culprit_verdict = (
@@ -1506,11 +1708,46 @@ def select_match_mvp_and_culprit(
                 f"本局关键失误点：{culprit['weaknesses'][0]}"
             )
 
+    mvp_st0_c = next((c for c in (mvp.get("conclusions") or []) if c.get("kind") == "strength"), None)
+    st0_ev = mvp_st0_c.get("evidence", "inferred") if isinstance(mvp_st0_c, dict) else "inferred"
+    st0_sf = mvp_st0_c.get("source_fields") if isinstance(mvp_st0_c, dict) else None
+    st0_entry: Dict[str, Any] = {"text": mvp_reasons[2], "kind": "rationale", "evidence": st0_ev}
+    if st0_ev == "measured" and st0_sf:
+        st0_entry["source_fields"] = list(st0_sf)
+
+    cul_entry: Dict[str, Any] = (
+        {"text": culprit_verdict, "kind": "rationale", "evidence": "measured", "source_fields": ["version"]}
+        if unparsed
+        else {"text": culprit_verdict, "kind": "rationale", "evidence": "inferred"}
+    )
+    mvp_conclusions: List[Dict[str, Any]] = [
+        {"text": mvp_reasons[0], "kind": "rationale", "evidence": "inferred"},
+        {
+            "text": mvp_reasons[1],
+            "kind": "rationale",
+            "evidence": "measured",
+            "source_fields": [
+                "players[].hero_damage",
+                "players[].tower_damage",
+                "players[].net_worth",
+                "players[].gold_per_min",
+                "players[].xp_per_min",
+            ],
+        },
+        st0_entry,
+        {"text": mvp_reasons[3], "kind": "rationale", "evidence": "inferred"},
+        {"text": mvp_reasons[4], "kind": "rationale", "evidence": "inferred"},
+        cul_entry,
+    ]
+
     return {
+        "evidence": "inferred",
+        "conclusions": mvp_conclusions,
         "no_clear_culprit": no_clear_culprit,
         "culprit_label": culprit_label,
         "rankings_by_side": rankings_by_side,
         "mvp_player": {
+            "evidence": "inferred",
             "player_slot": mvp["player_slot"],
             "side": win_side_zh,
             "pos": mvp["pos"],
@@ -1526,7 +1763,7 @@ def select_match_mvp_and_culprit(
             "rating_tier": mvp["rating_tier"],
             "mvp_score": mvp["mvp_score"],
             "blame_share_pct": mvp["blame_share_pct"],
-            "contrib_share_pct": mvp.get("contrib_share_pct", 25.0),
+            "contrib_share_pct": mvp.get("contrib_share_pct"),
             "contrib_tier": mvp.get("contrib_tier", "👑 头号首功 · 擎天真神"),
             "gpm": mvp["gpm"],
             "xpm": mvp["xpm"],
@@ -1558,7 +1795,7 @@ def select_match_mvp_and_culprit(
             "rating_score": runner_up["rating_score"],
             "rating_tier": runner_up["rating_tier"],
             "blame_share_pct": runner_up["blame_share_pct"],
-            "contrib_share_pct": runner_up.get("contrib_share_pct", 22.0),
+            "contrib_share_pct": runner_up.get("contrib_share_pct"),
             "contrib_tier": runner_up.get("contrib_tier", "⚔️ 破阵二当家 · 左膀右臂"),
             "strengths": runner_up.get("strengths", []),
             "praise_talk": runner_up.get("praise_talk", ""),
@@ -1581,9 +1818,10 @@ def select_match_mvp_and_culprit(
             "rating_score": svp["rating_score"],
             "rating_tier": svp["rating_tier"],
             "blame_share_pct": svp["blame_share_pct"],
-            "contrib_share_pct": svp.get("contrib_share_pct", 25.0),
+            "contrib_share_pct": svp.get("contrib_share_pct"),
         },
         "culprit_player": {
+            "evidence": "measured" if unparsed else "inferred",
             "player_slot": culprit["player_slot"],
             "side": focus_side_zh,
             "pos": culprit["pos"],
@@ -1598,7 +1836,7 @@ def select_match_mvp_and_culprit(
             "rating_score": culprit["rating_score"],
             "rating_tier": culprit["rating_tier"],
             "blame_share_pct": culprit["blame_share_pct"],
-            "contrib_share_pct": culprit.get("contrib_share_pct", 14.0),
+            "contrib_share_pct": culprit.get("contrib_share_pct"),
             "contrib_tier": culprit.get("contrib_tier", "🥂 凯旋功臣 · 团队拼图"),
             "no_clear_culprit": no_clear_culprit,
             "culprit_label": culprit_label,
@@ -1621,7 +1859,7 @@ def select_match_mvp_and_culprit(
             "kda": second_culprit["kda"],
             "rating_score": second_culprit["rating_score"],
             "blame_share_pct": second_culprit["blame_share_pct"],
-            "contrib_share_pct": second_culprit.get("contrib_share_pct", 16.0),
+            "contrib_share_pct": second_culprit.get("contrib_share_pct"),
             "main_crime": second_culprit["weaknesses"][0],
         },
         "focus_team_blame_ranking": (
@@ -1637,7 +1875,7 @@ def select_match_mvp_and_culprit(
                     "personaname": fp["personaname"],
                     "friend_tag": fp.get("friend_tag"),
                     "blame_share_pct": fp["blame_share_pct"],
-                    "contrib_share_pct": fp.get("contrib_share_pct", 20.0),
+                    "contrib_share_pct": fp.get("contrib_share_pct"),
                     "contrib_tier": fp.get("contrib_tier", ""),
                     "rating_score": fp["rating_score"],
                     "rating_tier": fp["rating_tier"],
@@ -1659,7 +1897,7 @@ def select_match_mvp_and_culprit(
                 "hero_icon": fp.get("hero_icon"),
                 "personaname": fp["personaname"],
                 "friend_tag": fp.get("friend_tag"),
-                "contrib_share_pct": fp.get("contrib_share_pct", 20.0),
+                "contrib_share_pct": fp.get("contrib_share_pct"),
                 "contrib_tier": fp.get("contrib_tier", ""),
                 "blame_share_pct": fp["blame_share_pct"],
                 "rating_score": fp["rating_score"],
@@ -1767,16 +2005,47 @@ def build_four_stage_narrative(
         my_side_zh = "天辉" if my_team is radiant_players else "夜魇"
         my_tdmg = sum(p.get("tower_damage", 0) for p in my_team)
         en_tdmg = sum(p.get("tower_damage", 0) for p in enemy_team)
+        unp_stages = [
+            {
+                "title": "0–10分钟 对线期三路对账",
+                "content": "需要先解析录像以获取对线期三路对账与信使记录。",
+                "evidence": "measured",
+                "source_fields": ["version"],
+            },
+            {
+                "title": "10–25分钟 中期节奏与装备真空取证",
+                "content": "需要先解析录像以获取中期经济差、开雾记录与装备成型时间。",
+                "evidence": "inferred",
+            },
+            {
+                "title": "25分钟至终局 决胜团战与肉山高地博弈",
+                "content": f"最终{'天辉' if radiant_win else '夜魇'}在 {duration_min} 分钟推平遗迹终结比赛（团战与肉山细节需要先解析录像）。",
+                "evidence": "measured",
+                "source_fields": ["radiant_win", "duration", "version"],
+            },
+            {
+                "title": "全局五人硬实力与团队执行力对比",
+                "content": f"主视角（{my_side_zh}）车队全局数据对比：建筑伤害 {my_tdmg:,} vs 敌方 {en_tdmg:,}（控制时长、视野开雾、读秒时长需要先解析录像）。",
+                "evidence": "inferred",
+            },
+        ]
+        unp_conclusions: List[Dict[str, Any]] = []
+        for stg in unp_stages:
+            c_item: Dict[str, Any] = {
+                "text": stg["content"],
+                "kind": "stage_narrative",
+                "evidence": stg["evidence"],
+            }
+            if stg["evidence"] == "measured" and stg.get("source_fields"):
+                c_item["source_fields"] = list(stg["source_fields"])
+            unp_conclusions.append(c_item)
         return {
+            "evidence": "inferred",
+            "conclusions": unp_conclusions,
             "lane_matchups": [],
             "roshan_events": [],
             "couriers_lost": {"radiant": None, "dire": None},
-            "stages": [
-                {"title": "0–10分钟 对线期三路对账", "content": "需要先解析录像以获取对线期三路对账与信使记录。"},
-                {"title": "10–25分钟 中期节奏与装备真空取证", "content": "需要先解析录像以获取中期经济差、开雾记录与装备成型时间。"},
-                {"title": "25分钟至终局 决胜团战与肉山高地博弈", "content": f"最终{'天辉' if radiant_win else '夜魇'}在 {duration_min} 分钟推平遗迹终结比赛（团战与肉山细节需要先解析录像）。"},
-                {"title": "全局五人硬实力与团队执行力对比", "content": f"主视角（{my_side_zh}）车队全局数据对比：建筑伤害 {my_tdmg:,} vs 敌方 {en_tdmg:,}（控制时长、视野开雾、读秒时长需要先解析录像）。"},
-            ],
+            "stages": unp_stages,
         }
 
     stage1 = f"{g10_str}{courier_str}"
@@ -1802,9 +2071,10 @@ def build_four_stage_narrative(
     if key_teamfights:
         top_tf = max(key_teamfights, key=lambda x: x.get("importance", 0))
         tf_str = f"全场最高权重胜负手团战爆发于 {top_tf['time_range']}（{top_tf['kills_trade']}，{top_tf['gold_swing']}，团战最高输出：{top_tf['top_damage_hero']}）。"
+    is_comeback_nar = bool(economy_timeline.get("is_comeback"))
     comeback_str = (
         "本局出现超过 5,000 经济的逆转翻盘：优势方中期上高/抓人接连失误送出大波经验钱，劣势方核心顶住压力完成翻盘！"
-        if economy_timeline.get("is_comeback")
+        if is_comeback_nar
         else f"最终{'天辉' if radiant_win else '夜魇'}在 {duration_min} 分钟推平遗迹终结比赛。"
     )
     stage3 = f"{tf_str}{rosh_str}{comeback_str}"
@@ -1829,16 +2099,38 @@ def build_four_stage_narrative(
         f"④ 全队泉水读秒总时长：{my_dead//60}分{my_dead%60:02d}秒 vs 敌方 {en_dead//60}分{en_dead%60:02d}秒。"
     )
 
+    stage1_sf = ["radiant_gold_adv", "objectives", "players[].lane", "players[].lh_t", "players[].gold_t"]
+    stage3_ev = "inferred" if is_comeback_nar else "measured"
+    stage3_sf = ["teamfights", "objectives", "radiant_win", "duration"]
+    parsed_stages: List[Dict[str, Any]] = [
+        {"title": "0–10分钟 对线期三路对账", "content": stage1, "evidence": "measured", "source_fields": stage1_sf},
+        {"title": "10–25分钟 中期节奏与装备真空取证", "content": stage2, "evidence": "inferred"},
+        {
+            "title": "25分钟至终局 决胜团战与肉山高地博弈",
+            "content": stage3,
+            "evidence": stage3_ev,
+            **({"source_fields": stage3_sf} if stage3_ev == "measured" else {}),
+        },
+        {"title": "全局五人硬实力与团队执行力对比", "content": stage4, "evidence": "inferred"},
+    ]
+    nar_conclusions: List[Dict[str, Any]] = []
+    for stg in parsed_stages:
+        c_item = {
+            "text": stg["content"],
+            "kind": "stage_narrative",
+            "evidence": stg["evidence"],
+        }
+        if stg["evidence"] == "measured" and stg.get("source_fields"):
+            c_item["source_fields"] = list(stg["source_fields"])
+        nar_conclusions.append(c_item)
+
     return {
+        "evidence": "inferred",
+        "conclusions": nar_conclusions,
         "lane_matchups": lane_matchups,
         "roshan_events": roshan_events,
         "couriers_lost": {"radiant": rad_couriers_lost, "dire": dire_couriers_lost},
-        "stages": [
-            {"title": "0–10分钟 对线期三路对账", "content": stage1},
-            {"title": "10–25分钟 中期节奏与装备真空取证", "content": stage2},
-            {"title": "25分钟至终局 决胜团战与肉山高地博弈", "content": stage3},
-            {"title": "全局五人硬实力与团队执行力对比", "content": stage4},
-        ],
+        "stages": parsed_stages,
     }
 
 
