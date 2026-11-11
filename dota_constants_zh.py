@@ -4,7 +4,7 @@
 import json as _json
 import os as _os
 import re
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 # Dota 2 / OpenDota gold_reasons 唯一标准枚举表
 GOLD_REASON_KEYS: Dict[str, str] = {

@@ -3,7 +3,7 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
-      "includeFiles": "{.cache/**,roster.json,*.py,microscope_sections/**,schema/**,ability_id_catalog.json}"
+      "includeFiles": "{static/**,.cache/**,roster.json,*.py,microscope_sections/**,schema/**,ability_id_catalog.json}"
     }
   },
   "headers": [
