@@ -303,7 +303,7 @@ sandbox.__state.profileData = {
 // Check Home Workspace, Sidebar Matches & Squad Ledger in coach mode
 for (const [, el] of elements) { el.innerHTML = ""; el.textContent = ""; }
 sandbox.renderHomeWorkspace();
-sandbox.renderWorkstationSidebarMatches();
+sandbox.renderSidebarMatches();
 sandbox.renderSquadLedgerSection(data.ledger);
 const hubTxt = visibleText();
 for (const w of bannedWords) {
@@ -361,7 +361,7 @@ for (const tone of ["coach", "roast"]) {
     match_id: repNc.match_id, won: false, is_analyzed: true, hero_short_zh: "幽鬼", kda: "3/8/9", duration_str: repNc.duration_str, party_size: 5,
   }];
   sandbox.renderHomeWorkspace();
-  sandbox.renderWorkstationSidebarMatches();
+  sandbox.renderSidebarMatches();
   const homeMatchListTxt = stripHtml(elements.get("home-matches-list")?.innerHTML || "");
   const sidebarListTxt = stripHtml(elements.get("ws-sidebar-matches-list")?.innerHTML || "");
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Dota 2 战后算账 & 赛前锦囊 - 云端持久化数据库引擎 (cloud_store.py)
+Dota 2 五黑复盘与赛前作战室 - 云端持久化数据库引擎 (cloud_store.py)
 基于 Supabase PostgreSQL (`dota_match_reports`, `match_players`, `dota_llm_tasks`) 与 Supabase Storage (`dota-reports`)，
 零外部依赖，纯 Python 标准库 `urllib.request`。
 """

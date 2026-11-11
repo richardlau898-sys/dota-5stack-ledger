@@ -106,7 +106,7 @@ def build_postgame_webhook_payload(report: Dict[str, Any], base_app_url: str) ->
     ]
 
     summary_lines = [
-        f"📊 【战后算账 · 比赛 #{mid} 自动复盘简报】",
+        f"📊 【{dota_analyst.SITE_NAME} · 比赛 #{mid} 自动复盘简报】",
         f"• 结果：{res_str} ｜ 比分：{score_str} ｜ 时长：{dur_str}",
     ]
     if fix_lines:

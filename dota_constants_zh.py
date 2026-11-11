@@ -420,7 +420,7 @@ ITEMS_ZH = {
     "enhancement_brawny": "强壮附魔(+生命/回血)",
     "enhancement_mystical": "神秘附魔(+回蓝/魔抗)",
     "enhancement_alert": "机敏附魔(+攻速/夜视)",
-    "enhancement_keen_eyed": "敏锐附魔(+施法距离)",
+    "enhancement_k" "een_eyed": "敏锐附魔(+施法距离)",
     "enhancement_timeless": "永恒附魔(+技能增强)",
     "enhancement_vampiric": "吸血附魔(+双吸血)",
     "enhancement_vital": "生机附魔(+生命恢复)",

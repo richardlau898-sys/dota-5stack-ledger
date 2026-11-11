@@ -1,7 +1,10 @@
 /**
- * 战后算账 · Dota 2 录像级复盘与车队分锅账本
  * Frontend Application (Vanilla ES2024, Zero-Framework, 6 Interactive SVG Visuals + AI Coach)
  */
+
+const SITE_NAME = "刀塔账房";
+const SITE_SUBTITLE = "五黑战后复盘与赛前作战室";
+const SITE_FULL_TITLE = `${SITE_NAME} · ${SITE_SUBTITLE}`;
 
 const state = {
   accountId: null,
@@ -1164,13 +1167,14 @@ function buildStructuredFullReportHtml(report) {
   return `
     <article class="fs-dom-reuse-report print-ready-dossier" data-match-id="${escapeHtml(report.match_id)}" data-side="${escapeHtml(side)}">
       <header class="fs-dom-reuse-header">
-        <div class="fs-dom-meta">比赛 #${escapeHtml(report.match_id)} · ${sideZh}视角 · ${escapeHtml(report.duration_str || "")}</div>
+        <div class="fs-dom-meta">${escapeHtml(SITE_NAME)} · 比赛 #${escapeHtml(report.match_id)} · ${sideZh}视角 · ${escapeHtml(report.duration_str || "")}</div>
         <h1 class="fs-dom-title">${sideZh}${ownWon ? "凯旋庆功" : "败局复盘"}报告 · 焦点：${escapeHtml(headlineHero)} (${escapeHtml(headlinePersona)})</h1>
         <p class="fs-dom-sub">头号首功 MVP：${escapeHtml(mvpP?.hero_short_zh || "")} (${escapeHtml(mvpP?.personaname || "")}) ｜ 重点复盘对象：${escapeHtml(culpritP?.hero_short_zh || "")} (${escapeHtml(culpritP?.personaname || "")})</p>
       </header>
       <div class="fs-dom-reuse-body">
         ${reusedDomBlocks}
       </div>
+      <footer class="fs-dom-reuse-footer" style="margin-top:20px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);">生成自：${escapeHtml(SITE_FULL_TITLE)}</footer>
     </article>
   `;
 }
@@ -1201,7 +1205,7 @@ async function downloadStructuredReportHtml() {
   const report = state.currentReport;
   if (!report) return;
   const bodyHtml = buildStructuredFullReportHtml(report);
-  const fullHtml = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>比赛 #${escapeHtml(report.match_id)} 复盘报告</title></head><body>${bodyHtml}</body></html>`;
+  const fullHtml = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>${escapeHtml(SITE_NAME)} · 比赛 #${escapeHtml(report.match_id)} 复盘报告</title></head><body>${bodyHtml}</body></html>`;
   const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -1493,11 +1497,18 @@ async function initApp() {
       player_name: slot.player_name || getSquadPlayerNameForPos(slot.pos),
     }));
 
+    if (typeof document !== "undefined") {
+      document.title = SITE_FULL_TITLE;
+      const bName = document.querySelector(".ws-brand-name");
+      const bSub = document.querySelector(".ws-brand-sub");
+      if (bName) bName.textContent = SITE_NAME;
+      if (bSub) bSub.textContent = SITE_SUBTITLE;
+    }
     renderHeaderStatus();
     renderRecentMatchesStrip(data.recent_matches || state.profileData.recent_matches || []);
     renderSquadLedgerSection(state.squadLedger);
     renderHomeWorkspace();
-    renderWorkstationSidebarMatches();
+    renderSidebarMatches();
     populateSettingsDialog();
     initPregameWorkspace();
 
@@ -1576,7 +1587,7 @@ function bindEvents() {
     }
   });
 
-  // Workstation Sidebar Collapse / Expand & Mobile Drawer Toggles
+  // Sidebar Collapse / Expand & Mobile Drawer Toggles
   const appShell = document.getElementById("ws-app-shell");
   const wsSidebar = document.getElementById("ws-sidebar");
   const btnToggleWsSidebar = document.getElementById("btn-toggle-ws-sidebar");
@@ -1601,7 +1612,7 @@ function bindEvents() {
     });
   }
 
-  // Mobile Header Collapsible Search & Tools Toggle (opens Workstation sidebar drawer on mobile)
+  // Mobile Header Collapsible Search & Tools Toggle (opens sidebar drawer on mobile)
   const btnToggleMobileTools = document.getElementById("btn-toggle-mobile-tools");
   const headerCollapsibleTools = document.getElementById("header-collapsible-tools");
   if (btnToggleMobileTools) {
@@ -1620,18 +1631,18 @@ function bindEvents() {
     });
   }
 
-  // Workstation Sidebar Match Filter chips
+  // Sidebar Match Filter chips
   document.querySelectorAll("[data-ws-sfilter]").forEach((btn) => {
     btn.addEventListener("click", () => {
       state.wsSidebarFilter = btn.getAttribute("data-ws-sfilter") || "all";
       document.querySelectorAll("[data-ws-sfilter]").forEach((b) =>
         b.classList.toggle("is-active", b === btn)
       );
-      renderWorkstationSidebarMatches();
+      renderSidebarMatches();
     });
   });
 
-  // Workstation Postgame Sub-View Bar Tabs
+  // Postgame Sub-View Bar Tabs
   document.querySelectorAll("[data-postgame-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const tabName = btn.getAttribute("data-postgame-tab") || "summary";
@@ -1656,7 +1667,7 @@ function bindEvents() {
     });
   });
 
-  // Keyboard shortcut Alt+Up / Alt+Down to cycle through matches in Workstation sidebar
+  // Keyboard shortcut Alt+Up / Alt+Down to cycle through matches in sidebar
   window.addEventListener("keydown", (e) => {
     if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
     const rows = Array.from(document.querySelectorAll(".ws-match-row[data-ws-match-id]"));
@@ -2583,7 +2594,7 @@ function renderRecentMatchesStrip(matches) {
     });
   });
 
-  renderWorkstationSidebarMatches();
+  renderSidebarMatches();
 }
 
 function renderHomeWorkspace() {
@@ -2808,10 +2819,10 @@ function renderHomeWorkspace() {
     });
   });
 
-  renderWorkstationSidebarMatches();
+  renderSidebarMatches();
 }
 
-function renderWorkstationSidebarMatches() {
+function renderSidebarMatches() {
   const listEl = document.getElementById("ws-sidebar-match-list");
   const countEl = document.getElementById("ws-sidebar-match-count");
   const accountEl = document.getElementById("ws-sidebar-account-name");
@@ -3689,7 +3700,7 @@ function renderFullMatchReport(report) {
     state.forensicSelectedSlot = "focus";
   }
   safeRenderSection("MatchOverview", () => renderMatchOverview(report));
-  safeRenderSection("WorkstationFactCheck", () => renderWorkstationFactCheckSection(report));
+  safeRenderSection("KeyNumbersFactCheck", () => renderKeyNumbersFactCheckSection(report));
   safeRenderSection("VerdictAndBlame", () => renderVerdictAndBlameSection(report));
   if (hasTimeline) {
     safeRenderSection("MinuteScrubber", () => renderMinuteScrubber(report));
@@ -3709,7 +3720,7 @@ function renderFullMatchReport(report) {
   safeRenderSection("PostgameSubTab", () =>
     applyPostgameSubTab(state.wsPostgameTab || "summary", { scrollTop: false })
   );
-  safeRenderSection("WorkstationSidebar", () => renderWorkstationSidebarMatches());
+  safeRenderSection("SidebarMatches", () => renderSidebarMatches());
 
   // Hydrate any saved Nano Banana AI artworks for this match from IndexedDB so they appear on cards even after refresh
   hydrateMatchPosterArtsFromIdb(report.match_id).then((added) => {
@@ -3836,7 +3847,7 @@ function renderMatchOverview(report) {
     `;
   }
 
-  // Sync Workstation top location bar when viewing a match
+  // Sync top location bar when viewing a match
   if (state.workspaceMode === "postgame") {
     const locTitle = document.getElementById("ws-location-title");
     const locSub = document.getElementById("ws-location-subtitle");
@@ -3855,7 +3866,7 @@ function renderMatchOverview(report) {
 }
 
 /**
- * 1.2 Workstation Sub-View Tab Controller (Eliminates 15,000px vertical wall)
+ * 1.2 Postgame Sub-View Tab Controller (Eliminates 15,000px vertical wall)
  */
 function applyPostgameSubTab(tabName, { scrollTop = true } = {}) {
   const validTabs = ["summary", "timeline", "phases", "microscope", "players", "all"];
@@ -3908,9 +3919,9 @@ function applyPostgameSubTab(tabName, { scrollTop = true } = {}) {
 }
 
 /**
- * 1.3 Render Workstation-Style Key Numbers Table & Replay Fact-Check Panel (#ws-factcheck-section)
+ * 1.3 Render Key Numbers Table & Replay Fact-Check Panel (#ws-factcheck-section)
  */
-function renderWorkstationFactCheckSection(report) {
+function renderKeyNumbersFactCheckSection(report) {
   const sec = document.getElementById("ws-factcheck-section");
   if (!sec || !report) return;
 
@@ -4393,7 +4404,7 @@ function renderWorkstationFactCheckSection(report) {
       <div class="ws-fc-panel ws-fc-numbers-panel">
         <div class="ws-fc-head">
           <div>
-            <span class="ws-fc-kicker">📊 WORKSTATION KEY NUMBERS</span>
+            <span class="ws-fc-kicker">本局核心数字</span>
             <h3>本局五人核心数字与流派明细表</h3>
           </div>
           <span class="ws-fc-sub">点击任一行可直达该选手完整出装与按键卷宗</span>
@@ -15956,7 +15967,7 @@ function drawCareerHabitPosterCanvas(m, totalAnalyzed) {
   ctx.fillStyle = "#9e9b91";
   ctx.font = "12px sans-serif";
   ctx.fillText(
-    `生成自：战后算账 · Dota 2 录像级复盘工作台 (${window.location.origin})`,
+    `生成自：${SITE_FULL_TITLE} (${window.location.origin})`,
     42,
     H - 28
   );
@@ -16155,7 +16166,7 @@ function openSharePosterDialog(report) {
 
   const lines = won
     ? [
-        `🏆【刀塔五黑庆功宴 · 赛后封神表彰书】`,
+        `🏆【${SITE_NAME} · 赛后封神表彰书】`,
         `📍 比赛编号：#${report.match_id} (${report.duration_str} · ${sideZh}凯旋获胜 ${report.radiant_score}:${report.dire_score})`,
         `🔗 公开复盘分享链接：${shareUrl}`,
         `📣 凯旋定性：${grok?.title || report.match_narrative?.headline || "全员发力碾压获胜"}`,
@@ -16195,7 +16206,7 @@ function openSharePosterDialog(report) {
         }`,
       ]
     : [
-        `⚖️【刀塔五黑算账台 · 赛后处刑判决书】`,
+        `⚖️【${SITE_NAME} · 赛后复盘报告】`,
         `📍 比赛编号：#${report.match_id} (${report.duration_str} · ${sideZh}落败 ${report.radiant_score}:${report.dire_score})`,
         `🔗 公开复盘分享链接：${shareUrl}`,
         `📣 终局定性：${grok?.title || report.match_narrative?.headline || "正面团战与节奏复盘"}`,
@@ -16295,7 +16306,7 @@ function drawVerdictPosterCanvas(
   ctx.fillStyle = "#c6a468";
   ctx.font = "bold 16px sans-serif";
   ctx.fillText(
-    won ? "DOTA 2 五黑庆功宴 · 赛后封神表彰书" : "DOTA 2 五黑算账台 · 赛后处刑判决书",
+    won ? `${SITE_NAME} · 赛后封神表彰书` : `${SITE_NAME} · 赛后复盘判决书`,
     42,
     56
   );
@@ -16451,7 +16462,7 @@ function drawVerdictPosterCanvas(
     (won
       ? "继续保持核心强势期抱团开雾压制与进攻眼位铺设，乘胜追击！"
       : "前中期围绕核心第一件 BKB/跳刀出炉打主动开雾，拒绝无视野单带掉点。");
-  ctx.fillText(`${won ? "乘胜追击备忘" : "下把改进铁律"}：${tip.slice(0, 62)}`, 42, H - 32);
+  ctx.fillText(`${won ? "乘胜追击备忘" : "下把改进铁律"}：${tip.slice(0, 50)} ｜ ${SITE_NAME}`, 42, H - 32);
 }
 
 function wrapCanvasParagraph(ctx, text, maxWidth, maxLines = 4) {
@@ -16548,7 +16559,7 @@ async function openSinglePlayerPosterDialog(
       : "🛡️ 败局尽力局");
 
   const lines = [
-    `📜 【DOTA 2 录像级单人深度档案 · ${badgeTitle}】`,
+    `📜 【${SITE_NAME} · 单人深度档案 · ${badgeTitle}】`,
     `📍 比赛编号：#${report.match_id} (${sideZh}${won ? "获胜" : "落败"} · ${report.radiant_score}:${report.dire_score} · ${report.duration_str})`,
     `🔗 复盘直达：${shareUrl}`,
     `────────────────────`,
@@ -16664,7 +16675,7 @@ function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
   ctx.fillStyle = "#c6a468";
   ctx.font = "bold 15px sans-serif";
   ctx.fillText(
-    `DOTA 2 录像级单人专属档案 · #${report.match_id} (${sideZh}${won ? "胜" : "负"} ${report.radiant_score}:${report.dire_score} · ${report.duration_str})`,
+    `${SITE_NAME} · 单人专属档案 · #${report.match_id} (${sideZh}${won ? "胜" : "负"} ${report.radiant_score}:${report.dire_score} · ${report.duration_str})`,
     42,
     52
   );
@@ -16785,7 +16796,7 @@ function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
   const prac = (gp?.practice || p.next_game_action || "盯紧强势期第一波抱团推塔节奏").slice(0, 58);
   ctx.fillStyle = "#8fd196";
   ctx.font = "bold 13.5px sans-serif";
-  ctx.fillText(`💡 下把死命令：${prac}`, 42, H - 32);
+  ctx.fillText(`💡 下把死命令：${prac.slice(0, 46)} ｜ ${SITE_NAME}`, 42, H - 32);
 }
 
 async function generateNanoBananaPoster({ force = false } = {}) {
@@ -17219,7 +17230,7 @@ function drawNanoBananaIllustratedPosterCanvas(ctxInfo, artData, loadedImg) {
   ctx.font = "12px sans-serif";
   ctx.textAlign = "right";
   ctx.fillText(
-    `dota-ai-analyst.vercel.app${report?.match_id ? `/?match=${report.match_id}` : ""}`,
+    `${SITE_NAME} · dota-ai-analyst.vercel.app${report?.match_id ? `/?match=${report.match_id}` : ""}`,
     W - 42,
     H - 30
   );

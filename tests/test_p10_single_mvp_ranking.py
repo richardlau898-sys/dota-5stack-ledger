@@ -163,7 +163,7 @@ for (const rep of reports) {
     }
 
     // 2. Workstation FactCheck key numbers table
-    sandbox.renderWorkstationFactCheckSection(rep);
+    sandbox.renderKeyNumbersFactCheckSection(rep);
     const fcHtml = getEl("ws-factcheck-section").innerHTML;
     if (!fcHtml.includes(expectedMvp.hero_short_zh)) {
       throw new Error(`FactCheck table missing MVP ${expectedMvp.hero_short_zh}`);
