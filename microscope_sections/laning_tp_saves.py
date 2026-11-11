@@ -578,7 +578,7 @@ def build_laning_tp_saves_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
         else:
             side_verdict = (
                 f"ℹ️ 团战记录：全队共 {critical_total} 人次团战阵亡时持有主动保命装本波未使用、"
-                f"{zero_spell_total} 人次中后期团战无技能释放记录（推断，未计入评分与分锅）。"
+                f"{zero_spell_total} 人次中后期团战无技能释放记录（推断，未计入评分与责任占比）。"
             )
 
         return {

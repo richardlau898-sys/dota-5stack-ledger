@@ -812,6 +812,7 @@ def _execute_llm_review_task(
     match_id: int,
     side: str,
     report: Dict[str, Any],
+    tone_mode: str = "coach",
 ) -> Dict[str, Any]:
     running_state = {
         "task_id": task_id,
@@ -822,7 +823,7 @@ def _execute_llm_review_task(
     }
     cloud_save_llm_task(task_id, running_state)
     try:
-        res = call_llm_coach_review(report=report)
+        res = call_llm_coach_review(report=report, tone_mode=tone_mode)
         if res.get("ok") and res.get("structured"):
             res["structured"] = sanitize_report_mixed_english(res["structured"])
             report["grok_coaching"] = res["structured"]
@@ -888,6 +889,7 @@ def start_async_llm_review_task(
     side: str,
     report: Dict[str, Any],
     run_async: bool = True,
+    tone_mode: str = "coach",
 ) -> Dict[str, Any]:
     task_id = f"llm-{int(match_id)}-{side}-{int(time.time() * 1000)}"
     init_state = {
@@ -900,7 +902,7 @@ def start_async_llm_review_task(
     }
     cloud_save_llm_task(task_id, init_state)
     if run_async:
-        _LLM_TASK_POOL.submit(_execute_llm_review_task, task_id, int(match_id), side, report)
+        _LLM_TASK_POOL.submit(_execute_llm_review_task, task_id, int(match_id), side, report, tone_mode)
         return {
             "ok": True,
             "task_id": task_id,
@@ -908,7 +910,7 @@ def start_async_llm_review_task(
             "side": side,
             "status": "pending",
         }
-    final_state = _execute_llm_review_task(task_id, int(match_id), side, report)
+    final_state = _execute_llm_review_task(task_id, int(match_id), side, report, tone_mode)
     return {
         "ok": final_state.get("status") == "completed",
         **final_state,
@@ -1322,6 +1324,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 mid = int(body.get("match_id"))
                 side = body.get("side") or "dire"
                 force = bool(body.get("force", True))
+                tone_mode = "roast" if str(body.get("tone_mode") or "").strip().lower() == "roast" else "coach"
 
                 # Fast-path: load existing match report from local/tmp disk in 0ms without blocking on OpenDota parse polling
                 report = None
@@ -1337,7 +1340,14 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 if not isinstance(report, dict):
                     report = get_or_build_match_report(mid, allow_build=True, require_ai=False, skip_llm=True)
 
-                if not force and isinstance(report, dict) and _has_complete_grok_coaching(report.get("grok_coaching")):
+                cached_gc = report.get("grok_coaching") if isinstance(report, dict) else None
+                cached_tone = ((cached_gc or {}).get("_meta") or {}).get("tone_mode") or "coach"
+                if (
+                    not force
+                    and isinstance(report, dict)
+                    and _has_complete_grok_coaching(cached_gc)
+                    and cached_tone == tone_mode
+                ):
                     self._send_json({
                         "ok": True,
                         "task_id": f"cached-{mid}-{side}",
@@ -1353,6 +1363,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     side=side,
                     report=report,
                     run_async=run_async,
+                    tone_mode=tone_mode,
                 )
                 self._send_json(task_resp)
                 return

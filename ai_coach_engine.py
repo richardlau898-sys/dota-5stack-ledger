@@ -227,9 +227,9 @@ def evaluate_player_deeply(
         elif not is_parsed:
             rating_tier = "C 待解析复盘"
         elif rating_score >= 6.6:
-            rating_tier = "C 重点背锅"
+            rating_tier = "C 重点短板"
         else:
-            rating_tier = "D 头号战犯"
+            rating_tier = "D 关键失误"
 
     # 3. 录像级数据取证 (去除模板化四字括号，完全用本局真实动作、按键、击杀关系说话)
     strengths: List[str] = []
@@ -611,7 +611,7 @@ def evaluate_player_deeply(
     if tower_deaths > 0:
         blame_points += 5.0 * tower_deaths
         weaknesses.append(
-            f"越塔犯罪记录：本局有 **{tower_deaths} 次直接死于敌方防御塔攻击**，冲塔上头未能计算防御塔仇恨与伤害。"
+            f"越塔阵亡记录：本局有 **{tower_deaths} 次直接死于敌方防御塔攻击**，冲塔上头未能计算防御塔仇恨与伤害。"
         )
     if fountain_deaths > 0:
         strengths.append(f"终局虐泉打卡：比赛结束前冲进敌方泉水被激光击杀 {fountain_deaths} 次。")
@@ -658,7 +658,7 @@ def evaluate_player_deeply(
         radar["survival"] = min(radar["survival"], 50)
         mvp_score = round(clamp(mvp_score - 21.0, 35.0, 61.0), 1)
         rating_score = round(clamp(mvp_score / 10.0, 4.0, 6.1), 1)
-        rating_tier = "C 毒瘤独刷" if won else ("C 脱节刷钱" if not is_parsed else "D 独刷战犯")
+        rating_tier = "C 毒瘤独刷" if won else ("C 脱节刷钱" if not is_parsed else "D 脱节独刷")
         blame_points += 38.0
         tf_afk_clause = (
             f"，且有 **{tf_afk_cnt} 波关键团战 0 伤害卖队友独刷（趁队友4打5挨揍在野区收割 +{tf_afk_gold:,} 金）**"
@@ -1227,7 +1227,7 @@ def build_player_playstyle_and_build_forensics(
         archetype_analysis_zh = (
             f"🧭 【流派与全链路出装时间轴】：本局 {hero} 完整成装演进为【{full_chain_str}】"
             + (
-                f"，头号伤害来源为《{top_spell_name}》（"
+                f"，主要伤害来源为《{top_spell_name}》（"
                 + (f"释放 {top_spell_casts} 次" if top_spell_casts > 0 else "")
                 + f"造成 {top_spell_dmg:,} 伤害，占 {top_spell_pct:.1f}%）。"
                 if top_spell_name and top_spell_dmg > 0
@@ -1409,10 +1409,12 @@ def select_match_mvp_and_culprit(
             p["contrib_rank"] = idx
 
         c_slots = [int(p["player_slot"]) for p in by_contrib]
+        side_won = bool(radiant_win if side_key == "radiant" else not radiant_win)
         if unparsed:
             for p in team_players:
                 p["blame_rank"] = None
             rankings_by_side[side_key] = {
+                "no_clear_culprit": True,
                 "mvp_slot": c_slots[0] if c_slots else 0,
                 "runner_up_slot": c_slots[1] if len(c_slots) > 1 else (c_slots[0] if c_slots else 0),
                 "culprit_slot": None,
@@ -1432,7 +1434,10 @@ def select_match_mvp_and_culprit(
             for idx, p in enumerate(by_blame, start=1):
                 p["blame_rank"] = idx
             b_slots = [int(p["player_slot"]) for p in by_blame]
+            side_max_blame = max((float(p.get("raw_blame_points") or 0.0) for p in team_players), default=0.0)
+            side_no_clear = bool(side_won or side_max_blame < BLAME_CULPRIT_THRESHOLD)
             rankings_by_side[side_key] = {
+                "no_clear_culprit": side_no_clear,
                 "mvp_slot": c_slots[0] if c_slots else 0,
                 "runner_up_slot": c_slots[1] if len(c_slots) > 1 else (c_slots[0] if c_slots else 0),
                 "culprit_slot": b_slots[0] if b_slots else 0,
@@ -1479,12 +1484,12 @@ def select_match_mvp_and_culprit(
 
     if unparsed:
         no_clear_culprit = True
-        culprit_label = "未解析比赛不计算分锅"
-        culprit_verdict = "本局录像未解析，不计算分锅（需要先解析录像）。"
+        culprit_label = "未解析比赛不计责任占比"
+        culprit_verdict = "本局录像未解析，不计算责任占比（需要先解析录像）。"
     else:
         max_blame_pts = max((float(p.get("raw_blame_points") or 0.0) for p in focus_team), default=0.0)
         no_clear_culprit = bool(focus_won or max_blame_pts < BLAME_CULPRIT_THRESHOLD)
-        culprit_label = "无明显责任人" if no_clear_culprit else "车队头号大锅"
+        culprit_label = "无明显责任人" if no_clear_culprit else "主要问题焦点"
         if focus_won:
             culprit_verdict = (
                 f"凯旋庆功总结：{focus_side_zh}头号首功 {mvp['hero_short_zh']}（{mvp['personaname']}，贡献 {mvp.get('contrib_share_pct', 25)}%）与二当家 {runner_up['hero_short_zh']}（{runner_up['personaname']}，贡献 {runner_up.get('contrib_share_pct', 22)}%）携手带飞！"
@@ -1492,13 +1497,13 @@ def select_match_mvp_and_culprit(
             )
         elif no_clear_culprit:
             culprit_verdict = (
-                f"无明显责任人：本局{focus_side_zh}五人最高分锅点数（{max_blame_pts:.1f}）低于阈值（{BLAME_CULPRIT_THRESHOLD:.0f}），不指定头号大锅。"
+                f"无明显责任人：本局{focus_side_zh}五人最高失误点数（{max_blame_pts:.1f}）低于阈值（{BLAME_CULPRIT_THRESHOLD:.0f}），不指定主要责任人。"
                 f" 相对待改进点（{culprit['pos']}号位 {culprit['hero_short_zh']}）：{culprit['weaknesses'][0]}"
             )
         else:
             culprit_verdict = (
-                f"车队头号大锅认证（分锅占比 {culprit['blame_share_pct']}%）：{focus_side_zh} {culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，评分 {culprit['rating_score']}）——"
-                f"本局失利首锅毫无疑问扣在他头上：{culprit['weaknesses'][0]}"
+                f"主要问题焦点（责任占比 {culprit['blame_share_pct']}%）：{focus_side_zh} {culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，评分 {culprit['rating_score']}）——"
+                f"本局关键失误点：{culprit['weaknesses'][0]}"
             )
 
     return {
@@ -2432,6 +2437,7 @@ def call_llm_coach_review(
     provider: Optional[str] = None,
     model_name: Optional[str] = None,
     base_url: Optional[str] = None,
+    tone_mode: str = "coach",
 ) -> Dict[str, Any]:
     """
     调用外部大模型 API（默认优先使用 .env.local 中的 xAI Grok grok-4.7，亦支持 Gemini gemini-3.8-flash / OpenAI）
@@ -2687,6 +2693,7 @@ def call_llm_coach_review(
     })
     compact_payload["patch"] = patch_val
 
+    eff_tone = "roast" if str(tone_mode or "").strip().lower() == "roast" else "coach"
     own_won = bool(
         (focus_side == "radiant" and report.get("radiant_win"))
         or (focus_side == "dire" and not report.get("radiant_win"))
@@ -2700,8 +2707,18 @@ def call_llm_coach_review(
             "   - 本方落败：`grok_share_pct` 表示败局责任占比（5人之和=100%），失误与责任越大则 `grok_share_pct` 越高、`grok_score` 越低；若全队表现接近，责任占比应趋于平分。\n"
         )
 
+    if eff_tone == "roast":
+        tone_instruction = (
+            "【语气模式：毒舌模式】在严格依据比赛事实数据、不编造时间点与数字的前提下，允许使用五黑熟人车队犀利调侃语气点评失误与分锅占比。\n"
+        )
+    else:
+        tone_instruction = (
+            "【语气模式：教练模式】围绕「本局主要问题」只客观陈述比赛事实数据与可执行改进建议，严禁使用讥讽攻击性词汇，统一使用“责任占比”“主要问题”“待改进点”等专业教练表述。\n"
+        )
+
     system_prompt = (
         "你是 Dota 2 赛后复盘教练。请仅依据提供的比赛事实数据，用中文输出结构化 JSON 复盘报告（不夹杂英文变量名，不使用玩家昵称，一律用位置+英雄名代指）。\n"
+        + tone_instruction +
         "一、【事实数据说明】\n"
         "1) 输入包含比赛补丁版本（patch）、对线分路（lane_matchups）、地图目标（macro_objectives）、三阶段表现（phases_breakdown）、关键团战（key_teamfights）及双方 1~5 号位完整遥测与职责数据（role_duty_audit）。\n"
         "2) 严禁编造输入数据中不存在的时间点、技能次数、伤害数字或装备记录；无法从数据直接得出的结论必须标为推断并使用中性措辞。\n"
@@ -2855,9 +2872,10 @@ def call_llm_coach_review(
             }
             payload_json_str = json.dumps(global_payload, ensure_ascii=False)
 
+            share_term_global = "分锅/贡献比例" if eff_tone == "roast" else "责任/贡献比例"
             user_prompt_global = (
-                "【全局定级与三幕复盘（单次调用统一产出 5 人打分、分锅/贡献比例与 MVP）】\n"
-                "请基于以下全部 5 名本方选手的事实数据与评分标准，在本次调用中统一完成全队 5 人的打分（`grok_score`）、分锅/贡献比例（`grok_share_pct`，5人总和=100.0）与 `mvp` 评选（`mvp.slot` 必须等于全队 `grok_score` 最高者的 `slot`），各英雄分路描述必须严格与 `authoritative_lanes` 一致。\n"
+                f"【全局定级与三幕复盘（单次调用统一产出 5 人打分、{share_term_global}与 MVP）】\n"
+                f"请基于以下全部 5 名本方选手的事实数据与评分标准，在本次调用中统一完成全队 5 人的打分（`grok_score`）、{share_term_global}（`grok_share_pct`，5人总和=100.0）与 `mvp` 评选（`mvp.slot` 必须等于全队 `grok_score` 最高者的 `slot`），各英雄分路描述必须严格与 `authoritative_lanes` 一致。\n"
                 "请输出 JSON 字段：`title`, `summary`, `verdict`, `team_practice`, `stage_reviews`（含 `early_lanes`, `mid_tempo`, `late_and_roshan`, `overall_verdict`）, `mvp`, `windows`（最多3条），以及包含全队 5 人打分定级的 `player_rankings`: `[{\"slot\": ..., \"pos\": 1..5, \"hero\": \"...\", \"lane\": \"上路/中路/下路\", \"grok_score\": 0..100, \"grok_share_pct\": ...}]`：\n"
                 + payload_json_str
             )
@@ -3075,6 +3093,11 @@ def call_llm_coach_review(
             raise RuntimeError(f"大模型返回结构校验未通过: {full_err}")
 
         fact_check_coaching_output(structured, report, compact_payload)
+        meta_obj = structured.get("_meta")
+        if not isinstance(meta_obj, dict):
+            meta_obj = {}
+            structured["_meta"] = meta_obj
+        meta_obj["tone_mode"] = eff_tone
         out_txt = json.dumps(structured, ensure_ascii=False)
         mid = report.get("match_id")
         if mid:

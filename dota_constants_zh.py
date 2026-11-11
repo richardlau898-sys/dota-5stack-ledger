@@ -1548,7 +1548,7 @@ LEGACY_ENGLISH_TO_ZH_MAP = {
     "is_afk_farmer": "毒瘤独刷标记",
     "tf_zero_dmg_afk_count": "团战0伤害独刷次数",
     "contrib_share_pct": "胜局贡献度",
-    "blame_share_pct": "背锅占比",
+    "blame_share_pct": "责任占比",
     "rating_score_100": "百分制评分",
     "contrib ": "胜局贡献度 ",
     "contrib": "胜局贡献度",

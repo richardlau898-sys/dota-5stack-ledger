@@ -1070,7 +1070,6 @@ def enrich_phases_with_evaluations(
             full_p = full_player_by_slot.get(slot) or {}
             pt_meta = full_p.get("phase_telemetry") or {}
             solo_picks = pt_meta.get("solo_pickoffs") or []
-            slark_audit = full_p.get("slark_mechanism_audit")
             phoenix_audit = full_p.get("phoenix_egg_audit")
             is_turret_ok = bool(full_p.get("is_turret_fulfilled"))
             hmp = full_p.get("hero_mechanism_profile") or {}
@@ -2657,6 +2656,9 @@ def build_squad_history_ledger(
                 )
                 mvp_p = sorted_svp[0] if sorted_svp else own_list[-1]
 
+            is_parsed_rep = bool(rep.get("is_parsed"))
+            mvp_rep_obj = rep.get("mvp") or {}
+            match_no_clear = bool((not is_parsed_rep) or won or mvp_rep_obj.get("no_clear_culprit"))
             me_p = next((x for x in own_list if x.get("is_me") or int(x.get("account_id") or 0) == main_aid), None) or own_list[0]
             analyzed_matches_summary.append({
                 "match_id": mid,
@@ -2665,11 +2667,12 @@ def build_squad_history_ledger(
                 "score": rep.get("score") or "",
                 "side_zh": "天辉" if f_side == "radiant" else "夜魇",
                 "won": won,
-                "is_parsed": bool(rep.get("is_parsed")),
+                "is_parsed": is_parsed_rep,
+                "no_clear_culprit": match_no_clear,
                 "has_grok": bool(gc.get("title")),
                 "grok_title": gc.get("title") or (rep.get("match_narrative") or {}).get("headline") or "",
                 "my_grok_score": int(round(_eff_score(me_p))),
-                "my_grok_share_pct": round(_eff_share(me_p), 1),
+                "my_grok_share_pct": round(_eff_share(me_p), 1) if (won or is_parsed_rep) else None,
                 "mvp_hero": mvp_p.get("hero_short_zh") or "",
                 "mvp_img": mvp_p.get("hero_img") or "",
                 "mvp_player": mvp_p.get("personaname") or "",
@@ -2684,7 +2687,7 @@ def build_squad_history_ledger(
                 "culprit_img": culprit_p.get("hero_img") or "",
                 "culprit_player": culprit_p.get("personaname") or "",
                 "culprit_score_100": int(round(_eff_score(culprit_p))),
-                "culprit_blame_pct": round(_eff_share(culprit_p), 1),
+                "culprit_blame_pct": round(_eff_share(culprit_p), 1) if is_parsed_rep else None,
             })
 
             df_obj = rep.get("deep_forensics") or {}
@@ -2765,7 +2768,7 @@ def build_squad_history_ledger(
                 st["total_rating"] += p_sc100
                 if int(p.get("player_slot", -1)) == int(mvp_p.get("player_slot", -2)):
                     st["mvp_count"] += 1
-                if (not won) and int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2)):
+                if (not won) and (not match_no_clear) and int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2)):
                     st["culprit_count"] += 1
                 st["total_kills"] += int(p.get("kills") or 0)
                 st["total_deaths"] += int(p.get("deaths") or 0)
@@ -2821,14 +2824,14 @@ def build_squad_history_ledger(
                     st["core_games"] += 1
                     is_clear_culprit = (
                         (not won)
-                        and not bool(culprit_p.get("no_clear_culprit"))
+                        and not match_no_clear
                         and int(p.get("player_slot", -1)) == int(culprit_p.get("player_slot", -2))
                     )
                     if p_sc100 <= 56.0 or is_clear_culprit:
                         st["core_choke_count"] += 1
                         if len(st["core_choke_examples"]) < 3:
                             st["core_choke_examples"].append(
-                                f"#{mid} {pos_p}号位{h_short} ({int(round(p_sc100))}分·{'落败首锅' if not won else '低迷'})"
+                                f"#{mid} {pos_p}号位{h_short} ({int(round(p_sc100))}分·{'主要责任' if not won else '低迷'})"
                             )
 
                 if gp_cur.get("headline") and len(st["grok_quotes"]) < 4:
@@ -3106,7 +3109,7 @@ def build_squad_history_ledger(
         if core_choke > 0:
             ex_c = "、".join(st.get("core_choke_examples") or [])
             flaw_parts.append(
-                f"📉【核心位低分记录】打1-3号位共 {core_g} 局中有 {core_choke} 局（{core_choke_rate}%）出现低分或背首锅（记录：{ex_c}）"
+                f"📉【核心位低分记录】打1-3号位共 {core_g} 局中有 {core_choke} 局（{core_choke_rate}%）出现低分或高责任占比（记录：{ex_c}）"
             )
         if st["solo_pickoffs_total"] > 0:
             flaw_parts.append(

@@ -385,8 +385,8 @@
     <section id="verdict-and-blame-section" class="verdict-and-blame-section" aria-labelledby="verdict-heading">
       <div class="section-heading">
         <div>
-          <h2 id="verdict-heading">② 胜局凯旋庆功榜 / 败局五人分锅定责总表</h2>
-          <p id="verdict-caption" class="section-caption">赢球论功行赏看谁贡献最多，输球硬核取证看谁最该背锅（具体技能机制、眼位、拉野与 TP 细节已归入下方「战术显微镜」）</p>
+          <h2 id="verdict-heading">② 本局主要问题</h2>
+          <p id="verdict-caption" class="section-caption">客观呈现五人贡献与责任占比、三阶段表现与改进建议（具体技能机制、眼位、拉野与 TP 细节已归入下方「战术显微镜」）</p>
         </div>
         <span id="parse-quality-badge" class="status-pill">录像解析核对中</span>
       </div>
@@ -414,25 +414,25 @@
         </article>
 
         <article id="culprit-card" class="verdict-card culprit-theme" aria-labelledby="culprit-card-title">
-          <div id="culprit-card-label" class="verdict-card-label">🚨 本方头号大锅 · 一级战犯</div>
+          <div id="culprit-card-label" class="verdict-card-label">⚠️ 本局主要问题焦点</div>
           <h3 id="culprit-card-title" class="sr-only">次席核心焦点</h3>
           <div id="culprit-card-body"></div>
         </article>
 
         <article id="third-verdict-card" class="verdict-card shortcoming-theme" aria-labelledby="third-card-title">
-          <div id="third-verdict-card-label" class="verdict-card-label">🐟 惊险躺赢/短板算账 · 为什么这把表现不行</div>
+          <div id="third-verdict-card-label" class="verdict-card-label">🔍 次要问题与可优化细节</div>
           <h3 id="third-card-title" class="sr-only">第三核心焦点</h3>
           <div id="third-verdict-card-body"></div>
         </article>
       </div>
 
-      <!-- 胜局：100% 胜局贡献庆功榜 / 败局：100% 分锅责任账本 -->
+      <!-- 胜局：100% 胜局贡献榜 / 败局：100% 责任占比总表 -->
       <article id="blame-ledger-panel" class="blame-ledger-panel" aria-labelledby="blame-ledger-title">
         <div class="blame-ledger-header">
-          <h3 id="blame-ledger-title">本方五人 100% 贡献/分锅总账</h3>
-          <span id="blame-ledger-caption" class="section-caption">点击任意行右侧按钮可直接复制该队友专属贺电或算账金句发群里</span>
+          <h3 id="blame-ledger-title">本方五人 100% 贡献与责任占比</h3>
+          <span id="blame-ledger-caption" class="section-caption">点击任意行右侧按钮可直接复制该位置复盘摘要</span>
         </div>
-        <div id="blame-stacked-bar" class="blame-stacked-bar" role="img" aria-label="五人100%贡献或分锅比例堆叠条"></div>
+        <div id="blame-stacked-bar" class="blame-stacked-bar" role="img" aria-label="五人100%贡献或责任占比堆叠条"></div>
         <div id="blame-ranking-rows" class="blame-ranking-rows"></div>
       </article>
     </section>
@@ -795,15 +795,15 @@
               <label style="font-size:12px;color:var(--gold-light);font-weight:700;display:flex;align-items:center;gap:5px;">
                 <span>🎨 构图剧本：</span>
                 <select id="select-nano-poster-style" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
-                  <option value="auto">✨ 智能按本局位置&amp;表现定制 (MVP独尊 / 破阵功臣 / 躺赢抱腿 / 孤胆院长 / 战犯花式处刑)</option>
+                  <option value="auto">✨ 智能按本局位置&amp;表现定制 (MVP独尊 / 破阵功臣 / 孤胆院长 / 毒舌调侃剧本)</option>
                   <option value="epic">👑 胜局首功 MVP 独尊C位 (2倍前景仰拍 · 斩杀猎物)</option>
                   <option value="win_co_carry">⚔️ 3/4/5号位先手开团 &amp; 破阵功臣 (跳刀大招/诡计之雾)</option>
-                  <option value="passenger">🛋️ 惊险躺赢抱大腿 (鼻青脸肿坐花轿看戏 · 大哥在前面乱杀)</option>
+                  <option value="passenger">🛋️ 惊险过关抱大腿 (鼻青脸肿坐花轿看戏 · 大哥在前面乱杀)</option>
                   <option value="svp">🩸 败方孤胆院长 1v5 浴血奋战 (一人独挡敌方五人 · 悲壮史诗)</option>
-                  <option value="roast_greedy">💸 战犯处刑：假辅助真毒瘤野区怀抱散失偷刷钱被抓</option>
-                  <option value="roast_bkb">🧤 战犯处刑：团战憋死BKB/救命装长蜘蛛网被控到死</option>
-                  <option value="roast_zero_dmg">📦 战犯处刑：大哥高占经低输出满身神装一秒融化送快递</option>
-                  <option value="roast_atm">🏧 战犯处刑：黑图河道孤狼单走变人形ATM狂爆金币</option>
+                  <option value="roast_greedy">💸 毒舌处刑：辅助出装偏移野区刷钱被抓</option>
+                  <option value="roast_bkb">🧤 毒舌处刑：团战保命装未按被控阵亡</option>
+                  <option value="roast_zero_dmg">📦 毒舌处刑：高占经低输出满身神装瞬间倒地</option>
+                  <option value="roast_atm">🏧 毒舌处刑：黑图河道单走连续阵亡</option>
                   <option value="anime">⚡ 热血番剧剧场版 (极致光影 · 必杀技动漫分镜)</option>
                 </select>
               </label>
@@ -887,9 +887,9 @@
   <div id="toast-banner" class="toast-banner" role="status" aria-live="polite" hidden></div>
 
   <footer class="site-footer">
-    <span>战后算账 · Dota 2 录像级战术复盘与车队分锅工作台</span>
+    <span>战后算账 · Dota 2 录像级战术复盘与赛前工作台</span>
     <span>·</span>
-    <span>有据才喷，数据来自 OpenDota 录像解析与 AI 教练</span>
+    <span>有据复盘，数据来自 OpenDota 录像解析与 AI 教练</span>
   </footer>
 
   <!-- 手机端底部拇指快捷导航栏（仅 <= 768px 显示） -->
@@ -900,7 +900,7 @@
     </button>
     <button type="button" class="m-bnav-btn active" data-mnav-target="verdict-and-blame-section">
       <span class="m-bnav-icon">⚖️</span>
-      <span class="m-bnav-txt">分锅</span>
+      <span class="m-bnav-txt">问题</span>
     </button>
     <button type="button" class="m-bnav-btn" data-mnav-target="windows-section">
       <span class="m-bnav-icon">⚔️</span>
@@ -920,6 +920,6 @@
     </button>
   </nav>
 
-  <script src="/app.5364a079.js" defer></script>
+  <script src="/app.9c9bc3bf.js" defer></script>
 </body>
 </html>
