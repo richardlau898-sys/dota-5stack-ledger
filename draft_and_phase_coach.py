@@ -51,22 +51,47 @@ def load_hero_stats_by_id(hs_path: Optional[Path] = None) -> Dict[int, Dict[str,
 
 def load_squad_hero_pool_and_against_stats() -> Tuple[Dict[int, Dict[str, Any]], List[Dict[str, Any]]]:
     """
-    聚合车队真实英雄池（我方使用各英雄的局数与胜场）与 against_games / against_win（对阵敌方各英雄的局数与胜场）。
-    数据来源：
-    1) .cache/player_heroes_against.json（OpenDota /players/{id}/heroes 同步快照）
-    2) reports/raw_*.json（本地已复盘比赛真实对局记录）
+    R3-5: 聚合车队真实英雄池与交手记录（绝不读取已从 Vercel 包排除的原始录像 JSON）：
+    1) 优先从 cloud_fetch_player_matches 读取全量历史对局英雄池（标注「车队全量对局」）
+    2) 若全量表为空，则从已生成的 match_*.json 报告汇总我方英雄池（标注「已复盘对局」）与敌方英雄交手记录
+    3) 若本地存在 .cache/player_heroes_against.json 则加载交手记录
     """
+    import cloud_store
     import dota_analyst
 
-    roster_ids = {
-        aid
+    roster_ids = sorted({
+        int(aid)
         for m in dota_analyst.iter_roster_accounts(dota_analyst.load_roster())
         for aid in m["account_ids"]
-    }
+    })
 
     squad_pool: Dict[int, Dict[str, Any]] = {}
     against_map: Dict[int, Dict[str, int]] = {}
 
+    # 1. 优先从 player_matches 全量历史读取车队个人英雄池
+    pm_rows = cloud_store.cloud_fetch_player_matches(roster_ids)
+    if pm_rows:
+        seen_pm_keys = set()
+        for r in pm_rows:
+            if not isinstance(r, dict) or not r.get("match_id") or not r.get("account_id"):
+                continue
+            key = (int(r["account_id"]), int(r["match_id"]))
+            if key in seen_pm_keys:
+                continue
+            seen_pm_keys.add(key)
+            hid = int(r.get("hero_id") or 0)
+            if hid <= 0:
+                continue
+            zh = r.get("hero_short_zh") or (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+            sp = squad_pool.setdefault(
+                hid,
+                {"hero_id": hid, "hero_short_zh": zh, "games": 0, "wins": 0, "source_zh": "车队全量对局"},
+            )
+            sp["games"] += 1
+            if r.get("won"):
+                sp["wins"] += 1
+
+    # 2. 若存在 against 缓存快照则读取
     against_cache_path = _REPO_ROOT / ".cache" / "player_heroes_against.json"
     if against_cache_path.exists():
         try:
@@ -82,47 +107,60 @@ def load_squad_hero_pool_and_against_stats() -> Tuple[Dict[int, Dict[str, Any]],
                     slot = against_map.setdefault(hid, {"hero_id": hid, "against_games": 0, "against_win": 0})
                     slot["against_games"] += ag_g
                     slot["against_win"] += ag_w
-                own_g = int(r.get("games") or 0)
-                own_w = int(r.get("win") or 0)
-                if own_g > 0:
-                    zh = (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
-                    sp = squad_pool.setdefault(hid, {"hero_id": hid, "hero_short_zh": zh, "games": 0, "wins": 0})
-                    sp["games"] += own_g
-                    sp["wins"] += own_w
+                if not pm_rows:
+                    own_g = int(r.get("games") or 0)
+                    own_w = int(r.get("win") or 0)
+                    if own_g > 0:
+                        zh = (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+                        sp = squad_pool.setdefault(
+                            hid,
+                            {"hero_id": hid, "hero_short_zh": zh, "games": 0, "wins": 0, "source_zh": "车队全量对局"},
+                        )
+                        sp["games"] += own_g
+                        sp["wins"] += own_w
         except Exception:
             pass
 
-    reports_dir = _REPO_ROOT / "reports"
-    if reports_dir.exists() and (not squad_pool or not against_map):
+    # 3. 从打包在部署环境内的 match_*.json（以及 /tmp/dota_reports/match_*.json）汇总已复盘对局英雄池与敌方交手记录
+    if not squad_pool or not against_map:
         need_pool = not bool(squad_pool)
         need_against = not bool(against_map)
-        for raw_p in sorted(reports_dir.glob("raw_*.json")):
-            try:
-                raw_m = json.loads(raw_p.read_text(encoding="utf-8"))
-            except Exception:
+        seen_mids = set()
+        for scan_dir in (Path("/tmp/dota_reports"), _REPO_ROOT / "reports"):
+            if not scan_dir.exists():
                 continue
-            players = raw_m.get("players") or []
-            if not players:
-                continue
-            rad_win = bool(raw_m.get("radiant_win"))
-            rad_cnt = sum(1 for pl in players if int(pl.get("player_slot") or 0) < 128 and int(pl.get("account_id") or 0) in roster_ids)
-            dire_cnt = sum(1 for pl in players if int(pl.get("player_slot") or 0) >= 128 and int(pl.get("account_id") or 0) in roster_ids)
-            squad_is_rad = rad_cnt >= dire_cnt
-            squad_won = rad_win if squad_is_rad else (not rad_win)
-            for pl in players:
-                hid = int(pl.get("hero_id") or 0)
-                if hid <= 0:
+            for rep_p in sorted(scan_dir.glob("match_*.json")):
+                try:
+                    rep = json.loads(rep_p.read_text(encoding="utf-8"))
+                except Exception:
                     continue
-                is_rad = int(pl.get("player_slot") or 0) < 128
-                if is_rad == squad_is_rad:
-                    if need_pool:
-                        zh = (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
-                        sp = squad_pool.setdefault(hid, {"hero_id": hid, "hero_short_zh": zh, "games": 0, "wins": 0})
+                mid = int(rep.get("match_id") or 0)
+                if not mid or mid in seen_mids:
+                    continue
+                seen_mids.add(mid)
+                focus_side = str(rep.get("focus_side") or "dire")
+                rad_win = bool(rep.get("radiant_win"))
+                squad_won = rad_win if focus_side == "radiant" else (not rad_win)
+                own_list = rep.get("radiant_pos_1_to_5" if focus_side == "radiant" else "dire_pos_1_to_5") or []
+                opp_list = rep.get("dire_pos_1_to_5" if focus_side == "radiant" else "radiant_pos_1_to_5") or []
+                if need_pool:
+                    for pl in own_list:
+                        hid = int(pl.get("hero_id") or 0)
+                        if hid <= 0:
+                            continue
+                        zh = pl.get("hero_short_zh") or (HEROES_ZH.get(hid) or (f"英雄#{hid}",))[0]
+                        sp = squad_pool.setdefault(
+                            hid,
+                            {"hero_id": hid, "hero_short_zh": zh, "games": 0, "wins": 0, "source_zh": "已复盘对局"},
+                        )
                         sp["games"] += 1
                         if squad_won:
                             sp["wins"] += 1
-                else:
-                    if need_against:
+                if need_against:
+                    for pl in opp_list:
+                        hid = int(pl.get("hero_id") or 0)
+                        if hid <= 0:
+                            continue
                         slot = against_map.setdefault(hid, {"hero_id": hid, "against_games": 0, "against_win": 0})
                         slot["against_games"] += 1
                         if squad_won:
@@ -177,6 +215,11 @@ def compute_real_bp_matchup_stats(
             "pub_win_rate": round(pub_win / pub_pick * 100.0, 1) if pub_pick > 0 else None,
         }
 
+    pool_source_zh = "车队全量对局" if any(
+        isinstance(v, dict) and v.get("source_zh") == "车队全量对局"
+        for v in (squad_hero_pool or {}).values()
+    ) else "已复盘对局"
+
     own_hero_real_stats: List[Dict[str, Any]] = []
     for item in own_picks or []:
         hid = int(item.get("hero_id") or 0)
@@ -199,6 +242,9 @@ def compute_real_bp_matchup_stats(
             "squad_wins": w,
             "squad_win_rate": wr,
             "squad_insufficient_sample": insuff,
+            "squad_source_zh": str(sp.get("source_zh") or pool_source_zh),
+            "bracket_source_zh": "OpenDota 超凡/冠绝",
+            "pub_source_zh": "OpenDota 全分段",
             **b_info,
         })
 
@@ -225,6 +271,9 @@ def compute_real_bp_matchup_stats(
             "against_losses": ag_l,
             "against_win_rate": ag_wr,
             "insufficient_sample": insuff,
+            "against_source_zh": "车队交手记录",
+            "bracket_source_zh": "OpenDota 超凡/冠绝",
+            "pub_source_zh": "OpenDota 全分段",
             **b_info,
         })
 
@@ -246,21 +295,23 @@ def compute_real_bp_matchup_stats(
             "against_win_rate": ag_wr,
             "loss_rate": round(100.0 - ag_wr, 1),
             "insufficient_sample": False,
+            "source_zh": "车队交手记录",
         })
     most_lost_against_top.sort(key=lambda x: (x["against_win_rate"], -x["against_losses"], -x["against_games"]))
 
     return {
         "min_games": min_games,
+        "squad_pool_source_zh": pool_source_zh,
         "own_hero_real_stats": own_hero_real_stats,
         "enemy_against_stats": enemy_against_stats,
         "most_lost_against_top": most_lost_against_top[:10],
         "data_sources": {
-            "squad_history": "F1_player_matches_and_ledger",
-            "against_stats": "opendota_players_heroes_against",
-            "bracket_stats": "opendota_heroStats",
+            "squad_history": pool_source_zh,
+            "against_stats": "车队交手记录",
+            "bracket_stats": "OpenDota 超凡/冠绝",
             "uses_pro_only_matchups_endpoint": False,
             "stratz_token_configured": bool(os.environ.get("STRATZ_API_TOKEN")),
-            "note": "OpenDota /heroes/{id}/matchups 仅统计职业比赛，不直接冒充路人局克制数据；克制统计采用车队真实交手 against_games/against_win（>=10局）与 /heroStats 分段位胜率。",
+            "note": "OpenDota /heroes/{id}/matchups 仅统计职业比赛，不冒充路人局克制数据；本页所有数字均逐项标注真实数据来源。",
         },
     }
 
@@ -4152,7 +4203,7 @@ def build_pregame_strategy_plan(
 
     grade_str = draft_eval.get("grade") or "A 级 · 扎实五黑体系"
     chat_brief_text = (
-        f"⚔️【五黑赛前10秒作战锦囊 · 阵容评级 {grade_str} ({overall_score}分)】\n"
+        f"⚔️【五黑赛前10秒作战锦囊 · 阵容评级 {grade_str} ({overall_score}分 [通用知识])】\n"
         f"👉 本方阵容：1.{p1['hero_short_zh']}({p1['personaname']}) / 2.{p2['hero_short_zh']}({p2['personaname']}) / 3.{p3['hero_short_zh']}({p3['personaname']}) / 4.{p4['hero_short_zh']}({p4['personaname']}) / 5.{p5['hero_short_zh']}({p5['personaname']})\n"
         f"{('👉 敌方阵容：' + ' / '.join(enemy_names) + chr(10)) if enemy_names else ''}"
         f"🏆 本局赢法：{win_condition}\n"
@@ -4172,6 +4223,8 @@ def build_pregame_strategy_plan(
         "enemy_players": enemy_players,
         "grade": grade_str,
         "overall_score": overall_score,
+        "score_source": "general_knowledge",
+        "score_source_zh": "通用知识",
         "dimensions": draft_eval.get("scores") or {},
         "real_data_bp_stats": real_data_bp_stats,
         "tempo_style": tempo_style,

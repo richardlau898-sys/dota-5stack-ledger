@@ -3699,6 +3699,25 @@ select:hover {
   line-height: 1.75;
 }
 
+.bp-src-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--muted);
+  background: rgba(198, 164, 104, 0.1);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  vertical-align: baseline;
+}
+
+.bp-src-tag.general {
+  color: var(--gold-light);
+  border-color: rgba(198, 164, 104, 0.35);
+}
+
 .pregame-stages-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
