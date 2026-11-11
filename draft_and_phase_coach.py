@@ -3171,10 +3171,30 @@ def build_squad_history_ledger(
     tilt_rows: List[Dict[str, Any]] = []
     for rm in recent_matches or []:
         if isinstance(rm, dict) and rm.get("match_id"):
+            raw_dur = rm.get("duration_sec") if rm.get("duration_sec") is not None else rm.get("duration")
+            dur_sec = 0
+            if isinstance(raw_dur, (int, float)):
+                dur_sec = int(raw_dur)
+            elif isinstance(raw_dur, str) and ":" in raw_dur:
+                parts = raw_dur.strip().split(":")
+                try:
+                    dur_sec = int(parts[0]) * 60 + int(parts[1])
+                except (ValueError, IndexError):
+                    dur_sec = 0
+            elif raw_dur is not None:
+                try:
+                    dur_sec = int(float(raw_dur))
+                except (ValueError, TypeError):
+                    dur_sec = 0
+            if dur_sec <= 0 and rm.get("duration_min"):
+                try:
+                    dur_sec = int(float(rm.get("duration_min")) * 60)
+                except (ValueError, TypeError):
+                    dur_sec = 0
             tilt_rows.append({
                 "match_id": int(rm["match_id"]),
                 "start_time": int(rm.get("start_time") or 0),
-                "duration": int(rm.get("duration") or int(float(rm.get("duration_min") or 0) * 60)),
+                "duration": dur_sec,
                 "won": bool(rm.get("won")),
             })
     for rep_item in loaded_reports_for_growth:

@@ -847,6 +847,9 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             path = "/" + path
         return path, qs
 
+    def do_HEAD(self) -> None:
+        self.do_GET()
+
     def do_GET(self) -> None:
         path, qs = self._resolve_path_and_qs()
 
