@@ -8,7 +8,7 @@
   },
   "headers": [
     {
-      "source": "/(app\\.e52c67fb\\.js|styles\\.fe672990\\.css)",
+      "source": "/(app\\.e52c67fb\\.js|styles\\.6227743b\\.css)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -44,7 +44,7 @@
       "destination": "/static/app.js"
     },
     {
-      "source": "/styles.fe672990.css",
+      "source": "/styles.6227743b.css",
       "destination": "/static/styles.css"
     },
     {
