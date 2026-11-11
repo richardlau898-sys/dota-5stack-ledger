@@ -177,18 +177,12 @@ def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
         is_rad = (m.get("player_slot", 0) < 128)
         won = (is_rad and m.get("radiant_win")) or (not is_rad and not m.get("radiant_win"))
         start_time = int(m.get("start_time") or 0)
-        dt_str = (
-            datetime.datetime.fromtimestamp(start_time).strftime("%m-%d %H:%M")
-            if start_time
-            else ""
-        )
         psize = m.get("party_size") or 1
         hid = int(m.get("hero_id") or 0)
         hinfo = hero_map.get(hid) or {}
         out.append({
             "match_id": mid,
             "start_time": start_time if start_time > 0 else None,
-            "start_time_str": dt_str,
             "won": bool(won),
             "result": "胜利" if won else "失败",
             "hero_id": hid,
@@ -225,7 +219,6 @@ def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
                 out.append({
                     "match_id": mid,
                     "start_time": rep.get("start_time"),
-                    "start_time_str": rep.get("start_time_str", ""),
                     "won": won,
                     "result": "胜利" if won else "失败",
                     "hero_id": me_p.get("hero_id", 0),

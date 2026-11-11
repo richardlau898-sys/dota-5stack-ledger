@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.p3"
+ENGINE_VERSION = "2026.11.r1.3"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -1119,11 +1119,6 @@ def analyze_match_data(
     radiant_score = match.get("radiant_score") or 0
     dire_score = match.get("dire_score") or 0
     start_time = int(match.get("start_time") or 0)
-    start_dt = (
-        datetime.datetime.fromtimestamp(start_time).strftime("%Y-%m-%d %H:%M")
-        if start_time
-        else "未知时间"
-    )
     is_parsed = bool(match.get("version"))
 
     players = match.get("players") or []
@@ -1748,7 +1743,6 @@ def analyze_match_data(
         "patch_str": resolve_patch_name(match.get("patch")),
         "mode_str": get_mode_and_lobby(match.get("game_mode", 0), match.get("lobby_type", 0)),
         "start_time": start_time if start_time > 0 else None,
-        "start_time_str": start_dt,
         "duration_str": format_duration(duration),
         "duration_min": round(duration_min, 1),
         "is_parsed": is_parsed,
@@ -1886,7 +1880,6 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
         "patch_str",
         "mode_str",
         "start_time",
-        "start_time_str",
         "duration_str",
         "duration_min",
         "is_parsed",
@@ -2287,8 +2280,14 @@ def render_markdown_report(report: Dict[str, Any]) -> str:
         else "基础统计模式 (可请求 OpenDota 解析录像补齐分钟级曲线与事件)"
     )
 
+    start_ts_val = int(report.get("start_time") or 0)
+    md_start_str = (
+        datetime.datetime.fromtimestamp(start_ts_val, tz=datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        if start_ts_val > 0
+        else "未知时间"
+    )
     lines.append(
-        f"- **模式与时间**: {report.get('mode_str', '未知模式')} | {report['start_time_str']} | 时长 {report['duration_str']} ({report['duration_min']} 分钟)"
+        f"- **模式与时间**: {report.get('mode_str', '未知模式')} | {md_start_str} | 时长 {report['duration_str']} ({report['duration_min']} 分钟)"
     )
     lines.append(f"- **比分与结果**: {report['score']} — 胜方：{report['winner']}{user_status}")
     lines.append(f"- **证据完整度**: {parse_badge}")
@@ -2367,7 +2366,12 @@ def cmd_recent(args: argparse.Namespace) -> None:
         hero_str = get_hero_name(m.get("hero_id", 0))
         kda = f"{m.get('kills',0)}/{m.get('deaths',0)}/{m.get('assists',0)}"
         dur = format_duration(m.get("duration", 0))
-        dt = datetime.datetime.fromtimestamp(m.get("start_time", 0)).strftime("%m-%d %H:%M")
+        st_sec = int(m.get("start_time") or 0)
+        dt = (
+            datetime.datetime.fromtimestamp(st_sec, tz=datetime.timezone.utc).strftime("%m-%d %H:%M UTC")
+            if st_sec > 0
+            else "未知时间"
+        )
         print(f"Match {mid} | {dt} | {res_str} | {hero_str:<14} | KDA: {kda:<9} | 时长: {dur}")
 
 

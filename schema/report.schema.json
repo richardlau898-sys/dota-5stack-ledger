@@ -46,7 +46,6 @@
     "patch_str": { "type": "string" },
     "mode_str": { "type": "string" },
     "start_time": { "type": ["integer", "null"] },
-    "start_time_str": { "type": "string" },
     "duration_str": { "type": "string" },
     "duration_min": { "type": "number" },
     "is_parsed": { "type": "boolean" },

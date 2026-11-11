@@ -569,7 +569,7 @@ function formatMatchStartTime(val, { short = false } = {}) {
     }
   }
   if (val && typeof val === "object") {
-    return String(val.start_time_str || val.time_ago || val.date_str || "");
+    return String(val.time_ago || val.date_str || "");
   }
   return "";
 }
@@ -2662,7 +2662,7 @@ function renderHomeWorkspace() {
       const heroShort = m.hero_short_zh || m.hero_name || "未知英雄";
       const partyLabel = m.party_label || (m.party_size >= 2 ? `${m.party_size}人黑` : "单排");
       const durText = m.duration_str || m.duration || "";
-      const timeAgo = formatMatchStartTime(m, { short: true }) || m.start_time_str || m.time_ago || "";
+      const timeAgo = formatMatchStartTime(m, { short: true }) || m.time_ago || "";
       const sideLabel = m.side_zh || m.side || (arch ? arch.side_zh : "");
       const isCurrent = Number(activeMid) === mid;
 
@@ -2840,7 +2840,6 @@ function renderWorkstationSidebarMatches() {
       kda: `${focusP.kills ?? 0}/${focusP.deaths ?? 0}/${focusP.assists ?? 0}`,
       duration_str: cr.duration_str || "",
       start_time: cr.start_time ?? null,
-      start_time_str: formatMatchStartTime(cr, { short: true }) || cr.start_time_str || "",
       party_size: cr.party_size || 5,
       party_label: cr.party_label || "车队局",
     });
@@ -2866,7 +2865,6 @@ function renderWorkstationSidebarMatches() {
         kda: am.my_kda || (am.score ? `比分 ${am.score}` : "-"),
         duration_str: am.duration_str || "",
         start_time: am.start_time ?? null,
-        start_time_str: formatMatchStartTime(am, { short: true }) || am.start_time_str || am.date_str || "",
         party_size: am.party_size || 5,
         party_label: am.party_label || "5人黑",
       });
@@ -2913,9 +2911,7 @@ function renderWorkstationSidebarMatches() {
       const timeStr =
         formatMatchStartTime(m, { short: true }) ||
         formatMatchStartTime(arch, { short: true }) ||
-        m.start_time_str ||
         m.time_ago ||
-        arch?.start_time_str ||
         "";
       const isSelected = mid === activeMid;
 

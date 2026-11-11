@@ -2540,7 +2540,6 @@ def build_squad_history_ledger(
             analyzed_matches_summary.append({
                 "match_id": mid,
                 "start_time": rep.get("start_time"),
-                "start_time_str": rep.get("start_time_str") or "",
                 "duration_str": rep.get("duration_str") or "",
                 "score": rep.get("score") or "",
                 "side_zh": "天辉" if f_side == "radiant" else "夜魇",
