@@ -1097,12 +1097,20 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 rel = path.lstrip("/")
                 if rel.startswith("static/"):
                     rel = rel[len("static/"):]
-                if re.fullmatch(r"app\.[0-9a-f]{8,}\.js", rel):
-                    rel = "app.js"
-                    is_hashed_asset = True
-                elif re.fullmatch(r"styles\.[0-9a-f]{8,}\.css", rel):
-                    rel = "styles.css"
-                    is_hashed_asset = True
+                m_js = re.fullmatch(r"app\.([0-9a-f]{8,})\.js", rel)
+                m_css = re.fullmatch(r"styles\.([0-9a-f]{8,})\.css", rel)
+                if m_js:
+                    app_js_file = STATIC_DIR / "app.js"
+                    cur_js_hash = hashlib.sha256(app_js_file.read_bytes()).hexdigest()[: len(m_js.group(1))] if app_js_file.is_file() else ""
+                    if m_js.group(1) == cur_js_hash:
+                        rel = "app.js"
+                        is_hashed_asset = True
+                elif m_css:
+                    styles_css_file = STATIC_DIR / "styles.css"
+                    cur_css_hash = hashlib.sha256(styles_css_file.read_bytes()).hexdigest()[: len(m_css.group(1))] if styles_css_file.is_file() else ""
+                    if m_css.group(1) == cur_css_hash:
+                        rel = "styles.css"
+                        is_hashed_asset = True
                 file_path = (STATIC_DIR / rel).resolve()
                 if not str(file_path).startswith(str(STATIC_DIR.resolve())):
                     self._send_json({"ok": False, "error": "拒绝访问该路径"}, status=403)
@@ -1120,7 +1128,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
 
             content = file_path.read_bytes()
             etag = f'"{hashlib.sha256(content).hexdigest()[:16]}"'
-            is_static_bundle = file_path.suffix.lower() in (".js", ".css") and (is_hashed_asset or bool(qs.get("v")))
+            is_static_bundle = file_path.suffix.lower() in (".js", ".css") and is_hashed_asset
             cache_ctrl = "public, max-age=31536000, immutable" if is_static_bundle else "no-cache"
 
             inm = (self.headers.get("If-None-Match") or "").strip() if hasattr(self, "headers") and self.headers else ""
