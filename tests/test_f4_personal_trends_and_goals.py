@@ -57,7 +57,12 @@ class TestF4PersonalTrendsAndGoals(unittest.TestCase):
 
         res = build_personal_trends_and_goals(
             fake_reports,
-            roster={"friends": {"86080912": "Flame", "125383759": "Siesta"}},
+            roster={
+                "players": {
+                    "86080912": {"name": "Flame"},
+                    "125383759": {"name": "Siesta"},
+                }
+            },
             weekly_goals={
                 "86080912": {
                     "metric": "non_teamfight_deaths_after_10m",
