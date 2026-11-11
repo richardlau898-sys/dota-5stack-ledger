@@ -1338,6 +1338,66 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 self._send_json({"ok": True, "roster": roster})
                 return
 
+            if path == "/api/player_goals":
+                import cloud_store
+                from dota_analyst import resolve_canonical_account_id
+                from draft_and_phase_coach import refresh_persisted_squad_ledger
+
+                body = self._read_json_body()
+                roster = load_roster()
+                raw_aid = body.get("account_id")
+                if not raw_aid:
+                    self._send_json({"ok": False, "error": "缺少队员 account_id"}, status=400)
+                    return
+                aid = int(resolve_canonical_account_id(int(raw_aid), roster) or int(raw_aid))
+                action = str(body.get("action") or "save").strip().lower()
+                if action in ("clear", "delete"):
+                    cloud_store.cloud_upsert_player_goal(aid, None)
+                    ledger = refresh_persisted_squad_ledger(REPORTS_DIR, roster, [], persist_disk=True)
+                    self._send_json({
+                        "ok": True,
+                        "account_id": aid,
+                        "goal": None,
+                        "personal_trends_and_goals": ledger.get("personal_trends_and_goals") or {"players": {}},
+                    })
+                    return
+
+                allowed_metrics = {
+                    "non_teamfight_deaths_after_10m": ("max", lambda t: f"10分钟后团战外阵亡 <= {t:g} 次/局"),
+                    "lane_nw_diff_10m": ("min", lambda t: f"对位10分钟净值差 >= {t:+g}"),
+                    "support_wards_per_min": ("min", lambda t: f"辅助每分钟插眼数 >= {t:g}/m"),
+                    "key_item_timing_delta_sec": ("max", lambda t: f"关键装相对中位数偏差 <= {t:+g}s"),
+                }
+                metric = str(body.get("metric") or "").strip()
+                if metric not in allowed_metrics:
+                    self._send_json({"ok": False, "error": "不支持的目标指标"}, status=400)
+                    return
+                raw_target = body.get("target")
+                if raw_target is None or str(raw_target).strip() == "":
+                    self._send_json({"ok": False, "error": "请输入目标数值"}, status=400)
+                    return
+                target_val = round(float(raw_target), 2)
+                default_dir, label_fn = allowed_metrics[metric]
+                direction = str(body.get("direction") or default_dir)
+                if direction not in ("min", "max"):
+                    direction = default_dir
+                label_zh = str(body.get("label_zh") or label_fn(target_val))
+                goal_obj = {
+                    "metric": metric,
+                    "direction": direction,
+                    "target": target_val,
+                    "label_zh": label_zh,
+                }
+                cloud_store.cloud_upsert_player_goal(aid, goal_obj)
+                ledger = refresh_persisted_squad_ledger(REPORTS_DIR, roster, [], persist_disk=True)
+                self._send_json({
+                    "ok": True,
+                    "account_id": aid,
+                    "goal": goal_obj,
+                    "personal_trends_and_goals": ledger.get("personal_trends_and_goals") or {"players": {}},
+                })
+                return
+
             if path in ("/api/llm_review", "/api/llm_coach"):
                 body = self._read_json_body()
                 mid = int(body.get("match_id"))

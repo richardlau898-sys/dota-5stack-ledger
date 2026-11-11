@@ -806,3 +806,195 @@ def cloud_save_notified_match_ids(match_ids: Set[int], cfg: Optional[Dict[str, s
         return False
 
 
+_PLAYER_GOALS_CACHE: Dict[str, Any] = {"url": "", "ts": 0.0, "goals": None}
+
+
+def cloud_fetch_player_goals(cfg: Optional[Dict[str, str]] = None) -> Dict[str, Dict[str, Any]]:
+    """R3-4: 从 Supabase public.player_goals（或 Storage / 本地 /tmp 缓存）读取队员个人目标。"""
+    import time
+
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+    out: Dict[str, Dict[str, Any]] = {}
+
+    if url and key:
+        now_ts = time.time()
+        if (
+            _PLAYER_GOALS_CACHE.get("url") == url
+            and (now_ts - float(_PLAYER_GOALS_CACHE.get("ts") or 0.0)) < 60.0
+            and isinstance(_PLAYER_GOALS_CACHE.get("goals"), dict)
+        ):
+            return dict(_PLAYER_GOALS_CACHE["goals"])
+
+        loaded = False
+        try:
+            req = urllib.request.Request(
+                f"{url}/rest/v1/player_goals?select=account_id,metric,direction,target,label_zh&limit=200",
+                headers=_supabase_headers(key, {"Accept": "application/json"}),
+            )
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                rows = json.loads(resp.read().decode("utf-8"))
+                if isinstance(rows, list):
+                    for r in rows:
+                        if isinstance(r, dict) and r.get("account_id") and r.get("metric") and r.get("target") is not None:
+                            out[str(int(r["account_id"]))] = {
+                                "metric": str(r["metric"]),
+                                "direction": str(r.get("direction") or "max"),
+                                "target": float(r["target"]),
+                                "label_zh": str(r.get("label_zh") or ""),
+                            }
+                    loaded = True
+        except Exception:
+            loaded = False
+
+        if not loaded:
+            bucket = cfg.get("supabase_bucket") or "dota-reports"
+            try:
+                req = urllib.request.Request(
+                    f"{url}/storage/v1/object/{bucket}/state/player_goals.json",
+                    headers=_supabase_headers(key),
+                )
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    if isinstance(data, dict):
+                        for k, v in data.items():
+                            if isinstance(v, dict) and v.get("metric") and v.get("target") is not None:
+                                out[str(k)] = {
+                                    "metric": str(v["metric"]),
+                                    "direction": str(v.get("direction") or "max"),
+                                    "target": float(v["target"]),
+                                    "label_zh": str(v.get("label_zh") or ""),
+                                }
+            except Exception:
+                pass
+
+        _PLAYER_GOALS_CACHE["url"] = url
+        _PLAYER_GOALS_CACHE["ts"] = now_ts
+        _PLAYER_GOALS_CACHE["goals"] = dict(out)
+        return out
+
+    local_file = TMP_REPORTS_DIR / "player_goals.json"
+    if local_file.exists():
+        try:
+            data = json.loads(local_file.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                for k, v in data.items():
+                    if isinstance(v, dict) and v.get("metric") and v.get("target") is not None:
+                        out[str(k)] = {
+                            "metric": str(v["metric"]),
+                            "direction": str(v.get("direction") or "max"),
+                            "target": float(v["target"]),
+                            "label_zh": str(v.get("label_zh") or ""),
+                        }
+        except Exception:
+            pass
+    return out
+
+
+def cloud_upsert_player_goal(
+    account_id: int,
+    goal: Optional[Dict[str, Any]],
+    cfg: Optional[Dict[str, str]] = None,
+) -> bool:
+    """R3-4: 写入或清除单个队员的最近 7 局目标（优先存 Supabase public.player_goals）。"""
+    _PLAYER_GOALS_CACHE["ts"] = 0.0
+    aid = int(account_id)
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+
+    if url and key:
+        if goal is None:
+            try:
+                req = urllib.request.Request(
+                    f"{url}/rest/v1/player_goals?account_id=eq.{aid}",
+                    method="DELETE",
+                    headers=_supabase_headers(key),
+                )
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    if 200 <= resp.status < 300:
+                        return True
+            except Exception:
+                pass
+        else:
+            row = [{
+                "account_id": aid,
+                "metric": str(goal.get("metric") or ""),
+                "direction": str(goal.get("direction") or "max"),
+                "target": float(goal["target"]),
+                "label_zh": str(goal.get("label_zh") or ""),
+            }]
+            try:
+                req = urllib.request.Request(
+                    f"{url}/rest/v1/player_goals?on_conflict=account_id",
+                    data=json.dumps(row, ensure_ascii=False).encode("utf-8"),
+                    method="POST",
+                    headers=_supabase_headers(
+                        key,
+                        {
+                            "Content-Type": "application/json",
+                            "Prefer": "resolution=merge-duplicates,return=minimal",
+                        },
+                    ),
+                )
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    if 200 <= resp.status < 300:
+                        return True
+            except Exception:
+                pass
+
+        # Fallback to Supabase Storage state/player_goals.json if SQL table not yet migrated
+        bucket = cfg.get("supabase_bucket") or "dota-reports"
+        cur = cloud_fetch_player_goals(cfg=cfg)
+        if goal is None:
+            cur.pop(str(aid), None)
+        else:
+            cur[str(aid)] = {
+                "metric": str(goal.get("metric") or ""),
+                "direction": str(goal.get("direction") or "max"),
+                "target": float(goal["target"]),
+                "label_zh": str(goal.get("label_zh") or ""),
+            }
+        _PLAYER_GOALS_CACHE["ts"] = 0.0
+        try:
+            req = urllib.request.Request(
+                f"{url}/storage/v1/object/{bucket}/state/player_goals.json",
+                data=json.dumps(cur, ensure_ascii=False).encode("utf-8"),
+                method="POST",
+                headers=_supabase_headers(key, {"Content-Type": "application/json", "x-upsert": "true"}),
+            )
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                return 200 <= resp.status < 300
+        except Exception:
+            return False
+
+    # Local dev / test fallback when Supabase credentials are not configured
+    try:
+        TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        local_file = TMP_REPORTS_DIR / "player_goals.json"
+        cur_local: Dict[str, Any] = {}
+        if local_file.exists():
+            try:
+                loaded = json.loads(local_file.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    cur_local = loaded
+            except Exception:
+                cur_local = {}
+        if goal is None:
+            cur_local.pop(str(aid), None)
+        else:
+            cur_local[str(aid)] = {
+                "metric": str(goal.get("metric") or ""),
+                "direction": str(goal.get("direction") or "max"),
+                "target": float(goal["target"]),
+                "label_zh": str(goal.get("label_zh") or ""),
+            }
+        local_file.write_text(json.dumps(cur_local, ensure_ascii=False, indent=2), encoding="utf-8")
+        return True
+    except OSError:
+        return False
+
+
