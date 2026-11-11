@@ -665,6 +665,8 @@ def build_team_combos(
     if not is_parsed:
         for cb in combos:
             cb["execution_audit"] = "需要先解析录像"
+    for cb in combos:
+        cb["evidence"] = "template"
     return combos[:4]
 
 
@@ -770,6 +772,7 @@ def build_draft_and_combo_analysis(
         specific_counter_disadvs: List[str] = []
         for op_p in own:
             dossier = build_hero_matchup_dossier(op_p, own, opp, dur_min, side_won)
+            dossier["evidence"] = "template"
             dossier["hero_img"] = op_p.get("hero_img", "")
             dossier["personaname"] = op_p.get("personaname", "")
             dossier["kda"] = op_p.get("kda", "")
@@ -886,6 +889,8 @@ def build_draft_and_combo_analysis(
             )
 
         return {
+            "evidence": "template",
+            "conclusions": [{"text": verdict_summary, "kind": "draft_verdict", "evidence": "template"}],
             "side": side_key,
             "side_zh": side_zh,
             "lineup_str": own_heroes_str,
@@ -938,7 +943,13 @@ def enrich_phases_with_evaluations(
     if not is_parsed:
         for pd in phases_data:
             pd["available"] = False
+            pd["evidence"] = "measured"
+            pd["source_fields"] = ["version"]
+            pd["conclusions"] = []
             for pp in pd.get("players") or []:
+                pp["evidence"] = "measured"
+                pp["source_fields"] = ["version"]
+                pp["conclusions"] = []
                 pp["assessment"] = "需要先解析录像"
                 pp["good"] = []
                 pp["bad"] = []
@@ -946,6 +957,8 @@ def enrich_phases_with_evaluations(
             pd["team_diagnostics"] = {
                 "radiant": {
                     "available": False,
+                    "evidence": "measured",
+                    "source_fields": ["version"],
                     "summary": "需要先解析录像",
                     "turning_point": "",
                     "team_good": "需要先解析录像",
@@ -954,6 +967,8 @@ def enrich_phases_with_evaluations(
                 },
                 "dire": {
                     "available": False,
+                    "evidence": "measured",
+                    "source_fields": ["version"],
                     "summary": "需要先解析录像",
                     "turning_point": "",
                     "team_good": "需要先解析录像",
@@ -1013,11 +1028,24 @@ def enrich_phases_with_evaluations(
         if pkey == "late" and raw_phase_min < 5.0:
             pd["available"] = False
             short_late_msg = f"25 分钟后仅持续 {raw_phase_min:.1f} 分钟（不足 5 分钟），不输出阶段判词。"
+            pd["evidence"] = "measured"
+            pd["source_fields"] = ["duration"]
+            pd["conclusions"] = [
+                {
+                    "text": short_late_msg,
+                    "kind": "phase_summary",
+                    "evidence": "measured",
+                    "source_fields": ["duration"],
+                }
+            ]
             for pp in pd.get("players") or []:
                 slot = int(pp.get("slot", 0))
                 full_p = full_player_by_slot.get(slot) or {}
                 hmp = full_p.get("hero_mechanism_profile") or {}
                 pp["timing_curve_zh"] = hmp.get("timing_curve_zh") or ""
+                pp["evidence"] = "measured"
+                pp["source_fields"] = ["duration"]
+                pp["conclusions"] = []
                 pp["assessment"] = short_late_msg
                 pp["good"] = []
                 pp["bad"] = []
@@ -1025,6 +1053,8 @@ def enrich_phases_with_evaluations(
             pd["team_diagnostics"] = {
                 "radiant": {
                     "available": False,
+                    "evidence": "measured",
+                    "source_fields": ["duration"],
                     "summary": short_late_msg,
                     "turning_point": "",
                     "team_good": "",
@@ -1033,6 +1063,8 @@ def enrich_phases_with_evaluations(
                 },
                 "dire": {
                     "available": False,
+                    "evidence": "measured",
+                    "source_fields": ["duration"],
                     "summary": short_late_msg,
                     "turning_point": "",
                     "team_good": "",
@@ -1059,12 +1091,33 @@ def enrich_phases_with_evaluations(
             obs_p = int(pp.get("obs_placed") or 0)
             sen_p = int(pp.get("sen_placed") or 0)
             items_b = pp.get("items_bought") or []
-            items_str = "、".join(f"{it['time_str']} {it['zh_name']}" for it in items_b[:4])
+            _consumable_names = ("诡计之雾", "显影之尘", "侦察守卫", "岗哨守卫", "回城卷轴", "净化药水", "魔法芒果", "治疗药膏", "树之祭祀", "腥红榴弹", "仙灵之火")
+            equip_b = [
+                it
+                for it in items_b
+                if not any(cn in str(it.get("zh_name") or "") for cn in _consumable_names)
+            ]
+            items_str = "、".join(f"{it['time_str']} {it['zh_name']}" for it in equip_b[:4])
             death_times = [f"{d['time_str']}(被{d.get('killer','敌方')}击杀)" for d in (pp.get("deaths_events") or [])]
             kill_times = [f"{k['time_str']}(杀{k.get('victim_hero','敌方')})" for k in (pp.get("kills_events") or [])]
 
             good_list: List[str] = []
             bad_list: List[str] = []
+            ph_item_meta: Dict[str, Tuple[str, Optional[List[str]]]] = {}
+
+            def _add_ph_item(
+                bucket: List[str],
+                txt: str,
+                ev: str,
+                source_fields: Optional[List[str]] = None,
+                prepend: bool = False,
+            ) -> None:
+                ph_item_meta[txt] = (ev, list(source_fields) if (ev == "measured" and source_fields) else None)
+                if prepend:
+                    bucket.insert(0, txt)
+                else:
+                    bucket.append(txt)
+
             focus_tip = ""
 
             full_p = full_player_by_slot.get(slot) or {}
@@ -1085,38 +1138,83 @@ def enrich_phases_with_evaluations(
             if pkey == "lane":
                 if pos in (1, 2):
                     if lh_gain >= 50:
-                        good_list.append(f"对线基本功扎实（{t_curve_zh or '核心'}）：前10分钟斩获 {lh_gain} 正补 / {dn_gain} 反补，阶段 GPM 高达 {gpm_p:.0f}，无解肥发育。")
+                        _add_ph_item(
+                            good_list,
+                            f"对线基本功扎实（{t_curve_zh or '核心'}）：前10分钟斩获 {lh_gain} 正补 / {dn_gain} 反补，阶段 GPM 高达 {gpm_p:.0f}，无解肥发育。",
+                            "measured",
+                            ["players[].lh_t", "players[].dn_t", "players[].gold_t"],
+                        )
                     elif lh_gain >= 38:
-                        good_list.append(f"抗压补刀合格（{t_curve_zh or '核心'}）：10分钟补出 {lh_gain} 正补 / {dn_gain} 反补（经济 +{gold_gain:,}），稳住了核心发育线。")
+                        _add_ph_item(
+                            good_list,
+                            f"抗压补刀合格（{t_curve_zh or '核心'}）：10分钟补出 {lh_gain} 正补 / {dn_gain} 反补（经济 +{gold_gain:,}），稳住了核心发育线。",
+                            "measured",
+                            ["players[].lh_t", "players[].dn_t", "players[].gold_t"],
+                        )
                     elif t_curve == "late_hyper_carry" and lh_gain >= 32 and deaths <= 1:
-                        good_list.append(f"大核对线隐忍抗压（{t_curve_zh}）：前期身板弱势情况下稳住 {lh_gain} 补刀（+{gold_gain:,} 金），成功过渡至刷钱装。")
+                        _add_ph_item(
+                            good_list,
+                            f"大核对线隐忍抗压（{t_curve_zh}）：前期身板弱势情况下稳住 {lh_gain} 补刀（+{gold_gain:,} 金），成功过渡至刷钱装。",
+                            "inferred",
+                        )
                     else:
-                        bad_list.append(f"对线补刀严重不达标：作为 {pos} 号位（{t_curve_zh or '核心'}）前10分钟仅有 {lh_gain} 刀（经济 +{gold_gain:,}），早期发育直接断档。")
+                        _add_ph_item(
+                            bad_list,
+                            f"对线补刀严重不达标：作为 {pos} 号位（{t_curve_zh or '核心'}）前10分钟仅有 {lh_gain} 刀（经济 +{gold_gain:,}），早期发育直接断档。",
+                            "inferred",
+                        )
                 elif pos == 3:
                     if lh_gain >= 32:
-                        good_list.append(f"劣势路占线出色（{t_curve_zh or '三号位'}）：10分钟补刀 {lh_gain}/{dn_gain}，打出 {hd_gain:,} 对线消耗伤害。")
+                        _add_ph_item(
+                            good_list,
+                            f"劣势路占线出色（{t_curve_zh or '三号位'}）：10分钟补刀 {lh_gain}/{dn_gain}，打出 {hd_gain:,} 对线消耗伤害。",
+                            "measured",
+                            ["players[].lh_t", "players[].dn_t", "teamfights[].players[].damage"],
+                        )
                     else:
-                        bad_list.append(f"劣势路混线艰难：10分钟仅 {lh_gain} 补刀（阶段 GPM {gpm_p:.0f}），未能压制敌方优势路大哥。")
+                        _add_ph_item(
+                            bad_list,
+                            f"劣势路混线艰难：10分钟仅 {lh_gain} 补刀（阶段 GPM {gpm_p:.0f}），未能压制敌方优势路大哥。",
+                            "inferred",
+                        )
                 else:
                     # 4/5 号位辅助
                     if kills >= 1 or hd_gain >= 2200:
-                        good_list.append(f"线上消耗与游走积极（{t_curve_zh or '辅助'}）：前期打出 {hd_gain:,} 英雄伤害" + (f"，在 {', '.join(kill_times)} 拿人头打开局面。" if kill_times else "，有效压低了敌方血量。"))
+                        _add_ph_item(
+                            good_list,
+                            f"线上消耗与游走积极（{t_curve_zh or '辅助'}）：前期打出 {hd_gain:,} 英雄伤害" + (f"，在 {', '.join(kill_times)} 拿人头打开局面。" if kill_times else "，有效压低了敌方血量。"),
+                            "inferred",
+                        )
                     if obs_p + sen_p >= 3:
-                        good_list.append(f"前期视野勤勉：前10分钟插下 {obs_p} 假眼 / {sen_p} 真眼保障线眼与抢符视野。")
+                        _add_ph_item(
+                            good_list,
+                            f"前期视野勤勉：前10分钟插下 {obs_p} 假眼 / {sen_p} 真眼保障线眼与抢符视野。",
+                            "measured",
+                            ["players[].obs_log", "players[].sen_log"],
+                        )
                     elif obs_p + sen_p == 0 and pos == 5:
-                        bad_list.append("对线期 0 真假眼记录：线上既没封敌方野店也没给中路补保护眼。")
+                        _add_ph_item(bad_list, "对线期 0 真假眼记录：线上既没封敌方野店也没给中路补保护眼。", "inferred")
 
                 if deaths == 0:
-                    good_list.append(f"对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。")
+                    _add_ph_item(
+                        good_list,
+                        "对线期保持 0 阵亡，没有给对位英雄送出任何额外提款。",
+                        "measured",
+                        ["players[].deaths_log"],
+                    )
                 elif deaths >= 2:
-                    bad_list.append(f"对线期连续阵亡 {deaths} 次（{', '.join(death_times)}），直接养肥了对位核心并亏损大量兵线经验。")
+                    _add_ph_item(
+                        bad_list,
+                        f"对线期连续阵亡 {deaths} 次（{', '.join(death_times)}），直接养肥了对位核心并亏损大量兵线经验。",
+                        "inferred",
+                    )
                 elif deaths == 1:
-                    bad_list.append(f"在 {death_times[0]} 阵亡 1 次，断了一波线上节奏与补给。")
+                    _add_ph_item(bad_list, f"在 {death_times[0]} 阵亡 1 次，断了一波线上节奏与补给。", "inferred")
 
                 if items_str and not good_list:
-                    good_list.append(f"按部就班做出前期过渡装：{items_str}。")
+                    _add_ph_item(good_list, f"按部就班做出前期过渡装：{items_str}。", "measured", ["players[].purchase_log"])
                 if not bad_list:
-                    bad_list.append(f"前10分钟推塔伤害为 {td_gain:,}，对线期拿到优势后未能进一步磨掉敌方一塔血量。")
+                    _add_ph_item(bad_list, f"前10分钟推塔伤害为 {td_gain:,}，对线期拿到优势后未能进一步磨掉敌方一塔血量。", "inferred")
 
                 focus_tip = (
                     f"前期改进重点（{hmp.get('early_rule') or ('注意 3 分钟莲花与 6 分钟河道动力符时间点，残血及时补大药别硬拼送人头。' if deaths >= 1 else '保持当前补刀手感，6级后主动呼叫辅助打第一波推进或支援。')}）"
@@ -1126,35 +1224,72 @@ def enrich_phases_with_evaluations(
             elif pkey == "mid":
                 if pos in (1, 2):
                     if early_farm_ok:
-                        good_list.insert(
-                            0,
+                        _add_ph_item(
+                            good_list,
                             f"刷核发育期合理避战（{t_curve_zh}）：前中期弱势期不盲目接劣势团，15分钟内高速刷出 +{gold_gain:,} 金（阶段 GPM {gpm_p:.0f}，补刀 +{lh_gain}）"
                             + (f"，加速成型 {items_str} 为后期出山收割奠定基础。" if items_str else "，为后期出山收割奠定基础。"),
+                            "inferred",
+                            prepend=True,
                         )
                     elif gpm_p >= 580:
-                        good_list.append(f"中期刷钱效率拉满：15分钟内经济狂涨 +{gold_gain:,}（阶段 GPM {gpm_p:.0f}，补刀 +{lh_gain}）" + (f"，顺利掏出 {items_str}。" if items_str else "。"))
+                        _add_ph_item(
+                            good_list,
+                            f"中期刷钱效率拉满：15分钟内经济狂涨 +{gold_gain:,}（阶段 GPM {gpm_p:.0f}，补刀 +{lh_gain}）" + (f"，顺利掏出 {items_str}。" if items_str else "。"),
+                            "measured",
+                            ["players[].gold_t", "players[].lh_t", "players[].purchase_log"],
+                        )
                     elif gpm_p < 420:
-                        bad_list.append(f"中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 {gpm_p:.0f}（经济 +{gold_gain:,}），核心装备成型过慢。")
+                        _add_ph_item(
+                            bad_list,
+                            f"中期刷钱节奏断档：10~25分钟阶段 GPM 仅有 {gpm_p:.0f}（经济 +{gold_gain:,}），核心装备成型过慢。",
+                            "inferred",
+                        )
                     if hd_gain >= 8000:
-                        good_list.append(f"中期团战火力支柱：单阶段轰出 {hd_gain:,} 英雄伤害并斩获 {kills} 个人头。")
+                        _add_ph_item(
+                            good_list,
+                            f"中期团战火力支柱：单阶段轰出 {hd_gain:,} 英雄伤害并斩获 {kills} 个人头。",
+                            "measured",
+                            ["teamfights[].players[].damage", "players[].kills_log"],
+                        )
                     elif mid_tempo_bad:
-                        bad_list.insert(
-                            0,
+                        _add_ph_item(
+                            bad_list,
                             f"中期干架强势期失职（{t_curve_zh}）：10~25m 本该带队抓人逼塔，却当大核闷头刷钱（阶段 +{gold_gain:,} 金仅打 {hd_gain:,} 伤害），白白浪费英雄最强节奏窗！",
+                            "inferred",
+                            prepend=True,
                         )
                     elif hd_gain < 4000 and not early_farm_ok:
-                        bad_list.append(f"中期打架参与度偏低：15分钟内仅打出 {hd_gain:,} 英雄伤害，队友正面接团时输出存在真空。")
+                        _add_ph_item(
+                            bad_list,
+                            f"中期打架参与度偏低：15分钟内仅打出 {hd_gain:,} 英雄伤害，队友正面接团时输出存在真空。",
+                            "inferred",
+                        )
                 elif pos == 3:
                     if items_str:
-                        good_list.append(f"中期关键先手/团队装成型（{t_curve_zh or '三号位'}）：{items_str}，阶段打出 {hd_gain:,} 伤害与 {kills} 次击杀。")
+                        _add_ph_item(
+                            good_list,
+                            f"中期关键先手/团队装成型（{t_curve_zh or '三号位'}）：{items_str}，阶段打出 {hd_gain:,} 伤害与 {kills} 次击杀。",
+                            "measured",
+                            ["players[].purchase_log", "teamfights[].players[].damage", "players[].kills_log"],
+                        )
                     if td_gain >= 1000:
-                        good_list.append(f"中期主动带队逼塔，造成 {td_gain:,} 点建筑伤害。")
+                        _add_ph_item(good_list, f"中期主动带队逼塔，造成 {td_gain:,} 点建筑伤害。", "measured", ["objectives", "players[].tower_damage"])
                 else:
                     # 4/5 号位
                     if obs_p + sen_p >= 6:
-                        good_list.append(f"中期视野铺设到位：10~25分钟插下 {obs_p} 颗假眼与 {sen_p} 颗真眼，努力支撑团队视野。")
+                        _add_ph_item(
+                            good_list,
+                            f"中期视野铺设到位：10~25分钟插下 {obs_p} 颗假眼与 {sen_p} 颗真眼，努力支撑团队视野。",
+                            "measured",
+                            ["players[].obs_log", "players[].sen_log"],
+                        )
                     if kills >= 2 or hd_gain >= 4500:
-                        good_list.append(f"中期接团技能释放果断：阶段贡献 {kills} 杀与 {hd_gain:,} 伤害" + (f"（出装：{items_str}）。" if items_str else "。"))
+                        _add_ph_item(
+                            good_list,
+                            f"中期接团技能释放果断：阶段贡献 {kills} 杀与 {hd_gain:,} 伤害" + (f"（出装：{items_str}）。" if items_str else "。"),
+                            "measured",
+                            ["players[].kills_log", "teamfights[].players[].damage", "players[].purchase_log"],
+                        )
 
                 mid_solos = [
                     (f"{s.get('time_str')} 被 {s.get('killer','敌方')} 击杀" if isinstance(s, dict) else str(s))
@@ -1162,22 +1297,34 @@ def enrich_phases_with_evaluations(
                     if 600 <= int(s.get("time", 0) if isinstance(s, dict) else int(str(s).split(":")[0]) * 60) < 1500
                 ]
                 if mid_solos:
-                    bad_list.insert(
-                        0,
+                    _add_ph_item(
+                        bad_list,
                         f"中期团战外阵亡：{'、'.join(mid_solos)}。",
+                        "inferred",
+                        prepend=True,
                     )
 
                 if deaths == 0:
-                    good_list.append("中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！")
+                    _add_ph_item(good_list, "中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！", "inferred")
                 elif deaths >= 4:
-                    bad_list.append(f"中期阵亡偏多：15分钟内阵亡 {deaths} 次（{', '.join(death_times[:4])}）。")
+                    _add_ph_item(
+                        bad_list,
+                        f"中期阵亡偏多：15分钟内阵亡 {deaths} 次（{', '.join(death_times[:4])}）。",
+                        "measured",
+                        ["players[].deaths_log"],
+                    )
                 elif deaths >= 2 and not mid_solos:
-                    bad_list.append(f"中期阵亡 {deaths} 次（{', '.join(death_times)}）。")
+                    _add_ph_item(bad_list, f"中期阵亡 {deaths} 次（{', '.join(death_times)}）。", "measured", ["players[].deaths_log"])
 
                 if not good_list:
-                    good_list.append(f"中期稳步过渡，经济增量 +{gold_gain:,}，造成 {hd_gain:,} 伤害。")
+                    _add_ph_item(
+                        good_list,
+                        f"中期稳步过渡，经济增量 +{gold_gain:,}，造成 {hd_gain:,} 伤害。",
+                        "measured",
+                        ["players[].gold_t", "teamfights[].players[].damage"],
+                    )
                 if not bad_list:
-                    bad_list.append("中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。")
+                    _add_ph_item(bad_list, "中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。", "template")
 
                 focus_tip = (
                     f"中期改进重点（{hmp.get('mid_rule') or ('第一件关键装成形后围绕队友抱团推进，减少无视野深带。' if (deaths >= 3 or mid_solos) else '中期打赢团战后及时集合推进外塔与压制野区。')}）"
@@ -1193,16 +1340,25 @@ def enrich_phases_with_evaluations(
                 dmg_per_death_str = f"{int(dmg_per_death_val):,}" if dmg_per_death_val is not None else "无数据"
 
                 if late_harvest_ok:
-                    good_list.insert(
-                        0,
+                    _add_ph_item(
+                        good_list,
                         f"大核出山收割完全兑现（{t_curve_zh}）：前中期闭关刷钱成型后，25m+ 决胜期轰出 {hd_gain:,} 英雄伤害（占全队 {late_hdmg_pct_str}）与 {td_gain:,} 推塔伤害，完美回馈团队空间！",
+                        "inferred",
+                        prepend=True,
                     )
                 elif hd_gain >= 12000 or kills >= 5:
-                    good_list.append(f"后期决战火力全开：单阶段砍下 {kills} 杀、轰出 {hd_gain:,} 英雄伤害" + (f"，更新 {items_str}。" if items_str else "。"))
+                    _add_ph_item(
+                        good_list,
+                        f"后期决战火力全开：单阶段砍下 {kills} 杀、轰出 {hd_gain:,} 英雄伤害" + (f"，更新 {items_str}。" if items_str else "。"),
+                        "measured",
+                        ["players[].kills_log", "teamfights[].players[].damage", "players[].purchase_log"],
+                    )
                 if is_turret_ok:
-                    good_list.insert(
-                        0,
+                    _add_ph_item(
+                        good_list,
                         f"炮台法核输出职责兑现（{t_curve_zh}）：后期顶着敌方强切入轰出 {hd_gain:,} 英雄伤害（全场每死换出 {dmg_per_death_str} 伤害），死前把爆发倾泻拉满！",
+                        "inferred",
+                        prepend=True,
                     )
                 if hmp.get("sacrificial_initiator_fulfilled"):
                     stun_clause = (
@@ -1210,45 +1366,89 @@ def enrich_phases_with_evaluations(
                         if (full_p.get("stuns_sec") is not None and float(full_p.get("stuns_sec") or 0) > 0)
                         else ""
                     )
-                    good_list.insert(
-                        0,
+                    _add_ph_item(
+                        good_list,
                         f"前排先手开团与承伤兑现（{t_curve_zh}）：全场{stun_clause}抗下全队 {full_p.get('damage_taken_share_pct') or 0}% 伤害，果断肉身开团为后排创造输出空间！",
+                        "inferred",
+                        prepend=True,
                     )
                 if hmp.get("save_support_fulfilled"):
-                    good_list.insert(
-                        0,
+                    _add_ph_item(
+                        good_list,
                         f"救人续航辅助职责兑现（{t_curve_zh}）：关键团战倾力提供救人技能与 {full_p.get('hero_healing', 0):,} 点英雄治疗，尽心尽力兜底大哥！",
+                        "inferred",
+                        prepend=True,
                     )
                 if td_gain >= 3500 and not late_harvest_ok:
-                    good_list.append(f"高地拆迁绝对主力：后期独自轰出 {td_gain:,} 点建筑伤害，打赢团战后拆塔破路毫不手软！")
+                    _add_ph_item(
+                        good_list,
+                        f"高地拆迁绝对主力：后期独自轰出 {td_gain:,} 点建筑伤害，打赢团战后拆塔破路毫不手软！",
+                        "measured",
+                        ["players[].tower_damage", "objectives"],
+                    )
                 if pos in (4, 5) and (obs_p + sen_p >= 5 or items_str):
-                    good_list.append(f"后期辅助尽职尽责：插下 {obs_p} 假眼 / {sen_p} 真眼" + (f"，做出 {items_str} 保护核心。" if items_str else "。"))
+                    _add_ph_item(
+                        good_list,
+                        f"后期辅助尽职尽责：插下 {obs_p} 假眼 / {sen_p} 真眼" + (f"，做出 {items_str} 保护核心。" if items_str else "。"),
+                        "measured",
+                        ["players[].obs_log", "players[].sen_log", "players[].purchase_log"],
+                    )
 
                 if late_harvest_fail:
-                    bad_list.insert(
-                        0,
+                    _add_ph_item(
+                        bad_list,
                         f"后期出山收割断档（{t_curve_zh}）：25m+ 吃下 +{gold_gain:,} 金（占全队 {late_gold_pct_str}），却仅打出 {hd_gain:,} 伤害（占全队 {late_hdmg_pct_str}），前中期刷的资源未能转化为决胜团战收割！",
+                        "inferred",
+                        prepend=True,
                     )
 
                 if hmp.get("missing_mandatory_shard"):
-                    bad_list.append(
-                        f"整局拒出 1400 金质变魔晶（{hmp.get('shard_desc', '核心技能机制加强')}），后期团战少一个关键救人/切入/输出机制！"
+                    _add_ph_item(
+                        bad_list,
+                        f"整局拒出 1400 金质变魔晶（{hmp.get('shard_desc', '核心技能机制加强')}），后期团战少一个关键救人/切入/输出机制！",
+                        "inferred",
                     )
 
                 if deaths == 0:
-                    good_list.append("后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！")
+                    _add_ph_item(good_list, "后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！", "inferred")
                 elif deaths >= 3 and not is_turret_ok and not hmp.get("sacrificial_initiator_fulfilled"):
-                    bad_list.append(f"后期阶段阵亡 {deaths} 次（{', '.join(death_times[:4])}），读秒时间偏长。")
+                    _add_ph_item(
+                        bad_list,
+                        f"后期阶段阵亡 {deaths} 次（{', '.join(death_times[:4])}），读秒时间偏长。",
+                        "measured",
+                        ["players[].deaths_log"],
+                    )
                 elif deaths >= 1:
-                    bad_list.append(f"后期阵亡 {deaths} 次（{', '.join(death_times)}）" + (f"，并交出 {pp.get('buybacks',0)} 次买活。" if pp.get("buybacks") else "，后期高地/肉山团站位与自保装需更到位。"))
+                    if pp.get("buybacks"):
+                        _add_ph_item(
+                            bad_list,
+                            f"后期阵亡 {deaths} 次（{', '.join(death_times)}），并交出 {pp.get('buybacks',0)} 次买活。",
+                            "measured",
+                            ["players[].deaths_log", "players[].buyback_log"],
+                        )
+                    else:
+                        _add_ph_item(
+                            bad_list,
+                            f"后期阵亡 {deaths} 次（{', '.join(death_times)}），后期高地/肉山团站位与自保装需更到位。",
+                            "inferred",
+                        )
 
                 if has_hd_data and pos in (1, 2, 3) and hd_gain < phase_min * 600.0 and not late_harvest_fail and not hmp.get("sacrificial_initiator_fulfilled"):
-                    bad_list.append(f"后期团战输出匮乏：25分钟后吃下 +{gold_gain:,} 金却仅打出 +{hd_gain:,} 英雄伤害，未能承担核心收割职责。")
+                    _add_ph_item(
+                        bad_list,
+                        f"后期团战输出匮乏：25分钟后吃下 +{gold_gain:,} 金却仅打出 +{hd_gain:,} 英雄伤害，未能承担核心收割职责。",
+                        "inferred",
+                    )
 
                 if not good_list:
-                    good_list.append(f"后期阶段贡献 {kills} 杀、经济 +{gold_gain:,}、英雄伤害 +{hd_gain:,}。")
+                    _add_ph_item(
+                        good_list,
+                        f"后期阶段贡献 {kills} 杀、经济 +{gold_gain:,}、英雄伤害 +{hd_gain:,}。",
+                        "measured",
+                        ["players[].kills_log", "players[].gold_t", "teamfights[].players[].damage"],
+                    )
                 if not bad_list:
-                    bad_list.append("后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。")
+                    _add_ph_item(bad_list, "后期上高地与买活反打阶段需要更严格地盯防敌方先手与买活反扑。", "template")
 
                 if is_turret_ok:
                     focus_tip = "后期改进重点：炮台法核输出已拉满，面对敌方强留人/框人控制时可补出《飓风长戟（大推推）》推开自己自救！"
@@ -1267,7 +1467,6 @@ def enrich_phases_with_evaluations(
                 pp["assessment"] = g_p.get("assessment") or default_assessment
                 g_good = [x for x in (g_p.get("good") or []) if x]
                 g_bad = [x for x in (g_p.get("bad") or []) if x]
-                # 将 Grok 的具体证据放在最前，并补充规则引擎诊断点确保内容详实
                 merged_good = g_good + [x for x in good_list if x not in g_good]
                 merged_bad = g_bad + [x for x in bad_list if x not in g_bad]
                 pp["good"] = merged_good[:3]
@@ -1278,6 +1477,20 @@ def enrich_phases_with_evaluations(
                 pp["good"] = good_list[:3]
                 pp["bad"] = bad_list[:3]
                 pp["focus"] = focus_tip
+
+            pp_conclusions: List[Dict[str, Any]] = []
+            for kind_k, seq_k in (("good", pp["good"][:1]), ("bad", pp["bad"][:1])):
+                for item_t in seq_k:
+                    t_clean = str(item_t or "").strip()
+                    if not t_clean:
+                        continue
+                    ev_t, sf_t = ph_item_meta.get(t_clean, ("inferred", None))
+                    c_entry: Dict[str, Any] = {"text": t_clean, "kind": kind_k, "evidence": ev_t}
+                    if ev_t == "measured" and sf_t:
+                        c_entry["source_fields"] = list(sf_t)
+                    pp_conclusions.append(c_entry)
+            pp["evidence"] = "inferred"
+            pp["conclusions"] = pp_conclusions
 
         # 为该阶段的 radiant 和 dire 双方分别生成「团队本阶段复盘与进步指南」
         team_diagnostics = {}
@@ -1344,6 +1557,7 @@ def enrich_phases_with_evaluations(
                 )
 
             team_diagnostics[side_k] = {
+                "evidence": "inferred",
                 "summary": g_phase.get("summary") or "",
                 "turning_point": g_phase.get("turning_point") or "",
                 "team_good": t_good,
@@ -1352,6 +1566,26 @@ def enrich_phases_with_evaluations(
             }
 
         pd["team_diagnostics"] = team_diagnostics
+        ts_obj = pd.get("team_summary") or {}
+        g_sum_str = str(g_phase.get("summary") or "").strip()
+        if g_sum_str:
+            pd["evidence"] = "inferred"
+            pd["conclusions"] = [{"text": g_sum_str, "kind": "phase_summary", "evidence": "inferred"}]
+        else:
+            ph_fact = (
+                f"{plabel}（{tlabel}）：经济差变动 {int(ts_obj.get('income_diff_change') or 0):+,} 金，"
+                f"推塔 {int(ts_obj.get('towers_taken') or 0)}:{int(ts_obj.get('towers_lost') or 0)}，"
+                f"肉山 {int(ts_obj.get('roshan_taken') or 0)}:{int(ts_obj.get('roshan_lost') or 0)}。"
+            )
+            pd["evidence"] = "inferred"
+            pd["conclusions"] = [
+                {
+                    "text": ph_fact,
+                    "kind": "phase_summary",
+                    "evidence": "measured",
+                    "source_fields": ["radiant_gold_adv", "objectives"],
+                }
+            ]
 
     return phases_data
 

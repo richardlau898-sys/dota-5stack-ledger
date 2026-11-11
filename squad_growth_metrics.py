@@ -46,7 +46,7 @@ def select_top3_measured_fixes(candidates: List[Dict[str, Any]]) -> List[Dict[st
         if not ts or not title or not fact or not action:
             continue
         scope = "team" if c.get("scope") == "team" else "player"
-        measured_only.append({
+        entry: Dict[str, Any] = {
             "scope": scope,
             "evidence": "measured",
             "timestamp_sec": int(c.get("timestamp_sec") or 0),
@@ -55,7 +55,10 @@ def select_top3_measured_fixes(candidates: List[Dict[str, Any]]) -> List[Dict[st
             "title": title,
             "fact_evidence": fact,
             "action_item": action,
-        })
+        }
+        if isinstance(c.get("source_fields"), list) and c.get("source_fields"):
+            entry["source_fields"] = list(c["source_fields"])
+        measured_only.append(entry)
 
     measured_only.sort(
         key=lambda x: (1 if x["scope"] == "team" else 0, x["impact_score"]),
@@ -328,6 +331,7 @@ def build_team_metrics_by_side(match: Dict[str, Any], report_dict: Dict[str, Any
                             "death_time_str": _fmt_mmss(next_d),
                             "delta_sec": next_d - bb_t,
                             "evidence": "measured",
+                            "source_fields": ["players[].buyback_log", "players[].kills_log"],
                         })
 
         # (D) 开雾效果（关联 deep_forensics.stacking_and_smoke_by_side，保留 T1-5 说明）
@@ -335,11 +339,15 @@ def build_team_metrics_by_side(match: Dict[str, Any], report_dict: Dict[str, Any
             ((report_dict.get("deep_forensics") or {}).get("stacking_and_smoke_by_side") or {})
             .get(side, {})
         )
+        smoke_windows = [
+            {**sw, "evidence": "inferred"} if isinstance(sw, dict) else sw
+            for sw in (df_ss.get("smoke_events") or [])
+        ]
         smoke_effectiveness = {
             "available": is_parsed,
             "own_smokes_used": df_ss.get("own_smoke_uses") if is_parsed else None,
-            "smoke_windows": df_ss.get("smoke_events") or [],
-            "note": "基于雾购买时间窗口推断，非实际使用时间",
+            "smoke_windows": smoke_windows,
+            "note": "基于团战记录中的 item_uses.smoke_of_deceit 推断，非精确施放时间",
             "evidence": "inferred",
         }
 
@@ -396,6 +404,7 @@ def build_team_metrics_by_side(match: Dict[str, Any], report_dict: Dict[str, Any
                     "opp_net_worth_10m": opp_nw10,
                     "net_worth_diff_10m": our_nw10 - opp_nw10,
                     "evidence": "measured",
+                    "source_fields": ["players[].lane", "players[].gold_t"],
                 })
 
         out_by_side[side] = {
@@ -523,6 +532,7 @@ def build_next_game_top3_fixes_by_side(
                 candidates.append({
                     "scope": "team",
                     "evidence": "measured",
+                    "source_fields": ["teamfights", "objectives"],
                     "timestamp_sec": int(f.get("end_sec") or 0),
                     "timestamp_str": str(f.get("time_str") or _fmt_mmss(f.get("end_sec") or 0)),
                     "impact_score": 1400.0 + diff_d * 350.0,
@@ -538,6 +548,7 @@ def build_next_game_top3_fixes_by_side(
             candidates.append({
                 "scope": "team",
                 "evidence": "measured",
+                "source_fields": ["radiant_gold_adv"],
                 "timestamp_sec": int(tc.get("start_min") or 0) * 60,
                 "timestamp_str": str(tc.get("window_str") or "10:00–13:00"),
                 "impact_score": float(drop_abs),
@@ -546,7 +557,7 @@ def build_next_game_top3_fixes_by_side(
                 "action_item": "关键技能或大招冷却期内避免连续接团，劣势窗口先处理兵线守高台视野。",
             })
 
-        # 3. 团队级：视野断档期（场上假眼 <= 1 颗）阵亡
+        # 3. 团队级：视野断档期（场上假眼 <= 1 颗）阵亡 (inferred)
         vis_side = ((df.get("support_vision_by_side") or {}).get(side)) or {}
         for bw in vis_side.get("blackout_windows") or []:
             if not isinstance(bw, dict):
@@ -560,7 +571,7 @@ def build_next_game_top3_fixes_by_side(
                 min_obs = int(bw.get("min_obs") or 0)
                 candidates.append({
                     "scope": "team",
-                    "evidence": "measured",
+                    "evidence": "inferred",
                     "timestamp_sec": start_sec,
                     "timestamp_str": ts_str,
                     "impact_score": 950.0 + bw_deaths * 450.0 + bw_dur_min * 120.0,
@@ -579,6 +590,7 @@ def build_next_game_top3_fixes_by_side(
                 candidates.append({
                     "scope": "team",
                     "evidence": "measured",
+                    "source_fields": ["players[].lane", "players[].gold_t"],
                     "timestamp_sec": 600,
                     "timestamp_str": t10_str,
                     "impact_score": float(abs(diff10)),
@@ -596,6 +608,7 @@ def build_next_game_top3_fixes_by_side(
             candidates.append({
                 "scope": "player",
                 "evidence": "measured",
+                "source_fields": ["players[].buyback_log", "players[].kills_log"],
                 "timestamp_sec": int(bbd.get("buyback_time_sec") or 0),
                 "timestamp_str": bb_ts,
                 "impact_score": 1300.0,
@@ -604,20 +617,20 @@ def build_next_game_top3_fixes_by_side(
                 "action_item": "买活落地后先等队友控制技能对齐再切入，严禁无视野单人冲高坡追击。",
             })
 
-        # 6. 个人级：10 分钟后团战外阵亡记录 (measured)
+        # 6. 个人级：10 分钟后团战外阵亡记录 (inferred)
         for p in own_players:
             pickoffs = (p.get("phase_telemetry") or {}).get("solo_pickoffs") or []
             post10_pickoffs = [
-                sp for sp in pickoffs if isinstance(sp, dict) and int(sp.get("time_sec") or 0) >= 600
+                sp for sp in pickoffs if isinstance(sp, dict) and int(sp.get("time_sec") or sp.get("time") or 0) >= 600
             ]
             if len(post10_pickoffs) >= 2:
                 first_sp = post10_pickoffs[0]
-                sp_ts = str(first_sp.get("time_str") or _fmt_mmss(first_sp.get("time_sec") or 600))
+                sp_ts = str(first_sp.get("time_str") or _fmt_mmss(first_sp.get("time_sec") or first_sp.get("time") or 600))
                 h_zh = p.get("hero_short_zh") or ""
                 candidates.append({
                     "scope": "player",
-                    "evidence": "measured",
-                    "timestamp_sec": int(first_sp.get("time_sec") or 600),
+                    "evidence": "inferred",
+                    "timestamp_sec": int(first_sp.get("time_sec") or first_sp.get("time") or 600),
                     "timestamp_str": sp_ts,
                     "impact_score": 850.0 + len(post10_pickoffs) * 180.0,
                     "title": f"{h_zh}（{p.get('pos')}号位）对线期后团战外阵亡 {len(post10_pickoffs)} 次（首例 {sp_ts}）",
@@ -632,6 +645,7 @@ def build_next_game_top3_fixes_by_side(
             candidates.append({
                 "scope": "team",
                 "evidence": "measured",
+                "source_fields": ["players[].deaths", "players[].tower_damage", "duration"],
                 "timestamp_sec": duration_sec,
                 "timestamp_str": duration_str,
                 "impact_score": float(total_team_deaths * 35),
@@ -646,6 +660,7 @@ def build_next_game_top3_fixes_by_side(
                 candidates.append({
                     "scope": "player",
                     "evidence": "measured",
+                    "source_fields": ["players[].kills", "players[].deaths", "players[].assists", "duration"],
                     "timestamp_sec": duration_sec,
                     "timestamp_str": duration_str,
                     "impact_score": float(d_cnt * 60),

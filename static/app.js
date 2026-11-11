@@ -438,13 +438,21 @@ function getHeroScore100(p, report = state.currentReport) {
   if (p.score_100 !== undefined && p.score_100 !== null) {
     return Math.max(0, Math.min(100, Math.round(Number(p.score_100))));
   }
-  const raw = Number(p.rating_score ?? 6.0);
+  if (p.rating_score === undefined || p.rating_score === null) {
+    return p.mvp_score !== undefined && p.mvp_score !== null
+      ? Math.max(0, Math.min(100, Math.round(Number(p.mvp_score))))
+      : null;
+  }
+  const raw = Number(p.rating_score);
   const scaled = raw <= 10.5 ? raw * 10 : raw;
   return Math.max(0, Math.min(100, Math.round(scaled)));
 }
 
 function getScore100Tier(score100, won = true) {
-  const s = Number(score100 || 0);
+  if (score100 === null || score100 === undefined) {
+    return { grade: "-", label: "无数据", cls: "score-c" };
+  }
+  const s = Number(score100);
   if (s >= 90) return { grade: "S+", label: "封神真神", cls: "score-s" };
   if (s >= 80) return { grade: "A", label: won ? "凯旋主力" : "孤胆院长", cls: "score-a" };
   if (s >= 70) return { grade: "B", label: "合格执行", cls: "score-b" };
@@ -809,7 +817,7 @@ function buildTeamfightDotaStory(tf, fObj, idx, { side, sideZh, oppZh, grokWin }
   const ownTopCombo = fmtSpellsAndItems(ownTop);
   const oppTopCombo = fmtSpellsAndItems(oppTop);
 
-  const minVal = Number(tf.minute || 20);
+  const minVal = Number(tf.minute ?? (tf.start_sec != null ? tf.start_sec / 60 : 0));
   const stageContext =
     minVal < 14
       ? "前中期外塔节奏争夺战"
@@ -947,7 +955,8 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
   const heroShort = p.hero_short_zh || p.hero_name || "该英雄";
   const pWon = Boolean(p.won);
   const isUnparsed = state.currentReport?.is_parsed === false;
-  const cPct = contribPct ?? Number(p.contrib_share_pct ?? p.blame_share_pct ?? 20).toFixed(1);
+  const rawContrib = contribPct ?? p.contrib_share_pct ?? p.blame_share_pct ?? null;
+  const cPct = rawContrib == null ? "无数据" : Number(rawContrib).toFixed(1);
   const rawBlame = isUnparsed ? null : (blamePct ?? p.blame_share_pct ?? null);
   const bPct = rawBlame == null ? null : Number(rawBlame).toFixed(1);
   const lh10 = p.laning_10m?.lh10;
@@ -992,9 +1001,8 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
   const hmp = p.hero_mechanism_profile || {};
   const tCurveTag = hmp.timing_curve_zh ? ` · ${hmp.timing_curve_zh}` : "";
   let punchline = "";
-  let badge = `🎙️ AI 老炮个人点评${tCurveTag} · ${score100}/100分`;
+  let badge = `🎙️ AI 老炮个人点评${tCurveTag} · ${score100 != null ? `${score100}/100分` : "无数据"}`;
   let tone = "mixed";
-  const rating = Number(p.rating_score || 6.0);
   if (pWon) {
     if (isMvp || score100 >= 88) {
       badge = `👑 AI 封神表彰评书${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
@@ -1247,19 +1255,11 @@ function getOwnAndOppPlayers(report) {
     report?.radiant_win !== undefined
       ? Boolean(report.radiant_win)
       : report?.winner === "天辉";
-  const enrichSide = (list, sideWon) => {
-    const rawContribSum =
-      list.reduce((s, p) => s + Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20)), 0) || 100;
-    return list.map((p) => {
+  const enrichSide = (list, sideWon) =>
+    list.map((p) => {
       p.won = sideWon;
-      if (p.contrib_share_pct === undefined || p.contrib_share_pct === null) {
-        p.contrib_share_pct = Number(
-          ((Math.max(1, Number(p.mvp_score ?? 20)) / rawContribSum) * 100).toFixed(1)
-        );
-      }
       return p;
     });
-  };
   const rad = enrichSide(report.radiant_pos_1_to_5 || report.radiant_players || [], radWon);
   const dire = enrichSide(report.dire_pos_1_to_5 || report.dire_players || [], !radWon);
   const own = side === "radiant" ? rad : dire;
@@ -1277,7 +1277,7 @@ function getOwnAndOppPlayers(report) {
 }
 
 function getCanonicalSideRanking(report, targetSide = null) {
-  const { side: defaultSide, own: defaultOwn, won: defaultWon } = getOwnAndOppPlayers(report);
+  const { side: defaultSide, own: defaultOwn } = getOwnAndOppPlayers(report);
   const side = targetSide === "radiant" || targetSide === "dire" ? targetSide : defaultSide;
   const radWon = Boolean(report?.radiant_win ?? report?.winner === "天辉");
   const ownWon = side === "radiant" ? radWon : !radWon;
@@ -1288,38 +1288,24 @@ function getCanonicalSideRanking(report, targetSide = null) {
   const bySlot = new Map(own.map((p) => [Number(p.player_slot), p]));
   const backendRank = report?.mvp?.rankings_by_side?.[side];
 
-  const rawContribVal = (p) => {
-    const gp = findGrokPlayerEntry(p, report);
-    if (ownWon && gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
-    return Math.max(1, Number(p.contrib_share_pct ?? p.mvp_score ?? 20));
-  };
-  const rawContribSum = own.reduce((s, p) => s + rawContribVal(p), 0) || 100;
   const contribMap = new Map();
   own.forEach((p) => {
-    contribMap.set(Number(p.player_slot), Number(((rawContribVal(p) / rawContribSum) * 100).toFixed(1)));
+    const gp = findGrokPlayerEntry(p, report);
+    const val = ownWon && gp && gp.grok_share_pct != null ? gp.grok_share_pct : p.contrib_share_pct;
+    contribMap.set(Number(p.player_slot), val != null ? Number(Number(val).toFixed(1)) : null);
   });
 
   const isUnparsedReport = report?.is_parsed === false;
-  const hasAnyBlameShare = !isUnparsedReport && own.some((p) => {
-    const gp = findGrokPlayerEntry(p, report);
-    return (!ownWon && gp && Number(gp.grok_share_pct) > 0) || p.blame_share_pct != null;
-  });
   const blameMap = new Map();
-  if (hasAnyBlameShare) {
-    const rawBlameVal = (p) => {
-      const gp = findGrokPlayerEntry(p, report);
-      if (!ownWon && gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
-      return Math.max(1, Number(p.blame_share_pct ?? 0));
-    };
-    const rawBlameSum = own.reduce((s, p) => s + rawBlameVal(p), 0) || 100;
-    own.forEach((p) => {
-      blameMap.set(Number(p.player_slot), Number(((rawBlameVal(p) / rawBlameSum) * 100).toFixed(1)));
-    });
-  } else {
-    own.forEach((p) => {
+  own.forEach((p) => {
+    if (isUnparsedReport) {
       blameMap.set(Number(p.player_slot), null);
-    });
-  }
+      return;
+    }
+    const gp = findGrokPlayerEntry(p, report);
+    const val = !ownWon && gp && gp.grok_share_pct != null ? gp.grok_share_pct : p.blame_share_pct;
+    blameMap.set(Number(p.player_slot), val != null ? Number(Number(val).toFixed(1)) : null);
+  });
 
   let contribOrder = [];
   if (Array.isArray(backendRank?.contrib_order_slots) && backendRank.contrib_order_slots.length) {
@@ -1331,8 +1317,8 @@ function getCanonicalSideRanking(report, targetSide = null) {
         (Number(a.contrib_rank || 0) && Number(b.contrib_rank || 0)
           ? Number(a.contrib_rank) - Number(b.contrib_rank)
           : 0) ||
-        (contribMap.get(Number(b.player_slot)) || 0) - (contribMap.get(Number(a.player_slot)) || 0) ||
-        getHeroScore100(b, report) - getHeroScore100(a, report)
+        (contribMap.get(Number(b.player_slot)) ?? -1) - (contribMap.get(Number(a.player_slot)) ?? -1) ||
+        (getHeroScore100(b, report) ?? -1) - (getHeroScore100(a, report) ?? -1)
     );
   }
 
@@ -1346,8 +1332,8 @@ function getCanonicalSideRanking(report, targetSide = null) {
         (Number(a.blame_rank || 0) && Number(b.blame_rank || 0)
           ? Number(a.blame_rank) - Number(b.blame_rank)
           : 0) ||
-        (blameMap.get(Number(b.player_slot)) || 0) - (blameMap.get(Number(a.player_slot)) || 0) ||
-        getHeroScore100(a, report) - getHeroScore100(b, report)
+        (blameMap.get(Number(b.player_slot)) ?? -1) - (blameMap.get(Number(a.player_slot)) ?? -1) ||
+        (getHeroScore100(a, report) ?? 999) - (getHeroScore100(b, report) ?? 999)
     );
   }
 
@@ -2691,8 +2677,8 @@ function renderHomeWorkspace() {
             <div class="hmc-verdict-preview win">
               ${grokHeadlineLine}
               <span>🏆 比分 <b>${escapeHtml(arch.score || "")}</b></span>
-              <span>👑 首功 MVP：<b>${escapeHtml(arch.mvp_hero || "")}</b> (${arch.mvp_score_100 ? `${arch.mvp_score_100}分·` : ""}${arch.mvp_contrib_pct ?? 25}%)</span>
-              ${arch.runner_up_hero ? `<span>⚔️ 二功：<b>${escapeHtml(arch.runner_up_hero)}</b> (${arch.runner_up_score_100 ? `${arch.runner_up_score_100}分·` : ""}${arch.runner_up_contrib_pct ?? 22}%)</span>` : ""}
+              <span>👑 首功 MVP：<b>${escapeHtml(arch.mvp_hero || "")}</b> (${arch.mvp_score_100 ? `${arch.mvp_score_100}分·` : ""}${arch.mvp_contrib_pct != null ? `${arch.mvp_contrib_pct}%` : "无数据"})</span>
+              ${arch.runner_up_hero ? `<span>⚔️ 二功：<b>${escapeHtml(arch.runner_up_hero)}</b> (${arch.runner_up_score_100 ? `${arch.runner_up_score_100}分·` : ""}${arch.runner_up_contrib_pct != null ? `${arch.runner_up_contrib_pct}%` : "无数据"})</span>` : ""}
             </div>
           `;
         } else {
@@ -2860,8 +2846,8 @@ function renderWorkstationSidebarMatches() {
       kda: `${focusP.kills ?? 0}/${focusP.deaths ?? 0}/${focusP.assists ?? 0}`,
       duration_str: cr.duration_str || "",
       start_time: cr.start_time ?? null,
-      party_size: cr.party_size || 5,
-      party_label: cr.party_label || "车队局",
+      party_size: cr.party_size ?? null,
+      party_label: cr.party_label || "",
     });
   }
 
@@ -2885,8 +2871,8 @@ function renderWorkstationSidebarMatches() {
         kda: am.my_kda || (am.score ? `比分 ${am.score}` : "-"),
         duration_str: am.duration_str || "",
         start_time: am.start_time ?? null,
-        party_size: am.party_size || 5,
-        party_label: am.party_label || "5人黑",
+        party_size: am.party_size ?? null,
+        party_label: am.party_label || "",
       });
     }
   });
@@ -3926,9 +3912,9 @@ function renderWorkstationFactCheckSection(report) {
         gr?.grok_score ??
         gr?.grok_score_100 ??
         p.score_100 ??
-        (p.rating_score !== undefined ? Math.round(Number(p.rating_score) * 10) : null) ??
-        (p.mvp_score !== undefined ? Math.round(Number(p.mvp_score)) : 70);
-      const scoreVal = Math.max(15, Math.min(99, Number(rawScore || 70)));
+        (p.rating_score != null ? Math.round(Number(p.rating_score) * 10) : null) ??
+        (p.mvp_score != null ? Math.round(Number(p.mvp_score)) : null);
+      const scoreVal = rawScore != null ? Math.max(15, Math.min(99, Number(rawScore))) : null;
       const sharePct = won
         ? gr?.grok_share_pct ?? p.contrib_share_pct ?? null
         : report.is_parsed === false
@@ -3995,7 +3981,7 @@ function renderWorkstationFactCheckSection(report) {
       }
 
       const scoreClass =
-        scoreVal >= 78 ? "good" : scoreVal >= 60 ? "neutral" : "bad";
+        scoreVal == null ? "neutral" : scoreVal >= 78 ? "good" : scoreVal >= 60 ? "neutral" : "bad";
       const tierTag = p.rating_tier || (won ? p.contrib_tier : "") || "";
 
       return `
@@ -4049,7 +4035,7 @@ function renderWorkstationFactCheckSection(report) {
           </td>
           <td>
             <div class="ws-num-score-cell ${scoreClass}">
-              <strong>${scoreVal}<small>/100</small></strong>
+              <strong>${scoreVal != null ? `${scoreVal}<small>/100</small>` : "无数据"}</strong>
               <span>${
                 sharePct == null
                   ? `${won ? "功劳" : (isRoastTone() ? "分锅" : "责任")} 无数据`
@@ -4202,16 +4188,14 @@ function renderWorkstationFactCheckSection(report) {
         Math.abs(b.net_swing_radiant ?? b.gold_delta ?? b.radiant_gold_delta ?? 0) -
         Math.abs(a.net_swing_radiant ?? a.gold_delta ?? a.radiant_gold_delta ?? 0)
     )[0];
-    const tfMin = Math.max(
-      1,
-      Math.round(Number(biggestTf.start_sec || biggestTf.start || (biggestTf.minute || 15) * 60) / 60)
-    );
+    const tfSec = biggestTf.start_sec ?? biggestTf.start ?? (biggestTf.minute != null ? biggestTf.minute * 60 : null);
+    const tfMin = tfSec != null ? Math.max(0, Math.round(Number(tfSec) / 60)) : null;
     const swingNum = Math.abs(
       Number(biggestTf.net_swing_radiant ?? biggestTf.gold_delta ?? biggestTf.radiant_gold_delta ?? 0)
     );
     const swingLabel =
       biggestTf.gold_swing || (swingNum > 0 ? `经济波动 ${swingNum.toLocaleString()} 金` : "关键胜负手团战");
-    const timeLabel = biggestTf.time_range || biggestTf.time_str || `${tfMin}:00`;
+    const timeLabel = biggestTf.time_range || biggestTf.time_str || (tfMin != null ? `${tfMin}:00` : "团战");
     const tradeLabel = biggestTf.kills_trade || biggestTf.location_zh || "正面遭遇战";
     const topDmgHero = biggestTf.top_damage_hero ? `全场最高输出：${biggestTf.top_damage_hero}。` : "";
     factCards.push({
@@ -4356,16 +4340,16 @@ function renderWorkstationFactCheckSection(report) {
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:8px;">
           ${replayMoments
             .map((rm) => {
-              const jumpMin = Math.max(1, Math.round(Number(rm.start_sec || 60) / 60));
+              const jumpMin = rm.start_sec != null ? Math.max(0, Math.round(Number(rm.start_sec) / 60)) : null;
               return `
                 <article class="ws-fc-card is-verified" data-replay-moment-rank="${escapeHtml(rm.rank)}">
                   <div class="ws-fc-card-top">
                     <span class="ws-fc-badge is-verified">时刻 #${escapeHtml(rm.rank)} · ${escapeHtml(
                 rm.timestamp_str
               )}</span>
-                    <button type="button" class="ws-fc-jump-btn" data-fc-jump-min="${escapeHtml(
+                    ${jumpMin != null ? `<button type="button" class="ws-fc-jump-btn" data-fc-jump-min="${escapeHtml(
                       jumpMin
-                    )}">⏱️ 跳至 ${escapeHtml(jumpMin)}:00 沙盘 →</button>
+                    )}">⏱️ 跳至 ${escapeHtml(jumpMin)}:00 沙盘 →</button>` : ""}
                   </div>
                   <p class="ws-fc-detail" style="margin-top:6px;">${escapeHtml(rm.neutral_summary)}</p>
                 </article>
@@ -4467,7 +4451,9 @@ function renderWorkstationFactCheckSection(report) {
   sec.querySelectorAll("[data-fc-jump-min]").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const targetMin = Number(btn.getAttribute("data-fc-jump-min") || 15);
+      const rawJump = btn.getAttribute("data-fc-jump-min");
+      if (rawJump == null || rawJump === "") return;
+      const targetMin = Number(rawJump);
       applyPostgameSubTab("timeline", { scrollTop: false });
       state.scrubberMinute = targetMin;
       state.scrubberSecond = targetMin * 60;
@@ -4545,8 +4531,13 @@ function renderDraftAndComboSection(report) {
 
   const dimsHtml = dims
     .map((d) => {
-      const rawO = Number(ownScores[d.key] ?? ownScores[d.altKey] ?? 75);
-      const rawE = Number(oppScores[d.key] ?? oppScores[d.altKey] ?? 75);
+      const valO = ownScores[d.key] ?? ownScores[d.altKey];
+      const valE = oppScores[d.key] ?? oppScores[d.altKey];
+      if (valO == null || valE == null) {
+        return `<div class="draft-dim-item"><div class="draft-dim-head"><span>${escapeHtml(d.label)}</span><b>无数据</b></div></div>`;
+      }
+      const rawO = Number(valO);
+      const rawE = Number(valE);
       const oPct = rawO <= 10 ? rawO * 10 : rawO;
       const ePct = rawE <= 10 ? rawE * 10 : rawE;
       return `
@@ -5053,7 +5044,7 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
 
   // 10. tp_save
   const tp = df.tp_rotation_by_side?.[targetSide] || {};
-  const zeroTpPlayers = (tp.player_tp_rows || []).filter((r) => Number(r.tp_bought ?? 1) === 0);
+  const zeroTpPlayers = (tp.player_tp_rows || []).filter((r) => r?.tp_bought != null && Number(r.tp_bought) === 0);
   const absentPlayers = (tp.player_tp_rows || []).filter((r) => Number(r.tf_absent_cnt ?? 0) > 0);
   results.tp_save =
     zeroTpPlayers.length >= 2 || absentPlayers.length >= 2
@@ -6005,7 +5996,7 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
 
   const totalObs = vis.total_obs ?? vis.obs_total ?? 0;
   const totalSen = vis.total_sen ?? vis.sen_total ?? 0;
-  const avgLife = vis.avg_lifespan_sec ?? 0;
+  const avgLife = vis.avg_lifespan_sec;
   const dewardedTotal = vis.dewarded_total ?? vis.obs_dewarded_count ?? 0;
   const dewardedPct = vis.dewarded_pct ?? vis.obs_dewarded_pct ?? 0;
   const godWards = vis.god_tier_wards || [];
@@ -6019,7 +6010,7 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
         <td>${renderHeroCellWithLogo(s.pos, s.hero_short_zh, s.personaname, report, s.hero_img)}</td>
         <td><b>${s.obs_total ?? s.obs_placed ?? 0} 颗假眼</b> / ${s.sen_total ?? s.sen_placed ?? 0} 真眼</td>
         <td>⚔️ 进攻 ${s.aggressive_cnt ?? s.aggressive ?? 0} / ⚖️ 河道 ${s.river_cnt ?? s.river_roshan ?? 0} / 🛡️ 防守 ${s.defensive_cnt ?? s.defensive ?? 0}</td>
-        <td><b>${s.avg_lifespan_sec ?? 0}s</b> / 360s</td>
+        <td><b>${s.avg_lifespan_sec != null ? `${s.avg_lifespan_sec}s / 360s` : "无数据"}</b></td>
         <td>被排 ${s.dewarded_cnt ?? s.dewarded_count ?? 0} 颗 / 反排敌方 <b>${s.obs_killed ?? s.obs_destroyed ?? 0} 假 ${s.sen_killed ?? 0} 真</b></td>
       </tr>
     `
@@ -6058,8 +6049,8 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
                 )} 插在 <b>${escapeHtml(w.zone_zh || "")} (${escapeHtml(
                   w.coords || `${w.x ?? ""},${w.y ?? ""}`
                 )})</b> 的【${escapeHtml(w.posture_zh || w.posture_label || "假眼")}】仅存活 <b>${
-                  w.lifespan_sec ?? 0
-                } 秒</b>即被 ${escapeHtml(w.dewarded_by || "敌方")} 秒排！`,
+                  w.lifespan_sec != null ? `${w.lifespan_sec} 秒` : "无数据"
+                }</b>即被 ${escapeHtml(w.dewarded_by || "敌方")} 秒排！`,
                 report
               )}</li>`
           )
@@ -6093,7 +6084,7 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
                 report
               )} 在 <b>${escapeHtml(gw.zone_zh || "")} (${escapeHtml(gw.coords || "")})</b> 点亮的【${escapeHtml(
                 gw.posture_zh || ""
-              )}】足足存活 <b>${gw.lifespan_sec ?? 360} 秒</b>！</li>`
+              )}】足足存活 <b>${gw.lifespan_sec != null ? `${gw.lifespan_sec} 秒` : "无数据"}</b>！</li>`
           )
           .join("")
       : `<li>本局暂无点亮满 330 秒以上的深入进攻/河道封神眼</li>`;
@@ -6111,12 +6102,14 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
   const obsRecords = vis.obs_records || [];
   const obsTableRows = obsRecords
     .map((w, idx) => {
-      const life = w.lifespan_sec ?? 360;
+      const life = w.lifespan_sec != null ? Number(w.lifespan_sec) : null;
       const wasDew = Boolean(w.was_dewarded ?? w.dewarded);
-      const isInstant = wasDew && life <= 90;
+      const isInstant = wasDew && life != null && life <= 90;
       const fateText = wasDew
-        ? `❌ 被 ${w.killer_zh || "敌方"} 排掉 (仅活 ${life}s)`
-        : `✓ 自然到点消失 (满 ${life}s)`;
+        ? `❌ 被 ${w.killer_zh || "敌方"} 排掉 (${life != null ? `仅活 ${life}s` : "存活无数据"})`
+        : life != null
+        ? `✓ 自然到点消失 (满 ${life}s)`
+        : "存活时长无数据";
       return `
       <tr>
         <td>#${idx + 1}</td>
@@ -6126,7 +6119,7 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
         <td>${escapeHtml(w.posture_zh || w.posture_label || "")}</td>
         <td><b style="color:${
           isInstant ? "var(--red-light)" : wasDew ? "var(--gold-light)" : "var(--green-light)"
-        }">${life} 秒</b> / 360 秒</td>
+        }">${life != null ? `${life}s / 360s` : "无数据"}</b></td>
         <td>${injectHeroLogosIntoHtml(escapeHtml(w.fate_zh || fateText), report)}</td>
       </tr>
     `;
@@ -6167,7 +6160,7 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
         </div>
         <div class="micro-kpi-cell">
           <span>假眼平均存活寿命 (满6分钟=360s)</span>
-          <strong>${avgLife} 秒 / 360 秒</strong>
+          <strong>${avgLife != null ? `${avgLife}s / 360s` : "无数据"}</strong>
         </div>
         <div class="micro-kpi-cell">
           <span>假眼被排 / 秒排白给(&le;90s)</span>
@@ -7134,20 +7127,22 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
   const rows = rm.mirror_rows || [];
   const wonOverall = Number(rm.won_overall_cnt ?? 0);
   const wonLanes = Number(rm.won_lanes_cnt ?? 0);
-  const avgOwnBm = rows.length
-    ? (rows.reduce((s, r) => s + Number(r.own_bm_avg ?? 50), 0) / rows.length).toFixed(1)
-    : "50.0";
-  const avgOppBm = rows.length
-    ? (rows.reduce((s, r) => s + Number(r.opp_bm_avg ?? 50), 0) / rows.length).toFixed(1)
-    : "50.0";
+  const validOwnBm = rows.filter((r) => r.own_bm_avg != null);
+  const validOppBm = rows.filter((r) => r.opp_bm_avg != null);
+  const avgOwnBm = validOwnBm.length
+    ? (validOwnBm.reduce((s, r) => s + Number(r.own_bm_avg), 0) / validOwnBm.length).toFixed(1)
+    : null;
+  const avgOppBm = validOppBm.length
+    ? (validOppBm.reduce((s, r) => s + Number(r.opp_bm_avg), 0) / validOppBm.length).toFixed(1)
+    : null;
 
   const fmtBmTop = (bmArr) => {
     if (!Array.isArray(bmArr) || bmArr.length === 0) {
-      return typeof bmArr === "string" && bmArr ? bmArr : "全球均值";
+      return typeof bmArr === "string" && bmArr ? bmArr : "无数据";
     }
     return bmArr
       .slice(0, 2)
-      .map((b) => `${b.label_zh || b.key || "指标"}超${b.pct ?? 50}%`)
+      .map((b) => (b.pct != null ? `${b.label_zh || b.key || "指标"}超${b.pct}%` : `${b.label_zh || b.key || "指标"}无数据`))
       .join(" / ");
   };
 
@@ -7156,12 +7151,20 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
       const g10Diff = Number(r.gold10_diff ?? 0);
       const nwDiff = Number(r.nw_diff ?? 0);
       const dmgDiff = Number(r.dmg_diff ?? 0);
-      const ownShare = Number(r.own_share_pct ?? 50);
-      const oppShare = Number(r.opp_share_pct ?? 50);
+      const ownShare = r.own_share_pct != null ? Number(r.own_share_pct) : null;
+      const oppShare = r.opp_share_pct != null ? Number(r.opp_share_pct) : null;
       const gradeCls = r.grade === "good" ? "grade-good" : r.grade === "bad" ? "grade-bad" : "grade-warn";
       const badgeTone = r.grade === "good" ? "good" : r.grade === "bad" ? "warn" : "";
       const ownBmTopStr = fmtBmTop(r.own_bm_top);
       const oppBmTopStr = fmtBmTop(r.opp_bm_top);
+      const ownBmPill =
+        r.own_bm_avg != null
+          ? `🌍 全球超越 ${r.own_bm_avg}% (${escapeHtml(ownBmTopStr)})`
+          : "🌍 全球分位 无数据";
+      const oppBmPill =
+        r.opp_bm_avg != null
+          ? `🌍 全球超越 ${r.opp_bm_avg}% (${escapeHtml(oppBmTopStr)})`
+          : "🌍 全球分位 无数据";
 
       return `
         <article class="role-mirror-card ${gradeCls}">
@@ -7185,10 +7188,8 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
                 </div>
                 <div style="font-size:11.5px; color:var(--text-dim); margin-top:2px;">
                   KDA <b>${escapeHtml(r.own_kda || "0/0/0")}</b> · 评分 <b>${
-        r.own_rating ?? 0
-      }</b> · <span class="bm-percentile-pill">🌍 全球超越 ${r.own_bm_avg ?? 50}% (${escapeHtml(
-        ownBmTopStr
-      )})</span>
+        r.own_rating ?? "无数据"
+      }</b> · <span class="bm-percentile-pill">${ownBmPill}</span>
                 </div>
               </div>
             </div>
@@ -7220,9 +7221,7 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
                   )})</span>
                 </div>
                 <div style="font-size:11.5px; color:var(--text-dim); margin-top:2px;">
-                  <span class="bm-percentile-pill">🌍 全球超越 ${r.opp_bm_avg ?? 50}% (${escapeHtml(
-        oppBmTopStr
-      )})</span> · 评分 <b>${r.opp_rating ?? 0}</b> · KDA <b>${escapeHtml(
+                  <span class="bm-percentile-pill">${oppBmPill}</span> · 评分 <b>${r.opp_rating ?? "无数据"}</b> · KDA <b>${escapeHtml(
         r.opp_kda || "0/0/0"
       )}</b>
                 </div>
@@ -7230,9 +7229,13 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
             </div>
           </div>
 
-          <div class="mirror-tug-bar" title="同位置压制力占比：本方 ${ownShare}% vs 敌方 ${oppShare}%">
-            <div class="mirror-tug-own" style="width:${ownShare}%"></div>
-            <div class="mirror-tug-opp" style="width:${oppShare}%"></div>
+          <div class="mirror-tug-bar" title="${
+            ownShare != null && oppShare != null
+              ? `同位置压制力占比：本方 ${ownShare}% vs 敌方 ${oppShare}%`
+              : "同位置压制力占比：无数据"
+          }">
+            <div class="mirror-tug-own" style="width:${ownShare ?? 0}%"></div>
+            <div class="mirror-tug-opp" style="width:${oppShare ?? 0}%"></div>
           </div>
 
           <div class="mirror-metrics-grid">
@@ -7329,7 +7332,7 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
         </div>
         <div class="micro-kpi-cell">
           <span>🌍 全队全球同英雄百分位均值</span>
-          <strong>本方超越 ${avgOwnBm}% vs 对手超越 ${avgOppBm}%</strong>
+          <strong>${avgOwnBm != null ? `本方超越 ${avgOwnBm}%` : "本方无数据"} vs ${avgOppBm != null ? `对手超越 ${avgOppBm}%` : "对手无数据"}</strong>
         </div>
       </div>
 
@@ -7759,12 +7762,9 @@ function analyzeRoshanAndResourceConversion(report) {
   }
 
   if (ownRoshMarkers.length > 0 || roshStrings.some((s) => String(s).includes(sideZh))) {
-    const lastOwnRosh = ownRoshMarkers[ownRoshMarkers.length - 1] || {
-      time_sec: 1800,
-      time_str: "后期",
-    };
-    const rSec = Number(lastOwnRosh.time_sec || 1800);
-    const rTimeStr = lastOwnRosh.time_str || "后期";
+    const lastOwnRosh = ownRoshMarkers[ownRoshMarkers.length - 1] || null;
+    const rSec = lastOwnRosh?.time_sec != null ? Number(lastOwnRosh.time_sec) : null;
+    const rTimeStr = lastOwnRosh?.time_str || "后期";
     const holderEventStr =
       roshStrings.find((s) => String(s).includes(sideZh)) ||
       roshStrings[0] ||
@@ -7772,13 +7772,16 @@ function analyzeRoshanAndResourceConversion(report) {
     const cleanedHolderStr = String(holderEventStr).replace(/^🛡️\s*/, "");
 
     // Check highground T3 towers & barracks taken within [rSec - 15, rSec + 315] (5-minute Aegis window)
-    const hgTakenInWindow = markers.filter(
-      (m) =>
-        m.side === side &&
-        m.type !== "roshan" &&
-        Number(m.time_sec || 0) >= rSec - 15 &&
-        Number(m.time_sec || 0) <= rSec + 315
-    );
+    const hgTakenInWindow =
+      rSec == null
+        ? []
+        : markers.filter(
+            (m) =>
+              m.side === side &&
+              m.type !== "roshan" &&
+              Number(m.time_sec || 0) >= rSec - 15 &&
+              Number(m.time_sec || 0) <= rSec + 315
+          );
     const t3Count = hgTakenInWindow.filter((m) => String(m.label || "").includes("三塔")).length;
     const raxCount = hgTakenInWindow.filter((m) => String(m.label || "").includes("兵营")).length;
     const firstHgTime = hgTakenInWindow[0]?.time_str || "";
@@ -7787,18 +7790,20 @@ function analyzeRoshanAndResourceConversion(report) {
     // Count kills and deaths during the 5-minute Aegis window
     let aegisKills = 0;
     let aegisDeaths = 0;
-    phasesList.forEach((pd) => {
-      (pd.players || []).forEach((pp) => {
-        if (pp.side === side) {
-          (pp.kills_events || []).forEach((ke) => {
-            if (Number(ke.time || 0) >= rSec && Number(ke.time || 0) <= rSec + 315) aegisKills++;
-          });
-          (pp.deaths_events || []).forEach((de) => {
-            if (Number(de.time || 0) >= rSec && Number(de.time || 0) <= rSec + 315) aegisDeaths++;
-          });
-        }
+    if (rSec != null) {
+      phasesList.forEach((pd) => {
+        (pd.players || []).forEach((pp) => {
+          if (pp.side === side) {
+            (pp.kills_events || []).forEach((ke) => {
+              if (Number(ke.time || 0) >= rSec && Number(ke.time || 0) <= rSec + 315) aegisKills++;
+            });
+            (pp.deaths_events || []).forEach((de) => {
+              if (Number(de.time || 0) >= rSec && Number(de.time || 0) <= rSec + 315) aegisDeaths++;
+            });
+          }
+        });
       });
-    });
+    }
 
     if (hgTakenInWindow.length >= 2 || lateTowersTaken >= 6) {
       const hgDesc =
@@ -7923,7 +7928,7 @@ function analyzePlayerItemizationIntelligence(p, report) {
     const inPhase = phaseItems.find((it) => regex.test(it.zh) || regex.test(it.key));
     if (inPhase) return inPhase;
     const inFinal = finalItems.find((it) => regex.test(it.zh) || regex.test(it.key));
-    if (inFinal) return { ...inFinal, time_str: "终局", sec: 1500 };
+    if (inFinal) return { ...inFinal, time_str: "终局", sec: null };
     return null;
   };
 
@@ -8044,8 +8049,8 @@ function analyzePlayerItemizationIntelligence(p, report) {
   const upgradeBlink = hasItemMatch(/迅疾闪光|盛势闪光|秘奥闪光|swift_blink|overwhelming_blink|arcane_blink/i);
   let blinkVerdict = null;
 
-  if (blinkItem) {
-    const bSec = blinkItem.sec || 1200;
+  if (blinkItem && blinkItem.sec != null && blinkItem.sec > 0) {
+    const bSec = blinkItem.sec;
     const postBlinkKills = allKillEvents.filter((ev) => ev.sec >= bSec - 10);
     const postBlinkDeaths = allDeathEvents.filter((ev) => ev.sec >= bSec + 10);
     const postKillCnt = postBlinkKills.length;
@@ -8629,7 +8634,7 @@ function computeStageRankings(stageKey, report) {
       const gold10 = Number(p.laning_10m?.gold10 ?? lp.gold_gain ?? 0);
       const dmg10 = Number(lp.hero_damage_gain || 0);
       const tdmg10 = Number(lp.tower_damage_gain || 0);
-      const eff = Number(p.lane_efficiency_pct || 60);
+      const eff = p.lane_efficiency_pct != null ? Number(p.lane_efficiency_pct) : null;
       const gDiff = Number(ctx.mirrorRow?.gold10_diff || 0);
       const pullPct = Number(ctx.pullRow?.pull_ratio_pct ?? 0);
       const earlySen = Number(ctx.pullRow?.early_sentries ?? 0);
@@ -8653,7 +8658,7 @@ function computeStageRankings(stageKey, report) {
           (lh - expectedLh) * 0.85 +
           dn * 0.7 +
           gDiff / 55 +
-          (eff - 65) * 0.6 +
+          (eff != null ? (eff - 65) * 0.6 : 0) +
           dmg10 / 400 +
           tdmg10 / 300 +
           (laneWon ? 14 : 0) -
@@ -8663,7 +8668,7 @@ function computeStageRankings(stageKey, report) {
         if (pos === 2 && gDiff >= 150 && k >= 2 && d <= 1) score += 16;
         if (pos === 2 && lh < 35 && !isSingleTargetGankMid && gDiff < -200) score -= 12;
 
-        const goodParts = [`10m <b>${lh}/${dn}刀（${fmtNum(gold10)}金·效率${eff}%）</b>，<b>${k}杀/${d}死</b>`];
+        const goodParts = [`10m <b>${lh}/${dn}刀（${fmtNum(gold10)}金·效率${eff != null ? `${eff}%` : "无数据"}）</b>，<b>${k}杀/${d}死</b>`];
         if (laneWon && allyStr) {
           goodParts.push(`联手${allyStr}把该路彻底打穿（压制${enemyStr}）`);
         } else if (isSingleTargetGankMid && gDiff >= 0) {
@@ -8796,7 +8801,7 @@ function computeStageRankings(stageKey, report) {
         return m >= 9 && m <= 26;
       });
       const tfAbsent = Number(ctx.tpRow?.tf_absent_cnt ?? 0);
-      const zeroTp = Number(ctx.tpRow?.tp_bought ?? 1) === 0;
+      const zeroTp = ctx.tpRow?.tp_bought != null && Number(ctx.tpRow.tp_bought) === 0;
       const smokedCnt = (ss.smoke_events || []).filter(
         (sm) => sm.initiator_hero === p.hero_short_zh || sm.activator_hero === p.hero_short_zh
       ).length;
@@ -8968,7 +8973,7 @@ function computeStageRankings(stageKey, report) {
       badReason = badParts.join("；") || (d > 0 ? `后期阵亡 ${d} 次，注意高地团拉扯` : "决胜期完美收官 0 失误");
     } else {
       // Overall Full-Game Summary: 1~5 Role Duty, Itemization Intelligence & Death Reasonableness
-      const score100 = getHeroScore100(p);
+      const score100 = getHeroScore100(p) ?? 0;
       const itemIntel = analyzePlayerItemizationIntelligence(p, report);
       const totalSac =
         ctx.laneDeathsCtx.sacList.length +
@@ -8977,7 +8982,7 @@ function computeStageRankings(stageKey, report) {
       const unexcusedDeaths = Math.max(0, Number(p.deaths || 0) - totalSac);
       score =
         score100 +
-        (Number(p.contrib_share_pct || 20) - Number(p.blame_share_pct || 20)) * 0.85 +
+        (Number(p.contrib_share_pct ?? 0) - Number(p.blame_share_pct ?? 0)) * 0.85 +
         itemIntel.highlights.length * 2.5 -
         itemIntel.warnings.length * 4.5 -
         unexcusedDeaths * 1.6 -
@@ -9019,7 +9024,7 @@ function computeStageRankings(stageKey, report) {
             .join("、")}）`
         );
       }
-      if (Number(ctx.tpRow?.tp_bought ?? 1) === 0) {
+      if (ctx.tpRow?.tp_bought != null && Number(ctx.tpRow.tp_bought) === 0) {
         badParts.push(`整局主动买 <b>0 张 TP</b>`);
       }
       const deadTail = p.dead_seconds != null ? `（泉水读秒 ${p.dead_seconds}s）` : "";
@@ -9245,7 +9250,7 @@ function buildRichFourStageCardsHtml(report) {
   const absentRows = (tp.player_tp_rows || []).filter(
     (r) => (r.tf_absent_cnt ?? r.spectator_teamfights ?? 0) > 0
   );
-  const zeroTpBuyers = (tp.player_tp_rows || []).filter((r) => Number(r.tp_bought ?? 1) === 0);
+  const zeroTpBuyers = (tp.player_tp_rows || []).filter((r) => r?.tp_bought != null && Number(r.tp_bought) === 0);
   const midSoloEvents = (ms.solo_pickoff_events || []).filter((ev) => {
     const m = parseInt(String(ev.time_str || "0").split(":")[0], 10);
     return m >= 9 && m <= 26;
@@ -9434,7 +9439,7 @@ function buildRichFourStageCardsHtml(report) {
       ]
     : [
         `<span class="stage-key-pill">① 控制链与大招兑现</span> 全队硬控 <b>${ownStuns}秒 vs ${oppStuns}秒</b>（控制王：<b>${topStunner?.pos ?? "?"}号位${escapeHtml(topStunner?.hero_short_zh || "")} ${topStunner?.stuns_sec ?? 0}秒</b>）。`,
-        `<span class="stage-key-pill">② 视野统治力与反眼</span> 假眼 <b>${vis.total_obs ?? 0} vs ${oppVis.total_obs ?? 0}</b>，真眼 <b>${vis.total_sen ?? 0} vs ${oppVis.total_sen ?? 0}</b>，假眼均寿 <b>${vis.avg_lifespan_sec ?? 0}s/360s</b>（视野劳模：<b>${topWarder?.pos ?? 5}号位${escapeHtml(topWarder?.hero_short_zh || "")} ${topWarder?.obs_placed ?? 0}假${topWarder?.sen_placed ?? 0}真</b>）。`,
+        `<span class="stage-key-pill">② 视野统治力与反眼</span> 假眼 <b>${vis.total_obs ?? 0} vs ${oppVis.total_obs ?? 0}</b>，真眼 <b>${vis.total_sen ?? 0} vs ${oppVis.total_sen ?? 0}</b>，假眼均寿 <b>${vis.avg_lifespan_sec != null ? `${vis.avg_lifespan_sec}s/360s` : "无数据"}</b>（视野劳模：<b>${topWarder?.pos ?? "?"}号位${escapeHtml(topWarder?.hero_short_zh || "")} ${topWarder?.obs_placed ?? 0}假${topWarder?.sen_placed ?? 0}真</b>）。`,
         `<span class="stage-key-pill">③ 输出转化与推塔拆迁</span> 英雄总伤害 <b>${fmtNum(ownDmg)} vs ${fmtNum(oppDmg)}</b>（输出王：<b>${escapeHtml(topDmgHero?.hero_short_zh || "")} ${fmtNum(topDmgHero?.hero_damage || 0)}</b>）；建筑推塔 <b>${fmtNum(ownTd)} vs ${fmtNum(oppTd)}</b>（拆迁王：<b>${escapeHtml(topPusherHero?.hero_short_zh || "")} ${fmtNum(topPusherHero?.tower_damage || 0)}</b>）。`,
         `<span class="stage-key-pill">④ 泉水读秒与同位对位</span> 全队泉水读秒 <b>${ownDeadSec}秒 vs ${oppDeadSec}秒</b>（读秒最多：<b>${escapeHtml(mostDeadHero?.hero_short_zh || "")} ${mostDeadHero?.dead_seconds ?? 0}秒</b>）；1~5号位同位置正面对位 <b>${rm.won_overall_cnt !== undefined && rm.won_overall_cnt !== null ? `${rm.won_overall_cnt} / 5 胜出` : "无数据"}</b>。`,
       ];
@@ -9930,7 +9935,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
           .join("；")}。`
       );
     }
-    if (Number(tpRow?.tp_bought ?? 1) === 0) {
+    if (tpRow?.tp_bought != null && Number(tpRow.tp_bought) === 0) {
       badPoints.push(`<b>支援物资隐患：</b>整局主动花钱购买回城卷轴（TP）为 <b>0 张</b>，边路防抓与支援响应受限。`);
     }
     if ((tpRow?.tf_absent_cnt ?? 0) > 0 && !p.is_afk_farmer) {
@@ -10253,7 +10258,7 @@ function renderVerdictAndBlameSection(report) {
     if (!p) return 0;
     const gp = findGrokPlayerEntry(p, report);
     if (gp && Number(gp.grok_score) > 0) {
-      return 200 - Number(gp.grok_score) * 2 + (100 - Number(gp.grok_share_pct || 20));
+      return 200 - Number(gp.grok_score) * 2 + (100 - Number(gp.grok_share_pct ?? 0));
     }
     const spRow = (msSide.player_space_rows || []).find(
       (r) => r.hero_short_zh === p.hero_short_zh || Number(r.pos) === Number(p.pos)
@@ -10264,10 +10269,10 @@ function renderVerdictAndBlameSection(report) {
     );
     const deadSec = Number(p.dead_seconds || 0);
     const deaths = Number(p.deaths || 0);
-    const ratingPenalty = Math.max(0, 8.6 - Number(p.rating_score || 7.5)) * 10;
+    const ratingPenalty = p.rating_score != null ? Math.max(0, 8.6 - Number(p.rating_score)) * 10 : 0;
     const coreZeroTdPenalty = (p.pos || 5) <= 3 && Number(p.tower_damage || 0) < 500 ? 48 : 0;
     const afkFarmerPenalty = p.is_afk_farmer ? 140 : 0;
-    const blameShare = Number(p.blame_share_pct || 15);
+    const blameShare = Number(p.blame_share_pct ?? 0);
     return afkFarmerPenalty + soloCnt * 28 + deadSec * 0.25 + deaths * 8.5 + ratingPenalty + coreZeroTdPenalty + blameShare;
   };
   const remainingCandidates = sortedByContrib
@@ -11073,7 +11078,7 @@ function renderMinuteScrubber(report) {
     state.scrubberSecond = state.scrubberMinute * 60;
   }
   if (typeof state.scrubberSecond !== "number" || state.scrubberSecond < 0 || state.scrubberSecond > maxSec) {
-    state.scrubberSecond = Math.min(maxSec, (state.scrubberMinute || 15) * 60);
+    state.scrubberSecond = Math.min(maxSec, Number(state.scrubberMinute ?? 0) * 60);
   }
   if (rangeEl) {
     rangeEl.min = "0";
@@ -11284,10 +11289,12 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
 
   // Compute clash center if a teamfight is happening
   let clashCenter = null;
-  const tfDeathsArr = activeTfForensic?.deaths_coords || activeTfForensic?.deaths_pos || [];
-  if (Array.isArray(tfDeathsArr) && tfDeathsArr.length > 0) {
-    const avgX = tfDeathsArr.reduce((acc, d) => acc + Number(d.nx || 50), 0) / tfDeathsArr.length;
-    const avgY = tfDeathsArr.reduce((acc, d) => acc + Number(d.ny || 50), 0) / tfDeathsArr.length;
+  const tfDeathsArr = (activeTfForensic?.deaths_coords || activeTfForensic?.deaths_pos || []).filter(
+    (d) => d && d.nx != null && d.ny != null
+  );
+  if (tfDeathsArr.length > 0) {
+    const avgX = tfDeathsArr.reduce((acc, d) => acc + Number(d.nx), 0) / tfDeathsArr.length;
+    const avgY = tfDeathsArr.reduce((acc, d) => acc + Number(d.ny), 0) / tfDeathsArr.length;
     clashCenter = { nx: Math.max(14, Math.min(86, avgX)), ny: Math.max(14, Math.min(86, avgY)) };
   } else if (activeKeyTf || activeTfForensic) {
     clashCenter = idx <= 15 ? { nx: 50, ny: 50 } : idx <= 28 ? { nx: 44, ny: 44 } : { nx: 62, ny: 38 };
@@ -11364,11 +11371,11 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
 
     // 2. Laning phase (0 - 600s): use real lane_heatmaps centroid (solid, no synthetic oscillation) or synthetic lane anchor
     if (secNow <= 600) {
-      const myHeat = heatmaps.filter((h) => h.hero_short_zh === hName);
+      const myHeat = heatmaps.filter((h) => h.hero_short_zh === hName && h.nx != null && h.ny != null);
       if (myHeat.length > 0) {
         const wSum = myHeat.reduce((s, h) => s + Number(h.weight || 1), 0) || 1;
-        const hx = myHeat.reduce((s, h) => s + Number(h.nx || 50) * Number(h.weight || 1), 0) / wSum;
-        const hy = myHeat.reduce((s, h) => s + Number(h.ny || 50) * Number(h.weight || 1), 0) / wSum;
+        const hx = myHeat.reduce((s, h) => s + Number(h.nx) * Number(h.weight || 1), 0) / wSum;
+        const hy = myHeat.reduce((s, h) => s + Number(h.ny) * Number(h.weight || 1), 0) / wSum;
         return {
           nx: Math.max(8, Math.min(92, hx)),
           ny: Math.max(8, Math.min(92, hy)),
@@ -12261,15 +12268,16 @@ function renderMinimap(report) {
   let overlaySvg = "";
 
   if (state.mapMode === "heatmap") {
-    const maxWeight = Math.max(...heatmaps.map((pt) => Number(pt.weight || 1)), 1);
-    overlaySvg = heatmaps
+    const validHeat = heatmaps.filter((pt) => (pt.nx ?? pt.x) != null && (pt.ny ?? pt.y) != null);
+    const maxWeight = Math.max(...validHeat.map((pt) => Number(pt.weight || 1)), 1);
+    overlaySvg = validHeat
       .map((pt) => {
         const isOwn = pt.side === side || pt.side === sideZh;
         const fill = pt.side === "radiant" || pt.side === "天辉" ? "#8aa78b" : "#df8978";
         const w = Number(pt.weight || 1);
         const r = 1.5 + (w / maxWeight) * 2.4;
-        const x = Number(pt.nx ?? pt.x ?? 50).toFixed(1);
-        const y = Number(pt.ny ?? pt.y ?? 50).toFixed(1);
+        const x = Number(pt.nx ?? pt.x).toFixed(1);
+        const y = Number(pt.ny ?? pt.y).toFixed(1);
         return `
           <circle
             cx="${x}"
@@ -12296,10 +12304,11 @@ function renderMinimap(report) {
     const markers = [];
     activeTfs.forEach((tf, tfIdx) => {
       (tf.deaths_coords || []).forEach((d) => {
+        if (d.nx == null || d.ny == null) return;
         const isOwn = d.side === side;
         const fill = isOwn ? "#d95548" : "#6fbf73";
-        const cx = Math.min(95, Math.max(5, Number(d.nx || 50))).toFixed(1);
-        const cy = Math.min(95, Math.max(5, Number(d.ny || 50))).toFixed(1);
+        const cx = Math.min(95, Math.max(5, Number(d.nx))).toFixed(1);
+        const cy = Math.min(95, Math.max(5, Number(d.ny))).toFixed(1);
         const tip = `[团战 #${tf.index || tfIdx + 1} · ${tf.time_range}] ${
           isOwn ? "本方阵亡" : "敌方阵亡"
         }: ${d.hero_short_zh} (${d.personaname}) ×${d.deaths}`;
@@ -12334,14 +12343,17 @@ function renderMinimap(report) {
     // Group wards placed on the exact same cliff cell (rounded to 2.5 grid) so they never overlap into a blob
     const cellGroups = new Map();
     filteredWards.forEach((w) => {
-      const gx = Math.round(Number(w.nx ?? w.x ?? 50) / 2.2) * 2.2;
-      const gy = Math.round(Number(w.ny ?? w.y ?? 50) / 2.2) * 2.2;
+      const rawX = w.nx ?? w.x;
+      const rawY = w.ny ?? w.y;
+      if (rawX == null || rawY == null) return;
+      const gx = Math.round(Number(rawX) / 2.2) * 2.2;
+      const gy = Math.round(Number(rawY) / 2.2) * 2.2;
       const key = `${w.type}_${w.side}_${gx.toFixed(1)}_${gy.toFixed(1)}`;
       if (!cellGroups.has(key)) {
         cellGroups.set(key, {
           ...w,
-          cx: Number(w.nx ?? w.x ?? 50),
-          cy: Number(w.ny ?? w.y ?? 50),
+          cx: Number(rawX),
+          cy: Number(rawY),
           count: 0,
           times: [],
         });
@@ -12724,10 +12736,11 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
                 .join("、") || "0死完美生存";
 
             let roleAuditText = "";
+            const fmtEff = lhHero.lane_eff != null ? `${lhHero.lane_eff}%` : "无数据";
             if (pos === 1) {
               roleAuditText = `<b>1号位打钱顺畅度：</b>10m 交出 <b>${lhHero.lh10}/${lhHero.dn10}刀（${fmtNum(
                 lhHero.gold10
-              )}金·效率${lhHero.lane_eff || 80}%）</b>，${
+              )}金·效率${fmtEff}）</b>，${
                 lhHero.lh10 >= 50 ? "打钱极其顺畅无解肥" : lhHero.lh10 >= 38 ? "发育平稳达标" : "受压补刀受限"
               }；对线打出 <b>${fmtNum(dmg10)} 伤害</b>、磨塔 <b>${fmtNum(tdmg10)}</b>，战果 <b>${k}杀/${d}死</b>（${killsStr}；${deathsStr}）。`;
             } else if (pos === 5) {
@@ -12739,13 +12752,13 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
             } else if (pos === 2) {
               roleAuditText = `<b>2号位对位压制与游走：</b>10m <b>${lhHero.lh10}/${lhHero.dn10}刀（${fmtNum(
                 lhHero.gold10
-              )}金·效率${lhHero.lane_eff || 69}%）</b>，高频技能消耗灌出 <b>${fmtNum(
+              )}金·效率${fmtEff}）</b>，高频技能消耗灌出 <b>${fmtNum(
                 dmg10
               )} 伤害</b>，战果 <b>${k}杀/${d}死</b>（${killsStr}；${deathsStr}），对线期单杀与支援节奏兼备。`;
             } else if (pos === 3) {
               roleAuditText = `<b>3号位抗压补刀与换血：</b>高压下抢到 <b>${lhHero.lh10}/${lhHero.dn10}刀（${fmtNum(
                 lhHero.gold10
-              )}金·效率${lhHero.lane_eff || 65}%）</b>，打出高达 <b>${fmtNum(
+              )}金·效率${fmtEff}）</b>，打出高达 <b>${fmtNum(
                 dmg10
               )} 对线消耗伤害</b>，战果 <b>${k}杀/${d}死</b>（击杀：${killsStr}；阵亡：${deathsStr}）。${
                 d >= 3 ? "需注意敌方中单消失时的退塔缩线时机。" : ""
@@ -14144,7 +14157,7 @@ function renderKeyWindowsSection(report) {
         <article class="window-card tf-scene-card ${escapeHtml(outcomeTone)}">
           <div class="window-head tf-scene-head">
             <span class="tf-rank-pill ${fObj.decisive_rank ? "is-top3" : ""}">${escapeHtml(rankLabel)}</span>
-            <span class="window-time-badge">${escapeHtml(fObj.time_range)} (${fObj.duration_sec || 30}s)</span>
+            <span class="window-time-badge">${escapeHtml(fObj.time_range)}${fObj.duration_sec != null ? ` (${fObj.duration_sec}s)` : ""}</span>
             <span class="tf-loc-badge">📍 ${escapeHtml(fObj.location_zh || "河道交火区")}</span>
             <span class="window-tone-badge ${escapeHtml(outcomeTone)}">${escapeHtml(outcomeBadge)}</span>
             ${
@@ -14478,7 +14491,8 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const pWon = Boolean(p.won);
   const isUnparsed = state.currentReport?.is_parsed === false;
   const gp = grokPlayer || findGrokPlayerEntry(p, state.currentReport);
-  const contribPct = Number(gp?.grok_share_pct ?? p.contrib_share_pct ?? p.blame_share_pct ?? 20).toFixed(1);
+  const rawContribCard = gp?.grok_share_pct ?? p.contrib_share_pct ?? null;
+  const contribPct = rawContribCard == null ? null : Number(rawContribCard).toFixed(1);
   const rawBlame = isUnparsed ? null : (gp?.grok_share_pct ?? p.blame_share_pct ?? null);
   const blamePct = rawBlame == null ? null : Number(rawBlame).toFixed(1);
   const score100 = getHeroScore100(p, state.currentReport);
@@ -14683,12 +14697,12 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
         <div class="forensic-badges-right">
           <div class="hero-score-100-pill ${escapeHtml(scoreTier.cls)}" title="百分制综合表现打分（100分最高，0分最低）">
             <span class="hs-label">本局打分</span>
-            <strong class="hs-value">${score100}<small>/100分</small></strong>
+            <strong class="hs-value">${score100 != null ? `${score100}<small>/100分</small>` : "无数据"}</strong>
             <span class="hs-tier">${escapeHtml(scoreTier.label)}</span>
           </div>
           ${
             pWon
-              ? `<span class="blame-badge" style="color:#a8e5a7;border-color:#3a6a40;background:#152317;">🏆 胜局贡献 ${contribPct}% · ${escapeHtml(scoreTier.label)}</span>`
+              ? `<span class="blame-badge" style="color:#a8e5a7;border-color:#3a6a40;background:#152317;">🏆 胜局贡献 ${contribPct != null ? `${contribPct}%` : "无数据"} · ${escapeHtml(scoreTier.label)}</span>`
               : blamePct == null
               ? `<span class="blame-badge">${isRoastCard ? "分锅" : "责任"} 无数据 · ${escapeHtml(scoreTier.label)}</span>`
               : `<span class="blame-badge">${isRoastCard ? "背锅" : "责任"} ${blamePct}% · ${escapeHtml(scoreTier.label)}</span>`
@@ -15107,8 +15121,8 @@ function renderSquadLedgerSection(squadLedger) {
         <span>#${m.match_id} (${escapeHtml(m.score)})</span>
         ${
           m.won
-            ? `<span style="color:var(--gold-light);">🏆首功:${escapeHtml(m.mvp_hero)}(${m.mvp_contrib_pct ?? 25}%)</span>${
-                m.runner_up_hero ? `<span style="color:var(--green-light);">⚔️二功:${escapeHtml(m.runner_up_hero)}(${m.runner_up_contrib_pct ?? 22}%)</span>` : ""
+            ? `<span style="color:var(--gold-light);">🏆首功:${escapeHtml(m.mvp_hero)}(${m.mvp_contrib_pct != null ? `${m.mvp_contrib_pct}%` : "无数据"})</span>${
+                m.runner_up_hero ? `<span style="color:var(--green-light);">⚔️二功:${escapeHtml(m.runner_up_hero)}(${m.runner_up_contrib_pct != null ? `${m.runner_up_contrib_pct}%` : "无数据"})</span>` : ""
               }`
             : m.no_clear_culprit
             ? `<span>SVP:${escapeHtml(m.mvp_hero)}</span><span style="color:var(--muted);">无明显责任人</span>`
@@ -15532,7 +15546,7 @@ function renderSquadLedgerSection(squadLedger) {
                     .slice(0, 4)
                     .map((h) =>
                       h.hero_img
-                        ? `<img src="${escapeHtml(h.hero_img)}" width="26" height="15" alt="${escapeHtml(h.hero_short_zh)}" title="#${h.match_id} ${escapeHtml(h.hero_short_zh)} (${h.kda} · ${h.won ? `胜局贡献${h.contrib_pct ?? 20}%` : `败局${sqBlameWord}${h.blame_pct ?? "无数据"}%`})" loading="lazy" />`
+                        ? `<img src="${escapeHtml(h.hero_img)}" width="26" height="15" alt="${escapeHtml(h.hero_short_zh)}" title="#${h.match_id} ${escapeHtml(h.hero_short_zh)} (${h.kda} · ${h.won ? `胜局贡献${h.contrib_pct != null ? `${h.contrib_pct}%` : "无数据"}` : `败局${sqBlameWord}${h.blame_pct != null ? `${h.blame_pct}%` : "无数据"}`})" loading="lazy" />`
                         : ""
                     )
                     .join("");
@@ -15546,7 +15560,7 @@ function renderSquadLedgerSection(squadLedger) {
                       <td><span class="squad-member-name">${escapeHtml(m.personaname)}${m.is_me ? " [我]" : ""}</span></td>
                       <td><span class="squad-role-tag ${tagCls}">${escapeHtml(m.role_tag)}</span></td>
                       <td>${m.games}局 (${m.win_rate}%)</td>
-                      <td style="color:${m.avg_blame_pct >= 22 ? "var(--red-light)" : "var(--gold-light)"};font-weight:700;">贡献${m.avg_contrib_pct ?? 20}% / ${sqShortBlame}${m.avg_blame_pct}%</td>
+                      <td style="color:${m.avg_blame_pct >= 22 ? "var(--red-light)" : "var(--gold-light)"};font-weight:700;">贡献${m.avg_contrib_pct != null ? `${m.avg_contrib_pct}%` : "无数据"} / ${sqShortBlame}${m.avg_blame_pct != null ? `${m.avg_blame_pct}%` : "无数据"}</td>
                       <td><b>${m.avg_rating}</b> (${m.mvp_count}MVP / <b style="color:${m.culprit_count > 0 ? "var(--red-light)" : "inherit"}">${m.culprit_count}${sqShortBlame}</b>)</td>
                       <td>
                         <div style="font-size:11px; line-height:1.45;">
@@ -16112,7 +16126,7 @@ function openSharePosterDialog(report) {
   } = getCanonicalSideRanking(report, side);
   const getEffShare = (p) => {
     const slotNum = Number(p?.player_slot);
-    if (won) return contribMap.get(slotNum) ?? Number(p?.contrib_share_pct ?? 20);
+    if (won) return contribMap.get(slotNum) ?? (p?.contrib_share_pct != null ? Number(p.contrib_share_pct) : null);
     if (report.is_parsed === false) return null;
     return blameMap.get(slotNum) ?? (p?.blame_share_pct != null ? Number(p.blame_share_pct) : null);
   };
@@ -16148,16 +16162,16 @@ function openSharePosterDialog(report) {
         `🔗 公开复盘分享链接：${shareUrl}`,
         `📣 凯旋定性：${grok?.title || report.match_narrative?.headline || "全员发力碾压获胜"}`,
         `────────────────────`,
-        `👑 头号首功 (MVP)：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${getEffShare(mvpPlayer).toFixed(1)}% · 综合评分 ${getHeroScore100(mvpPlayer, report)}/100分`,
-        `⚔️ 破阵二当家：${runnerUpPlayer?.personaname || ""} (${runnerUpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${getEffShare(runnerUpPlayer).toFixed(1)}% · 综合评分 ${getHeroScore100(runnerUpPlayer, report)}/100分`,
+        `👑 头号首功 (MVP)：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${fmtShareOrNa(getEffShare(mvpPlayer))} · 综合评分 ${getHeroScore100(mvpPlayer, report) ?? "无数据"}/100分`,
+        `⚔️ 破阵二当家：${runnerUpPlayer?.personaname || ""} (${runnerUpPlayer?.hero_short_zh || ""}) — 胜局贡献 ${fmtShareOrNa(getEffShare(runnerUpPlayer))} · 综合评分 ${getHeroScore100(runnerUpPlayer, report) ?? "无数据"}/100分`,
         `────────────────────`,
         `📊 五黑全员胜局贡献榜 (100% 胜局贡献排位)：`,
         ...sortedContrib.map((p, i) => {
           const b0 = (p.hero_execution_audit?.headline_badges || [])[0];
           const b0Txt = typeof b0 === "string" ? b0 : b0?.text || "";
-          const cPct = getEffShare(p).toFixed(1);
-          const sc100 = getHeroScore100(p, report);
-          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | 评分 ${sc100}/100 | 胜局贡献 ${cPct}% | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}%${
+          const cPct = fmtShareOrNa(getEffShare(p));
+          const sc100 = getHeroScore100(p, report) ?? "无数据";
+          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | 评分 ${sc100}/100 | 胜局贡献 ${cPct} | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}%${
             b0Txt ? ` | 🔬 ${b0Txt}` : ""
           }`;
         }),
@@ -16320,10 +16334,11 @@ function drawVerdictPosterCanvas(
     ctx.fillText("👑 本局头号首功 (MATCH MVP)", 56, 176);
     ctx.fillStyle = "#f2efe9";
     ctx.font = "bold 19px sans-serif";
+    const mvpShareRaw = findGrokPlayerEntry(mvpPlayer, report)?.grok_share_pct ?? mvpPlayer?.contrib_share_pct ?? null;
     ctx.fillText(
-      `${mvpPlayer?.personaname || ""} · ${mvpPlayer?.hero_short_zh || ""} (贡献 ${Number(
-        findGrokPlayerEntry(mvpPlayer, report)?.grok_share_pct ?? mvpPlayer?.contrib_share_pct ?? 25
-      ).toFixed(1)}%)`,
+      `${mvpPlayer?.personaname || ""} · ${mvpPlayer?.hero_short_zh || ""} (贡献 ${
+        mvpShareRaw != null ? `${Number(mvpShareRaw).toFixed(1)}%` : "无数据"
+      })`,
       56,
       206
     );
@@ -16338,10 +16353,11 @@ function drawVerdictPosterCanvas(
     ctx.fillText("⚔️ 本局破阵二当家 (RUNNER-UP)", 482, 176);
     ctx.fillStyle = "#f2efe9";
     ctx.font = "bold 19px sans-serif";
+    const ruShareRaw = findGrokPlayerEntry(runnerUpPlayer, report)?.grok_share_pct ?? runnerUpPlayer?.contrib_share_pct ?? null;
     ctx.fillText(
-      `${runnerUpPlayer?.personaname || ""} · ${runnerUpPlayer?.hero_short_zh || ""} (贡献 ${Number(
-        findGrokPlayerEntry(runnerUpPlayer, report)?.grok_share_pct ?? runnerUpPlayer?.contrib_share_pct ?? 22
-      ).toFixed(1)}%)`,
+      `${runnerUpPlayer?.personaname || ""} · ${runnerUpPlayer?.hero_short_zh || ""} (贡献 ${
+        ruShareRaw != null ? `${Number(ruShareRaw).toFixed(1)}%` : "无数据"
+      })`,
       482,
       206
     );
@@ -16903,15 +16919,16 @@ function drawNanoBananaIllustratedPosterCanvas(ctxInfo, artData, loadedImg) {
 
   const { sideZh, won } = report
     ? getOwnAndOppPlayers(report)
-    : { sideZh: "五黑跨局", won: (m.win_rate || 50) >= 50 };
+    : { sideZh: "五黑跨局", won: m.win_rate != null ? Number(m.win_rate) >= 50 : false };
   const heroZh = p.hero_short_zh || p.hero_name || artData.hero_zh || "代表英雄";
-  const sc100 = isCareer ? Math.round(m.avg_rating || 75) : getHeroScore100(p, report);
-  const sharePct = isCareer
-    ? Number(m.avg_contrib_pct || 22).toFixed(1)
-    : Number(
-        gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
-      ).toFixed(1);
-  const isHighPraise = artData.tone !== "roast" && ((won && sc100 >= 70) || sc100 >= 75);
+  const sc100 = isCareer ? (m.avg_rating != null ? Math.round(Number(m.avg_rating)) : null) : getHeroScore100(p, report);
+  const rawShareVal = isCareer
+    ? m.avg_contrib_pct
+    : !won && report?.is_parsed === false
+    ? null
+    : gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? null;
+  const sharePct = rawShareVal != null ? Number(rawShareVal).toFixed(1) : "无数据";
+  const isHighPraise = artData.tone !== "roast" && sc100 != null && ((won && sc100 >= 70) || sc100 >= 75);
   const badgeTitle =
     ctxInfo.badgeTitle ||
     (isCareer

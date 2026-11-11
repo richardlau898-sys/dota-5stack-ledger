@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r2.5"
+ENGINE_VERSION = "2026.11.r2.6"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -2123,256 +2123,116 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
     return report
 
 
-def classify_text_evidence(text: Any, default_evidence: str = "measured") -> str:
-    """根据结论文本内容与上下文类别，标注来源类型: measured / inferred / template"""
-    s = str(text or "")
-    if "推断" in s or "疑似" in s:
-        return "inferred"
-    if default_evidence in ("measured", "inferred", "template"):
-        return default_evidence
-    return "measured"
+_VALID_EVIDENCE_SET = {"measured", "inferred", "template"}
 
 
 def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
-    """为报告所有分节的结论对象标注 evidence 字段（measured / inferred / template）"""
+    """校验并保留各规则模块显式声明的 evidence / source_fields / conclusions（绝不根据结论文本猜测来源）"""
     if not isinstance(report, dict):
         return report
 
+    def _require_declared_evidence(obj: Dict[str, Any], path_label: str) -> None:
+        ev = obj.get("evidence")
+        if ev not in _VALID_EVIDENCE_SET:
+            raise ValueError(f"Rule at {path_label} did not declare valid evidence: {ev!r}")
+
     # 1. radiant_pos_1_to_5 & dire_pos_1_to_5
     for side_key in ("radiant_pos_1_to_5", "dire_pos_1_to_5"):
-        for p in report.get(side_key) or []:
+        for idx, p in enumerate(report.get(side_key) or []):
             if not isinstance(p, dict):
                 continue
-            p["evidence"] = "measured"
-            conclusions: List[Dict[str, str]] = []
-            for st in (p.get("strengths") or [])[:1]:
-                st_str = str(st or "").strip()
-                if st_str:
-                    conclusions.append({
-                        "text": st_str,
-                        "kind": "strength",
-                        "evidence": classify_text_evidence(st_str, "measured"),
-                    })
-            for wk in (p.get("weaknesses") or [])[:1]:
-                wk_str = str(wk or "").strip()
-                if wk_str:
-                    conclusions.append({
-                        "text": wk_str,
-                        "kind": "weakness",
-                        "evidence": classify_text_evidence(wk_str, "measured"),
-                    })
-            for imp in (p.get("improvements") or [])[:1]:
-                imp_str = str(imp or "").strip()
-                if imp_str:
-                    conclusions.append({
-                        "text": imp_str,
-                        "kind": "improvement",
-                        "evidence": classify_text_evidence(imp_str, "template"),
-                    })
-            p["conclusions"] = conclusions
-
-            dossier = p.get("hero_matchup_dossier")
-            if isinstance(dossier, dict):
-                dossier["evidence"] = "template"
-            h_prof = p.get("hero_mechanism_profile")
-            if isinstance(h_prof, dict):
-                h_prof["evidence"] = "template"
-                if isinstance(h_prof.get("hero_matchup_dossier"), dict):
-                    h_prof["hero_matchup_dossier"]["evidence"] = "template"
-            h_exec = p.get("hero_execution_audit")
-            if isinstance(h_exec, dict):
-                h_exec["evidence"] = classify_text_evidence(h_exec.get("verdict_zh"), "measured")
-
+            _require_declared_evidence(p, f"{side_key}[{idx}]")
             coaching = p.get("coaching")
             if not isinstance(coaching, dict):
-                coaching = {}
+                coaching = {"evidence": "inferred"}
                 p["coaching"] = coaching
-            coaching["evidence"] = "measured"
+            _require_declared_evidence(coaching, f"{side_key}[{idx}].coaching")
+            for c_idx, c in enumerate(p.get("conclusions") or []):
+                if isinstance(c, dict):
+                    _require_declared_evidence(c, f"{side_key}[{idx}].conclusions[{c_idx}]")
+            dossier = p.get("hero_matchup_dossier")
+            if isinstance(dossier, dict):
+                _require_declared_evidence(dossier, f"{side_key}[{idx}].hero_matchup_dossier")
+            h_prof = p.get("hero_mechanism_profile")
+            if isinstance(h_prof, dict):
+                _require_declared_evidence(h_prof, f"{side_key}[{idx}].hero_mechanism_profile")
+            h_exec = p.get("hero_execution_audit")
+            if isinstance(h_exec, dict):
+                _require_declared_evidence(h_exec, f"{side_key}[{idx}].hero_execution_audit")
 
     # 2. mvp section
     mvp_sec = report.get("mvp")
     if isinstance(mvp_sec, dict):
-        mvp_sec["evidence"] = "measured"
-        mvp_conclusions: List[Dict[str, str]] = []
-        for r_txt in mvp_sec.get("rationale_list") or []:
-            r_clean = str(r_txt or "").strip()
-            if r_clean:
-                mvp_conclusions.append({
-                    "text": r_clean,
-                    "kind": "rationale",
-                    "evidence": classify_text_evidence(r_clean, "measured"),
-                })
-        for sub_key, reason_field in (("mvp_player", "praise_talk"), ("culprit_player", "verdict"), ("mvp", "reason"), ("culprit", "reason")):
+        _require_declared_evidence(mvp_sec, "mvp")
+        for sub_key in ("mvp_player", "culprit_player", "mvp", "culprit"):
             sub_obj = mvp_sec.get(sub_key)
             if isinstance(sub_obj, dict):
-                ev = classify_text_evidence(sub_obj.get(reason_field), "measured")
-                sub_obj["evidence"] = ev
-                if not mvp_conclusions and sub_obj.get(reason_field):
-                    mvp_conclusions.append({"text": str(sub_obj[reason_field]), "kind": sub_key, "evidence": ev})
-        if mvp_sec.get("verdict_headline"):
-            vh_txt = str(mvp_sec["verdict_headline"])
-            mvp_conclusions.append({
-                "text": vh_txt,
-                "kind": "verdict_headline",
-                "evidence": classify_text_evidence(vh_txt, "measured"),
-            })
-        mvp_sec["conclusions"] = mvp_conclusions
+                if sub_key in ("mvp", "culprit") and sub_obj.get("evidence") not in _VALID_EVIDENCE_SET:
+                    sub_obj["evidence"] = "inferred"
+                _require_declared_evidence(sub_obj, f"mvp.{sub_key}")
+        for c_idx, c in enumerate(mvp_sec.get("conclusions") or []):
+            if isinstance(c, dict):
+                _require_declared_evidence(c, f"mvp.conclusions[{c_idx}]")
 
     # 3. match_narrative section
     narrative = report.get("match_narrative")
     if isinstance(narrative, dict):
-        narrative["evidence"] = "measured"
-        nar_conclusions: List[Dict[str, str]] = []
-        for stg in narrative.get("stages") or []:
+        _require_declared_evidence(narrative, "match_narrative")
+        for s_idx, stg in enumerate(narrative.get("stages") or []):
             if isinstance(stg, dict):
-                stg_txt = str(stg.get("summary") or stg.get("detail") or stg.get("headline") or "")
-                ev = classify_text_evidence(stg_txt, "measured")
-                stg["evidence"] = ev
-                if stg_txt:
-                    nar_conclusions.append({"text": stg_txt, "kind": "stage_narrative", "evidence": ev})
-        for key_name, default_ev in (("overall_verdict", "measured"), ("headline", "measured"), ("turning_point", "measured")):
-            val = narrative.get(key_name)
-            if val:
-                nar_conclusions.append({
-                    "text": str(val),
-                    "kind": key_name,
-                    "evidence": classify_text_evidence(val, default_ev),
-                })
-        narrative["conclusions"] = nar_conclusions
+                _require_declared_evidence(stg, f"match_narrative.stages[{s_idx}]")
+        for c_idx, c in enumerate(narrative.get("conclusions") or []):
+            if isinstance(c, dict):
+                _require_declared_evidence(c, f"match_narrative.conclusions[{c_idx}]")
 
     # 4. phases_data section
     phases = report.get("phases_data")
     phase_list = phases if isinstance(phases, list) else (list(phases.values()) if isinstance(phases, dict) else [])
-    for ph in phase_list:
+    for ph_idx, ph in enumerate(phase_list):
         if not isinstance(ph, dict):
             continue
-        ph_sum = str(ph.get("summary") or ph.get("label") or "").strip()
-        ph["evidence"] = classify_text_evidence(ph_sum, "measured")
-        ph["conclusions"] = (
-            [{
-                "text": ph_sum,
-                "kind": "phase_summary",
-                "evidence": classify_text_evidence(ph_sum, "measured"),
-            }]
-            if ph_sum
-            else []
-        )
-        for sd_k, sd_v in (ph.get("side_diagnosis") or {}).items():
-            if isinstance(sd_v, dict):
-                sd_v["evidence"] = classify_text_evidence(sd_v.get("summary"), "measured")
-        for pp in ph.get("players") or []:
-            if not isinstance(pp, dict):
-                continue
-            pp["evidence"] = "measured"
-            pp_conclusions: List[Dict[str, str]] = []
-            for g in (pp.get("good") or [])[:1]:
-                g_str = str(g or "").strip()
-                if g_str:
-                    pp_conclusions.append({
-                        "text": g_str,
-                        "kind": "good",
-                        "evidence": classify_text_evidence(g_str, "measured"),
-                    })
-            for b in (pp.get("bad") or [])[:1]:
-                b_str = str(b or "").strip()
-                if b_str:
-                    pp_conclusions.append({
-                        "text": b_str,
-                        "kind": "bad",
-                        "evidence": classify_text_evidence(b_str, "measured"),
-                    })
-            pp["conclusions"] = pp_conclusions
+        _require_declared_evidence(ph, f"phases_data[{ph_idx}]")
+        for pp_idx, pp in enumerate(ph.get("players") or []):
+            if isinstance(pp, dict):
+                _require_declared_evidence(pp, f"phases_data[{ph_idx}].players[{pp_idx}]")
+                for c_idx, c in enumerate(pp.get("conclusions") or []):
+                    if isinstance(c, dict):
+                        _require_declared_evidence(c, f"phases_data[{ph_idx}].players[{pp_idx}].conclusions[{c_idx}]")
 
     # 5. draft_analysis & draft_analysis_by_side
-    da_by_side = report.get("draft_analysis_by_side") or {}
-    for _side_k, da in da_by_side.items():
+    for side_k, da in (report.get("draft_analysis_by_side") or {}).items():
         if not isinstance(da, dict):
             continue
-        da["evidence"] = "measured"
-        da_conclusions: List[Dict[str, str]] = []
-        for k_name, def_ev in (
-            ("win_condition", "template"),
-            ("lose_condition", "template"),
-            ("draft_verdict", "measured"),
-            ("lane_summary", "measured"),
-        ):
-            v_txt = str(da.get(k_name) or "").strip()
-            if v_txt:
-                da_conclusions.append({
-                    "text": v_txt,
-                    "kind": k_name,
-                    "evidence": classify_text_evidence(v_txt, def_ev),
-                })
-        for list_key, def_ev in (
-            ("combos", "template"),
-            ("counters", "template"),
-            ("hero_matchup_matrix", "template"),
-            ("lane_matchups", "measured"),
-            ("ban_eval", "measured"),
-        ):
-            for item in da.get(list_key) or []:
+        _require_declared_evidence(da, f"draft_analysis_by_side.{side_k}")
+        for c_idx, c in enumerate(da.get("conclusions") or []):
+            if isinstance(c, dict):
+                _require_declared_evidence(c, f"draft_analysis_by_side.{side_k}.conclusions[{c_idx}]")
+        for list_key in ("combos", "counters", "lane_matchups", "ban_eval", "hero_matchup_matrix"):
+            for i_idx, item in enumerate(da.get(list_key) or []):
                 if isinstance(item, dict):
-                    item_txt = " ".join(str(v) for v in item.values() if isinstance(v, str))
-                    item["evidence"] = classify_text_evidence(item_txt, def_ev)
-        da["conclusions"] = da_conclusions
+                    _require_declared_evidence(item, f"draft_analysis_by_side.{side_k}.{list_key}[{i_idx}]")
 
     # 6. deep_forensics (all 13 *_by_side sections + top-level)
     df = report.get("deep_forensics")
     if isinstance(df, dict):
-        df["evidence"] = "measured"
+        _require_declared_evidence(df, "deep_forensics")
         for mod_key, mod_val in df.items():
             if not mod_key.endswith("_by_side") or not isinstance(mod_val, dict):
                 continue
             for side_k in ("dire", "radiant"):
                 side_block = mod_val.get(side_k)
                 if isinstance(side_block, dict):
-                    sv_txt = str(side_block.get("side_verdict") or side_block.get("summary") or "").strip()
-                    side_block["evidence"] = classify_text_evidence(sv_txt, "measured")
-                    sb_conclusions: List[Dict[str, str]] = []
-                    if sv_txt:
-                        sb_conclusions.append({
-                            "text": sv_txt,
-                            "kind": "side_verdict",
-                            "evidence": classify_text_evidence(sv_txt, "measured"),
-                        })
-                    for k_sub, v_sub in side_block.items():
-                        if isinstance(v_sub, list):
-                            for elem in v_sub:
-                                if isinstance(elem, dict):
-                                    elem_txt = " ".join(
-                                        str(elem.get(fk) or "")
-                                        for fk in (
-                                            "verdict",
-                                            "verdict_zh",
-                                            "audit_verdict",
-                                            "craft_verdict",
-                                            "mirror_verdict",
-                                            "space_verdict",
-                                            "save_verdict",
-                                            "tp_verdict",
-                                            "econ_verdict",
-                                            "note",
-                                            "detail",
-                                        )
-                                    )
-                                    ev_elem = classify_text_evidence(elem_txt, "measured")
-                                    elem["evidence"] = ev_elem
-                    side_block["conclusions"] = sb_conclusions
+                    _require_declared_evidence(side_block, f"deep_forensics.{mod_key}.{side_k}")
+                    for c_idx, c in enumerate(side_block.get("conclusions") or []):
+                        if isinstance(c, dict):
+                            _require_declared_evidence(c, f"deep_forensics.{mod_key}.{side_k}.conclusions[{c_idx}]")
                 elif isinstance(side_block, list):
-                    for elem in side_block:
+                    for e_idx, elem in enumerate(side_block):
                         if isinstance(elem, dict):
-                            elem_txt = str(elem.get("verdict_zh") or elem.get("summary") or "").strip()
-                            ev_elem = classify_text_evidence(elem_txt, "measured")
-                            elem["evidence"] = ev_elem
-                            elem["conclusions"] = (
-                                [{
-                                    "text": elem_txt,
-                                    "kind": "hero_execution",
-                                    "evidence": ev_elem,
-                                }]
-                                if elem_txt
-                                else []
-                            )
+                            _require_declared_evidence(elem, f"deep_forensics.{mod_key}.{side_k}[{e_idx}]")
+                            for c_idx, c in enumerate(elem.get("conclusions") or []):
+                                if isinstance(c, dict):
+                                    _require_declared_evidence(c, f"deep_forensics.{mod_key}.{side_k}[{e_idx}].conclusions[{c_idx}]")
 
     return report
 

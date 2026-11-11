@@ -450,7 +450,11 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
                 "fix_advice_zh": "；".join(fix_list[:2]) + "。",
                 "verdict_badge": verdict_badge,
                 "grade": grade,
+                "evidence": "inferred",
             })
+
+        for tcc in team_counter_checks:
+            tcc["evidence"] = "inferred"
 
         bad_counter_cnt = sum(1 for c in team_counter_checks if c["grade"] == "bad")
         if bad_counter_cnt == 0 and bad_build_cnt == 0:
@@ -463,7 +467,9 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
 
         return {
             "side": side_key,
+            "evidence": "inferred",
             "side_verdict": side_verdict,
+            "conclusions": [{"text": side_verdict, "kind": "side_verdict", "evidence": "inferred"}],
             "bad_counter_cnt": bad_counter_cnt,
             "bad_build_cnt": bad_build_cnt,
             "team_counter_checks": team_counter_checks,
@@ -1073,6 +1079,7 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
                 "perm_buff_badges": perm_buff_badges,
                 "perm_buff_notes": perm_buff_notes,
                 "grade": overall_grade,
+                "evidence": "inferred",
             })
 
         side_zh = "夜魇" if side_key == "dire" else "天辉"
@@ -1088,7 +1095,9 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
 
         return {
             "side": side_key,
+            "evidence": "inferred",
             "side_verdict": side_verdict,
+            "conclusions": [{"text": side_verdict, "kind": "side_verdict", "evidence": "inferred"}],
             "fake_dmg_suspects_cnt": fake_dmg_suspects_cnt,
             "true_core_slayers_cnt": true_core_slayers_cnt,
             "skill_build_issues_cnt": skill_build_issues_cnt,

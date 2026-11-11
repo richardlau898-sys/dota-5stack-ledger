@@ -317,11 +317,11 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
             wards_opp = int(opp_p.get("obs_placed") or 0) + int(opp_p.get("sen_placed") or 0)
             dew_own = int(own_p.get("obs_destroyed") or 0)
             dew_opp = int(opp_p.get("obs_destroyed") or 0)
-            rating_own = float(own_p.get("rating_score") or 60.0)
-            rating_opp = float(opp_p.get("rating_score") or 60.0)
+            rating_own = float(own_p["rating_score"]) if own_p.get("rating_score") is not None else None
+            rating_opp = float(opp_p["rating_score"]) if opp_p.get("rating_score") is not None else None
 
             # 4) 全球同英雄百分位 (OpenDota Benchmarks)
-            def extract_benchmarks(rp_obj: Dict[str, Any]) -> Tuple[float, List[Dict[str, Any]]]:
+            def extract_benchmarks(rp_obj: Dict[str, Any]) -> Tuple[Optional[float], List[Dict[str, Any]]]:
                 bm = rp_obj.get("benchmarks") or {}
                 items = []
                 pct_vals = []
@@ -342,7 +342,7 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
                             "raw": round(float(raw_val or 0), 1),
                         })
                 items.sort(key=lambda x: x["pct"], reverse=True)
-                avg_pct = round(sum(pct_vals) / max(1, len(pct_vals)), 1) if pct_vals else 50.0
+                avg_pct = round(sum(pct_vals) / len(pct_vals), 1) if pct_vals else None
                 return avg_pct, items[:4]
 
             own_bm_avg, own_bm_top = extract_benchmarks(own_rp)
@@ -350,9 +350,11 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
 
             # 5) 计算同位置对位胜负指数 (own_edge: 正数代表我方占优，负数代表敌方占优)
             is_core = pos_i in (1, 2, 3)
+            r_own_calc = rating_own if rating_own is not None else 0.0
+            r_opp_calc = rating_opp if rating_opp is not None else 0.0
             if is_core:
                 own_power = (
-                    rating_own * 1.1
+                    r_own_calc * 1.1
                     + (nw_own / 1000.0) * 1.4
                     + (dmg_own / 1000.0) * 1.1
                     + (td_own / 1000.0) * 1.2
@@ -360,7 +362,7 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
                     + h2h_own_kills * 4.5
                 )
                 opp_power = (
-                    rating_opp * 1.1
+                    r_opp_calc * 1.1
                     + (nw_opp / 1000.0) * 1.4
                     + (dmg_opp / 1000.0) * 1.1
                     + (td_opp / 1000.0) * 1.2
@@ -369,7 +371,7 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
                 )
             else:
                 own_power = (
-                    rating_own * 1.1
+                    r_own_calc * 1.1
                     + kp_own * 0.45
                     + wards_own * 1.4
                     + dew_own * 3.2
@@ -378,7 +380,7 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
                     + h2h_own_kills * 4.0
                 )
                 opp_power = (
-                    rating_opp * 1.1
+                    r_opp_calc * 1.1
                     + kp_opp * 0.45
                     + wards_opp * 1.4
                     + dew_opp * 3.2
@@ -471,6 +473,7 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
                 "verdict_tag": verdict_tag,
                 "grade": grade,
                 "summary_txt": summary_txt,
+                "evidence": "inferred",
             })
 
         side_verdict = (
@@ -480,7 +483,9 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
         )
         return {
             "side": side_key,
+            "evidence": "inferred",
             "side_verdict": side_verdict,
+            "conclusions": [{"text": side_verdict, "kind": "side_verdict", "evidence": "inferred"}],
             "won_lanes_cnt": won_lanes_cnt,
             "won_overall_cnt": won_overall_cnt,
             "mirror_rows": mirror_rows,
@@ -625,6 +630,7 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
                     "outcome_tag": outcome_tag,
                     "severity": severity,
                     "detail": detail,
+                    "evidence": "inferred",
                 })
 
         buyback_events.sort(key=lambda x: x["time_sec"])
@@ -664,6 +670,12 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
                     "detail": (
                         f"{fmt_mmss(ot)} {'本方' if is_own_lost else '敌方'}信使被 {killer_str} 击杀"
                         + ("（对线期断运鞋/大药/魔瓶，极大伤线！）" if is_laning_courier else "。")
+                    ),
+                    "evidence": "inferred" if is_laning_courier else "measured",
+                    **(
+                        {}
+                        if is_laning_courier
+                        else {"source_fields": ["objectives"]}
                     ),
                 })
             elif otype in ("CHAT_MESSAGE_ROSHAN_KILL", "CHAT_MESSAGE_AEGIS", "CHAT_MESSAGE_AEGIS_STOLEN"):
@@ -740,6 +752,7 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
                 "craft_steps": craft_steps,
                 "craft_verdict": craft_verdict,
                 "grade": grade,
+                "evidence": "inferred",
             })
 
         side_verdict = (
@@ -749,7 +762,9 @@ def build_snapshots_matchups_objectives_sections(ctx: Dict[str, Any]) -> Dict[st
         )
         return {
             "side": side_key,
+            "evidence": "inferred",
             "side_verdict": side_verdict,
+            "conclusions": [{"text": side_verdict, "kind": "side_verdict", "evidence": "inferred"}],
             "dieback_cnt": dieback_cnt,
             "clutch_bb_cnt": clutch_bb_cnt,
             "own_couriers_lost": own_couriers_lost,
