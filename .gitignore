@@ -17,3 +17,5 @@ venv/
 node_modules/
 .vercel
 .env*
+.cache/player_matches_history.json
+.cache/opendota_sync_state.json

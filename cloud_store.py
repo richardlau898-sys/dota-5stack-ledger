@@ -598,8 +598,12 @@ def cloud_load_llm_task(task_id: str) -> Optional[Dict[str, Any]]:
     return None
 
 
+_PLAYER_MATCHES_CACHE: Dict[str, Any] = {"url": "", "ts": 0.0, "rows": []}
+
+
 def cloud_upsert_player_matches(rows: List[Dict[str, Any]], cfg: Optional[Dict[str, str]] = None) -> bool:
     """F1: 批量写入或更新 public.player_matches 表"""
+    _PLAYER_MATCHES_CACHE["ts"] = 0.0
     if not rows:
         return True
     if cfg is None:
@@ -632,6 +636,79 @@ def cloud_upsert_player_matches(rows: List[Dict[str, Any]], cfg: Optional[Dict[s
         except Exception:
             ok_all = False
     return ok_all
+
+
+def cloud_fetch_player_matches(
+    account_ids: Optional[List[int]] = None,
+    limit: int = 20000,
+    cfg: Optional[Dict[str, str]] = None,
+) -> List[Dict[str, Any]]:
+    """F1 / R3-3: 从 Supabase public.player_matches（或本地同步缓存）读取全量历史对局行"""
+    import time
+
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+    aid_filter = {int(a) for a in (account_ids or []) if a}
+
+    if url and key:
+        now_ts = time.time()
+        if (
+            _PLAYER_MATCHES_CACHE.get("url") == url
+            and (now_ts - float(_PLAYER_MATCHES_CACHE.get("ts") or 0.0)) < 60.0
+            and isinstance(_PLAYER_MATCHES_CACHE.get("rows"), list)
+        ):
+            cached_rows = _PLAYER_MATCHES_CACHE["rows"]
+            if aid_filter:
+                return [r for r in cached_rows if int(r.get("account_id") or 0) in aid_filter]
+            return list(cached_rows)
+
+        fetched_all: List[Dict[str, Any]] = []
+        page_size = 1000
+        offset = 0
+        select_cols = (
+            "account_id,match_id,player_slot,radiant_win,won,hero_id,hero_short_zh,"
+            "pos,lane_role,kills,deaths,assists,duration,start_time,game_mode,lobby_type,party_size,included_roster_ids"
+        )
+        while offset < limit:
+            cur_lim = min(page_size, limit - offset)
+            q = f"{url}/rest/v1/player_matches?select={select_cols}&order=match_id.desc&limit={cur_lim}&offset={offset}"
+            try:
+                req = urllib.request.Request(
+                    q,
+                    headers=_supabase_headers(key, {"Accept": "application/json"}),
+                )
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    batch = json.loads(resp.read().decode("utf-8"))
+                if not isinstance(batch, list) or not batch:
+                    break
+                fetched_all.extend(r for r in batch if isinstance(r, dict))
+                if len(batch) < cur_lim:
+                    break
+                offset += len(batch)
+            except Exception:
+                break
+
+        _PLAYER_MATCHES_CACHE["url"] = url
+        _PLAYER_MATCHES_CACHE["ts"] = now_ts
+        _PLAYER_MATCHES_CACHE["rows"] = fetched_all
+        if aid_filter:
+            return [r for r in fetched_all if int(r.get("account_id") or 0) in aid_filter]
+        return list(fetched_all)
+
+    local_cache = Path(__file__).resolve().parent / ".cache" / "player_matches_history.json"
+    if local_cache.exists():
+        try:
+            data = json.loads(local_cache.read_text(encoding="utf-8"))
+            rows = data.get("rows") if isinstance(data, dict) else None
+            if isinstance(rows, list):
+                if aid_filter:
+                    return [r for r in rows if isinstance(r, dict) and int(r.get("account_id") or 0) in aid_filter]
+                return [r for r in rows if isinstance(r, dict)]
+        except Exception:
+            pass
+    return []
 
 
 def cloud_load_notified_match_ids(cfg: Optional[Dict[str, str]] = None) -> Set[int]:

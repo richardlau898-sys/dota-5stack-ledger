@@ -102,8 +102,8 @@ CREATE TABLE IF NOT EXISTS public.player_matches (
     won BOOLEAN NOT NULL DEFAULT false,
     hero_id INTEGER NOT NULL DEFAULT 0,
     hero_short_zh TEXT NOT NULL DEFAULT '',
-    pos SMALLINT NOT NULL DEFAULT 0,
-    lane_role SMALLINT NOT NULL DEFAULT 0,
+    pos SMALLINT,
+    lane_role SMALLINT,
     kills INTEGER NOT NULL DEFAULT 0,
     deaths INTEGER NOT NULL DEFAULT 0,
     assists INTEGER NOT NULL DEFAULT 0,
@@ -111,11 +111,18 @@ CREATE TABLE IF NOT EXISTS public.player_matches (
     start_time BIGINT NOT NULL DEFAULT 0,
     game_mode SMALLINT NOT NULL DEFAULT 0,
     lobby_type SMALLINT NOT NULL DEFAULT 0,
-    party_size SMALLINT NOT NULL DEFAULT 1,
+    party_size SMALLINT,
     included_roster_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
     synced_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (account_id, match_id)
 );
+
+ALTER TABLE public.player_matches ALTER COLUMN pos DROP NOT NULL;
+ALTER TABLE public.player_matches ALTER COLUMN pos DROP DEFAULT;
+ALTER TABLE public.player_matches ALTER COLUMN lane_role DROP NOT NULL;
+ALTER TABLE public.player_matches ALTER COLUMN lane_role DROP DEFAULT;
+ALTER TABLE public.player_matches ALTER COLUMN party_size DROP NOT NULL;
+ALTER TABLE public.player_matches ALTER COLUMN party_size DROP DEFAULT;
 
 CREATE INDEX IF NOT EXISTS idx_player_matches_account_start
     ON public.player_matches (account_id, start_time DESC);
@@ -127,6 +134,19 @@ CREATE INDEX IF NOT EXISTS idx_player_matches_hero_id
     ON public.player_matches (account_id, hero_id, won);
 
 ALTER TABLE public.player_matches ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE tablename = 'player_matches' AND policyname = 'Allow public read player_matches'
+    ) THEN
+        CREATE POLICY "Allow public read player_matches"
+            ON public.player_matches FOR SELECT
+            USING (true);
+    END IF;
+END
+$$;
 
 -- F8 / R1-5: 赛后自动推送已通知比赛去重状态表
 CREATE TABLE IF NOT EXISTS public.postgame_notified_matches (
