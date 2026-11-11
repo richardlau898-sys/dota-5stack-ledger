@@ -1120,22 +1120,22 @@ def enrich_phases_with_evaluations(
                         good_list.append(f"中期接团技能释放果断：阶段贡献 {kills} 杀与 {hd_gain:,} 伤害" + (f"（出装：{items_str}）。" if items_str else "。"))
 
                 mid_solos = [
-                    (f"{s.get('time_str')}(被{s.get('killer','敌方')}单抓)" if isinstance(s, dict) else str(s))
+                    (f"{s.get('time_str')} 被 {s.get('killer','敌方')} 击杀" if isinstance(s, dict) else str(s))
                     for s in solo_picks
                     if 600 <= int(s.get("time", 0) if isinstance(s, dict) else int(str(s).split(":")[0]) * 60) < 1500
                 ]
                 if mid_solos:
                     bad_list.insert(
                         0,
-                        f"中期脱离团队单带无故被抓（{'、'.join(mid_solos)}），直接断送关键装强势期与控图节奏！",
+                        f"中期团战外阵亡：{'、'.join(mid_solos)}。",
                     )
 
                 if deaths == 0:
                     good_list.append("中期 15 分钟保持 0 阵亡，走位与防抓单警觉性极高！")
                 elif deaths >= 4:
-                    bad_list.append(f"中期沦为突破口：15分钟内连续暴毙 {deaths} 次（{', '.join(death_times[:4])}），把前期积攒的节奏全送了出去！")
+                    bad_list.append(f"中期阵亡偏多：15分钟内阵亡 {deaths} 次（{', '.join(death_times[:4])}）。")
                 elif deaths >= 2 and not mid_solos:
-                    bad_list.append(f"中期阵亡 {deaths} 次（{', '.join(death_times)}），多次在团战或带线时被抓断节奏。")
+                    bad_list.append(f"中期阵亡 {deaths} 次（{', '.join(death_times)}）。")
 
                 if not good_list:
                     good_list.append(f"中期稳步过渡，经济增量 +{gold_gain:,}，造成 {hd_gain:,} 伤害。")
@@ -1143,7 +1143,7 @@ def enrich_phases_with_evaluations(
                     bad_list.append("中期赢下小规模遭遇战后转推外塔或压制敌方野区不够果断。")
 
                 focus_tip = (
-                    f"中期改进重点（{hmp.get('mid_rule') or ('第一件关键装到手后必须跟队友抱团打一波信息差，严禁在无视野河道或二塔前孤身带线白给！' if (deaths >= 3 or mid_solos) else '中期大核刷钱时注意看小地图敌方蹲人动向，打赢团第一时间集合拆外塔压野区。')}）"
+                    f"中期改进重点（{hmp.get('mid_rule') or ('第一件关键装成形后围绕队友抱团推进，减少无视野深带。' if (deaths >= 3 or mid_solos) else '中期打赢团战后及时集合推进外塔与压制野区。')}）"
                 )
 
             # 3. 后期决策 (25分钟–终局) 规则诊断
@@ -1196,7 +1196,7 @@ def enrich_phases_with_evaluations(
                 if deaths == 0:
                     good_list.append("后期决胜阶段 0 阵亡，团战拉扯与切入时机无懈可击！")
                 elif deaths >= 3 and not is_turret_ok and not hmp.get("sacrificial_initiator_fulfilled"):
-                    bad_list.append(f"后期高价值人头连送 {deaths} 次（{', '.join(death_times[:4])}），后期每一次读秒都直接让队伍少人接团/守高地！")
+                    bad_list.append(f"后期阶段阵亡 {deaths} 次（{', '.join(death_times[:4])}），读秒时间偏长。")
                 elif deaths >= 1:
                     bad_list.append(f"后期阵亡 {deaths} 次（{', '.join(death_times)}）" + (f"，并交出 {pp.get('buybacks',0)} 次买活。" if pp.get("buybacks") else "，后期高地/肉山团站位与自保装需更到位。"))
 
@@ -3067,7 +3067,7 @@ def build_squad_history_ledger(
             )
         if st["solo_pickoffs_total"] > 0:
             flaw_parts.append(
-                f"🗺️【落单阵亡统计】跨 {g} 局场均 {avg_solo_pickoffs:.2f} 次落单被抓"
+                f"🗺️【团战外阵亡统计】跨 {g} 局场均 {avg_solo_pickoffs:.2f} 次团战外阵亡"
             )
         if st["unpressed_saves_total"] > 0 or st["bad_builds_total"] > 0:
             flaw_parts.append(
@@ -3220,9 +3220,9 @@ def build_squad_history_ledger(
         top_pickoff_holder = max(core_members, key=lambda x: x["avg_solo_pickoffs"])
         if top_pickoff_holder["avg_solo_pickoffs"] > 0:
             guinness_records.append({
-                "title": "🗺️ 场均落单被抓",
+                "title": "🗺️ 场均团战外阵亡",
                 "holder": top_pickoff_holder["personaname"],
-                "value": f"场均 {top_pickoff_holder['avg_solo_pickoffs']:.2f} 次落单被抓（{top_pickoff_holder['games']}局）",
+                "value": f"场均 {top_pickoff_holder['avg_solo_pickoffs']:.2f} 次团战外阵亡（{top_pickoff_holder['games']}局）",
                 "tone": "bad",
             })
         top_build_holder = max(core_members, key=lambda x: x["avg_bad_builds"])

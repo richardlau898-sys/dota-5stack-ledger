@@ -759,7 +759,7 @@ def evaluate_player_deeply(
                 f"凤凰本局共施放 {egg_casts} 次《超新星》（团战 {tf_egg_total} 次）、{ray_casts} 次《烈日炙烤》（全队治疗 {heal:,} 点），可提高团战中后排《烈日炙烤》开启频率以兼顾消耗与治疗。",
             )
 
-    # 3) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」&「单带被抓」审计
+    # 3) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」审计（推断类团战外阵亡不计入分锅）
     if pos in (1, 2) and not is_turret_fulfilled and duration_min >= 25:
         if hmp.get("late_harvest_fulfilled") and not is_afk_farmer:
             strengths.insert(0, hmp["late_phase_note"])
@@ -770,15 +770,6 @@ def evaluate_player_deeply(
                 104,
                 f"@{pname} 玩个{hero_name}前中期全队给你让资源避战刷钱完全合理，结果25分钟出山期你吃下全队{late_gold_share:.0f}%经济却只打了{late_hdmg_share:.0f}%后期伤害，刷最肥的钱打最低的输出，后期收割呢？",
             ))
-        elif len(solo_pickoffs) >= 2 and late_gold_share >= 22.0 and late_hdmg_share <= 17.0:
-            pickoff_str = "、".join(f"{sp['time_str']}(被{sp['killer']}抓)" for sp in solo_pickoffs[:4])
-            blame_points += 18.0
-            weaknesses.insert(
-                0,
-                f"单带屡屡被抓 + 后期团战输出崩盘：中后期在 {pickoff_str} 等非团战期单带无故被抓断节奏；"
-                f"25m+ 后期吃下全队 {late_gold_share:.1f}% 的经济（+{late_gold:,} 金），却只打出 {late_hdmg:,} 点后期伤害（仅占全队后期伤害 {late_hdmg_share:.1f}%）"
-                + (f"，在 {', '.join(low_dmg_tfs[:3])} 团战中近乎零输出阵亡！" if low_dmg_tfs else "！"),
-            )
 
     # 5) 针对全 126 英雄的「节奏核闷头刷错失强势期」「先手肉核敢死开团功臣」「救人辅助保核兑现」「必出命脉魔晶缺失」审计
     if hmp.get("mid_tempo_wasted") and not is_afk_farmer:

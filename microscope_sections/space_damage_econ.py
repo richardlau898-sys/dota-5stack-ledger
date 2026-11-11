@@ -116,7 +116,7 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 killer_npc = str(d_entry.get("key") or "")
                 killer_hid = npc_to_hid.get(killer_npc, 0)
                 killer_fp = fmt_by_hid.get(killer_hid)
-                killer_zh = killer_fp["hero_short_zh"] if killer_fp else get_ability_zh(killer_npc)
+                killer_zh = (killer_fp["hero_short_zh"] if killer_fp else get_ability_zh(killer_npc)) or "敌方单位"
 
                 # 检查是否在大规模团战内
                 matched_tf = None
@@ -166,38 +166,8 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                     total_solo_pickoffs += 1
                     p_solo_gold_fed += gold_fed
 
-                    is_enemy_smoke_gank = any(abs(t_sec - st) <= 15 for st in opp_smoke_kill_times)
-                    gank_nature_tag = "🌫️ 敌方破雾击杀" if is_enemy_smoke_gank else "非团战期单人阵亡"
-                    vision_tag = "🌫️ 敌方诡计之雾击杀" if is_enemy_smoke_gank else ""
-
-                    # 死后 70 秒内的地图事件（并列陈述事实，不作因果断言）
-                    consequence_list = []
-                    for obj in raw_objectives:
-                        ot = int(obj.get("time") or 0)
-                        if t_sec <= ot <= t_sec + 70:
-                            otype = str(obj.get("type") or "")
-                            okey = str(obj.get("key") or "")
-                            if otype == "CHAT_MESSAGE_ROSHAN_KILL":
-                                oteam = int(obj.get("team") or 0)
-                                if (is_rad and oteam == 3) or ((not is_rad) and oteam == 2):
-                                    consequence_list.append(f"{fmt_mmss(ot)} 敌方控下肉山盾")
-                            elif otype == "building_kill":
-                                if (is_rad and "goodguys" in okey) or ((not is_rad) and "badguys" in okey):
-                                    b_zh = "高地塔/兵营" if ("3" in okey or "rax" in okey) else "外塔"
-                                    consequence_list.append(f"{fmt_mmss(ot)} 本方损失{b_zh}")
-
-                    conseq_str = (
-                        f"；随后 70 秒内：{'、'.join(consequence_list[:2])}。"
-                        if consequence_list
-                        else "。"
-                    )
-                    zone_clause = f"在【{death_zone_zh}】" if death_zone_zh else ""
-                    smoke_clause = f"（{vision_tag}）" if vision_tag else ""
-                    detail_txt = (
-                        f"[{fmt_mmss(t_sec)}] {pos_i}号位 {fp['hero_short_zh']} {zone_clause}被 {killer_zh} 击杀{smoke_clause}"
-                        f"（读秒 {dead_s}s · 损失 {gold_fed} 金）{conseq_str}"
-                    )
-                    p_pickoff_details.append(f"{fmt_mmss(t_sec)}(被{killer_zh}击杀)")
+                    detail_txt = f"[{fmt_mmss(t_sec)}] 被 {killer_zh} 击杀"
+                    p_pickoff_details.append(f"{fmt_mmss(t_sec)} 被 {killer_zh} 击杀")
                     solo_pickoff_events.append({
                         "time_str": fmt_mmss(t_sec),
                         "time_sec": t_sec,
@@ -205,86 +175,76 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                         "hero_short_zh": fp["hero_short_zh"],
                         "hero_img": fp["hero_img"],
                         "personaname": fp["personaname"],
-                        "zone_zh": death_zone_zh,
+                        "zone_zh": "",
                         "killer_zh": killer_zh,
-                        "is_enemy_smoke_gank": is_enemy_smoke_gank,
-                        "gank_nature_tag": gank_nature_tag,
-                        "vision_tag": vision_tag,
+                        "is_enemy_smoke_gank": False,
+                        "gank_nature_tag": "团战外阵亡",
+                        "vision_tag": "",
                         "gold_fed": gold_fed,
                         "time_dead": dead_s,
-                        "consequence": "、".join(consequence_list[:2]) if consequence_list else "",
+                        "consequence": "",
                         "detail": detail_txt,
                     })
 
-            # 判定该选手的「地图空间理解画像」（结合英雄内置强势期曲线 timing_curve）
+            # 判定该选手的「地图空间与兵线野区分配统计」（结合英雄强势期曲线 timing_curve，中性描述）
             is_core = pos_i in (1, 2, 3)
             prof_space = get_hero_profile_126(int(fp.get("hero_id") or 0), pos_i, fp["hero_short_zh"])
             is_hyper_carry = prof_space.get("timing_curve") == "late_hyper_carry"
             hdmg_share_val = float(fp.get("hero_damage_share_pct") or 0.0)
+            pickoff_list_txt = f"（{'、'.join(p_pickoff_details[:3])}）" if p_pickoff_details else ""
             if is_core and p_solo_cnt >= 2 and tower_dmg < 2500:
-                style_badge = "🚨 危险呆刷 · 无聊带线提款机"
-                grade = "bad"
-                verdict = (
-                    f"🚨 空间感亮红灯：线上补刀 {lane_kills} / 野区 {neutral_kills}（推塔仅 {tower_dmg}），"
-                    f"中后期发生 {p_solo_cnt} 次无掩护落单被抓（{'、'.join(p_pickoff_details[:3])}，累计白给 {p_solo_gold_fed} 金），带了最危险的线却没换成塔伤！"
-                )
-                audit_obj = fp.get("hero_execution_audit")
-                if isinstance(audit_obj, dict):
-                    audit_obj.setdefault("headline_badges", []).append(
-                        {"text": f"🗺️ 落单带线被抓 ×{p_solo_cnt}次", "tone": "bad"}
-                    )
-            elif is_core and is_hyper_carry and jungle_farm_pct >= 52.0 and hdmg_share_val >= 22.0 and p_solo_cnt <= 1:
-                style_badge = "🌾➡️⚔️ 大核闭关成型·出山收割"
-                grade = "good"
-                verdict = (
-                    f"✓ 符合【{fp['hero_short_zh']}】后期大核特性的空间分配：前中期避开无效乱战高效收野（野区 {neutral_kills} / 兵线 {lane_kills}），"
-                    f"核心装成型后出山轰出全队 {hdmg_share_val:.1f}% 英雄伤害且仅 {p_solo_cnt} 次落单被抓，完美兑现『前期避战刷钱 -> 后期接管收割』！"
-                )
-            elif is_core and jungle_farm_pct >= 58.0 and tower_dmg < 1800 and kp_pct < 55.0:
-                style_badge = "📉 大核刷野未兑现收割" if is_hyper_carry else "🧛 缩壳野区吸血鬼"
+                style_badge = "⚠️ 推塔偏低 · 团战外阵亡偏多"
                 grade = "warn"
                 verdict = (
-                    f"⚠️ {'身为后期大核前中期钻野发育合理，但出山后未能将经济转化为收割与推塔' if is_hyper_carry else '地图空间利用偏消极'}：野区补刀占 {jungle_farm_pct}%（{neutral_kills}野 vs {lane_kills}线），"
-                    f"推塔 {tower_dmg}，参战率仅有 {kp_pct}%。"
+                    f"线上补刀 {lane_kills} / 野区 {neutral_kills}，建筑伤害 {tower_dmg}；"
+                    f"9 分钟后发生 {p_solo_cnt} 次团战外阵亡{pickoff_list_txt}。"
+                )
+            elif is_core and is_hyper_carry and jungle_farm_pct >= 52.0 and hdmg_share_val >= 22.0 and p_solo_cnt <= 1:
+                style_badge = "🌾➡️⚔️ 大核发育·后期输出"
+                grade = "good"
+                verdict = (
+                    f"✓ 符合【{fp['hero_short_zh']}】后期核心资源分配：野区 {neutral_kills} / 兵线 {lane_kills}，"
+                    f"全场打出全队 {hdmg_share_val:.1f}% 英雄伤害，9 分钟后团战外阵亡 {p_solo_cnt} 次{pickoff_list_txt}。"
+                )
+            elif is_core and jungle_farm_pct >= 58.0 and tower_dmg < 1800 and kp_pct < 55.0:
+                style_badge = "📉 刷野占比较高 · 参战偏低"
+                grade = "warn"
+                verdict = (
+                    f"野区补刀占 {jungle_farm_pct}%（{neutral_kills} 野 / {lane_kills} 线），"
+                    f"建筑伤害 {tower_dmg}，参战率 {kp_pct}%。"
                 )
             elif is_core and tower_dmg >= 4000 and p_solo_cnt <= 1:
-                style_badge = "👑 顶级带线牵制大师"
+                style_badge = "👑 高建筑推进效率"
                 grade = "good"
                 verdict = (
-                    f"✓ 教科书级空间牵制：收线补刀 {lane_kills}（占 {lane_farm_pct}%）+ 建筑推塔高达 {tower_dmg}，"
-                    f"全局中后期仅 {p_solo_cnt} 次落单被抓，真正做到了『带线逼塔牵制、看着小地图极限全身而退』！"
+                    f"✓ 收线补刀 {lane_kills}（占 {lane_farm_pct}%），建筑伤害 {tower_dmg}，"
+                    f"9 分钟后团战外阵亡 {p_solo_cnt} 次{pickoff_list_txt}。"
                 )
                 audit_obj = fp.get("hero_execution_audit")
                 if isinstance(audit_obj, dict):
                     audit_obj.setdefault("headline_badges", []).append(
-                        {"text": f"🗺️ 顶级带线牵制(塔伤{tower_dmg})", "tone": "good"}
+                        {"text": f"🗺️ 高建筑伤害(塔伤{tower_dmg})", "tone": "good"}
                     )
             elif p_solo_cnt >= 3:
-                style_badge = "🚨 迷雾乱逛提款机"
-                grade = "bad"
+                style_badge = "⚠️ 团战外阵亡偏多"
+                grade = "warn"
                 verdict = (
-                    f"🚨 中后期高达 {p_solo_cnt} 次脱离大部队独自在迷雾/危险线乱逛被抓（{'、'.join(p_pickoff_details[:3])}），"
-                    f"累计送出 {p_solo_gold_fed} 金，极大断送了本方控图节奏！"
+                    f"收线补刀 {lane_kills} / 野区 {neutral_kills}，建筑伤害 {tower_dmg}；"
+                    f"9 分钟后发生 {p_solo_cnt} 次团战外阵亡{pickoff_list_txt}。"
                 )
-                audit_obj = fp.get("hero_execution_audit")
-                if isinstance(audit_obj, dict):
-                    audit_obj.setdefault("headline_badges", []).append(
-                        {"text": f"🗺️ 迷雾落单被抓 ×{p_solo_cnt}次", "tone": "bad"}
-                    )
             elif kp_pct >= 62.0 and p_solo_cnt <= 1:
-                style_badge = "⚔️ 侵略控图发动机"
+                style_badge = "⚔️ 高参战抱团"
                 grade = "good"
                 verdict = (
-                    f"✓ 空间嗅觉敏锐：参团率 {kp_pct}%，中后期仅 {p_solo_cnt} 次落单掉点，"
-                    f"兵线/野区分配合理（收线 {lane_kills} / 刷野 {neutral_kills}），始终在有视野或队友掩护区活动。"
+                    f"✓ 参战率 {kp_pct}%，收线 {lane_kills} / 野区 {neutral_kills}，"
+                    f"9 分钟后团战外阵亡 {p_solo_cnt} 次{pickoff_list_txt}。"
                 )
             else:
-                style_badge = "🛡️ 稳健抱团驻守" if p_solo_cnt <= 1 else "⚠️ 偶有盲区深带掉点"
+                style_badge = "🛡️ 常规分配" if p_solo_cnt <= 1 else "⚠️ 偶有团战外阵亡"
                 grade = "good" if p_solo_cnt <= 1 else "warn"
                 verdict = (
-                    f"收线补刀 {lane_kills}（{lane_farm_pct}%）/ 刷野 {neutral_kills}（{jungle_farm_pct}%），推塔伤害 {tower_dmg}；"
-                    f"中后期发生 {p_solo_cnt} 次落单被抓"
-                    + (f"（{'、'.join(p_pickoff_details[:2])}，喂钱 {p_solo_gold_fed} 金）。" if p_solo_cnt > 0 else "，位置感保持稳健。")
+                    f"收线补刀 {lane_kills}（{lane_farm_pct}%）/ 野区 {neutral_kills}（{jungle_farm_pct}%），建筑伤害 {tower_dmg}；"
+                    f"9 分钟后团战外阵亡 {p_solo_cnt} 次{pickoff_list_txt}。"
                 )
 
             player_space_rows.append({

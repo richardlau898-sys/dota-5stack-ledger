@@ -4906,22 +4906,22 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
   results.map_space =
     solos.length >= 3
       ? {
-          level: "critical",
-          badge: `🚨 ${solos.length}次落单白给`,
-          title: "5. 单带无故被抓 & 白给侦探社",
-          reason: `9分钟后全队出现 <b>${solos.length} 次脱离团队落单被抓</b>（${solos
+          level: "warn",
+          badge: `⚠️ ${solos.length}次团战外阵亡`,
+          title: "5. 地图空间与团战外阵亡记录",
+          reason: `9分钟后全队记录 <b>${solos.length} 次团战外阵亡</b>（${solos
             .slice(0, 3)
-            .map((s) => `${s.time_str}${s.hero_short_zh}`)
-            .join("、")}），地图危险感与防抓意识急需加强！`,
+            .map((s) => `${s.time_str} 被 ${s.killer_zh || "敌方"} 击杀`)
+            .join("、")}）。`,
         }
       : solos.length >= 1
       ? {
           level: "warn",
-          badge: `⚠️ ${solos.length}次落单`,
-          title: "5. 单带无故被抓 & 白给侦探社",
-          reason: `出现 ${solos.length} 次落单被抓（${solos.map((s) => `${s.time_str}${s.hero_short_zh}`).join("、")}）。`,
+          badge: `⚠️ ${solos.length}次团战外阵亡`,
+          title: "5. 地图空间与团战外阵亡记录",
+          reason: `9分钟后记录 ${solos.length} 次团战外阵亡（${solos.map((s) => `${s.time_str} 被 ${s.killer_zh || "敌方"} 击杀`).join("、")}）。`,
         }
-      : { level: "good", badge: "✓ 0落单", title: "5. 单带无故被抓 & 白给侦探社", reason: "中后期抱团紧凑0落单" };
+      : { level: "good", badge: "✓ 0次", title: "5. 地图空间与团战外阵亡记录", reason: "9分钟后无团战外阵亡" };
 
   // 6. damage_received
   const dr = df.damage_received_by_side?.[targetSide] || {};
@@ -5085,7 +5085,7 @@ function auditAllMicroDimensions(report, df, targetSide, targetSideZh) {
     itemization: "🎒 2. 全员出装路线与克制装处刑台",
     damage_quality: "🔥 3. 伤害含金量·加点路线与叠层审判",
     unpressed_saves: "💀 4. 憋死BKB/救命装与0技能秒躺",
-    map_space: "🕵️‍♂️ 5. 单带无故被抓 & 开雾/白给侦探社",
+    map_space: "🧭 5. 地图空间与团战外阵亡记录",
     damage_received: "🛡️ 6. 承伤来源拆解与防装审计",
     vision: "👁️ 7. 眼位博弈·满时长神眼与黑图真空期",
     stack_smoke: "🌾 8. 辅助堆野 & 开雾找节奏",
@@ -6258,9 +6258,9 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
   const smokeSuccessCnt =
     ss.smoke_success_count ?? smokeEvents.filter((e) => e.outcome === "success").length;
   const smokeBackfireCnt =
-    ss.smoke_backfire_count ?? smokeEvents.filter((e) => e.outcome === "backfire").length;
+    ss.smoke_backfire_count ?? smokeEvents.filter((e) => e.outcome === "backfire" || e.outcome === "loss").length;
   const smokeDryCnt =
-    ss.smoke_dry_count ?? smokeEvents.filter((e) => e.outcome === "wasted").length;
+    ss.smoke_dry_count ?? smokeEvents.filter((e) => e.outcome === "wasted" || e.outcome === "dry").length;
 
   const smokeRowsHtml = smokeEvents
     .map(
@@ -6334,7 +6334,7 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
               <strong>${smokeSuccessCnt} 波</strong>
             </div>
             <div class="micro-kpi-cell">
-              <span>🔴 开雾撞墙</span>
+              <span>🔴 团战阵亡偏多</span>
               <strong>${smokeBackfireCnt} 波</strong>
             </div>
             <div class="micro-kpi-cell">
@@ -6816,12 +6816,12 @@ function renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh) {
 }
 
 /**
- * Tab 4: 🕵️‍♂️ 单带无故被抓 & 敌方开雾强抓 vs 未开雾纯白给侦探社
+ * Tab 5: 🧭 地图空间与团战外阵亡记录
  */
 function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
   const ms = df.map_space_by_side?.[targetSide];
   if (!ms) {
-    return `<div class="empty-state compact">当前比赛暂无地图空间理解与落单被抓数据</div>`;
+    return `<div class="empty-state compact">当前比赛暂无地图空间与团战外阵亡数据</div>`;
   }
 
   const totalSolo = Number(ms.total_solo_pickoffs ?? 0);
@@ -6831,30 +6831,20 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
   const pRowsHtml = pRows
     .map((r) => {
       const soloCnt = Number(r.solo_pickoff_cnt ?? 0);
-      const smokeGankCnt = Number(r.smoke_ganked_cnt ?? 0);
       const isBad = r.grade === "bad" || soloCnt >= 2;
       const isGood = r.grade === "good";
       return `
         <tr>
           <td>${renderHeroCellWithLogo(r.pos, r.hero_short_zh, r.personaname, report, r.hero_img)}</td>
           <td class="micro-badge-cell"><span class="micro-exec-badge ${isBad ? "warn" : isGood ? "good" : ""}">${escapeHtml(
-        r.space_style_badge || "常规驻守"
+        r.space_style_badge || "常规分配"
       )}</span></td>
           <td>兵线 <b>${r.lane_kills ?? 0}</b> (${r.lane_farm_pct ?? 0}%) / 野区 <b>${r.neutral_kills ?? 0}</b> (${r.jungle_farm_pct ?? 0}%)</td>
           <td><b style="color:${(r.tower_damage ?? 0) >= 3500 ? "var(--gold-light)" : "var(--text)"}">${fmtNum(
         r.tower_damage || 0
       )}</b></td>
           <td>
-            <b style="color:${soloCnt >= 2 ? "var(--red-light)" : soloCnt === 0 ? "var(--green-light)" : "var(--gold-light)"}">${soloCnt} 次</b> (送 ${fmtNum(
-        r.solo_gold_fed || 0
-      )} 金)
-            ${
-              soloCnt > 0 && smokeGankCnt > 0
-                ? `<div style="font-size:11px; margin-top:2px;">
-                    <span style="color:var(--muted);">🌫️ 被开雾抓 ${smokeGankCnt}次</span>
-                  </div>`
-                : ""
-            }
+            <b style="color:${soloCnt >= 2 ? "var(--red-light)" : soloCnt === 0 ? "var(--green-light)" : "var(--gold-light)"}">${soloCnt} 次</b>
           </td>
           <td>${injectHeroLogosIntoHtml(escapeHtml(r.verdict || ""), report)}</td>
         </tr>
@@ -6868,21 +6858,11 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
       const killerHtml = killerImg
         ? `<span class="inline-hero-chip"><img class="inline-hero-logo" src="${escapeHtml(killerImg)}" alt="" /><b>${escapeHtml(ev.killer_zh || "敌方")}</b></span>`
         : `<b>${escapeHtml(ev.killer_zh || "敌方")}</b>`;
-      const isSmoke = Boolean(ev.is_enemy_smoke_gank);
-      const natureTag = ev.gank_nature_tag || (isSmoke ? "🌫️ 敌方开雾强抓" : ev.vision_tag || "");
       return `
       <tr>
         <td><b>${escapeHtml(ev.time_str || "")}</b></td>
         <td>${renderHeroCellWithLogo(ev.pos, ev.hero_short_zh, ev.personaname, report, ev.hero_img)}</td>
-        <td><b>${escapeHtml(ev.zone_zh || "")}</b> (被 ${killerHtml} 抓死)</td>
-        <td>
-          <div style="font-weight:700; color:${isSmoke ? "var(--gold-light)" : "var(--red-light)"};">${escapeHtml(natureTag)}</div>
-          <div style="font-size:11px; color:var(--muted);">${escapeHtml(ev.vision_tag || "")}</div>
-        </td>
-        <td>读秒 <b>${ev.time_dead ?? 0}s</b> · 送 <b>${fmtNum(ev.gold_fed || 0)} 金</b></td>
-        <td><b style="color:${
-          (ev.consequence || "").includes("无战略收益") ? "var(--gold-light)" : "var(--red-light)"
-        }">${escapeHtml(ev.consequence || "")}</b></td>
+        <td>被 ${killerHtml} 击杀</td>
       </tr>
     `;
     })
@@ -6892,7 +6872,7 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
     <div class="micro-pane-block">
       <div class="micro-pane-banner">
         <div>
-          <h3>🕵️‍♂️ 4. 单带无故被抓 &amp; 敌方开雾强抓 vs 未开雾纯白给侦探社 (${escapeHtml(targetSideZh)})</h3>
+          <h3>🧭 5. 地图空间与团战外阵亡记录 (${escapeHtml(targetSideZh)})</h3>
           <p>${injectHeroLogosIntoHtml(escapeHtml(ms.side_verdict || ""), report)}</p>
         </div>
       </div>
@@ -6904,22 +6884,22 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
         </div>
         <div class="micro-kpi-cell">
           <span>记录依据</span>
-          <strong>kills_log 精确时间 + 团战区间排除 + 70s 目标时间线</strong>
+          <strong>deaths_log 时间 + 团战区间排除</strong>
         </div>
       </div>
 
       <div class="micro-card">
-        <h4>🧭 1~5 号位地图空间画像 · 收线 vs 刷野比例、推塔牵制与非团战阵亡统计</h4>
+        <h4>🧭 1~5 号位兵线 vs 野区分配、建筑伤害与团战外阵亡统计</h4>
         <div class="micro-table-wrap">
           <table class="micro-data-table">
             <thead>
               <tr>
                 <th>位置 / 英雄</th>
-                <th>地图空间理解画像</th>
+                <th>空间分配标签</th>
                 <th>收线补刀 vs 刷野占比</th>
                 <th>建筑推塔转化</th>
-                <th>9m后非团战阵亡</th>
-                <th>空间利用与带线纪律判词</th>
+                <th>9m后团战外阵亡</th>
+                <th>空间与资源分配记录</th>
               </tr>
             </thead>
             <tbody>${pRowsHtml}</tbody>
@@ -6928,23 +6908,20 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
       </div>
 
       <div class="micro-card">
-        <h4>📋 9 分钟后非团战单人阵亡记录 (共 ${totalSolo} 次)</h4>
+        <h4>📋 9 分钟后团战外阵亡记录 (共 ${totalSolo} 次)</h4>
         <div class="micro-table-wrap">
           <table class="micro-data-table">
             <thead>
               <tr>
-                <th>被抓时间</th>
-                <th>落单当事人</th>
-                <th>暴毙地点 &amp; 凶手</th>
-                <th>被抓定性 (敌方开雾 vs 未开雾白给)</th>
-                <th>读秒与经济出血</th>
-                <th>70秒内连锁后果 / 战略收益审计</th>
+                <th>阵亡时间</th>
+                <th>阵亡英雄</th>
+                <th>击杀者</th>
               </tr>
             </thead>
             <tbody>
               ${
                 evRowsHtml ||
-                `<tr><td colspan="6" style="color:var(--green-light);">✓ 本局 9 分钟后未发生脱离团队无聊带线或盲区落单被抓事故！</td></tr>`
+                `<tr><td colspan="3" style="color:var(--green-light);">✓ 本局 9 分钟后无团战外单人阵亡记录。</td></tr>`
               }
             </tbody>
           </table>
@@ -8388,13 +8365,7 @@ function analyzePlayerPhaseAndRoleContext(p, report) {
           ...d,
           reason_type: "solo_pickoff",
           solo_ev: soloMatch,
-          desc: `${d.time_str} 在${soloMatch.zone_zh || "野区交界"}落单被${soloMatch.killer_zh || d.killer}抓死${
-            soloMatch.consequence && soloMatch.consequence !== "无战略收益白给"
-              ? `（${soloMatch.consequence}）`
-              : soloMatch.vision_tag?.includes("5 颗假眼")
-              ? "（场上5颗假眼仍不看图）"
-              : ""
-          }`,
+          desc: `${d.time_str} 被 ${soloMatch.killer_zh || d.killer || "敌方"} 击杀`,
         });
       } else if (
         ownKillsNear.length >= 2 &&
@@ -8836,13 +8807,8 @@ function computeStageRankings(stageKey, report) {
       const badParts = [];
       if (midSolos.length > 0) {
         badParts.push(
-          `脱离大部队落单被抓 <b>${midSolos.length} 次</b>（${midSolos
-            .map(
-              (s) =>
-                `${s.time_str}被${s.killer_zh}抓死${
-                  s.consequence && s.consequence !== "无战略收益白给" ? `→${s.consequence}` : ""
-                }`
-            )
+          `中期团战外阵亡 <b>${midSolos.length} 次</b>（${midSolos
+            .map((s) => `${s.time_str} 被 ${s.killer_zh || "敌方"} 击杀`)
             .join("、")}）`
         );
       }
@@ -8922,13 +8888,8 @@ function computeStageRankings(stageKey, report) {
       const badParts = [];
       if (lateSolos.length > 0) {
         badParts.push(
-          `决胜期致命落单白给：<b>${lateSolos
-            .map(
-              (s) =>
-                `${s.time_str}在${s.zone_zh}被${s.killer_zh}单抓（${
-                  s.vision_tag?.includes("5 颗假眼") ? "场上5颗假眼不看小地图" : "无视野盲区孤走"
-                }·读秒${s.time_dead}s）`
-            )
+          `后期团战外阵亡：<b>${lateSolos
+            .map((s) => `${s.time_str} 被 ${s.killer_zh || "敌方"} 击杀`)
             .join("、")}</b>`
         );
       }
@@ -8999,8 +8960,8 @@ function computeStageRankings(stageKey, report) {
       }
       if (ctx.soloEvents.length > 0) {
         badParts.push(
-          `全场落单被抓 <b>${ctx.soloEvents.length} 次</b>（${ctx.soloEvents
-            .map((s) => `${s.time_str}被${s.killer_zh}抓`)
+          `全场团战外阵亡 <b>${ctx.soloEvents.length} 次</b>（${ctx.soloEvents
+            .map((s) => `${s.time_str} 被 ${s.killer_zh || "敌方"} 击杀`)
             .join("、")}）`
         );
       }
@@ -9248,18 +9209,15 @@ function buildRichFourStageCardsHtml(report) {
   }
   if (midSoloEvents.length > 0) {
     attendanceParts.push(
-      `🚨 中期脱离团队落单被抓 <b>${midSoloEvents.length}</b> 次：${escapeHtml(
+      `⚠️ 中期团战外阵亡 <b>${midSoloEvents.length}</b> 次：${escapeHtml(
         midSoloEvents
           .slice(0, 4)
-          .map(
-            (ev) =>
-              `${ev.time_str} ${ev.pos}号位${ev.hero_short_zh}在${ev.zone_zh}被${ev.killer_zh || "敌方"}抓死`
-          )
+          .map((ev) => `${ev.time_str} 被 ${ev.killer_zh || "敌方"} 击杀`)
           .join("；")
       )}`
     );
   } else {
-    attendanceParts.push(`中期 0 次盲区落单掉点`);
+    attendanceParts.push(`中期 0 次团战外单人阵亡`);
   }
   const attendanceBullet = `<span class="stage-key-pill">打团齐整度与掉点</span> ${attendanceParts.join("；")}。`;
 
@@ -9354,12 +9312,12 @@ function buildRichFourStageCardsHtml(report) {
     roshAudit.shortHtml
   } ${
     lateSoloEvents.length > 0
-      ? `｜ 🚨 26m后关键期落单被抓：<b>${escapeHtml(
+      ? `｜ ⚠️ 26m后团战外阵亡：<b>${escapeHtml(
           lateSoloEvents
-            .map((ev) => `${ev.time_str} ${ev.pos}号位${ev.hero_short_zh}在${ev.zone_zh}被${ev.killer_zh || "敌方"}击杀`)
+            .map((ev) => `${ev.time_str} 被 ${ev.killer_zh || "敌方"} 击杀`)
             .join("、")
         )}</b>`
-      : "｜ ✓ 26m后决胜期 0 次无脑落单白给"
+      : "｜ ✓ 26m后 0 次团战外单人阵亡"
   }`;
 
   const bbSummary =
@@ -9681,15 +9639,10 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
           : `阶段战绩 <b>${midK}杀/${midD}死</b>`;
       const soloWarn =
         midSoloList.length > 0
-          ? `；唯独遗憾的是在 <b>${midSoloList
-              .map(
-                (e) =>
-                  `${e.time_str}于${e.zone_zh}落单被${e.killer_zh}抓死${
-                    e.consequence && e.consequence !== "无战略收益白给" ? `（${e.consequence}）` : ""
-                  }`
-              )
-              .join("、")}</b>，送出了不该有的节奏断点`
-          : `，中期走位紧凑 0 次落单掉点`;
+          ? `；期间团战外阵亡：<b>${midSoloList
+              .map((e) => `${e.time_str} 被 ${e.killer_zh || "敌方"} 击杀`)
+              .join("、")}</b>`
+          : `，中期 0 次团战外单人阵亡`;
       act2Story = `转入 10–25 分钟中期博弈，作为 ${pos}号位辅助的 ${heroShort} 全力围绕团队运转，打出 <b>${fmtNum(
         midDmg
       )} 英雄伤害</b>${midMajorItems ? `并更新 <b>${midMajorItems}</b>` : ""}${
@@ -9702,7 +9655,7 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
         midMajorItems ? `，并相继合出 <b>${midMajorItems}</b>` : ""
       }${
         midSoloList.length > 0
-          ? `；但期间在 ${midSoloList.map((e) => `${e.time_str}被${e.killer_zh}抓死`).join("、")} 出现落单断档。`
+          ? `；期间团战外阵亡：${midSoloList.map((e) => `${e.time_str} 被 ${e.killer_zh || "敌方"} 击杀`).join("、")}。`
           : `，正面顶在最前排为大哥拉扯出宝贵的发育空间。`
       }`;
     }
@@ -9767,15 +9720,15 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
       lateDmg
     )} 伤害</b>${lateMajorItems ? `并补出 <b>${lateMajorItems}</b>` : ""}，${ultSummary}。值得重点平反的是：<b>后期 ${lateD} 次阵亡（${lateDeathsCtx.sacList
       .map((s) => s.time_str)
-      .join("、")}）全部是在团战前排肉身吃满敌方第一波爆发，直接掩护一号位大哥完成收割团赢的【合理战术牺牲】</b>！之所以综合评分停在 <b>${score100}/100 分</b>，主要是受前中期 <b>${
+      .join("、")}）全部是在团战前排肉身吃满敌方第一波爆发，掩护一号位大哥完成收割团赢的【战术牺牲】</b>！综合评分停在 <b>${score100}/100 分</b>，还受到前中期 <b>${
       soloEvents.length
-    } 次落单被抓</b> 与 <b>整局未主动买 TP</b> 所拖累，绝非无脑白给！`;
+    } 次团战外阵亡</b> 与 <b>整局未主动买 TP</b> 的影响。`;
   } else if (roleType === "struggle" || roleType === "culprit1" || roleType === "culprit2") {
     const lateFailNote =
       lateSoloList.length > 0
-        ? `决胜期在 <b>${lateSoloList
-            .map((e) => `${e.time_str}于${e.zone_zh}落单被${e.killer_zh}单抓（${e.vision_tag || "黑图孤走"}）`)
-            .join("、")}</b> 险些送出翻盘机会；`
+        ? `决胜期团战外阵亡：<b>${lateSoloList
+            .map((e) => `${e.time_str} 被 ${e.killer_zh || "敌方"} 击杀`)
+            .join("、")}</b>；`
         : "";
     const lowDmgNote =
       isCore && lateGold >= 5500 && lateDmg < 6500
@@ -9921,17 +9874,8 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     }
     if (soloEvents.length > 0) {
       badPoints.push(
-        `<b>脱离团队落单被抓（${soloEvents.length}次）：</b>${soloEvents
-          .map(
-            (s) =>
-              `<b>${s.time_str}</b>在${s.zone_zh}被${s.killer_zh}抓死${
-                s.consequence && s.consequence !== "无战略收益白给"
-                  ? `（${s.consequence}）`
-                  : s.vision_tag?.includes("5 颗假眼")
-                  ? "（场上5颗假眼不看小地图）"
-                  : ""
-              }`
-          )
+        `<b>团战外阵亡（${soloEvents.length}次）：</b>${soloEvents
+          .map((s) => `<b>${s.time_str}</b> 被 ${s.killer_zh || "敌方"} 击杀`)
           .join("；")}。`
       );
     }
@@ -9966,7 +9910,11 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
           (lateP?.deaths_events || [])[0] || (midP?.deaths_events || [])[0] || (laneP?.deaths_events || [])[0];
         badPoints.push(
           `<b>白璧微瑕：</b>全场仅阵亡 ${p.deaths} 次${
-            anyDeath ? `（如 ${anyDeath.time_str} 被 ${anyDeath.killer} 击杀读秒 ${anyDeath.time_dead}s）` : ""
+            anyDeath
+              ? `（如 ${anyDeath.time_str} 被 ${anyDeath.killer || "敌方"} 击杀${
+                  anyDeath.time_dead != null ? `读秒 ${anyDeath.time_dead}s` : ""
+                }）`
+              : ""
           }，几乎无可挑剔。`
         );
       } else {
@@ -12905,9 +12853,9 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
               : ""
           }${
             midSolos.length > 0
-              ? `⚠️ 但存在 <b>${midSolos.length} 次脱离大部队落单被抓</b>（${midSolos
-                  .map((s) => `${s.time_str}被${s.killer_zh}单抓`)
-                  .join("、")}），需严控野区孤走；`
+              ? `⚠️ 期间存在 <b>${midSolos.length} 次团战外阵亡</b>（${midSolos
+                  .map((s) => `${s.time_str} 被 ${s.killer_zh || "敌方"} 击杀`)
+                  .join("、")}）；`
               : ""
           }${hasGreedyMidas ? `⚠️ 中期裸出点金手略微延后了微光披风等救人装成型时间。` : ""}`;
         }
@@ -12990,7 +12938,7 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
             <span class="pillar-tag">🌾 1号位发育与参团平衡</span>
             <strong>${
               pos1Mid
-                ? `1号位${escapeHtml(pos1Mid.hero_short_zh)} +${fmtNum(pos1Mid.gold_gain)}金 (+${pos1Mid.lh_gain}刀)`
+                ? `1号位${escapeHtml(pos1Mid.hero_short_zh)} ${pos1Mid.gold_gain == null ? "经济无数据" : `+${fmtNum(pos1Mid.gold_gain)}金`} (${pos1Mid.lh_gain == null ? "补刀无数据" : `+${pos1Mid.lh_gain}刀`})`
                 : "核心刷钱提速"
             }</strong>
             <p>${
@@ -13101,7 +13049,7 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
                     ? `🟢 后期仅阵亡 ${d} 次，系正面决胜团被敌方集火切入，倒下前打足输出由队友顺势完成收割（0次落单白给）！`
                     : `🟢 后期 ${d} 次阵亡均属决胜团第一波顶前排吃满敌方技能、掩护1号位收割团灭对手的功勋战术牺牲！`
                   : lateSolos.length > 0
-                  ? `🚨 存在决胜期落单被抓（${lateSolos.map((s) => `${s.time_str}被${s.killer_zh}抓`).join("、")}），高地前夕严禁盲区孤走！`
+                  ? `⚠️ 后期团战外阵亡：${lateSolos.map((s) => `${s.time_str} 被 ${s.killer_zh || "敌方"} 击杀`).join("、")}。`
                   : ""
               }${itemAuditSnippet}`,
               report
@@ -13162,8 +13110,8 @@ function buildPhaseSpecificDeepAuditHtml(activePd, report) {
             totalLateSac > 0
               ? `决胜期辅助/前排共有 <b>${totalLateSac} 人次</b> 在高地团第一波吃满敌方技能换取团战大胜；${
                   totalLateSolos > 0
-                    ? `但需警惕 <b>${totalLateSolos} 次</b> 26m后落单被抓。`
-                    : "且无致命买活死。"
+                    ? `另记录 <b>${totalLateSolos} 次</b> 26m后团战外阵亡。`
+                    : "且无买活死。"
                 }`
               : "后期抱团推进纪律性良好。"
           }</p>
@@ -13243,9 +13191,9 @@ function renderPhaseSection(report) {
             rk.worst1?.player?.hero_short_zh || ""
           }等）与支援TP缺失！`;
         } else {
-          smartBadLead = `后期${mostD.pos}号位${mostD.hero_short_zh}阵亡多属团战前排吃技能换赢团战的【合理牺牲】；真正病灶是核心位（${
+          smartBadLead = `后期${mostD.pos}号位${mostD.hero_short_zh}阵亡多属团战前排吃技能换赢团战的【合理牺牲】；主要改进点在于核心位（${
             rk.worst1?.player?.pos || ""
-          }号位${rk.worst1?.player?.hero_short_zh || ""}）後期落单被抓或输出转化断档！`;
+          }号位${rk.worst1?.player?.hero_short_zh || ""}）后期团战外阵亡或输出转化不足！`;
         }
       }
     }
@@ -13547,8 +13495,10 @@ function renderPhaseSection(report) {
                         state.activePhaseKey === "lane" ? "10分钟正补/反补" : "阶段补刀增量"
                       }</span>
                       <b>${
-                        state.activePhaseKey === "lane"
-                          ? `${pp.lh_gain} / ${pp.dn_gain || 0}`
+                        pp.lh_gain == null
+                          ? "无数据"
+                          : state.activePhaseKey === "lane"
+                          ? `${pp.lh_gain} / ${pp.dn_gain ?? "无数据"}`
                           : `+${pp.lh_gain} 刀`
                       }</b>
                     </div>
