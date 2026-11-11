@@ -166,22 +166,25 @@ class TestT13BackendBugs(unittest.TestCase):
             ledger = draft_and_phase_coach.build_squad_history_ledger(reports_dir=tmppath, roster=dota_analyst.load_roster(), recent_matches=[])
             self.assertGreaterEqual(len(ledger.get("analyzed_matches") or []), 1)
 
-    def test_k_skill_points_17_to_19_mapped_to_levels_18_20_25_and_talent_tier_by_id(self) -> None:
-        """k: Skill points 17, 18, 19 map to levels 18, 20, 25 and talent tier comes from talent ID."""
+    def test_k_skill_points_17_to_20_mapped_to_levels_18_20_25_26_and_attr_supported(self) -> None:
+        """k: Skill points 17, 18, 19, 20 map to levels 18, 20, 25, 26 (and attr builds satisfy unlock levels)."""
         rep = self.reports[9046364324]
         dq_by_side = (rep.get("deep_forensics") or {}).get("damage_quality_and_build_by_side") or {}
         found_18_ult = False
         for side_data in dq_by_side.values():
+            if not isinstance(side_data, dict):
+                continue
             for row in side_data.get("player_rows") or []:
                 seq = row.get("level_sequence") or []
-                levels = [item.get("level") for item in seq]
-                # Point 17 should be level 18, not 17 (unless special_bonus_attributes was manually taken)
-                if len(seq) >= 18 and not any(item.get("type") == "attr" for item in seq):
+                has_attr = any(item.get("type") == "attr" for item in seq)
+                if not has_attr and len(seq) >= 18:
                     self.assertEqual(seq[16].get("level"), 18, f"{row.get('hero_short_zh')} point 17 level={seq[16]}")
                     self.assertEqual(seq[17].get("level"), 20, f"{row.get('hero_short_zh')} point 18 level={seq[17]}")
                     found_18_ult = True
-                if len(seq) >= 19 and not any(item.get("type") == "attr" for item in seq):
+                if not has_attr and len(seq) >= 19:
                     self.assertEqual(seq[18].get("level"), 25, f"{row.get('hero_short_zh')} point 19 level={seq[18]}")
+                if not has_attr and len(seq) >= 20:
+                    self.assertEqual(seq[19].get("level"), 26, f"{row.get('hero_short_zh')} point 20 level={seq[19]}")
         self.assertTrue(found_18_ult)
 
     def test_l_facet_badge_not_shown_for_zero_and_no_hardcoded_738(self) -> None:

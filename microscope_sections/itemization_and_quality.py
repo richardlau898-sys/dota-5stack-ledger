@@ -529,6 +529,9 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
 
     SUB_SKILL_REMAP: Dict[str, str] = {
         "phoenix_launch_fire_spirit": "phoenix_fire_spirits",
+        "phoenix_icarus_dive_stop": "phoenix_icarus_dive",
+        "phoenix_sun_ray_stop": "phoenix_sun_ray",
+        "phoenix_sun_ray_toggle_move": "phoenix_sun_ray",
         "kunkka_return": "kunkka_x_marks_the_spot",
         "puck_ethereal_jaunt": "puck_illusory_orb",
         "Tiny_toss_tree": "tiny_avalanche",
@@ -541,6 +544,20 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
         "ancient_apparition_ice_blast_release": "ancient_apparition_ice_blast",
         "bane_nightmare_end": "bane_nightmare",
         "shadow_demon_shadow_poison_release": "shadow_demon_shadow_poison",
+        "dawnbreaker_converge": "dawnbreaker_celestial_hammer",
+        "hoodwink_sharpshooter_release": "hoodwink_sharpshooter",
+        "ringmaster_tame_the_beasts_crack": "ringmaster_tame_the_beasts",
+        "rubick_telekinesis_land": "rubick_telekinesis",
+        "rubick_telekinesis_land_self": "rubick_telekinesis",
+        "faceless_void_time_walk_reverse": "faceless_void_time_walk",
+        "nyx_assassin_unburrow": "nyx_assassin_burrow",
+        "spectre_reality": "spectre_haunt",
+        "tusk_launch_snowball": "tusk_snowball",
+        "elder_titan_return_spirit": "elder_titan_ancestral_spirit",
+        "wisp_tether_break": "wisp_tether",
+        "keeper_of_the_light_illuminate_end": "keeper_of_the_light_illuminate",
+        "templar_assassin_trap": "templar_assassin_psionic_trap",
+        "techies_reactive_tazer_stop": "techies_reactive_tazer",
     }
 
     _hid_to_npc: Dict[int, str] = {int(v): str(k) for k, v in (npc_to_hid or {}).items()}
@@ -661,12 +678,13 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
             elif max_hit_inflictor in NEUTRAL_ITEMS_ZH:
                 max_hit_source_zh = NEUTRAL_ITEMS_ZH[max_hit_inflictor]
             else:
-                raw_ab_zh = get_ability_zh(max_hit_inflictor)
+                norm_inflictor = SUB_SKILL_REMAP.get(max_hit_inflictor, max_hit_inflictor)
+                raw_ab_zh = get_ability_zh(norm_inflictor) or get_ability_zh(max_hit_inflictor) or "英雄技能"
                 is_foreign_spell = (
                     h_key
-                    and (not max_hit_inflictor.startswith(h_key))
+                    and (not norm_inflictor.startswith(h_key))
                     and h_key not in ("rubick", "morphling")
-                    and any(max_hit_inflictor.startswith(op_n.replace("npc_dota_hero_", "")) for op_n in opp_by_npc)
+                    and any(norm_inflictor.startswith(op_n.replace("npc_dota_hero_", "")) for op_n in opp_by_npc)
                 )
                 if is_foreign_spell and has_lotus_orb:
                     max_hit_source_zh = f"🪷 清莲宝珠反弹·{raw_ab_zh}"
@@ -686,7 +704,7 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
             all_spell_keys = list(dict.fromkeys(list(raw_dmg_targets.keys()) + list(raw_ab_targets.keys())))
             spell_target_matrix = []
             for sk in all_spell_keys:
-                if not sk or sk in ("soul_ring",):
+                if not sk or sk in ("soul_ring",) or sk.startswith(("seasonal_", "plus_", "ability_", "twin_gate_")):
                     continue
                 t_dmg_map = raw_dmg_targets.get(sk) or {}
                 t_cast_map = raw_ab_targets.get(sk) or {}
@@ -713,7 +731,7 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
                 if not enemy_hits:
                     continue
                 enemy_hits.sort(key=lambda x: (x["dmg"], x["casts"]), reverse=True)
-                if sk in ("null", "None", "attack"):
+                if sk in ("null", "None", "attack", "default_attack"):
                     sk_zh = "🗡️ 普通攻击(平A)"
                     sk_type = "attack"
                 elif sk in ITEMS_ZH:
@@ -723,12 +741,13 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
                     sk_zh = f"🎲 {NEUTRAL_ITEMS_ZH[sk]}"
                     sk_type = "item"
                 else:
-                    base_ab_zh = get_ability_zh(sk)
+                    sk_norm = SUB_SKILL_REMAP.get(sk, sk)
+                    base_ab_zh = get_ability_zh(sk_norm) or get_ability_zh(sk) or "英雄技能"
                     is_foreign = (
                         h_key
-                        and (not sk.startswith(h_key))
+                        and (not sk_norm.startswith(h_key))
                         and h_key not in ("rubick", "morphling")
-                        and any(sk.startswith(op_n.replace("npc_dota_hero_", "")) for op_n in opp_by_npc)
+                        and any(sk_norm.startswith(op_n.replace("npc_dota_hero_", "")) for op_n in opp_by_npc)
                     )
                     if is_foreign and has_lotus_orb:
                         sk_zh = f"🪷 清莲宝珠反弹·{base_ab_zh}"
@@ -821,20 +840,46 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
             talent_tiers = ["10级天赋", "15级天赋", "20级天赋", "25级天赋"]
             talent_idx = 0
             hero_tal_map = _HERO_TALENT_TIERS.get(h_npc) or {}
-            has_explicit_attr = any(
-                bool((_AID_BY_ID.get(str(a)) or {}).get("is_attr")) for a in upgrades_arr
-            )
-            pt_to_level_map = {17: 18, 18: 20, 19: 25, 20: 27, 21: 28, 22: 29, 23: 30}
+            ult_key = basic_skills_order[3] if len(basic_skills_order) >= 4 else None
+            p_hid = int(p.get("hero_id") or raw_p.get("hero_id") or 0)
+            is_invoker = p_hid == 74 or h_npc == "npc_dota_hero_invoker"
+            is_meepo = p_hid == 82 or h_npc == "npc_dota_hero_meepo"
+            is_lone_druid = p_hid == 80 or h_npc == "npc_dota_hero_lone_druid"
+            cur_lvl = 0
+            manual_attr_used = 0
+            auto_attr_used = 0
+            ult_rank = 0
+            tal_rank = 0
 
             for pt_idx, raw_aid in enumerate(upgrades_arr, 1):
-                lv_idx = pt_idx if has_explicit_attr else pt_to_level_map.get(pt_idx, pt_idx)
                 cat_entry = _AID_BY_ID.get(str(raw_aid)) or {}
                 akey = cat_entry.get("key") or f"ability_{raw_aid}"
                 akey_norm = SUB_SKILL_REMAP.get(akey, akey)
-                azh = cat_entry.get("zh") or get_ability_zh(akey_norm)
+                azh = cat_entry.get("zh") or get_ability_zh(akey_norm) or "技能升级"
                 is_tal = bool(cat_entry.get("is_talent"))
                 is_attr = bool(cat_entry.get("is_attr"))
-                slot_lbl = skill_slot_map.get(akey_norm, "大招" if "ult" in akey_norm else "技能")
+                slot_lbl = skill_slot_map.get(akey_norm, "技能")
+                is_ult = (not is_invoker) and (not is_tal) and (not is_attr) and bool(ult_key and akey_norm == ult_key)
+
+                cur_lvl += 1
+                min_req_lvl = 1
+                if is_attr:
+                    manual_attr_used += 1
+                elif is_tal:
+                    tal_rank += 1
+                    eff_tal_rank = ((tal_rank + 1) // 2) if is_lone_druid else tal_rank
+                    min_req_lvl = {1: 10, 2: 15, 3: 20, 4: 25, 5: 26, 6: 27, 7: 28, 8: 29}.get(eff_tal_rank, 29)
+                elif is_ult:
+                    ult_rank += 1
+                    if is_meepo:
+                        min_req_lvl = {1: 4, 2: 11, 3: 18}.get(ult_rank, 18)
+                    else:
+                        min_req_lvl = {1: 6, 2: 12, 3: 18}.get(ult_rank, 18)
+
+                while cur_lvl < min_req_lvl and (manual_attr_used + auto_attr_used) < 7:
+                    auto_attr_used += 1
+                    cur_lvl += 1
+                lv_idx = cur_lvl
 
                 if is_tal:
                     t_label = (
@@ -879,7 +924,7 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
                         "level": lv_idx,
                         "zh": azh,
                         "short_tag": f"L{lv_idx}:{short_zh}({cur_pt}级)",
-                        "type": "ult" if slot_lbl == "大招" else "skill",
+                        "type": "ult" if is_ult else "skill",
                     })
 
             # 提炼主副技能路线描述
@@ -989,7 +1034,7 @@ def build_itemization_and_quality_sections(ctx: Dict[str, Any]) -> Dict[str, Any
                     )
                 else:
                     perm_buff_notes.append(
-                        f"🔥 叠层丰厚：全场累计叠出 {actual_stacks} 层【{exp_name}】（远超合格线 {target_stacks} 层），后期成长统治力拉满！"
+                        f"🔥 叠层丰厚：全场累计叠出 {actual_stacks} 层【{exp_name}】（远超合格线 {target_stacks} 层），成长叠层速度出色！"
                     )
 
             overall_grade = "bad" if (dmg_quality_grade == "bad" or skill_build_grade == "bad") else (

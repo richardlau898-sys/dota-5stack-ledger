@@ -542,6 +542,11 @@ IGNORED_SUB_OR_DUMMY_ABILITIES = {
 
 # 全英雄技能池 100% 纯中文映射（含环轨百戏王 Ringmaster、凯 Kez 及所有常见登场英雄）
 ABILITIES_ZH = {
+    # 中立生物与召唤单位常见技能
+    "mud_golem_hurl_boulder": "泥土傀儡投石",
+    "satyr_hellcaller_shockwave": "萨特冲击波",
+    "warpine_raider_seed_shot": "松果投射",
+    "tornado_tempest": "狂风龙卷",
     # 环轨百戏王 (Ringmaster)
     "ringmaster_tame_the_beasts": "驯兽术(皮鞭恐惧)",
     "ringmaster_the_box": "逃生暗箱(救人箱)",

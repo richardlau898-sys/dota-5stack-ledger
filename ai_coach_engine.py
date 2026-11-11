@@ -666,12 +666,13 @@ def evaluate_player_deeply(
             else ""
         )
         if is_parsed and mid_gold > 0:
+            afk_tail = "才混到后期出山收割面板！" if duration_min >= 30 else "，与团队正面节奏严重脱节！"
             weaknesses.insert(
                 0,
                 f"前中期毒瘤独刷不参战：全场参战率仅 **{kp:.1f}%（全队倒数第一，{kills}/{deaths}/{assists} 全场仅 {assists} 个助攻）**！"
                 f"前10分钟仅打出 **{lane_hdmg:,} 英雄伤害**，10–25m 中期狂刷 **+{mid_gold:,} 金（占全队中期经济 {mid_gold_share:.1f}%）** "
                 f"却只打出 **{mid_hdmg:,} 伤害（仅占全队中期伤害 {mid_hdmg_share:.1f}%，连双辅助都不如）**{tf_afk_clause}，"
-                f"全靠四个队友前中期 4 打 5 血战撑住局势才混到后期出山收割面板！",
+                f"全靠四个队友前中期 4 打 5 血战撑住局势{afk_tail}",
             )
         else:
             weaknesses.insert(
@@ -729,7 +730,7 @@ def evaluate_player_deeply(
                 lane_lead_clause = f"前期对线 10m 交出 {lh10}正/{dn10}反（{gold10:,} 金，压制对位 {opp_same_pos.get('hero_short_zh','')} +{g_diff:,} 金）打出优势；"
         late_turret_clause = (
             f"，25m+ 后期再轰 {late_hdmg:,} 伤害"
-            if (is_parsed and late_hdmg_share is not None and late_hdmg > 0)
+            if (is_parsed and duration_min >= 30 and late_hdmg_share is not None and late_hdmg > 0)
             else ""
         )
         stun_turret_clause = f"外加 {stuns:.1f} 秒硬控" if (is_parsed and stuns > 0) else ""
@@ -767,14 +768,14 @@ def evaluate_player_deeply(
                 f"凤凰本局共施放 {egg_casts} 次《超新星》（团战 {tf_egg_total} 次）、{ray_casts} 次《烈日炙烤》（全队治疗 {heal:,} 点），可提高团战中后排《烈日炙烤》开启频率以兼顾消耗与治疗。",
             )
 
-    # 3) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」审计（推断类团战外阵亡不计入分锅；后期空值跳过）
+    # 3) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」审计（推断类团战外阵亡不计入分锅；后期空值或不足5分钟跳过）
     if (
         is_parsed
         and late_gold_share is not None
         and late_hdmg_share is not None
         and pos in (1, 2)
         and not is_turret_fulfilled
-        and duration_min >= 25
+        and duration_min >= 30
     ):
         if hmp.get("late_harvest_fulfilled") and not is_afk_farmer:
             strengths.insert(0, hmp["late_phase_note"])
@@ -987,7 +988,8 @@ def evaluate_player_deeply(
         contrib_points = max(6.0, contrib_points * 0.72)
 
     if is_afk_farmer:
-        praise_talk = f"@{pname} 这把 {hero_name} 前中期闷头独刷 25 分钟（参战率仅 {kp:.1f}% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！"
+        afk_praise_tail = "才把你抬进后期收割！" if duration_min >= 30 else "顶住正面压力！"
+        praise_talk = f"@{pname} 这把 {hero_name} 前中期闷头独刷（参战率仅 {kp:.1f}% 全队垫底），全靠四个好兄弟正面 4 打 5 {afk_praise_tail}"
     elif pos == 1 and tdmg_share >= 48.0 and tdmg >= 9000:
         praise_talk = f"@{pname} 擎天一号位真核！{hero_name} 顶着前中期少人压力参战接团，单人狂拆 {tdmg:,} 建筑伤害（包揽全队 {tdmg_share:.0f}% 拆塔量）+ {hdmg:,} 伤害，当之无愧本局头号首功！"
     elif hmp.get("late_harvest_fulfilled") and late_hdmg_share is not None:

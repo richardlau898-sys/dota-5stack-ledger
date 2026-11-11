@@ -1006,7 +1006,41 @@ def enrich_phases_with_evaluations(
         plabel = pd.get("label", "")
         tlabel = pd.get("time_label", "")
         g_phase = grok_phase_map.get(pkey, {})
-        phase_min = max(1.0, (int(pd.get("end_sec") or 0) - int(pd.get("start_sec") or 0)) / 60.0)
+        raw_phase_sec = max(0, int(pd.get("end_sec") or 0) - int(pd.get("start_sec") or 0))
+        raw_phase_min = raw_phase_sec / 60.0
+        phase_min = max(1.0, raw_phase_min)
+
+        if pkey == "late" and raw_phase_min < 5.0:
+            pd["available"] = False
+            short_late_msg = f"25 分钟后仅持续 {raw_phase_min:.1f} 分钟（不足 5 分钟），不输出阶段判词。"
+            for pp in pd.get("players") or []:
+                slot = int(pp.get("slot", 0))
+                full_p = full_player_by_slot.get(slot) or {}
+                hmp = full_p.get("hero_mechanism_profile") or {}
+                pp["timing_curve_zh"] = hmp.get("timing_curve_zh") or ""
+                pp["assessment"] = short_late_msg
+                pp["good"] = []
+                pp["bad"] = []
+                pp["focus"] = ""
+            pd["team_diagnostics"] = {
+                "radiant": {
+                    "available": False,
+                    "summary": short_late_msg,
+                    "turning_point": "",
+                    "team_good": "",
+                    "team_bad": "",
+                    "team_action": "",
+                },
+                "dire": {
+                    "available": False,
+                    "summary": short_late_msg,
+                    "turning_point": "",
+                    "team_good": "",
+                    "team_bad": "",
+                    "team_action": "",
+                },
+            }
+            continue
 
         for pp in pd.get("players") or []:
             slot = int(pp.get("slot", 0))
