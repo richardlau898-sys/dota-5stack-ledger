@@ -43,7 +43,7 @@
     "engine_version": { "type": "string" },
     "match_id": { "type": "integer" },
     "patch": { "type": ["integer", "string", "null"] },
-    "patch_str": { "type": "string" },
+    "patch_str": { "type": ["string", "null"] },
     "mode_str": { "type": "string" },
     "start_time": { "type": ["integer", "null"] },
     "duration_str": { "type": "string" },

@@ -1070,12 +1070,9 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
     } else {
       badge = `⚖️ AI 败局算账点评${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
-      const extraWeak =
-        p.phoenix_egg_audit && p.phoenix_egg_audit.shattered_cnt >= 2
-          ? `团战 ${p.phoenix_egg_audit.tf_egg_casts} 次变蛋被打碎 ${p.phoenix_egg_audit.shattered_cnt} 次（碎蛋率 ${p.phoenix_egg_audit.shatter_rate_pct}%），`
-          : hmp.missing_mandatory_shard
-          ? `整局漏出 1400 金核心魔晶（${hmp.shard_desc}），`
-          : "";
+      const extraWeak = hmp.missing_mandatory_shard
+        ? `整局漏出 1400 金核心魔晶（${hmp.shard_desc}），`
+        : "";
       punchline = `本局百人制得分 ${score100}/100 分，分摊 ${bPct}% 败局责任（泉水读秒 ${p.dead_seconds || 0} 秒），${extraWeak}${heroShort} 中后期几波关键团战走位与技能机制配合失误明显，下把急需找回状态！`;
     }
   }
@@ -6816,14 +6813,12 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
   }
 
   const totalSolo = Number(ms.total_solo_pickoffs ?? 0);
-  const totalUnsmoked = Number(ms.total_unsmoked_blind_feeds ?? 0);
   const events = ms.solo_pickoff_events || [];
   const pRows = ms.player_space_rows || [];
 
   const pRowsHtml = pRows
     .map((r) => {
       const soloCnt = Number(r.solo_pickoff_cnt ?? 0);
-      const unsmokedCnt = Number(r.unsmoked_blind_cnt ?? 0);
       const smokeGankCnt = Number(r.smoke_ganked_cnt ?? 0);
       const isBad = r.grade === "bad" || soloCnt >= 2;
       const isGood = r.grade === "good";
@@ -6842,10 +6837,9 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
         r.solo_gold_fed || 0
       )} 金)
             ${
-              soloCnt > 0
+              soloCnt > 0 && smokeGankCnt > 0
                 ? `<div style="font-size:11px; margin-top:2px;">
-                    ${unsmokedCnt > 0 ? `<span style="color:var(--red-light);font-weight:700;">🚨 未开雾白给 ${unsmokedCnt}次</span>` : ""}
-                    ${smokeGankCnt > 0 ? `<span style="color:var(--muted);">🌫️ 被开雾抓 ${smokeGankCnt}次</span>` : ""}
+                    <span style="color:var(--muted);">🌫️ 被开雾抓 ${smokeGankCnt}次</span>
                   </div>`
                 : ""
             }
@@ -6893,25 +6887,17 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
 
       <div class="micro-kpi-row">
         <div class="micro-kpi-cell">
-          <span>9m后落单被抓总次数</span>
-          <strong style="color:${totalSolo >= 4 ? "var(--red-light)" : "var(--gold-light)"};">${totalSolo} 次落单被抓</strong>
+          <span>9m后非团战单人阵亡次数</span>
+          <strong style="color:${totalSolo >= 4 ? "var(--red-light)" : "var(--gold-light)"};">${totalSolo} 次</strong>
         </div>
         <div class="micro-kpi-cell">
-          <span>🚨 敌方未开雾 · 纯白给次数</span>
-          <strong style="color:${totalUnsmoked > 0 ? "var(--red-light)" : "var(--green-light)"};">${totalUnsmoked} 次未开雾白给</strong>
-        </div>
-        <div class="micro-kpi-cell">
-          <span>🌫️ 敌方开雾强抓次数</span>
-          <strong>${Math.max(0, totalSolo - totalUnsmoked)} 次被诡计之雾突袭</strong>
-        </div>
-        <div class="micro-kpi-cell">
-          <span>判定依据</span>
-          <strong>敌方65秒内开雾日志 + 假眼ehandle实时坐标 + 70s掉塔丢盾</strong>
+          <span>记录依据</span>
+          <strong>kills_log 精确时间 + 团战区间排除 + 70s 目标时间线</strong>
         </div>
       </div>
 
       <div class="micro-card">
-        <h4>🧭 1~5 号位地图空间画像 · 收线 vs 缩野比例、推塔牵制与中后期落单被抓统计</h4>
+        <h4>🧭 1~5 号位地图空间画像 · 收线 vs 刷野比例、推塔牵制与非团战阵亡统计</h4>
         <div class="micro-table-wrap">
           <table class="micro-data-table">
             <thead>
@@ -6920,7 +6906,7 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
                 <th>地图空间理解画像</th>
                 <th>收线补刀 vs 刷野占比</th>
                 <th>建筑推塔转化</th>
-                <th>9m后落单被抓 (开雾 vs 白给)</th>
+                <th>9m后非团战阵亡</th>
                 <th>空间利用与带线纪律判词</th>
               </tr>
             </thead>
@@ -6930,7 +6916,7 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
       </div>
 
       <div class="micro-card">
-        <h4>🚨 9 分钟后脱离团队「单带无故被抓 / 黑图盲区乱逛被抓死」逐次铁证笔录 (共 ${totalSolo} 次，其中未开雾白给 ${totalUnsmoked} 次)</h4>
+        <h4>📋 9 分钟后非团战单人阵亡记录 (共 ${totalSolo} 次)</h4>
         <div class="micro-table-wrap">
           <table class="micro-data-table">
             <thead>
@@ -7051,7 +7037,14 @@ function renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh) {
           (r.death_loss || 0) + (r.buyback_loss || 0) >= 2200 ? "var(--red-light)" : "var(--muted)"
         }">-${fmtNum((r.death_loss || 0) + (r.buyback_loss || 0))} 金</b> (死-${fmtNum(
         r.death_loss || 0
-      )} / 买活-${fmtNum(r.buyback_loss || 0)})</td>
+      )} / ${escapeHtml(
+        r.buyback_text ||
+          (Number(r.buyback_count || 0) > 0
+            ? r.buyback_loss != null
+              ? `买活 ${r.buyback_count} 次（-${fmtNum(r.buyback_loss)} 金）`
+              : `买活 ${r.buyback_count} 次（金额无数据）`
+            : "未买活")
+      )})</td>
         <td>📡 点信号 <b>${r.pings ?? 0}</b> 次 / 轮盘 <b>${r.chatwheel_cnt ?? 0}</b> 条</td>
       </tr>
     `
@@ -15534,7 +15527,6 @@ function renderSquadLedgerSection(squadLedger) {
                     .join("");
                   const unp = Number(m.unpressed_saves_total ?? 0);
                   const solo = Number(m.solo_pickoffs_total ?? 0);
-                  const blind = Number(m.unsmoked_blind_total ?? 0);
                   const badBuild = Number(m.bad_builds_total ?? 0);
                   const bestH = m.best_hero;
                   const worstH = m.worst_hero;
@@ -15556,7 +15548,7 @@ function renderSquadLedgerSection(squadLedger) {
                       <td>
                         <div style="font-size:11px; line-height:1.45;">
                           <span style="color:${unp >= 3 ? "var(--red-light)" : "var(--text)"};">💀 憋装秒躺 <b>${unp}次</b></span><br/>
-                          <span style="color:${solo >= 4 ? "var(--red-light)" : "var(--text)"};">🕵️‍♂️ 单带被抓 <b>${solo}次</b> (白给${blind}次)</span>
+                          <span style="color:${solo >= 4 ? "var(--red-light)" : "var(--text)"};">🕵️‍♂️ 非团战阵亡 <b>${solo}次</b></span>
                           ${badBuild > 0 ? `<br/><span style="color:var(--gold-light);">🎒 出装抓包 <b>${badBuild}局</b></span>` : ""}
                         </div>
                       </td>

@@ -1641,11 +1641,5 @@ def resolve_patch_name(patch_val: Any) -> Optional[str]:
                 return str(val.get("name") if isinstance(val, dict) else val)
         except Exception:
             pass
-    if 50 <= pid <= 58:
-        return f"7.{pid - 19}"
-    if pid == 59:
-        return "7.39"
-    if pid >= 60:
-        return f"7.{pid - 20}"
     return str(pid)
 

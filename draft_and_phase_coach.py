@@ -1127,14 +1127,6 @@ def enrich_phases_with_evaluations(
                     if kills >= 2 or hd_gain >= 4500:
                         good_list.append(f"中期接团技能释放果断：阶段贡献 {kills} 杀与 {hd_gain:,} 伤害" + (f"（出装：{items_str}）。" if items_str else "。"))
 
-                if phoenix_audit and phoenix_audit.get("shattered_cnt", 0) >= 2:
-                    mid_shatters = [t for t in (phoenix_audit.get("shattered_times") or []) if int(t.split(":")[0]) < 25]
-                    if mid_shatters:
-                        bad_list.insert(
-                            0,
-                            f"中期团战大招《超新星》变蛋连续被打碎（{'、'.join(mid_shatters)}），未提前铺满烈火精灵减攻速或卡高坡视野变蛋！",
-                        )
-
                 mid_solos = [
                     (f"{s.get('time_str')}(被{s.get('killer','敌方')}单抓)" if isinstance(s, dict) else str(s))
                     for s in solo_picks
@@ -2598,7 +2590,6 @@ def build_squad_history_ledger(
                         "total_dead_sec": 0,
                         "unpressed_saves_total": 0,
                         "solo_pickoffs_total": 0,
-                        "unsmoked_blind_total": 0,
                         "bad_builds_total": 0,
                         "support_games": 0,
                         "support_grief_count": 0,
@@ -2639,7 +2630,6 @@ def build_squad_history_ledger(
                 st["unpressed_saves_total"] += int(up_r.get("unpressed_core_cnt") or 0)
                 sp_r = space_by_pos.get(pos_p) or {}
                 st["solo_pickoffs_total"] += int(sp_r.get("solo_pickoff_cnt") or 0)
-                st["unsmoked_blind_total"] += int(sp_r.get("unsmoked_blind_cnt") or 0)
                 it_r = item_by_pos.get(pos_p) or {}
                 if it_r.get("grade") == "bad":
                     st["bad_builds_total"] += 1
@@ -2807,7 +2797,6 @@ def build_squad_history_ledger(
         avg_mvp_rate = round(st["mvp_count"] / g, 2)
         avg_unpressed_saves = round(st["unpressed_saves_total"] / g, 2)
         avg_solo_pickoffs = round(st["solo_pickoffs_total"] / g, 2)
-        avg_unsmoked_blind = round(st["unsmoked_blind_total"] / g, 2)
         avg_bad_builds = round(st["bad_builds_total"] / g, 2)
 
         # 汇总该队员的英雄统计（最小样本量门槛：<10局注明样本不足，不做绝活/低胜率定性；>=20局才给建议）
@@ -2971,7 +2960,7 @@ def build_squad_history_ledger(
             )
         if st["solo_pickoffs_total"] > 0:
             flaw_parts.append(
-                f"🗺️【落单阵亡统计】跨 {g} 局场均 {avg_solo_pickoffs:.2f} 次落单被抓（场均 {avg_unsmoked_blind:.2f} 次未开雾危险区阵亡）"
+                f"🗺️【落单阵亡统计】跨 {g} 局场均 {avg_solo_pickoffs:.2f} 次落单被抓"
             )
         if st["unpressed_saves_total"] > 0 or st["bad_builds_total"] > 0:
             flaw_parts.append(
@@ -3065,8 +3054,6 @@ def build_squad_history_ledger(
             "avg_unpressed_saves": avg_unpressed_saves,
             "solo_pickoffs_total": st["solo_pickoffs_total"],
             "avg_solo_pickoffs": avg_solo_pickoffs,
-            "unsmoked_blind_total": st["unsmoked_blind_total"],
-            "avg_unsmoked_blind": avg_unsmoked_blind,
             "bad_builds_total": st["bad_builds_total"],
             "avg_bad_builds": avg_bad_builds,
             "support_games": sup_g,
@@ -3128,7 +3115,7 @@ def build_squad_history_ledger(
             guinness_records.append({
                 "title": "🗺️ 场均落单被抓",
                 "holder": top_pickoff_holder["personaname"],
-                "value": f"场均 {top_pickoff_holder['avg_solo_pickoffs']:.2f} 次落单被抓 (场均 {top_pickoff_holder['avg_unsmoked_blind']:.2f} 次未开雾危险区阵亡 · {top_pickoff_holder['games']}局)",
+                "value": f"场均 {top_pickoff_holder['avg_solo_pickoffs']:.2f} 次落单被抓（{top_pickoff_holder['games']}局）",
                 "tone": "bad",
             })
         top_build_holder = max(core_members, key=lambda x: x["avg_bad_builds"])
