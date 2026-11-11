@@ -4500,7 +4500,7 @@ def call_nano_banana_poster_art(
         return {
             "ok": False,
             "need_gemini_key": True,
-            "error": "尚未检测到 GEMINI_API_KEY。请在下方输入框粘贴 Gemini API Key，或切换为「智能双擎 (优先 Nano Banana / 内置引擎自动兜底)」。",
+            "error": "服务端尚未配置 GEMINI_API_KEY，请切换为「智能双擎」或在服务端环境变量中配置。",
             "prompt_info": prompt_info,
         }
 
@@ -4514,7 +4514,7 @@ def call_nano_banana_poster_art(
         return {
             "ok": False,
             "need_gemini_key": not bool(g_key),
-            "error": "；".join(err_notes) if err_notes else "未检测到可用的生图 API Key（请填入 Gemini API Key）。",
+            "error": "；".join(err_notes) if err_notes else "服务端尚未配置可用的生图 API Key。",
             "prompt_info": prompt_info,
         }
 

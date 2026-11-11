@@ -509,6 +509,7 @@ IGNORED_SUB_OR_DUMMY_ABILITIES = {
     "default_attack",
     "seasonal_dark_carnival_pie",
     "rubick_telekinesis_land",
+    "dawnbreaker_land",
     "ringmaster_tame_the_beasts_crack",
     "alchemist_unstable_concoction_throw",
     "ancient_apparition_ice_blast_release",
@@ -1453,6 +1454,25 @@ def get_item_zh(item_key: str, fallback_dname: str = "") -> str:
     return ""
 
 
+def _load_cached_abilities_zh() -> Dict[str, str]:
+    cache_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), ".cache", "abilities_zh.json")
+    if not _os.path.isfile(cache_path):
+        return {}
+    try:
+        with open(cache_path, "r", encoding="utf-8") as f:
+            doc = _json.load(f)
+        by_key = doc.get("by_key") if isinstance(doc, dict) else None
+        if isinstance(by_key, dict):
+            return {str(k): str(v) for k, v in by_key.items() if k and v and "专属技能" not in str(v)}
+    except Exception:
+        return {}
+    return {}
+
+
+for _ck, _cv in _load_cached_abilities_zh().items():
+    ABILITIES_ZH.setdefault(_ck, _cv)
+
+
 def get_ability_zh(ability_key: str) -> str:
     """将任何英雄技能 key 转为 100% 纯中文名称，自动过滤子技能/机关与娱乐动作"""
     if not ability_key:
@@ -1462,12 +1482,10 @@ def get_ability_zh(ability_key: str) -> str:
         return ""
     if k in ABILITIES_ZH:
         return ABILITIES_ZH[k]
+    if k.lower() in ABILITIES_ZH:
+        return ABILITIES_ZH[k.lower()]
     if k.startswith("seasonal_") or k.startswith("plus_") or k.startswith("ability_"):
         return ""
-    # 若未来出现新小技能，按英雄前缀映射为纯中文「XX专属技能」绝不外泄英文或下划线
-    for prefix, h_zh in sorted(HERO_PREFIX_ZH.items(), key=lambda x: len(x[0]), reverse=True):
-        if k.startswith(prefix + "_"):
-            return f"{h_zh}专属技能"
     return ""
 
 
