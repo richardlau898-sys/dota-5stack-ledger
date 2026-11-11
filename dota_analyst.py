@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r0.5"
+ENGINE_VERSION = "2026.11.r3.1"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -160,6 +160,115 @@ def resolve_canonical_account_id(
                 except (TypeError, ValueError):
                     pass
     return aid
+
+
+def iter_roster_accounts(
+    roster: Optional[Dict[str, Any]] = None,
+) -> List[Dict[str, Any]]:
+    """
+    统一读取花名册（R3-1）：返回每个成员及其全部账号（含合并）。
+    每项结构：
+      {
+        "canonical_id": int,
+        "account_id": int,
+        "name": str,
+        "account_ids": List[int],
+        "is_main": bool,
+        "pos": Optional[int],
+        "usual_pos": Optional[str],
+        "info": Dict[str, Any],
+      }
+    """
+    if roster is None:
+        roster = load_roster()
+    if not isinstance(roster, dict):
+        return []
+
+    merge_enabled = roster.get("merge_accounts_enabled") is not False
+    players_cfg = roster.get("players") if isinstance(roster.get("players"), dict) else {}
+
+    main_id: Optional[int] = None
+    if roster.get("main_account_id") is not None:
+        try:
+            cand_main = normalize_account_id(roster["main_account_id"])
+            if cand_main > 0:
+                main_id = cand_main
+        except (TypeError, ValueError):
+            main_id = None
+
+    raw_order: List[int] = []
+    if main_id and str(main_id) not in players_cfg:
+        raw_order.append(main_id)
+    for k in players_cfg.keys():
+        try:
+            aid = normalize_account_id(k)
+        except (TypeError, ValueError):
+            continue
+        if aid > 0 and aid not in raw_order:
+            raw_order.append(aid)
+
+    def _entry_dict(aid_val: int) -> Dict[str, Any]:
+        raw_entry = players_cfg.get(str(aid_val))
+        if isinstance(raw_entry, dict):
+            return raw_entry
+        if isinstance(raw_entry, str) and raw_entry.strip():
+            return {"name": raw_entry.strip()}
+        return {}
+
+    grouped: Dict[int, Dict[str, Any]] = {}
+    for aid in raw_order:
+        canon_id = resolve_canonical_account_id(aid, roster) if merge_enabled else aid
+        if not canon_id or canon_id <= 0:
+            continue
+        bucket = grouped.get(canon_id)
+        if bucket is None:
+            canon_info = _entry_dict(canon_id)
+            raw_pos = canon_info.get("pos")
+            pos_val = int(raw_pos) if str(raw_pos or "").isdigit() and 1 <= int(raw_pos) <= 5 else None
+            name_val = (
+                canon_info.get("name")
+                or (roster.get("main_name") if main_id and canon_id == main_id else None)
+                or str(canon_id)
+            )
+            bucket = {
+                "canonical_id": canon_id,
+                "account_id": canon_id,
+                "name": str(name_val),
+                "account_ids": [canon_id],
+                "is_main": bool(main_id and canon_id == main_id),
+                "pos": pos_val,
+                "usual_pos": canon_info.get("usual_pos"),
+                "info": dict(canon_info),
+            }
+            if merge_enabled:
+                sub_ids = canon_info.get("account_ids")
+                if isinstance(sub_ids, list):
+                    for sid in sub_ids:
+                        try:
+                            sid_int = normalize_account_id(sid)
+                        except (TypeError, ValueError):
+                            continue
+                        if sid_int > 0 and sid_int not in bucket["account_ids"]:
+                            bucket["account_ids"].append(sid_int)
+            grouped[canon_id] = bucket
+        if aid not in bucket["account_ids"]:
+            bucket["account_ids"].append(aid)
+        if main_id and aid == main_id:
+            bucket["is_main"] = True
+
+    if merge_enabled and isinstance(roster.get("account_aliases"), dict):
+        for alias_raw, target_raw in roster["account_aliases"].items():
+            try:
+                alias_int = normalize_account_id(alias_raw)
+                target_int = resolve_canonical_account_id(target_raw, roster) or normalize_account_id(target_raw)
+            except (TypeError, ValueError):
+                continue
+            if target_int in grouped and alias_int > 0 and alias_int not in grouped[target_int]["account_ids"]:
+                grouped[target_int]["account_ids"].append(alias_int)
+                if main_id and alias_int == main_id:
+                    grouped[target_int]["is_main"] = True
+
+    return list(grouped.values())
 
 
 def get_hero_constants_map() -> Tuple[Dict[int, Dict[str, Any]], Dict[str, int]]:
@@ -1127,17 +1236,22 @@ def analyze_match_data(
     dire_raw = [p for p in players if not (p.get("isRadiant") or (p.get("player_slot", 0) < 128))]
 
     main_id = focus_account_id or roster.get("main_account_id")
-    roster_players = roster.get("players") or {}
+    member_by_aid = {
+        acc_id: m
+        for m in iter_roster_accounts(roster)
+        for acc_id in m["account_ids"]
+    }
 
     focus_party_ids = set()
     user_team_side = None
     for p in players:
         aid = p.get("account_id")
+        aid_int = int(aid) if isinstance(aid, int) or (isinstance(aid, str) and aid.isdigit()) else None
         is_rad = p.get("isRadiant") or (p.get("player_slot", 0) < 128)
-        if aid and (aid == main_id or str(aid) in roster_players):
+        if aid_int and (aid_int == main_id or aid_int in member_by_aid):
             if p.get("party_id") is not None and (p.get("party_size") or 1) > 1:
                 focus_party_ids.add(p.get("party_id"))
-            if aid == main_id:
+            if aid_int == main_id or (aid_int in member_by_aid and member_by_aid[aid_int]["is_main"]):
                 user_team_side = "radiant" if is_rad else "dire"
             elif user_team_side is None:
                 user_team_side = "radiant" if is_rad else "dire"
@@ -1170,15 +1284,20 @@ def analyze_match_data(
         for p in team_list:
             slot = int(p.get("player_slot", 0))
             aid = p.get("account_id")
+            aid_int = int(aid) if isinstance(aid, int) or (isinstance(aid, str) and aid.isdigit()) else None
+            roster_member = member_by_aid.get(aid_int) if aid_int else None
             persona = p.get("personaname") or "匿名玩家"
             friend_tag = None
             is_me = False
-            if aid and aid == roster.get("main_account_id"):
+            if roster_member and roster_member["is_main"]:
+                friend_tag = f"我 · {roster.get('main_name') or roster_member['name'] or persona}"
+                is_me = True
+            elif aid_int and aid_int == roster.get("main_account_id"):
                 friend_tag = f"我 · {roster.get('main_name', persona)}"
                 is_me = True
-            elif aid and str(aid) in roster_players:
-                friend_tag = f"车队好友 · {roster_players[str(aid)].get('name')}"
-            elif aid and focus_account_id and aid == focus_account_id:
+            elif roster_member:
+                friend_tag = f"车队好友 · {roster_member['name']}"
+            elif aid_int and focus_account_id and aid_int == focus_account_id:
                 friend_tag = "当前视角"
                 is_me = True
             elif p.get("party_id") is not None and p.get("party_id") in focus_party_ids:

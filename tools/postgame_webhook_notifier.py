@@ -138,20 +138,16 @@ def run_postgame_notification_cycle(
     state = load_notified_state(state_path)
     notified_set = {int(x) for x in (state.get("notified_match_ids") or []) if str(x).isdigit()}
 
+    roster_members = dota_analyst.iter_roster_accounts(roster)
+    main_aid = next((int(m["canonical_id"]) for m in roster_members if m.get("is_main")), int(roster.get("main_account_id") or 0))
     account_ids: List[int] = []
-    main_aid = int(roster.get("main_account_id") or 0)
-    if main_aid > 0:
-        account_ids.append(main_aid)
-    for k in (roster.get("teammates") or roster.get("friends") or {}).keys():
-        try:
-            aid = int(k)
+    for m in roster_members:
+        for aid in m["account_ids"]:
             if aid > 0 and aid not in account_ids:
                 account_ids.append(aid)
-        except Exception:
-            pass
 
     candidate_mids: List[int] = []
-    for aid in account_ids[:2]:
+    for aid in account_ids:
         try:
             recent = fetch_recent_fn(aid) or []
         except Exception:

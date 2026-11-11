@@ -56,21 +56,13 @@ def load_squad_hero_pool_and_against_stats() -> Tuple[Dict[int, Dict[str, Any]],
     1) .cache/player_heroes_against.json（OpenDota /players/{id}/heroes 同步快照）
     2) reports/raw_*.json（本地已复盘比赛真实对局记录）
     """
-    roster_ids = set()
-    roster_path = _REPO_ROOT / "roster.json"
-    if roster_path.exists():
-        try:
-            r_data = json.loads(roster_path.read_text(encoding="utf-8"))
-            main_aid = int(r_data.get("main_account_id") or 0)
-            if main_aid > 0:
-                roster_ids.add(main_aid)
-            for k in (r_data.get("teammates") or {}).keys():
-                try:
-                    roster_ids.add(int(k))
-                except Exception:
-                    pass
-        except Exception:
-            pass
+    import dota_analyst
+
+    roster_ids = {
+        aid
+        for m in dota_analyst.iter_roster_accounts(dota_analyst.load_roster())
+        for aid in m["account_ids"]
+    }
 
     squad_pool: Dict[int, Dict[str, Any]] = {}
     against_map: Dict[int, Dict[str, int]] = {}
@@ -2445,7 +2437,11 @@ def build_squad_history_ledger(
 
     rdir = Path(reports_dir)
     main_aid = int(roster.get("main_account_id") or 0)
-    roster_players = roster.get("players") or {}
+    roster_member_by_aid = {
+        acc_id: m
+        for m in dota_analyst.iter_roster_accounts(roster)
+        for acc_id in m["account_ids"]
+    }
 
     analyzed_matches_summary = []
     loaded_reports_for_growth: List[Dict[str, Any]] = []
@@ -2559,24 +2555,32 @@ def build_squad_history_ledger(
 
             for p in own_list:
                 raw_aid = p.get("account_id")
-                aid = dota_analyst.resolve_canonical_account_id(raw_aid, roster) if raw_aid is not None else None
+                raw_aid_int = int(raw_aid) if isinstance(raw_aid, int) or (isinstance(raw_aid, str) and raw_aid.isdigit()) else None
+                roster_member = roster_member_by_aid.get(raw_aid_int) if raw_aid_int else None
+                aid = (
+                    roster_member["canonical_id"]
+                    if roster_member
+                    else (dota_analyst.resolve_canonical_account_id(raw_aid, roster) if raw_aid is not None else None)
+                )
                 pname = p.get("personaname") or "匿名玩家"
                 if not aid and pname in ("匿名玩家", "Anonymous"):
                     continue
                 pos_p = int(p.get("pos") or 1)
                 key = str(aid) if aid else pname
-                cfg_entry = roster_players.get(str(aid), {}) if aid else {}
-                cfg_sub_ids = cfg_entry.get("account_ids") if isinstance(cfg_entry, dict) else None
-                init_merged_ids = [int(x) for x in cfg_sub_ids] if isinstance(cfg_sub_ids, list) else ([int(aid)] if aid else [])
+                init_merged_ids = (
+                    list(roster_member["account_ids"])
+                    if roster_member
+                    else ([int(aid)] if aid else [])
+                )
                 st = member_stats.setdefault(
                     key,
                     {
                         "key": key,
                         "account_id": aid,
                         "merged_account_ids": list(init_merged_ids),
-                        "personaname": cfg_entry.get("name") or pname,
-                        "is_me": bool(aid and int(aid) == main_aid),
-                        "is_roster_friend": str(aid) in roster_players,
+                        "personaname": (roster_member["name"] if roster_member else None) or pname,
+                        "is_me": bool((roster_member and roster_member["is_main"]) or (aid and int(aid) == main_aid)),
+                        "is_roster_friend": roster_member is not None,
                         "games": 0,
                         "wins": 0,
                         "total_blame_pct": 0.0,
@@ -2717,8 +2721,12 @@ def build_squad_history_ledger(
                     pb = by_pos.get(p_b)
                     if not pa or not pb:
                         continue
-                    na = roster_players.get(str(pa.get("account_id")), {}).get("name") or pa.get("personaname") or ""
-                    nb = roster_players.get(str(pb.get("account_id")), {}).get("name") or pb.get("personaname") or ""
+                    pa_aid = pa.get("account_id")
+                    pb_aid = pb.get("account_id")
+                    ma = roster_member_by_aid.get(int(pa_aid)) if isinstance(pa_aid, int) or (isinstance(pa_aid, str) and pa_aid.isdigit()) else None
+                    mb = roster_member_by_aid.get(int(pb_aid)) if isinstance(pb_aid, int) or (isinstance(pb_aid, str) and pb_aid.isdigit()) else None
+                    na = (ma["name"] if ma else None) or pa.get("personaname") or ""
+                    nb = (mb["name"] if mb else None) or pb.get("personaname") or ""
                     if na in ("匿名玩家", "Anonymous", "") or nb in ("匿名玩家", "Anonymous", ""):
                         continue
                     dkey = f"{lane_label}:{na}+{nb}"

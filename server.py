@@ -57,6 +57,7 @@ from dota_analyst import (
     extract_report_part,
     format_duration,
     get_hero_constants_map,
+    iter_roster_accounts,
     load_roster,
     normalize_account_id,
     render_markdown_report,
@@ -412,19 +413,11 @@ def match_has_roster_player(raw_or_report: Dict[str, Any], roster: Dict[str, Any
     """检查比赛的 10 名玩家里是否至少有 1 名在花名册中。"""
     if not isinstance(raw_or_report, dict) or not isinstance(roster, dict):
         return False
-    roster_ids = set()
-    main_id = roster.get("main_account_id")
-    if main_id:
-        try:
-            roster_ids.add(int(main_id))
-        except (ValueError, TypeError):
-            pass
-    for map_key in ("players", "teammates"):
-        for k in (roster.get(map_key) or {}).keys():
-            try:
-                roster_ids.add(int(k))
-            except (ValueError, TypeError):
-                pass
+    roster_ids = {
+        aid
+        for m in iter_roster_accounts(roster)
+        for aid in m["account_ids"]
+    }
     if not roster_ids:
         return False
 
@@ -1141,7 +1134,6 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                         "note": "开黑队友",
                     })
                     roster["players"][str(faid)] = existing
-                    roster.setdefault("teammates", {})[str(faid)] = existing
                 save_roster(roster)
                 self._send_json({"ok": True, "roster": roster})
                 return

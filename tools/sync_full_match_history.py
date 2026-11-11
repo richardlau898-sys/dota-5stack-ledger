@@ -22,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+import dota_analyst
 from cloud_store import cloud_upsert_player_matches
 from dota_constants_zh import get_hero_name
 
@@ -229,10 +230,19 @@ def sync_player_matches_incremental(
     }
 
 
+def build_roster_names_map(roster: Optional[Dict[str, Any]] = None) -> Dict[int, str]:
+    """从统一花名册 iter_roster_accounts 提取 canonical_id -> 队员名称映射。"""
+    out: Dict[int, str] = {}
+    for m in dota_analyst.iter_roster_accounts(roster):
+        out[int(m["canonical_id"])] = str(m["name"])
+    return out
+
+
 def aggregate_full_history_stats(
     rows: List[Dict[str, Any]],
     roster_names: Optional[Dict[int, str]] = None,
     min_games: int = MIN_SAMPLE_GAMES,
+    roster: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     聚合全量历史对局统计（严格执行 T1-9 最小样本量规则）：
@@ -241,6 +251,8 @@ def aggregate_full_history_stats(
     - party_size_winrates
     - combo_winrates（同场比赛同一阵营出现的花名册成员组合）
     """
+    if roster_names is None and isinstance(roster, dict):
+        roster_names = build_roster_names_map(roster)
     roster_names = roster_names or {}
     by_account: Dict[int, List[Dict[str, Any]]] = {}
     by_match_side: Dict[Tuple[int, str], List[Dict[str, Any]]] = {}
@@ -249,7 +261,12 @@ def aggregate_full_history_stats(
     for raw in rows or []:
         if not isinstance(raw, dict) or not raw.get("account_id") or not raw.get("match_id"):
             continue
-        aid = int(raw["account_id"])
+        raw_aid = int(raw["account_id"])
+        aid = (
+            int(dota_analyst.resolve_canonical_account_id(raw_aid, roster) or raw_aid)
+            if isinstance(roster, dict)
+            else raw_aid
+        )
         norm = normalize_player_match_row(aid, raw)
         if not norm:
             continue
@@ -399,8 +416,12 @@ def aggregate_full_history_stats(
 def build_rows_from_local_raw_reports(roster: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """从本地 reports/raw_*.json 提取历史对局行（用于离线测试或初始种子）"""
     reports_dir = BASE_DIR / "reports"
-    roster = roster or {}
-    friends = roster.get("friends") or {}
+    roster = roster if isinstance(roster, dict) else dota_analyst.load_roster()
+    member_by_aid = {
+        acc_id: m
+        for m in dota_analyst.iter_roster_accounts(roster)
+        for acc_id in m["account_ids"]
+    }
     rows: List[Dict[str, Any]] = []
     for raw_file in sorted(reports_dir.glob("raw_*.json")):
         try:
@@ -420,8 +441,8 @@ def build_rows_from_local_raw_reports(roster: Optional[Dict[str, Any]] = None) -
             aid = p.get("account_id")
             if not aid:
                 continue
-            f_info = friends.get(str(aid)) or {}
-            default_pos = int(f_info.get("pos") or 0) if isinstance(f_info, dict) else 0
+            member = member_by_aid.get(int(aid))
+            default_pos = int(member["pos"] or 0) if member and member.get("pos") else 0
             row = normalize_player_match_row(
                 int(aid),
                 {
@@ -453,13 +474,14 @@ def main() -> int:
     parser.add_argument("--push-supabase", action="store_true", help="将同步结果批量写入 Supabase player_matches 表")
     args = parser.parse_args()
 
-    roster_path = BASE_DIR / "roster.json"
-    roster = json.loads(roster_path.read_text(encoding="utf-8")) if roster_path.exists() else {}
-    friends = roster.get("friends") or {}
-    roster_names: Dict[int, str] = {}
-    for k, v in friends.items():
-        if str(k).isdigit():
-            roster_names[int(k)] = v.get("name", str(k)) if isinstance(v, dict) else str(v)
+    roster = dota_analyst.load_roster()
+    members = dota_analyst.iter_roster_accounts(roster)
+    roster_names = build_roster_names_map(roster)
+    account_default_pos = {
+        aid: int(m["pos"] or 0)
+        for m in members
+        for aid in m["account_ids"]
+    }
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     existing_rows: List[Dict[str, Any]] = []
@@ -485,9 +507,8 @@ def main() -> int:
             except Exception:
                 pass
         all_rows: List[Dict[str, Any]] = []
-        for aid in sorted(roster_names.keys()):
-            f_info = friends.get(str(aid)) or {}
-            default_pos = int(f_info.get("pos") or 0) if isinstance(f_info, dict) else 0
+        for aid in sorted(account_default_pos.keys()):
+            default_pos = account_default_pos.get(aid, 0)
             acc_existing = [r for r in existing_rows if int(r.get("account_id") or 0) == aid]
             merged, meta = sync_player_matches_incremental(
                 account_id=aid,
@@ -502,7 +523,7 @@ def main() -> int:
         existing_rows = all_rows
         SYNC_STATE_PATH.write_text(json.dumps(sync_state, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    stats = aggregate_full_history_stats(existing_rows, roster_names=roster_names)
+    stats = aggregate_full_history_stats(existing_rows, roster_names=roster_names, roster=roster)
     HISTORY_CACHE_PATH.write_text(
         json.dumps({"rows": existing_rows, "stats": stats}, ensure_ascii=False, indent=2),
         encoding="utf-8",

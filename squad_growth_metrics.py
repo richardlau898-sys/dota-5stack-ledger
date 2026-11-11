@@ -748,20 +748,17 @@ def build_personal_trends_and_goals(
     4. key_item_timing_delta_sec: 关键装备完成时间相对本人中位数的偏差秒数
     并支持每人每周设定一个目标值，计算当前进度。
     """
+    import dota_analyst
+
     roster = roster or {}
-    friends = roster.get("friends") or roster.get("teammates") or {}
     weekly_goals = weekly_goals or roster.get("weekly_goals") or {}
-    allowed_aids = set()
-    if roster.get("main_account_id"):
-        try:
-            allowed_aids.add(int(roster["main_account_id"]))
-        except Exception:
-            pass
-    for k in friends.keys():
-        try:
-            allowed_aids.add(int(k))
-        except Exception:
-            pass
+    member_by_aid = {
+        acc_id: m
+        for m in dota_analyst.iter_roster_accounts(roster)
+        for acc_id in m["account_ids"]
+    }
+    member_by_canon = {int(m["canonical_id"]): m for m in dota_analyst.iter_roster_accounts(roster)}
+    allowed_aids = set(member_by_aid.keys())
     for k in weekly_goals.keys():
         try:
             allowed_aids.add(int(k))
@@ -786,9 +783,10 @@ def build_personal_trends_and_goals(
             for p in rep.get(list_key) or []:
                 if not isinstance(p, dict) or not p.get("account_id"):
                     continue
-                aid = int(p["account_id"])
-                if allowed_aids and aid not in allowed_aids:
+                raw_aid = int(p["account_id"])
+                if allowed_aids and raw_aid not in allowed_aids:
                     continue
+                aid = member_by_aid[raw_aid]["canonical_id"] if raw_aid in member_by_aid else raw_aid
                 pos = int(p.get("pos") or 0)
                 lane = int(p.get("raw_lane") or p.get("lane_id") or p.get("lane") or 0)
 
@@ -879,11 +877,19 @@ def build_personal_trends_and_goals(
                 "key_item_timing_delta_sec": delta_sec,
             })
 
-        f_entry = friends.get(str(aid)) or {}
-        p_name = f_entry.get("name", str(aid)) if isinstance(f_entry, dict) else str(f_entry or aid)
+        m_entry = member_by_canon.get(int(aid))
+        f_entry = m_entry["info"] if m_entry else {}
+        p_name = m_entry["name"] if m_entry else str(aid)
 
         # 每周目标计算
-        goal_cfg = weekly_goals.get(str(aid)) or (f_entry.get("weekly_goal") if isinstance(f_entry, dict) else None)
+        goal_cfg = weekly_goals.get(str(aid))
+        if goal_cfg is None and m_entry:
+            for sub_id in m_entry["account_ids"]:
+                if str(sub_id) in weekly_goals:
+                    goal_cfg = weekly_goals[str(sub_id)]
+                    break
+        if goal_cfg is None and isinstance(f_entry, dict):
+            goal_cfg = f_entry.get("weekly_goal")
         if not isinstance(goal_cfg, dict):
             # 默认按常打位置分配客观目标
             sup_vals = [x["support_wards_per_min"] for x in points_out if x["support_wards_per_min"] is not None]
