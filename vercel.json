@@ -8,7 +8,7 @@
   },
   "headers": [
     {
-      "source": "/(app\\.4293ad85\\.js|styles\\.0a61236b\\.css)",
+      "source": "/(app\\.5364a079\\.js|styles\\.0a61236b\\.css)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -40,7 +40,7 @@
       "destination": "/api/index.py?__vercel_path=/api/$1"
     },
     {
-      "source": "/app.4293ad85.js",
+      "source": "/app.5364a079.js",
       "destination": "/static/app.js"
     },
     {

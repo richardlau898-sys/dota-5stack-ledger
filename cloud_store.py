@@ -110,8 +110,8 @@ def extract_match_players_rows(report_dict: Dict[str, Any]) -> List[Dict[str, An
                 "hero_damage": int(p.get("hero_damage") or 0),
                 "tower_damage": int(p.get("tower_damage") or 0),
                 "score_100": float(p["score_100"]) if p.get("score_100") is not None else None,
-                "blame_share_pct": float(p.get("blame_share_pct") or 0.0),
-                "contrib_share_pct": float(p.get("contrib_share_pct") or 0.0),
+                "blame_share_pct": float(p["blame_share_pct"]) if p.get("blame_share_pct") is not None else None,
+                "contrib_share_pct": float(p["contrib_share_pct"]) if p.get("contrib_share_pct") is not None else None,
                 "start_time_str": start_time_str,
                 "duration_min": duration_min,
             })
