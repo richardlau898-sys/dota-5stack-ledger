@@ -91,7 +91,8 @@ class TestP12ModularSplit(unittest.TestCase):
             f"styles.css 应合并为唯一一套 :root 变量，当前有 {len(root_blocks)} 处",
         )
         self.assertIn("--bg:", root_blocks[0])
-        self.assertIn("--ws-canvas:", root_blocks[0])
+        self.assertIn("--line-soft:", root_blocks[0])
+        self.assertNotIn("--ws-canvas:", root_blocks[0])
         self.assertIn("@media print", css_txt)
 
     def test_4_all_sample_reports_identical_before_and_after_split(self):
