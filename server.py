@@ -708,6 +708,36 @@ def fetch_match_icons_base64(match_id: int, allow_network: bool = False) -> Dict
 
 _LLM_TASK_POOL = ThreadPoolExecutor(max_workers=4)
 
+_SENSITIVE_ERROR_MARKERS = (
+    "Traceback",
+    "invalid literal",
+    'File "',
+    "/Users/",
+    "/home/",
+    "/var/",
+    "/etc/",
+    "/tmp/",
+    "\\",
+    ".py",
+    "ValueError",
+    "TypeError",
+    "KeyError",
+    "RuntimeError",
+    "URLError",
+    "HTTPError",
+)
+
+
+def _sanitize_client_error(raw_err: Any, fallback: str = "请求处理失败，请稍后重试") -> str:
+    txt = str(raw_err or "").strip()
+    if not txt:
+        return fallback
+    if any(m in txt for m in _SENSITIVE_ERROR_MARKERS):
+        return fallback
+    if not any("\u4e00" <= ch <= "\u9fff" for ch in txt):
+        return fallback
+    return txt
+
 
 def _execute_llm_review_task(
     task_id: str,
@@ -757,7 +787,10 @@ def _execute_llm_review_task(
             cloud_save_llm_task(task_id, done_state)
             return done_state
         else:
-            err_msg = str(res.get("error") or "大模型判词生成失败")
+            raw_err = res.get("error")
+            if raw_err:
+                sys.stderr.write(f"[DotaLedgerServer] LLM review failed ({task_id}): {raw_err}\n")
+            err_msg = _sanitize_client_error(raw_err, "大模型判词生成失败，请稍后重试")
             fail_state = {
                 "task_id": task_id,
                 "match_id": int(match_id),
@@ -768,13 +801,14 @@ def _execute_llm_review_task(
             }
             cloud_save_llm_task(task_id, fail_state)
             return fail_state
-    except Exception as exc:
+    except Exception:
+        traceback.print_exc(file=sys.stderr)
         fail_state = {
             "task_id": task_id,
             "match_id": int(match_id),
             "side": side,
             "status": "failed",
-            "error": str(exc) or "判词后台任务执行异常",
+            "error": "判词后台任务执行失败，请稍后重试",
             "updated_at": int(time.time()),
         }
         cloud_save_llm_task(task_id, fail_state)
@@ -1046,7 +1080,12 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 if not isinstance(task_data, dict):
                     self._send_json({"ok": False, "error": "未找到对应的判词任务"}, status=404)
                     return
-                self._send_json({"ok": True, **task_data})
+                safe_task = dict(task_data)
+                if safe_task.get("error") is not None:
+                    safe_task["error"] = _sanitize_client_error(
+                        safe_task.get("error"), "判词后台任务执行失败，请稍后重试"
+                    )
+                self._send_json({"ok": True, **safe_task})
                 return
 
             # 静态文件服务 (支持 /, /pregame, 以及公开分享链接 /match/<id>)
@@ -1066,11 +1105,11 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     is_hashed_asset = True
                 file_path = (STATIC_DIR / rel).resolve()
                 if not str(file_path).startswith(str(STATIC_DIR.resolve())):
-                    self._send_json({"ok": False, "error": "Forbidden"}, status=403)
+                    self._send_json({"ok": False, "error": "拒绝访问该路径"}, status=403)
                     return
 
             if not file_path.exists() or not file_path.is_file():
-                self._send_json({"ok": False, "error": f"Not found: {path}"}, status=404)
+                self._send_json({"ok": False, "error": "未找到请求的资源"}, status=404)
                 return
 
             ctype, _ = mimetypes.guess_type(str(file_path))
@@ -1105,9 +1144,11 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             self.wfile.write(content)
 
         except ValueError as ve:
-            self._send_json({"ok": False, "error": str(ve)}, status=400)
+            sys.stderr.write(f"[DotaLedgerServer] ValueError on GET {path}: {ve}\n")
+            self._send_json({"ok": False, "error": "请求参数格式无效，请检查后重试"}, status=400)
         except PermissionError as pe:
-            self._send_json({"ok": False, "error": str(pe)}, status=403)
+            sys.stderr.write(f"[DotaLedgerServer] PermissionError on GET {path}: {pe}\n")
+            self._send_json({"ok": False, "error": "该比赛不在车队花名册范围内，拒绝操作"}, status=403)
         except Exception:
             traceback.print_exc(file=sys.stderr)
             self._send_json({"ok": False, "error": "服务器内部错误，请稍后重试"}, status=500)
@@ -1143,7 +1184,8 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     if llm_res.get("ok") and llm_res.get("grok_live_brief"):
                         plan["grok_live_brief"] = llm_res["grok_live_brief"]
                     elif llm_res.get("error"):
-                        plan["llm_error"] = llm_res["error"]
+                        sys.stderr.write(f"[DotaLedgerServer] Pregame LLM error: {llm_res.get('error')}\n")
+                        plan["llm_error"] = _sanitize_client_error(llm_res["error"], "赛前建议生成失败，请稍后重试")
                 self._send_json({"ok": True, "plan": plan})
                 return
 
@@ -1270,14 +1312,20 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     career_member=career_member if isinstance(career_member, dict) else None,
                     force=force,
                 )
+                if isinstance(res, dict) and not res.get("ok") and res.get("error"):
+                    sys.stderr.write(f"[DotaLedgerServer] Poster error: {res.get('error')}\n")
+                    res = dict(res)
+                    res["error"] = _sanitize_client_error(res.get("error"), "海报生成失败，请稍后重试")
                 self._send_json(res)
                 return
 
-            self._send_json({"ok": False, "error": f"Unknown endpoint: {path}"}, status=404)
+            self._send_json({"ok": False, "error": "请求的接口不存在"}, status=404)
         except ValueError as ve:
-            self._send_json({"ok": False, "error": str(ve)}, status=400)
+            sys.stderr.write(f"[DotaLedgerServer] ValueError on POST {path}: {ve}\n")
+            self._send_json({"ok": False, "error": "请求参数格式无效，请检查后重试"}, status=400)
         except PermissionError as pe:
-            self._send_json({"ok": False, "error": str(pe)}, status=403)
+            sys.stderr.write(f"[DotaLedgerServer] PermissionError on POST {path}: {pe}\n")
+            self._send_json({"ok": False, "error": "该比赛不在车队花名册范围内，拒绝操作"}, status=403)
         except Exception:
             traceback.print_exc(file=sys.stderr)
             self._send_json({"ok": False, "error": "服务器内部错误，请稍后重试"}, status=500)
