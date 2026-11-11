@@ -13,6 +13,7 @@ API 路由:
 """
 
 import datetime
+import gzip
 import hashlib
 import hmac
 import json
@@ -934,10 +935,21 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args: Any) -> None:
         sys.stderr.write(f"[DotaLedgerServer] {self.address_string()} - {fmt % args}\n")
 
+    def _accepts_gzip(self) -> bool:
+        if not hasattr(self, "headers") or not self.headers:
+            return False
+        return "gzip" in str(self.headers.get("Accept-Encoding") or "").lower()
+
     def _send_json(self, data: Any, status: int = 200) -> None:
-        body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        body = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        use_gzip = self._accepts_gzip() and len(body) >= 512
+        if use_gzip:
+            body = gzip.compress(body, compresslevel=9)
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        if use_gzip:
+            self.send_header("Content-Encoding", "gzip")
+            self.send_header("Vary", "Accept-Encoding")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Robots-Tag", "noindex")
@@ -998,6 +1010,12 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
         has_token = self._has_provided_valid_token()
 
         try:
+            if path == "/favicon.ico":
+                self.send_response(204)
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                return
+
             if path == "/api/match_icons":
                 mid_str = (qs.get("match_id") or [""])[0].strip()
                 mid = int(mid_str) if mid_str.isdigit() else 0
@@ -1018,22 +1036,17 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 wins = sum(1 for m in recent if m.get("won"))
                 losses = len(recent) - wins
                 win_rate = round((wins / len(recent)) * 100, 1) if recent else 0.0
-                latest_report = None
+                latest_mid = None
                 analyzed_in_recent = [m for m in recent if m.get("is_analyzed")]
                 if analyzed_in_recent:
-                    latest_report = get_or_build_match_report(
-                        analyzed_in_recent[0]["match_id"],
-                        focus_account_id=main_id,
-                        allow_build=False,
-                    )
-                elif recent:
-                    # Fallback to latest match_*.json in REPORTS_DIR without auto-analyzing unanalyzed matches
+                    latest_mid = int(analyzed_in_recent[0]["match_id"])
+                else:
                     existing_files = sorted(REPORTS_DIR.glob("match_*.json"), reverse=True)
-                    if existing_files:
-                        try:
-                            latest_report = json.loads(existing_files[0].read_text(encoding="utf-8"))
-                        except Exception:
-                            latest_report = None
+                    for ef in existing_files:
+                        m_id = re.fullmatch(r"match_(\d+)\.json", ef.name)
+                        if m_id:
+                            latest_mid = int(m_id.group(1))
+                            break
                 profile_obj = {
                     "profile": {
                         "account_id": main_id,
@@ -1055,7 +1068,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     "recent_matches": recent,
                     "squad_ledger": squad_ledger,
                     "heroes_catalog": heroes_catalog,
-                    "latest_match_report": latest_report,
+                    "latest_match_id": latest_mid,
                 })
                 return
 
@@ -1068,13 +1081,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 losses = len(recent) - wins
                 win_rate = round((wins / len(recent)) * 100, 1) if recent else 0.0
                 analyzed_in_recent = [m for m in recent if m.get("is_analyzed")]
-                latest_report = (
-                    get_or_build_match_report(
-                        analyzed_in_recent[0]["match_id"], focus_account_id=aid, allow_build=False
-                    )
-                    if analyzed_in_recent
-                    else None
-                )
+                latest_mid = int(analyzed_in_recent[0]["match_id"]) if analyzed_in_recent else None
                 profile_obj = {
                     "profile": {
                         "account_id": aid,
@@ -1091,7 +1098,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     "profile": profile_obj,
                     "recent_matches": recent,
                     "squad_ledger": squad_ledger,
-                    "latest_match_report": latest_report,
+                    "latest_match_id": latest_mid,
                 })
                 return
 
@@ -1211,15 +1218,27 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
 
+            is_compressible = (
+                ctype.startswith("text/")
+                or "javascript" in ctype
+                or "json" in ctype
+                or "svg" in ctype
+            )
+            use_gzip = is_compressible and self._accepts_gzip() and len(content) >= 512
+            wire_body = gzip.compress(content, compresslevel=9) if use_gzip else content
+
             self.send_response(200)
             self.send_header("Content-Type", ctype)
-            self.send_header("Content-Length", str(len(content)))
+            if use_gzip:
+                self.send_header("Content-Encoding", "gzip")
+                self.send_header("Vary", "Accept-Encoding")
+            self.send_header("Content-Length", str(len(wire_body)))
             self.send_header("Cache-Control", cache_ctrl)
             self.send_header("ETag", etag)
             self.send_header("X-Robots-Tag", "noindex")
             self.send_header("Content-Security-Policy-Report-Only", CSP_REPORT_ONLY_VALUE)
             self.end_headers()
-            self.wfile.write(content)
+            self.wfile.write(wire_body)
 
         except ValueError as ve:
             sys.stderr.write(f"[DotaLedgerServer] ValueError on GET {path}: {ve}\n")

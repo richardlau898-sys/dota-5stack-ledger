@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r2.8"
+ENGINE_VERSION = "2026.11.r2.9"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -2038,6 +2038,7 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
             "hero_mechanism_profile",
             "benchmarks",
             "raw_benchmarks",
+            "benchmarks_list",
             "killed_by_breakdown",
             "kills_breakdown",
             "phase_telemetry",
@@ -2046,40 +2047,69 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
             "key_item_timings_rich",
             "backpack_items_rich",
             "hero_execution_audit",
+            "neutral_craft_audit",
+            "conclusions",
         }
+
+        def _slim_summary_player(p_obj: Dict[str, Any], is_focus: bool) -> Dict[str, Any]:
+            sp = {pk: pv for pk, pv in p_obj.items() if pk not in heavy_player_keys}
+            if isinstance(sp.get("damage_and_build_audit"), dict):
+                dba = sp["damage_and_build_audit"]
+                stm = dba.get("spell_target_matrix") if isinstance(dba.get("spell_target_matrix"), dict) else {}
+                sp["damage_and_build_audit"] = {
+                    "dmg_quality_badge": dba.get("dmg_quality_badge"),
+                    "skill_route_summary_zh": dba.get("skill_route_summary_zh"),
+                    "facet_badge": dba.get("facet_badge"),
+                    "perm_buff_badges": dba.get("perm_buff_badges"),
+                    "max_hit_val": dba.get("max_hit_val"),
+                    "max_hit_summary_zh": dba.get("max_hit_summary_zh"),
+                    "spell_target_matrix": (
+                        {"max_single_hit": stm.get("max_single_hit")}
+                        if stm.get("max_single_hit")
+                        else {}
+                    ),
+                }
+            if isinstance(sp.get("playstyle_archetype_audit"), dict):
+                pa = sp["playstyle_archetype_audit"]
+                sp["playstyle_archetype_audit"] = {
+                    "archetype_badge": pa.get("archetype_badge"),
+                    "detected_style_label": pa.get("detected_style_label"),
+                    "skill_route_summary_zh": pa.get("skill_route_summary_zh"),
+                }
+            if not is_focus:
+                for extra_k in ("strengths", "weaknesses", "improvements", "praise_talk", "trash_talk"):
+                    sp.pop(extra_k, None)
+            else:
+                for list_k in ("strengths", "weaknesses", "improvements"):
+                    if isinstance(sp.get(list_k), list):
+                        sp[list_k] = sp[list_k][:2]
+            return sp
+
         focus_side_val = str(report.get("focus_side") or report.get("user_team_side") or "radiant")
         for side_k in ("radiant_pos_1_to_5", "dire_pos_1_to_5"):
             is_focus_team = (side_k == "radiant_pos_1_to_5" and focus_side_val == "radiant") or (
                 side_k == "dire_pos_1_to_5" and focus_side_val == "dire"
             )
-            slim_players = []
-            for p in report.get(side_k) or []:
-                if not isinstance(p, dict):
-                    continue
-                sp = {pk: pv for pk, pv in p.items() if pk not in heavy_player_keys}
-                if isinstance(sp.get("playstyle_archetype_audit"), dict):
-                    pa = sp["playstyle_archetype_audit"]
-                    sp["playstyle_archetype_audit"] = {
-                        "archetype_badge": pa.get("archetype_badge"),
-                        "detected_style_label": pa.get("detected_style_label"),
-                        "skill_route_summary_zh": pa.get("skill_route_summary_zh"),
-                    }
-                if not is_focus_team:
-                    for extra_k in ("strengths", "weaknesses", "improvements", "praise_talk", "trash_talk", "conclusions"):
-                        sp.pop(extra_k, None)
-                else:
-                    for list_k in ("strengths", "weaknesses", "improvements"):
-                        if isinstance(sp.get(list_k), list):
-                            sp[list_k] = sp[list_k][:2]
-                slim_players.append(sp)
-            out[side_k] = slim_players
+            out[side_k] = [
+                _slim_summary_player(p, is_focus_team)
+                for p in (report.get(side_k) or [])
+                if isinstance(p, dict)
+            ]
         out["economy_timeline"] = report.get("economy_timeline")
         out["key_teamfights"] = [
             {k: v for k, v in tf.items() if k != "participants"}
             for tf in (report.get("key_teamfights") or [])
             if isinstance(tf, dict)
         ]
-        out["mvp"] = report.get("mvp")
+        raw_mvp = report.get("mvp")
+        if isinstance(raw_mvp, dict):
+            slim_mvp = dict(raw_mvp)
+            for mp_key in ("mvp_player", "runner_up_player", "culprit_player"):
+                if isinstance(slim_mvp.get(mp_key), dict):
+                    slim_mvp[mp_key] = _slim_summary_player(slim_mvp[mp_key], True)
+            out["mvp"] = slim_mvp
+        else:
+            out["mvp"] = raw_mvp
         out["match_narrative"] = report.get("match_narrative")
         out["grok_coaching"] = report.get("grok_coaching")
         out["team_metrics"] = report.get("team_metrics")
@@ -2087,12 +2117,33 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
         out["next_game_top3_fixes"] = report.get("next_game_top3_fixes")
         out["next_game_top3_fixes_by_side"] = report.get("next_game_top3_fixes_by_side")
         out["top3_replay_moments"] = report.get("top3_replay_moments")
+        if "phase_reviews" in report:
+            out["phase_reviews"] = report.get("phase_reviews")
+        slim_unpressed = {}
+        for sk, sv in (df.get("unpressed_saves_by_side") or {}).items():
+            if isinstance(sv, dict):
+                slim_unpressed[sk] = {
+                    "evidence": sv.get("evidence"),
+                    "incidents": (sv.get("incidents") or [])[:3],
+                }
+        slim_ss = {}
+        for sk, sv in (df.get("stacking_and_smoke_by_side") or {}).items():
+            if isinstance(sv, dict):
+                slim_ss[sk] = {
+                    "evidence": sv.get("evidence"),
+                    "own_smoke_uses": sv.get("own_smoke_uses"),
+                    "smoke_total_uses": sv.get("smoke_total_uses"),
+                    "total_stacks": sv.get("total_stacks"),
+                    "total_team_stacks": sv.get("total_team_stacks"),
+                    "smoke_events": sv.get("smoke_events") or [],
+                }
         out["deep_forensics"] = {
             "available": df.get("available"),
             "evidence": df.get("evidence"),
-            "unpressed_saves_by_side": df.get("unpressed_saves_by_side"),
-            "stacking_and_smoke_by_side": df.get("stacking_and_smoke_by_side"),
+            "unpressed_saves_by_side": slim_unpressed,
+            "stacking_and_smoke_by_side": slim_ss,
         }
+        out["_loaded_parts"] = ["summary"]
         return out
 
     if part_norm == "timeline":

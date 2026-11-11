@@ -38,7 +38,7 @@ class TestP1InitSpeed(unittest.TestCase):
             elapsed = time.perf_counter() - t0
 
         self.assertTrue(data.get("ok"))
-        self.assertIn("latest_match_report", data)
+        self.assertNotIn("latest_match_report", data, "/api/init must not embed full match report")
         self.assertNotIn("latest_report", data, "/api/init must not duplicate report in latest_report")
 
         without_report = {k: v for k, v in data.items() if k != "latest_match_report"}

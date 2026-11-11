@@ -472,12 +472,12 @@ function findMatchHeroImg(heroNameZh, report = state.currentReport) {
       ...(report.dire_pos_1_to_5 || report.dire_players || []),
     ];
     const found = all.find((p) => p.hero_short_zh === clean || p.hero_name === clean);
-    if (found && found.hero_img) return found.hero_img;
+    if (found && (found.hero_icon || found.hero_img)) return found.hero_icon || found.hero_img;
   }
   const cat = (state.heroesCatalog || []).find(
     (h) => h.short_zh === clean || h.full_zh === clean || h.name_zh === clean
   );
-  return cat?.img || "";
+  return cat?.icon || cat?.img || "";
 }
 
 /**
@@ -529,10 +529,11 @@ function injectHeroLogosIntoHtml(safeHtml, report = state.currentReport) {
   };
   all.forEach((p) => {
     const name = (p.hero_short_zh || "").trim();
-    if (name && p.hero_img && !heroMap.has(name)) {
-      heroMap.set(name, p.hero_img);
+    const hLogo = p.hero_icon || p.hero_img;
+    if (name && hLogo && !heroMap.has(name)) {
+      heroMap.set(name, hLogo);
       (aliasPairs[name] || []).forEach((al) => {
-        if (!heroMap.has(al)) heroMap.set(al, p.hero_img);
+        if (!heroMap.has(al)) heroMap.set(al, hLogo);
       });
     }
   });
@@ -731,6 +732,16 @@ async function ensurePdfExportLibsLoaded() {
 
 function openFullscreenStructuredReport(report = state.currentReport) {
   if (!report) return;
+  if (
+    Array.isArray(report._loaded_parts) &&
+    (!report._loaded_parts.includes("timeline") || !report._loaded_parts.includes("microscope"))
+  ) {
+    Promise.all([ensureReportPartLoaded("timeline"), ensureReportPartLoaded("microscope")]).then(() => {
+      if (state.currentReport && Number(state.currentReport.match_id) === Number(report.match_id)) {
+        openFullscreenStructuredReport(state.currentReport);
+      }
+    });
+  }
   const dlg = document.getElementById("fullscreen-report-dialog");
   const paper = document.getElementById("fs-report-paper");
   const topTitle = document.getElementById("fs-report-top-title");
@@ -1482,14 +1493,6 @@ async function initApp() {
       player_name: slot.player_name || getSquadPlayerNameForPos(slot.pos),
     }));
 
-    const firstReport = data.latest_match_report;
-    if (!directMatchLoaded && !state.userSelectedMatch && firstReport) {
-      state.currentMatchId = firstReport.match_id;
-      state.currentReport = firstReport;
-      toggleOnDemandGate(false);
-      renderFullMatchReport(state.currentReport);
-    }
-
     renderHeaderStatus();
     renderRecentMatchesStrip(data.recent_matches || state.profileData.recent_matches || []);
     renderSquadLedgerSection(state.squadLedger);
@@ -1498,8 +1501,12 @@ async function initApp() {
     populateSettingsDialog();
     initPregameWorkspace();
 
+    const fallbackMid =
+      data.latest_match_id || (data.recent_matches || []).find((m) => m.is_analyzed)?.match_id || null;
     if (urlMatchId && !directMatchLoaded) {
       await loadMatchReport(urlMatchId, { analyzeNow: false, switchToPostgame: true, fromPopState: true });
+    } else if (!directMatchLoaded && !state.userSelectedMatch && fallbackMid) {
+      await loadMatchReport(fallbackMid, { analyzeNow: false, switchToPostgame: false, fromPopState: true });
     } else if (state.currentMatchId) {
       highlightSelectedMatchCard(state.currentMatchId);
       if (urlMatchId) syncMatchUrlInAddressBar(state.currentMatchId, { replace: true });
@@ -2542,8 +2549,8 @@ function renderRecentMatchesStrip(matches) {
           <div class="recent-top">
             <div class="recent-identity">
               ${
-                m.hero_img
-                  ? `<img class="recent-portrait" src="${escapeHtml(m.hero_img)}" width="34" height="19" alt="${escapeHtml(heroShort)}" loading="lazy" />`
+                m.hero_icon || m.hero_img
+                  ? `<img class="recent-portrait" src="${escapeHtml(m.hero_icon || m.hero_img)}" width="34" height="19" alt="${escapeHtml(heroShort)}" loading="lazy" />`
                   : ""
               }
               <span class="recent-hero">${escapeHtml(heroShort)}</span>
@@ -2713,8 +2720,8 @@ function renderHomeWorkspace() {
           <div class="hmc-top">
             <div class="hmc-hero-box">
               ${
-                m.hero_img
-                  ? `<img class="hmc-hero-img" src="${escapeHtml(m.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
+                m.hero_icon || m.hero_img
+                  ? `<img class="hmc-hero-img" src="${escapeHtml(m.hero_icon || m.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
                   : ""
               }
               <div class="hmc-hero-meta">
@@ -2842,6 +2849,7 @@ function renderWorkstationSidebarMatches() {
       won: crWon,
       is_analyzed: true,
       hero_short_zh: focusP.hero_short_zh || focusP.hero_name || "本局视角",
+      hero_icon: focusP.hero_icon || "",
       hero_img: focusP.hero_img || "",
       kda: `${focusP.kills ?? 0}/${focusP.deaths ?? 0}/${focusP.assists ?? 0}`,
       duration_str: cr.duration_str || "",
@@ -2867,6 +2875,7 @@ function renderWorkstationSidebarMatches() {
         won: Boolean(am.won),
         is_analyzed: true,
         hero_short_zh: am.my_hero || am.mvp_hero || "历史复盘",
+        hero_icon: heroMeta?.icon || "",
         hero_img: am.my_hero_img || heroMeta?.img || "",
         kda: am.my_kda || (am.score ? `比分 ${am.score}` : "-"),
         duration_str: am.duration_str || "",
@@ -2911,7 +2920,10 @@ function renderWorkstationSidebarMatches() {
       const arch = analyzedMap.get(mid);
       const isAnalyzed = Boolean(m.is_analyzed || arch);
       const heroShort = m.hero_short_zh || m.hero_name || arch?.my_hero || arch?.mvp_hero || "未知英雄";
-      const heroImg = m.hero_img || arch?.my_hero_img || "";
+      const rawHeroImg = m.hero_img || arch?.my_hero_img || "";
+      const heroImg = rawHeroImg.includes("/dota_react/heroes/") && !rawHeroImg.includes("/heroes/icons/")
+        ? rawHeroImg.replace("/dota_react/heroes/", "/dota_react/heroes/icons/")
+        : rawHeroImg;
       const partyLabel = m.party_label || (Number(m.party_size || 1) >= 2 ? `${m.party_size}人黑` : "单排");
       const durText = m.duration_str || m.duration || arch?.duration_str || "";
       const timeStr =
@@ -3054,13 +3066,8 @@ async function handleSmartQuery(raw) {
     renderHeaderStatus();
     renderRecentMatchesStrip(data.recent_matches || []);
     renderHomeWorkspace();
-    if (data.latest_match_report) {
-      state.currentMatchId = data.latest_match_report.match_id;
-      state.currentReport = data.latest_match_report;
-      toggleOnDemandGate(false);
-      renderFullMatchReport(state.currentReport);
-      highlightSelectedMatchCard(state.currentMatchId);
-      syncMatchUrlInAddressBar(state.currentMatchId);
+    if (data.latest_match_id) {
+      await loadMatchReport(data.latest_match_id, { analyzeNow: false, switchToPostgame: false });
     }
     showToast(`已切换主视角至 #${state.accountId}`);
   } catch (err) {
@@ -3070,7 +3077,7 @@ async function handleSmartQuery(raw) {
 
 async function loadMatchReport(
   matchId,
-  { forceRefresh = false, analyzeNow = false, switchToPostgame = true, fromPopState = false } = {}
+  { forceRefresh = false, analyzeNow = false, switchToPostgame = true, fromPopState = false, fullReport = false } = {}
 ) {
   state.userSelectedMatch = true;
   state.loadMatchSeq = (state.loadMatchSeq || 0) + 1;
@@ -3124,7 +3131,8 @@ async function loadMatchReport(
     showToast(`🤖 AI 正在深度拆解比赛 #${matchId} 录像日志并生成分享链接...`, 4000);
   }
   try {
-    const flags = `${forceRefresh ? "&refresh=1&skip_llm=1" : ""}${
+    const partFlag = !forceRefresh && !analyzeNow && !fullReport ? "&part=summary" : "";
+    const flags = `${partFlag}${forceRefresh ? "&refresh=1&skip_llm=1" : ""}${
       analyzeNow && !forceRefresh ? "&analyze=1&skip_llm=1" : ""
     }`;
     const url = `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
@@ -3172,6 +3180,9 @@ async function loadMatchReport(
     toggleOnDemandGate(false);
     if (data.stale && data.report) {
       data.report.stale = true;
+    }
+    if (data.part === "summary" && data.report && !Array.isArray(data.report._loaded_parts)) {
+      data.report._loaded_parts = ["summary"];
     }
     state.currentMatchId = data.report.match_id;
     state.currentReport = data.report;
@@ -3564,33 +3575,54 @@ function hydrateReportData(report) {
   return report;
 }
 
+const _inFlightPartLoads = new Map();
 async function ensureReportPartLoaded(partName) {
   const rep = state.currentReport;
   if (!rep || !rep.match_id) return;
-  if (partName === "timeline" && rep.deep_forensics?.minute_snapshots !== undefined) return;
-  if (partName === "microscope" && rep.phases_data !== undefined) return;
-  const reqMid = Number(rep.match_id);
-  try {
-    const res = await fetch(
-      `/api/match/${encodeURIComponent(reqMid)}?part=${encodeURIComponent(partName)}&account_id=${encodeURIComponent(
-        state.accountId || ""
-      )}`
-    );
-    const data = await res.json();
-    if (!data.ok || !data.report || Number(state.currentMatchId) !== reqMid) return;
-    const partRep = data.report;
-    for (const [k, v] of Object.entries(partRep)) {
-      if (k === "deep_forensics" && v && typeof v === "object") {
-        rep.deep_forensics = { ...(rep.deep_forensics || {}), ...v };
-      } else if (v !== undefined) {
-        rep[k] = v;
-      }
-    }
-    hydrateReportData(rep);
-    renderFullMatchReport(rep);
-  } catch (err) {
-    console.error(`[PartLoader] Failed loading part=${partName}:`, err);
+  const loaded = Array.isArray(rep._loaded_parts) ? rep._loaded_parts : null;
+  if (!loaded || loaded.includes(partName)) return;
+  if (partName === "timeline" && rep.deep_forensics?.minute_snapshots !== undefined) {
+    loaded.push("timeline");
+    return;
   }
+  if (partName === "microscope" && rep.phases_data !== undefined) {
+    loaded.push("microscope");
+    return;
+  }
+  const reqMid = Number(rep.match_id);
+  const key = `${reqMid}:${partName}`;
+  if (_inFlightPartLoads.has(key)) return _inFlightPartLoads.get(key);
+  const p = (async () => {
+    try {
+      const res = await fetch(
+        `/api/match/${encodeURIComponent(reqMid)}?part=${encodeURIComponent(partName)}&account_id=${encodeURIComponent(
+          state.accountId || ""
+        )}`
+      );
+      const data = await res.json();
+      if (!data.ok || !data.report || Number(state.currentMatchId) !== reqMid) return;
+      const partRep = data.report;
+      for (const [k, v] of Object.entries(partRep)) {
+        if (k === "_loaded_parts") continue;
+        if (k === "deep_forensics" && v && typeof v === "object") {
+          rep.deep_forensics = { ...(rep.deep_forensics || {}), ...v };
+        } else if (v !== undefined) {
+          rep[k] = v;
+        }
+      }
+      if (Array.isArray(rep._loaded_parts) && !rep._loaded_parts.includes(partName)) {
+        rep._loaded_parts.push(partName);
+      }
+      hydrateReportData(rep);
+      renderFullMatchReport(rep);
+    } catch (err) {
+      console.error(`[PartLoader] Failed loading part=${partName}:`, err);
+    } finally {
+      _inFlightPartLoads.delete(key);
+    }
+  })();
+  _inFlightPartLoads.set(key, p);
+  return p;
 }
 
 function readReportField(obj, key, contextLabel = "report") {
@@ -3610,19 +3642,10 @@ function validateReportContract(report) {
     console.error("[FieldContract] Report is null or not an object");
     return false;
   }
-  const requiredTop = [
-    "match_id",
-    "is_parsed",
-    "radiant_win",
-    "radiant_score",
-    "dire_score",
-    "focus_side",
-    "draft_analysis_by_side",
-    "deep_forensics",
-    "mvp",
-    "radiant_pos_1_to_5",
-    "dire_pos_1_to_5",
-  ];
+  const loaded = Array.isArray(report._loaded_parts) ? report._loaded_parts : null;
+  const hasMicro = !loaded || loaded.includes("microscope");
+  const requiredTop = ["match_id", "is_parsed", "radiant_win", "radiant_score", "dire_score", "focus_side", "deep_forensics", "mvp", "radiant_pos_1_to_5", "dire_pos_1_to_5"];
+  if (hasMicro) requiredTop.push("draft_analysis_by_side");
   let ok = true;
   for (const k of requiredTop) {
     if (readReportField(report, k, "report") === undefined) ok = false;
@@ -3632,22 +3655,14 @@ function validateReportContract(report) {
     if (readReportField(report.mvp, "culprit_player", "report.mvp") === undefined) ok = false;
   }
   const df = report.deep_forensics;
-  if (df && typeof df === "object") {
-    for (const dfKey of [
-      "hero_execution_by_side",
-      "itemization_audit_by_side",
-      "damage_quality_and_build_by_side",
-      "support_vision_by_side",
-      "stacking_and_smoke_by_side",
-      "laning_mechanics_by_side",
-      "tp_rotation_by_side",
-      "unpressed_saves_by_side",
-      "map_space_by_side",
-      "damage_received_by_side",
-      "economy_and_pings_by_side",
-      "role_mirror_by_side",
-      "macro_objectives_by_side",
-    ]) {
+  if (hasMicro && df && typeof df === "object") {
+    const dfKeys = [
+      "hero_execution_by_side", "itemization_audit_by_side", "damage_quality_and_build_by_side",
+      "support_vision_by_side", "stacking_and_smoke_by_side", "laning_mechanics_by_side",
+      "tp_rotation_by_side", "unpressed_saves_by_side", "map_space_by_side", "damage_received_by_side",
+      "economy_and_pings_by_side", "role_mirror_by_side", "macro_objectives_by_side",
+    ];
+    for (const dfKey of dfKeys) {
       if (readReportField(df, dfKey, "report.deep_forensics") === undefined) ok = false;
     }
   }
@@ -3661,6 +3676,9 @@ function renderFullMatchReport(report) {
   if (!report) return;
   validateReportContract(report);
   hydrateReportData(report);
+  const loaded = Array.isArray(report._loaded_parts) ? report._loaded_parts : null;
+  const hasTimeline = !loaded || loaded.includes("timeline");
+  const hasMicro = !loaded || loaded.includes("microscope");
   if (state._lastRenderedMatchId !== report.match_id) {
     state._lastRenderedMatchId = report.match_id;
     state.verdictActiveCard = "focus";
@@ -3672,18 +3690,22 @@ function renderFullMatchReport(report) {
   }
   safeRenderSection("MatchOverview", () => renderMatchOverview(report));
   safeRenderSection("WorkstationFactCheck", () => renderWorkstationFactCheckSection(report));
-  safeRenderSection("DraftAndCombo", () => renderDraftAndComboSection(report));
   safeRenderSection("VerdictAndBlame", () => renderVerdictAndBlameSection(report));
-  safeRenderSection("TacticalMicroscope", () => renderTacticalMicroscopeSection(report));
-  safeRenderSection("MinuteScrubber", () => renderMinuteScrubber(report));
-  safeRenderSection("AdvChart", () => renderAdvChart(report));
-  safeRenderSection("NetWorthChart", () => renderNetWorthChart(report));
-  safeRenderSection("Minimap", () => renderMinimap(report));
-  safeRenderSection("DamageMatrix", () => renderDamageMatrix(report));
-  safeRenderSection("FocusFireMatrix", () => renderFocusFireMatrix(report));
-  safeRenderSection("PhaseSection", () => renderPhaseSection(report));
-  safeRenderSection("KeyWindows", () => renderKeyWindowsSection(report));
-  safeRenderSection("PlayersForensics", () => renderPlayersForensicsList(report));
+  if (hasTimeline) {
+    safeRenderSection("MinuteScrubber", () => renderMinuteScrubber(report));
+    safeRenderSection("AdvChart", () => renderAdvChart(report));
+    safeRenderSection("NetWorthChart", () => renderNetWorthChart(report));
+    safeRenderSection("Minimap", () => renderMinimap(report));
+  }
+  if (hasMicro) {
+    safeRenderSection("DraftAndCombo", () => renderDraftAndComboSection(report));
+    safeRenderSection("TacticalMicroscope", () => renderTacticalMicroscopeSection(report));
+    safeRenderSection("DamageMatrix", () => renderDamageMatrix(report));
+    safeRenderSection("FocusFireMatrix", () => renderFocusFireMatrix(report));
+    safeRenderSection("PhaseSection", () => renderPhaseSection(report));
+    safeRenderSection("KeyWindows", () => renderKeyWindowsSection(report));
+    safeRenderSection("PlayersForensics", () => renderPlayersForensicsList(report));
+  }
   safeRenderSection("PostgameSubTab", () =>
     applyPostgameSubTab(state.wsPostgameTab || "summary", { scrollTop: false })
   );
@@ -3946,18 +3968,20 @@ function renderWorkstationFactCheckSection(report) {
         .filter(Boolean)
         .join(" · ");
 
-      const itemsRich = Array.isArray(p.final_items_rich) ? p.final_items_rich.slice(0, 5) : [];
+      const itemsRich = Array.isArray(p.final_items_rich) ? p.final_items_rich.filter((it) => !["branches", "dust", "magic_stick", "tpscroll"].includes(it.item_key || it.key || "")).slice(0, 2) : [];
       const itemsStripHtml = itemsRich.length
         ? `<div class="ws-num-items-strip">${itemsRich
-            .map((it) =>
-              it.img
-                ? `<img src="${escapeHtml(it.img)}" alt="${escapeHtml(
+            .map((it) => {
+              const ik = it.item_key || it.key || "";
+              const smImg = ik ? "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/items/" + ik + "_eg.png" : it.img;
+              return smImg
+                ? `<img src="${escapeHtml(smImg)}" onerror="this.onerror=null;this.src='${escapeHtml(it.img || "")}'" alt="${escapeHtml(
                     it.zh_name || ""
                   )}" title="${escapeHtml(it.zh_name || "")}${
                     it.purchase_time_str ? ` (${escapeHtml(it.purchase_time_str)})` : ""
                   }" width="26" height="19" loading="lazy" />`
-                : `<span class="ws-mini-item-txt">${escapeHtml(it.zh_name || "")}</span>`
-            )
+                : `<span class="ws-mini-item-txt">${escapeHtml(it.zh_name || "")}</span>`;
+            })
             .join("")}</div>`
         : "";
 
@@ -3991,10 +4015,10 @@ function renderWorkstationFactCheckSection(report) {
           <td>
             <div class="ws-num-hero-cell">
               ${
-                p.hero_img
-                  ? `<img class="ws-num-hero-avatar" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(
+                p.hero_icon || p.hero_img
+                  ? `<img class="ws-num-hero-avatar" src="${escapeHtml(p.hero_icon || p.hero_img)}" alt="${escapeHtml(
                       p.hero_short_zh
-                    )}" width="44" height="25" loading="lazy" />`
+                    )}" width="28" height="28" loading="lazy" />`
                   : ""
               }
               <div class="ws-num-hero-meta">
@@ -9070,11 +9094,7 @@ function renderStageRankingsBlockHtml(stageKey, report) {
       <div class="stage-rank-item ${themeClass}">
         <div class="stage-rank-top">
           <span class="stage-rank-badge ${themeClass}">${badgeText}</span>
-          ${
-            p.hero_img
-              ? `<img src="${escapeHtml(p.hero_img)}" width="24" height="14" alt="" class="stage-rank-avatar" />`
-              : ""
-          }
+          ${p.hero_icon || p.hero_img ? `<img src="${escapeHtml(p.hero_icon || p.hero_img)}" width="18" height="18" alt="" class="stage-rank-avatar" loading="lazy" />` : ""}
           <strong class="stage-rank-hero">${p.pos}号位 ${escapeHtml(p.hero_short_zh)}</strong>
           <span class="stage-rank-player">(${escapeHtml(p.personaname)})</span>
         </div>
@@ -10608,8 +10628,8 @@ function renderVerdictAndBlameSection(report) {
                 data-verdict-card-tab="${escapeHtml(entry.key)}"
               >
                 ${
-                  p.hero_img
-                    ? `<img src="${escapeHtml(p.hero_img)}" width="22" height="13" alt="" class="tf-p-pill-avatar" />`
+                  p.hero_icon || p.hero_img
+                    ? `<img src="${escapeHtml(p.hero_icon || p.hero_img)}" width="20" height="20" alt="" class="tf-p-pill-avatar" loading="lazy" />`
                     : ""
                 }
                 <span class="tf-pill-label">${p.pos}号 ${escapeHtml(heroShort)}</span>
@@ -10684,10 +10704,10 @@ function renderVerdictAndBlameSection(report) {
             <div class="verdict-card-body">
               <div class="verdict-hero-row">
                 ${
-                  p.hero_img
-                    ? `<img class="verdict-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(
+                  p.hero_icon || p.hero_img
+                    ? `<img class="verdict-portrait" src="${escapeHtml(p.hero_icon || p.hero_img)}" alt="${escapeHtml(
                         heroShort
-                      )}" />`
+                      )}" loading="lazy" />`
                     : ""
                 }
                 <div class="verdict-identity">
@@ -10813,11 +10833,7 @@ function renderVerdictAndBlameSection(report) {
             return `
               <div class="blame-row win-mode rank-${idx}">
                 <div class="blame-rank-num">${rankMedals[idx] || `0${idx + 1}`}</div>
-                ${
-                  p.hero_img
-                    ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
-                    : `<div class="blame-row-portrait"></div>`
-                }
+                ${p.hero_icon || p.hero_img ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_icon || p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />` : `<div class="blame-row-portrait"></div>`}
                 <div class="blame-row-who">
                   <div class="blame-row-title">
                     <strong>${escapeHtml(heroShort)}</strong>
@@ -10852,7 +10868,7 @@ function renderVerdictAndBlameSection(report) {
             return `
               <div class="blame-row rank-${idx}">
                 <div class="blame-rank-num">0${idx + 1}</div>
-                ${p.hero_img ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />` : `<div class="blame-row-portrait"></div>`}
+                ${p.hero_icon || p.hero_img ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_icon || p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />` : `<div class="blame-row-portrait"></div>`}
                 <div class="blame-row-who">
                   <div class="blame-row-title">
                     <strong>${escapeHtml(heroShort)}</strong><span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span><span class="hero-score-100-inline">${sc100}分</span>
@@ -15220,7 +15236,7 @@ function renderSquadLedgerSection(squadLedger) {
                         <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:rgba(34,68,40,0.45);border:1px solid rgba(98,186,108,0.4);margin:2px;">
                           ${
                             h.hero_img
-                              ? `<img src="${escapeHtml(h.hero_img)}" width="28" height="16" alt="" style="border-radius:2px;" />`
+                              ? `<img src="${escapeHtml(h.hero_img)}" width="28" height="16" alt="" style="border-radius:2px;" loading="lazy" />`
                               : ""
                           }
                           <span style="font-size:11.5px;color:#d6f5d9;"><b>${escapeHtml(h.hero_short_zh)}</b> (${h.win_rate}% · ${h.games}局 · <b>${h.avg_rating}分</b>)</span>
@@ -15238,7 +15254,7 @@ function renderSquadLedgerSection(squadLedger) {
                         <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:5px;background:rgba(82,26,22,0.48);border:1px solid rgba(214,88,72,0.45);margin:2px;">
                           ${
                             h.hero_img
-                              ? `<img src="${escapeHtml(h.hero_img)}" width="28" height="16" alt="" style="border-radius:2px;" />`
+                              ? `<img src="${escapeHtml(h.hero_img)}" width="28" height="16" alt="" style="border-radius:2px;" loading="lazy" />`
                               : ""
                           }
                           <span style="font-size:11.5px;color:#ffb4a8;"><b>${escapeHtml(h.hero_short_zh)}</b> (${h.win_rate}% · ${h.games}局 · <b>${h.avg_rating}分</b>)</span>
@@ -17462,7 +17478,7 @@ function renderPregameSlots() {
               hero
                 ? `<img src="${escapeHtml(hero.img)}" width="38" height="21" alt="${escapeHtml(
                     hero.short_zh
-                  )}" /><strong>${escapeHtml(hero.short_zh)}</strong>`
+                  )}" loading="lazy" /><strong>${escapeHtml(hero.short_zh)}</strong>`
                 : `<span style="font-size:11px;color:var(--dim);">点击点选英雄</span>`
             }
           </div>
@@ -17500,7 +17516,7 @@ function renderPregameSlots() {
               hero
                 ? `<img src="${escapeHtml(hero.img)}" width="38" height="21" alt="${escapeHtml(
                     hero.short_zh
-                  )}" /><strong>${escapeHtml(hero.short_zh)}</strong>`
+                  )}" loading="lazy" /><strong>${escapeHtml(hero.short_zh)}</strong>`
                 : `<span style="font-size:11px;color:var(--dim);">可选填敌方</span>`
             }
           </div>
