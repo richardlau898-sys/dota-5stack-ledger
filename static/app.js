@@ -15463,50 +15463,31 @@ function renderSquadLedgerSection(squadLedger) {
   const tiltData = squadLedger?.duration_and_session_tilt || {};
   const durBuckets = Array.isArray(tiltData.duration_buckets) ? tiltData.duration_buckets : [];
   const sessBuckets = Array.isArray(tiltData.session_game_buckets) ? tiltData.session_game_buckets : [];
-  const durationAndTiltHtml = `
-    <div id="squad-duration-session-tilt" class="squad-card" style="margin-bottom: 14px;">
-      <div class="squad-card-head">
-        <h3>⏳ 时长画像与当晚连打疲劳曲线 (F6 · 遵守 T1-9 最小样本量 &gt;=10局)</h3>
-        <span>两局间隔 &lt; 90 分钟记为同一晚连打 · 样本不足 10 局仅展示场次不给胜率定性</span>
-      </div>
-      <div class="squad-grid-2col" style="margin-top:8px;">
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">⏱️ 比赛时长分桶胜率：</div>
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
-            ${durBuckets
-              .map(
-                (b) => `
-              <div style="padding:7px 9px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;">
-                <strong>${escapeHtml(b.label_zh)}</strong>
-                <div style="color:var(--muted);margin-top:2px;">${b.games}局 (${b.wins}胜${b.losses}负) · <b>${
-                  b.win_rate !== null && b.win_rate !== undefined ? `${b.win_rate}%` : "样本不足（无数据）"
-                }</b></div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">🌙 当晚第几局连打胜率（间隔&lt;90m）：</div>
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
-            ${sessBuckets
-              .map(
-                (b) => `
-              <div style="padding:7px 9px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;">
-                <strong>${escapeHtml(b.label_zh)}</strong>
-                <div style="color:var(--muted);margin-top:2px;">${b.games}局 (${b.wins}胜${b.losses}负) · <b>${
-                  b.win_rate !== null && b.win_rate !== undefined ? `${b.win_rate}%` : "样本不足（无数据）"
-                }</b></div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  const fmtTiltBucket = (b) => `<div style="padding:7px 9px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;"><strong>${escapeHtml(b.label_zh)}</strong><div style="color:var(--muted);margin-top:2px;">${b.games}局 (${b.wins}胜${b.losses}负) · <b>${b.win_rate != null ? `${b.win_rate}%` : "样本不足（无数据）"}</b></div></div>`;
+  const durationAndTiltHtml = `<div id="squad-duration-session-tilt" class="squad-card" style="margin-bottom:14px;"><div class="squad-card-head"><h3>⏳ 时长画像与当晚连打疲劳曲线</h3><span>两局间隔 &lt; 90 分钟记为同一晚连打 · 样本不足 10 局仅展示场次不给胜率定性</span></div><div class="squad-grid-2col" style="margin-top:8px;"><div><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">比赛时长分桶胜率：</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">${durBuckets.map(fmtTiltBucket).join("")}</div></div><div><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">当晚第几局连打胜率（间隔&lt;90m）：</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">${sessBuckets.map(fmtTiltBucket).join("")}</div></div></div></div>`;
+
+  const f1Stats = squadLedger?.full_history_stats || {};
+  const f1RowsCnt = Number(f1Stats.synced_rows_count || 0);
+  const f1Players = Object.values(f1Stats.players || {}).sort((a, b) => (b.total_games || 0) - (a.total_games || 0));
+  const f1Combos = Array.isArray(f1Stats.combo_winrates) ? f1Stats.combo_winrates.slice(0, 6) : [];
+  const f1PartySizes = Array.isArray(f1Stats.party_size_winrates) ? f1Stats.party_size_winrates : [];
+  const fullHistoryHtml = `<div id="squad-full-history-f1" class="squad-card" style="margin-bottom:14px;"><div class="squad-card-head"><h3>全量历史对局统计（数据源：player_matches）</h3><span>${f1RowsCnt > 0 ? `已同步 ${Number(f1Stats.synced_players_count || f1Players.length)} 名队员 · ${f1RowsCnt} 条记录 · ${Number(f1Stats.unique_matches_count || 0)} 场对局（样本 &lt; 10 局不展示胜率）` : "无数据（尚未同步 player_matches 全量历史）"}</span></div>${
+    f1RowsCnt > 0
+      ? `<div class="squad-grid-2col" style="margin-top:8px;"><div><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">队员全量历史与常玩英雄（&ge;10局）：</div><div style="display:grid;gap:6px;">${f1Players.map((p) => {
+          const topHeroes = (p.hero_winrates || []).filter((h) => !h.insufficient_sample).slice(0, 3).map((h) => `${escapeHtml(h.hero_short_zh)} ${h.win_rate}% (${h.games}局)`).join(" · ") || "无满10局英雄";
+          const wrTxt = p.win_rate != null ? `${p.win_rate}%` : "样本不足";
+          return `<div style="padding:7px 9px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;"><strong>${escapeHtml(p.personaname)}</strong> · 共 ${p.total_games} 局 (${p.total_wins}胜) · 胜率 <b>${wrTxt}</b><div style="color:var(--muted);margin-top:2px;">主力英雄：${topHeroes}</div></div>`;
+        }).join("")}</div></div><div><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">开黑组合与组排人数胜率（&ge;10局）：</div><div style="display:grid;gap:6px;">${
+          f1Combos.length > 0
+            ? f1Combos.map((c) => `<div style="padding:6px 9px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;"><strong>${escapeHtml((c.player_names || []).join(" + "))}</strong> · ${c.games}局 (${c.wins}胜${c.losses}负) · <b>${c.win_rate != null ? `${c.win_rate}%` : "样本不足"}</b></div>`).join("")
+            : `<div style="font-size:12px;color:var(--muted);">暂无同场车队组合记录</div>`
+        }${
+          f1PartySizes.length > 0
+            ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">${f1PartySizes.map((ps) => `<span class="squad-pill">${ps.party_size}人排：${ps.games}局 · ${ps.win_rate != null ? `${ps.win_rate}%` : "样本不足"}</span>`).join("")}</div>`
+            : ""
+        }</div></div></div>`
+      : `<div style="font-size:12px;color:var(--muted);margin-top:6px;">无数据：运行 <code>python3 tools/sync_full_match_history.py --push-supabase</code> 同步后自动展示全量英雄与车队组合胜率。</div>`
+  }</div>`;
 
   const isRoastSq = isRoastTone();
   const sqBlameWord = isRoastSq ? "分锅" : "责任";
@@ -15520,8 +15501,11 @@ function renderSquadLedgerSection(squadLedger) {
       <div class="squad-summary-pills">
         <span class="squad-pill">近期组排开黑：${partySum.party_games || 0}局 (${partySum.party_win_rate || 0}%胜率)</span>
         <span class="squad-pill">近期单排：${partySum.solo_games || 0}局 (${partySum.solo_win_rate || 0}%胜率)</span>
+        <span class="squad-pill">player_matches 全量库：${f1RowsCnt > 0 ? `${f1RowsCnt}条 (${Number(f1Stats.unique_matches_count || 0)}局)` : "无数据"}</span>
       </div>
     </div>
+
+    ${fullHistoryHtml}
 
     ${guinnessCardsHtml}
 

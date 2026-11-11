@@ -3528,11 +3528,37 @@ def build_squad_history_ledger(
         build_personal_trends_and_goals,
         compute_duration_and_session_tilt_buckets,
     )
+    import cloud_store
+    import dota_analyst
+    from tools.sync_full_match_history import aggregate_full_history_stats
 
     high_risk_ward_spots = aggregate_high_risk_ward_spots(loaded_reports_for_growth)
     personal_trends_and_goals = build_personal_trends_and_goals(loaded_reports_for_growth, roster=roster)
 
+    roster_members_all = dota_analyst.iter_roster_accounts(roster)
+    all_roster_aids = sorted({int(aid) for m in roster_members_all for aid in m["account_ids"]})
+    pm_rows = cloud_store.cloud_fetch_player_matches(all_roster_aids)
+    full_history_stats = aggregate_full_history_stats(pm_rows, roster=roster)
+    # JSON-friendly string keys for players
+    full_history_stats["players"] = {str(k): v for k, v in (full_history_stats.get("players") or {}).items()}
+
     tilt_rows: List[Dict[str, Any]] = []
+    main_canon_aid = int(dota_analyst.resolve_canonical_account_id((roster or {}).get("main_account_id"), roster) or 0)
+    main_all_aids = set()
+    for m in roster_members_all:
+        if m["canonical_id"] == main_canon_aid:
+            main_all_aids.update(int(x) for x in m["account_ids"])
+    for pm in pm_rows:
+        if isinstance(pm, dict) and pm.get("match_id") and (not main_all_aids or int(pm.get("account_id") or 0) in main_all_aids):
+            slot_val = int(pm.get("player_slot") or 0)
+            rad_w = bool(pm.get("radiant_win"))
+            won_pm = bool(pm["won"]) if pm.get("won") is not None else (rad_w if slot_val < 128 else (not rad_w))
+            tilt_rows.append({
+                "match_id": int(pm["match_id"]),
+                "start_time": int(pm.get("start_time") or 0),
+                "duration": int(pm.get("duration") or 0),
+                "won": won_pm,
+            })
     for rm in recent_matches or []:
         if isinstance(rm, dict) and rm.get("match_id"):
             raw_dur = rm.get("duration_sec") if rm.get("duration_sec") is not None else rm.get("duration")
@@ -3582,6 +3608,7 @@ def build_squad_history_ledger(
         "high_risk_ward_spots": high_risk_ward_spots,
         "personal_trends_and_goals": personal_trends_and_goals,
         "duration_and_session_tilt": duration_and_session_tilt,
+        "full_history_stats": full_history_stats,
         "recent_hero_pool": recent_hero_pool,
         "party_summary": party_summary,
     }
@@ -3683,9 +3710,19 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
         if (cur_url and cloud_store._CLOUD_IDS_CACHE.get("url") == cur_url)
         else []
     )
+    pm_cache_rows = cloud_store._PLAYER_MATCHES_CACHE.get("rows") or []
+    pm_cache_cnt = len(pm_cache_rows) if isinstance(pm_cache_rows, list) else 0
+    local_pm_path = Path(__file__).resolve().parent / ".cache" / "player_matches_history.json"
+    local_pm_mtime = int(local_pm_path.stat().st_mtime_ns) if local_pm_path.exists() else 0
     main_aid = int((roster or {}).get("main_account_id") or 0)
     players_cnt = len((roster or {}).get("players") or {})
-    sig_payload = {"files": files, "cloud_url": cur_url, "cloud_ids": cloud_ids}
+    sig_payload = {
+        "files": files,
+        "cloud_url": cur_url,
+        "cloud_ids": cloud_ids,
+        "pm_cache_cnt": pm_cache_cnt,
+        "local_pm_mtime": local_pm_mtime,
+    }
     digest = hashlib.sha256(json.dumps(sig_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     return f"{rdir.resolve()}|{main_aid}|{players_cnt}|{len(files)}|{digest}"
 
@@ -3720,6 +3757,7 @@ def refresh_persisted_squad_ledger(
         "high_risk_ward_spots": ledger.get("high_risk_ward_spots") or [],
         "personal_trends_and_goals": ledger.get("personal_trends_and_goals") or {"players": {}},
         "duration_and_session_tilt": ledger.get("duration_and_session_tilt") or {},
+        "full_history_stats": ledger.get("full_history_stats") or {},
     }
     _LEDGER_MEM_CACHE[str(reports_dir)] = core_payload
     if persist_disk:
@@ -3766,6 +3804,7 @@ def load_or_build_squad_ledger(
         "high_risk_ward_spots": cached_core.get("high_risk_ward_spots") or [],
         "personal_trends_and_goals": cached_core.get("personal_trends_and_goals") or {"players": {}},
         "duration_and_session_tilt": cached_core.get("duration_and_session_tilt") or {},
+        "full_history_stats": cached_core.get("full_history_stats") or {},
         "recent_hero_pool": recent_hero_pool,
         "party_summary": party_summary,
     }
