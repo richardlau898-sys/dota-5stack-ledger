@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r2.9"
+ENGINE_VERSION = "2026.11.r3.2"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -1406,13 +1406,53 @@ def analyze_match_data(
             obs_destroyed = int(killed_raw.get("npc_dota_observer_wards") or p.get("observer_kills") or 0)
             sen_destroyed = int(killed_raw.get("npc_dota_sentry_wards") or p.get("sentry_kills") or 0)
 
-            # 提取眼位坐标 (x, y in [64, 192] -> nx, ny in [0, 100])
-            for wtype, wlog in [("obs", p.get("obs_log") or []), ("sen", p.get("sen_log") or [])]:
+            # 提取眼位坐标并配对 obs_left_log / sen_left_log 计算存活秒数 (x, y in [64, 192] -> nx, ny in [0, 100])
+            own_team_npcs = {
+                (hero_map.get(int(tp.get("hero_id") or 0)) or {}).get("npc")
+                for tp in team_list
+            } - {None, ""}
+            for wtype, wlog, llog, nat_life in [
+                ("obs", p.get("obs_log") or [], p.get("obs_left_log") or [], 355),
+                ("sen", p.get("sen_log") or [], p.get("sen_left_log") or [], 415),
+            ]:
+                used_left_idx = set()
+                left_by_eh = {}
+                for l_idx, le in enumerate(llog):
+                    if isinstance(le, dict) and le.get("ehandle") is not None and le.get("ehandle") not in left_by_eh:
+                        left_by_eh[le["ehandle"]] = (l_idx, le)
                 for we in wlog:
                     wx = we.get("x")
                     wy = we.get("y")
                     wt = we.get("time", 0)
                     if isinstance(wx, (int, float)) and isinstance(wy, (int, float)):
+                        matched_le = None
+                        eh = we.get("ehandle")
+                        if eh is not None and eh in left_by_eh:
+                            l_idx, cand_le = left_by_eh[eh]
+                            if l_idx not in used_left_idx:
+                                used_left_idx.add(l_idx)
+                                matched_le = cand_le
+                        if matched_le is None:
+                            for l_idx, cand_le in enumerate(llog):
+                                if l_idx in used_left_idx or not isinstance(cand_le, dict):
+                                    continue
+                                if (
+                                    cand_le.get("x") == wx
+                                    and cand_le.get("y") == wy
+                                    and cand_le.get("time") is not None
+                                    and int(cand_le["time"]) >= int(wt)
+                                ):
+                                    used_left_idx.add(l_idx)
+                                    matched_le = cand_le
+                                    break
+                        life_sec = None
+                        was_dewarded = False
+                        if matched_le is not None and matched_le.get("time") is not None:
+                            life_sec = max(0, int(matched_le["time"]) - int(wt))
+                            att = str(matched_le.get("attackername") or "")
+                            was_dewarded = bool(
+                                life_sec < nat_life and (not att or att not in own_team_npcs)
+                            )
                         nx = round(max(2.0, min(98.0, (float(wx) - 64.0) / 128.0 * 100.0)), 1)
                         ny = round(max(2.0, min(98.0, (1.0 - (float(wy) - 64.0) / 128.0) * 100.0)), 1)
                         all_wards_map.append({
@@ -1428,6 +1468,8 @@ def analyze_match_data(
                             "y": round(float(wy), 1),
                             "nx": nx,
                             "ny": ny,
+                            "lifespan_sec": life_sec,
+                            "was_dewarded": was_dewarded,
                         })
 
             # 提取对线期走位热力点（每位英雄保留权重最高的前 15 个高密度热力格）
