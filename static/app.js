@@ -3159,6 +3159,9 @@ async function loadMatchReport(
     }
 
     toggleOnDemandGate(false);
+    if (data.stale && data.report) {
+      data.report.stale = true;
+    }
     state.currentMatchId = data.report.match_id;
     state.currentReport = data.report;
     state.selectedTeamfightIndex = null;
@@ -3708,6 +3711,15 @@ function renderMatchOverview(report) {
     metaEl.textContent = `比赛编号 #${report.match_id} · ${formattedStartTime} · ${
       report.mode_str || ""
     } · 当前审视阵营：${sideZh} (${side.toUpperCase()}) · ${statusText}`;
+  }
+
+  const staleBannerEl = document.getElementById("stale-report-banner");
+  if (staleBannerEl) {
+    const isStale = Boolean(report.stale);
+    staleBannerEl.hidden = !isStale;
+    if (isStale) {
+      staleBannerEl.textContent = "报告版本较旧，需要口令重算";
+    }
   }
 
   const parseBadge = document.getElementById("parse-quality-badge");

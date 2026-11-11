@@ -3313,8 +3313,9 @@ def refresh_persisted_squad_ledger(
     reports_dir: Any,
     roster: Dict[str, Any],
     recent_matches: Optional[List[Dict[str, Any]]] = None,
+    persist_disk: bool = True,
 ) -> Dict[str, Any]:
-    """在报告入库或花名册变更时计算一次总账并持久化缓存。"""
+    """在报告入库或花名册变更时计算一次总账并持久化缓存（只读请求设 persist_disk=False）。"""
     import json
 
     ledger = build_squad_history_ledger(reports_dir, roster, recent_matches or [])
@@ -3330,12 +3331,13 @@ def refresh_persisted_squad_ledger(
         "duration_and_session_tilt": ledger.get("duration_and_session_tilt") or {},
     }
     _LEDGER_MEM_CACHE[str(reports_dir)] = core_payload
-    cpath = _ledger_cache_file_path(reports_dir)
-    try:
-        cpath.parent.mkdir(parents=True, exist_ok=True)
-        cpath.write_text(json.dumps(core_payload, ensure_ascii=False), encoding="utf-8")
-    except OSError:
-        pass
+    if persist_disk:
+        cpath = _ledger_cache_file_path(reports_dir)
+        try:
+            cpath.parent.mkdir(parents=True, exist_ok=True)
+            cpath.write_text(json.dumps(core_payload, ensure_ascii=False), encoding="utf-8")
+        except OSError:
+            pass
     return ledger
 
 
@@ -3343,6 +3345,7 @@ def load_or_build_squad_ledger(
     reports_dir: Any,
     roster: Dict[str, Any],
     recent_matches: Optional[List[Dict[str, Any]]] = None,
+    allow_write: bool = True,
 ) -> Dict[str, Any]:
     """请求时直接读取预计算好的总账缓存，不重复解析全部 match_*.json。"""
     import json
@@ -3361,7 +3364,7 @@ def load_or_build_squad_ledger(
                 cached_core = None
 
     if not isinstance(cached_core, dict) or cached_core.get("_sig") != sig:
-        return refresh_persisted_squad_ledger(reports_dir, roster, recent_matches)
+        return refresh_persisted_squad_ledger(reports_dir, roster, recent_matches, persist_disk=allow_write)
 
     recent_hero_pool, party_summary = _compute_recent_pool_and_party_summary(recent_matches)
     return {

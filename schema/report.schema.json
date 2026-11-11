@@ -41,6 +41,7 @@
   "properties": {
     "_zh_schema_v": { "type": "integer" },
     "engine_version": { "type": "string" },
+    "stale": { "type": "boolean" },
     "match_id": { "type": "integer" },
     "patch": { "type": ["integer", "string", "null"] },
     "patch_str": { "type": ["string", "null"] },
