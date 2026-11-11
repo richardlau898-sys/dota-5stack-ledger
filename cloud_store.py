@@ -576,3 +576,99 @@ def cloud_upsert_player_matches(rows: List[Dict[str, Any]], cfg: Optional[Dict[s
             ok_all = False
     return ok_all
 
+
+def cloud_load_notified_match_ids(cfg: Optional[Dict[str, str]] = None) -> Set[int]:
+    """R1-5: 从 Supabase 读取已发送赛后推送的 match_id 集合"""
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+    out: Set[int] = set()
+    if not url or not key:
+        return out
+
+    try:
+        req = urllib.request.Request(
+            f"{url}/rest/v1/postgame_notified_matches?select=match_id&limit=2000",
+            headers=_supabase_headers(key, {"Accept": "application/json"}),
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            rows = json.loads(resp.read().decode("utf-8"))
+            if isinstance(rows, list):
+                for r in rows:
+                    if isinstance(r, dict) and r.get("match_id"):
+                        out.add(int(r["match_id"]))
+                return out
+    except Exception:
+        pass
+
+    bucket = cfg.get("supabase_bucket") or "dota-reports"
+    try:
+        req = urllib.request.Request(
+            f"{url}/storage/v1/object/{bucket}/state/postgame_notified_matches.json",
+            headers=_supabase_headers(key),
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if isinstance(data, dict):
+                for x in data.get("notified_match_ids") or []:
+                    if str(x).isdigit():
+                        out.add(int(x))
+    except Exception:
+        pass
+    return out
+
+
+def cloud_save_notified_match_ids(match_ids: Set[int], cfg: Optional[Dict[str, str]] = None) -> bool:
+    """R1-5: 将已发送赛后推送的 match_id 集合持久化到 Supabase"""
+    if not match_ids:
+        return True
+    if cfg is None:
+        cfg = get_cloud_config()
+    url = cfg.get("supabase_url") or ""
+    key = cfg.get("supabase_key") or ""
+    if not url or not key:
+        return False
+
+    sorted_ids = sorted(int(m) for m in match_ids if int(m) > 0)
+    rows = [{"match_id": mid} for mid in sorted_ids]
+    try:
+        req = urllib.request.Request(
+            f"{url}/rest/v1/postgame_notified_matches?on_conflict=match_id",
+            data=json.dumps(rows, ensure_ascii=False).encode("utf-8"),
+            method="POST",
+            headers=_supabase_headers(
+                key,
+                {
+                    "Content-Type": "application/json",
+                    "Prefer": "resolution=merge-duplicates,return=minimal",
+                },
+            ),
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            if 200 <= resp.status < 300:
+                return True
+    except Exception:
+        pass
+
+    bucket = cfg.get("supabase_bucket") or "dota-reports"
+    try:
+        payload = json.dumps({"notified_match_ids": sorted_ids}, ensure_ascii=False).encode("utf-8")
+        req = urllib.request.Request(
+            f"{url}/storage/v1/object/{bucket}/state/postgame_notified_matches.json",
+            data=payload,
+            method="POST",
+            headers=_supabase_headers(
+                key,
+                {
+                    "Content-Type": "application/json",
+                    "x-upsert": "true",
+                },
+            ),
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
+
+

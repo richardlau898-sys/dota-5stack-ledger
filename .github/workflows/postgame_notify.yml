@@ -1,8 +1,6 @@
 name: Postgame Match Parse & Webhook Notify
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -20,5 +18,7 @@ jobs:
       - name: Check new squad matches, request parse, and send webhook summary
         env:
           POSTGAME_WEBHOOK_URL: ${{ secrets.POSTGAME_WEBHOOK_URL }}
-          PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL || 'https://dota-5stack-ledger.vercel.app' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PUBLIC_APP_URL: ${{ vars.PUBLIC_APP_URL || 'https://dota-ai-analyst.vercel.app' }}
         run: python3 tools/postgame_webhook_notifier.py
