@@ -3533,7 +3533,12 @@ def build_squad_history_ledger(
     from tools.sync_full_match_history import aggregate_full_history_stats
 
     high_risk_ward_spots = aggregate_high_risk_ward_spots(loaded_reports_for_growth)
-    personal_trends_and_goals = build_personal_trends_and_goals(loaded_reports_for_growth, roster=roster)
+    saved_goals = cloud_store.cloud_fetch_player_goals()
+    personal_trends_and_goals = build_personal_trends_and_goals(
+        loaded_reports_for_growth,
+        roster=roster,
+        weekly_goals=saved_goals,
+    )
 
     roster_members_all = dota_analyst.iter_roster_accounts(roster)
     all_roster_aids = sorted({int(aid) for m in roster_members_all for aid in m["account_ids"]})
@@ -3714,6 +3719,9 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
     pm_cache_cnt = len(pm_cache_rows) if isinstance(pm_cache_rows, list) else 0
     local_pm_path = Path(__file__).resolve().parent / ".cache" / "player_matches_history.json"
     local_pm_mtime = int(local_pm_path.stat().st_mtime_ns) if local_pm_path.exists() else 0
+    local_goals_path = Path("/tmp/dota_reports/player_goals.json")
+    local_goals_mtime = int(local_goals_path.stat().st_mtime_ns) if local_goals_path.exists() else 0
+    goals_cache_obj = cloud_store._PLAYER_GOALS_CACHE.get("goals")
     main_aid = int((roster or {}).get("main_account_id") or 0)
     players_cnt = len((roster or {}).get("players") or {})
     sig_payload = {
@@ -3722,6 +3730,8 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
         "cloud_ids": cloud_ids,
         "pm_cache_cnt": pm_cache_cnt,
         "local_pm_mtime": local_pm_mtime,
+        "local_goals_mtime": local_goals_mtime,
+        "goals_cache": goals_cache_obj if isinstance(goals_cache_obj, dict) else None,
     }
     digest = hashlib.sha256(json.dumps(sig_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     return f"{rdir.resolve()}|{main_aid}|{players_cnt}|{len(files)}|{digest}"

@@ -89,7 +89,7 @@ class TestF4PersonalTrendsAndGoals(unittest.TestCase):
         p_sup = players["125383759"]
         series_sup = p_sup["series"]
         self.assertEqual([pt["support_wards_per_min"] for pt in series_sup], [0.9, 1.0, 1.13])
-        self.assertTrue(p_sup["weekly_goal"]["achieved"])
+        self.assertIsNone(p_sup["weekly_goal"])
 
     def test_squad_ledger_and_frontend_expose_personal_trends_and_goals(self):
         """build_squad_history_ledger includes personal_trends_and_goals and static/app.js renders #squad-personal-trends-goals."""

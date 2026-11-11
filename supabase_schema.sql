@@ -156,3 +156,28 @@ CREATE TABLE IF NOT EXISTS public.postgame_notified_matches (
 
 ALTER TABLE public.postgame_notified_matches ENABLE ROW LEVEL SECURITY;
 
+-- F4 / R3-4: 队员个人最近 7 局训练目标表
+CREATE TABLE IF NOT EXISTS public.player_goals (
+    account_id BIGINT PRIMARY KEY,
+    metric TEXT NOT NULL,
+    direction TEXT NOT NULL DEFAULT 'max',
+    target NUMERIC NOT NULL,
+    label_zh TEXT NOT NULL DEFAULT '',
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.player_goals ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE tablename = 'player_goals' AND policyname = 'Allow public read player_goals'
+    ) THEN
+        CREATE POLICY "Allow public read player_goals"
+            ON public.player_goals FOR SELECT
+            USING (true);
+    END IF;
+END
+$$;
+

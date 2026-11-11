@@ -915,7 +915,7 @@ def build_personal_trends_and_goals(
         f_entry = m_entry["info"] if m_entry else {}
         p_name = m_entry["name"] if m_entry else str(aid)
 
-        # 每周目标计算
+        # R3-4: 最近 7 局个人目标计算（未设置目标则留空 None，绝不写死 0.85 或 2.0 默认目标）
         goal_cfg = weekly_goals.get(str(aid))
         if goal_cfg is None and m_entry:
             for sub_id in m_entry["account_ids"]:
@@ -923,43 +923,57 @@ def build_personal_trends_and_goals(
                     goal_cfg = weekly_goals[str(sub_id)]
                     break
         if goal_cfg is None and isinstance(f_entry, dict):
-            goal_cfg = f_entry.get("weekly_goal")
-        if not isinstance(goal_cfg, dict):
-            # 默认按常打位置分配客观目标
-            sup_vals = [x["support_wards_per_min"] for x in points_out if x["support_wards_per_min"] is not None]
-            if len(sup_vals) >= len(points_out) / 2 and sup_vals:
-                goal_cfg = {
-                    "metric": "support_wards_per_min",
-                    "label_zh": "辅助每分钟插眼数 >= 0.85",
-                    "direction": "min",
-                    "target": 0.85,
-                }
-            else:
-                goal_cfg = {
-                    "metric": "non_teamfight_deaths_after_10m",
-                    "label_zh": "10分钟后团战外阵亡 <= 2.0 次/局",
-                    "direction": "max",
-                    "target": 2.0,
-                }
+            goal_cfg = f_entry.get("recent_7_goal") or f_entry.get("weekly_goal")
 
-        m_key = str(goal_cfg.get("metric") or "non_teamfight_deaths_after_10m")
-        target_val = float(goal_cfg.get("target") or 2.0)
-        direction = str(goal_cfg.get("direction") or ("min" if m_key in ("support_wards_per_min", "lane_nw_diff_10m") else "max"))
-        recent_vals = [
-            float(x[m_key])
-            for x in points_out[-7:]
-            if x.get(m_key) is not None
-        ]
-        current_avg = round(sum(recent_vals) / len(recent_vals), 2) if recent_vals else None
-        if current_avg is None:
-            achieved = None
-            progress_pct = None
-        elif direction == "min":
-            achieved = current_avg >= target_val
-            progress_pct = round(min(100.0, max(0.0, (current_avg / target_val) * 100.0)), 1) if target_val > 0 else 100.0
-        else:
-            achieved = current_avg <= target_val
-            progress_pct = 100.0 if current_avg <= target_val else round(max(0.0, (target_val / max(current_avg, 0.01)) * 100.0), 1)
+        goal_out: Optional[Dict[str, Any]] = None
+        if isinstance(goal_cfg, dict) and goal_cfg.get("metric") and goal_cfg.get("target") is not None:
+            m_key = str(goal_cfg["metric"])
+            target_val = float(goal_cfg["target"])
+            direction = str(
+                goal_cfg.get("direction")
+                or ("min" if m_key in ("support_wards_per_min", "lane_nw_diff_10m") else "max")
+            )
+            default_labels = {
+                "non_teamfight_deaths_after_10m": f"10分钟后团战外阵亡 <= {target_val} 次/局",
+                "lane_nw_diff_10m": f"对位10分钟净值差 >= {target_val:+g}",
+                "support_wards_per_min": f"辅助每分钟插眼数 >= {target_val}/m",
+                "key_item_timing_delta_sec": f"关键装相对本人中位数偏差 <= {target_val:+g}s",
+            }
+            recent_vals = [
+                float(x[m_key])
+                for x in points_out[-7:]
+                if x.get(m_key) is not None
+            ]
+            current_avg = round(sum(recent_vals) / len(recent_vals), 2) if recent_vals else None
+            if current_avg is None:
+                achieved = None
+                progress_pct = None
+            elif direction == "min":
+                achieved = current_avg >= target_val
+                if target_val > 0:
+                    progress_pct = round(min(100.0, max(0.0, (current_avg / target_val) * 100.0)), 1)
+                else:
+                    progress_pct = 100.0 if achieved else 0.0
+            else:
+                achieved = current_avg <= target_val
+                if achieved:
+                    progress_pct = 100.0
+                elif target_val > 0 and current_avg > 0:
+                    progress_pct = round(max(0.0, min(100.0, (target_val / current_avg) * 100.0)), 1)
+                else:
+                    progress_pct = 0.0
+
+            goal_out = {
+                "window_label_zh": "最近 7 局",
+                "metric": m_key,
+                "label_zh": str(goal_cfg.get("label_zh") or default_labels.get(m_key) or m_key),
+                "direction": direction,
+                "target": target_val,
+                "current_avg": current_avg,
+                "sample_games": len(recent_vals),
+                "achieved": achieved,
+                "progress_pct": progress_pct,
+            }
 
         players_trends[str(aid)] = {
             "account_id": aid,
@@ -967,16 +981,8 @@ def build_personal_trends_and_goals(
             "games_count": len(points_out),
             "median_key_item_sec": round(median_item_sec, 1) if median_item_sec is not None else None,
             "series": points_out,
-            "weekly_goal": {
-                "metric": m_key,
-                "label_zh": goal_cfg.get("label_zh") or m_key,
-                "direction": direction,
-                "target": target_val,
-                "current_avg": current_avg,
-                "sample_games": len(recent_vals),
-                "achieved": achieved,
-                "progress_pct": progress_pct,
-            },
+            "recent_7_goal": goal_out,
+            "weekly_goal": goal_out,
         }
 
     return {"players": players_trends}

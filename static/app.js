@@ -15382,56 +15382,63 @@ function renderSquadLedgerSection(squadLedger) {
       : "";
 
   const trendsMap = squadLedger?.personal_trends_and_goals?.players || {};
-  const trendPlayers = coreHabitMembers
-    .map((m) => trendsMap[String(m.account_id)] || null)
-    .filter(Boolean);
+  const trendPlayers = coreHabitMembers.map((m) => trendsMap[String(m.account_id)] || null).filter(Boolean);
+  const renderSparkRow = (pts, key, label, suffix = "", signed = false, stroke = "var(--gold)") => {
+    const valid = pts.map((p, idx) => ({ idx, v: p[key] })).filter((x) => x.v !== null && x.v !== undefined && !Number.isNaN(Number(x.v)));
+    if (valid.length === 0) return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;border-top:1px dashed rgba(255,255,255,0.06);"><span style="color:var(--muted);">${label}</span><span style="color:var(--dim);">无数据</span></div>`;
+    const nums = valid.map((x) => Number(x.v));
+    const minV = Math.min(...nums), maxV = Math.max(...nums), span = maxV - minV || 1;
+    const w = 128, h = 24, pad = 3;
+    const coords = nums.map((n, i) => {
+      const x = nums.length === 1 ? w / 2 : pad + (i / (nums.length - 1)) * (w - pad * 2);
+      const y = h - pad - ((n - minV) / span) * (h - pad * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+    const last = nums[nums.length - 1];
+    const fmt = (n) => `${signed && n > 0 ? "+" : ""}${Number.isInteger(n) ? n : n.toFixed(2).replace(/\.?0+$/, "")}${suffix}`;
+    const dots = coords.map((c, i) => { const [cx, cy] = c.split(","); return `<circle cx="${cx}" cy="${cy}" r="${i === coords.length - 1 ? 2.6 : 1.7}" fill="${stroke}"/>`; }).join("");
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;border-top:1px dashed rgba(255,255,255,0.06);"><span style="color:var(--muted);min-width:118px;">${label}</span><svg class="f4-sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-label="${label}折线图" style="flex-shrink:0;overflow:visible;"><polyline fill="none" stroke="${stroke}" stroke-width="1.6" points="${coords.join(" ")}" />${dots}</svg><span style="font-variant-numeric:tabular-nums;min-width:74px;text-align:right;color:var(--text);">近局 <b>${escapeHtml(fmt(last))}</b></span></div>`;
+  };
   const personalTrendsHtml =
     trendPlayers.length > 0
-      ? `
-      <div id="squad-personal-trends-goals" class="squad-card" style="margin-bottom: 14px;">
+      ? `<div id="squad-personal-trends-goals" class="squad-card" style="margin-bottom:14px;">
         <div class="squad-card-head">
-          <h3>📈 个人随比赛变化趋势曲线 &amp; 每周目标进度 (F4)</h3>
-          <span>追踪：10m后团战外阵亡数 · 对真实对位10m净值差 · 辅助每分钟插眼数 · 关键装时间相对本人中位数偏差</span>
+          <h3>个人随比赛变化趋势曲线与最近 7 局目标</h3>
+          <span>追踪最近对局四项指标折线 · 目标按最近 7 局均值核算并存至 Supabase</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 10px;padding:7px 10px;background:rgba(255,255,255,0.025);border:1px solid var(--line);">
+          <span style="font-size:12px;color:var(--gold);font-weight:700;">设置最近 7 局目标：</span>
+          <select id="f4-goal-player" class="select-input" style="padding:4px 8px;font-size:12px;">${trendPlayers.map((tp) => `<option value="${tp.account_id}">${escapeHtml(tp.personaname)}</option>`).join("")}</select>
+          <select id="f4-goal-metric" class="select-input" style="padding:4px 8px;font-size:12px;">
+            <option value="non_teamfight_deaths_after_10m">10分钟后团战外阵亡 (&le; 目标次/局)</option>
+            <option value="lane_nw_diff_10m">对位10分钟净值差 (&ge; 目标金)</option>
+            <option value="support_wards_per_min">辅助每分钟插眼数 (&ge; 目标/m)</option>
+            <option value="key_item_timing_delta_sec">关键装相对本人中位数偏差 (&le; 目标秒)</option>
+          </select>
+          <input id="f4-goal-target" type="number" step="0.05" placeholder="输入目标数值" style="width:112px;padding:4px 8px;font-size:12px;background:var(--bg);color:var(--text);border:1px solid var(--line);" />
+          <button type="button" id="btn-save-f4-goal" class="btn-secondary" style="padding:4px 10px;font-size:12px;">保存目标</button>
+          <button type="button" id="btn-clear-f4-goal" class="btn-secondary" style="padding:4px 10px;font-size:12px;">清除目标</button>
         </div>
         <div class="habit-member-cards-grid" style="margin-top:8px;">
-          ${trendPlayers
-            .map((tp) => {
-              const wg = tp.weekly_goal || {};
-              const pts = (tp.series || []).slice(-6);
-              const fmtSeriesVals = (key, suffix = "", signed = false) => {
-                const vals = pts.map((pt) => {
-                  const v = pt[key];
-                  if (v === null || v === undefined) return "无数据";
-                  const num = Number(v);
-                  return `${signed && num > 0 ? "+" : ""}${num}${suffix}`;
-                });
-                return vals.length ? vals.join(" → ") : "无数据";
-              };
-              const progText =
-                wg.current_avg !== null && wg.current_avg !== undefined
-                  ? `当前近 ${wg.sample_games || 0} 局均值 ${wg.current_avg} / 目标 ${wg.target} (${
-                      wg.achieved ? "✅ 已达标" : `${wg.progress_pct ?? 0}%`
-                    })`
-                  : "无数据";
-              return `
-                <article style="padding:10px 12px;border-radius:8px;background:rgba(15,17,14,0.92);border:1px solid rgba(255,255,255,0.1);font-size:12px;line-height:1.55;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">
-                    <strong style="color:#f5f2eb;font-size:14px;">${escapeHtml(tp.personaname)} (${tp.games_count}局)</strong>
-                    <span class="status-pill ${wg.achieved ? "connected" : ""}" style="font-size:11px;">🎯 ${escapeHtml(
-                wg.label_zh || ""
-              )} · ${escapeHtml(progText)}</span>
-                  </div>
-                  <div><b>10m后团战外阵亡：</b>${escapeHtml(fmtSeriesVals("non_teamfight_deaths_after_10m", "次"))}</div>
-                  <div><b>对真实对位10m净值差：</b>${escapeHtml(fmtSeriesVals("lane_nw_diff_10m", "", true))}</div>
-                  <div><b>辅助每分钟插眼数：</b>${escapeHtml(fmtSeriesVals("support_wards_per_min", "/m"))}</div>
-                  <div><b>关键装相对本人中位数偏差：</b>${escapeHtml(fmtSeriesVals("key_item_timing_delta_sec", "s", true))}</div>
-                </article>
-              `;
-            })
-            .join("")}
+          ${trendPlayers.map((tp) => {
+            const wg = tp.recent_7_goal || tp.weekly_goal || null;
+            const pts = (tp.series || []).slice(-10);
+            const goalHtml = wg
+              ? `<span class="status-pill ${wg.achieved ? "connected" : ""}" style="font-size:11px;">${escapeHtml(wg.label_zh || "")} · ${wg.current_avg != null ? `最近 7 局（实测${wg.sample_games || 0}局）均值 ${wg.current_avg} (${wg.achieved ? "已达标" : `${wg.progress_pct ?? 0}%`})` : "无数据"}</span>`
+              : `<span style="font-size:11px;color:var(--dim);">未设目标</span>`;
+            return `<article style="padding:10px 12px;border-radius:4px;background:rgba(15,17,14,0.92);border:1px solid rgba(255,255,255,0.1);font-size:12px;line-height:1.5;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+                <strong style="color:var(--text);font-size:13.5px;">${escapeHtml(tp.personaname)} (${tp.games_count}局)</strong>
+                ${goalHtml}
+              </div>
+              ${renderSparkRow(pts, "non_teamfight_deaths_after_10m", "10m后团战外阵亡", "次", false, "#df8978")}
+              ${renderSparkRow(pts, "lane_nw_diff_10m", "对位10m净值差", "", true, "#c6a468")}
+              ${renderSparkRow(pts, "support_wards_per_min", "辅助每分钟插眼", "/m", false, "#a5c6a7")}
+              ${renderSparkRow(pts, "key_item_timing_delta_sec", "关键装中位数偏差", "s", true, "#e4c992")}
+            </article>`;
+          }).join("")}
         </div>
-      </div>
-    `
+      </div>`
       : `<div id="squad-personal-trends-goals" hidden></div>`;
 
   const wardSpots = Array.isArray(squadLedger?.high_risk_ward_spots) ? squadLedger.high_risk_ward_spots : [];
@@ -15639,39 +15646,30 @@ function renderSquadLedgerSection(squadLedger) {
     </div>
   `;
 
-  container.querySelectorAll("[data-load-archived]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const mid = Number(btn.getAttribute("data-load-archived"));
-      if (mid) {
-        await loadMatchReport(mid, { switchToPostgame: true });
-      }
-    });
-  });
-
-  container.querySelectorAll("[data-habit-member-filter]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      state.selectedHabitMemberKey = btn.getAttribute("data-habit-member-filter") || "all";
-      renderSquadLedgerSection(squadLedger);
-    });
-  });
-
-  container.querySelectorAll("[data-copy-habit]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const txt = btn.getAttribute("data-copy-habit") || "";
-      const name = btn.getAttribute("data-copy-habit-name") || "队员";
-      copyTextToClipboard(txt, `${name} 跨局习性诊断书`);
-    });
-  });
-
-  container.querySelectorAll("[data-habit-poster-idx]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const idx = Number(btn.getAttribute("data-habit-poster-idx"));
-      const m = finalHabitMembers[idx];
-      if (m) {
-        openCareerHabitPosterDialog(m, squadLedger);
-      }
-    });
-  });
+  const submitGoalAction = async (action) => {
+    const pSel = container.querySelector("#f4-goal-player");
+    const mSel = container.querySelector("#f4-goal-metric");
+    const tInp = container.querySelector("#f4-goal-target");
+    const aid = Number(pSel?.value || 0);
+    if (!aid) return;
+    const payload = action === "clear" ? { account_id: aid, action: "clear" } : { account_id: aid, metric: mSel?.value || "", target: tInp?.value };
+    if (action !== "clear" && (tInp?.value === "" || tInp?.value == null)) { showToast("请输入目标数值"); return; }
+    try {
+      const res = await fetch("/api/player_goals", { method: "POST", headers: getTeamTokenHeaders({ "Content-Type": "application/json" }), body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (promptTeamTokenOn401(res, data)) return;
+      if (!data.ok) throw new Error(data.error || "保存目标失败");
+      if (state.squadLedger && data.personal_trends_and_goals) state.squadLedger.personal_trends_and_goals = data.personal_trends_and_goals;
+      renderSquadLedgerSection(state.squadLedger || squadLedger);
+      showToast(action === "clear" ? "已清除个人目标" : "已保存最近 7 局个人目标");
+    } catch (err) { showToast(`保存目标失败: ${err.message}`); }
+  };
+  container.querySelector("#btn-save-f4-goal")?.addEventListener("click", () => submitGoalAction("save"));
+  container.querySelector("#btn-clear-f4-goal")?.addEventListener("click", () => submitGoalAction("clear"));
+  container.querySelectorAll("[data-load-archived]").forEach((btn) => btn.addEventListener("click", async () => { const mid = Number(btn.getAttribute("data-load-archived")); if (mid) await loadMatchReport(mid, { switchToPostgame: true }); }));
+  container.querySelectorAll("[data-habit-member-filter]").forEach((btn) => btn.addEventListener("click", () => { state.selectedHabitMemberKey = btn.getAttribute("data-habit-member-filter") || "all"; renderSquadLedgerSection(squadLedger); }));
+  container.querySelectorAll("[data-copy-habit]").forEach((btn) => btn.addEventListener("click", () => copyTextToClipboard(btn.getAttribute("data-copy-habit") || "", `${btn.getAttribute("data-copy-habit-name") || "队员"} 跨局习性诊断书`)));
+  container.querySelectorAll("[data-habit-poster-idx]").forEach((btn) => btn.addEventListener("click", () => { const m = finalHabitMembers[Number(btn.getAttribute("data-habit-poster-idx"))]; if (m) openCareerHabitPosterDialog(m, squadLedger); }));
   applyToneModeUI();
 }
 
