@@ -2456,12 +2456,111 @@ def build_squad_history_ledger(
             for mp in scan_dir.glob("match_*.json"):
                 candidate_paths[mp.name] = mp
 
+    rep_sources: List[Dict[str, Any]] = []
+    seen_mids = set()
     for mpath in sorted(candidate_paths.values(), key=lambda p: p.name, reverse=True):
-        if True:
-            try:
-                rep = json.loads(mpath.read_text(encoding="utf-8"))
-            except Exception:
+        try:
+            rep_disk = json.loads(mpath.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        mid_disk = rep_disk.get("match_id")
+        if mid_disk:
+            seen_mids.add(int(mid_disk))
+            rep_sources.append(rep_disk)
+
+    # R1-8: 从 Supabase match_players 表补充/构建总账（无本地 reports/ 目录时完整可用）
+    import cloud_store
+
+    cloud_mp_rows = cloud_store.cloud_fetch_match_players(limit=5000)
+    if cloud_mp_rows:
+        hero_map_l, _ = dota_analyst.get_hero_constants_map(allow_network=False)
+        mp_by_mid: Dict[int, List[Dict[str, Any]]] = {}
+        for r in cloud_mp_rows:
+            m_id_val = int(r.get("match_id") or 0)
+            if m_id_val > 0 and m_id_val not in seen_mids:
+                mp_by_mid.setdefault(m_id_val, []).append(r)
+
+        for mid_c in sorted(mp_by_mid.keys(), reverse=True):
+            m_rows = mp_by_mid[mid_c]
+            rad_roster_cnt = sum(
+                1
+                for r in m_rows
+                if r.get("side") == "radiant" and r.get("account_id") in roster_member_by_aid
+            )
+            dire_roster_cnt = sum(
+                1
+                for r in m_rows
+                if r.get("side") == "dire" and r.get("account_id") in roster_member_by_aid
+            )
+            has_main_rad = any(
+                r.get("side") == "radiant" and r.get("account_id") == main_aid for r in m_rows
+            )
+            has_main_dire = any(
+                r.get("side") == "dire" and r.get("account_id") == main_aid for r in m_rows
+            )
+            if has_main_rad and not has_main_dire:
+                f_side_c = "radiant"
+            elif has_main_dire and not has_main_rad:
+                f_side_c = "dire"
+            else:
+                f_side_c = "radiant" if rad_roster_cnt >= dire_roster_cnt else "dire"
+
+            own_rows_c = sorted(
+                [r for r in m_rows if r.get("side") == f_side_c],
+                key=lambda r: (int(r.get("pos") or 99), int(r.get("player_slot") or 0)),
+            )
+            if not own_rows_c:
                 continue
+            won_c = bool(own_rows_c[0].get("won"))
+            rad_kills = sum(int(r.get("kills") or 0) for r in m_rows if r.get("side") == "radiant")
+            dire_kills = sum(int(r.get("kills") or 0) for r in m_rows if r.get("side") == "dire")
+            dur_min_c = float(own_rows_c[0].get("duration_min") or 0.0)
+            dur_str_c = dota_analyst.format_duration(int(round(dur_min_c * 60)))
+            own_players_c = []
+            for idx_p, r in enumerate(own_rows_c, 1):
+                hid_p = int(r.get("hero_id") or 0)
+                hinfo_p = hero_map_l.get(hid_p) or {}
+                k_p = int(r.get("kills") or 0)
+                d_p = int(r.get("deaths") or 0)
+                a_p = int(r.get("assists") or 0)
+                sc_p = float(r["score_100"]) if r.get("score_100") is not None else 60.0
+                own_players_c.append({
+                    "player_slot": int(r.get("player_slot") or 0),
+                    "account_id": int(r["account_id"]) if r.get("account_id") is not None else None,
+                    "personaname": str(r.get("personaname") or "匿名玩家"),
+                    "pos": int(r.get("pos") or idx_p),
+                    "hero_id": hid_p,
+                    "hero_short_zh": str(r.get("hero_short_zh") or hinfo_p.get("short_zh") or ""),
+                    "hero_img": hinfo_p.get("img") or "",
+                    "kills": k_p,
+                    "deaths": d_p,
+                    "assists": a_p,
+                    "kda": f"{k_p}/{d_p}/{a_p}",
+                    "dead_seconds": 0,
+                    "rating_score_100": sc_p,
+                    "blame_share_pct": float(r.get("blame_share_pct") or 0.0),
+                    "contrib_share_pct": float(r.get("contrib_share_pct") or 0.0),
+                    "is_me": bool(r.get("account_id") is not None and int(r["account_id"]) == main_aid),
+                })
+
+            rep_sources.append({
+                "match_id": mid_c,
+                "start_time": None,
+                "duration_min": dur_min_c,
+                "duration_str": dur_str_c,
+                "score": f"{rad_kills}:{dire_kills}",
+                "focus_side": f_side_c,
+                "radiant_win": won_c if f_side_c == "radiant" else (not won_c),
+                "is_parsed": True,
+                "radiant_pos_1_to_5": own_players_c if f_side_c == "radiant" else [],
+                "dire_pos_1_to_5": own_players_c if f_side_c == "dire" else [],
+                "deep_forensics": {},
+            })
+
+    rep_sources.sort(key=lambda r: int(r.get("match_id") or 0), reverse=True)
+
+    for rep in rep_sources:
+        if True:
             mid = rep.get("match_id")
             if not mid:
                 continue
@@ -3283,6 +3382,7 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
     import hashlib
     import json
     from pathlib import Path
+    import cloud_store
 
     rdir = Path(reports_dir)
     tmp_rdir = Path("/tmp/dota_reports")
@@ -3296,9 +3396,17 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
                 except OSError:
                     pass
     files.sort()
+    cloud_cfg = cloud_store.get_cloud_config()
+    cur_url = cloud_cfg.get("supabase_url") or ""
+    cloud_ids = (
+        sorted(cloud_store._CLOUD_IDS_CACHE.get("ids") or [])
+        if (cur_url and cloud_store._CLOUD_IDS_CACHE.get("url") == cur_url)
+        else []
+    )
     main_aid = int((roster or {}).get("main_account_id") or 0)
     players_cnt = len((roster or {}).get("players") or {})
-    digest = hashlib.sha256(json.dumps(files, separators=(",", ":")).encode("utf-8")).hexdigest()
+    sig_payload = {"files": files, "cloud_url": cur_url, "cloud_ids": cloud_ids}
+    digest = hashlib.sha256(json.dumps(sig_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     return f"{rdir.resolve()}|{main_aid}|{players_cnt}|{len(files)}|{digest}"
 
 

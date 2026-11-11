@@ -50,6 +50,7 @@ def migrate_all(reports_dir: Path = REPORTS_DIR, dry_run: bool = False) -> dict:
         "raw_uploaded": 0,
         "player_rows_prepared": 0,
         "coaching_uploaded": 0,
+        "failed_uploads": 0,
         "dry_run": dry_run,
         "supabase_configured": has_supabase,
     }
@@ -84,18 +85,26 @@ def migrate_all(reports_dir: Path = REPORTS_DIR, dry_run: bool = False) -> dict:
         if isinstance(rep_data, dict) and rep_data.get("match_id"):
             p_rows = extract_match_players_rows(rep_data)
             stats["player_rows_prepared"] += len(p_rows)
-            if not dry_run and has_supabase:
+            if dry_run:
+                stats["reports_migrated"] += 1
+            elif has_supabase:
                 if cloud_save_match_report(mid, rep_data):
                     stats["reports_migrated"] += 1
+                else:
+                    stats["failed_uploads"] += 1
             else:
-                stats["reports_migrated"] += 1
+                stats["failed_uploads"] += 1
 
         if isinstance(raw_data, dict) and raw_data.get("match_id"):
-            if not dry_run and has_supabase:
+            if dry_run:
+                stats["raw_uploaded"] += 1
+            elif has_supabase:
                 if cloud_save_raw_match(mid, raw_data):
                     stats["raw_uploaded"] += 1
+                else:
+                    stats["failed_uploads"] += 1
             else:
-                stats["raw_uploaded"] += 1
+                stats["failed_uploads"] += 1
 
     for c_path in sorted(reports_dir.glob("coaching-*.json")):
         parts = c_path.stem.split("-")
@@ -105,11 +114,15 @@ def migrate_all(reports_dir: Path = REPORTS_DIR, dry_run: bool = False) -> dict:
             try:
                 c_obj = json.loads(c_path.read_text(encoding="utf-8"))
                 if isinstance(c_obj, dict):
-                    if not dry_run and has_supabase:
+                    if dry_run:
+                        stats["coaching_uploaded"] += 1
+                    elif has_supabase:
                         if cloud_save_coaching(mid, side, c_obj):
                             stats["coaching_uploaded"] += 1
+                        else:
+                            stats["failed_uploads"] += 1
                     else:
-                        stats["coaching_uploaded"] += 1
+                        stats["failed_uploads"] += 1
             except Exception:
                 pass
 
@@ -119,9 +132,20 @@ def migrate_all(reports_dir: Path = REPORTS_DIR, dry_run: bool = False) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Migrate match reports & raw JSONs to Supabase")
     parser.add_argument("--dry-run", action="store_true", help="Validate & rebuild without network calls")
+    parser.add_argument("--reports-dir", default=None, help="Optional custom reports directory")
     args = parser.parse_args()
-    summary = migrate_all(REPORTS_DIR, dry_run=args.dry_run)
+    target_dir = Path(args.reports_dir) if args.reports_dir else REPORTS_DIR
+    summary = migrate_all(target_dir, dry_run=args.dry_run)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
+    if not args.dry_run:
+        if not summary.get("supabase_configured"):
+            sys.stderr.write("ERROR: Supabase 未配置（缺少 SUPABASE_URL 或 SUPABASE_SERVICE_ROLE_KEY），迁移未执行。\n")
+            return 1
+        if summary.get("failed_uploads", 0) > 0 or (
+            summary.get("total_matches", 0) > 0 and summary.get("reports_migrated", 0) == 0
+        ):
+            sys.stderr.write("ERROR: 连接或写入 Supabase 失败，存在未成功上传的记录。\n")
+            return 1
     return 0
 
 
