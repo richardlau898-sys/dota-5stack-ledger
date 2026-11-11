@@ -17419,30 +17419,27 @@ function renderPregameSlots() {
 
       let poolAuditHtml = "";
       if (matchedSig) {
-        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#86efac;background:rgba(34,197,94,0.14);border:1px solid rgba(74,222,128,0.35);padding:2px 5px;border-radius:4px;">👑 本人绝活招牌 (${matchedSig.games}局 ${matchedSig.win_rate}%胜 · 均分${matchedSig.avg_rating})</div>`;
+        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#86efac;background:rgba(34,197,94,0.14);border:1px solid rgba(74,222,128,0.35);padding:2px 5px;border-radius:4px;">👑 本人绝活招牌 (${matchedSig.games}局 ${matchedSig.win_rate}%胜 · 均分${matchedSig.avg_rating}) <span class="bp-src-tag">[已复盘对局]</span></div>`;
       } else if (matchedCursed) {
-        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#fca5a5;background:rgba(220,38,38,0.18);border:1px solid rgba(248,113,113,0.45);padding:2px 5px;border-radius:4px;">🚨 科研陷阱警告 (${matchedCursed.games}局仅 ${matchedCursed.win_rate}%胜 · 均分${matchedCursed.avg_rating})</div>`;
+        poolAuditHtml = `<div style="margin-top:4px;font-size:10px;color:#fca5a5;background:rgba(220,38,38,0.18);border:1px solid rgba(248,113,113,0.45);padding:2px 5px;border-radius:4px;">🚨 科研陷阱警告 (${matchedCursed.games}局仅 ${matchedCursed.win_rate}%胜 · 均分${matchedCursed.avg_rating}) <span class="bp-src-tag">[已复盘对局]</span></div>`;
       } else if (!hero && sigList.length > 0) {
-        poolAuditHtml = `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;">
-          <span style="font-size:9.5px;color:var(--gold-light);">👑绝活秒选:</span>
-          ${sigList
-            .slice(0, 2)
-            .map(
-              (s) =>
-                `<button type="button" class="cp-pill" data-pg-quick-sig="${pos}:${s.hero_id || 0}:${escapeHtml(
-                  s.hero_short_zh || ""
-                )}" style="font-size:9.5px;padding:1px 5px;cursor:pointer;border-color:rgba(74,222,128,0.4);color:#bbf7d0;" title="一键为 ${escapeHtml(
-                  entry.player_name || pName
-                )} 锁定绝活 ${escapeHtml(s.hero_short_zh)} (${s.games}局 ${s.win_rate}%胜)">${escapeHtml(
-                  s.hero_short_zh
-                )} ${s.win_rate}%</button>`
-            )
-            .join("")}
-        </div>`;
+        poolAuditHtml = `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;"><span style="font-size:9.5px;color:var(--gold-light);">👑绝活秒选:</span>${sigList
+          .slice(0, 2)
+          .map(
+            (s) =>
+              `<button type="button" class="cp-pill" data-pg-quick-sig="${pos}:${s.hero_id || 0}:${escapeHtml(
+                s.hero_short_zh || ""
+              )}" style="font-size:9.5px;padding:1px 5px;cursor:pointer;border-color:rgba(74,222,128,0.4);color:#bbf7d0;" title="一键为 ${escapeHtml(
+                entry.player_name || pName
+              )} 锁定绝活 ${escapeHtml(s.hero_short_zh)} (${s.games}局 ${s.win_rate}%胜)">${escapeHtml(
+                s.hero_short_zh
+              )} ${s.win_rate}%</button>`
+          )
+          .join("")}<span class="bp-src-tag">[已复盘对局]</span></div>`;
       }
 
-      const posBadgeStr = posStat
-        ? ` · ${pos}号位${posStat.win_rate}%胜(${posStat.games}局)`
+      const posBadgeHtml = posStat
+        ? ` · ${pos}号位${posStat.win_rate}%胜(${posStat.games}局) <span class="bp-src-tag">[已复盘对局]</span>`
         : "";
 
       return `
@@ -17466,7 +17463,7 @@ function renderPregameSlots() {
           </div>
           <div class="pregame-slot-player">👤 ${escapeHtml(
             entry.player_name || pName
-          )}<span style="color:var(--muted);font-size:10px;">${escapeHtml(posBadgeStr)}</span></div>
+          )}<span style="color:var(--muted);font-size:10px;">${posBadgeHtml}</span></div>
           ${poolAuditHtml}
         </div>
       `;
@@ -17813,47 +17810,53 @@ function renderPregamePlanOutput(plan) {
     .join("");
 
   const realBp = plan.real_data_bp_stats || null;
+  const scoreSrcLabel = escapeHtml(plan.score_source_zh || "通用知识");
+  const dims = plan.dimensions || {};
+  const dimLabels = [["init", "先手"], ["burst", "爆发"], ["tf", "团战"], ["push", "推进"], ["pick", "抓人"], ["late", "后期"], ["tank", "前排"]];
+  const dimsHtml = dimLabels.some(([k]) => dims[k] != null)
+    ? `<div style="font-size:11.5px;color:var(--muted);margin-bottom:6px;">阵容维度评分：${dimLabels.filter(([k]) => dims[k] != null).map(([k, zh]) => `${zh} ${dims[k]}`).join(" · ")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></div>`
+    : "";
+  const mostLostList = (realBp?.most_lost_against_top || []).slice(0, 5);
+  const mostLostHtml = mostLostList.length > 0
+    ? `<div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:10px 12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--gold-light);margin-bottom:6px;">车队最常输给谁 <span class="bp-src-tag">[车队交手记录]</span></div>
+        ${mostLostList.map((m) => `<div style="display:flex;justify-content:space-between;gap:6px;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);"><span><b>${escapeHtml(m.hero_short_zh)}</b></span><span>交手 ${m.against_games}局 负${m.against_losses}局 (对阵胜率 ${m.against_win_rate}%) <span class="bp-src-tag">[${escapeHtml(m.source_zh || "车队交手记录")}]</span></span></div>`).join("")}
+      </div>`
+    : "";
   const realBpHtml = realBp
     ? `<section style="margin-bottom:12px;">
         <div class="combos-header-bar">
           <h3>📊 零、真实数据 BP 底盘（车队历史胜率 / OpenDota 分段位胜率 / 历史交手克制）</h3>
-          <span style="font-size:12px;color:var(--muted);">遵循 T1-9 最小样本量规则（≥10局才展示胜率结论）</span>
+          <span style="font-size:12px;color:var(--muted);">最小样本量：≥10局才展示胜率结论</span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;">
           <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:10px 12px;">
             <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:6px;">我方所选英雄 · 车队历史 &amp; 高分段胜率</div>
             ${(realBp.own_hero_real_stats || [])
               .map(
-                (h) => `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);">
+                (h) => `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);">
                   <span>${h.pos}号位 · <b>${escapeHtml(h.hero_short_zh)}</b></span>
-                  <span>车队：${h.squad_games}局 ${h.squad_wins}胜${
-                    !h.squad_insufficient_sample && h.squad_win_rate != null
-                      ? ` (${h.squad_win_rate}%)`
-                      : " (样本<10局)"
-                  } ｜ 高分段：${h.bracket_win_rate != null ? `${h.bracket_win_rate}%` : "无数据"}</span>
+                  <span>车队：${h.squad_games}局 ${h.squad_wins}胜${!h.squad_insufficient_sample && h.squad_win_rate != null ? ` (${h.squad_win_rate}%)` : " (样本<10局)"} <span class="bp-src-tag">[${escapeHtml(h.squad_source_zh || "已复盘对局")}]</span> ｜ 高分段：${h.bracket_win_rate != null ? `${h.bracket_win_rate}%` : "无数据"} <span class="bp-src-tag">[${escapeHtml(h.bracket_source_zh || "OpenDota 超凡/冠绝")}]</span></span>
                 </div>`
               )
               .join("")}
           </div>
           <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:10px 12px;">
-            <div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:6px;">敌方所选英雄 · 车队历史对阵 (against_win)</div>
+            <div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:6px;">敌方所选英雄 · 车队交手 &amp; 高分段胜率</div>
             ${
               (realBp.enemy_against_stats || []).length > 0
                 ? (realBp.enemy_against_stats || [])
                     .map(
-                      (e) => `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);">
+                      (e) => `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);">
                         <span>敌方${e.pos}号位 · <b>${escapeHtml(e.hero_short_zh)}</b></span>
-                        <span>交手 ${e.against_games}局 ${e.against_win}胜${
-                          !e.insufficient_sample && e.against_win_rate != null
-                            ? ` (对阵胜率 ${e.against_win_rate}%)`
-                            : " (样本<10局)"
-                        }</span>
+                        <span>${e.against_games > 0 ? `交手 ${e.against_games}局 ${e.against_win}胜${!e.insufficient_sample && e.against_win_rate != null ? ` (对阵胜率 ${e.against_win_rate}%)` : " (样本<10局)"}` : "无交手记录"} <span class="bp-src-tag">[${escapeHtml(e.against_source_zh || "车队交手记录")}]</span> ｜ 高分段：${e.bracket_win_rate != null ? `${e.bracket_win_rate}%` : "无数据"} <span class="bp-src-tag">[${escapeHtml(e.bracket_source_zh || "OpenDota 超凡/冠绝")}]</span></span>
                       </div>`
                     )
                     .join("")
                 : `<div style="font-size:12px;color:var(--muted);">点选敌方阵容后自动核查车队历史交手胜率</div>`
             }
           </div>
+          ${mostLostHtml}
         </div>
       </section>`
     : "";
@@ -17867,7 +17870,8 @@ function renderPregamePlanOutput(plan) {
       <article class="pregame-wl-card win">
         <h3>🏆 本局核心赢法 · 评级 ${escapeHtml(plan.grade || "无数据")} (${
           plan.overall_score ?? "无数据"
-        }分 · ${escapeHtml(plan.tempo_style || "")})</h3>
+        }分 · ${escapeHtml(plan.tempo_style || "")}) <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
+        ${dimsHtml}
         <p>${escapeHtml(grokBrief?.win_condition || plan.win_condition || "")}</p>
         <div style="font-size:12px;color:var(--green-light);padding-top:6px;border-top:1px dashed #2e3429;">
           🎯 <b>团战第一集火律令：</b>${escapeHtml(
@@ -17908,7 +17912,7 @@ function renderPregamePlanOutput(plan) {
       </div>
       <div class="pregame-stages-grid">
         <article class="pregame-stage-box">
-          <h3>🌅 ${escapeHtml(early.title || "前期对线与抢符 (0–10分钟)")}</h3>
+          <h3>🌅 ${escapeHtml(early.title || "前期对线与抢符 (0–10分钟)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
           <ul>
             ${
               grokBrief?.early_game
@@ -17929,7 +17933,7 @@ function renderPregamePlanOutput(plan) {
         </article>
 
         <article class="pregame-stage-box">
-          <h3>🔥 ${escapeHtml(mid.title || "中期抱团与控图 (10–25分钟)")}</h3>
+          <h3>🔥 ${escapeHtml(mid.title || "中期抱团与控图 (10–25分钟)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
           <ul>
             ${
               grokBrief?.mid_game
@@ -17943,7 +17947,7 @@ function renderPregamePlanOutput(plan) {
         </article>
 
         <article class="pregame-stage-box">
-          <h3>👑 ${escapeHtml(late.title || "后期盾团与高地终结 (25分钟后)")}</h3>
+          <h3>👑 ${escapeHtml(late.title || "后期盾团与高地终结 (25分钟后)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
           <ul>
             ${
               grokBrief?.late_game
@@ -17990,21 +17994,7 @@ function renderPregamePlanOutput(plan) {
                 : posStat
                 ? `📊 该玩家 ${rg.pos}号位历史 ${posStat.games}局 ${posStat.win_rate}%胜 (均分${posStat.avg_rating})`
                 : `📊 车队总场次 ${member.games || 0}局 (${member.win_rate || 0}%胜 · 均分${member.avg_rating || 0})`;
-              squadPoolStripHtml = `<div style="font-size:10.5px;color:${
-                cursedMatch ? "#fca5a5" : sigMatch ? "#86efac" : "#fde68a"
-              };background:${
-                cursedMatch
-                  ? "rgba(220,38,38,0.16)"
-                  : sigMatch
-                  ? "rgba(34,197,94,0.14)"
-                  : "rgba(198,164,104,0.1)"
-              };padding:4px 7px;border-radius:4px;border-left:2px solid ${
-                cursedMatch ? "#ef4444" : sigMatch ? "#4ade80" : "var(--gold)"
-              };line-height:1.45;">
-                <b>${escapeHtml(statusTxt)}</b>${
-                habitFix ? `<br/><span style="color:var(--muted);">💊 个人防毒瘤军规：${escapeHtml(habitFix)}</span>` : ""
-              }
-              </div>`;
+              squadPoolStripHtml = `<div style="font-size:10.5px;color:${cursedMatch ? "#fca5a5" : sigMatch ? "#86efac" : "#fde68a"};background:${cursedMatch ? "rgba(220,38,38,0.16)" : sigMatch ? "rgba(34,197,94,0.14)" : "rgba(198,164,104,0.1)"};padding:4px 7px;border-radius:4px;border-left:2px solid ${cursedMatch ? "#ef4444" : sigMatch ? "#4ade80" : "var(--gold)"};line-height:1.45;"><b>${escapeHtml(statusTxt)}</b> <span class="bp-src-tag">[已复盘对局]</span>${habitFix ? `<br/><span style="color:var(--muted);">💊 个人防毒瘤军规：${escapeHtml(habitFix)}</span>` : ""}</div>`;
             }
             return `
               <article class="pregame-role-card">

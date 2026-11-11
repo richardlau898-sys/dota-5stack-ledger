@@ -30,6 +30,7 @@ from dota_constants_zh import get_hero_name
 OPENDOTA_BASE_URL = "https://api.opendota.com/api"
 CACHE_DIR = BASE_DIR / ".cache"
 HISTORY_CACHE_PATH = CACHE_DIR / "player_matches_history.json"
+HEROES_AGAINST_CACHE_PATH = CACHE_DIR / "player_heroes_against.json"
 SYNC_STATE_PATH = CACHE_DIR / "opendota_sync_state.json"
 
 MATCH_PROJECT_FIELDS: Tuple[str, ...] = (
@@ -360,6 +361,49 @@ def sync_roster_matches(
     }
 
 
+def sync_player_heroes_against(
+    account_id: int,
+    fetcher: Callable[[str], List[Dict[str, Any]]] = default_opendota_fetcher,
+    cache_path: Path = HEROES_AGAINST_CACHE_PATH,
+    min_interval_sec: float = 0.0,
+) -> List[Dict[str, Any]]:
+    """从 OpenDota /players/{account_id}/heroes?significant=0 同步真实交手胜负并写入缓存文件。"""
+    if min_interval_sec > 0:
+        time.sleep(min_interval_sec)
+    url = f"{OPENDOTA_BASE_URL}/players/{int(account_id)}/heroes?significant=0"
+    raw_rows = fetcher(url) or []
+    cleaned: List[Dict[str, Any]] = []
+    for r in raw_rows:
+        if not isinstance(r, dict):
+            continue
+        hid = int(r.get("hero_id") or 0)
+        if hid <= 0:
+            continue
+        cleaned.append({
+            "hero_id": hid,
+            "games": int(r.get("games") or 0),
+            "win": int(r.get("win") or 0),
+            "with_games": int(r.get("with_games") or 0),
+            "with_win": int(r.get("with_win") or 0),
+            "against_games": int(r.get("against_games") or 0),
+            "against_win": int(r.get("against_win") or 0),
+        })
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(
+        json.dumps(
+            {
+                "account_id": int(account_id),
+                "downloaded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "heroes": cleaned,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    return cleaned
+
+
 def build_roster_names_map(roster: Optional[Dict[str, Any]] = None) -> Dict[int, str]:
     """从统一花名册 iter_roster_accounts 提取 canonical_id -> 队员名称映射。"""
     out: Dict[int, str] = {}
@@ -666,6 +710,13 @@ def main() -> int:
             daily_used=int(sync_state.get("daily_used") or 0),
             daily_limit=2000,
         )
+        members = dota_analyst.iter_roster_accounts(roster)
+        if members and int(sync_meta["daily_used"]) < 2000:
+            sync_player_heroes_against(
+                account_id=int(members[0]["canonical_id"]),
+                min_interval_sec=1.05,
+            )
+            sync_meta["daily_used"] += 1
         sync_state["daily_used"] = sync_meta["daily_used"]
         SYNC_STATE_PATH.write_text(json.dumps(sync_state, indent=2, ensure_ascii=False), encoding="utf-8")
 
