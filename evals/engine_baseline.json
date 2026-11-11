@@ -1,6 +1,7 @@
 {
   "dataset_version": "1.0",
-  "description": "Dota 5-stack Ledger 10场固定样本基准评测集（谁的问题最大 + 3个关键时刻）",
+  "source_note": "引擎输出，不是人工标注",
+  "description": "引擎输出，不是人工标注（10场固定样本的规则引擎基线快照）",
   "matches": [
     {
       "match_id": 9046276667,
