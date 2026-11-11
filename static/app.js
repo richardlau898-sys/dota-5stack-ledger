@@ -359,9 +359,9 @@ function sanitizeMixedEnglishClient(raw) {
       out = out.replaceAll(enKey, zhVal);
     }
   }
-  // If string contains Chinese characters and still has snake_case raw ability/item keys, scrub them
+  // If string contains Chinese characters and still has known snake_case raw ability/item keys, scrub them
   if (/[\u4e00-\u9fff]/.test(out) && /[a-z]{3,}_[a-z_]{3,}/.test(out)) {
-    out = out.replace(/\b([a-z]{3,}_[a-z0-9_]{3,})\b/g, (m) => CLIENT_EN_TO_ZH_MAP[m] || "专属技能");
+    out = out.replace(/\b([a-z]{3,}_[a-z0-9_]{3,})\b/g, (m) => CLIENT_EN_TO_ZH_MAP[m] || m);
   }
   return out;
 }
