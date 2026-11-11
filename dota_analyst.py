@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r2.4"
+ENGINE_VERSION = "2026.11.r2.5"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -2416,7 +2416,7 @@ def render_markdown_report(report: Dict[str, Any]) -> str:
         lines.append(f"## {side_title}")
         lines.append("")
         lines.append(
-            "| 位置 | 英雄 | 玩家 | 段位 | K/D/A (参战) | 净资产 (GPM/XPM) | 补刀 (10m) | 英雄伤害 (占比) | 承受伤害 | 建筑伤害 | 读秒时长 | 分锅占比 |"
+            "| 位置 | 英雄 | 玩家 | 段位 | K/D/A (参战) | 净资产 (GPM/XPM) | 补刀 (10m) | 英雄伤害 (占比) | 承受伤害 | 建筑伤害 | 读秒时长 | 责任占比 |"
         )
         lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
         for p in team:

@@ -380,44 +380,6 @@ def build_hero_execution_section(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "hero_healing": total_heal,
             }
 
-        # 3f. 斯拉克 (Slark) 魔晶《深海劫掠》缺失、团战叠敏捷与后期隐身审计
-        if hid == 93:
-            has_shard = bool(int(rp.get("aghanims_shard") or 0) or fp.get("aghanims_shard"))
-            shroud_casts = au.get("slark_depth_shroud", 0)
-            dance_casts = au.get("slark_shadow_dance", 0)
-            pact_casts = au.get("slark_dark_pact", 0)
-            pounce_casts = au.get("slark_pounce", 0)
-            pounce_hits = hh.get("slark_pounce", 0)
-            zero_or_low_tfs = [
-                f"{tfr['time_range']}({tfr['damage']}伤{'/死' if tfr['deaths'] > 0 else ''})"
-                for tfr in tf_list
-                if tfr["start_sec"] >= 900 and (tfr["damage"] < 500 or (tfr["deaths"] > 0 and tfr["damage"] < 900))
-            ]
-            shard_tone = "good" if has_shard else "bad"
-            shard_badge = f"深海劫掠(魔晶): {shroud_casts}次救人" if has_shard else f"🚫 {duration_min:.0f}m未出魔晶(深海劫掠)!"
-            headline_badges.insert(0, {"text": shard_badge, "tone": shard_tone})
-            headline_badges.insert(1, {"text": f"暗影之舞(大招): {dance_casts}次", "tone": "good" if dance_casts >= 10 else "warn"})
-            slark_msg = (
-                f"🐟《斯拉克核心机制与魔晶》审判：全场开启大招《暗影之舞》{dance_casts} 次、《黑暗契约》{pact_casts} 次、《突袭》施放 {pounce_casts} 次（造成 {pounce_hits} 次伤害）；"
-                + (
-                    f"🚨 致命机制缺失：比赛打到 {duration_min:.0f} 分钟竟然未购买仅 1,400 金的阿哈利姆魔晶《深海劫掠》（0 次释放）！"
-                    f"既少了 3 秒群体黑雾救队友（原本可化解敌方点控留人），自己也少了一团黑雾拉扯叠《能量转移》敏捷层数，导致正面根本 A 不过敌方大哥！"
-                    if not has_shard and duration_min >= 22
-                    else f"魔晶《深海劫掠》释放 {shroud_casts} 次掩护队友。"
-                )
-                + (f"此外在 {', '.join(zero_or_low_tfs[:4])} 等中后期关键团战中近乎 0 输出蒸发或边缘OB！" if zero_or_low_tfs else "")
-            )
-            special_insights.insert(0, slark_msg)
-            fp["slark_mechanism_audit"] = {
-                "has_shard": has_shard,
-                "shroud_casts": shroud_casts,
-                "dance_casts": dance_casts,
-                "pact_casts": pact_casts,
-                "pounce_casts": pounce_casts,
-                "pounce_hits": pounce_hits,
-                "low_dmg_tfs": zero_or_low_tfs,
-            }
-
         # 3g. 脆皮高爆发炮台核心 (莉娜/宙斯/天怒/狙击手) 「死前火力倾泻与每死换伤兑现度」审计
         if hid in (25, 22, 101, 35):
             hdmg = int(fp.get("hero_damage") or 0)
@@ -445,7 +407,7 @@ def build_hero_execution_section(ctx: Dict[str, Any]) -> Dict[str, Any]:
         prof126 = get_hero_profile_126(hid, int(fp["pos"]), fp["hero_short_zh"])
         curve126 = prof126.get("timing_curve", "")
         has_shard_any = bool(int(rp.get("aghanims_shard") or 0) or fp.get("aghanims_shard"))
-        if prof126.get("shard_desc") and "必出" in prof126.get("shard_desc", "") and duration_min >= 25 and not has_shard_any and hid != 93:
+        if prof126.get("shard_desc") and "必出" in prof126.get("shard_desc", "") and duration_min >= 25 and not has_shard_any:
             headline_badges.insert(0, {"text": f"🚫 {duration_min:.0f}m未出命脉魔晶!", "tone": "bad"})
             special_insights.insert(0, f"🚨 专属魔晶缺失：打到 {duration_min:.0f} 分钟仍未购买该英雄质变魔晶【{prof126['shard_desc']}】！")
 
