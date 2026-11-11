@@ -955,7 +955,7 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
   const heroShort = p.hero_short_zh || p.hero_name || "该英雄";
   const pWon = Boolean(p.won);
   const isUnparsed = state.currentReport?.is_parsed === false;
-  const rawContrib = contribPct ?? p.contrib_share_pct ?? p.blame_share_pct ?? null;
+  const rawContrib = contribPct ?? p.contrib_share_pct ?? null;
   const cPct = rawContrib == null ? "无数据" : Number(rawContrib).toFixed(1);
   const rawBlame = isUnparsed ? null : (blamePct ?? p.blame_share_pct ?? null);
   const bPct = rawBlame == null ? null : Number(rawBlame).toFixed(1);
@@ -14491,9 +14491,9 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const pWon = Boolean(p.won);
   const isUnparsed = state.currentReport?.is_parsed === false;
   const gp = grokPlayer || findGrokPlayerEntry(p, state.currentReport);
-  const rawContribCard = gp?.grok_share_pct ?? p.contrib_share_pct ?? null;
+  const rawContribCard = pWon ? (gp?.grok_share_pct ?? p.contrib_share_pct ?? null) : (p.contrib_share_pct ?? null);
   const contribPct = rawContribCard == null ? null : Number(rawContribCard).toFixed(1);
-  const rawBlame = isUnparsed ? null : (gp?.grok_share_pct ?? p.blame_share_pct ?? null);
+  const rawBlame = isUnparsed ? null : (!pWon ? (gp?.grok_share_pct ?? p.blame_share_pct ?? null) : (p.blame_share_pct ?? null));
   const blamePct = rawBlame == null ? null : Number(rawBlame).toFixed(1);
   const score100 = getHeroScore100(p, state.currentReport);
   const scoreTier = getScore100Tier(score100, pWon);

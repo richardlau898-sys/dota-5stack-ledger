@@ -2306,11 +2306,102 @@ def _is_valid_number_in_range(val: Any, lo: float = 0.0, hi: float = 100.0) -> b
     return lo <= float(val) <= hi
 
 
-def validate_coaching_schema(
-    structured: Any, partial_mode: Optional[str] = None
+def _validate_mvp_consistency(
+    structured: Dict[str, Any],
+    own_team: Optional[List[Dict[str, Any]]] = None,
+    rankings: Optional[List[Dict[str, Any]]] = None,
 ) -> Tuple[bool, str]:
     """
-    标准库结构校验函数：检查必填字段、类型及分数/占比范围 (0..100)。
+    校验 mvp.slot 与最高分选手、以及 mvp.reason 中提及的位置/英雄名是否一致。
+    不一致时直接判为无效（严禁事后强行篡改 mvp.slot 却保留旧的 mvp.reason）。
+    """
+    mvp = structured.get("mvp")
+    if not isinstance(mvp, dict) or isinstance(mvp.get("slot"), bool) or not isinstance(mvp.get("slot"), int):
+        return False, "mvp.slot 必须为整数"
+    reason = mvp.get("reason")
+    if not isinstance(reason, str) or not reason.strip():
+        return False, "mvp.reason 必须为非空字符串"
+
+    mvp_slot = int(mvp["slot"])
+    own_by_pos: Dict[int, Dict[str, Any]] = {}
+    own_by_slot: Dict[int, Dict[str, Any]] = {}
+    for p in (own_team or []):
+        if not isinstance(p, dict):
+            continue
+        pos_v = int(p.get("pos") or 0)
+        if pos_v in (1, 2, 3, 4, 5):
+            own_by_pos[pos_v] = p
+        if isinstance(p.get("player_slot"), int) and not isinstance(p.get("player_slot"), bool):
+            own_by_slot[int(p["player_slot"])] = p
+
+    cand_list = rankings if isinstance(rankings, list) and rankings else (structured.get("players") or [])
+    rk_by_pos: Dict[int, Dict[str, Any]] = {}
+    rk_by_slot: Dict[int, Dict[str, Any]] = {}
+    for rk in cand_list:
+        if not isinstance(rk, dict):
+            continue
+        pos_v = rk.get("pos")
+        if not isinstance(pos_v, bool) and isinstance(pos_v, int) and pos_v in (1, 2, 3, 4, 5):
+            rk_by_pos[pos_v] = rk
+        sl_v = rk.get("slot")
+        if not isinstance(sl_v, bool) and isinstance(sl_v, int):
+            rk_by_slot[sl_v] = rk
+
+    mvp_pos: Optional[int] = None
+    if mvp_slot in own_by_slot:
+        mvp_pos = int(own_by_slot[mvp_slot].get("pos") or 0) or None
+    elif mvp_slot in rk_by_slot:
+        p_v = rk_by_slot[mvp_slot].get("pos")
+        if not isinstance(p_v, bool) and isinstance(p_v, int) and p_v in (1, 2, 3, 4, 5):
+            mvp_pos = p_v
+
+    if (own_by_pos or rk_by_pos) and mvp_pos is None:
+        return False, f"mvp.slot ({mvp_slot}) 无法对应本方 1..5 号位任何选手"
+
+    scored_pos: List[Tuple[int, float]] = []
+    for pos_k, rk in rk_by_pos.items():
+        sc = rk.get("grok_score")
+        if _is_valid_number_in_range(sc, 0, 100):
+            scored_pos.append((pos_k, float(sc)))
+    if scored_pos and mvp_pos is not None:
+        max_sc = max(sc for _, sc in scored_pos)
+        top_positions = {pos_k for pos_k, sc in scored_pos if sc == max_sc}
+        if mvp_pos not in top_positions:
+            return False, f"mvp 对应 {mvp_pos}号位，但最高 grok_score 属于 {sorted(top_positions)}号位"
+
+    if mvp_pos is not None:
+        pos_mentions = [int(m.group(1)) for m in re.finditer(r"([1-5])\s*号位", reason)]
+        if pos_mentions and (mvp_pos not in pos_mentions or pos_mentions[0] != mvp_pos):
+            return False, f"mvp.reason 提及 {pos_mentions}号位，与 mvp.slot ({mvp_pos}号位) 不一致"
+
+        team_heroes: List[Tuple[int, str]] = []
+        for pos_k in (1, 2, 3, 4, 5):
+            h_name = ""
+            if pos_k in own_by_pos:
+                h_name = str(own_by_pos[pos_k].get("hero_short_zh") or own_by_pos[pos_k].get("hero_name") or "").strip()
+            if not h_name and pos_k in rk_by_pos:
+                h_name = str(rk_by_pos[pos_k].get("hero") or "").strip()
+            if h_name and h_name != "测试英雄":
+                team_heroes.append((pos_k, h_name))
+
+        mentioned_heroes = [(pos_k, h_name) for pos_k, h_name in team_heroes if h_name in reason]
+        if mentioned_heroes:
+            if all(pos_k != mvp_pos for pos_k, _ in mentioned_heroes):
+                return False, f"mvp.reason 提及英雄 {[h for _, h in mentioned_heroes]}，与 mvp.slot ({mvp_pos}号位) 不一致"
+            first_hero_pos = min(mentioned_heroes, key=lambda x: reason.find(x[1]))[0]
+            if first_hero_pos != mvp_pos:
+                return False, f"mvp.reason 首选英雄为 {first_hero_pos}号位，与 mvp.slot ({mvp_pos}号位) 不一致"
+
+    return True, ""
+
+
+def validate_coaching_schema(
+    structured: Any,
+    partial_mode: Optional[str] = None,
+    own_team: Optional[List[Dict[str, Any]]] = None,
+) -> Tuple[bool, str]:
+    """
+    标准库结构校验函数：检查必填字段、类型及分数/占比范围 (0..100)，并核验 MVP 一致性。
     """
     if not isinstance(structured, dict):
         return False, "根对象不是字典"
@@ -2346,22 +2437,27 @@ def validate_coaching_schema(
         if not isinstance(sr.get(sr_key), str) or not sr.get(sr_key, "").strip():
             return False, f"stage_reviews.{sr_key} 必须为非空字符串"
 
-    mvp = structured.get("mvp")
-    if not isinstance(mvp, dict) or isinstance(mvp.get("slot"), bool) or not isinstance(mvp.get("slot"), int):
-        return False, "mvp.slot 必须为整数"
-    if not isinstance(mvp.get("reason"), str) or not mvp.get("reason", "").strip():
-        return False, "mvp.reason 必须为非空字符串"
-
     if partial_mode == "global":
         rk_list = structured.get("player_rankings") or structured.get("players") or []
-        if isinstance(rk_list, list) and len(rk_list) >= 5:
-            for rk in rk_list[:5]:
-                if not isinstance(rk, dict):
-                    return False, "player_rankings 元素必须为字典"
-                if not _is_valid_number_in_range(rk.get("grok_score"), 0, 100):
-                    return False, f"player_rankings grok_score 超出 0..100: {rk.get('grok_score')}"
-                if not _is_valid_number_in_range(rk.get("grok_share_pct"), 0, 100):
-                    return False, f"player_rankings grok_share_pct 超出 0..100: {rk.get('grok_share_pct')}"
+        if not isinstance(rk_list, list) or len(rk_list) < 5:
+            return False, f"全局排名不足 5 条（当前 {len(rk_list) if isinstance(rk_list, list) else 0} 条）"
+        seen_rk_pos = set()
+        for rk in rk_list[:5]:
+            if not isinstance(rk, dict):
+                return False, "player_rankings 元素必须为字典"
+            rk_pos = rk.get("pos")
+            if isinstance(rk_pos, bool) or not isinstance(rk_pos, int) or rk_pos not in (1, 2, 3, 4, 5):
+                return False, f"player_rankings pos 必须为 1..5 整数: {rk_pos}"
+            seen_rk_pos.add(rk_pos)
+            if not _is_valid_number_in_range(rk.get("grok_score"), 0, 100):
+                return False, f"player_rankings grok_score 超出 0..100: {rk.get('grok_score')}"
+            if not _is_valid_number_in_range(rk.get("grok_share_pct"), 0, 100):
+                return False, f"player_rankings grok_share_pct 超出 0..100: {rk.get('grok_share_pct')}"
+        if len(seen_rk_pos) != 5:
+            return False, f"player_rankings 必须完整覆盖 1..5 号位，当前为: {sorted(seen_rk_pos)}"
+        mvp_ok, mvp_err = _validate_mvp_consistency(structured, own_team=own_team, rankings=rk_list[:5])
+        if not mvp_ok:
+            return False, mvp_err
         return True, ""
 
     pls = structured.get("players")
@@ -2391,6 +2487,10 @@ def validate_coaching_schema(
     if len(seen_pos) != 5:
         return False, f"players 必须完整覆盖 1..5 号位，当前为: {sorted(seen_pos)}"
 
+    mvp_ok, mvp_err = _validate_mvp_consistency(structured, own_team=own_team, rankings=pls)
+    if not mvp_ok:
+        return False, mvp_err
+
     return True, ""
 
 
@@ -2398,54 +2498,180 @@ def _collect_ground_truth_tokens(
     report: Dict[str, Any], input_payload: Optional[Dict[str, Any]] = None
 ) -> Tuple[set, set]:
     """
-    从比赛报告和输入 payload 中提取全部合法的 mm:ss 时间点（归一化为总秒数集合）与四位以上整数集合。
+    合法时间点严格只来自事件时间线（击杀、阵亡、购买、团战起止、目标），允许 ±5 秒；
+    四位以上整数集合继续从比赛报告和输入 payload 中提取。
     """
     valid_time_secs: set = set()
     valid_big_nums: set = set()
 
-    def _add_time(m_int: int, s_int: int) -> None:
-        if 0 <= m_int <= 180 and 0 <= s_int < 60:
-            total_s = m_int * 60 + s_int
-            # Allow ±1s rounding tolerance
-            for delta in (-1, 0, 1):
+    def _add_event_sec(sec_val: Any) -> None:
+        if isinstance(sec_val, bool) or not isinstance(sec_val, (int, float)):
+            return
+        total_s = int(round(float(sec_val)))
+        if 0 <= total_s <= 10800:
+            for delta in range(-5, 6):
                 if total_s + delta >= 0:
                     valid_time_secs.add(total_s + delta)
+
+    def _add_event_time_str(val: Any) -> None:
+        if not isinstance(val, str) or not val:
+            return
+        for m_ts in re.finditer(r"(?<!\d)(\d{1,3}):(\d{2})(?!\d)", val):
+            m_int, s_int = int(m_ts.group(1)), int(m_ts.group(2))
+            if 0 <= m_int <= 180 and 0 <= s_int < 60:
+                _add_event_sec(m_int * 60 + s_int)
+        for m_zh in re.finditer(r"(\d{1,3})分(\d{1,2})秒", val):
+            m_int, s_int = int(m_zh.group(1)), int(m_zh.group(2))
+            if 0 <= m_int <= 180 and 0 <= s_int < 60:
+                _add_event_sec(m_int * 60 + s_int)
+
+    def _extract_event_timelines(rep_obj: Dict[str, Any]) -> None:
+        if not isinstance(rep_obj, dict):
+            return
+        # 1. 阶段流水：击杀、阵亡、购买、阶段关键事件
+        raw_phases = rep_obj.get("phases_data") or []
+        phases_iter = raw_phases if isinstance(raw_phases, list) else list(raw_phases.values())
+        for pd in phases_iter:
+            if not isinstance(pd, dict):
+                continue
+            for ev in (pd.get("events") or []):
+                if isinstance(ev, dict):
+                    _add_event_sec(ev.get("time_sec") if ev.get("time_sec") is not None else ev.get("time"))
+                    _add_event_time_str(ev.get("time_str"))
+                else:
+                    _add_event_time_str(ev)
+            for pl in (pd.get("players") or []):
+                if not isinstance(pl, dict):
+                    continue
+                for ke in (pl.get("kills_events") or []):
+                    if isinstance(ke, dict):
+                        _add_event_sec(ke.get("time_sec") if ke.get("time_sec") is not None else ke.get("time"))
+                        _add_event_time_str(ke.get("time_str"))
+                    else:
+                        _add_event_time_str(ke)
+                for de in (pl.get("deaths_events") or []):
+                    if isinstance(de, dict):
+                        _add_event_sec(de.get("time_sec") if de.get("time_sec") is not None else de.get("time"))
+                        _add_event_time_str(de.get("time_str"))
+                    else:
+                        _add_event_time_str(de)
+                for it in (pl.get("items_bought") or []):
+                    if isinstance(it, dict):
+                        _add_event_sec(it.get("time_sec") if it.get("time_sec") is not None else it.get("time"))
+                        _add_event_time_str(it.get("time_str"))
+                    else:
+                        _add_event_time_str(it)
+
+        # 2. 选手关键装备购买时间轴
+        for side_k in ("radiant_pos_1_to_5", "dire_pos_1_to_5"):
+            for p in (rep_obj.get(side_k) or []):
+                if not isinstance(p, dict):
+                    continue
+                for kt in (p.get("key_item_timings") or []):
+                    _add_event_time_str(kt)
+                for ktr in (p.get("key_item_timings_rich") or []):
+                    if isinstance(ktr, dict):
+                        _add_event_sec(ktr.get("time_sec") if ktr.get("time_sec") is not None else ktr.get("time"))
+                        _add_event_time_str(ktr.get("time_str"))
+
+        # 3. 团战起止时间
+        for tf in (rep_obj.get("key_teamfights") or []):
+            if isinstance(tf, dict):
+                _add_event_sec(tf.get("start_sec"))
+                _add_event_sec(tf.get("end_sec"))
+                _add_event_time_str(tf.get("start_str"))
+                _add_event_time_str(tf.get("end_str"))
+                _add_event_time_str(tf.get("time_range"))
+                _add_event_time_str(tf.get("time"))
+
+        df = rep_obj.get("deep_forensics") or {}
+        if isinstance(df, dict):
+            for tf in (df.get("teamfight_forensics") or []):
+                if isinstance(tf, dict):
+                    _add_event_sec(tf.get("start_sec"))
+                    _add_event_sec(tf.get("end_sec"))
+                    _add_event_time_str(tf.get("time_range"))
+            for side_ms in (df.get("map_space_by_side") or {}).values():
+                if isinstance(side_ms, dict):
+                    for sev in (side_ms.get("solo_pickoff_events") or []):
+                        if isinstance(sev, dict):
+                            _add_event_sec(sev.get("time_sec") if sev.get("time_sec") is not None else sev.get("time"))
+                            _add_event_time_str(sev.get("time_str"))
+            for side_mo in (df.get("macro_objectives_by_side") or {}).values():
+                if isinstance(side_mo, dict):
+                    for rev in (side_mo.get("roshan_events") or []):
+                        if isinstance(rev, dict):
+                            _add_event_sec(rev.get("time_sec") if rev.get("time_sec") is not None else rev.get("time"))
+                            _add_event_time_str(rev.get("time_str"))
+                        else:
+                            _add_event_time_str(rev)
+
+        # 4. 地图目标时间线（防御塔、兵营、肉山、魔方）与关键录像节点
+        for list_k in ("objective_markers", "roshan_and_tower_timeline", "top3_replay_moments"):
+            for item in (rep_obj.get(list_k) or []):
+                if isinstance(item, dict):
+                    _add_event_sec(item.get("time_sec") if item.get("time_sec") is not None else item.get("time"))
+                    _add_event_time_str(item.get("time_str"))
+
+    def _extract_payload_event_timelines(payload_obj: Dict[str, Any]) -> None:
+        if not isinstance(payload_obj, dict):
+            return
+        for pb in (payload_obj.get("phases_breakdown") or []):
+            if not isinstance(pb, dict):
+                continue
+            for pl in (pb.get("own_players") or []):
+                if not isinstance(pl, dict):
+                    continue
+                for lst_k in ("items_bought", "kills_events", "deaths_events"):
+                    for s_ev in (pl.get(lst_k) or []):
+                        _add_event_time_str(s_ev)
+        for tf in (payload_obj.get("key_teamfights") or []):
+            if isinstance(tf, dict):
+                _add_event_time_str(tf.get("time"))
+        for p in (payload_obj.get("own_team") or []):
+            if isinstance(p, dict):
+                for kt in (p.get("key_item_timings") or []):
+                    _add_event_time_str(kt)
+        mo = payload_obj.get("macro_objectives") or {}
+        if isinstance(mo, dict):
+            for rev in (mo.get("roshan_events") or []):
+                if isinstance(rev, dict):
+                    _add_event_sec(rev.get("time_sec") if rev.get("time_sec") is not None else rev.get("time"))
+                    _add_event_time_str(rev.get("time_str"))
+                else:
+                    _add_event_time_str(rev)
 
     def _add_num(n_val: int) -> None:
         if abs(n_val) >= 1000:
             valid_big_nums.add(abs(n_val))
 
-    def _walk(obj: Any) -> None:
+    def _walk_numbers(obj: Any) -> None:
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if k == "grok_coaching":
                     continue
-                _walk(v)
+                _walk_numbers(v)
         elif isinstance(obj, list):
             for item in obj:
-                _walk(item)
+                _walk_numbers(item)
         elif isinstance(obj, bool):
             return
         elif isinstance(obj, int):
             _add_num(obj)
-            if 0 <= obj <= 10800:
-                _add_time(obj // 60, obj % 60)
         elif isinstance(obj, float):
             _add_num(int(round(obj)))
             _add_num(int(obj))
         elif isinstance(obj, str):
-            for m_ts in re.finditer(r"(?<!\d)(\d{1,3}):(\d{2})(?!\d)", obj):
-                _add_time(int(m_ts.group(1)), int(m_ts.group(2)))
-            for m_zh in re.finditer(r"(\d{1,3})分(\d{1,2})秒", obj):
-                _add_time(int(m_zh.group(1)), int(m_zh.group(2)))
             for m_num in re.finditer(r"(?<![:\d])\b\d{1,3}(?:,\d{3})+\b|(?<![:\d])\b\d{4,}\b", obj):
                 raw_n = m_num.group(0).replace(",", "")
                 if raw_n.isdigit():
                     _add_num(int(raw_n))
 
-    _walk(report)
+    _extract_event_timelines(report)
+    _walk_numbers(report)
     if input_payload:
-        _walk(input_payload)
+        _extract_payload_event_timelines(input_payload)
+        _walk_numbers(input_payload)
     return valid_time_secs, valid_big_nums
 
 
@@ -3069,26 +3295,43 @@ def call_llm_coach_review(
                 "input": user_prompt,
                 "temperature": 0,
             }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                method="POST",
-                headers={
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": key,
-                    "User-Agent": "DotaAiAnalyst/2.0",
-                },
-            )
-            with urllib.request.urlopen(req, timeout=45) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-            steps = data.get("steps") or []
-            texts = []
-            for st in steps:
-                if st.get("type") == "model_output":
-                    for c in st.get("content") or []:
-                        if c.get("type") == "text" and c.get("text"):
-                            texts.append(c["text"])
-            out_txt = "\n".join(texts) or data.get("output_text") or ""
+            last_gem_err: Optional[Exception] = None
+            out_txt = ""
+            for _gem_att in range(2):
+                try:
+                    req = urllib.request.Request(
+                        url,
+                        data=json.dumps(payload).encode("utf-8"),
+                        method="POST",
+                        headers={
+                            "Content-Type": "application/json",
+                            "x-goog-api-key": key,
+                            "User-Agent": "DotaAiAnalyst/2.0",
+                        },
+                    )
+                    with urllib.request.urlopen(req, timeout=45) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                    steps = data.get("steps") or []
+                    texts = []
+                    for st in steps:
+                        if st.get("type") == "model_output":
+                            for c in st.get("content") or []:
+                                if c.get("type") == "text" and c.get("text"):
+                                    texts.append(c["text"])
+                    cand_txt = "\n".join(texts) or data.get("output_text") or ""
+                    parsed_gem = _parse_llm_json_robust(cand_txt)
+                    if not isinstance(parsed_gem, dict):
+                        raise ValueError("Gemini 返回的 JSON 截断或无法解析")
+                    gem_ok, gem_err = validate_coaching_schema(parsed_gem, own_team=own_team)
+                    if not gem_ok:
+                        raise ValueError(f"Gemini JSON 结构校验未通过: {gem_err}")
+                    out_txt = cand_txt
+                    last_gem_err = None
+                    break
+                except Exception as e_gem:
+                    last_gem_err = e_gem
+            if last_gem_err is not None:
+                raise last_gem_err
         else:
             from concurrent.futures import ThreadPoolExecutor
 
@@ -3212,7 +3455,9 @@ def call_llm_coach_review(
                         if not isinstance(parsed_c, dict):
                             raise ValueError("返回的 JSON 截断或无法解析")
                         if partial_mode:
-                            is_valid_c, err_c = validate_coaching_schema(parsed_c, partial_mode=partial_mode)
+                            is_valid_c, err_c = validate_coaching_schema(
+                                parsed_c, partial_mode=partial_mode, own_team=own_team
+                            )
                             if not is_valid_c:
                                 raise ValueError(f"JSON 结构校验失败: {err_c}")
                         return parsed_c
@@ -3232,6 +3477,8 @@ def call_llm_coach_review(
                 for rk in raw_rank_list:
                     if isinstance(rk, dict) and int(rk.get("pos") or 0) in (1, 2, 3, 4, 5):
                         global_rank_by_pos[int(rk["pos"])] = rk
+            if len(global_rank_by_pos) < 5:
+                raise RuntimeError(f"Grok 全局排名不足 5 条（实际 {len(global_rank_by_pos)} 条）")
 
             global_conclusion = {
                 "title": part_global.get("title"),
@@ -3242,8 +3489,8 @@ def call_llm_coach_review(
                     {
                         "pos": pos_k,
                         "lane": authoritative_lanes.get(pos_k),
-                        "grok_score": (global_rank_by_pos.get(pos_k) or {}).get("grok_score"),
-                        "grok_share_pct": (global_rank_by_pos.get(pos_k) or {}).get("grok_share_pct"),
+                        "grok_score": global_rank_by_pos[pos_k]["grok_score"],
+                        "grok_share_pct": global_rank_by_pos[pos_k]["grok_share_pct"],
                     }
                     for pos_k in (1, 2, 3, 4, 5)
                 ],
@@ -3255,7 +3502,7 @@ def call_llm_coach_review(
                     if target_pos in (4, 5)
                     else "请结合 `role_duty_audit` 评估该核心位的英雄机制、1/2/3号位职责履行、经济转化与关键装时间点、队友配合及敌我克制关系。"
                 )
-                assigned_rk = global_rank_by_pos.get(target_pos) or {}
+                assigned_rk = global_rank_by_pos[target_pos]
                 target_lane = authoritative_lanes.get(target_pos, "上路")
                 pos_payload = {
                     "match_id": compact_payload.get("match_id"),
@@ -3339,11 +3586,9 @@ def call_llm_coach_review(
             if len(merged_players_by_pos) < 5:
                 raise RuntimeError("Grok 选手分片未全部成功返回")
             for pos_i, gp in merged_players_by_pos.items():
-                rk_entry = global_rank_by_pos.get(pos_i) or {}
-                if rk_entry.get("grok_score") is not None:
-                    gp["grok_score"] = rk_entry["grok_score"]
-                if rk_entry.get("grok_share_pct") is not None:
-                    gp["grok_share_pct"] = rk_entry["grok_share_pct"]
+                rk_entry = global_rank_by_pos[pos_i]
+                gp["grok_score"] = rk_entry["grok_score"]
+                gp["grok_share_pct"] = rk_entry["grok_share_pct"]
                 gp["lane"] = authoritative_lanes.get(pos_i, gp.get("lane") or "上路")
             part_global["players"] = [merged_players_by_pos[k] for k in sorted(merged_players_by_pos.keys())]
             out_txt = json.dumps(part_global, ensure_ascii=False)
@@ -3358,6 +3603,25 @@ def call_llm_coach_review(
         structured["provider"] = prov
         structured["side"] = focus_side
         own_pos_map = {int(p.get("pos") or 0): p for p in own_team if isinstance(p, dict)}
+        own_valid_slots = {
+            int(p["player_slot"])
+            for p in own_team
+            if isinstance(p, dict) and isinstance(p.get("player_slot"), int) and not isinstance(p.get("player_slot"), bool)
+        }
+        raw_slot_to_pos: Dict[int, int] = {}
+        for rk_src in (structured.get("player_rankings") or []) + (structured.get("players") or []):
+            if isinstance(rk_src, dict):
+                sl_v = rk_src.get("slot")
+                ps_v = rk_src.get("pos")
+                if (
+                    not isinstance(sl_v, bool)
+                    and isinstance(sl_v, int)
+                    and not isinstance(ps_v, bool)
+                    and isinstance(ps_v, int)
+                    and ps_v in (1, 2, 3, 4, 5)
+                ):
+                    raw_slot_to_pos[sl_v] = ps_v
+
         pls = [gp for gp in (structured.get("players") or []) if isinstance(gp, dict)]
         for gp in pls:
             pos_i = int(gp.get("pos") or 0)
@@ -3367,20 +3631,23 @@ def call_llm_coach_review(
                 gp["hero"] = p_orig.get("hero_short_zh") or p_orig.get("hero_name") or gp.get("hero")
             if gp.get("deep_verdict") and not gp.get("assessment"):
                 gp["assessment"] = gp["deep_verdict"]
-        scored_pls = [gp for gp in pls if gp.get("grok_score") is not None]
-        if scored_pls:
-            max_sc = max(float(gp["grok_score"]) for gp in scored_pls)
-            top_slots = {gp.get("slot") for gp in scored_pls if float(gp["grok_score"]) == max_sc}
-            mvp_obj = structured.get("mvp")
-            if not isinstance(mvp_obj, dict):
-                mvp_obj = {}
-                structured["mvp"] = mvp_obj
-            if mvp_obj.get("slot") not in top_slots:
-                top_gp = max(scored_pls, key=lambda x: (float(x.get("grok_score") or 0), float(x.get("grok_share_pct") or 0)))
-                mvp_obj["slot"] = top_gp.get("slot")
+
+        mvp_obj = structured.get("mvp")
+        if isinstance(mvp_obj, dict):
+            raw_mvp_slot = mvp_obj.get("slot")
+            if (
+                not isinstance(raw_mvp_slot, bool)
+                and isinstance(raw_mvp_slot, int)
+                and raw_mvp_slot not in own_valid_slots
+                and raw_mvp_slot in raw_slot_to_pos
+            ):
+                mapped_p = own_pos_map.get(raw_slot_to_pos[raw_mvp_slot])
+                if mapped_p and mapped_p.get("player_slot") is not None:
+                    mvp_obj["slot"] = mapped_p["player_slot"]
+
         structured["players"] = pls
 
-        is_valid_full, full_err = validate_coaching_schema(structured)
+        is_valid_full, full_err = validate_coaching_schema(structured, own_team=own_team)
         if not is_valid_full:
             raise RuntimeError(f"大模型返回结构校验未通过: {full_err}")
 
