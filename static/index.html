@@ -5,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
   <meta name="color-scheme" content="dark" />
-  <title>Workstation · 战后算账 &amp; Dota 2 录像级复盘工作台</title>
-  <link rel="stylesheet" href="/styles.d552247f.css" />
+  <title>刀塔账房 · 五黑战后复盘与赛前作战室</title>
+  <link rel="stylesheet" href="/styles.fe672990.css" />
 </head>
 <body>
   <div id="ws-app-shell" class="ws-app-shell">
     <!-- =========================================================================
-         Workstation 左侧常驻战局边栏：每一场比赛随时点开即看 + 模式切换 + 搜索过滤
+         左侧常驻战局边栏：每一场比赛随时点开即看 + 模式切换 + 搜索过滤
          ========================================================================= -->
-    <aside id="ws-sidebar" class="ws-sidebar" aria-label="Workstation 战局列表与导航">
+    <aside id="ws-sidebar" class="ws-sidebar" aria-label="战局列表与导航">
       <div class="ws-brand-row">
         <div class="brand-group" id="brand-home-trigger" role="button" tabindex="0" title="点击查看跨局车队大账本与全部战局">
           <span class="ws-logo brand-mark" aria-hidden="true">刀</span>
           <div class="ws-brand-copy">
-            <h1 class="ws-brand-name brand-title">Workstation · 战后算账</h1>
-            <p class="ws-brand-sub brand-subtitle">Dota 2 录像级复盘工作台</p>
+            <h1 class="ws-brand-name brand-title">刀塔账房</h1>
+            <p class="ws-brand-sub brand-subtitle">五黑战后复盘与赛前作战室</p>
           </div>
         </div>
         <button
@@ -81,7 +81,7 @@
         <span id="ws-sidebar-match-count" class="ws-sidebar-count">加载中</span>
       </div>
 
-      <!-- 每一场比赛列表：Workstation 笔记式行列表 -->
+      <!-- 每一场比赛列表 -->
       <div id="ws-sidebar-match-list" class="ws-sidebar-notes" role="listbox" aria-label="最近比赛记录列表">
         <div class="ws-sidebar-empty">正在同步最近比赛记录...</div>
       </div>
@@ -98,7 +98,7 @@
     </aside>
 
     <!-- =========================================================================
-         Workstation 右侧主阅读工作区：顶部位置栏 + 视图切换栏 + 独立滚动阅读舱
+         右侧主阅读工作区：顶部位置栏 + 视图切换栏 + 独立滚动阅读舱
          ========================================================================= -->
     <div id="ws-main-shell" class="ws-main-shell">
       <header class="ws-location-bar site-header">
@@ -132,7 +132,7 @@
         </div>
       </header>
 
-      <!-- Workstation 风格视图切换栏 (仅在单局复盘模式下显示，彻底告别万字杂乱堆叠) -->
+      <!-- 单局复盘子视图切换栏 (仅在单局复盘模式下显示) -->
       <div id="ws-postgame-view-bar" class="ws-view-bar" role="tablist" aria-label="单局复盘子视图切换">
         <div class="ws-view-tabs">
           <button type="button" class="ws-view-tab is-active" data-postgame-tab="summary" role="tab" aria-selected="true">
@@ -319,7 +319,7 @@
     </div>
 
     <!-- =========================================================================
-         工作台 A：单局录像级复盘与车队分锅账本 (Workstation 主阅读区)
+         工作台 A：单局录像级复盘与车队账本 (主阅读区)
          ========================================================================= -->
     <div id="postgame-workspace" hidden>
     <!-- 按需 AI 分析门控面板：当用户点击一局尚未分析的比赛时呈现，只有用户点击按钮才执行 AI 复盘分析 -->
@@ -337,7 +337,7 @@
     </section>
 
     <div id="analyzed-report-content">
-    <!-- 比赛总览横幅 (Workstation 文档头风格) -->
+    <!-- 比赛总览横幅 -->
     <section id="match-overview-section" class="match-overview" aria-labelledby="match-overview-title">
       <div class="overview-top-row">
         <div>
@@ -362,7 +362,7 @@
       </nav>
     </section>
 
-    <!-- Workstation 招牌模块：📊 核心数字明细表 & ✅ 录像事实核查 -->
+    <!-- 核心数字明细表 & 录像事实核查 -->
     <section id="ws-factcheck-section" class="ws-factcheck-section" aria-label="核心数字与录像事实核查">
       <div id="ws-top3-fixes-container" class="ws-top3-fixes-container"></div>
       <div id="ws-team-metrics-strip" class="ws-team-metrics-strip"></div>
@@ -887,7 +887,7 @@
   <div id="toast-banner" class="toast-banner" role="status" aria-live="polite" hidden></div>
 
   <footer class="site-footer">
-    <span>战后算账 · Dota 2 录像级战术复盘与赛前工作台</span>
+    <span>刀塔账房 · 五黑战后复盘与赛前作战室</span>
     <span>·</span>
     <span>有据复盘，数据来自 OpenDota 录像解析与 AI 教练</span>
   </footer>
@@ -920,6 +920,6 @@
     </button>
   </nav>
 
-  <script src="/app.d4483be1.js" defer></script>
+  <script src="/app.e52c67fb.js" defer></script>
 </body>
 </html>

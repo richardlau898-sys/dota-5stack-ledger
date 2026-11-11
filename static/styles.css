@@ -8756,7 +8756,7 @@ body {
 }
 
 /* =========================================================================
-   Workstation Design System (Master-Detail Sidebar + Sub-View Tabs)
+   Master-Detail Sidebar + Sub-View Tabs Layout
    ========================================================================= */
 
 html,
@@ -9066,7 +9066,7 @@ body {
   color: var(--ws-text-secondary);
 }
 
-/* Scrollable Match List in Sidebar (Keen / Shopify / Workstation 2-line spacious style) */
+/* Scrollable Match List in Sidebar (2-line spacious style) */
 .ws-sidebar-notes {
   min-height: 0;
   flex: 1 1 0%;
@@ -9366,7 +9366,7 @@ body {
   white-space: nowrap;
 }
 
-/* Workstation Sub-View Bar */
+/* Postgame Sub-View Bar */
 .ws-view-bar {
   display: flex;
   min-height: 46px;
@@ -9483,12 +9483,12 @@ body {
   padding: 26px 34px 96px !important;
 }
 
-/* Hide redundant Quick-Jump row inside Match Overview since Workstation View Bar is sticky at top */
+/* Hide redundant Quick-Jump row inside Match Overview since Sub-View Bar is sticky at top */
 #postgame-workspace .section-jump-nav {
   display: none !important;
 }
 
-/* Workstation Document Title & Signal Strip */
+/* Match Document Title & Signal Strip */
 .ws-document-kicker,
 #match-meta-line {
   color: var(--ws-text-secondary) !important;
@@ -9538,7 +9538,7 @@ body {
   color: var(--ws-text-secondary) !important;
 }
 
-/* Workstation v9.1 Sub-Tab Hiding & Fact-Check / Key Numbers Grid */
+/* Sub-Tab Hiding & Fact-Check / Key Numbers Grid */
 .ws-tab-hidden {
   display: none !important;
 }
@@ -9896,7 +9896,7 @@ body {
 }
 
 /* =========================================================================
-   Workstation & Keen Reading Rhythm: Global Prose, Inline Hero Chips & Card Spacing
+   Reading Rhythm: Global Prose, Inline Hero Chips & Card Spacing
    ========================================================================= */
 .inline-hero-mention,
 .hero-inline-tag {

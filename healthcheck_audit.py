@@ -251,7 +251,7 @@ for (const file of reportFiles) {
       sandbox.applyPostgameSubTab(pgTab, { scrollTop: true });
       totalChecks++;
     }
-    sandbox.renderWorkstationFactCheckSection(report);
+    sandbox.renderKeyNumbersFactCheckSection(report);
     totalChecks++;
     sandbox.toggleScrubberAutoplay();
     sandbox.stopScrubberAutoplay();
@@ -276,12 +276,12 @@ sandbox.renderHomeWorkspace();
 totalChecks++;
 for (const sf of ["all", "analyzed", "party", "win", "loss"]) {
   sandbox.__state.wsSidebarFilter = sf;
-  sandbox.renderWorkstationSidebarMatches();
+  sandbox.renderSidebarMatches();
   totalChecks++;
 }
 for (const reqId of ["ws-app-shell", "ws-sidebar", "ws-sidebar-match-list", "ws-postgame-view-bar", "ws-factcheck-section"]) {
   if (!htmlIds.has(reqId)) {
-    safeRenderErrors.push("Missing required Workstation DOM ID: " + reqId);
+    safeRenderErrors.push("Missing required layout DOM ID: " + reqId);
   }
 }
 

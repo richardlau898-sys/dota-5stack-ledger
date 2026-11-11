@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Dota 2 战后算账与录像级复盘引擎 (dota_analyst.py)
+Dota 2 五黑复盘与赛前分析引擎 (dota_analyst.py)
 功能:
 1. 好友与五黑车队花名册管理 (roster.json) - 自动识别 Steam32 / Steam64 ID
 2. 查询玩家最近比赛列表 (recent)
@@ -52,7 +52,9 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r3.5"
+ENGINE_VERSION = "2026.11.r4.1"
+SITE_NAME = "刀塔账房"
+SITE_SUBTITLE = "五黑战后复盘与赛前作战室"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Dota 2 战后算账 & 录像级复盘工作台 - Web 后端服务 (server.py)
+Dota 2 五黑复盘与赛前作战室 - Web 后端服务 (server.py)
 基于 Python 标准库 http.server，零外部依赖，默认自动接入 .env.local 中的 xAI Grok (grok-4.7)。
 API 路由:
 - GET  /api/init                   -> 获取主账号花名册、模型状态、最近比赛列表及最新比赛完整复盘
@@ -52,6 +52,8 @@ from cloud_store import (
 from dota_analyst import (
     ENGINE_VERSION,
     REPORTS_DIR,
+    SITE_NAME,
+    SITE_SUBTITLE,
     STEAM64_OFFSET,
     analyze_match_data,
     api_get,
@@ -1501,7 +1503,7 @@ def main() -> None:
     port = int(os.environ.get("PORT", "8788"))
     ThreadingHTTPServer.allow_reuse_address = True
     server = ThreadingHTTPServer(("127.0.0.1", port), DotaAnalystHandler)
-    print(f"Dota 2 战后算账工作台已启动: http://127.0.0.1:{port}", flush=True)
+    print(f"{SITE_NAME} ({SITE_SUBTITLE}) 已启动: http://127.0.0.1:{port}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
