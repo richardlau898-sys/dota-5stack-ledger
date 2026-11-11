@@ -460,7 +460,13 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
             )
 
             dmg_share = float(fp.get("hero_damage_share_pct") or 0.0)
-            if kill_pct >= 32.0:
+            p_pos = int(fp["pos"])
+            kill_gpm = kill_g / max(1.0, float(duration_min))
+            is_kill_gold_king = (
+                (p_pos in (1, 2, 3) and kill_pct >= 37.5 and kill_gpm >= 150.0)
+                or (p_pos in (4, 5) and kill_pct >= 53.5 and kill_gpm >= 130.0)
+            )
+            if is_kill_gold_king:
                 econ_tag = "⚔️ 以战养战提款王"
             elif jungle_pct >= 38.0 and dmg_share < 18.0:
                 econ_tag = "🧛 野区只进不出吸尘器"
