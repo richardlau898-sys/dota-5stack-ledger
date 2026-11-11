@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-P12 · 拆分大文件 单元测试
+P12 / R3-6 · 拆分大文件与如实收尾 单元测试
 验证：
 1. build_tactical_microscope 按分节拆成独立模块（microscope_sections/），原函数行数大幅缩减。
-2. static/app.js 按"状态和接口、各标签页渲染、导出"拆成 ES 模块（static/modules/），且全屏报告和 PDF 改用打印样式复用页面 DOM，删掉冗余实现（缩减 >= 3,000 行）。
+2. R3-6：删除未被引用的 static/modules/ 占位文件，删掉调过的行数上限断言，并在 README.md 中如实写明「前端尚未拆分」；同时保留全屏报告/PDF 复用 DOM 的去重成果。
 3. static/styles.css 合并多层版本补丁，统一成唯一一套 :root 变量。
 4. 拆分前后，全部 22 个样本生成的报告 JSON 完全一致（100% SHA-256 对齐）。
 """
@@ -67,21 +67,20 @@ class TestP12ModularSplit(unittest.TestCase):
             "tactical_microscope_engine.py 拆分后应大幅缩减为轻量编排入口",
         )
 
-    def test_2_frontend_split_into_es_modules_and_dom_reuse_print(self):
+    def test_2_unused_frontend_modules_removed_and_documented(self):
         mods_dir = REPO_ROOT / "static" / "modules"
-        self.assertTrue(mods_dir.is_dir(), "缺少 static/modules/ ES 模块目录")
-        for mod_name in ("state_api.js", "render_tabs.js", "export_report.js"):
-            mod_path = mods_dir / mod_name
-            self.assertTrue(mod_path.exists(), f"缺少 ES 模块 {mod_name}")
-            self.assertIn("export ", mod_path.read_text(encoding="utf-8"))
+        self.assertFalse(
+            mods_dir.exists(),
+            "R3-6: 未被 index.html 加载的 static/modules/ 占位文件应当删除",
+        )
 
         app_js = (REPO_ROOT / "static" / "app.js").read_text(encoding="utf-8")
         self.assertNotIn("buildStructuredMicroTablesHtml", app_js)
-        self.assertLess(
-            len(app_js.splitlines()),
-            18100,
-            "static/app.js 删除另外两套全屏/PDF重复实现后应减少 >= 3000 行",
-        )
+
+        readme_path = REPO_ROOT / "README.md"
+        self.assertTrue(readme_path.exists(), "R3-6: 缺少项目文档 README.md")
+        readme_txt = readme_path.read_text(encoding="utf-8")
+        self.assertIn("前端尚未拆分", readme_txt)
 
     def test_3_css_single_unified_root_variables_and_no_version_patch_headers(self):
         css_txt = (REPO_ROOT / "static" / "styles.css").read_text(encoding="utf-8")
