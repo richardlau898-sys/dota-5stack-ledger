@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r0.4"
+ENGINE_VERSION = "2026.11.r0.5"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -2036,12 +2036,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                         "kind": "improvement",
                         "evidence": classify_text_evidence(imp_str, "template"),
                     })
-            if not conclusions:
-                conclusions.append({
-                    "text": f"{p.get('hero_short_zh') or p.get('hero_name') or '选手'} KDA {p.get('kda') or '0/0/0'}",
-                    "kind": "summary",
-                    "evidence": "measured",
-                })
             p["conclusions"] = conclusions
 
             dossier = p.get("hero_matchup_dossier")
@@ -2067,27 +2061,21 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
     if isinstance(mvp_sec, dict):
         mvp_sec["evidence"] = "measured"
         mvp_conclusions: List[Dict[str, str]] = []
-        mvp_obj = mvp_sec.get("mvp")
-        if isinstance(mvp_obj, dict):
-            ev = classify_text_evidence(mvp_obj.get("reason"), "measured")
-            mvp_obj["evidence"] = ev
-            if mvp_obj.get("reason"):
-                mvp_conclusions.append({"text": str(mvp_obj["reason"]), "kind": "mvp_reason", "evidence": ev})
-        cul_obj = mvp_sec.get("culprit")
-        if isinstance(cul_obj, dict):
-            ev = classify_text_evidence(cul_obj.get("reason"), "measured")
-            cul_obj["evidence"] = ev
-            if cul_obj.get("reason"):
-                mvp_conclusions.append({"text": str(cul_obj["reason"]), "kind": "culprit_reason", "evidence": ev})
-            if cul_obj.get("fix"):
+        for r_txt in mvp_sec.get("rationale_list") or []:
+            r_clean = str(r_txt or "").strip()
+            if r_clean:
                 mvp_conclusions.append({
-                    "text": str(cul_obj["fix"]),
-                    "kind": "culprit_fix",
-                    "evidence": classify_text_evidence(cul_obj["fix"], "template"),
+                    "text": r_clean,
+                    "kind": "rationale",
+                    "evidence": classify_text_evidence(r_clean, "measured"),
                 })
-        elif mvp_sec.get("no_culprit_reason"):
-            nc_txt = str(mvp_sec["no_culprit_reason"])
-            mvp_conclusions.append({"text": nc_txt, "kind": "no_culprit_reason", "evidence": "measured"})
+        for sub_key, reason_field in (("mvp_player", "praise_talk"), ("culprit_player", "verdict"), ("mvp", "reason"), ("culprit", "reason")):
+            sub_obj = mvp_sec.get(sub_key)
+            if isinstance(sub_obj, dict):
+                ev = classify_text_evidence(sub_obj.get(reason_field), "measured")
+                sub_obj["evidence"] = ev
+                if not mvp_conclusions and sub_obj.get(reason_field):
+                    mvp_conclusions.append({"text": str(sub_obj[reason_field]), "kind": sub_key, "evidence": ev})
         if mvp_sec.get("verdict_headline"):
             vh_txt = str(mvp_sec["verdict_headline"])
             mvp_conclusions.append({
@@ -2095,8 +2083,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                 "kind": "verdict_headline",
                 "evidence": classify_text_evidence(vh_txt, "measured"),
             })
-        if not mvp_conclusions:
-            mvp_conclusions.append({"text": str(report.get("score") or "比赛结算"), "kind": "summary", "evidence": "measured"})
         mvp_sec["conclusions"] = mvp_conclusions
 
     # 3. match_narrative section
@@ -2119,8 +2105,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                     "kind": key_name,
                     "evidence": classify_text_evidence(val, default_ev),
                 })
-        if not nar_conclusions:
-            nar_conclusions.append({"text": str(report.get("score") or "全场走势"), "kind": "summary", "evidence": "measured"})
         narrative["conclusions"] = nar_conclusions
 
     # 4. phases_data section
@@ -2129,13 +2113,17 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
     for ph in phase_list:
         if not isinstance(ph, dict):
             continue
-        ph_sum = str(ph.get("summary") or ph.get("label") or "")
+        ph_sum = str(ph.get("summary") or ph.get("label") or "").strip()
         ph["evidence"] = classify_text_evidence(ph_sum, "measured")
-        ph["conclusions"] = [{
-            "text": ph_sum or "阶段统计",
-            "kind": "phase_summary",
-            "evidence": classify_text_evidence(ph_sum, "measured"),
-        }]
+        ph["conclusions"] = (
+            [{
+                "text": ph_sum,
+                "kind": "phase_summary",
+                "evidence": classify_text_evidence(ph_sum, "measured"),
+            }]
+            if ph_sum
+            else []
+        )
         for sd_k, sd_v in (ph.get("side_diagnosis") or {}).items():
             if isinstance(sd_v, dict):
                 sd_v["evidence"] = classify_text_evidence(sd_v.get("summary"), "measured")
@@ -2160,12 +2148,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                         "kind": "bad",
                         "evidence": classify_text_evidence(b_str, "measured"),
                     })
-            if not pp_conclusions:
-                pp_conclusions.append({
-                    "text": f"阶段战绩 {pp.get('kills_count', 0)}/{pp.get('deaths_count', 0)}",
-                    "kind": "stat",
-                    "evidence": "measured",
-                })
             pp["conclusions"] = pp_conclusions
 
     # 5. draft_analysis & draft_analysis_by_side
@@ -2199,8 +2181,6 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                 if isinstance(item, dict):
                     item_txt = " ".join(str(v) for v in item.values() if isinstance(v, str))
                     item["evidence"] = classify_text_evidence(item_txt, def_ev)
-        if not da_conclusions:
-            da_conclusions.append({"text": "阵容与分路分析", "kind": "summary", "evidence": "measured"})
         da["conclusions"] = da_conclusions
 
     # 6. deep_forensics (all 13 *_by_side sections + top-level)
@@ -2213,7 +2193,7 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
             for side_k in ("dire", "radiant"):
                 side_block = mod_val.get(side_k)
                 if isinstance(side_block, dict):
-                    sv_txt = str(side_block.get("side_verdict") or side_block.get("summary") or "")
+                    sv_txt = str(side_block.get("side_verdict") or side_block.get("summary") or "").strip()
                     side_block["evidence"] = classify_text_evidence(sv_txt, "measured")
                     sb_conclusions: List[Dict[str, str]] = []
                     if sv_txt:
@@ -2244,20 +2224,22 @@ def annotate_report_evidence(report: Dict[str, Any]) -> Dict[str, Any]:
                                     )
                                     ev_elem = classify_text_evidence(elem_txt, "measured")
                                     elem["evidence"] = ev_elem
-                    if not sb_conclusions:
-                        sb_conclusions.append({"text": mod_key, "kind": "module", "evidence": "measured"})
                     side_block["conclusions"] = sb_conclusions
                 elif isinstance(side_block, list):
                     for elem in side_block:
                         if isinstance(elem, dict):
-                            elem_txt = str(elem.get("verdict_zh") or elem.get("summary") or "")
+                            elem_txt = str(elem.get("verdict_zh") or elem.get("summary") or "").strip()
                             ev_elem = classify_text_evidence(elem_txt, "measured")
                             elem["evidence"] = ev_elem
-                            elem["conclusions"] = [{
-                                "text": elem_txt or "英雄微操审计",
-                                "kind": "hero_execution",
-                                "evidence": ev_elem,
-                            }]
+                            elem["conclusions"] = (
+                                [{
+                                    "text": elem_txt,
+                                    "kind": "hero_execution",
+                                    "evidence": ev_elem,
+                                }]
+                                if elem_txt
+                                else []
+                            )
 
     return report
 

@@ -25,8 +25,8 @@ class TestT110EvidenceTags(unittest.TestCase):
                         self.assertIn(p.get("evidence"), VALID_EVIDENCE_TYPES, f"Player missing evidence in {side_key}")
                         coaching = p.get("coaching") or {}
                         self.assertIn(coaching.get("evidence"), VALID_EVIDENCE_TYPES)
-                        conclusions = coaching.get("conclusions") or p.get("conclusions") or []
-                        self.assertGreater(len(conclusions), 0, f"Player missing conclusions list in {side_key}")
+                        conclusions = coaching.get("conclusions") if isinstance(coaching.get("conclusions"), list) else p.get("conclusions")
+                        self.assertIsInstance(conclusions, list, f"Player missing conclusions list in {side_key}")
                         for c in conclusions:
                             self.assertIn(c.get("evidence"), VALID_EVIDENCE_TYPES, f"Invalid evidence on {c}")
                             txt = str(c.get("text") or "")
@@ -43,8 +43,10 @@ class TestT110EvidenceTags(unittest.TestCase):
                     self.assertIn(mvp_sec["mvp"].get("evidence"), VALID_EVIDENCE_TYPES)
                 if isinstance(mvp_sec.get("culprit"), dict):
                     self.assertIn(mvp_sec["culprit"].get("evidence"), VALID_EVIDENCE_TYPES)
-                mvp_conclusions = mvp_sec.get("conclusions") or []
-                self.assertGreater(len(mvp_conclusions), 0)
+                mvp_conclusions = mvp_sec.get("conclusions")
+                self.assertIsInstance(mvp_conclusions, list)
+                if report.get("is_parsed"):
+                    self.assertGreater(len(mvp_conclusions), 0)
                 for c in mvp_conclusions:
                     self.assertIn(c.get("evidence"), VALID_EVIDENCE_TYPES)
 

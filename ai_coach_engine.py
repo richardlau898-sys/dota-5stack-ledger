@@ -14,6 +14,7 @@ import re
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
+from dota_constants_zh import resolve_patch_name
 from hero_profiles_126 import (
     audit_hero_mechanism_and_timing,
     build_hero_matchup_dossier,
@@ -2530,7 +2531,14 @@ def call_llm_coach_review(
         and v not in (None, [], {})
     }
 
-    patch_val = report.get("patch_str") or str(report.get("patch") or "7.39")
+    raw_patch_str = report.get("patch_str")
+    raw_patch_id = report.get("patch")
+    if raw_patch_str not in (None, ""):
+        patch_val: Optional[str] = str(raw_patch_str)
+    elif raw_patch_id not in (None, ""):
+        patch_val = resolve_patch_name(raw_patch_id)
+    else:
+        patch_val = None
     lane_id_to_zh = {1: "下路", 2: "中路", 3: "上路"}
 
     compact_payload = _sanitize_for_llm({
@@ -2616,6 +2624,7 @@ def call_llm_coach_review(
             for p in opp_team
         ],
     })
+    compact_payload["patch"] = patch_val
 
     own_won = bool(
         (focus_side == "radiant" and report.get("radiant_win"))

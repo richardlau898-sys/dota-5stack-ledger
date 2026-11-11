@@ -87,7 +87,6 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
         solo_pickoff_events: List[Dict[str, Any]] = []
         player_space_rows: List[Dict[str, Any]] = []
         total_solo_pickoffs = 0
-        total_unsmoked_blind_feeds = 0
         total_pointless_deaths = 0
 
         for fp in sorted(own_players, key=lambda x: int(x["pos"])):
@@ -104,7 +103,6 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
             kp_pct = float(fp.get("kill_participation_pct") or 0.0)
 
             p_solo_cnt = 0
-            p_unsmoked_cnt = 0
             p_solo_gold_fed = 0
             p_deep_death_cnt = 0
             p_pickoff_details: List[str] = []
@@ -300,7 +298,6 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "jungle_farm_pct": jungle_farm_pct,
                 "tower_damage": tower_dmg,
                 "solo_pickoff_cnt": p_solo_cnt,
-                "unsmoked_blind_cnt": p_unsmoked_cnt,
                 "solo_gold_fed": p_solo_gold_fed,
                 "deep_death_cnt": p_deep_death_cnt,
                 "space_style_badge": style_badge,
@@ -323,7 +320,6 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
             "side": side_key,
             "side_verdict": side_verdict,
             "total_solo_pickoffs": total_solo_pickoffs,
-            "total_unsmoked_blind_feeds": total_unsmoked_blind_feeds,
             "solo_pickoff_events": solo_pickoff_events[:12],
             "player_space_rows": player_space_rows,
         }
@@ -468,7 +464,25 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 + max(0, int(gr.get(GOLD_REASON_KEYS["ward_kill"]) or 0))
             )
             death_loss = abs(int(gr.get(GOLD_REASON_KEYS["death_loss"]) or 0))
-            buyback_loss = abs(min(0, int(gr.get(GOLD_REASON_KEYS["buyback"]) or 0)))
+            buyback_count = (
+                len(rp["buyback_log"])
+                if isinstance(rp.get("buyback_log"), list)
+                else int(fp.get("buybacks") or 0)
+            )
+            raw_bb = gr.get(GOLD_REASON_KEYS["buyback"])
+            buyback_loss = (
+                abs(min(0, int(raw_bb)))
+                if (raw_bb is not None and int(raw_bb) != 0)
+                else None
+            )
+            if buyback_count > 0:
+                buyback_text = (
+                    f"买活 {buyback_count} 次（-{buyback_loss:,} 金）"
+                    if buyback_loss is not None
+                    else f"买活 {buyback_count} 次（金额无数据）"
+                )
+            else:
+                buyback_text = "未买活"
 
             pos_earned = max(1, lane_g + jungle_g + kill_g + obj_g + bounty_ward_g)
             lane_pct = round(lane_g * 100.0 / pos_earned, 1)
@@ -492,7 +506,7 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 econ_tag = "🧛 野区只进不出吸尘器"
             elif lane_pct >= 45.0:
                 econ_tag = "🌾 扎实兵线收割机"
-            elif death_loss + buyback_loss >= 2400:
+            elif death_loss + (buyback_loss or 0) >= 2400:
                 econ_tag = "💸 阵亡/买活散财童子"
             else:
                 econ_tag = "⚖️ 均衡发育节奏手"
@@ -507,7 +521,9 @@ def build_space_damage_econ_sections(ctx: Dict[str, Any]) -> Dict[str, Any]:
                 "kill_gold": kill_g,
                 "obj_gold": obj_g + bounty_ward_g,
                 "death_loss": death_loss,
+                "buyback_count": buyback_count,
                 "buyback_loss": buyback_loss,
+                "buyback_text": buyback_text,
                 "lane_pct": lane_pct,
                 "jungle_pct": jungle_pct,
                 "kill_pct": kill_pct,

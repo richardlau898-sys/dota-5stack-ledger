@@ -373,11 +373,6 @@ def build_hero_execution_section(ctx: Dict[str, Any]) -> Dict[str, Any]:
             fp["phoenix_egg_audit"] = {
                 "total_casts": egg_casts,
                 "tf_egg_total": tf_egg_total,
-                "survived_cnt": tf_egg_total,
-                "shattered_cnt": 0,
-                "shatter_rate_pct": 0.0,
-                "survived_waves": egg_tf_waves,
-                "shattered_waves": [],
                 "held_death_waves": egg_held_death_waves,
                 "sun_ray_casts": ray_casts,
                 "sun_ray_dmg": ray_dmg,
