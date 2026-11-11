@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r2.1"
+ENGINE_VERSION = "2026.11.r2.2"
 
 STEAM64_OFFSET = 76561197960265728
 OPENDOTA_BASE = "https://api.opendota.com/api"
@@ -1355,9 +1355,17 @@ def analyze_match_data(
                 if str(k).startswith("npc_dota_hero_") and isinstance(v, (int, float))
             )
 
-            dead_seconds = int(p.get("life_state_dead") or 0)
-            gold_reasons = p.get("gold_reasons") or {}
-            death_gold_lost = abs(int(gold_reasons.get(GOLD_REASON_KEYS["death_loss"]) or 0))
+            dead_seconds = (
+                int(p.get("life_state_dead") or 0)
+                if (is_parsed and p.get("life_state_dead") is not None)
+                else None
+            )
+            gold_reasons = p.get("gold_reasons")
+            death_gold_lost = (
+                abs(int(gold_reasons.get(GOLD_REASON_KEYS["death_loss"]) or 0))
+                if (is_parsed and isinstance(gold_reasons, dict))
+                else None
+            )
             buybacks = int(p.get("buyback_count") or len(p.get("buyback_log") or []))
 
             killed_by_raw = p.get("killed_by") or {}
@@ -1491,7 +1499,11 @@ def analyze_match_data(
                 "hero_damage_taken": hero_dmg_taken,
                 "tower_damage": p.get("tower_damage") or 0,
                 "hero_healing": p.get("hero_healing") or 0,
-                "stuns_sec": round(float(p.get("stuns") or 0), 1),
+                "stuns_sec": (
+                    round(float(p.get("stuns") or 0), 1)
+                    if (is_parsed and p.get("stuns") is not None)
+                    else None
+                ),
                 "obs_placed": p.get("obs_placed"),
                 "sen_placed": p.get("sen_placed"),
                 "obs_destroyed": obs_destroyed,
@@ -1824,13 +1836,13 @@ def analyze_match_data(
         if isinstance(tp.get("hero_mechanism_profile"), dict):
             tp["hero_mechanism_profile"].pop("hero_matchup_dossier", None)
 
-    assign_team_blame_percentages(radiant_report)
-    assign_team_blame_percentages(dire_report)
+    assign_team_blame_percentages(radiant_report, is_parsed=is_parsed)
+    assign_team_blame_percentages(dire_report, is_parsed=is_parsed)
 
     grok_coaching = load_cached_grok_coaching(match_id, focus_side_resolved)
 
     mvp_and_culprit = select_match_mvp_and_culprit(
-        radiant_report, dire_report, radiant_win, user_team_side, grok_coaching=grok_coaching
+        radiant_report, dire_report, radiant_win, user_team_side, grok_coaching=grok_coaching, is_parsed=is_parsed
     )
     match_narrative = build_four_stage_narrative(
         match, radiant_report, dire_report, economy_timeline, key_teamfights, user_team_side
@@ -2410,12 +2422,15 @@ def render_markdown_report(report: Dict[str, Any]) -> str:
         for p in team:
             l10 = p["laning_10m"]
             lh10_str = f" ({l10['lh10']}/{l10['dn10']})" if l10["lh10"] is not None else ""
-            d_sec = p.get("dead_seconds") or 0
+            raw_d_sec = p.get("dead_seconds")
+            dead_str = f"{int(raw_d_sec)//60}m{int(raw_d_sec)%60:02d}s" if raw_d_sec is not None else "无数据"
+            raw_blame = p.get("blame_share_pct")
+            blame_str = f"{raw_blame}%" if raw_blame is not None else "无数据"
             lines.append(
                 f"| {p['pos']}号位 | {p['hero_short_zh']} | `{p['personaname']}` | {p['rank']} | "
                 f"{p['kda']} ({p['kill_participation_pct']}%) | {p['net_worth']:,} ({p['gpm']}/{p['xpm']}) | "
                 f"{p['last_hits']}/{p['denies']}{lh10_str} | {p['hero_damage']:,} ({p['hero_damage_share_pct']}%) | "
-                f"{p.get('damage_taken', 0):,} | {p['tower_damage']:,} | {d_sec//60}m{d_sec%60:02d}s | {p.get('blame_share_pct', 0)}% |"
+                f"{p.get('damage_taken', 0):,} | {p['tower_damage']:,} | {dead_str} | {blame_str} |"
             )
         lines.append("")
 

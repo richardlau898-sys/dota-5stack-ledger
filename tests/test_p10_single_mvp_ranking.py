@@ -32,9 +32,13 @@ class TestP10SingleMvpRanking(unittest.TestCase):
                 ):
                     self.assertIn(key, side_rank, f"match {mid} {side} missing {key}")
                 self.assertEqual(len(side_rank["contrib_order_slots"]), 5)
-                self.assertEqual(len(side_rank["blame_order_slots"]), 5)
                 self.assertEqual(side_rank["mvp_slot"], side_rank["contrib_order_slots"][0])
-                self.assertEqual(side_rank["culprit_slot"], side_rank["blame_order_slots"][0])
+                if rep.get("is_parsed"):
+                    self.assertEqual(len(side_rank["blame_order_slots"]), 5)
+                    self.assertEqual(side_rank["culprit_slot"], side_rank["blame_order_slots"][0])
+                else:
+                    self.assertEqual(side_rank["blame_order_slots"], [])
+                    self.assertIsNone(side_rank["culprit_slot"])
 
             for p in rep["radiant_pos_1_to_5"] + rep["dire_pos_1_to_5"]:
                 self.assertIn("score_100", p)
@@ -145,7 +149,7 @@ for (const rep of reports) {
     const ranking = sandbox.getCanonicalSideRanking(rep, perspective);
     const expectedMvp = ranking.mvpPlayer;
     const expectedCulprit = ranking.culpritPlayer;
-    if (!expectedMvp || !expectedCulprit) {
+    if (!expectedMvp || (rep.is_parsed !== false && !expectedCulprit)) {
       throw new Error("Missing mvpPlayer or culpritPlayer from getCanonicalSideRanking");
     }
 
@@ -153,8 +157,8 @@ for (const rep of reports) {
     sandbox.state.verdictActiveCard = "focus";
     sandbox.renderVerdictAndBlameSection(rep);
     const mvpCardHtml = getEl("verdict-grid-3col").innerHTML;
-    const expectedCardHero = ranking.ownWon ? expectedMvp.hero_short_zh : expectedCulprit.hero_short_zh;
-    if (!mvpCardHtml.includes(expectedCardHero)) {
+    const expectedCardHero = (ranking.ownWon || rep.is_parsed === false) ? expectedMvp.hero_short_zh : expectedCulprit.hero_short_zh;
+    if (rep.is_parsed !== false && !mvpCardHtml.includes(expectedCardHero)) {
       throw new Error(`Card hero mismatch on ${rep.match_id} (${perspective}): expected ${expectedCardHero}`);
     }
 
@@ -170,15 +174,15 @@ for (const rep of reports) {
     sandbox.state.forensicSelectedSlot = "focus";
     sandbox.renderPlayersForensicsList(rep);
     const playersHtml = getEl("players-forensics-container").innerHTML;
-    const expectedSpotlight = ranking.ownWon ? expectedMvp : expectedCulprit;
+    const expectedSpotlight = (ranking.ownWon || rep.is_parsed === false) ? expectedMvp : expectedCulprit;
     if (!playersHtml.includes(expectedSpotlight.hero_short_zh)) {
       throw new Error(`Players forensics spotlight mismatch: expected ${expectedSpotlight.hero_short_zh}`);
     }
 
     // 4. Fullscreen / PDF structured report
     const fsHtml = sandbox.buildStructuredFullReportHtml(rep);
-    const expectedHeadlineHero = ranking.ownWon ? expectedMvp.hero_short_zh : expectedCulprit.hero_short_zh;
-    if (!fsHtml.includes(`${expectedHeadlineHero} (`)) {
+    const expectedHeadlineHero = (ranking.ownWon || rep.is_parsed === false) ? expectedMvp.hero_short_zh : expectedCulprit.hero_short_zh;
+    if (rep.is_parsed !== false && !fsHtml.includes(`${expectedHeadlineHero} (`)) {
       throw new Error(`Fullscreen/PDF headline hero mismatch: expected ${expectedHeadlineHero}`);
     }
 
@@ -189,7 +193,7 @@ for (const rep of reports) {
     if (!lastSpokenText.includes(expectedMvp.hero_short_zh)) {
       throw new Error(`Voice broadcast MVP mismatch: expected ${expectedMvp.hero_short_zh} in '${lastSpokenText}'`);
     }
-    if (!ranking.ownWon && !lastSpokenText.includes(expectedCulprit.hero_short_zh)) {
+    if (!ranking.ownWon && rep.is_parsed !== false && !lastSpokenText.includes(expectedCulprit.hero_short_zh)) {
       throw new Error(`Voice broadcast culprit mismatch: expected ${expectedCulprit.hero_short_zh} in '${lastSpokenText}'`);
     }
   }

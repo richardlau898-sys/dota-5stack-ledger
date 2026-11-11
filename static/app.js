@@ -928,42 +928,33 @@ function buildTeamfightDotaStory(tf, fObj, idx, { side, sideZh, oppZh, grokWin }
 function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contribPct, blamePct } = {}) {
   const heroShort = p.hero_short_zh || p.hero_name || "该英雄";
   const pWon = Boolean(p.won);
+  const isUnparsed = state.currentReport?.is_parsed === false;
   const cPct = contribPct ?? Number(p.contrib_share_pct ?? p.blame_share_pct ?? 20).toFixed(1);
-  const bPct = blamePct ?? Number(p.blame_share_pct || 0).toFixed(1);
-  const lh10 = p.laning_10m?.lh10 ?? 0;
-  const dn10 = p.laning_10m?.dn10 ?? 0;
-  const laneEff = p.lane_efficiency_pct || 0;
+  const rawBlame = isUnparsed ? null : (blamePct ?? p.blame_share_pct ?? null);
+  const bPct = rawBlame == null ? null : Number(rawBlame).toFixed(1);
+  const lh10 = p.laning_10m?.lh10;
+  const dn10 = p.laning_10m?.dn10;
+  const laneEff = p.lane_efficiency_pct;
   const dmgPerGold = p.net_worth ? (p.hero_damage / p.net_worth).toFixed(2) : "0.00";
   const score100 = getHeroScore100(p);
   const scoreTier = getScore100Tier(score100, pWon);
 
   // Item timing narrative
   const coreItems = (p.final_items_rich || []).filter((it) => it.purchase_time_str);
-  const itemRouteStr =
-    coreItems.length > 0
-      ? coreItems
-          .slice(0, 4)
-          .map((it) => `${it.purchase_time_str}${it.zh_name || it.key}`)
-          .join(" → ")
-      : "常规散件过渡";
+  const itemRouteStr = coreItems.length > 0 ? coreItems.slice(0, 4).map((it) => `${it.purchase_time_str}${it.zh_name || it.key}`).join(" → ") : "终局出装面板";
 
   // Check BKB or active item button presses
   const bkbItem = (p.final_items_rich || []).find((it) => String(it.key || "").includes("black_king_bar"));
-  const activeUsesList = Object.values(p.active_item_uses || {})
-    .filter((u) => u && !TRIVIAL_ACTIVE_ITEMS.has(u.key))
-    .sort((a, b) => (b.count || 0) - (a.count || 0));
+  const activeUsesList = Object.values(p.active_item_uses || {}).filter((u) => u && !TRIVIAL_ACTIVE_ITEMS.has(u.key)).sort((a, b) => (b.count || 0) - (a.count || 0));
   const topActive = activeUsesList[0];
 
   let activeAuditClause = "";
-  if (bkbItem) {
+  if (isUnparsed) activeAuditClause = "本局录像未解析，主动装备按键次数无数据；";
+  else if (bkbItem) {
     const bkbCnt = Number(bkbItem.use_count || 0);
-    if (bkbCnt <= 2) {
-      activeAuditClause = `${bkbItem.purchase_time_str || "中期"}好不容易掏出黑皇杖(BKB)，结果整局只按了 ${bkbCnt} 次，纯纯把 BKB 当挂件供着！`;
-    } else if (bkbCnt <= 5) {
-      activeAuditClause = `${bkbItem.purchase_time_str || "中期"}做出黑皇杖(BKB)后整局按下 ${bkbCnt} 次，几波关键混战开BKB时机仍略显犹豫；`;
-    } else {
-      activeAuditClause = `${bkbItem.purchase_time_str || "中期"}掏出黑皇杖(BKB)后高频按下 ${bkbCnt} 次，团战切入与魔免拉扯非常果断；`;
-    }
+    if (bkbCnt <= 2) activeAuditClause = `${bkbItem.purchase_time_str || "中期"}好不容易掏出黑皇杖(BKB)，结果整局只按了 ${bkbCnt} 次，纯纯把 BKB 当挂件供着！`;
+    else if (bkbCnt <= 5) activeAuditClause = `${bkbItem.purchase_time_str || "中期"}做出黑皇杖(BKB)后整局按下 ${bkbCnt} 次，几波关键混战开BKB时机仍略显犹豫；`;
+    else activeAuditClause = `${bkbItem.purchase_time_str || "中期"}掏出黑皇杖(BKB)后高频按下 ${bkbCnt} 次，团战切入与魔免拉扯非常果断；`;
   } else if (topActive && topActive.count >= 8) {
     activeAuditClause = `手里的「${topActive.zh_name || topActive.key}」整局狂按 ${topActive.count} 次，道具操作频率拉满；`;
   } else {
@@ -974,31 +965,10 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
   const benches = p.benchmarks_list || [];
   const topBenches = benches.filter((b) => Number(b.pct) >= 80).sort((a, b) => Number(b.pct) - Number(a.pct));
   const lowBenches = benches.filter((b) => Number(b.pct) <= 35).sort((a, b) => Number(a.pct) - Number(b.pct));
-
-  const benchPraise =
-    topBenches.length > 0
-      ? `在全球同英雄对标中，「${topBenches
-          .slice(0, 2)
-          .map((b) => `${b.label}(击败${b.pct}%)`)
-          .join("、")}」堪称大腿级数据`
-      : "";
-  const benchRoast =
-    lowBenches.length > 0
-      ? `但「${lowBenches
-          .slice(0, 2)
-          .map((b) => `${b.label}(仅击败${b.pct}%)`)
-          .join("、")}」严重拉胯`
-      : "";
-
-  // Target focus highlight
+  const benchPraise = topBenches.length > 0 ? `在全球同英雄对标中，「${topBenches.slice(0, 2).map((b) => `${b.label}(击败${b.pct}%)`).join("、")}」堪称大腿级数据` : "";
+  const benchRoast = lowBenches.length > 0 ? `但「${lowBenches.slice(0, 2).map((b) => `${b.label}(仅击败${b.pct}%)`).join("、")}」严重拉胯` : "";
   const topTargetAbil = (p.ability_targets_list || [])[0];
-  const targetClause =
-    topTargetAbil && (topTargetAbil.targets || []).length > 0
-      ? `指向性技能「${topTargetAbil.ability_zh}」整局甩出 ${topTargetAbil.total_casts} 次（重点照顾${topTargetAbil.targets
-          .slice(0, 2)
-          .map((t) => `${t.hero_short_zh}×${t.count}`)
-          .join("、")}），`
-      : "";
+  const targetClause = topTargetAbil && (topTargetAbil.targets || []).length > 0 ? `指向性技能「${topTargetAbil.ability_zh}」整局甩出 ${topTargetAbil.total_casts} 次（重点照顾${topTargetAbil.targets.slice(0, 2).map((t) => `${t.hero_short_zh}×${t.count}`).join("、")}），` : "";
 
   // Closing punchline (Dota 2 veteran tone)
   const hmp = p.hero_mechanism_profile || {};
@@ -1015,40 +985,48 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
         ? `前中期弱势期隐忍刷出核心装（合理避战不盲目送团），25m+ 决胜期出山狂轰全队 ${hmp.late_hdmg_share_pct || p.hero_damage_share_pct}% 伤害完成终极收割，`
         : "从对线一路 C 到终局的绝对真神，";
       punchline = `本局百人制打分砍下 ${score100}/100 分（全场贡献 ${cPct}% 胜局功勋），${harvestPraise}这把赢球全队得给 ${heroShort} 敬一杯！`;
-    } else if ((p.dead_seconds || 0) >= 180 || score100 < 78) {
+    } else if (p.dead_seconds != null && Number(p.dead_seconds) >= 180) {
       badge = `🌶️ AI 胜局毒舌敲打${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "mixed";
       const tempoRoast = hmp.mid_tempo_wasted
         ? `身为【${hmp.timing_curve_zh || "中期节奏核"}】却在 10~25m 强势期当大核闷头独刷不参战，`
         : `全场在泉水读秒长达 ${p.dead_seconds} 秒，`;
       punchline = `本局百人制得分 ${score100}/100 分（贡献 ${cPct}%）——${heroShort} ${tempoRoast}在团队配合下拿下比赛，下把可按英雄强势期优化节奏！`;
+    } else if (score100 < 78) {
+      badge = `🌶️ AI 胜局毒舌敲打${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
+      tone = "mixed";
+      punchline = `本局百人制得分 ${score100}/100 分（贡献 ${cPct}%）——${heroShort} 在团队配合下拿下比赛，下把可按英雄强势期进一步提升参战效率！`;
     } else {
       badge = `🏆 AI 凯旋功臣点评${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "praise";
       const roleNote = hmp.late_harvest_fulfilled
         ? "前中期稳健刷钱成型、后期团战完美兑现大核收割职责"
         : hmp.sacrificial_initiator_fulfilled
-        ? `果断肉身跳刀先手开团（硬控 ${p.stuns_sec || 0} 秒 / 吃下全队 ${p.damage_taken_share_pct || 0}% 伤害）`
+        ? `果断肉身跳刀先手开团（${p.stuns_sec != null ? `硬控 ${p.stuns_sec} 秒 / ` : ""}吃下全队 ${p.damage_taken_share_pct || 0}% 伤害）`
         : `扎实完成了 ${p.pos} 号位（${hmp.timing_curve_zh || "核心/辅助"}）本职工作`;
       punchline = `本局百人制斩获 ${score100}/100 高分（稳健拿下 ${cPct}% 胜局贡献），${heroShort} ${roleNote}，是车队赢球不可或缺的坚实拼图！`;
     }
+  } else if (isUnparsed || bPct === null) {
+    badge = `📋 未解析战绩点评${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
+    tone = "mixed";
+    punchline = `本局百人制得分 ${score100}/100 分（录像未解析，不计算分锅百分比）。${heroShort} 基础面板已记录，解析录像后可查看分阶段节奏与细节复盘。`;
   } else {
+    const deadClause =
+      p.dead_seconds != null
+        ? `（泉水读秒 ${p.dead_seconds} 秒${p.death_gold_lost != null ? ` / 阵亡掉钱 -${fmtNum(p.death_gold_lost)}` : ""}）`
+        : "";
     if (isTopCulprit || Number(bPct) >= 25 || score100 < 52) {
       badge = `🚨 AI 一级战犯处刑词${tCurveTag} · ${score100}/100分 (${scoreTier.label})`;
       tone = "roast";
       let mechCrimeClause = "";
-      if (hmp.late_harvest_failed) {
-        mechCrimeClause = `前中期吃了团队大量安全线与野区资源，但 25m+ 决胜期吃下 ${hmp.late_gold_share_pct || 22}% 经济却仅打出 ${
-          hmp.late_hdmg_share_pct || 15
-        }% 伤害，完全没能兑现【${hmp.timing_curve_zh || "大核"}】后期收割职责${
+      if (hmp.late_harvest_failed && hmp.late_gold_share_pct != null && hmp.late_hdmg_share_pct != null) {
+        mechCrimeClause = `前中期吃了团队大量安全线与野区资源，但 25m+ 决胜期吃下 ${hmp.late_gold_share_pct}% 经济却仅打出 ${hmp.late_hdmg_share_pct}% 伤害，完全没能兑现【${hmp.timing_curve_zh || "大核"}】后期收割职责${
           hmp.missing_mandatory_shard ? `（且拒出 1400 金质变魔晶：${hmp.shard_desc}）` : ""
         }；`;
       } else if (Array.isArray(p.weaknesses) && p.weaknesses[0]) {
         mechCrimeClause = `${String(p.weaknesses[0]).replace(/\*\*/g, "")}；`;
       }
-      punchline = `本局百人制仅得 ${score100}/100 分，背下全队 ${bPct}% 头号大锅（泉水读秒 ${p.dead_seconds || 0} 秒 / 阵亡掉钱 -${fmtNum(
-        p.death_gold_lost || 0
-      )}）！${mechCrimeClause}这把输球 ${heroShort} 得在群里主动发红包谢罪！`;
+      punchline = `本局百人制仅得 ${score100}/100 分，背下全队 ${bPct}% 头号大锅${deadClause}！${mechCrimeClause}这把输球 ${heroShort} 得在群里主动发红包谢罪！`;
     } else if (
       p.is_turret_fulfilled ||
       hmp.sacrificial_initiator_fulfilled ||
@@ -1073,12 +1051,18 @@ function buildPlayerDossierAiStory(p, { grokPlayer, isMvp, isTopCulprit, contrib
       const extraWeak = hmp.missing_mandatory_shard
         ? `整局漏出 1400 金核心魔晶（${hmp.shard_desc}），`
         : "";
-      punchline = `本局百人制得分 ${score100}/100 分，分摊 ${bPct}% 败局责任（泉水读秒 ${p.dead_seconds || 0} 秒），${extraWeak}${heroShort} 中后期几波关键团战走位与技能机制配合失误明显，下把急需找回状态！`;
+      punchline = `本局百人制得分 ${score100}/100 分，分摊 ${bPct}% 败局责任${
+        p.dead_seconds != null ? `（泉水读秒 ${p.dead_seconds} 秒）` : ""
+      }，${extraWeak}${heroShort} 中后期几波关键团战走位与技能机制配合失误明显，下把急需找回状态！`;
     }
   }
 
+  const laningIntro =
+    lh10 != null && dn10 != null
+      ? `前10分钟在${p.lane_role || "线上"}交出 ${lh10}/${dn10} 补刀${laneEff != null ? `（效率 ${laneEff}%）` : ""}`
+      : `前10分钟补刀无数据（录像未解析）`;
   const baseStory =
-    `【${heroShort}${tCurveTag ? `（${hmp.timing_curve_zh}）` : ""} 本局评分：${score100}/100分】前10分钟在${p.lane_role || "线上"}交出 ${lh10}/${dn10} 补刀（效率 ${laneEff}%），装备按「${itemRouteStr}」成型；` +
+    `【${heroShort}${tCurveTag ? `（${hmp.timing_curve_zh}）` : ""} 本局评分：${score100}/100分】${laningIntro}，装备按「${itemRouteStr}」成型；` +
     `${activeAuditClause}` +
     `实战交出 ${p.kda}（参战 ${p.kill_participation_pct}%），轰出 ${fmtNum(p.hero_damage)} 英雄伤害（占全队 ${
       p.hero_damage_share_pct
@@ -1292,16 +1276,27 @@ function getCanonicalSideRanking(report, targetSide = null) {
     contribMap.set(Number(p.player_slot), Number(((rawContribVal(p) / rawContribSum) * 100).toFixed(1)));
   });
 
-  const rawBlameVal = (p) => {
+  const isUnparsedReport = report?.is_parsed === false;
+  const hasAnyBlameShare = !isUnparsedReport && own.some((p) => {
     const gp = findGrokPlayerEntry(p, report);
-    if (!ownWon && gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
-    return Math.max(1, Number(p.blame_share_pct || 20));
-  };
-  const rawBlameSum = own.reduce((s, p) => s + rawBlameVal(p), 0) || 100;
-  const blameMap = new Map();
-  own.forEach((p) => {
-    blameMap.set(Number(p.player_slot), Number(((rawBlameVal(p) / rawBlameSum) * 100).toFixed(1)));
+    return (!ownWon && gp && Number(gp.grok_share_pct) > 0) || p.blame_share_pct != null;
   });
+  const blameMap = new Map();
+  if (hasAnyBlameShare) {
+    const rawBlameVal = (p) => {
+      const gp = findGrokPlayerEntry(p, report);
+      if (!ownWon && gp && Number(gp.grok_share_pct) > 0) return Number(gp.grok_share_pct);
+      return Math.max(1, Number(p.blame_share_pct ?? 0));
+    };
+    const rawBlameSum = own.reduce((s, p) => s + rawBlameVal(p), 0) || 100;
+    own.forEach((p) => {
+      blameMap.set(Number(p.player_slot), Number(((rawBlameVal(p) / rawBlameSum) * 100).toFixed(1)));
+    });
+  } else {
+    own.forEach((p) => {
+      blameMap.set(Number(p.player_slot), null);
+    });
+  }
 
   let contribOrder = [];
   if (Array.isArray(backendRank?.contrib_order_slots) && backendRank.contrib_order_slots.length) {
@@ -1372,11 +1367,11 @@ function getCanonicalSideRanking(report, targetSide = null) {
     secondCulpritPlayer,
     sortedByContrib: contribOrder.map((p) => ({
       player: p,
-      contribShare: contribMap.get(Number(p.player_slot)) ?? 20,
+      contribShare: contribMap.get(Number(p.player_slot)) ?? null,
     })),
     sortedByBlame: blameOrder.map((p) => ({
       player: p,
-      blameShare: blameMap.get(Number(p.player_slot)) ?? 20,
+      blameShare: blameMap.get(Number(p.player_slot)) ?? null,
     })),
   };
 }
@@ -3751,12 +3746,17 @@ function renderMatchOverview(report) {
   const totalSen = own.reduce((s, p) => s + (p.sen_placed || 0), 0);
   const totalDewards = own.reduce((s, p) => s + (p.obs_destroyed || 0), 0);
   const totalDeaths = own.reduce((s, p) => s + (p.deaths || 0), 0);
-  const totalDeadSec = own.reduce((s, p) => s + (p.dead_seconds || 0), 0);
+  const hasDeadSec = own.some((p) => p.dead_seconds != null);
+  const totalDeadSec = hasDeadSec ? own.reduce((s, p) => s + (p.dead_seconds || 0), 0) : null;
   const totalBuybacks = own.reduce((s, p) => s + (p.buybacks || 0), 0);
   const econ = report.economy_timeline || {};
 
   const kpiStrip = document.getElementById("match-kpi-strip");
   if (kpiStrip) {
+    const deadKpiSub =
+      totalDeadSec == null
+        ? "泉水读秒 无数据（录像未解析）"
+        : `泉水读秒 ${Math.floor(totalDeadSec / 60)}分${totalDeadSec % 60}秒 · 买活 ${totalBuybacks} 次`;
     kpiStrip.innerHTML = `
       <div class="stat-block">
         <strong>天辉 ${report.radiant_score} : ${report.dire_score} 夜魇</strong>
@@ -3767,16 +3767,24 @@ function renderMatchOverview(report) {
         <span>比赛时长 · ${econ.is_comeback ? "惊天翻盘局" : "正面绞杀局"}</span>
       </div>
       <div class="stat-block">
-        <strong>${(report.key_teamfights || []).length} 场关键团战</strong>
-        <span>${escapeHtml(econ.radiant_max_lead || "")} / ${escapeHtml(econ.dire_max_lead || "")}</span>
+        <strong>${report.is_parsed === false ? "团战无数据" : `${(report.key_teamfights || []).length} 场关键团战`}</strong>
+        <span>${
+          report.is_parsed === false
+            ? "录像尚未解析"
+            : `${escapeHtml(econ.radiant_max_lead || "")} / ${escapeHtml(econ.dire_max_lead || "")}`
+        }</span>
       </div>
       <div class="stat-block">
-        <strong>${totalObs} 假眼 / ${totalSen} 真眼</strong>
-        <span>本方插眼总数 · 排掉敌方 ${totalDewards} 颗假眼</span>
+        <strong>${report.is_parsed === false ? "视野无数据" : `${totalObs} 假眼 / ${totalSen} 真眼`}</strong>
+        <span>${
+          report.is_parsed === false
+            ? "录像尚未解析"
+            : `本方插眼总数 · 排掉敌方 ${totalDewards} 颗假眼`
+        }</span>
       </div>
       <div class="stat-block">
         <strong>合计阵亡 ${totalDeaths} 次</strong>
-        <span>泉水读秒 ${Math.floor(totalDeadSec / 60)}分${totalDeadSec % 60}秒 · 买活 ${totalBuybacks} 次</span>
+        <span>${deadKpiSub}</span>
       </div>
       <div class="stat-block">
         <strong>外部录像核验</strong>
@@ -3891,8 +3899,10 @@ function renderWorkstationFactCheckSection(report) {
         (p.mvp_score !== undefined ? Math.round(Number(p.mvp_score)) : 70);
       const scoreVal = Math.max(15, Math.min(99, Number(rawScore || 70)));
       const sharePct = won
-        ? gr?.grok_share_pct ?? p.contrib_share_pct ?? 20
-        : gr?.grok_share_pct ?? p.blame_share_pct ?? 20;
+        ? gr?.grok_share_pct ?? p.contrib_share_pct ?? null
+        : report.is_parsed === false
+        ? null
+        : gr?.grok_share_pct ?? p.blame_share_pct ?? null;
 
       const pa = p.playstyle_archetype_audit || p.playstyle_audit || {};
       const dba = p.damage_and_build_audit || {};
@@ -4009,7 +4019,13 @@ function renderWorkstationFactCheckSection(report) {
           <td>
             <div class="ws-num-score-cell ${scoreClass}">
               <strong>${scoreVal}<small>/100</small></strong>
-              <span>${won ? `功劳 ${sharePct}%` : `分锅 ${sharePct}%`}</span>
+              <span>${
+                sharePct == null
+                  ? `${won ? "功劳" : "分锅"} 无数据`
+                  : won
+                  ? `功劳 ${sharePct}%`
+                  : `分锅 ${sharePct}%`
+              }</span>
               ${tierTag ? `<em class="ws-num-tier-tag">${escapeHtml(tierTag)}</em>` : ""}
             </div>
           </td>
@@ -7487,12 +7503,18 @@ function toggleVoiceBroadcast() {
         runnerUp?.pos ?? 2
       }号位 ${runnerUp?.hero_short_zh || ""} ${runnerUp?.personaname || ""}。`
     );
+  } else if (report.is_parsed === false || topCulprit?.blame_share_pct == null) {
+    speechParts.push(
+      `本局录像尚未解析，不计算败局分锅百分比。败方尽力王是 ${mvpPlayer?.pos ?? 1}号位 ${
+        mvpPlayer?.hero_short_zh || ""
+      } ${mvpPlayer?.personaname || ""}。`
+    );
   } else {
     speechParts.push(
       `本局败局分锅定责：头号背锅侠是 ${topCulprit?.pos ?? 1}号位 ${
         topCulprit?.hero_short_zh || ""
       } ${topCulprit?.personaname || ""}，战绩 ${topCulprit?.kda || ""}，分锅占比高达百分之 ${
-        topCulprit?.blame_share_pct || 0
+        topCulprit?.blame_share_pct
       }。败方尽力王是 ${mvpPlayer?.pos ?? 1}号位 ${mvpPlayer?.hero_short_zh || ""} ${
         mvpPlayer?.personaname || ""
       }。`
@@ -8079,9 +8101,9 @@ function analyzePlayerItemizationIntelligence(p, report) {
       } else if (totalDeaths >= 6 && !forceItem && !lotusItem) {
         badges.push("🚨 缺BKB/推推自保");
         warnings.push(
-          `🚨 <b>保命装缺失吐槽点（0 BKB / 0 推推棒）：</b>身为 ${pos}号位核心全场阵亡 <b>${totalDeaths} 次（泉水读秒 ${
-            p.dead_seconds || 0
-          }s）</b>，面对敌方切入与减速控制既未出 <b>黑皇杖(BKB)</b> 也未补 <b>原力法杖(推推棒)</b>，后期一旦被贴脸极为脆弱。`
+          `🚨 <b>保命装缺失吐槽点（0 BKB / 0 推推棒）：</b>身为 ${pos}号位核心全场阵亡 <b>${totalDeaths} 次${
+            p.dead_seconds != null ? `（泉水读秒 ${p.dead_seconds}s）` : ""
+          }</b>，面对敌方切入与减速控制既未出 <b>黑皇杖(BKB)</b> 也未补 <b>原力法杖(推推棒)</b>，后期一旦被贴脸极为脆弱。`
         );
       }
     }
@@ -8124,12 +8146,13 @@ function analyzePlayerItemizationIntelligence(p, report) {
 
     if (khandaOrPhylactery && !forceItem && !glimmerItem) {
       badges.push("⚠️ 纯堆伤害0推推/微光");
+      const supDeadClause = p.dead_seconds != null ? `（读秒 ${p.dead_seconds}s）` : "";
       warnings.push(
         `⚠️ <b>辅助重输出轻保命（${khandaOrPhylactery.time_str} ${khandaOrPhylactery.zh} · 0推推/0微光）：</b>虽然前中期做出大骨灰并靠 <b>灵匣→绝刃</b> 轰出 <b>${fmtNum(
           p.hero_damage
         )} 伤害</b>，但作为 ${pos}号位整局 <b>0 原力法杖(推推棒) / 0 微光披风</b>，无位移自保导致被敌方冲脸提款阵亡 <b>${
           p.deaths
-        } 次（读秒 ${p.dead_seconds}s）</b>；若把绝刃卷轴换成推推棒，存活率与救队友能力会再上一层楼。`
+        } 次${supDeadClause}</b>；若把绝刃卷轴换成推推棒，存活率与救队友能力会再上一层楼。`
       );
     } else if (!midasItem && !selfishCarryItemOnSup && !forceItem && oppKiteAndCatchHeroes.length >= 2) {
       warnings.push(
@@ -8968,12 +8991,13 @@ function computeStageRankings(stageKey, report) {
       if (Number(ctx.tpRow?.tp_bought ?? 1) === 0) {
         badParts.push(`整局主动买 <b>0 张 TP</b>`);
       }
+      const deadTail = p.dead_seconds != null ? `（泉水读秒 ${p.dead_seconds}s）` : "";
       if (totalSac >= 2 && Number(p.deaths || 0) >= 8) {
         badParts.push(
-          `全场 ${p.deaths} 死中虽含 <b>${totalSac} 波团战合理换命牺牲</b>，但其余 ${unexcusedDeaths} 次对线/落单阵亡仍偏多（读秒 ${p.dead_seconds}s）`
+          `全场 ${p.deaths} 死中虽含 <b>${totalSac} 波团战合理换命牺牲</b>，但其余 ${unexcusedDeaths} 次对线/落单阵亡仍偏多${deadTail}`
         );
       } else if (Number(p.deaths || 0) >= 8) {
-        badParts.push(`全场阵亡 <b>${p.deaths} 次</b>（泉水读秒 ${p.dead_seconds}s）`);
+        badParts.push(`全场阵亡 <b>${p.deaths} 次</b>${deadTail}`);
       }
       badReason = badParts.join("；") || `全场仅 ${p.deaths} 死，出装与履职稳定`;
     }
@@ -9045,6 +9069,20 @@ function renderStageRankingsBlockHtml(stageKey, report) {
  * Build rich 4-stage replay cards with inline Hero Mini-Logos + Per-Stage Top 2 Best / Top 2 Scapegoat for Chapter ②
  */
 function buildRichFourStageCardsHtml(report) {
+  if (report?.is_parsed === false) {
+    const stages = report.match_narrative?.stages || [];
+    if (!stages.length) {
+      return `<div class="empty-hint">需要先解析录像以获取前、中、后期分段复盘细节。</div>`;
+    }
+    return `<div class="stages-grid-2x2">${stages
+      .map(
+        (st) =>
+          `<div class="stage-card"><div class="stage-card-title">${escapeHtml(
+            st.title || ""
+          )}</div><div class="stage-card-body">${escapeHtml(st.content || "")}</div></div>`
+      )
+      .join("")}</div>`;
+  }
   const { side, sideZh, own, opp } = getOwnAndOppPlayers(report);
   const oppZh = side === "radiant" ? "夜魇" : "天辉";
   const df = report.deep_forensics || {};
@@ -9357,50 +9395,24 @@ function buildRichFourStageCardsHtml(report) {
   const oppDeadSec = opp.reduce((s, p) => s + Number(p.dead_seconds || 0), 0);
   const mostDeadHero = [...own].sort((a, b) => Number(b.dead_seconds || 0) - Number(a.dead_seconds || 0))[0];
 
-  const stage4Bullets = [
-    `<span class="stage-key-pill">① 控制链与大招兑现</span> 全队硬控 <b>${ownStuns}秒 vs ${oppStuns}秒</b>（控制王：<b>${
-      topStunner?.pos ?? "?"
-    }号位${escapeHtml(topStunner?.hero_short_zh || "")} ${topStunner?.stuns_sec ?? 0}秒</b>）。`,
-    `<span class="stage-key-pill">② 视野统治力与反眼</span> 假眼 <b>${vis.total_obs ?? 0} vs ${
-      oppVis.total_obs ?? 0
-    }</b>，真眼 <b>${vis.total_sen ?? 0} vs ${
-      oppVis.total_sen ?? 0
-    }</b>，假眼均寿 <b>${vis.avg_lifespan_sec ?? 0}s/360s</b>（视野劳模：<b>${
-      topWarder?.pos ?? 5
-    }号位${escapeHtml(topWarder?.hero_short_zh || "")} ${topWarder?.obs_placed ?? 0}假${
-      topWarder?.sen_placed ?? 0
-    }真</b>）。`,
-    `<span class="stage-key-pill">③ 输出转化与推塔拆迁</span> 英雄总伤害 <b>${fmtNum(ownDmg)} vs ${fmtNum(
-      oppDmg
-    )}</b>（输出王：<b>${escapeHtml(topDmgHero?.hero_short_zh || "")} ${fmtNum(
-      topDmgHero?.hero_damage || 0
-    )}</b>）；建筑推塔 <b>${fmtNum(ownTd)} vs ${fmtNum(oppTd)}</b>（拆迁王：<b>${escapeHtml(
-      topPusherHero?.hero_short_zh || ""
-    )} ${fmtNum(topPusherHero?.tower_damage || 0)}</b>）。`,
-    `<span class="stage-key-pill">④ 泉水读秒与同位对位</span> 全队泉水读秒 <b>${ownDeadSec}秒 vs ${oppDeadSec}秒</b>（读秒最多：<b>${escapeHtml(
-      mostDeadHero?.hero_short_zh || ""
-    )} ${mostDeadHero?.dead_seconds ?? 0}秒</b>）；1~5号位同位置正面对位 <b>${
-      rm.won_overall_cnt !== undefined && rm.won_overall_cnt !== null ? `${rm.won_overall_cnt} / 5 胜出` : "无数据"
-    }</b>。`,
-  ];
+  const stage4Bullets = report.is_parsed === false
+    ? [
+        `<span class="stage-key-pill">① 控制链与视野</span> 本局录像尚未解析，硬控秒数与眼位存活时长无数据。`,
+        `<span class="stage-key-pill">② 输出转化与推塔拆迁</span> 英雄总伤害 <b>${fmtNum(ownDmg)} vs ${fmtNum(oppDmg)}</b>（输出王：<b>${escapeHtml(topDmgHero?.hero_short_zh || "")} ${fmtNum(topDmgHero?.hero_damage || 0)}</b>）；建筑推塔 <b>${fmtNum(ownTd)} vs ${fmtNum(oppTd)}</b>（拆迁王：<b>${escapeHtml(topPusherHero?.hero_short_zh || "")} ${fmtNum(topPusherHero?.tower_damage || 0)}</b>）。`,
+        `<span class="stage-key-pill">③ 泉水读秒与分锅</span> 本局录像尚未解析，泉水读秒无数据，不计算分锅百分比。`,
+      ]
+    : [
+        `<span class="stage-key-pill">① 控制链与大招兑现</span> 全队硬控 <b>${ownStuns}秒 vs ${oppStuns}秒</b>（控制王：<b>${topStunner?.pos ?? "?"}号位${escapeHtml(topStunner?.hero_short_zh || "")} ${topStunner?.stuns_sec ?? 0}秒</b>）。`,
+        `<span class="stage-key-pill">② 视野统治力与反眼</span> 假眼 <b>${vis.total_obs ?? 0} vs ${oppVis.total_obs ?? 0}</b>，真眼 <b>${vis.total_sen ?? 0} vs ${oppVis.total_sen ?? 0}</b>，假眼均寿 <b>${vis.avg_lifespan_sec ?? 0}s/360s</b>（视野劳模：<b>${topWarder?.pos ?? 5}号位${escapeHtml(topWarder?.hero_short_zh || "")} ${topWarder?.obs_placed ?? 0}假${topWarder?.sen_placed ?? 0}真</b>）。`,
+        `<span class="stage-key-pill">③ 输出转化与推塔拆迁</span> 英雄总伤害 <b>${fmtNum(ownDmg)} vs ${fmtNum(oppDmg)}</b>（输出王：<b>${escapeHtml(topDmgHero?.hero_short_zh || "")} ${fmtNum(topDmgHero?.hero_damage || 0)}</b>）；建筑推塔 <b>${fmtNum(ownTd)} vs ${fmtNum(oppTd)}</b>（拆迁王：<b>${escapeHtml(topPusherHero?.hero_short_zh || "")} ${fmtNum(topPusherHero?.tower_damage || 0)}</b>）。`,
+        `<span class="stage-key-pill">④ 泉水读秒与同位对位</span> 全队泉水读秒 <b>${ownDeadSec}秒 vs ${oppDeadSec}秒</b>（读秒最多：<b>${escapeHtml(mostDeadHero?.hero_short_zh || "")} ${mostDeadHero?.dead_seconds ?? 0}秒</b>）；1~5号位同位置正面对位 <b>${rm.won_overall_cnt !== undefined && rm.won_overall_cnt !== null ? `${rm.won_overall_cnt} / 5 胜出` : "无数据"}</b>。`,
+      ];
 
   const grokStages = report.grok_coaching?.stage_reviews || {};
   const stageModelName = escapeHtml(getCoachModelDisplayName(report));
-  const grokEarlyBullet = grokStages.early_lanes
-    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(
-        grokStages.early_lanes
-      )}`
-    : null;
-  const grokMidBullet = grokStages.mid_tempo
-    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(
-        grokStages.mid_tempo
-      )}`
-    : null;
-  const grokLateBullet = grokStages.late_and_roshan
-    ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(
-        grokStages.late_and_roshan
-      )}`
-    : null;
+  const grokEarlyBullet = grokStages.early_lanes ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(grokStages.early_lanes)}` : null;
+  const grokMidBullet = grokStages.mid_tempo ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(grokStages.mid_tempo)}` : null;
+  const grokLateBullet = grokStages.late_and_roshan ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 复盘</span> ${escapeHtml(grokStages.late_and_roshan)}` : null;
   const grokOverallBullet = grokStages.overall_verdict
     ? `<span class="stage-key-pill" style="background:rgba(139,92,246,0.22);border-color:rgba(167,139,250,0.55);color:#ddd6fe;">🧠 ${stageModelName} AI 总评</span> ${escapeHtml(
         grokStages.overall_verdict
@@ -9680,7 +9692,9 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   const ultAudit = (p.hero_execution_audit?.ult_audits || [])[0];
   const ultSummary = ultAudit
     ? `招牌大招【${ultAudit.ability_zh}】全场释放 <b>${ultAudit.casts ?? 0} 次</b>`
-    : `全场贡献 <b>${p.stuns_sec || 0} 秒硬控</b>`;
+    : p.stuns_sec != null && Number(p.stuns_sec) > 0
+    ? `全场贡献 <b>${p.stuns_sec} 秒硬控</b>`
+    : `全场交出 <b>KDA ${escapeHtml(p.kda)}</b>`;
   const mo = df.macro_objectives_by_side?.[side] || {};
   const aegisTaken = (mo.roshan_events || []).some((r) => String(r).includes(heroShort));
   const lateSoloList = soloEvents.filter((ev) => {
@@ -9712,7 +9726,9 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
         : ""
     }${ultSummary}，全场交出 <b>${p.kda}（${p.kill_participation_pct}% 参战）</b>${
       isSup
-        ? `并铺设 <b>${p.obs_placed || 0} 假眼 / ${p.sen_placed || 0} 真眼</b>`
+        ? p.obs_placed != null || p.sen_placed != null
+          ? `并铺设 <b>${p.obs_placed || 0} 假眼 / ${p.sen_placed || 0} 真眼</b>`
+          : ""
         : `、轰出 <b>${fmtNum(p.hero_damage)} 伤害与 ${fmtNum(p.tower_damage || 0)} 拆塔</b>`
     }，砍下 <b>${score100}/100 分（胜局贡献 ${sharePct}%）</b>，是本局凯旋不可或缺的破阵二当家！`;
   } else if (isSup && lateDeathsCtx.sacList.length > 0 && roleType === "struggle") {
@@ -9731,16 +9747,20 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
             .join("、")}</b>；`
         : "";
     const lowDmgNote =
-      isCore && lateGold >= 5500 && lateDmg < 6500
+      hasTimelineTelemetry && isCore && lateGold >= 5500 && lateDmg < 6500
         ? `后期吃下 <b>+${fmtNum(lateGold)} 金</b> 却仅打出 <b>${fmtNum(lateDmg)} 英雄伤害</b>，核心收割能力严重断档；`
         : "";
-    act3Story = `进入 25 分钟后的终局阶段，${heroShort} 交出 <b>${lateK}杀/${lateD}死、+${fmtNum(
-      lateDmg
-    )} 伤害</b>。${lateFailNote}${lowDmgNote}纵观全局，本局评分 <b>${score100}/100 分</b>，暴露出的走位脱节与细节短板亟需下一把重点复盘整改。`;
+    const latePhaseHead = hasTimelineTelemetry
+      ? `进入 25 分钟后的终局阶段，${heroShort} 交出 <b>${lateK}杀/${lateD}死、+${fmtNum(lateDmg)} 伤害</b>。`
+      : `终局面板结算，${heroShort} 全场交出 <b>${escapeHtml(p.kda)}、${fmtNum(p.hero_damage)} 英雄伤害</b>（分阶段时间轴需先解析录像）。`;
+    act3Story = `${latePhaseHead}${lateFailNote}${lowDmgNote}纵观全局，本局评分 <b>${score100}/100 分</b>，复盘细节见下方清单。`;
   } else {
-    act3Story = `决胜阶段依然倾尽全力打出 <b>${lateK}杀/${lateD}死、+${fmtNum(lateDmg)} 伤害</b>，全场交出 <b>${
+    const lateSvpHead = hasTimelineTelemetry
+      ? `决胜阶段依然倾尽全力打出 <b>${lateK}杀/${lateD}死、+${fmtNum(lateDmg)} 伤害</b>，`
+      : "";
+    act3Story = `${lateSvpHead}全场交出 <b>${
       p.kda
-    }、${fmtNum(p.hero_damage)} 伤害（全队 ${p.hero_damage_share_pct || 0}%）</b>，拿下 <b>${score100}/100 分</b> 虽败犹荣！`;
+    }、${fmtNum(p.hero_damage)} 伤害（全队 ${p.hero_damage_share_pct || 0}%）</b>，拿下 <b>${score100}/100 分</b>！`;
   }
 
   // =========================================================================
@@ -10317,8 +10337,8 @@ function renderVerdictAndBlameSection(report) {
       `<span class="v-stat-pill">GPM <b>${p.gpm}</b></span>`,
       `<span class="v-stat-pill">伤害 <b>${fmtNum(p.hero_damage)}</b> (${p.hero_damage_share_pct || 0}%)</span>`,
     ];
-    if (isTrouble || (p.dead_seconds || 0) >= 160) {
-      pills.push(`<span class="v-stat-pill warn">泉水读秒 <b>${p.dead_seconds || 0}秒</b></span>`);
+    if (p.dead_seconds != null && (isTrouble || Number(p.dead_seconds) >= 160)) {
+      pills.push(`<span class="v-stat-pill warn">泉水读秒 <b>${p.dead_seconds}秒</b></span>`);
     }
     if ((p.pos || 1) >= 4 && (p.obs_placed || 0) + (p.sen_placed || 0) > 0) {
       pills.push(`<span class="v-stat-pill">视野 <b>${p.obs_placed || 0}假/${p.sen_placed || 0}真</b></span>`);
@@ -10441,10 +10461,12 @@ function renderVerdictAndBlameSection(report) {
         if (!p || seenSlots.has(Number(p.player_slot))) return;
         seenSlots.add(Number(p.player_slot));
         const bShare =
-          sortedByBlame.find((x) => Number(x.player.player_slot) === Number(p.player_slot))
-            ?.blameShare ??
-          p.blame_share_pct ??
-          20.0;
+          report.is_parsed === false
+            ? null
+            : sortedByBlame.find((x) => Number(x.player.player_slot) === Number(p.player_slot))
+                ?.blameShare ??
+              p.blame_share_pct ??
+              null;
         let roleType = "culprit2";
         let tabTag = "⚖️ 背锅复盘";
         let cardHeader = "⚖️ 败局全员审讯 · 功过得失与出装复盘";
@@ -10455,7 +10477,20 @@ function renderVerdictAndBlameSection(report) {
         let isSpot = false;
         let displayShare = bShare;
 
-        if (Number(p.player_slot) === Number(c1P?.player_slot)) {
+        if (report.is_parsed === false) {
+          roleType = Number(p.player_slot) === Number(svpP?.player_slot) ? "svp" : "culprit2";
+          tabTag = Number(p.player_slot) === Number(svpP?.player_slot) ? "👑 败方最高分" : "📋 战局复盘";
+          cardHeader =
+            Number(p.player_slot) === Number(svpP?.player_slot)
+              ? "👑 败方最高评分 · 基础战绩复盘（未解析不计分锅）"
+              : `📋 ${p.pos}号位${p.hero_short_zh} · 基础战绩复盘（未解析不计分锅）`;
+          themeClass = Number(p.player_slot) === Number(svpP?.player_slot) ? "mvp-theme" : "struggle-theme";
+          statusTag = "未解析不计分锅";
+          copyBtnLabel = "复制复盘词";
+          isTrouble = false;
+          isSpot = Number(p.player_slot) === Number(svpP?.player_slot);
+          displayShare = null;
+        } else if (Number(p.player_slot) === Number(c1P?.player_slot)) {
           roleType = "culprit1";
           tabTag = "🚨 头号大锅";
           cardHeader = "🚨 本方头号大锅 · 一级战犯逮捕令";
@@ -10558,38 +10593,48 @@ function renderVerdictAndBlameSection(report) {
         const heroShort = p.hero_short_zh || p.hero_name || "";
         const sc100 = getHeroScore100(p, report);
         const grokP = findGrokPlayerEntry(p, report);
+        const shareFormatted = entry.share != null ? Number(entry.share).toFixed(1) : "无数据";
         const chronologyHtml = buildPlayerChronologyStoryHtml(
           p,
           report,
           entry.roleType,
-          Number(entry.share).toFixed(1)
+          shareFormatted
         );
         const isHidden = !isAllVerdict && activeVerdictKey !== entry.key;
         const hasGrokScore = grokP && Number(grokP.grok_score) > 0;
-        const shareLabel = won
-          ? `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 贡献 ${Number(entry.share).toFixed(1)}%`
-          : `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 背锅 ${Number(entry.share).toFixed(1)}%`;
+        const shareLabel =
+          entry.share == null
+            ? `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 分锅 无数据`
+            : won
+            ? `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 贡献 ${shareFormatted}%`
+            : `${hasGrokScore ? "🧠 Grok重评" : "本局评分"} · 背锅 ${shareFormatted}%`;
 
         const isRoast = state.toneMode === "roast";
         const quoteText =
           grokP?.headline ||
           (entry.roleType === "mvp"
             ? p.praise_talk ||
-              `「${heroShort} 本局评分 ${sc100}/100 分（贡献 ${entry.share}%）。」`
+              `「${heroShort} 本局评分 ${sc100}/100 分（贡献 ${shareFormatted}%）。」`
             : entry.roleType === "svp"
             ? `「${heroShort} (${sc100}/100分) 本局败方最高评分。」`
             : entry.roleType === "runnerup"
             ? p.praise_talk ||
-              `「${p.pos}号位 ${heroShort} 评分 ${sc100}/100 分（贡献 ${entry.share}%）。」`
+              `「${p.pos}号位 ${heroShort} 评分 ${sc100}/100 分（贡献 ${shareFormatted}%）。」`
             : entry.roleType === "struggle"
             ? (isRoast ? p.trash_talk : (p.improvements && p.improvements[0]) || (p.weaknesses && p.weaknesses[0])) ||
               `「${heroShort} (${sc100}/100分) 存在可优化细节。」`
             : (isRoast ? p.trash_talk : (p.improvements && p.improvements[0]) || (p.weaknesses && p.weaknesses[0])) ||
-              `「${heroShort} 本局评分 ${sc100}/100 分（分锅 ${entry.share}%），复盘细节见上方客观清单。」`);
+              `「${heroShort} 本局评分 ${sc100}/100 分（${
+                entry.share == null ? "未解析不计分锅" : `分锅 ${shareFormatted}%`
+              }），复盘细节见上方客观清单。」`);
 
-        const copyText = `【${entry.tabTag} · ${p.pos}号位${heroShort}】${p.personaname} 本局打分 ${sc100}/100 分（${
-          won ? `贡献 ${entry.share}%` : `分锅 ${entry.share}%`
-        }），KDA ${p.kda}，GPM ${p.gpm}，英雄伤害 ${fmtNum(p.hero_damage)}，推塔 ${fmtNum(
+        const copySharePart =
+          entry.share == null
+            ? "分锅 无数据"
+            : won
+            ? `贡献 ${shareFormatted}%`
+            : `分锅 ${shareFormatted}%`;
+        const copyText = `【${entry.tabTag} · ${p.pos}号位${heroShort}】${p.personaname} 本局打分 ${sc100}/100 分（${copySharePart}），KDA ${p.kda}，GPM ${p.gpm}，英雄伤害 ${fmtNum(p.hero_damage)}，推塔 ${fmtNum(
           p.tower_damage
         )}。${quoteText}`;
 
@@ -10662,139 +10707,153 @@ function renderVerdictAndBlameSection(report) {
 
   if (stackedBar && rankingRows) {
     stackedBar.classList.toggle("win-mode", won);
-    const listToDisplay = won
-      ? sortedByContrib.map((x) => ({ player: x.player, share: x.contribShare }))
-      : sortedByBlame.map((x) => ({ player: x.player, share: x.blameShare }));
+    if (!won && report.is_parsed === false) {
+      stackedBar.innerHTML = `<div class="empty-hint" style="padding:8px 12px;">本局录像未解析，不计算分锅百分比。</div>`;
+      rankingRows.innerHTML = "";
+    } else {
+      const listToDisplay = won
+        ? sortedByContrib.map((x) => ({ player: x.player, share: x.contribShare }))
+        : sortedByBlame.map((x) => ({ player: x.player, share: x.blameShare }));
 
-    stackedBar.innerHTML = listToDisplay
-      .map(({ player: p, share }, idx) => {
-        const heroShort = p.hero_short_zh || p.hero_name;
-        const sc100 = getHeroScore100(p, report);
-        let innerLabel = "";
-        if (share >= 15) {
-          innerLabel = `${escapeHtml(heroShort)} ${share}% (${sc100}分)`;
-        } else if (share >= 9) {
-          innerLabel = `${share}%`;
-        }
-        const tooltip = won
-          ? `${p.pos_label} ${heroShort} (${p.personaname}): 胜局贡献度 ${share}% · 评分 ${sc100}/100`
-          : `${p.pos_label} ${heroShort} (${p.personaname}): 败局分锅占比 ${share}% · 评分 ${sc100}/100`;
-        return `
-          <div
-            class="blame-seg rank-${idx}"
-            style="--share: ${Math.max(share, 2.5)}; cursor: pointer;"
-            data-verdict-card-tab="slot_${p.player_slot}"
-            title="${escapeHtml(tooltip)}（点击切换查看详情卡）"
-          >${innerLabel}</div>
-        `;
-      })
-      .join("");
+      stackedBar.innerHTML = listToDisplay
+        .map(({ player: p, share }, idx) => {
+          const heroShort = p.hero_short_zh || p.hero_name;
+          const sc100 = getHeroScore100(p, report);
+          const shareNum = share != null ? Number(share) : 0;
+          let innerLabel = "";
+          if (share != null && shareNum >= 15) {
+            innerLabel = `${escapeHtml(heroShort)} ${shareNum}% (${sc100}分)`;
+          } else if (share != null && shareNum >= 9) {
+            innerLabel = `${shareNum}%`;
+          }
+          const shareTxt = share != null ? `${shareNum}%` : "无数据";
+          const tooltip = won
+            ? `${p.pos_label} ${heroShort} (${p.personaname}): 胜局贡献度 ${shareTxt} · 评分 ${sc100}/100`
+            : `${p.pos_label} ${heroShort} (${p.personaname}): 败局分锅占比 ${shareTxt} · 评分 ${sc100}/100`;
+          return `
+            <div
+              class="blame-seg rank-${idx}"
+              style="--share: ${Math.max(shareNum, 2.5)}; cursor: pointer;"
+              data-verdict-card-tab="slot_${p.player_slot}"
+              title="${escapeHtml(tooltip)}（点击切换查看详情卡）"
+            >${innerLabel}</div>
+          `;
+        })
+        .join("");
 
-    stackedBar.querySelectorAll("[data-verdict-card-tab]").forEach((seg) => {
-      seg.addEventListener("click", () => {
-        state.verdictActiveCard = seg.getAttribute("data-verdict-card-tab") || "all";
-        if (state.currentReport) renderVerdictAndBlameSection(state.currentReport);
+      stackedBar.querySelectorAll("[data-verdict-card-tab]").forEach((seg) => {
+        seg.addEventListener("click", () => {
+          state.verdictActiveCard = seg.getAttribute("data-verdict-card-tab") || "all";
+          if (state.currentReport) renderVerdictAndBlameSection(state.currentReport);
+        });
       });
-    });
 
-    const rankMedals = ["🥇", "🥈", "🥉", "04", "05"];
-    const rowsHtml = listToDisplay
-      .map(({ player: p, share }, idx) => {
-        const heroShort = p.hero_short_zh || p.hero_name;
-        const sc100 = getHeroScore100(p, report);
-        const grokP = findGrokPlayerEntry(p, report);
+      const rankMedals = ["🥇", "🥈", "🥉", "04", "05"];
+      const rowsHtml = listToDisplay
+        .map(({ player: p, share }, idx) => {
+          const heroShort = p.hero_short_zh || p.hero_name;
+          const sc100 = getHeroScore100(p, report);
+          const grokP = findGrokPlayerEntry(p, report);
+          const shareNum = share != null ? Number(share) : 0;
+          const shareLabelTxt = share != null ? `${shareNum.toFixed(1)}%` : "无数据";
 
-        if (won) {
-          const oneLinePraise =
-            grokP?.headline ||
-            (Array.isArray(grokP?.good) ? grokP.good[0] : grokP?.good) ||
-            (p.strengths && p.strengths[0]) ||
-            p.praise_talk ||
-            "稳健发挥助力团队拿下一城";
-          const tierTag =
-            idx === 0
-              ? "👑 头号首功"
-              : idx === 1
-              ? "⚔️ 破阵次功"
-              : Number(p.player_slot) === Number(strugglePlayer?.player_slot) && sc100 <= 82
-              ? "🛡️ 团队拼图"
-              : "🔥 凯旋功臣";
-          const copyQuote = `🏆【凯旋庆功榜 #${idx + 1} · ${tierTag}】${p.personaname} (${heroShort} · ${p.pos_label}) 本局评分 ${sc100}/100 分，胜局贡献 ${share}%：KDA ${p.kda}，${oneLinePraise}`;
-          const extraStat =
-            p.pos >= 4
-              ? `视野 ${(p.obs_placed || 0) + (p.sen_placed || 0)}颗 · 控制 ${p.stuns_sec || 0}s`
-              : `伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct || 0}%) · 拆塔 ${fmtNum(p.tower_damage)}`;
+          if (won) {
+            const oneLinePraise =
+              grokP?.headline ||
+              (Array.isArray(grokP?.good) ? grokP.good[0] : grokP?.good) ||
+              (p.strengths && p.strengths[0]) ||
+              p.praise_talk ||
+              "稳健发挥助力团队拿下一城";
+            const tierTag =
+              idx === 0
+                ? "👑 头号首功"
+                : idx === 1
+                ? "⚔️ 破阵次功"
+                : Number(p.player_slot) === Number(strugglePlayer?.player_slot) && sc100 <= 82
+                ? "🛡️ 团队拼图"
+                : "🔥 凯旋功臣";
+            const copyQuote = `🏆【凯旋庆功榜 #${idx + 1} · ${tierTag}】${p.personaname} (${heroShort} · ${p.pos_label}) 本局评分 ${sc100}/100 分，胜局贡献 ${shareLabelTxt}：KDA ${p.kda}，${oneLinePraise}`;
+            const extraStat =
+              p.pos >= 4
+                ? p.obs_placed != null || p.sen_placed != null
+                  ? `视野 ${(p.obs_placed || 0) + (p.sen_placed || 0)}颗${
+                      p.stuns_sec != null ? ` · 控制 ${p.stuns_sec}s` : ""
+                    }`
+                  : `参战 ${p.kill_participation_pct}%`
+                : `伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct || 0}%) · 拆塔 ${fmtNum(p.tower_damage)}`;
 
-          return `
-            <div class="blame-row win-mode rank-${idx}">
-              <div class="blame-rank-num">${rankMedals[idx] || `0${idx + 1}`}</div>
-              ${
-                p.hero_img
-                  ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
-                  : `<div class="blame-row-portrait"></div>`
-              }
-              <div class="blame-row-who">
-                <div class="blame-row-title">
-                  <strong>${escapeHtml(heroShort)}</strong>
-                  <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
-                  <span class="hero-score-100-inline">${sc100}分</span>
+            return `
+              <div class="blame-row win-mode rank-${idx}">
+                <div class="blame-rank-num">${rankMedals[idx] || `0${idx + 1}`}</div>
+                ${
+                  p.hero_img
+                    ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
+                    : `<div class="blame-row-portrait"></div>`
+                }
+                <div class="blame-row-who">
+                  <div class="blame-row-title">
+                    <strong>${escapeHtml(heroShort)}</strong>
+                    <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
+                    <span class="hero-score-100-inline">${sc100}分</span>
+                  </div>
+                  <div class="blame-row-sub">
+                    ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} (${p.kill_participation_pct}%参战) · ${extraStat}
+                  </div>
                 </div>
-                <div class="blame-row-sub">
-                  ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} (${p.kill_participation_pct}%参战) · ${extraStat}
+                <div class="blame-row-bar-wrap">
+                  <div class="blame-row-bar-track">
+                    <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, shareNum))}%"></div>
+                  </div>
+                  <div class="blame-row-quote" title="${escapeHtml(oneLinePraise)}">${injectHeroLogosIntoHtml(escapeHtml(oneLinePraise), report)}</div>
                 </div>
+                <span class="blame-badge">${tierTag} · 贡献 ${shareLabelTxt}</span>
+                <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制贺电</button>
+                <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(tierTag)}">🖼️ 海报</button>
               </div>
-              <div class="blame-row-bar-wrap">
-                <div class="blame-row-bar-track">
-                  <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, share))}%"></div>
-                </div>
-                <div class="blame-row-quote" title="${escapeHtml(oneLinePraise)}">${injectHeroLogosIntoHtml(escapeHtml(oneLinePraise), report)}</div>
-              </div>
-              <span class="blame-badge">${tierTag} · 贡献 ${share.toFixed(1)}%</span>
-              <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制贺电</button>
-              <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="${escapeHtml(tierTag)}">🖼️ 海报</button>
-            </div>
-          `;
-        } else {
-          const oneLineCrime =
-            grokP?.headline ||
-            (p.weaknesses && p.weaknesses[0]) ||
-            p.trash_talk ||
-            "本局表现中规中矩";
-          const copyQuote = `【分锅账单 #${idx + 1}】${p.personaname} (${heroShort} · ${p.pos_label}) 本局评分 ${sc100}/100 分，背锅占比 ${share}%：KDA ${p.kda}，${oneLineCrime}`;
+            `;
+          } else {
+            const oneLineCrime =
+              grokP?.headline ||
+              (p.weaknesses && p.weaknesses[0]) ||
+              p.trash_talk ||
+              "本局表现中规中矩";
+            const copyQuote = `【分锅账单 #${idx + 1}】${p.personaname} (${heroShort} · ${p.pos_label}) 本局评分 ${sc100}/100 分，背锅占比 ${shareLabelTxt}：KDA ${p.kda}，${oneLineCrime}`;
+            const deadRowTail = p.dead_seconds != null ? ` · 读秒 ${p.dead_seconds}s` : "";
 
-          return `
-            <div class="blame-row rank-${idx}">
-              <div class="blame-rank-num">0${idx + 1}</div>
-              ${
-                p.hero_img
-                  ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
-                  : `<div class="blame-row-portrait"></div>`
-              }
-              <div class="blame-row-who">
-                <div class="blame-row-title">
-                  <strong>${escapeHtml(heroShort)}</strong>
-                  <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
-                  <span class="hero-score-100-inline">${sc100}分</span>
+            return `
+              <div class="blame-row rank-${idx}">
+                <div class="blame-rank-num">0${idx + 1}</div>
+                ${
+                  p.hero_img
+                    ? `<img class="blame-row-portrait" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(heroShort)}" loading="lazy" />`
+                    : `<div class="blame-row-portrait"></div>`
+                }
+                <div class="blame-row-who">
+                  <div class="blame-row-title">
+                    <strong>${escapeHtml(heroShort)}</strong>
+                    <span>${escapeHtml(p.personaname)}${p.is_me ? " [我]" : ""}</span>
+                    <span class="hero-score-100-inline">${sc100}分</span>
+                  </div>
+                  <div class="blame-row-sub">
+                    ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} · 参战 ${p.kill_participation_pct}%${deadRowTail}
+                  </div>
                 </div>
-                <div class="blame-row-sub">
-                  ${escapeHtml(p.pos_label)} · KDA ${escapeHtml(p.kda)} · 参战 ${p.kill_participation_pct}% · 读秒 ${p.dead_seconds || 0}s
+                <div class="blame-row-bar-wrap">
+                  <div class="blame-row-bar-track">
+                    <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, shareNum))}%"></div>
+                  </div>
+                  <div class="blame-row-quote" title="${escapeHtml(oneLineCrime)}">${injectHeroLogosIntoHtml(escapeHtml(oneLineCrime), report)}</div>
                 </div>
+                <span class="blame-badge">${share != null ? `背锅 ${shareLabelTxt}` : "无数据"}</span>
+                <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制算账</button>
+                <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="分锅账单 #${idx + 1}">🖼️ 海报</button>
               </div>
-              <div class="blame-row-bar-wrap">
-                <div class="blame-row-bar-track">
-                  <div class="blame-row-bar-fill" style="--bar-w: ${Math.min(100, Math.max(4, share))}%"></div>
-                </div>
-                <div class="blame-row-quote" title="${escapeHtml(oneLineCrime)}">${injectHeroLogosIntoHtml(escapeHtml(oneLineCrime), report)}</div>
-              </div>
-              <span class="blame-badge">背锅 ${share.toFixed(1)}%</span>
-              <button type="button" class="button secondary" data-copy-quote="${escapeHtml(copyQuote)}">复制算账</button>
-              <button type="button" class="button secondary" data-player-poster-slot="${p.player_slot}" data-player-poster-tag="分锅账单 #${idx + 1}">🖼️ 海报</button>
-            </div>
-          `;
-        }
-      })
-      .join("");
-    rankingRows.innerHTML = `<details class="mobile-summary-fold"><summary class="mobile-summary-trigger">📋 展开/收起五人 100% 贡献/分锅横向明细表（点击上方色块或标签可直接切换单人卡片）</summary><div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">${rowsHtml}</div></details>`;
+            `;
+          }
+        })
+        .join("");
+      rankingRows.innerHTML = `<details class="mobile-summary-fold"><summary class="mobile-summary-trigger">📋 展开/收起五人 100% 贡献/分锅横向明细表（点击上方色块或标签可直接切换单人卡片）</summary><div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">${rowsHtml}</div></details>`;
+    }
   }
 
   document.querySelectorAll(".verdict-and-blame-section [data-copy-quote]").forEach((btn) => {
@@ -14279,19 +14338,19 @@ function renderPlayersForensicsList(report) {
     if (ownRanking.contribMap.has(slotNum)) {
       return ownWon ? ownRanking.contribMap.get(slotNum) : ownRanking.blameMap.get(slotNum);
     }
-    return oppRanking.ownWon ? oppRanking.contribMap.get(slotNum) || 20 : oppRanking.blameMap.get(slotNum) || 20;
+    return oppRanking.ownWon ? oppRanking.contribMap.get(slotNum) : oppRanking.blameMap.get(slotNum);
   };
 
-  const maxCulpritSlot = !ownWon ? ownRanking.culpritPlayer?.player_slot : null;
+  const maxCulpritSlot = !ownWon && report.is_parsed !== false ? ownRanking.culpritPlayer?.player_slot : null;
   const mvpSlot = ownRanking.mvpPlayer?.player_slot;
 
   // Determine the #1 Most Important Player in listToRender for default spotlight
   const defaultFocusPlayer =
     state.activeTeamTab === "own"
-      ? (ownWon ? ownRanking.mvpPlayer : ownRanking.culpritPlayer) || listToRender[0]
+      ? (ownWon || report.is_parsed === false ? ownRanking.mvpPlayer : ownRanking.culpritPlayer) || listToRender[0]
       : state.activeTeamTab === "opp"
-      ? (oppRanking.ownWon ? oppRanking.mvpPlayer : oppRanking.culpritPlayer) || listToRender[0]
-      : [...listToRender].sort((a, b) => getPlayerEffectiveShare(b) - getPlayerEffectiveShare(a))[0] || listToRender[0];
+      ? (oppRanking.ownWon || report.is_parsed === false ? oppRanking.mvpPlayer : oppRanking.culpritPlayer) || listToRender[0]
+      : [...listToRender].sort((a, b) => (getPlayerEffectiveShare(b) ?? 0) - (getPlayerEffectiveShare(a) ?? 0))[0] || listToRender[0];
 
   const defaultFocusSlot = Number(defaultFocusPlayer?.player_slot ?? 0);
   const selectedSlotMode = state.forensicSelectedSlot ?? "focus";
@@ -14318,14 +14377,20 @@ function renderPlayersForensicsList(report) {
             const isFocus = pSlot === defaultFocusSlot;
             const isAct = finalActiveSlot !== "all" && Number(finalActiveSlot) === pSlot;
             const heroShort = p.hero_short_zh || p.hero_name;
-            const effShare = getPlayerEffectiveShare(p).toFixed(0);
-            const badgeText = isFocus
-              ? p.won
-                ? `👑头号功臣 ${effShare}%`
-                : `🚨头号焦点 ${effShare}%锅`
-              : p.won
-              ? `${effShare}%贡献`
-              : `${effShare}%锅`;
+            const effShareRaw = getPlayerEffectiveShare(p);
+            const effShare = effShareRaw == null ? null : Number(effShareRaw).toFixed(0);
+            const badgeText =
+              effShare == null
+                ? isFocus
+                  ? "🎯复盘焦点"
+                  : "分锅无数据"
+                : isFocus
+                ? p.won
+                  ? `👑头号功臣 ${effShare}%`
+                  : `🚨头号焦点 ${effShare}%锅`
+                : p.won
+                ? `${effShare}%贡献`
+                : `${effShare}%锅`;
             return `
               <button
                 type="button"
@@ -14416,9 +14481,11 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const heroShort = p.hero_short_zh || p.hero_name;
   const posNum = p.pos || 1;
   const pWon = Boolean(p.won);
+  const isUnparsed = state.currentReport?.is_parsed === false;
   const gp = grokPlayer || findGrokPlayerEntry(p, state.currentReport);
   const contribPct = Number(gp?.grok_share_pct ?? p.contrib_share_pct ?? p.blame_share_pct ?? 20).toFixed(1);
-  const blamePct = Number(gp?.grok_share_pct ?? p.blame_share_pct ?? 0).toFixed(1);
+  const rawBlame = isUnparsed ? null : (gp?.grok_share_pct ?? p.blame_share_pct ?? null);
+  const blamePct = rawBlame == null ? null : Number(rawBlame).toFixed(1);
   const score100 = getHeroScore100(p, state.currentReport);
   const scoreTier = getScore100Tier(score100, pWon);
 
@@ -14535,10 +14602,12 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
 
   const copyText = pWon
     ? `【${p.pos_label}庆功表彰】${p.personaname} (${heroShort})：本局评分 ${score100}/100 分，KDA ${p.kda}，GPM ${p.gpm}，胜局贡献 ${contribPct}%。${footerQuote}`
-    : `【${p.pos_label}算账单】${p.personaname} (${heroShort})：本局评分 ${score100}/100 分，KDA ${p.kda}，GPM ${p.gpm}，分锅占比 ${blamePct}%。${footerQuote}`;
+    : `【${p.pos_label}算账单】${p.personaname} (${heroShort})：本局评分 ${score100}/100 分，KDA ${p.kda}，GPM ${p.gpm}，${
+        blamePct == null ? "未解析不计分锅" : `分锅占比 ${blamePct}%`
+      }。${footerQuote}`;
 
-  const lh10 = p.laning_10m?.lh10 ?? "-";
-  const dn10 = p.laning_10m?.dn10 ?? "-";
+  const lh10 = p.laning_10m?.lh10 ?? null;
+  const dn10 = p.laning_10m?.dn10 ?? null;
   const dmgPerGold = p.net_worth ? (p.hero_damage / p.net_worth).toFixed(2) : "0.00";
 
   // Merge micro execution headline badges inline into the top bar to save a full horizontal row
@@ -14597,11 +14666,13 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
               ${inlineMicroBadgesHtml}
             </div>
             <div class="forensic-sub-row">
-              <span>${escapeHtml(p.lane_role || "")} (对线效率 ${p.lane_efficiency_pct || 0}%)</span>
+              <span>${escapeHtml(p.lane_role || "分路未知")}${
+                p.lane_efficiency_pct != null ? ` (对线效率 ${p.lane_efficiency_pct}%)` : ""
+              }</span>
               <span>·</span>
               <span>段位 ${escapeHtml(p.rank || "未知")}</span>
               <span>·</span>
-              <span>APM ${p.apm || 0}</span>
+              <span>APM ${p.apm != null ? p.apm : "无数据"}</span>
               ${
                 headlineText
                   ? `<span>·</span><strong style="color: var(--gold-light)">「${escapeHtml(headlineText)}」</strong>`
@@ -14622,6 +14693,8 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
               ? `<span class="blame-badge" style="color:#a8e5a7;border-color:#3a6a40;background:#152317;">🏆 胜局贡献 ${contribPct}% · ${escapeHtml(
                   scoreTier.label
                 )}</span>`
+              : blamePct == null
+              ? `<span class="blame-badge">分锅 无数据 · ${escapeHtml(scoreTier.label)}</span>`
               : `<span class="blame-badge">背锅 ${blamePct}% · ${escapeHtml(
                   scoreTier.label
                 )}</span>`
@@ -14677,13 +14750,17 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
         </div>
         <div class="f-metric">
           <span>10m补刀 / 终局补刀</span>
-          <strong>${lh10}/${dn10} · ${p.last_hits}/${p.denies}</strong>
+          <strong>${lh10 != null && dn10 != null ? `${lh10}/${dn10}` : "无数据"} · ${p.last_hits}/${p.denies}</strong>
         </div>
         <div class="f-metric">
           <span>泉水读秒 / 阵亡掉钱</span>
           <strong style="color: ${(p.dead_seconds || 0) >= 180 ? "var(--red-light)" : "inherit"}">${
-            p.dead_seconds || 0
-          }秒 / -${fmtNum(p.death_gold_lost || 0)}</strong>
+            p.dead_seconds == null && p.death_gold_lost == null
+              ? "无数据"
+              : `${p.dead_seconds != null ? `${p.dead_seconds}秒` : "无数据"} / ${
+                  p.death_gold_lost != null ? `-${fmtNum(p.death_gold_lost)}` : "无数据"
+                }`
+          }</strong>
         </div>
       </div>
 
@@ -16071,8 +16148,11 @@ function openSharePosterDialog(report) {
   } = getCanonicalSideRanking(report, side);
   const getEffShare = (p) => {
     const slotNum = Number(p?.player_slot);
-    return won ? contribMap.get(slotNum) ?? Number(p?.contrib_share_pct ?? 20) : blameMap.get(slotNum) ?? Number(p?.blame_share_pct ?? 20);
+    if (won) return contribMap.get(slotNum) ?? Number(p?.contrib_share_pct ?? 20);
+    if (report.is_parsed === false) return null;
+    return blameMap.get(slotNum) ?? (p?.blame_share_pct != null ? Number(p.blame_share_pct) : null);
   };
+  const fmtShareOrNa = (val) => (val == null ? "无数据" : `${Number(val).toFixed(1)}%`);
 
   const df = report.deep_forensics || {};
   const rawExec = df.hero_execution_by_side?.[side];
@@ -16144,18 +16224,20 @@ function openSharePosterDialog(report) {
         `🔗 公开复盘分享链接：${shareUrl}`,
         `📣 终局定性：${grok?.title || report.match_narrative?.headline || "正面团战与节奏复盘"}`,
         `────────────────────`,
-        `🚨 头号背锅侠：${topCulprit?.personaname || ""} (${topCulprit?.hero_short_zh || ""}) — 分锅占比 ${getEffShare(topCulprit).toFixed(1)}% · 综合评分 ${getHeroScore100(topCulprit, report)}/100分`,
+        report.is_parsed === false
+          ? `📋 录像未解析：本局不计算分锅百分比`
+          : `🚨 头号背锅侠：${topCulprit?.personaname || ""} (${topCulprit?.hero_short_zh || ""}) — 分锅占比 ${fmtShareOrNa(getEffShare(topCulprit))} · 综合评分 ${getHeroScore100(topCulprit, report)}/100分`,
         `👑 败方尽力王：${mvpPlayer?.personaname || ""} (${mvpPlayer?.hero_short_zh || ""}) — 综合评分 ${getHeroScore100(mvpPlayer, report)}/100分`,
         `────────────────────`,
-        `📊 五黑全员算账明细 (按背锅排序)：`,
+        `📊 五黑全员算账明细 (${report.is_parsed === false ? "未解析不计分锅" : "按背锅排序"})：`,
         ...sortedBlame.map((p, i) => {
           const b0 = (p.hero_execution_audit?.headline_badges || [])[0];
           const b0Txt = typeof b0 === "string" ? b0 : b0?.text || "";
-          const bPct = getEffShare(p).toFixed(1);
+          const bPct = fmtShareOrNa(getEffShare(p));
           const sc100 = getHeroScore100(p, report);
-          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | 评分 ${sc100}/100 | 锅 ${bPct}% | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}% | 读秒 ${p.dead_seconds || 0}s${
-            b0Txt ? ` | 🔬 ${b0Txt}` : ""
-          }`;
+          return `${i + 1}. [${p.pos_label}] ${p.personaname} (${p.hero_short_zh}) | 评分 ${sc100}/100 | 锅 ${bPct} | KDA ${p.kda} | GPM ${p.gpm} | 伤害占比 ${p.hero_damage_share_pct}%${
+            p.dead_seconds != null ? ` | 读秒 ${p.dead_seconds}s` : ""
+          }${b0Txt ? ` | 🔬 ${b0Txt}` : ""}`;
         }),
         ...(microExec || microSaves || microSpace || microVis || microTp || microMirror || microMacro
           ? [
@@ -16305,15 +16387,19 @@ function drawVerdictPosterCanvas(
     ctx.strokeStyle = "#b84a39";
     ctx.strokeRect(42, 152, 410, 74);
 
+    const topBlameRaw =
+      report.is_parsed === false
+        ? null
+        : findGrokPlayerEntry(topCulprit, report)?.grok_share_pct ?? topCulprit?.blame_share_pct ?? null;
     ctx.fillStyle = "#e5897a";
     ctx.font = "bold 13px sans-serif";
-    ctx.fillText("🚨 本局头号背锅侠 (TOP CULPRIT)", 56, 176);
+    ctx.fillText(topBlameRaw == null ? "📋 未解析比赛（不计算分锅）" : "🚨 本局头号背锅侠 (TOP CULPRIT)", 56, 176);
     ctx.fillStyle = "#f2efe9";
     ctx.font = "bold 19px sans-serif";
     ctx.fillText(
-      `${topCulprit?.personaname || ""} · ${topCulprit?.hero_short_zh || ""} (背锅 ${Number(
-        findGrokPlayerEntry(topCulprit, report)?.grok_share_pct ?? topCulprit?.blame_share_pct ?? 25
-      ).toFixed(1)}%)`,
+      topBlameRaw == null
+        ? "分锅：无数据（需先解析录像）"
+        : `${topCulprit?.personaname || ""} · ${topCulprit?.hero_short_zh || ""} (背锅 ${Number(topBlameRaw).toFixed(1)}%)`,
       56,
       206
     );
@@ -16340,9 +16426,11 @@ function drawVerdictPosterCanvas(
   rowsList.forEach((p, idx) => {
     const isFirst = idx === 0;
     const gpRow = findGrokPlayerEntry(p, report);
-    const rowShare = Number(
-      gpRow?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
-    ).toFixed(1);
+    const rawRowShare =
+      !won && report.is_parsed === false
+        ? null
+        : gpRow?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? null;
+    const rowShareTxt = rawRowShare == null ? "无数据" : `${Number(rawRowShare).toFixed(1)}%`;
     const rowScore = getHeroScore100(p, report);
     ctx.fillStyle = isFirst ? (won ? "#182419" : "#201715") : "#181a16";
     ctx.fillRect(42, y, W - 84, 58);
@@ -16368,8 +16456,8 @@ function drawVerdictPosterCanvas(
     ctx.textAlign = "right";
     ctx.fillText(
       won
-        ? `胜局贡献 ${rowShare}% · 评分 ${rowScore}/100`
-        : `分锅 ${rowShare}% · 评分 ${rowScore}/100`,
+        ? `胜局贡献 ${rowShareTxt} · 评分 ${rowScore}/100`
+        : `分锅 ${rowShareTxt} · 评分 ${rowScore}/100`,
       W - 58,
       y + 34
     );
@@ -16462,9 +16550,11 @@ async function openSinglePlayerPosterDialog(
   const heroZh = p.hero_short_zh || p.hero_name || p.hero_zh || "";
   const shareUrl = `${window.location.origin}/?match=${report.match_id}`;
   const sc100 = getHeroScore100(p, report);
-  const sharePct = Number(
-    gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
-  ).toFixed(1);
+  const rawSingleShare =
+    !won && report.is_parsed === false
+      ? null
+      : gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? null;
+  const sharePctTxt = rawSingleShare == null ? "无数据" : `${Number(rawSingleShare).toFixed(1)}%`;
   const shareLabel = won ? "胜局功勋占比" : "败局背锅占比";
   const badgeTitle =
     roleTag ||
@@ -16473,9 +16563,11 @@ async function openSinglePlayerPosterDialog(
       ? sc100 >= 84
         ? "👑 胜局首功 MVP"
         : "⚔️ 胜局功臣"
+      : report.is_parsed === false
+      ? "📋 未解析基础档案"
       : sc100 < 55
-        ? "🚨 败局头号战犯"
-        : "🛡️ 败局尽力局");
+      ? "🚨 败局头号战犯"
+      : "🛡️ 败局尽力局");
 
   const lines = [
     `📜 【DOTA 2 录像级单人深度档案 · ${badgeTitle}】`,
@@ -16483,8 +16575,8 @@ async function openSinglePlayerPosterDialog(
     `🔗 复盘直达：${shareUrl}`,
     `────────────────────`,
     `👤 选手与英雄：${p.personaname} · ${heroZh} ([${p.pos_label}])`,
-    `📊 ${getCoachModelDisplayName(report)} 终审评分：${sc100}/100 分 ｜ ${shareLabel}：${sharePct}%`,
-    `📈 基础面板：KDA ${p.kda} (参战率 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm} / XPM ${p.xpm} ｜ 英雄伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 建筑伤害 ${fmtNum(p.tower_damage)} ｜ 读秒 ${p.dead_seconds || 0}s`,
+    `📊 ${getCoachModelDisplayName(report)} 终审评分：${sc100}/100 分 ｜ ${shareLabel}：${sharePctTxt}`,
+    `📈 基础面板：KDA ${p.kda} (参战率 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm} / XPM ${p.xpm} ｜ 英雄伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 建筑伤害 ${fmtNum(p.tower_damage)}${p.dead_seconds != null ? ` ｜ 读秒 ${p.dead_seconds}s` : ""}`,
     `🗣️ 一针见血定性：${gp?.headline || p.blame_Headline || "录像级全周期数据实锤定责"}`,
     `────────────────────`,
     `📋 【本职工作与全周期结案陈词】`,
@@ -16573,9 +16665,11 @@ function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
   const { sideZh, won } = getOwnAndOppPlayers(report);
   const heroZh = p.hero_short_zh || p.hero_name || p.hero_zh || "";
   const sc100 = getHeroScore100(p, report);
-  const sharePct = Number(
-    gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? 20
-  ).toFixed(1);
+  const rawSingleShare =
+    !won && report.is_parsed === false
+      ? null
+      : gp?.grok_share_pct ?? (won ? p.contrib_share_pct : p.blame_share_pct) ?? null;
+  const sharePctTxt = rawSingleShare == null ? "无数据" : `${Number(rawSingleShare).toFixed(1)}%`;
   const isHighPraise = (won && sc100 >= 78) || (!won && sc100 >= 75);
 
   const grad = ctx.createLinearGradient(0, 0, 0, H);
@@ -16607,7 +16701,7 @@ function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
   ctx.font = "bold 24px sans-serif";
   ctx.textAlign = "right";
   ctx.fillText(
-    `${badgeTitle} ｜ 评分 ${sc100}/100 · ${won ? "功勋" : "分锅"} ${sharePct}%`,
+    `${badgeTitle} ｜ 评分 ${sc100}/100 · ${won ? "功勋" : "分锅"} ${sharePctTxt}`,
     W - 42,
     90
   );
@@ -16617,7 +16711,7 @@ function drawSinglePlayerPosterCanvas(report, p, gp, badgeTitle) {
   ctx.fillStyle = "#cfc9ba";
   ctx.font = "14px sans-serif";
   ctx.fillText(
-    `KDA ${p.kda} (参战 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm} / XPM ${p.xpm} ｜ 英雄伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 推塔 ${fmtNum(p.tower_damage)} ｜ 读秒 ${p.dead_seconds || 0}s`,
+    `KDA ${p.kda} (参战 ${p.kill_participation_pct}%) ｜ GPM ${p.gpm} / XPM ${p.xpm} ｜ 英雄伤害 ${fmtNum(p.hero_damage)} (${p.hero_damage_share_pct}%) ｜ 推塔 ${fmtNum(p.tower_damage)}${p.dead_seconds != null ? ` ｜ 读秒 ${p.dead_seconds}s` : ""}`,
     42,
     122
   );

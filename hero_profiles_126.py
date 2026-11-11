@@ -1511,10 +1511,11 @@ def audit_hero_mechanism_and_timing(
 
     pt = p.get("phase_telemetry") or {}
     mid_gold = int(pt.get("mid_gold_gain") or pt.get("mid_gold_gained") or 0)
+    mid_gold_share = float(pt["mid_gold_share_pct"]) if pt.get("mid_gold_share_pct") is not None else None
     late_gold = int(pt.get("late_gold_gain") or pt.get("late_gold_gained") or 0)
-    late_gold_share = float(pt.get("late_gold_share_pct") or 0.0)
+    late_gold_share = float(pt["late_gold_share_pct"]) if pt.get("late_gold_share_pct") is not None else None
     late_hdmg = int(pt.get("late_hdmg_gain") or pt.get("late_hero_damage") or 0)
-    late_hdmg_share = float(pt.get("late_hdmg_share_pct") or 0.0)
+    late_hdmg_share = float(pt["late_hdmg_share_pct"]) if pt.get("late_hdmg_share_pct") is not None else None
     solo_pickoffs = pt.get("solo_pickoffs") or []
     low_dmg_tfs = pt.get("low_dmg_tfs") or []
 
@@ -1557,13 +1558,18 @@ def audit_hero_mechanism_and_timing(
 
     if curve == "late_hyper_carry" and pos in (1, 2):
         # 大后期刷钱核：前中期（10-25m）低参战刷钱是合理的！关键看 25m+ 是否完成收割
-        if mid_gold >= 5800 or gpm >= 520:
+        if (mid_gold_share is not None and mid_gold >= 5800) or gpm >= 520:
             early_farm_reasonable = True
+            mid_econ_clause = (
+                f"中期(10-25m)避开无效乱战专心刷出 +{mid_gold:,} 经济（GPM {gpm}）"
+                if (mid_gold_share is not None and mid_gold > 0)
+                else f"本局保持发育节奏（GPM {gpm}）"
+            )
             mid_phase_note = (
                 f"【符合{hero_name}大核特性的避战刷钱】{hero_name}前期作战弱、极度依赖核心装成型，"
-                f"中期(10-25m)避开无效乱战专心刷出 +{mid_gold:,} 经济（GPM {gpm}）在策略上完全合理，核心看 25m+ 出山能否收割。"
+                f"{mid_econ_clause}在策略上完全合理，核心看 25m+ 出山能否收割。"
             )
-        if duration_min >= 25:
+        if duration_min >= 25 and late_gold_share is not None and late_hdmg_share is not None:
             if late_hdmg_share >= 23.0 or (won and (late_hdmg_share >= 19.0 or tdmg >= 4500)):
                 late_harvest_fulfilled = True
                 verdict_tag = "大核出山收割"
@@ -1588,7 +1594,7 @@ def audit_hero_mechanism_and_timing(
     elif curve == "mid_tempo_brawler" and pos in (1, 2, 3):
         # 前中期干架节奏核（如小鱼人/拍拍熊/女王/帕克/蓝猫/火猫/影魔/哈斯卡）：中期绝不能闷头纯刷！
         mid_k = int(pt.get("mid_kills") or 0)
-        if duration_min >= 22 and kp < 42.0 and mid_k <= 2:
+        if mid_gold_share is not None and duration_min >= 22 and kp < 42.0 and mid_k <= 2:
             mid_tempo_wasted = True
             verdict_tag = "节奏核闷头刷错失强势期"
             badges.append(f"⏳ 错失中期强势期(参战仅{kp:.0f}%)")
@@ -1603,9 +1609,11 @@ def audit_hero_mechanism_and_timing(
         if (stuns >= 35.0 or dtaken_share >= 24.0) and kp >= 55.0:
             sacrificial_initiator_fulfilled = True
             verdict_tag = "敢死先手开团顶梁柱"
-            badges.append(f"🛡️ 先手开团顶伤: {dtaken_share:.0f}%承伤/{stuns:.0f}s控")
+            stun_badge_part = f"/{stuns:.0f}s控" if stuns > 0 else ""
+            stun_text_part = f"打出 {stuns:.1f} 秒硬控、" if stuns > 0 else ""
+            badges.append(f"🛡️ 先手开团顶伤: {dtaken_share:.0f}%承伤{stun_badge_part}")
             mechanism_summary = (
-                f"【先手肉核职责兑现】作为{pos}号位开团手，全场打出 {stuns:.1f} 秒硬控、扛下全队 {dtaken_share:.1f}% 伤害（参战率 {kp:.1f}%），"
+                f"【先手肉核职责兑现】作为{pos}号位开团手，全场{stun_text_part}扛下全队 {dtaken_share:.1f}% 伤害（参战率 {kp:.1f}%），"
                 f"哪怕先手进场阵亡 {deaths} 次也是为后排炮台撑起输出空间的战略牺牲。"
             )
 
@@ -1620,9 +1628,15 @@ def audit_hero_mechanism_and_timing(
         if heal >= 3500 or save_item_casts >= 8 or stuns >= 45.0 or kp >= 68.0:
             save_support_fulfilled = True
             verdict_tag = "保核救人兑现"
-            badges.append(f"🚑 保核救人: 参战{kp:.0f}%/救人道具{save_item_casts}次")
+            save_badge_tail = f"/救人道具{save_item_casts}次" if save_item_casts > 0 else ""
+            badges.append(f"🚑 保核救人: 参战{kp:.0f}%{save_badge_tail}")
+            stat_parts = [f"治疗 {heal:,}"]
+            if stuns > 0:
+                stat_parts.append(f"控制 {stuns:.1f}s")
+            stat_parts.append(f"参战率 {kp:.1f}%")
+            cast_part = f"配合救人道具按出 {save_item_casts} 次" if save_item_casts > 0 else "全程紧跟团队阵型"
             mechanism_summary = (
-                f"【救人辅助机制兑现】全场高频释放 {ab_summary_str}，配合救人道具按出 {save_item_casts} 次（治疗 {heal:,} / 控制 {stuns:.1f}s / 参战率 {kp:.1f}%），"
+                f"【救人辅助机制兑现】全场高频释放 {ab_summary_str}，{cast_part}（{' / '.join(stat_parts)}），"
                 f"在团战后排尽全力拉扯保护核心。"
             )
 

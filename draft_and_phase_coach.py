@@ -559,10 +559,14 @@ def build_team_combos(
                 f"2) 远程火力覆盖：{a_name}严禁走第一排吃控制，必须站在侧后方安全距离，在《{i_ult}》眩晕/嘲讽命中的瞬间倾泻《{a_sig}》，把敌方核心死死摁在AOE火海里融化！"
             ),
             "execution_audit": (
-                f"本局实战验货：{i_name}释放《{i_ult}/核心控》{i_cnt} 次（全场控制 {init_big.get('stuns_sec', 0)} 秒，承伤 {init_big.get('damage_taken', 0):,}），"
-                f"{a_name}释放《{a_sig}》{a_cnt} 次"
-                + (f"、《驯良之饼》{cookie_cnt} 次" if int(artillery_big["hero_id"]) == 128 else "")
-                + f"（轰出 {artillery_big['hero_damage']:,} 英雄伤害）。"
+                (
+                    f"本局实战验货：{i_name}释放《{i_ult}/核心控》{i_cnt} 次（全场控制 {init_big.get('stuns_sec') or 0} 秒，承伤 {init_big.get('damage_taken', 0):,}），"
+                    f"{a_name}释放《{a_sig}》{a_cnt} 次"
+                    + (f"、《驯良之饼》{cookie_cnt} 次" if int(artillery_big["hero_id"]) == 128 else "")
+                    + f"（轰出 {artillery_big['hero_damage']:,} 英雄伤害）。"
+                )
+                if is_parsed
+                else f"本局实战验货：{i_name}交出 KDA {init_big['kda']}，{a_name}轰出 {artillery_big['hero_damage']:,} 英雄伤害（技能释放次数与控制时长需先解析录像）。"
             ),
         })
 
@@ -1168,9 +1172,14 @@ def enrich_phases_with_evaluations(
                         f"炮台法核输出职责兑现（{t_curve_zh}）：后期顶着敌方强切入轰出 {hd_gain:,} 英雄伤害（全场每死换出 {dmg_per_death_str} 伤害），死前把爆发倾泻拉满！",
                     )
                 if hmp.get("sacrificial_initiator_fulfilled"):
+                    stun_clause = (
+                        f"贡献 {full_p.get('stuns_sec')} 秒硬控并"
+                        if (full_p.get("stuns_sec") is not None and float(full_p.get("stuns_sec") or 0) > 0)
+                        else ""
+                    )
                     good_list.insert(
                         0,
-                        f"前排先手开团与承伤兑现（{t_curve_zh}）：全场贡献 {full_p.get('stuns_sec', 0)} 秒硬控并抗下全队 {full_p.get('damage_taken_share_pct', 0)}% 伤害，果断肉身开团为后排创造输出空间！",
+                        f"前排先手开团与承伤兑现（{t_curve_zh}）：全场{stun_clause}抗下全队 {full_p.get('damage_taken_share_pct') or 0}% 伤害，果断肉身开团为后排创造输出空间！",
                     )
                 if hmp.get("save_support_fulfilled"):
                     good_list.insert(

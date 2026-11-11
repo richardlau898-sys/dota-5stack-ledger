@@ -63,14 +63,14 @@ def evaluate_player_deeply(
     tdmg = p.get("tower_damage", 0)
     dmg_taken = p.get("damage_taken", 0)
     heal = p.get("hero_healing", 0)
-    stuns = p.get("stuns_sec", 0.0)
+    stuns = float(p.get("stuns_sec") or 0.0)
     obs = p.get("obs_placed") or 0
     sen = p.get("sen_placed") or 0
     stacked = p.get("camps_stacked") or 0
     smokes = p.get("smokes_bought") or 0
     dusts = p.get("dusts_bought") or 0
-    dead_sec = p.get("dead_seconds") or 0
-    death_gold_lost = p.get("death_gold_lost") or 0
+    dead_sec = int(p.get("dead_seconds") or 0)
+    death_gold_lost = int(p.get("death_gold_lost") or 0)
     buybacks = p.get("buybacks") or 0
     apm = p.get("apm") or 0
     pings = p.get("pings") or 0
@@ -224,6 +224,8 @@ def evaluate_player_deeply(
             rating_tier = "A 尽力大腿"
         elif rating_score >= 7.2:
             rating_tier = "B 随波逐流"
+        elif not is_parsed:
+            rating_tier = "C 待解析复盘"
         elif rating_score >= 6.6:
             rating_tier = "C 重点背锅"
         else:
@@ -396,7 +398,7 @@ def evaluate_player_deeply(
             bkb_timing_str = tm.get("time_str")
             break
     bkb_uses = (active_uses.get("black_king_bar") or {}).get("count", 0)
-    enemy_total_stuns = sum(ep.get("stuns_sec", 0) for ep in enemy_players)
+    enemy_total_stuns = sum(float(ep.get("stuns_sec") or 0.0) for ep in enemy_players)
 
     if pos in (1, 2, 3) and bkb_timing_min is not None:
         if bkb_timing_min <= 24 and bkb_uses >= 3:
@@ -623,8 +625,8 @@ def evaluate_player_deeply(
     lane_hdmg = int(pt.get("lane_hdmg_gain") or 0)
     mid_gold = int(pt.get("mid_gold_gain") or 0)
     mid_hdmg = int(pt.get("mid_hdmg_gain") or 0)
-    mid_gold_share = float(pt.get("mid_gold_share_pct") or 0.0)
-    mid_hdmg_share = float(pt.get("mid_hdmg_share_pct") or 20.0)
+    mid_gold_share = float(pt["mid_gold_share_pct"]) if pt.get("mid_gold_share_pct") is not None else None
+    mid_hdmg_share = float(pt["mid_hdmg_share_pct"]) if pt.get("mid_hdmg_share_pct") is not None else None
     tf_afk_cnt = int(pt.get("tf_zero_dmg_afk_count") or 0)
     tf_afk_gold = int(pt.get("tf_zero_dmg_gold_farmed") or 0)
 
@@ -633,7 +635,7 @@ def evaluate_player_deeply(
 
     is_afk_farmer = False
     if pos in (1, 2, 3) and duration_min >= 20 and not is_turbo:
-        if is_parsed and mid_gold > 0:
+        if is_parsed and mid_gold > 0 and mid_gold_share is not None and mid_hdmg_share is not None:
             # 如果是天生后期大核 (敌法/美杜莎/幽鬼/TB/猴子/水人/露娜/虚空等)，前中期(10-25m)避战刷钱是合理的！
             # 只有当他属于前中期节奏核，或者大核在后期也没参战(kp < 42% 或 assists <= 4)时，才判定为毒瘤独刷
             if is_late_hyper_carry and hmp.get("late_harvest_fulfilled") and kp >= 42.0 and assists >= 5:
@@ -656,7 +658,7 @@ def evaluate_player_deeply(
         radar["survival"] = min(radar["survival"], 50)
         mvp_score = round(clamp(mvp_score - 21.0, 35.0, 61.0), 1)
         rating_score = round(clamp(mvp_score / 10.0, 4.0, 6.1), 1)
-        rating_tier = "C 毒瘤独刷" if won else "D 独刷战犯"
+        rating_tier = "C 毒瘤独刷" if won else ("C 脱节刷钱" if not is_parsed else "D 独刷战犯")
         blame_points += 38.0
         tf_afk_clause = (
             f"，且有 **{tf_afk_cnt} 波关键团战 0 伤害卖队友独刷（趁队友4打5挨揍在野区收割 +{tf_afk_gold:,} 金）**"
@@ -698,8 +700,8 @@ def evaluate_player_deeply(
     low_dmg_tfs = pt.get("low_dmg_tfs") or []
     late_gold = int(pt.get("late_gold_gain") or 0)
     late_hdmg = int(pt.get("late_hdmg_gain") or 0)
-    late_gold_share = float(pt.get("late_gold_share_pct") or 0.0)
-    late_hdmg_share = float(pt.get("late_hdmg_share_pct") or 20.0)
+    late_gold_share = float(pt["late_gold_share_pct"]) if pt.get("late_gold_share_pct") is not None else None
+    late_hdmg_share = float(pt["late_hdmg_share_pct"]) if pt.get("late_hdmg_share_pct") is not None else None
     dmg_per_death = hdmg / max(1, deaths)
 
     # 1) 脆皮高爆发炮台核心 (莉娜/宙斯/天怒/狙击手/修补匠/卡尔/黑鸟等) 「虽死犹荣 · 火力倾泻兑现」判定
@@ -725,10 +727,16 @@ def evaluate_player_deeply(
             g_diff = gold10 - opp_same_pos["laning_10m"]["gold10"]
             if g_diff >= 400:
                 lane_lead_clause = f"前期对线 10m 交出 {lh10}正/{dn10}反（{gold10:,} 金，压制对位 {opp_same_pos.get('hero_short_zh','')} +{g_diff:,} 金）打出优势；"
+        late_turret_clause = (
+            f"，25m+ 后期再轰 {late_hdmg:,} 伤害"
+            if (is_parsed and late_hdmg_share is not None and late_hdmg > 0)
+            else ""
+        )
+        stun_turret_clause = f"外加 {stuns:.1f} 秒硬控" if (is_parsed and stuns > 0) else ""
         strengths.insert(
             0,
             f"炮台火力彻底兑现（哪怕阵亡也把输出灌满）：{lane_lead_clause}作为无位移脆皮高爆发核心，全场狂甩 {ab_top_str}，"
-            f"轰出 **{hdmg:,} 点英雄伤害（占全队 {hdmg_share:.1f}%，平均每次阵亡前倾泻 {int(dmg_per_death):,} 点高额伤害，25m+ 后期再轰 {late_hdmg:,} 伤害）**外加 {stuns:.1f} 秒硬控！"
+            f"轰出 **{hdmg:,} 点英雄伤害（占全队 {hdmg_share:.1f}%，平均每次阵亡前倾泻 {int(dmg_per_death):,} 点高额伤害{late_turret_clause}）**{stun_turret_clause}！"
             f"在团队前排与救人匮乏的逆境下，真正做到了倒下前把每一滴输出倾泻干净。",
         )
         weaknesses = [w for w in weaknesses if "BKB 严重难产" not in w]
@@ -759,8 +767,15 @@ def evaluate_player_deeply(
                 f"凤凰本局共施放 {egg_casts} 次《超新星》（团战 {tf_egg_total} 次）、{ray_casts} 次《烈日炙烤》（全队治疗 {heal:,} 点），可提高团战中后排《烈日炙烤》开启频率以兼顾消耗与治疗。",
             )
 
-    # 3) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」审计（推断类团战外阵亡不计入分锅）
-    if pos in (1, 2) and not is_turret_fulfilled and duration_min >= 25:
+    # 3) 全 126 英雄通用「大后期核(late_hyper_carry)避战刷钱->后期收割兑现 vs 后期隐身违约」审计（推断类团战外阵亡不计入分锅；后期空值跳过）
+    if (
+        is_parsed
+        and late_gold_share is not None
+        and late_hdmg_share is not None
+        and pos in (1, 2)
+        and not is_turret_fulfilled
+        and duration_min >= 25
+    ):
         if hmp.get("late_harvest_fulfilled") and not is_afk_farmer:
             strengths.insert(0, hmp["late_phase_note"])
         elif hmp.get("late_harvest_failed"):
@@ -894,18 +909,30 @@ def evaluate_player_deeply(
     death_rate_weight = 10.0 if pos in (1, 2) else (8.0 if pos == 3 else 6.0)
 
     if deaths <= 4 and duration_min >= 30 and not is_afk_farmer:
+        dead_ok_clause = (
+            f"（读秒总计 {dead_min}分{dead_rem_s:02d}秒，仅占全场 {dead_pct:.1f}%）"
+            if (is_parsed and dead_sec > 0)
+            else ""
+        )
         strengths.append(
-            f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次（读秒总计 {dead_min}分{dead_rem_s:02d}秒，仅占全场 {dead_pct:.1f}%），团战站位拉扯极佳。"
+            f"极高生存容错：{duration_min:.0f} 分钟高强度对抗仅阵亡 {deaths} 次{dead_ok_clause}，团战站位拉扯极佳。"
         )
     elif deaths >= 6 and deaths_per_10m >= death_rate_threshold and not is_turret_fulfilled and not hmp.get("sacrificial_initiator_fulfilled"):
         blame_points += (deaths_per_10m - death_rate_threshold + 0.5) * death_rate_weight
-        gold_lost_txt = f"，光阵亡直接扣掉 **{death_gold_lost:,} 金币**" if death_gold_lost > 0 else ""
-        weaknesses.append(
-            f"高频阵亡提款机：全场阵亡 **{deaths} 次**（每10分钟 {deaths_per_10m:.1f} 死）{nemesis_str}，黑白屏幕读秒长达 **{dead_min}分{dead_rem_s:02d}秒（占整局比赛 {dead_pct:.1f}% 时间）**{gold_lost_txt}！"
+        gold_lost_txt = f"，光阵亡直接扣掉 **{death_gold_lost:,} 金币**" if (is_parsed and death_gold_lost > 0) else ""
+        dead_bad_clause = (
+            f"，黑白屏幕读秒长达 **{dead_min}分{dead_rem_s:02d}秒（占整局比赛 {dead_pct:.1f}% 时间）**"
+            if (is_parsed and dead_sec > 0)
+            else ""
         )
+        weaknesses.append(
+            f"高频阵亡提款机：全场阵亡 **{deaths} 次**（每10分钟 {deaths_per_10m:.1f} 死）{nemesis_str}{dead_bad_clause}{gold_lost_txt}！"
+        )
+        roast_dead_txt = f"，看了整整 {dead_min}分{dead_rem_s}秒 黑白电视" if (is_parsed and dead_sec > 0) else ""
+        roast_gold_txt = f"，光死就扣了 {death_gold_lost} 块钱" if (is_parsed and death_gold_lost > 0) else ""
         trash_candidates.append((
             88 + deaths,
-            f"@{pname} 一局死 {deaths} 次，看了整整 {dead_min}分{dead_rem_s}秒 黑白电视{nemesis_str}，光死就扣了 {death_gold_lost} 块钱，对面大哥给你磕一个不过分吧？",
+            f"@{pname} 一局死 {deaths} 次{roast_dead_txt}{nemesis_str}{roast_gold_txt}，对面大哥给你磕一个不过分吧？",
         ))
         if pos in (4, 5):
             improvements.append(
@@ -922,8 +949,9 @@ def evaluate_player_deeply(
             f"基础数据合格：交出 {kills}/{deaths}/{assists}（参战率 {kp:.1f}%，英雄伤害 {hdmg:,}），完成了该位置基础任务。"
         )
     if not weaknesses:
+        steady_dead_clause = f"（读秒 {dead_min}分{dead_rem_s:02d}秒）" if (is_parsed and dead_sec > 0) else ""
         weaknesses.append(
-            f"整体发挥稳健：全场仅阵亡 {deaths} 次（读秒 {dead_min}分{dead_rem_s:02d}秒），非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
+            f"整体发挥稳健：全场仅阵亡 {deaths} 次{steady_dead_clause}，非要挑刺就是优势期拿盾推高的节奏可以再果断一点。"
         )
     if not improvements:
         improvements.append(
@@ -962,21 +990,23 @@ def evaluate_player_deeply(
         praise_talk = f"@{pname} 这把 {hero_name} 前中期闷头独刷 25 分钟（参战率仅 {kp:.1f}% 全队垫底），全靠四个好兄弟正面 4 打 5 顶住压力才把你抬进后期收割！"
     elif pos == 1 and tdmg_share >= 48.0 and tdmg >= 9000:
         praise_talk = f"@{pname} 擎天一号位真核！{hero_name} 顶着前中期少人压力参战接团，单人狂拆 {tdmg:,} 建筑伤害（包揽全队 {tdmg_share:.0f}% 拆塔量）+ {hdmg:,} 伤害，当之无愧本局头号首功！"
-    elif hmp.get("late_harvest_fulfilled"):
+    elif hmp.get("late_harvest_fulfilled") and late_hdmg_share is not None:
         praise_talk = f"@{pname} 教科书式大核节奏！{hero_name} 前中期隐忍刷钱成型，25m+ 决胜期出山狂轰 {late_hdmg:,} 后期伤害（占全队后期伤害 {late_hdmg_share:.1f}%）完成终极收割！"
     elif pos in (1, 2) and (hdmg_share >= 26.0 or is_turret_fulfilled):
         praise_talk = f"@{pname} 这把 {hero_name} 炮台火力全开狂轰 {hdmg:,} 伤害（占全队 {hdmg_share:.1f}% 输出，场均每死换 {int(dmg_per_death):,} 伤害），真正做到倒下前把所有技能灌满！"
     elif tdmg >= 5500 or (tdmg_share >= 45.0 and tdmg >= 3000):
         praise_talk = f"@{pname} 推塔终结机器！{hero_name} 单人拆出 {tdmg:,} 建筑伤害（占全队 {tdmg_share:.0f}%），赢团推塔一气呵成！"
     elif pos == 3 and (stuns >= 25.0 or dmg_taken_share >= 23.0):
-        praise_talk = f"@{pname} 铁血三号位！{hero_name} 参战率 {kp:.0f}% 肉身扛下 {dmg_taken:,} 伤害（全队 {dmg_taken_share:.0f}%）外加 {stuns:.1f} 秒硬控，完美团战发动机！"
+        stun_praise_part = f"外加 {stuns:.1f} 秒硬控" if stuns > 0 else ""
+        praise_talk = f"@{pname} 铁血三号位！{hero_name} 参战率 {kp:.0f}% 肉身扛下 {dmg_taken:,} 伤害（全队 {dmg_taken_share:.0f}%）{stun_praise_part}，完美团战发动机！"
     elif pos in (4, 5) and (obs + sen) >= 12:
         praise_talk = f"@{pname} 最佳幕后功臣！{hero_name} 全场点亮 {obs} 假 {sen} 真视野 + 参战率 {kp:.0f}%，吃草挤奶把大哥伺候得明明白白！"
     elif deaths >= 10:
         if won:
             praise_talk = f"@{pname} 这把 {hero_name} 阵亡 {deaths} 次吸引大量敌方火力，协助团队赢下比赛！"
         else:
-            praise_talk = f"@{pname} 这把 {hero_name} 阵亡 {deaths} 次承压严重（读秒 {dead_min}分{dead_rem_s:02d}秒），团战站位与切入时机亟待复盘优化。"
+            praise_dead_clause = f"（读秒 {dead_min}分{dead_rem_s:02d}秒）" if (is_parsed and dead_sec > 0) else ""
+            praise_talk = f"@{pname} 这把 {hero_name} 阵亡 {deaths} 次承压严重{praise_dead_clause}，团战站位与切入时机亟待复盘优化。"
     else:
         praise_talk = f"@{pname} 稳健上分拼图！{hero_name} 交出 {kills}/{deaths}/{assists}（参战率 {kp:.0f}% · 伤害 {hdmg:,}），关键团战从不掉链子！"
 
@@ -988,6 +1018,8 @@ def evaluate_player_deeply(
     else:
         if won:
             trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 标准打卡下班，平稳跟团完成基础任务！"
+        elif not is_parsed:
+            trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 基础面板复盘（录像未解析，不计算分锅）。"
         else:
             trash_talk = f"@{pname} 这把 {kills}/{deaths}/{assists} 标准打卡下班，背锅占比 {blame_points:.0f} 点，逆风局未能站出来破局！"
 
@@ -1000,7 +1032,7 @@ def evaluate_player_deeply(
         "rating_score": rating_score,
         "rating_tier": rating_tier,
         "mvp_score": mvp_score,
-        "raw_blame_points": round(blame_points, 1),
+        "raw_blame_points": round(blame_points, 1) if is_parsed else None,
         "raw_contrib_points": round(contrib_points, 1),
         "strengths": strengths,
         "weaknesses": weaknesses,
@@ -1240,21 +1272,27 @@ def build_player_playstyle_and_build_forensics(
     }
 
 
-def assign_team_blame_percentages(team_players: List[Dict[str, Any]]) -> None:
+def assign_team_blame_percentages(team_players: List[Dict[str, Any]], is_parsed: bool = True) -> None:
     """
     同时计算一方 5 人的:
-    1) 100% 败局分锅占比 (blame_share_pct)
+    1) 100% 败局分锅占比 (blame_share_pct) —— 未解析比赛不计算分锅 (设为 None)
     2) 100% 胜局贡献占比 (contrib_share_pct) 与功勋头衔 (contrib_tier)
     """
-    total_blame = sum(p.get("raw_blame_points", 10.0) for p in team_players) or 1.0
-    for p in team_players:
-        share = round(p.get("raw_blame_points", 10.0) / total_blame * 100.0, 1)
-        p["blame_share_pct"] = share
+    has_blame = bool(is_parsed) and any(p.get("raw_blame_points") is not None for p in team_players)
+    if has_blame:
+        total_blame = sum(float(p.get("raw_blame_points") or 10.0) for p in team_players) or 1.0
+        for p in team_players:
+            share = round(float(p.get("raw_blame_points") or 10.0) / total_blame * 100.0, 1)
+            p["blame_share_pct"] = share
 
-    if team_players:
-        diff = round(100.0 - sum(p["blame_share_pct"] for p in team_players), 1)
-        max_p = max(team_players, key=lambda x: x["blame_share_pct"])
-        max_p["blame_share_pct"] = round(max_p["blame_share_pct"] + diff, 1)
+        if team_players:
+            diff = round(100.0 - sum(p["blame_share_pct"] for p in team_players), 1)
+            max_p = max(team_players, key=lambda x: x["blame_share_pct"])
+            max_p["blame_share_pct"] = round(max_p["blame_share_pct"] + diff, 1)
+    else:
+        for p in team_players:
+            p["blame_share_pct"] = None
+            p["blame_rank"] = None
 
     total_contrib = sum(p.get("raw_contrib_points", 20.0) for p in team_players) or 1.0
     for p in team_players:
@@ -1290,14 +1328,20 @@ def select_match_mvp_and_culprit(
     radiant_win: bool,
     user_team_side: Optional[str],
     grok_coaching: Optional[Dict[str, Any]] = None,
+    is_parsed: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """
     评选:
     1. 全场 MVP (AI MVP)
     2. 胜方二当家 (Runner-up)
     3. 败方 SVP (Losing Team Best)
-    4. 车队头号大锅 / 一级战犯 (仅在败局重点处刑；胜局展示头号首功 + 破阵二当家 + 100% 胜局贡献榜)
+    4. 车队头号大锅 / 一级战犯 (仅在已解析败局判定；未解析比赛不计算分锅)
     """
+    all_ps = list(radiant_players or []) + list(dire_players or [])
+    unparsed = (is_parsed is False) or (
+        bool(all_ps)
+        and all(p.get("raw_blame_points") is None and p.get("blame_share_pct") is None for p in all_ps)
+    )
     grok_side = (grok_coaching or {}).get("side") if isinstance(grok_coaching, dict) else None
     grok_players = (grok_coaching or {}).get("players") if isinstance(grok_coaching, dict) else None
 
@@ -1336,7 +1380,7 @@ def select_match_mvp_and_culprit(
             if gp and gp.get("grok_share_pct") is not None and float(gp.get("grok_share_pct") or 0) > 0:
                 if side_won:
                     p["contrib_share_pct"] = round(float(gp["grok_share_pct"]), 1)
-                else:
+                elif not unparsed:
                     p["blame_share_pct"] = round(float(gp["grok_share_pct"]), 1)
 
         if side_won:
@@ -1359,29 +1403,41 @@ def select_match_mvp_and_culprit(
                 ),
                 reverse=True,
             )
-        by_blame = sorted(
-            team_players,
-            key=lambda x: (
-                float(x.get("blame_share_pct") or 0),
-                -int(x.get("score_100") or 0),
-            ),
-            reverse=True,
-        )
         for idx, p in enumerate(by_contrib, start=1):
             p["contrib_rank"] = idx
-        for idx, p in enumerate(by_blame, start=1):
-            p["blame_rank"] = idx
 
         c_slots = [int(p["player_slot"]) for p in by_contrib]
-        b_slots = [int(p["player_slot"]) for p in by_blame]
-        rankings_by_side[side_key] = {
-            "mvp_slot": c_slots[0] if c_slots else 0,
-            "runner_up_slot": c_slots[1] if len(c_slots) > 1 else (c_slots[0] if c_slots else 0),
-            "culprit_slot": b_slots[0] if b_slots else 0,
-            "second_culprit_slot": b_slots[1] if len(b_slots) > 1 else (b_slots[0] if b_slots else 0),
-            "contrib_order_slots": c_slots,
-            "blame_order_slots": b_slots,
-        }
+        if unparsed:
+            for p in team_players:
+                p["blame_rank"] = None
+            rankings_by_side[side_key] = {
+                "mvp_slot": c_slots[0] if c_slots else 0,
+                "runner_up_slot": c_slots[1] if len(c_slots) > 1 else (c_slots[0] if c_slots else 0),
+                "culprit_slot": None,
+                "second_culprit_slot": None,
+                "contrib_order_slots": c_slots,
+                "blame_order_slots": [],
+            }
+        else:
+            by_blame = sorted(
+                team_players,
+                key=lambda x: (
+                    float(x.get("blame_share_pct") or 0),
+                    -int(x.get("score_100") or 0),
+                ),
+                reverse=True,
+            )
+            for idx, p in enumerate(by_blame, start=1):
+                p["blame_rank"] = idx
+            b_slots = [int(p["player_slot"]) for p in by_blame]
+            rankings_by_side[side_key] = {
+                "mvp_slot": c_slots[0] if c_slots else 0,
+                "runner_up_slot": c_slots[1] if len(c_slots) > 1 else (c_slots[0] if c_slots else 0),
+                "culprit_slot": b_slots[0] if b_slots else 0,
+                "second_culprit_slot": b_slots[1] if len(b_slots) > 1 else (b_slots[0] if b_slots else 0),
+                "contrib_order_slots": c_slots,
+                "blame_order_slots": b_slots,
+            }
 
     winning_team = radiant_players if radiant_win else dire_players
     losing_team = dire_players if radiant_win else radiant_players
@@ -1398,8 +1454,12 @@ def select_match_mvp_and_culprit(
 
     win_sorted = sorted(winning_team, key=lambda x: int(x.get("contrib_rank") or 99))
     lose_sorted = sorted(losing_team, key=lambda x: int(x.get("contrib_rank") or 99))
-    focus_by_blame = sorted(focus_team, key=lambda x: int(x.get("blame_rank") or 99))
     focus_by_contrib = sorted(focus_team, key=lambda x: int(x.get("contrib_rank") or 99))
+    focus_by_blame = (
+        list(reversed(focus_by_contrib))
+        if unparsed
+        else sorted(focus_team, key=lambda x: int(x.get("blame_rank") or 99))
+    )
 
     mvp = win_sorted[0]
     runner_up = win_sorted[1] if len(win_sorted) > 1 else win_sorted[0]
@@ -1415,25 +1475,29 @@ def select_match_mvp_and_culprit(
         f"败方孤胆院长 (SVP)：{lose_side_zh} {svp['pos']}号位 {svp['hero_short_zh']}（{svp['personaname']}，评分 {svp['rating_score']}）交出 {svp['kda']}（伤害 {svp['hero_damage']:,}），一神带四坑实在带不动。",
     ]
 
-    max_blame_pts = max((float(p.get("raw_blame_points") or 0.0) for p in focus_team), default=0.0)
-    no_clear_culprit = bool(focus_won or max_blame_pts < BLAME_CULPRIT_THRESHOLD)
-    culprit_label = "无明显责任人" if no_clear_culprit else "车队头号大锅"
-
-    if focus_won:
-        culprit_verdict = (
-            f"凯旋庆功总结：{focus_side_zh}头号首功 {mvp['hero_short_zh']}（{mvp['personaname']}，贡献 {mvp.get('contrib_share_pct', 25)}%）与二当家 {runner_up['hero_short_zh']}（{runner_up['personaname']}，贡献 {runner_up.get('contrib_share_pct', 22)}%）携手带飞！"
-            f" 本局复盘短板位：{culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，贡献 {culprit.get('contrib_share_pct', 14)}%）。"
-        )
-    elif no_clear_culprit:
-        culprit_verdict = (
-            f"无明显责任人：本局{focus_side_zh}五人最高分锅点数（{max_blame_pts:.1f}）低于阈值（{BLAME_CULPRIT_THRESHOLD:.0f}），不指定头号大锅。"
-            f" 相对待改进点（{culprit['pos']}号位 {culprit['hero_short_zh']}）：{culprit['weaknesses'][0]}"
-        )
+    if unparsed:
+        no_clear_culprit = True
+        culprit_label = "未解析比赛不计算分锅"
+        culprit_verdict = "本局录像未解析，不计算分锅（需要先解析录像）。"
     else:
-        culprit_verdict = (
-            f"车队头号大锅认证（分锅占比 {culprit['blame_share_pct']}%）：{focus_side_zh} {culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，评分 {culprit['rating_score']}）——"
-            f"本局失利首锅毫无疑问扣在他头上：{culprit['weaknesses'][0]}"
-        )
+        max_blame_pts = max((float(p.get("raw_blame_points") or 0.0) for p in focus_team), default=0.0)
+        no_clear_culprit = bool(focus_won or max_blame_pts < BLAME_CULPRIT_THRESHOLD)
+        culprit_label = "无明显责任人" if no_clear_culprit else "车队头号大锅"
+        if focus_won:
+            culprit_verdict = (
+                f"凯旋庆功总结：{focus_side_zh}头号首功 {mvp['hero_short_zh']}（{mvp['personaname']}，贡献 {mvp.get('contrib_share_pct', 25)}%）与二当家 {runner_up['hero_short_zh']}（{runner_up['personaname']}，贡献 {runner_up.get('contrib_share_pct', 22)}%）携手带飞！"
+                f" 本局复盘短板位：{culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，贡献 {culprit.get('contrib_share_pct', 14)}%）。"
+            )
+        elif no_clear_culprit:
+            culprit_verdict = (
+                f"无明显责任人：本局{focus_side_zh}五人最高分锅点数（{max_blame_pts:.1f}）低于阈值（{BLAME_CULPRIT_THRESHOLD:.0f}），不指定头号大锅。"
+                f" 相对待改进点（{culprit['pos']}号位 {culprit['hero_short_zh']}）：{culprit['weaknesses'][0]}"
+            )
+        else:
+            culprit_verdict = (
+                f"车队头号大锅认证（分锅占比 {culprit['blame_share_pct']}%）：{focus_side_zh} {culprit['pos']}号位 {culprit['hero_short_zh']}（{culprit['personaname']}，评分 {culprit['rating_score']}）——"
+                f"本局失利首锅毫无疑问扣在他头上：{culprit['weaknesses'][0]}"
+            )
 
     return {
         "no_clear_culprit": no_clear_culprit,
@@ -1553,28 +1617,32 @@ def select_match_mvp_and_culprit(
             "contrib_share_pct": second_culprit.get("contrib_share_pct", 16.0),
             "main_crime": second_culprit["weaknesses"][0],
         },
-        "focus_team_blame_ranking": [
-            {
-                "pos": fp["pos"],
-                "hero_name": fp["hero_name"],
-                "hero_short_zh": fp.get("hero_short_zh", fp["hero_name"]),
-                "hero_img": fp.get("hero_img"),
-                "hero_icon": fp.get("hero_icon"),
-                "personaname": fp["personaname"],
-                "friend_tag": fp.get("friend_tag"),
-                "blame_share_pct": fp["blame_share_pct"],
-                "contrib_share_pct": fp.get("contrib_share_pct", 20.0),
-                "contrib_tier": fp.get("contrib_tier", ""),
-                "rating_score": fp["rating_score"],
-                "rating_tier": fp["rating_tier"],
-                "kda": fp["kda"],
-                "dead_seconds": fp.get("dead_seconds", 0),
-                "death_gold_lost": fp.get("death_gold_lost", 0),
-                "trash_talk": fp["trash_talk"],
-                "praise_talk": fp.get("praise_talk", ""),
-            }
-            for fp in focus_by_blame
-        ],
+        "focus_team_blame_ranking": (
+            []
+            if unparsed
+            else [
+                {
+                    "pos": fp["pos"],
+                    "hero_name": fp["hero_name"],
+                    "hero_short_zh": fp.get("hero_short_zh", fp["hero_name"]),
+                    "hero_img": fp.get("hero_img"),
+                    "hero_icon": fp.get("hero_icon"),
+                    "personaname": fp["personaname"],
+                    "friend_tag": fp.get("friend_tag"),
+                    "blame_share_pct": fp["blame_share_pct"],
+                    "contrib_share_pct": fp.get("contrib_share_pct", 20.0),
+                    "contrib_tier": fp.get("contrib_tier", ""),
+                    "rating_score": fp["rating_score"],
+                    "rating_tier": fp["rating_tier"],
+                    "kda": fp["kda"],
+                    "dead_seconds": fp.get("dead_seconds"),
+                    "death_gold_lost": fp.get("death_gold_lost"),
+                    "trash_talk": fp["trash_talk"],
+                    "praise_talk": fp.get("praise_talk", ""),
+                }
+                for fp in focus_by_blame
+            ]
+        ),
         "focus_team_contrib_ranking": [
             {
                 "pos": fp["pos"],
