@@ -138,7 +138,11 @@ def is_match_already_analyzed(match_id: Any) -> bool:
 _RECENT_MATCHES_CACHE: Dict[int, Dict[str, Any]] = {}
 
 
-def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
+def fetch_recent_matches_formatted(
+    account_id: int,
+    limit: int = 12,
+    allow_network: bool = True,
+) -> list:
     import time
 
     now_ts = time.time()
@@ -149,21 +153,25 @@ def fetch_recent_matches_formatted(account_id: int, limit: int = 12) -> list:
             item["is_analyzed"] = is_match_already_analyzed(item.get("match_id"))
         return out_cached[:limit]
 
-    hero_map, _ = get_hero_constants_map()
+    hero_map, _ = get_hero_constants_map(allow_network=allow_network)
     recent_cache_file = REPORTS_DIR / f"recent_matches_{account_id}.json"
     tmp_recent_cache_file = TMP_REPORTS_DIR / f"recent_matches_{account_id}.json"
 
     raw_list = None
-    try:
-        raw_list = api_get(f"/players/{account_id}/recentMatches")
-        if isinstance(raw_list, list) and raw_list:
-            try:
-                REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-                recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
-            except OSError:
-                TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-                tmp_recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
-    except Exception:
+    if allow_network:
+        try:
+            raw_list = api_get(f"/players/{account_id}/recentMatches")
+            if isinstance(raw_list, list) and raw_list:
+                try:
+                    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                    recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
+                except OSError:
+                    TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                    tmp_recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
+        except Exception:
+            raw_list = None
+
+    if raw_list is None:
         for cf in (recent_cache_file, tmp_recent_cache_file):
             if cf.exists():
                 try:
@@ -260,7 +268,11 @@ def _has_complete_grok_coaching(gc: Any) -> bool:
     return has_stages and has_deep
 
 
-def _hydrate_grok_from_caches(report: Dict[str, Any], match_id: int) -> Dict[str, Any]:
+def _hydrate_grok_from_caches(
+    report: Dict[str, Any],
+    match_id: int,
+    allow_cloud: bool = True,
+) -> Dict[str, Any]:
     """Attach the newest grok_coaching from /tmp, reports/coaching-*.json, or Supabase Cloud DB if report lacks it."""
     if not isinstance(report, dict):
         return report
@@ -281,14 +293,15 @@ def _hydrate_grok_from_caches(report: Dict[str, Any], match_id: int) -> Dict[str
                 except Exception:
                     pass
 
-    try:
-        cloud_rep = cloud_fetch_match_report(match_id)
-        if isinstance(cloud_rep, dict) and isinstance(cloud_rep.get("grok_coaching"), dict):
-            c_gc = cloud_rep["grok_coaching"]
-            if _has_complete_grok_coaching(c_gc) or not report.get("grok_coaching"):
-                report["grok_coaching"] = c_gc
-    except Exception:
-        pass
+    if allow_cloud:
+        try:
+            cloud_rep = cloud_fetch_match_report(match_id, persist_tmp=False)
+            if isinstance(cloud_rep, dict) and isinstance(cloud_rep.get("grok_coaching"), dict):
+                c_gc = cloud_rep["grok_coaching"]
+                if _has_complete_grok_coaching(c_gc) or not report.get("grok_coaching"):
+                    report["grok_coaching"] = c_gc
+        except Exception:
+            pass
     return report
 
 
@@ -409,8 +422,12 @@ def check_team_token_auth(
     return True, 200, ""
 
 
-def match_has_roster_player(raw_or_report: Dict[str, Any], roster: Dict[str, Any]) -> bool:
-    """检查比赛的 10 名玩家里是否至少有 1 名在花名册中。"""
+def match_has_roster_player(
+    raw_or_report: Dict[str, Any],
+    roster: Dict[str, Any],
+    allow_anonymous: bool = False,
+) -> bool:
+    """检查比赛的 10 名玩家里是否至少有 1 名在花名册中（或带口令新建时存在隐藏资料玩家）。"""
     if not isinstance(raw_or_report, dict) or not isinstance(roster, dict):
         return False
     roster_ids = {
@@ -426,13 +443,19 @@ def match_has_roster_player(raw_or_report: Dict[str, Any], roster: Dict[str, Any
         candidates = list(raw_or_report.get("radiant_pos_1_to_5") or []) + list(
             raw_or_report.get("dire_pos_1_to_5") or []
         )
+    has_anon = False
     for p in candidates:
-        if isinstance(p, dict) and p.get("account_id") is not None:
+        if isinstance(p, dict):
+            if p.get("account_id") is None:
+                has_anon = True
+                continue
             try:
                 if int(p["account_id"]) in roster_ids:
                     return True
             except (ValueError, TypeError):
                 pass
+    if allow_anonymous and has_anon:
+        return True
     return False
 
 
@@ -454,10 +477,37 @@ def get_or_build_match_report(
     tmp_md_cache = TMP_REPORTS_DIR / f"match_{match_id}.md"
     tmp_raw_cache = TMP_REPORTS_DIR / f"raw_{match_id}.json"
 
+    # R1-1: 不带口令的只读模式（allow_build=False）严格只读已有报告，零写入、零 OpenDota 请求、不拦非花名册/匿名读取
+    if not allow_build:
+        for jc in (json_cache, tmp_json_cache):
+            if jc.exists():
+                try:
+                    cached_rep = json.loads(jc.read_text(encoding="utf-8"))
+                    if isinstance(cached_rep, dict) and cached_rep.get("match_id"):
+                        rep_out = dict(cached_rep)
+                        rep_out = _ensure_v69_hero_matchup_matrix(rep_out)
+                        rep_out = _hydrate_grok_from_caches(rep_out, match_id, allow_cloud=False)
+                        rep_out = sanitize_report_mixed_english(rep_out)
+                        if rep_out.get("engine_version") != ENGINE_VERSION:
+                            rep_out["stale"] = True
+                        return rep_out
+                except Exception:
+                    pass
+
+        cloud_rep = cloud_fetch_match_report(match_id, persist_tmp=False)
+        if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
+            rep_out = dict(cloud_rep)
+            rep_out = _ensure_v69_hero_matchup_matrix(rep_out)
+            rep_out = _hydrate_grok_from_caches(rep_out, match_id, allow_cloud=False)
+            rep_out = sanitize_report_mixed_english(rep_out)
+            if rep_out.get("engine_version") != ENGINE_VERSION:
+                rep_out["stale"] = True
+            return rep_out
+        return None
+
     fallback_unparsed_rep = None
     stale_cached_rep = None
     if not force_refresh:
-        # Check json_cache and tmp_json_cache (GET never calls LLM; only hydrates from existing cache)
         for jc in (json_cache, tmp_json_cache):
             if jc.exists():
                 try:
@@ -478,7 +528,6 @@ def get_or_build_match_report(
                 except Exception:
                     pass
 
-        # Read-through from Cloud DB (Supabase) when container /tmp was wiped
         cloud_rep = cloud_fetch_match_report(match_id)
         if isinstance(cloud_rep, dict) and cloud_rep.get("match_id"):
             cloud_rep = _ensure_v69_hero_matchup_matrix(cloud_rep)
@@ -490,17 +539,12 @@ def get_or_build_match_report(
             elif stale_cached_rep is None:
                 stale_cached_rep = cloud_rep
 
-    if (
-        not allow_build
-        and fallback_unparsed_rep is None
-        and stale_cached_rep is None
-        and not json_cache.exists()
-        and not tmp_json_cache.exists()
-    ):
-        return None
-    if not allow_build and stale_cached_rep is not None and not raw_cache.exists() and not tmp_raw_cache.exists():
-        return sanitize_report_mixed_english(stale_cached_rep)
-
+    already_analyzed = (
+        json_cache.exists()
+        or tmp_json_cache.exists()
+        or (stale_cached_rep is not None)
+        or (fallback_unparsed_rep is not None)
+    )
     roster = load_roster()
     aid = focus_account_id or roster.get("main_account_id")
 
@@ -527,7 +571,7 @@ def get_or_build_match_report(
     if not raw_match:
         try:
             raw_match = api_get(f"/matches/{match_id}")
-            if raw_match and not match_has_roster_player(raw_match, roster):
+            if not already_analyzed and raw_match and not match_has_roster_player(raw_match, roster, allow_anonymous=True):
                 raise PermissionError("该比赛 10 名玩家均不在车队花名册中，拒绝分析与落库")
             # If the match just ended and OpenDota hasn't parsed the .dem replay yet, auto-request parse and poll briefly!
             if raw_match and not raw_match.get("version"):
@@ -566,7 +610,7 @@ def get_or_build_match_report(
                 return sanitize_report_mixed_english(stale_cached_rep)
             raise
 
-    if raw_match and not match_has_roster_player(raw_match, roster):
+    if not already_analyzed and raw_match and not match_has_roster_player(raw_match, roster, allow_anonymous=True):
         raise PermissionError("该比赛 10 名玩家均不在车队花名册中，拒绝分析与落库")
 
     report = analyze_match_data(raw_match, roster, focus_account_id=aid)
@@ -619,7 +663,7 @@ from concurrent.futures import ThreadPoolExecutor
 _ICON_B64_CACHE: Dict[str, str] = {}
 
 
-def fetch_match_icons_base64(match_id: int) -> Dict[str, str]:
+def fetch_match_icons_base64(match_id: int, allow_network: bool = False) -> Dict[str, str]:
     report = get_or_build_match_report(match_id, allow_build=False)
     if not report:
         return {}
@@ -642,7 +686,7 @@ def fetch_match_icons_base64(match_id: int) -> Dict[str, str]:
             urls.add(n_url)
 
     missing = [u for u in urls if u and u not in _ICON_B64_CACHE]
-    if missing:
+    if allow_network and missing:
         def _dl(u: str):
             try:
                 req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
@@ -836,19 +880,29 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
     def do_HEAD(self) -> None:
         self.do_GET()
 
+    def _has_provided_valid_token(self) -> bool:
+        if not hasattr(self, "headers") or not self.headers:
+            return False
+        provided = (self.headers.get("X-Team-Token") or "").strip()
+        if not provided:
+            return False
+        ok, _, _ = check_team_token_auth(provided)
+        return bool(ok)
+
     def do_GET(self) -> None:
         path, qs = self._resolve_path_and_qs()
+        has_token = self._has_provided_valid_token()
 
         try:
             if path == "/api/match_icons":
                 mid_str = (qs.get("match_id") or [""])[0].strip()
                 mid = int(mid_str) if mid_str.isdigit() else 0
-                icons = fetch_match_icons_base64(mid) if mid else {}
+                icons = fetch_match_icons_base64(mid, allow_network=has_token) if mid else {}
                 self._send_json({"ok": True, "match_id": mid, "icons": icons})
                 return
 
             if path == "/api/heroes":
-                hero_map, _ = get_hero_constants_map()
+                hero_map, _ = get_hero_constants_map(allow_network=has_token)
                 heroes_list = sorted(hero_map.values(), key=lambda x: x["id"])
                 self._send_json({"ok": True, "heroes": heroes_list})
                 return
@@ -856,7 +910,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             if path == "/api/init":
                 roster = load_roster()
                 main_id = int(roster.get("main_account_id") or 0)
-                recent = fetch_recent_matches_formatted(main_id, limit=12) if main_id else []
+                recent = fetch_recent_matches_formatted(main_id, limit=12, allow_network=has_token) if main_id else []
                 wins = sum(1 for m in recent if m.get("won"))
                 losses = len(recent) - wins
                 win_rate = round((wins / len(recent)) * 100, 1) if recent else 0.0
@@ -885,8 +939,8 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     "wl": {"win": wins, "lose": losses, "win_rate": win_rate},
                     "recent_matches": recent,
                 }
-                squad_ledger = load_or_build_squad_ledger(REPORTS_DIR, roster, recent)
-                hero_map, _ = get_hero_constants_map()
+                squad_ledger = load_or_build_squad_ledger(REPORTS_DIR, roster, recent, allow_write=has_token)
+                hero_map, _ = get_hero_constants_map(allow_network=has_token)
                 heroes_catalog = sorted(hero_map.values(), key=lambda x: x["id"])
                 self._send_json({
                     "ok": True,
@@ -905,7 +959,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 raw_q = (qs.get("query") or qs.get("q") or qs.get("account_id") or [""])[0].strip()
                 roster = load_roster()
                 aid = resolve_player_input(raw_q) if raw_q else int(roster.get("main_account_id") or 0)
-                recent = fetch_recent_matches_formatted(aid, limit=12)
+                recent = fetch_recent_matches_formatted(aid, limit=12, allow_network=has_token)
                 wins = sum(1 for m in recent if m.get("won"))
                 losses = len(recent) - wins
                 win_rate = round((wins / len(recent)) * 100, 1) if recent else 0.0
@@ -926,7 +980,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     "wl": {"win": wins, "lose": losses, "win_rate": win_rate},
                     "recent_matches": recent,
                 }
-                squad_ledger = load_or_build_squad_ledger(REPORTS_DIR, roster, recent)
+                squad_ledger = load_or_build_squad_ledger(REPORTS_DIR, roster, recent, allow_write=has_token)
                 self._send_json({
                     "ok": True,
                     "account_id": aid,
@@ -965,15 +1019,22 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                         "match_id": mid,
                     })
                     return
+                is_stale = bool(report.get("stale"))
                 part_param = (qs.get("part") or [""])[0].strip().lower()
                 if part_param in ("summary", "timeline", "microscope"):
-                    self._send_json({
+                    resp_obj: Dict[str, Any] = {
                         "ok": True,
                         "part": part_param,
                         "report": extract_report_part(report, part_param),
-                    })
+                    }
+                    if is_stale:
+                        resp_obj["stale"] = True
+                    self._send_json(resp_obj)
                     return
-                self._send_json({"ok": True, "report": report})
+                resp_full: Dict[str, Any] = {"ok": True, "report": report}
+                if is_stale:
+                    resp_full["stale"] = True
+                self._send_json(resp_full)
                 return
 
             if path == "/api/llm_review_status":

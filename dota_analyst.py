@@ -271,7 +271,7 @@ def iter_roster_accounts(
     return list(grouped.values())
 
 
-def get_hero_constants_map() -> Tuple[Dict[int, Dict[str, Any]], Dict[str, int]]:
+def get_hero_constants_map(allow_network: bool = True) -> Tuple[Dict[int, Dict[str, Any]], Dict[str, int]]:
     """
     返回:
     1. hero_id -> {"id": int, "npc": str, "slug": str, "short_zh": str, "alias": str, "full_zh": str, "img": str, "icon": str}
@@ -288,7 +288,7 @@ def get_hero_constants_map() -> Tuple[Dict[int, Dict[str, Any]], Dict[str, int]]
             except Exception:
                 heroes_data = None
 
-    if not heroes_data:
+    if not heroes_data and allow_network:
         try:
             heroes_data = api_get("/constants/heroes", timeout=15)
             try:
@@ -2011,6 +2011,7 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
         "user_team_side",
         "focus_side",
         "user_won",
+        "stale",
     )
     out: Dict[str, Any] = {k: report.get(k) for k in base_keys if k in report}
     df = report.get("deep_forensics") if isinstance(report.get("deep_forensics"), dict) else {}

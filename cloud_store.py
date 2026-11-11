@@ -363,8 +363,8 @@ def cloud_save_match_report(match_id: int, report_dict: Dict[str, Any]) -> bool:
     return False
 
 
-def cloud_fetch_match_report(match_id: int) -> Optional[Dict[str, Any]]:
-    """从 Supabase 拉取复盘报告并缓存至 /tmp/dota_reports"""
+def cloud_fetch_match_report(match_id: int, persist_tmp: bool = True) -> Optional[Dict[str, Any]]:
+    """从 Supabase 拉取复盘报告（仅在 persist_tmp=True 时写 /tmp 缓存）"""
     if not match_id:
         return None
 
@@ -375,13 +375,14 @@ def cloud_fetch_match_report(match_id: int) -> Optional[Dict[str, Any]]:
 
     if isinstance(rep, dict) and rep.get("match_id"):
         _CLOUD_IDS_CACHE["ids"].add(int(match_id))
-        try:
-            TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-            (TMP_REPORTS_DIR / f"match_{int(match_id)}.json").write_text(
-                json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
-            )
-        except Exception:
-            pass
+        if persist_tmp:
+            try:
+                TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                (TMP_REPORTS_DIR / f"match_{int(match_id)}.json").write_text(
+                    json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
+                )
+            except Exception:
+                pass
         return rep
     return None
 
