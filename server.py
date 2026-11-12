@@ -48,6 +48,7 @@ from cloud_store import (
     cloud_save_raw_match,
     get_cloud_analyzed_match_ids,
     get_cloud_db_status_safe,
+    is_valid_llm_task_id,
 )
 from dota_analyst import (
     ENGINE_VERSION,
@@ -831,35 +832,68 @@ def fetch_match_icons_base64(match_id: int, allow_network: bool = False) -> Dict
 
 _LLM_TASK_POOL = ThreadPoolExecutor(max_workers=4)
 
-_SENSITIVE_ERROR_MARKERS = (
-    "Traceback",
-    "invalid literal",
-    'File "',
-    "/Users/",
-    "/home/",
-    "/var/",
-    "/etc/",
-    "/tmp/",
-    "\\",
-    ".py",
-    "ValueError",
-    "TypeError",
-    "KeyError",
-    "RuntimeError",
-    "URLError",
-    "HTTPError",
-)
+_CLIENT_ERROR_WHITELIST: Dict[str, str] = {
+    "LLM_TIMEOUT": "大模型请求超时，请稍后重试",
+    "LLM_AUTH_FAILED": "大模型服务鉴权失败，请检查服务端密钥配置",
+    "LLM_UPSTREAM_ERROR": "大模型上游服务异常，请稍后重试",
+    "INVALID_TASK_ID": "无效的 task_id 参数",
+    "TASK_NOT_FOUND": "未找到对应的判词任务",
+    "AUTH_REQUIRED": "需要车队口令（X-Team-Token）验证，请在设置中填写后重试",
+    "TOKEN_NOT_CONFIGURED": "服务端未配置 TEAM_TOKEN，已拒绝写入与算力操作",
+    "BAD_REQUEST": "请求参数格式无效，请检查后重试",
+    "FORBIDDEN": "该比赛不在车队花名册范围内，拒绝操作",
+    "NOT_FOUND": "未找到请求的资源",
+    "INTERNAL_ERROR": "服务器内部错误，请稍后重试",
+}
 
 
-def _sanitize_client_error(raw_err: Any, fallback: str = "请求处理失败，请稍后重试") -> str:
+def classify_llm_error(raw_err: Any) -> Tuple[str, str]:
+    """将大模型失败严格归入超时、鉴权失败、上游错误三类白名单，绝不透传底层异常原文。"""
+    if isinstance(raw_err, TimeoutError):
+        return "LLM_TIMEOUT", _CLIENT_ERROR_WHITELIST["LLM_TIMEOUT"]
+    http_code = getattr(raw_err, "code", None)
+    if http_code in (401, 403):
+        return "LLM_AUTH_FAILED", _CLIENT_ERROR_WHITELIST["LLM_AUTH_FAILED"]
+
     txt = str(raw_err or "").strip()
-    if not txt:
-        return fallback
-    if any(m in txt for m in _SENSITIVE_ERROR_MARKERS):
-        return fallback
-    if not any("\u4e00" <= ch <= "\u9fff" for ch in txt):
-        return fallback
-    return txt
+    if txt in ("LLM_TIMEOUT", "LLM_AUTH_FAILED", "LLM_UPSTREAM_ERROR"):
+        return txt, _CLIENT_ERROR_WHITELIST[txt]
+    low = txt.lower()
+    if any(k in low for k in ("timed out", "timeout", "readtimeout")) or "超时" in txt:
+        return "LLM_TIMEOUT", _CLIENT_ERROR_WHITELIST["LLM_TIMEOUT"]
+    if (
+        any(
+            k in low
+            for k in (
+                "http error 401",
+                "http error 403",
+                "status 401",
+                "status 403",
+                "unauthorized",
+                "forbidden",
+                "invalid api key",
+                "incorrect api key",
+                "api_key",
+                "authentication",
+            )
+        )
+        or any(zh_k in txt for zh_k in ("鉴权", "密钥", "未配置"))
+    ):
+        return "LLM_AUTH_FAILED", _CLIENT_ERROR_WHITELIST["LLM_AUTH_FAILED"]
+    return "LLM_UPSTREAM_ERROR", _CLIENT_ERROR_WHITELIST["LLM_UPSTREAM_ERROR"]
+
+
+def _sanitize_client_error(raw_err: Any, fallback_code: str = "LLM_UPSTREAM_ERROR") -> str:
+    """严格白名单错误返回：仅允许预定义中文提示，绝不回显原始错误文本。"""
+    if isinstance(raw_err, str):
+        s = raw_err.strip()
+        if s in _CLIENT_ERROR_WHITELIST:
+            return _CLIENT_ERROR_WHITELIST[s]
+        if s in _CLIENT_ERROR_WHITELIST.values():
+            return s
+    if fallback_code in ("LLM_TIMEOUT", "LLM_AUTH_FAILED", "LLM_UPSTREAM_ERROR"):
+        return classify_llm_error(raw_err)[1]
+    return _CLIENT_ERROR_WHITELIST.get(fallback_code, _CLIENT_ERROR_WHITELIST["INTERNAL_ERROR"])
 
 
 def _execute_llm_review_task(
@@ -902,6 +936,8 @@ def _execute_llm_review_task(
                 "match_id": int(match_id),
                 "side": side,
                 "status": "completed",
+                "progress": 100,
+                "error_code": None,
                 "structured": res["structured"],
                 "report": sanitized_rep,
                 "model": res.get("model") or res["structured"].get("model"),
@@ -914,25 +950,30 @@ def _execute_llm_review_task(
             raw_err = res.get("error")
             if raw_err:
                 sys.stderr.write(f"[DotaLedgerServer] LLM review failed ({task_id}): {raw_err}\n")
-            err_msg = _sanitize_client_error(raw_err, "大模型判词生成失败，请稍后重试")
+            err_code, err_msg = classify_llm_error(raw_err)
             fail_state = {
                 "task_id": task_id,
                 "match_id": int(match_id),
                 "side": side,
                 "status": "failed",
+                "progress": 100,
+                "error_code": err_code,
                 "error": err_msg,
                 "updated_at": int(time.time()),
             }
             cloud_save_llm_task(task_id, fail_state)
             return fail_state
-    except Exception:
+    except Exception as exc:
         traceback.print_exc(file=sys.stderr)
+        err_code, err_msg = classify_llm_error(exc)
         fail_state = {
             "task_id": task_id,
             "match_id": int(match_id),
             "side": side,
             "status": "failed",
-            "error": "判词后台任务执行失败，请稍后重试",
+            "progress": 100,
+            "error_code": err_code,
+            "error": err_msg,
             "updated_at": int(time.time()),
         }
         cloud_save_llm_task(task_id, fail_state)
@@ -946,28 +987,45 @@ def start_async_llm_review_task(
     run_async: bool = True,
     tone_mode: str = "coach",
 ) -> Dict[str, Any]:
-    task_id = f"llm-{int(match_id)}-{side}-{int(time.time() * 1000)}"
+    side_norm = "radiant" if str(side or "").strip().lower() == "radiant" else "dire"
+    task_id = f"llm-{int(match_id)}-{side_norm}-{int(time.time() * 1000)}"
     init_state = {
         "task_id": task_id,
         "match_id": int(match_id),
-        "side": side,
+        "side": side_norm,
         "status": "pending",
+        "progress": 0,
+        "error_code": None,
         "created_at": int(time.time()),
         "updated_at": int(time.time()),
     }
     cloud_save_llm_task(task_id, init_state)
     if run_async:
-        _LLM_TASK_POOL.submit(_execute_llm_review_task, task_id, int(match_id), side, report, tone_mode)
+        _LLM_TASK_POOL.submit(_execute_llm_review_task, task_id, int(match_id), side_norm, report, tone_mode)
         return {
             "ok": True,
             "task_id": task_id,
             "match_id": int(match_id),
-            "side": side,
+            "side": side_norm,
             "status": "pending",
+            "progress": 0,
+            "error_code": None,
         }
-    final_state = _execute_llm_review_task(task_id, int(match_id), side, report, tone_mode)
+    final_state = _execute_llm_review_task(task_id, int(match_id), side_norm, report, tone_mode)
+    if final_state.get("status") != "completed":
+        err_code, err_msg = classify_llm_error(final_state.get("error_code") or final_state.get("error"))
+        return {
+            "ok": False,
+            "task_id": task_id,
+            "match_id": int(match_id),
+            "side": side_norm,
+            "status": "failed",
+            "progress": 100,
+            "error_code": err_code,
+            "error": err_msg,
+        }
     return {
-        "ok": final_state.get("status") == "completed",
+        "ok": True,
         **final_state,
     }
 
@@ -1129,7 +1187,21 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             if path in ("/api/recent", "/api/player"):
                 raw_q = (qs.get("query") or qs.get("q") or qs.get("account_id") or [""])[0].strip()
                 roster = load_roster()
-                aid = resolve_player_input(raw_q) if raw_q else int(roster.get("main_account_id") or 0)
+                if raw_q and not re.fullmatch(r"\d+", raw_q):
+                    if not has_token:
+                        self._send_json(
+                            {
+                                "ok": False,
+                                "need_team_token": True,
+                                "error_code": "AUTH_REQUIRED",
+                                "error": _CLIENT_ERROR_WHITELIST["AUTH_REQUIRED"],
+                            },
+                            status=401,
+                        )
+                        return
+                    aid = resolve_player_input(raw_q)
+                else:
+                    aid = normalize_account_id(raw_q) if raw_q else int(roster.get("main_account_id") or 0)
                 recent = fetch_recent_matches_formatted(aid, limit=12, allow_network=has_token)
                 wins = sum(1 for m in recent if m.get("won"))
                 losses = len(recent) - wins
@@ -1168,7 +1240,21 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                     if not self._require_team_token():
                         return
                 aid_str = (qs.get("account_id") or [""])[0].strip()
-                aid = resolve_player_input(aid_str) if aid_str else None
+                if aid_str and not re.fullmatch(r"\d+", aid_str):
+                    if not has_token:
+                        self._send_json(
+                            {
+                                "ok": False,
+                                "need_team_token": True,
+                                "error_code": "AUTH_REQUIRED",
+                                "error": _CLIENT_ERROR_WHITELIST["AUTH_REQUIRED"],
+                            },
+                            status=401,
+                        )
+                        return
+                    aid = resolve_player_input(aid_str)
+                else:
+                    aid = normalize_account_id(aid_str) if aid_str else None
                 report = get_or_build_match_report(
                     mid,
                     focus_account_id=aid,
@@ -1204,19 +1290,54 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
 
             if path == "/api/llm_review_status":
                 task_id = (qs.get("task_id") or [""])[0].strip()
-                if not task_id:
-                    self._send_json({"ok": False, "error": "缺少 task_id 参数"}, status=400)
+                if not is_valid_llm_task_id(task_id):
+                    self._send_json(
+                        {
+                            "ok": False,
+                            "error_code": "INVALID_TASK_ID",
+                            "error": _CLIENT_ERROR_WHITELIST["INVALID_TASK_ID"],
+                        },
+                        status=400,
+                    )
                     return
                 task_data = cloud_load_llm_task(task_id)
                 if not isinstance(task_data, dict):
-                    self._send_json({"ok": False, "error": "未找到对应的判词任务"}, status=404)
-                    return
-                safe_task = dict(task_data)
-                if safe_task.get("error") is not None:
-                    safe_task["error"] = _sanitize_client_error(
-                        safe_task.get("error"), "判词后台任务执行失败，请稍后重试"
+                    self._send_json(
+                        {
+                            "ok": False,
+                            "error_code": "TASK_NOT_FOUND",
+                            "error": _CLIENT_ERROR_WHITELIST["TASK_NOT_FOUND"],
+                        },
+                        status=404,
                     )
-                self._send_json({"ok": True, **safe_task})
+                    return
+                status_val = str(task_data.get("status") or "pending")
+                if status_val not in ("pending", "running", "completed", "failed"):
+                    status_val = "pending"
+                raw_prog = task_data.get("progress")
+                if isinstance(raw_prog, (int, float)):
+                    progress_val = max(0, min(100, int(raw_prog)))
+                elif status_val == "completed" or status_val == "failed":
+                    progress_val = 100
+                elif status_val == "running":
+                    progress_val = 50
+                else:
+                    progress_val = 0
+
+                status_payload: Dict[str, Any] = {
+                    "ok": True,
+                    "task_id": task_id,
+                    "status": status_val,
+                    "progress": progress_val,
+                    "error_code": None,
+                }
+                if status_val == "failed":
+                    err_code, err_msg = classify_llm_error(
+                        task_data.get("error_code") or task_data.get("error")
+                    )
+                    status_payload["error_code"] = err_code
+                    status_payload["error"] = err_msg
+                self._send_json(status_payload)
                 return
 
             # 静态文件服务 (支持 /, /pregame, 以及公开分享链接 /match/<id>)
@@ -1336,7 +1457,9 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                         plan["grok_live_brief"] = llm_res["grok_live_brief"]
                     elif llm_res.get("error"):
                         sys.stderr.write(f"[DotaLedgerServer] Pregame LLM error: {llm_res.get('error')}\n")
-                        plan["llm_error"] = _sanitize_client_error(llm_res["error"], "赛前建议生成失败，请稍后重试")
+                        err_code, err_msg = classify_llm_error(llm_res["error"])
+                        plan["llm_error_code"] = err_code
+                        plan["llm_error"] = err_msg
                 self._send_json({"ok": True, "plan": plan})
                 return
 
@@ -1534,8 +1657,13 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 )
                 if isinstance(res, dict) and not res.get("ok") and res.get("error"):
                     sys.stderr.write(f"[DotaLedgerServer] Poster error: {res.get('error')}\n")
-                    res = dict(res)
-                    res["error"] = _sanitize_client_error(res.get("error"), "海报生成失败，请稍后重试")
+                    err_code, err_msg = classify_llm_error(res.get("error"))
+                    res = {
+                        "ok": False,
+                        "error_code": err_code,
+                        "error": err_msg,
+                        "need_gemini_key": bool(res.get("need_gemini_key")),
+                    }
                 self._send_json(res)
                 return
 
