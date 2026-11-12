@@ -90,7 +90,7 @@ function applyToneModeUI() {
   const toneBtn = document.getElementById("btn-toggle-tone-mode");
   if (toneBtn) {
     toneBtn.setAttribute("data-tone-mode", state.toneMode);
-    toneBtn.textContent = isRoast ? "🌶️ 毒舌模式" : "🎓 教练模式";
+    toneBtn.textContent = isRoast ? "毒舌模式" : "教练模式";
     toneBtn.classList?.toggle("active", isRoast);
   }
   ["btn-open-share-poster", "btn-open-share-poster-2"].forEach((id) => {
@@ -270,8 +270,8 @@ function downloadCachedPosterArtByKey(cacheKey, heroZh = "hero") {
   showToast(`已直接下载 ${heroZh} 高清无字原画 PNG！`);
 }
 
-const NW_COLORS_RAD = ["#76b87a", "#9ad49e", "#5d9e8f", "#b2d184", "#7fa882"];
-const NW_COLORS_DIRE = ["#e07a68", "#d9a75c", "#c95b4c", "#e4c282", "#b87a96"];
+const NW_COLORS_RAD = ["#92a525", "#aec23b", "#73871d", "#c3d458", "#829d38"];
+const NW_COLORS_DIRE = ["#c23c2a", "#db5a47", "#9e2f20", "#e67c6b", "#b2473d"];
 
 const TRIVIAL_ACTIVE_ITEMS = new Set([
   "tango",
@@ -3165,7 +3165,7 @@ async function loadMatchReport(
       const confirmBtn = document.getElementById("btn-confirm-analyze-match");
       if (confirmBtn) {
         confirmBtn.disabled = false;
-        confirmBtn.textContent = "🔐 验证车队口令并执行本局复盘";
+        confirmBtn.textContent = "验证车队口令并执行本局复盘";
       }
       toggleOnDemandGate(true, matchId);
       return;
@@ -3234,7 +3234,7 @@ async function loadMatchReport(
       const confirmBtn = document.getElementById("btn-confirm-analyze-match");
       if (confirmBtn) {
         confirmBtn.disabled = false;
-        confirmBtn.textContent = "🔐 验证车队口令并执行本局复盘";
+        confirmBtn.textContent = "验证车队口令并执行本局复盘";
       }
     }
     console.error(err);
@@ -3735,10 +3735,14 @@ function renderFullMatchReport(report) {
  * 1. Render Match Overview Header & KPIs
  */
 function renderMatchOverview(report) {
-  const { side, sideZh, own } = getOwnAndOppPlayers(report);
-  const won =
-    (side === "radiant" && Boolean(report.radiant_win)) ||
-    (side === "dire" && !report.radiant_win);
+  const { side, sideZh, own, opp } = getOwnAndOppPlayers(report);
+  const radWon =
+    report.radiant_win !== undefined
+      ? Boolean(report.radiant_win)
+      : String(report.winner || "").includes("天辉");
+  const won = side === "radiant" ? radWon : !radWon;
+  const radPlayers = (side === "radiant" ? own : opp).slice(0, 5);
+  const direPlayers = (side === "dire" ? own : opp).slice(0, 5);
   const grok = report.grok_coaching;
   const isParsed = Boolean(report.is_parsed);
   const hasGrok = Boolean(grok?.title);
@@ -3748,14 +3752,14 @@ function renderMatchOverview(report) {
   if (metaEl) {
     const statusText =
       isParsed && hasGrok
-        ? `✅ AI 完整判定已成功 (OpenDota 录像级11维解析 + ${modelLabel} 深度判词已就绪)`
+        ? `AI 完整判定已就绪（OpenDota 录像级解析 + ${modelLabel} 判词）`
         : isParsed
-        ? `🟢 OpenDota 录像级解析已成功 (可点下方「用 ${modelLabel} 重算判词」生成大模型标题)`
-        : "🟡 当前仅基础统计 (刚结束的比赛 OpenDota 尚未解析 .dem 录像，系统正自动请求解析)";
+        ? `OpenDota 录像级解析已就绪（可点「Grok 判词」生成大模型评语）`
+        : "当前仅基础统计（刚结束的比赛 OpenDota 尚未解析 .dem 录像，系统正自动请求解析）";
     const formattedStartTime = formatMatchStartTime(report);
     metaEl.textContent = `比赛编号 #${report.match_id} · ${formattedStartTime} · ${
       report.mode_str || ""
-    } · 当前审视阵营：${sideZh} (${side.toUpperCase()}) · ${statusText}`;
+    } · 当前审视阵营：${sideZh} · ${statusText}`;
   }
 
   const staleBannerEl = document.getElementById("stale-report-banner");
@@ -3771,10 +3775,10 @@ function renderMatchOverview(report) {
   if (parseBadge) {
     parseBadge.textContent =
       isParsed && hasGrok
-        ? `✅ 录像级 + ${modelLabel} 完整判定已就绪`
+        ? `录像级 + ${modelLabel} 完整判定已就绪`
         : isParsed
-        ? "🟢 录像级解析已就绪 (含眼位/时间轴/按键次数)"
-        : "🟡 未解析录像 (正在自动请求 OpenDota 解析...)";
+        ? "录像级解析已就绪（含眼位/时间轴/按键次数）"
+        : "未解析录像（正在自动请求 OpenDota 解析...）";
     parseBadge.classList.toggle("connected", isParsed);
   }
 
@@ -3805,43 +3809,83 @@ function renderMatchOverview(report) {
   if (kpiStrip) {
     const deadKpiSub =
       totalDeadSec == null
-        ? "泉水读秒 无数据（录像未解析）"
+        ? "泉水读秒 无数据"
         : `泉水读秒 ${Math.floor(totalDeadSec / 60)}分${totalDeadSec % 60}秒 · 买活 ${totalBuybacks} 次`;
+    const renderSbHeroes = (list, factionCls) =>
+      list
+        .map((p) => {
+          const heroZh = p.hero_short_zh || p.hero_name || "英雄";
+          const kda = `${p.kills ?? 0}/${p.deaths ?? 0}/${p.assists ?? 0}`;
+          const pname = p.personaname || heroZh;
+          return `
+            <div class="dota-sb-hero-slot ${factionCls}${p.is_me ? " is-me" : ""}" title="${escapeHtml(
+            `${p.pos ? `${p.pos}号位 · ` : ""}${heroZh} (${pname}) · KDA ${kda}`
+          )}">
+              ${
+                p.hero_img
+                  ? `<img class="dota-sb-hero-img" src="${escapeHtml(p.hero_img)}" alt="${escapeHtml(
+                      heroZh
+                    )}" width="56" height="32" />`
+                  : `<span class="dota-sb-hero-img">${escapeHtml(heroZh.slice(0, 2))}</span>`
+              }
+              <span class="dota-sb-hero-kda">${escapeHtml(kda)}</span>
+              <span class="dota-sb-hero-name">${escapeHtml(heroZh)}</span>
+            </div>
+          `;
+        })
+        .join("");
+
     kpiStrip.innerHTML = `
-      <div class="stat-block">
-        <strong>天辉 ${report.radiant_score} : ${report.dire_score} 夜魇</strong>
-        <span>终局人头比分 (${escapeHtml(report.winner || "")}获胜)</span>
-      </div>
-      <div class="stat-block">
-        <strong>${escapeHtml(report.duration_str || "")}</strong>
-        <span>比赛时长 · ${econ.is_comeback ? "惊天翻盘局" : "正面绞杀局"}</span>
-      </div>
-      <div class="stat-block">
-        <strong>${report.is_parsed === false ? "团战无数据" : `${(report.key_teamfights || []).length} 场关键团战`}</strong>
-        <span>${
-          report.is_parsed === false
-            ? "录像尚未解析"
-            : `${escapeHtml(econ.radiant_max_lead || "")} / ${escapeHtml(econ.dire_max_lead || "")}`
-        }</span>
-      </div>
-      <div class="stat-block">
-        <strong>${report.is_parsed === false ? "视野无数据" : `${totalObs} 假眼 / ${totalSen} 真眼`}</strong>
-        <span>${
-          report.is_parsed === false
-            ? "录像尚未解析"
-            : `本方插眼总数 · 排掉敌方 ${totalDewards} 颗假眼`
-        }</span>
-      </div>
-      <div class="stat-block">
-        <strong>合计阵亡 ${totalDeaths} 次</strong>
-        <span>${deadKpiSub}</span>
-      </div>
-      <div class="stat-block">
-        <strong>外部录像核验</strong>
-        <div class="stat-links">
-          <a href="https://www.opendota.com/matches/${report.match_id}" target="_blank" rel="noopener">OpenDota ↗</a>
-          <a href="https://www.dotabuff.com/matches/${report.match_id}" target="_blank" rel="noopener">Dotabuff ↗</a>
-          <a href="https://stratz.com/matches/${report.match_id}" target="_blank" rel="noopener">Stratz ↗</a>
+      <div class="dota-scoreboard">
+        <div class="dota-sb-main">
+          <div class="dota-sb-side is-radiant${radWon ? " is-winner" : ""}">
+            <div class="dota-sb-side-head">
+              <span class="dota-sb-faction rad">◆ 天辉阵营</span>
+              ${radWon ? `<span class="dota-sb-win-badge">获胜方</span>` : `<span class="dota-sb-side-note">${side === "radiant" ? "主审视" : "对手"}</span>`}
+            </div>
+            <div class="dota-sb-heroes-row">
+              ${renderSbHeroes(radPlayers, "rad")}
+            </div>
+          </div>
+
+          <div class="dota-sb-center">
+            <span class="dota-sb-duration">${escapeHtml(report.duration_str || "--:--")} · ${
+      econ.is_comeback ? "翻盘局" : "正面局"
+    }</span>
+            <div class="dota-sb-score" aria-label="终局比分 天辉 ${report.radiant_score} 比 夜魇 ${report.dire_score}">
+              <span class="dota-sb-score-num">${report.radiant_score ?? 0}</span>
+              <span class="dota-sb-score-sep">:</span>
+              <span class="dota-sb-score-num">${report.dire_score ?? 0}</span>
+            </div>
+            <span class="dota-sb-winner-line">${radWon ? "天辉获胜" : "夜魇获胜"}</span>
+          </div>
+
+          <div class="dota-sb-side is-dire${!radWon ? " is-winner" : ""}">
+            <div class="dota-sb-side-head dire-head">
+              ${!radWon ? `<span class="dota-sb-win-badge">获胜方</span>` : `<span class="dota-sb-side-note">${side === "dire" ? "主审视" : "对手"}</span>`}
+              <span class="dota-sb-faction dire">夜魇阵营 ◆</span>
+            </div>
+            <div class="dota-sb-heroes-row">
+              ${renderSbHeroes(direPlayers, "dire")}
+            </div>
+          </div>
+        </div>
+
+        <div class="dota-sb-ledger-strip">
+          <span><b>关键团战：</b>${
+            report.is_parsed === false ? "无数据（录像未解析）" : `${(report.key_teamfights || []).length} 场`
+          }</span>
+          <span><b>本方视野：</b>${
+            report.is_parsed === false
+              ? "无数据"
+              : `${totalObs} 假眼 / ${totalSen} 真眼（反眼 ${totalDewards}）`
+          }</span>
+          <span><b>本方阵亡：</b>${totalDeaths} 次（${escapeHtml(deadKpiSub)}）</span>
+          <span class="stat-links">
+            <a href="https://www.opendota.com/matches/${report.match_id}" target="_blank" rel="noopener">OpenDota ↗</a>
+            <a href="https://www.dotabuff.com/matches/${report.match_id}" target="_blank" rel="noopener">Dotabuff ↗</a>
+            <a href="https://stratz.com/matches/${report.match_id}" target="_blank" rel="noopener">Stratz ↗</a>
+          </span>
         </div>
       </div>
     `;
@@ -4269,7 +4313,7 @@ function renderKeyNumbersFactCheckSection(report) {
       <div id="ws-top3-fixes-container" class="ws-top3-fixes-container ws-fc-panel" style="margin-bottom:14px;">
         <div class="ws-fc-head">
           <div>
-            <span class="ws-fc-kicker">🎯 NEXT GAME TOP 3 FIXES · 仅取实测数据 (MEASURED) · 团队优先</span>
+            <span class="ws-fc-kicker">实测数据 · 团队优先</span>
             <h3>下一把要改的 3 件事（${escapeHtml(sideZh)}视角）</h3>
           </div>
           <span class="ws-fc-sub">严格过滤推断与模板建议 · 按对胜负影响排序</span>
@@ -4284,12 +4328,12 @@ function renderKeyNumbersFactCheckSection(report) {
               <div class="ws-fc-card-top">
                 <span class="ws-fc-badge is-${item.scope === "team" ? "danger" : "warning"}">#${escapeHtml(
                 item.rank
-              )} · ${item.scope === "team" ? "👥 团队层面" : "🎯 个人层面"}</span>
-                <span class="ws-fc-badge is-verified">⏱️ ${escapeHtml(item.timestamp_str)} · 实测</span>
+              )} · ${item.scope === "team" ? "团队层面" : "个人层面"}</span>
+                <span class="ws-fc-badge is-verified">${escapeHtml(item.timestamp_str)} · 实测</span>
               </div>
               <strong class="ws-fc-title" style="display:block;margin:6px 0 4px;">${escapeHtml(item.title)}</strong>
               <p class="ws-fc-detail" style="margin:0 0 6px;"><b>证据：</b>${escapeHtml(item.fact_evidence)}</p>
-              <p class="ws-fc-detail" style="margin:0;color:#93c5fd;"><b>下一把行动：</b>${escapeHtml(item.action_item)}</p>
+              <p class="ws-fc-detail" style="margin:0;color:var(--gold-light);"><b>下一把行动：</b>${escapeHtml(item.action_item)}</p>
             </article>
           `
             )
@@ -4344,7 +4388,7 @@ function renderKeyNumbersFactCheckSection(report) {
       <div id="ws-team-metrics-strip" class="ws-fc-panel" style="margin-bottom:14px;">
         <div class="ws-fc-head">
           <div>
-            <span class="ws-fc-kicker">📐 TEAM METRICS (F3) · 基于 OpenDota 原始字段精确定义</span>
+            <span class="ws-fc-kicker">基于 OpenDota 原始字段精确定义</span>
             <h3>本局团队核心战术指标（${escapeHtml(sideZh)}）</h3>
           </div>
           <span class="ws-fc-sub">缺失或未解析字段统一显示“无数据”</span>
@@ -4367,7 +4411,7 @@ function renderKeyNumbersFactCheckSection(report) {
       <div id="ws-top3-replay-moments" class="ws-fc-panel" style="margin-bottom:14px;">
         <div class="ws-fc-head">
           <div>
-            <span class="ws-fc-kicker">🎬 TOP 3 REPLAY MOMENTS (F7) · 客户端录像复盘定位点</span>
+            <span class="ws-fc-kicker">客户端录像复盘定位点</span>
             <h3>本局经济波动最大的 3 个复盘时刻</h3>
           </div>
           <span class="ws-fc-sub">供车队进客户端跳转到对应时间点一起看录像</span>
@@ -4384,7 +4428,7 @@ function renderKeyNumbersFactCheckSection(report) {
               )}</span>
                     ${jumpMin != null ? `<button type="button" class="ws-fc-jump-btn" data-fc-jump-min="${escapeHtml(
                       jumpMin
-                    )}">⏱️ 跳至 ${escapeHtml(jumpMin)}:00 沙盘 →</button>` : ""}
+                    )}">跳至 ${escapeHtml(jumpMin)}:00 沙盘 →</button>` : ""}
                   </div>
                   <p class="ws-fc-detail" style="margin-top:6px;">${escapeHtml(rm.neutral_summary)}</p>
                 </article>
@@ -4429,7 +4473,7 @@ function renderKeyNumbersFactCheckSection(report) {
       <div class="ws-fc-panel ws-fc-audit-panel">
         <div class="ws-fc-head">
           <div>
-            <span class="ws-fc-kicker">✅ REPLAY FACT-CHECK</span>
+            <span class="ws-fc-kicker">录像事实核验</span>
             <h3>录像底层事实核查 (${factCards.length} 项硬核取证)</h3>
           </div>
           <span class="ws-fc-sub">${
@@ -4450,7 +4494,7 @@ function renderKeyNumbersFactCheckSection(report) {
                   fc.jumpMinute
                     ? `<button type="button" class="ws-fc-jump-btn" data-fc-jump-min="${escapeHtml(
                         fc.jumpMinute
-                      )}">⏱️ 跳至 ${escapeHtml(fc.jumpMinute)}:00 小地图 →</button>`
+                      )}">跳至 ${escapeHtml(fc.jumpMinute)}:00 小地图 →</button>`
                     : ""
                 }
               </div>
@@ -4813,8 +4857,8 @@ function renderHeroMatchupMatrixHtml(draft, own, sideZh, oppZh, report) {
             )}
           </div>
 
-          <div class="combo-how" style="font-size:12px;line-height:1.52;background:rgba(15,23,42,0.45);padding:7px 9px;border-radius:6px;border:1px solid rgba(148,163,184,0.18);">
-            <div><strong style="color:#93c5fd;">🎯 ${m.pos}号位专属打法：</strong>${injectHeroLogosIntoHtml(
+          <div class="combo-how" style="font-size:12px;line-height:1.52;background:var(--panel-2);padding:7px 9px;border-radius:2px;border:1px solid var(--line);">
+            <div><strong style="color:var(--gold-light);">▸ ${m.pos}号位专属打法：</strong>${injectHeroLogosIntoHtml(
               escapeHtml(m.pos_playstyle || ""),
               report
             )}</div>
@@ -10075,16 +10119,16 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
           : "rgba(109,40,217,0.20),rgba(15,118,110,0.14)"
       });border:1px solid ${
         isRoleBad ? "rgba(248,113,113,0.45)" : "rgba(167,139,250,0.48)"
-      };border-radius:10px;">
+      };border-radius:2px;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
           <span style="font-size:12.5px;font-weight:800;color:${
-            isRoleBad ? "#fca5a5" : "#ddd6fe"
-          };letter-spacing:0.3px;">🧠 ${coachNameEsc} · ${escapeHtml(roleVerdictTag)}</span>
-          <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(15,23,42,0.65);border:1px solid rgba(167,139,250,0.4);color:#e9d5ff;">🎯 Grok 重新打分：<b>${score100}/100分</b> · ${
+            isRoleBad ? "var(--red-light)" : "var(--gold-light)"
+          };letter-spacing:0.3px;">◆ ${coachNameEsc} · ${escapeHtml(roleVerdictTag)}</span>
+          <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:2px;background:var(--panel-2);border:1px solid var(--line-strong);color:var(--gold-light);">Grok 重新打分：<b>${score100}/100分</b> · ${
             roleType === "mvp" || roleType === "runnerup" || roleType === "svp" ? "功勋占比" : "定责占比"
           } <b>${sharePct}%</b></span>
         </div>
-        <div style="font-size:13px;line-height:1.72;color:#f8fafc;text-align:justify;">
+        <div style="font-size:13px;line-height:1.72;color:var(--text);text-align:justify;">
           ${escapeHtml(deepVerdictText)}
         </div>
       </div>
@@ -10099,9 +10143,9 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
     );
   const heroRoleMatchupStripHtml = hDossier
     ? `
-      <details class="evidence-fold" style="margin-bottom:9px;padding:9px 12px;background:rgba(15,23,42,0.58);border:1px solid rgba(235,194,117,0.28);border-radius:8px;font-size:12px;line-height:1.55;">
+      <details class="evidence-fold" style="margin-bottom:9px;padding:9px 12px;background:var(--panel-2);border:1px solid var(--line-strong);border-radius:2px;font-size:12px;line-height:1.55;">
         <summary style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
-          <strong style="color:var(--gold-light);">${renderEvidenceBadge("template")}🧬 【${escapeHtml(
+          <strong style="color:var(--gold-light);">${renderEvidenceBadge("template")}【${escapeHtml(
             hDossier.pos_role_title || `${pos}号位·${heroShort}`
           )}】英雄×位置法则 &amp; 敌我克制关系</strong>
           <span style="font-size:11px;color:var(--muted);">强势期：${escapeHtml(
@@ -10223,53 +10267,53 @@ function renderVerdictAndBlameSection(report) {
   const noClear = isSideNoClearCulprit(report, side);
 
   if (won) {
-    if (jumpChip) jumpChip.textContent = "② 🏆 凯旋庆功与100%贡献榜";
-    if (secHeading) secHeading.textContent = `② 🏆 ${sideZh}凯旋庆功封神榜 · 谁是头号首功、二号功臣与短板复盘`;
-    if (secCaption) secCaption.textContent = "赢球论功行赏 + 细节捉虫！从前期对线、中期节奏到后期决战全周期复盘头号MVP、二当家与本局暴露短板";
-    if (mvpCardLabel) mvpCardLabel.textContent = "👑 头号首功 · 本局擎天真大腿 (MVP)";
+    if (jumpChip) jumpChip.textContent = "② 凯旋庆功与100%贡献榜";
+    if (secHeading) secHeading.textContent = `② ${sideZh}凯旋庆功封神榜 · 头号首功、二号功臣与短板复盘`;
+    if (secCaption) secCaption.textContent = "赢球论功行赏 + 细节捉虫：从前期对线、中期节奏到后期决战全周期复盘头号MVP、二当家与本局暴露短板";
+    if (mvpCardLabel) mvpCardLabel.textContent = "◆ 头号首功 · 本局擎天真大腿 (MVP)";
     if (secondCardEl) { secondCardEl.classList.remove("culprit-theme"); secondCardEl.classList.add("runnerup-theme"); }
-    if (secondCardLabel) secondCardLabel.textContent = "⚔️ 二号功臣 · 破阵二当家 & 定海神针";
+    if (secondCardLabel) secondCardLabel.textContent = "◆ 二号功臣 · 破阵二当家 & 定海神针";
     if (thirdCardEl) { thirdCardEl.classList.remove("culprit-theme"); thirdCardEl.classList.add("struggle-theme"); }
-    if (thirdCardLabel) thirdCardLabel.textContent = "🔍 胜局短板复盘 · 可优化细节";
-    if (ledgerTitle) ledgerTitle.textContent = `🎉 ${sideZh}五黑 100% 胜局贡献庆功榜 · 谁的军功章最大一目了然`;
+    if (thirdCardLabel) thirdCardLabel.textContent = "◆ 胜局短板复盘 · 可优化细节";
+    if (ledgerTitle) ledgerTitle.textContent = `${sideZh}五黑 100% 胜局贡献庆功榜`;
     if (ledgerCaption) ledgerCaption.textContent = "按本局五人综合战功归一化为 100% 胜局贡献度 + 0~100 分制打分，点击右侧按钮可直接复制夸人/庆功贺电发群里";
-    if (shareBtn1) shareBtn1.textContent = "🏆 导出群聊庆功榜";
-    if (shareBtn2) shareBtn2.textContent = "🏆 导出群聊庆功榜";
+    if (shareBtn1) shareBtn1.textContent = "导出群聊庆功榜";
+    if (shareBtn2) shareBtn2.textContent = "导出群聊庆功榜";
   } else {
-    if (jumpChip) jumpChip.textContent = isRoast ? "② ⚖️ 红黑榜与100%分锅" : "② ⚖️ 本局主要问题";
+    if (jumpChip) jumpChip.textContent = isRoast ? "② 红黑榜与100%分锅" : "② 本局主要问题";
     if (secHeading) {
       secHeading.textContent = isRoast
-        ? `② ⚖️ ${sideZh}败局分锅定责总表 · 这把谁在尽力，谁在犯罪`
-        : `② ⚖️ ${sideZh}本局主要问题 · 关键失误与责任占比`;
+        ? `② ${sideZh}败局分锅定责总表 · 这把谁在尽力，谁在犯罪`
+        : `② ${sideZh}本局主要问题 · 关键失误与责任占比`;
     }
     if (secCaption) {
       secCaption.textContent = isRoast
-        ? "输球不留情面，硬核数据定责！从前期、中期到后期全周期审讯败方孤胆院长、头号战犯与二号背锅位"
+        ? "输球不留情面，硬核数据定责：从前期、中期到后期全周期审讯败方孤胆院长、头号战犯与二号背锅位"
         : "客观数据复盘：从前期对线、中期节奏到后期决战，逐项定位本局主要问题与改进方向";
     }
-    if (mvpCardLabel) mvpCardLabel.textContent = "👑 败方孤胆院长 · 全场尽力大腿 (SVP)";
+    if (mvpCardLabel) mvpCardLabel.textContent = "◆ 败方孤胆院长 · 全场尽力大腿 (SVP)";
     if (secondCardEl) { secondCardEl.classList.remove("runnerup-theme"); secondCardEl.classList.add("culprit-theme"); }
     if (secondCardLabel) {
       secondCardLabel.textContent = noClear
-        ? "⚖️ 责任评估 · 无明显责任人"
+        ? "◆ 责任评估 · 无明显责任人"
         : isRoast
-        ? "🚨 本方头号大锅 · 一级战犯逮捕令"
-        : "⚠️ 本局主要问题焦点";
+        ? "◆ 本方头号大锅 · 一级战犯逮捕令"
+        : "◆ 本局主要问题焦点";
     }
     if (thirdCardEl) { thirdCardEl.classList.remove("struggle-theme"); thirdCardEl.classList.add("culprit-theme"); }
-    if (thirdCardLabel) thirdCardLabel.textContent = isRoast ? "⚠️ 二号背锅位 · 次锅共犯审讯室" : "🔍 次要问题与可优化细节";
+    if (thirdCardLabel) thirdCardLabel.textContent = isRoast ? "◆ 二号背锅位 · 次锅共犯审讯室" : "◆ 次要问题与可优化细节";
     if (ledgerTitle) {
       ledgerTitle.textContent = isRoast
-        ? `⚖️ ${sideZh}五人 100% 败局分锅账本 · 谁该在群里发致歉红包`
-        : `⚖️ ${sideZh}五人 100% 败局责任占比`;
+        ? `${sideZh}五人 100% 败局分锅账本 · 谁该在群里发致歉红包`
+        : `${sideZh}五人 100% 败局责任占比`;
     }
     if (ledgerCaption) {
       ledgerCaption.textContent = isRoast
         ? "点击任意行右侧按钮可直接复制该队友专属分锅算账金句发群里"
         : "点击任意行右侧按钮可直接复制该队友复盘摘要";
     }
-    if (shareBtn1) shareBtn1.textContent = isRoast ? "📜 导出群聊处刑书" : "📋 导出复盘摘要";
-    if (shareBtn2) shareBtn2.textContent = isRoast ? "📜 导出群聊处刑书" : "📋 导出复盘摘要";
+    if (shareBtn1) shareBtn1.textContent = isRoast ? "导出群聊处刑书" : "导出复盘摘要";
+    if (shareBtn2) shareBtn2.textContent = isRoast ? "导出群聊处刑书" : "导出复盘摘要";
   }
 
   const hasGrokEval =
@@ -11211,7 +11255,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
 
   const timeStrNow = formatSecToMmSs(secNow);
   if (badgeEl) {
-    badgeEl.textContent = `⏱️ ${timeStrNow}`;
+    badgeEl.textContent = timeStrNow;
   }
   if (curLabelEl) {
     curLabelEl.textContent = timeStrNow;
@@ -11517,7 +11561,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
       const cx = rawCx.toFixed(1);
       const cy = rawCy.toFixed(1);
       const isRad = pSnap.side === "radiant";
-      const strokeColor = isRad ? "#22c55e" : "#ef4444";
+      const strokeColor = isRad ? "#92a525" : "#c23c2a";
       const pt = tfParticipantsMap.get(hName);
       const hasBkbInBag = (pSnap.recent_purchases || pSnap.items || []).some((it) => /黑皇杖|black_king_bar/i.test(it.zh || it.key || ""));
       const ptItemsArr = pt?.items_used_zh || pt?.items || pt?.item_uses || pt?.items_used || [];
@@ -11681,8 +11725,8 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
               const diedByNow =
                 killSecForHero >= 0 ? secNow >= killSecForHero : Number(pt.deaths || 0) > 0;
               return `
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border-left:3px solid ${
-                  isRadPt ? "#4ade80" : "#f87171"
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:2px;background:rgba(255,255,255,0.03);border-left:3px solid ${
+                  isRadPt ? "#92a525" : "#c23c2a"
                 };font-size:11.5px;flex-wrap:wrap;">
                   <div style="display:flex;align-items:center;gap:6px;min-width:145px;">
                     ${
@@ -11828,14 +11872,14 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
   const goldKpiColor =
     radGoldAdv === 0
       ? "var(--text)"
-      : (radGoldAdv > 0 && side === "radiant") || (radGoldAdv < 0 && side === "dire")
-      ? "var(--green-light)"
-      : "var(--red-light)";
+      : radGoldAdv > 0
+      ? "var(--radiant)"
+      : "var(--dire)";
   const goldKpiVal = `${goldLeadTeam} ${radGoldAdv === 0 ? "0" : `+${fmtNum(Math.abs(radGoldAdv))}`}`;
   const xpKpiVal = `${xpLeadTeam} ${radXpAdv === 0 ? "0" : `+${fmtNum(Math.abs(radXpAdv))}`}`;
   const obsKpiVal = `天辉 ${radObsNow} / 夜魇 ${direObsNow}`;
-  const eventsTitleTxt = `⚔️ 本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 关键交火与推塔战报`;
-  const compareTitleTxt = `⚖️ ${timeStrNow} 时刻 · 双方团队与 1~5 号位对位净值横评`;
+  const eventsTitleTxt = `◆ 本分钟 (${Math.max(0, idx - 1)}:00–${idx}:00) 关键交火与推塔战报`;
+  const compareTitleTxt = `◆ ${timeStrNow} 时刻 · 双方团队与 1~5 号位对位净值横评`;
   const compareSubTxt = `天辉 ${fmtNum(radTotalNw)} 金 (${radNwSharePct}%) vs 夜魇 ${fmtNum(direTotalNw)} 金 (${100 - radNwSharePct}%)`;
   const coresNwTxt = `天辉 ${fmtNum(radCoresNw)} vs 夜魇 ${fmtNum(direCoresNw)}`;
   const supsNwTxt = `天辉 ${fmtNum(radSupsNw)} vs 夜魇 ${fmtNum(direSupsNw)}`;
@@ -11847,38 +11891,38 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
     contentEl.innerHTML = `
       <div style="grid-column: 1 / -1;">
         <div class="scrub-minimap-combat-grid">
-          <div class="scrub-mini-map-card" style="background:rgba(16,18,15,0.95);border:1px solid rgba(198,164,104,0.32);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;">
+          <div class="scrub-mini-map-card" style="background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:2px;padding:12px;display:flex;flex-direction:column;align-items:center;">
             <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
               <div style="display:flex;align-items:center;gap:8px;">
-                <strong id="scrub-map-title" style="font-size:13.5px;color:var(--gold-light);font-variant-numeric:tabular-nums;">🗺️ ${escapeHtml(
+                <strong id="scrub-map-title" style="font-size:13.5px;color:var(--gold-light);font-variant-numeric:tabular-nums;">◆ ${escapeHtml(
                   timeStrNow
                 )} 小地图（示意位置，非真实走位）</strong>
                 <button type="button" id="btn-scrub-map-play" class="button primary" style="padding:2px 10px;font-size:11.5px;font-weight:700;">${
-                  state.scrubberPlaying ? "⏸ 暂停" : "▶ 播放团战"
+                  state.scrubberPlaying ? "暂停" : "▶ 播放团战"
                 }</button>
               </div>
               <span style="font-size:11px;color:var(--muted);">实心=真实点 ｜ 半透明=示意位置，非真实走位</span>
             </div>
-            <svg viewBox="0 0 420 420" style="width:100%;max-width:468px;aspect-ratio:1/1;border-radius:10px;background:radial-gradient(circle at 50% 50%, #1e2820 0%, #101511 100%);border:1px solid #333b30;box-shadow:0 6px 20px rgba(0,0,0,0.45);">
-              <path d="M 22 26 Q 198 204 396 394" fill="none" stroke="rgba(56, 189, 248, 0.22)" stroke-width="28" stroke-linecap="round" />
-              <polyline points="34,386 34,42 386,42" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="10" stroke-linejoin="round" />
-              <polyline points="34,386 386,386 386,42" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-width="10" stroke-linejoin="round" />
-              <line x1="34" y1="386" x2="386" y2="42" stroke="rgba(148, 163, 184, 0.18)" stroke-width="10" />
-              <rect x="18" y="356" width="46" height="46" rx="8" fill="rgba(34, 197, 94, 0.16)" stroke="#22c55e" stroke-width="1.5" />
-              <text x="41" y="383" fill="#86efac" font-size="11" font-weight="700" text-anchor="middle">天辉</text>
-              <rect x="356" y="18" width="46" height="46" rx="8" fill="rgba(239, 68, 68, 0.16)" stroke="#ef4444" stroke-width="1.5" />
-              <text x="379" y="45" fill="#fca5a5" font-size="11" font-weight="700" text-anchor="middle">夜魇</text>
-              <circle cx="155" cy="155" r="14" fill="rgba(245, 158, 11, 0.14)" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="3,2" />
-              <text x="155" y="159" fill="#fcd34d" font-size="9.5" font-weight="700" text-anchor="middle">肉山</text>
+            <svg viewBox="0 0 420 420" style="width:100%;max-width:468px;aspect-ratio:1/1;border-radius:2px;background:radial-gradient(circle at 50% 50%, #1d241c 0%, #111411 100%);border:1px solid var(--line);">
+              <path d="M 22 26 Q 198 204 396 394" fill="none" stroke="rgba(112, 152, 184, 0.22)" stroke-width="28" stroke-linecap="round" />
+              <polyline points="34,386 34,42 386,42" fill="none" stroke="rgba(178, 175, 165, 0.16)" stroke-width="10" stroke-linejoin="round" />
+              <polyline points="34,386 386,386 386,42" fill="none" stroke="rgba(178, 175, 165, 0.16)" stroke-width="10" stroke-linejoin="round" />
+              <line x1="34" y1="386" x2="386" y2="42" stroke="rgba(178, 175, 165, 0.18)" stroke-width="10" />
+              <rect x="18" y="356" width="46" height="46" rx="2" fill="rgba(146, 165, 37, 0.18)" stroke="#92a525" stroke-width="1.5" />
+              <text x="41" y="383" fill="#c3d458" font-size="11" font-weight="700" text-anchor="middle">天辉</text>
+              <rect x="356" y="18" width="46" height="46" rx="2" fill="rgba(194, 60, 42, 0.18)" stroke="#c23c2a" stroke-width="1.5" />
+              <text x="379" y="45" fill="#e68a7a" font-size="11" font-weight="700" text-anchor="middle">夜魇</text>
+              <circle cx="155" cy="155" r="14" fill="rgba(198, 164, 104, 0.14)" stroke="#c6a468" stroke-width="1.2" stroke-dasharray="3,2" />
+              <text x="155" y="159" fill="#e4c992" font-size="9.5" font-weight="700" text-anchor="middle">肉山</text>
               <g id="scrub-map-svg-dynamic">${mapDynamicSvg}</g>
             </svg>
           </div>
-          <div class="scrub-combat-log-card" style="background:rgba(16,18,15,0.92);border:1px solid rgba(198,164,104,0.28);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
+          <div class="scrub-combat-log-card" style="background:var(--panel);border:1px solid var(--line);border-radius:2px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;">
             <div>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
-                <strong id="scrub-combat-title" style="font-size:13px;color:var(--gold-light);">📜 ${escapeHtml(
+                <strong id="scrub-combat-title" style="font-size:13px;color:var(--gold-light);">◆ ${escapeHtml(
                   timeStrNow
-                )} 实时战斗记录 &amp; 🛡️ BKB/保命装按键验尸</strong>
+                )} 实时战斗记录 &amp; BKB/保命装按键验尸</strong>
                 <span id="scrub-combat-status" style="font-size:11px;color:${combatStatusColor};font-weight:600;">${escapeHtml(
                   combatStatusText
                 )}</span>
@@ -11892,7 +11936,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
       </div>
       <div class="scrub-left-col">
         <div class="scrub-col-title">
-          <strong id="scrub-left-title">🏆 ${escapeHtml(timeStrNow)} 时刻 · 十人实时净资产与最近购买排位</strong>
+          <strong id="scrub-left-title">◆ ${escapeHtml(timeStrNow)} 时刻 · 十人实时净资产与最近购买排位</strong>
           <span>正补/反补与最近购买（近 6 次购买记录）</span>
         </div>
         <div id="scrub-players-list" class="scrub-players-list">${barsHtml}</div>
@@ -11900,15 +11944,15 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
       <div class="scrub-right-col">
         <div class="scrub-kpi-grid">
           <div class="scrub-kpi-card">
-            <span id="scrub-kpi-gold-label">💰 ${escapeHtml(timeStrNow)} 经济差</span>
+            <span id="scrub-kpi-gold-label">${escapeHtml(timeStrNow)} 经济差</span>
             <strong id="scrub-kpi-gold-val" style="color:${goldKpiColor}">${escapeHtml(goldKpiVal)}</strong>
           </div>
           <div class="scrub-kpi-card">
-            <span id="scrub-kpi-xp-label">📚 ${escapeHtml(timeStrNow)} 经验差</span>
+            <span id="scrub-kpi-xp-label">${escapeHtml(timeStrNow)} 经验差</span>
             <strong id="scrub-kpi-xp-val">${escapeHtml(xpKpiVal)}</strong>
           </div>
           <div class="scrub-kpi-card">
-            <span>👁️ 场上存活假眼</span>
+            <span>场上存活假眼</span>
             <strong id="scrub-kpi-obs-val">${escapeHtml(obsKpiVal)}</strong>
           </div>
         </div>
@@ -11985,9 +12029,9 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
     }
   };
 
-  setTxt("scrub-map-title", `🗺️ ${timeStrNow} 小地图（示意位置，非真实走位）`);
+  setTxt("scrub-map-title", `◆ ${timeStrNow} 小地图（示意位置，非真实走位）`);
   setHtml("scrub-map-svg-dynamic", mapDynamicSvg);
-  setTxt("scrub-combat-title", `📜 ${timeStrNow} 实时战斗记录 & 🛡️ BKB/保命装按键验尸`);
+  setTxt("scrub-combat-title", `◆ ${timeStrNow} 实时战斗记录 & BKB/保命装按键验尸`);
   const statusEl = document.getElementById("scrub-combat-status");
   if (statusEl) {
     if (statusEl._lastTxt !== combatStatusText) {
@@ -12000,10 +12044,10 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
   setHtml("scrub-combat-body", combatRowsHtml);
   setHtml("scrub-combat-footer", combatFooterHtml);
 
-  setTxt("scrub-left-title", `🏆 ${timeStrNow} 时刻 · 十人实时净资产与最近购买排位`);
+  setTxt("scrub-left-title", `◆ ${timeStrNow} 时刻 · 十人实时净资产与最近购买排位`);
   setHtml("scrub-players-list", barsHtml);
 
-  setTxt("scrub-kpi-gold-label", `💰 ${timeStrNow} 经济差`);
+  setTxt("scrub-kpi-gold-label", `${timeStrNow} 经济差`);
   const goldValEl = document.getElementById("scrub-kpi-gold-val");
   if (goldValEl) {
     if (goldValEl._lastTxt !== goldKpiVal) {
@@ -12012,7 +12056,7 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
     }
     goldValEl.style.color = goldKpiColor;
   }
-  setTxt("scrub-kpi-xp-label", `📚 ${timeStrNow} 经验差`);
+  setTxt("scrub-kpi-xp-label", `${timeStrNow} 经验差`);
   setTxt("scrub-kpi-xp-val", xpKpiVal);
   setTxt("scrub-kpi-obs-val", obsKpiVal);
 
@@ -12115,16 +12159,16 @@ function renderAdvChart(report) {
       <line x1="${padL}" y1="${midY}" x2="${W - padR}" y2="${midY}" stroke="#595443" stroke-width="1" />
       <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#2a2c25" stroke-width="1" />
 
-      <text x="${padL - 6}" y="${padT + 8}" fill="#8aa78b" font-size="10" text-anchor="end">天辉 +${Math.round(
+      <text x="${padL - 6}" y="${padT + 8}" fill="#92a525" font-size="10" text-anchor="end">天辉 +${Math.round(
         maxAbs / 1000
       )}k</text>
       <text x="${padL - 6}" y="${midY + 3}" fill="#7b7c72" font-size="10" text-anchor="end">0</text>
-      <text x="${padL - 6}" y="${H - padB - 2}" fill="#df8978" font-size="10" text-anchor="end">夜魇 +${Math.round(
+      <text x="${padL - 6}" y="${H - padB - 2}" fill="#c23c2a" font-size="10" text-anchor="end">夜魇 +${Math.round(
         maxAbs / 1000
       )}k</text>
 
-      <path d="${areaPath}" fill="rgba(138, 167, 139, 0.25)" clip-path="url(#clip-rad-above)" />
-      <path d="${areaPath}" fill="rgba(185, 74, 61, 0.28)" clip-path="url(#clip-dire-below)" />
+      <path d="${areaPath}" fill="rgba(146, 165, 37, 0.25)" clip-path="url(#clip-rad-above)" />
+      <path d="${areaPath}" fill="rgba(194, 60, 42, 0.28)" clip-path="url(#clip-dire-below)" />
 
       ${markerLines}
 
@@ -12300,7 +12344,7 @@ function renderMinimap(report) {
     overlaySvg = validHeat
       .map((pt) => {
         const isOwn = pt.side === side || pt.side === sideZh;
-        const fill = pt.side === "radiant" || pt.side === "天辉" ? "#8aa78b" : "#df8978";
+        const fill = pt.side === "radiant" || pt.side === "天辉" ? "#92a525" : "#c23c2a";
         const w = Number(pt.weight || 1);
         const r = 1.5 + (w / maxWeight) * 2.4;
         const x = Number(pt.nx ?? pt.x).toFixed(1);
@@ -12332,12 +12376,12 @@ function renderMinimap(report) {
     activeTfs.forEach((tf, tfIdx) => {
       (tf.deaths_coords || []).forEach((d) => {
         if (d.nx == null || d.ny == null) return;
-        const isOwn = d.side === side;
-        const fill = isOwn ? "#d95548" : "#6fbf73";
+        const isRadDeath = d.side === "radiant" || d.side === "天辉";
+        const fill = isRadDeath ? "#92a525" : "#c23c2a";
         const cx = Math.min(95, Math.max(5, Number(d.nx))).toFixed(1);
         const cy = Math.min(95, Math.max(5, Number(d.ny))).toFixed(1);
         const tip = `[团战 #${tf.index || tfIdx + 1} · ${tf.time_range}] ${
-          isOwn ? "本方阵亡" : "敌方阵亡"
+          isRadDeath ? "天辉阵亡" : "夜魇阵亡"
         }: ${d.hero_short_zh} (${d.personaname}) ×${d.deaths}`;
         markers.push(`
           <g>
@@ -12394,7 +12438,7 @@ function renderMinimap(report) {
       .map((w) => {
         const isObs = w.type === "obs";
         const isRad = w.side === "radiant" || w.side === "天辉";
-        const strokeColor = isRad ? "#8aa78b" : "#df8978";
+        const strokeColor = isRad ? "#92a525" : "#c23c2a";
         const fillColor = isObs ? "#e8c55a" : "#6ca6d9";
         const x = w.cx.toFixed(1);
         const y = w.cy.toFixed(1);
@@ -12443,10 +12487,10 @@ function renderMinimap(report) {
       <circle cx="37" cy="40" r="3.2" fill="#2c221e" stroke="#a66c49" stroke-width="0.6" />
       <text x="37" y="41.2" fill="#c6a468" font-size="3.2" text-anchor="middle" font-weight="700">R</text>
 
-      <rect x="6" y="86" width="8" height="8" fill="#3a5e3d" stroke="#8aa78b" stroke-width="0.7" />
+      <rect x="6" y="86" width="8" height="8" fill="#32411a" stroke="#92a525" stroke-width="0.7" />
       <text x="10" y="91.2" fill="#e6e3dc" font-size="3.2" text-anchor="middle">天辉</text>
 
-      <rect x="86" y="6" width="8" height="8" fill="#6b342b" stroke="#df8978" stroke-width="0.7" />
+      <rect x="86" y="6" width="8" height="8" fill="#5b2219" stroke="#c23c2a" stroke-width="0.7" />
       <text x="90" y="11.2" fill="#e6e3dc" font-size="3.2" text-anchor="middle">夜魇</text>
 
       ${overlaySvg}
@@ -12461,12 +12505,12 @@ function renderMinimap(report) {
               ? `当前高亮：团战 #${state.selectedTeamfightIndex + 1} (${escapeHtml(
                   tfForensics[state.selectedTeamfightIndex].time_range
                 )}) 阵亡墓碑`
-              : `当前显示全场 ${tfForensics.length} 波关键团战阵亡坐标（红✕本方阵亡 / 绿✕敌方阵亡）`
+              : `当前显示全场 ${tfForensics.length} 波关键团战阵亡坐标（绿✕天辉阵亡 / 红✕夜魇阵亡）`
           }
         </div>`
       : state.scrubSyncMapMinute !== null
       ? `<div style="font-size: 11px; color: var(--gold-light); background: #232017; border: 1px solid #594f36; padding: 4px 8px;">
-          ⏱️ 已与上方时间轴联动：当前仅显示第 <b>${String(state.scrubSyncMapMinute).padStart(2, "0")}:00</b> 时刻场上仍在生效的真假眼
+          已与上方时间轴联动：当前仅显示第 <b>${String(state.scrubSyncMapMinute).padStart(2, "0")}:00</b> 时刻场上仍在生效的真假眼
         </div>`
       : "";
 
@@ -15456,7 +15500,7 @@ function renderSquadLedgerSection(squadLedger) {
   const highRiskWardsHtml = `
     <div id="squad-high-risk-wards" class="squad-card" style="margin-bottom: 14px;">
       <div class="squad-card-head">
-        <h3>👁️ 跨局高危短命眼位预警 (F3 · 存活中位数 &lt; 120秒)</h3>
+        <h3>跨局高危短命眼位预警（存活中位数 &lt; 120秒）</h3>
         <span>聚合 obs_log 与 obs_left_log，识别插下后极易被秒排的固定坐标</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
@@ -15466,7 +15510,7 @@ function renderSquadLedgerSection(squadLedger) {
                 .slice(0, 8)
                 .map(
                   (ws) => `
-                <span class="squad-pill" style="border-color:rgba(239,68,68,0.45);color:#fca5a5;">
+                <span class="squad-pill" style="border-color:rgba(194,60,42,0.45);color:var(--red-light);">
                   坐标 (${ws.x}, ${ws.y}) · 样本 ${ws.sample_count} 颗 · 存活中位数 ${ws.median_lifespan_sec}s
                 </span>
               `
@@ -15481,8 +15525,8 @@ function renderSquadLedgerSection(squadLedger) {
   const tiltData = squadLedger?.duration_and_session_tilt || {};
   const durBuckets = Array.isArray(tiltData.duration_buckets) ? tiltData.duration_buckets : [];
   const sessBuckets = Array.isArray(tiltData.session_game_buckets) ? tiltData.session_game_buckets : [];
-  const fmtTiltBucket = (b) => `<div style="padding:7px 9px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;"><strong>${escapeHtml(b.label_zh)}</strong><div style="color:var(--muted);margin-top:2px;">${b.games}局 (${b.wins}胜${b.losses}负) · <b>${b.win_rate != null ? `${b.win_rate}%` : "样本不足（无数据）"}</b></div></div>`;
-  const durationAndTiltHtml = `<div id="squad-duration-session-tilt" class="squad-card" style="margin-bottom:14px;"><div class="squad-card-head"><h3>⏳ 时长画像与当晚连打疲劳曲线</h3><span>两局间隔 &lt; 90 分钟记为同一晚连打 · 样本不足 10 局仅展示场次不给胜率定性</span></div><div class="squad-grid-2col" style="margin-top:8px;"><div><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">比赛时长分桶胜率：</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">${durBuckets.map(fmtTiltBucket).join("")}</div></div><div><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">当晚第几局连打胜率（间隔&lt;90m）：</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">${sessBuckets.map(fmtTiltBucket).join("")}</div></div></div></div>`;
+  const fmtTiltBucket = (b) => `<div style="padding:7px 9px;border-radius:2px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-size:12px;"><strong>${escapeHtml(b.label_zh)}</strong><div style="color:var(--muted);margin-top:2px;">${b.games}局 (${b.wins}胜${b.losses}负) · <b>${b.win_rate != null ? `${b.win_rate}%` : "样本不足（无数据）"}</b></div></div>`;
+  const durationAndTiltHtml = `<div id="squad-duration-session-tilt" class="squad-card" style="margin-bottom:14px;"><div class="squad-card-head"><h3>时长画像与当晚连打疲劳曲线</h3><span>两局间隔 &lt; 90 分钟记为同一晚连打 · 样本不足 10 局仅展示场次不给胜率定性</span></div><div class="squad-grid-2col" style="margin-top:8px;"><div><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">比赛时长分桶胜率：</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">${durBuckets.map(fmtTiltBucket).join("")}</div></div><div><div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">当晚第几局连打胜率（间隔&lt;90m）：</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">${sessBuckets.map(fmtTiltBucket).join("")}</div></div></div></div>`;
 
   const f1Stats = squadLedger?.full_history_stats || {};
   const f1RowsCnt = Number(f1Stats.synced_rows_count || 0);
@@ -17741,7 +17785,7 @@ async function requestAndRenderPregamePlan({ useLlm = false } = {}) {
   } finally {
     if (useLlm && grokBtn && reqSeq === state.pregamePlanSeq) {
       grokBtn.disabled = false;
-      grokBtn.textContent = `🧠 呼叫 ${getCoachModelDisplayName()} 深度推演本局战术`;
+      grokBtn.textContent = `呼叫 ${getCoachModelDisplayName()} 深度推演本局战术`;
     }
   }
 }
@@ -17771,14 +17815,14 @@ function renderPregamePlanOutput(plan) {
         )}</p>
         ${
           Array.isArray(grokBrief.combo_calls) && grokBrief.combo_calls.length > 0
-            ? `<div class="grok-verdict-box">🎙️ <b>语音连招口令：</b>${escapeHtml(
+            ? `<div class="grok-verdict-box"><b>语音连招口令：</b>${escapeHtml(
                 grokBrief.combo_calls.join(" ｜ ")
               )}</div>`
             : ""
         }
         ${
           grokBrief.target_priority
-            ? `<div class="grok-practice-strip">🎯 <b>团战第一集火目标：</b>${escapeHtml(
+            ? `<div class="grok-practice-strip"><b>团战第一集火目标：</b>${escapeHtml(
                 grokBrief.target_priority
               )}</div>`
             : ""
@@ -17812,9 +17856,9 @@ function renderPregamePlanOutput(plan) {
             <div class="combo-heroes-avatars">${avatars}</div>
             <span class="combo-phase-tag">核心配合连招</span>
           </div>
-          <h4 class="combo-title">🔥 ${escapeHtml(c.name || "双人/多人技能联动")}</h4>
+          <h4 class="combo-title">◆ ${escapeHtml(c.name || "双人/多人技能联动")}</h4>
           <p class="combo-how">${escapeHtml(c.mechanic || "")}</p>
-          <div class="combo-audit">🎙️ ${escapeHtml(c.voice_call || "")}</div>
+          <div class="combo-audit">语音口令：${escapeHtml(c.voice_call || "")}</div>
         </article>
       `;
     })
@@ -17829,36 +17873,36 @@ function renderPregamePlanOutput(plan) {
     : "";
   const mostLostList = (realBp?.most_lost_against_top || []).slice(0, 5);
   const mostLostHtml = mostLostList.length > 0
-    ? `<div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:10px 12px;">
+    ? `<div style="background:var(--panel-2);border:1px solid var(--line);border-radius:2px;padding:10px 12px;">
         <div style="font-size:12px;font-weight:700;color:var(--gold-light);margin-bottom:6px;">车队最常输给谁 <span class="bp-src-tag">[车队交手记录]</span></div>
-        ${mostLostList.map((m) => `<div style="display:flex;justify-content:space-between;gap:6px;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);"><span><b>${escapeHtml(m.hero_short_zh)}</b></span><span>交手 ${m.against_games}局 负${m.against_losses}局 (对阵胜率 ${m.against_win_rate}%) <span class="bp-src-tag">[${escapeHtml(m.source_zh || "车队交手记录")}]</span></span></div>`).join("")}
+        ${mostLostList.map((m) => `<div style="display:flex;justify-content:space-between;gap:6px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--line-soft);"><span><b>${escapeHtml(m.hero_short_zh)}</b></span><span>交手 ${m.against_games}局 负${m.against_losses}局 (对阵胜率 ${m.against_win_rate}%) <span class="bp-src-tag">[${escapeHtml(m.source_zh || "车队交手记录")}]</span></span></div>`).join("")}
       </div>`
     : "";
   const realBpHtml = realBp
     ? `<section style="margin-bottom:12px;">
         <div class="combos-header-bar">
-          <h3>📊 零、真实数据 BP 底盘（车队历史胜率 / OpenDota 分段位胜率 / 历史交手克制）</h3>
+          <h3>零、真实数据 BP 底盘（车队历史胜率 / OpenDota 分段位胜率 / 历史交手克制）</h3>
           <span style="font-size:12px;color:var(--muted);">最小样本量：≥10局才展示胜率结论</span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;">
-          <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:10px 12px;">
-            <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:6px;">我方所选英雄 · 车队历史 &amp; 高分段胜率</div>
+          <div style="background:var(--panel-2);border:1px solid var(--line);border-top:2px solid var(--radiant);border-radius:2px;padding:10px 12px;">
+            <div style="font-size:12px;font-weight:700;color:var(--gold-light);margin-bottom:6px;">我方所选英雄 · 车队历史 &amp; 高分段胜率</div>
             ${(realBp.own_hero_real_stats || [])
               .map(
-                (h) => `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);">
+                (h) => `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--line-soft);">
                   <span>${h.pos}号位 · <b>${escapeHtml(h.hero_short_zh)}</b></span>
                   <span>车队：${h.squad_games}局 ${h.squad_wins}胜${!h.squad_insufficient_sample && h.squad_win_rate != null ? ` (${h.squad_win_rate}%)` : " (样本<10局)"} <span class="bp-src-tag">[${escapeHtml(h.squad_source_zh || "已复盘对局")}]</span> ｜ 高分段：${h.bracket_win_rate != null ? `${h.bracket_win_rate}%` : "无数据"} <span class="bp-src-tag">[${escapeHtml(h.bracket_source_zh || "OpenDota 超凡/冠绝")}]</span></span>
                 </div>`
               )
               .join("")}
           </div>
-          <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(148,163,184,0.18);border-radius:8px;padding:10px 12px;">
-            <div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:6px;">敌方所选英雄 · 车队交手 &amp; 高分段胜率</div>
+          <div style="background:var(--panel-2);border:1px solid var(--line);border-top:2px solid var(--dire);border-radius:2px;padding:10px 12px;">
+            <div style="font-size:12px;font-weight:700;color:var(--red-light);margin-bottom:6px;">敌方所选英雄 · 车队交手 &amp; 高分段胜率</div>
             ${
               (realBp.enemy_against_stats || []).length > 0
                 ? (realBp.enemy_against_stats || [])
                     .map(
-                      (e) => `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;font-size:12px;padding:3px 0;border-bottom:1px dashed rgba(148,163,184,0.12);">
+                      (e) => `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--line-soft);">
                         <span>敌方${e.pos}号位 · <b>${escapeHtml(e.hero_short_zh)}</b></span>
                         <span>${e.against_games > 0 ? `交手 ${e.against_games}局 ${e.against_win}胜${!e.insufficient_sample && e.against_win_rate != null ? ` (对阵胜率 ${e.against_win_rate}%)` : " (样本<10局)"}` : "无交手记录"} <span class="bp-src-tag">[${escapeHtml(e.against_source_zh || "车队交手记录")}]</span> ｜ 高分段：${e.bracket_win_rate != null ? `${e.bracket_win_rate}%` : "无数据"} <span class="bp-src-tag">[${escapeHtml(e.bracket_source_zh || "OpenDota 超凡/冠绝")}]</span></span>
                       </div>`
@@ -17879,25 +17923,25 @@ function renderPregamePlanOutput(plan) {
     <!-- 1. 核心赢法 vs 翻车红线 + 团战集火优先级 -->
     <div class="pregame-winloss-grid">
       <article class="pregame-wl-card win">
-        <h3>🏆 本局核心赢法 · 评级 ${escapeHtml(plan.grade || "无数据")} (${
+        <h3>本局核心赢法 · 评级 ${escapeHtml(plan.grade || "无数据")} (${
           plan.overall_score ?? "无数据"
         }分 · ${escapeHtml(plan.tempo_style || "")}) <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
         ${dimsHtml}
         <p>${escapeHtml(grokBrief?.win_condition || plan.win_condition || "")}</p>
-        <div style="font-size:12px;color:var(--green-light);padding-top:6px;border-top:1px dashed #2e3429;">
-          🎯 <b>团战第一集火律令：</b>${escapeHtml(
+        <div style="font-size:12px;color:var(--gold-light);padding-top:6px;border-top:1px dashed #3d3829;">
+          <b>团战第一集火律令：</b>${escapeHtml(
             grokBrief?.target_priority || plan.target_priority || ""
           )}
         </div>
       </article>
 
       <article class="pregame-wl-card lose">
-        <h3>⚠️ 本局绝对翻车红线 (怎么输 &amp; 敌方克制点)</h3>
+        <h3>本局绝对翻车红线（怎么输 &amp; 敌方克制点）</h3>
         <p>${escapeHtml(grokBrief?.lose_condition || plan.lose_condition || "")}</p>
         ${
           (plan.counter_tips || []).length > 0
             ? `<div style="font-size:11.5px;color:#e3b3a8;padding-top:6px;border-top:1px dashed #3d2b28;">
-                🛡️ <b>针对敌方阵容细节：</b>${escapeHtml(plan.counter_tips[0])}
+                <b>针对敌方阵容细节：</b>${escapeHtml(plan.counter_tips[0])}
               </div>`
             : ""
         }
@@ -17907,7 +17951,7 @@ function renderPregamePlanOutput(plan) {
     <!-- 2. 这套阵容有什么配合可以打 (Combo 链与语音口令) -->
     <section>
       <div class="combos-header-bar">
-        <h3>🔗 一、这套五黑阵容有什么配合可以打（必打技能 Combo 链 &amp; 开黑语音口令）</h3>
+        <h3>一、这套五黑阵容有什么配合可以打（必打技能 Combo 链 &amp; 开黑语音口令）</h3>
         <span style="font-size:11px;color:var(--muted);">开团前先报跳刀/大招 CD，严禁脱节单跳</span>
       </div>
       <div class="combos-grid">
@@ -17918,12 +17962,12 @@ function renderPregamePlanOutput(plan) {
     <!-- 3. 前期 (0-10m) / 中期 (10-25m) / 后期 (25m+) 团队三阶段作战纲领 -->
     <section>
       <div class="combos-header-bar">
-        <h3>⏱️ 二、前、中、后期五黑整体作战纲领（对线怎么分路、中期谁带队开雾、后期怎么上高）</h3>
+        <h3>二、前、中、后期五黑整体作战纲领（对线怎么分路、中期谁带队开雾、后期怎么上高）</h3>
         <span style="font-size:11px;color:var(--muted);">按时间节点严格执行团队节奏</span>
       </div>
       <div class="pregame-stages-grid">
         <article class="pregame-stage-box">
-          <h3>🌅 ${escapeHtml(early.title || "前期对线与抢符 (0–10分钟)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
+          <h3>${escapeHtml(early.title || "前期对线与抢符 (0–10分钟)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
           <ul>
             ${
               grokBrief?.early_game
@@ -17944,7 +17988,7 @@ function renderPregamePlanOutput(plan) {
         </article>
 
         <article class="pregame-stage-box">
-          <h3>🔥 ${escapeHtml(mid.title || "中期抱团与控图 (10–25分钟)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
+          <h3>${escapeHtml(mid.title || "中期抱团与控图 (10–25分钟)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
           <ul>
             ${
               grokBrief?.mid_game
@@ -17958,7 +18002,7 @@ function renderPregamePlanOutput(plan) {
         </article>
 
         <article class="pregame-stage-box">
-          <h3>👑 ${escapeHtml(late.title || "后期盾团与高地终结 (25分钟后)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
+          <h3>${escapeHtml(late.title || "后期盾团与高地终结 (25分钟后)")} <span class="bp-src-tag general">[${scoreSrcLabel}]</span></h3>
           <ul>
             ${
               grokBrief?.late_game
@@ -17976,7 +18020,7 @@ function renderPregamePlanOutput(plan) {
     <!-- 4. 1~5 号位每人专属位置打法、敌我克制、出装与禁忌卡片 -->
     <section>
       <div class="combos-header-bar">
-        <h3>🎯 三、1~5 号位逐英雄位置专精打法、敌我克制解法、联动拍档与本局禁忌</h3>
+        <h3>三、1~5 号位逐英雄位置专精打法、敌我克制解法、联动拍档与本局禁忌</h3>
         <span style="font-size:11px;color:var(--muted);">点击右上角「复制赛前作战简报」可一键发到开黑群</span>
       </div>
       <div class="pregame-roles-grid">
@@ -17999,13 +18043,13 @@ function renderPregamePlanOutput(plan) {
             let squadPoolStripHtml = "";
             if (member) {
               const statusTxt = sigMatch
-                ? `👑 本人绝活招牌 (${sigMatch.games}局 ${sigMatch.win_rate}%胜 · 均分${sigMatch.avg_rating})`
+                ? `本人绝活招牌 (${sigMatch.games}局 ${sigMatch.win_rate}%胜 · 均分${sigMatch.avg_rating})`
                 : cursedMatch
-                ? `🚨 历史低胜率科研陷阱 (${cursedMatch.games}局仅 ${cursedMatch.win_rate}%胜 · 均分${cursedMatch.avg_rating}，建议慎选或严格跟团)`
+                ? `历史低胜率科研陷阱 (${cursedMatch.games}局仅 ${cursedMatch.win_rate}%胜 · 均分${cursedMatch.avg_rating}，建议慎选或严格跟团)`
                 : posStat
-                ? `📊 该玩家 ${rg.pos}号位历史 ${posStat.games}局 ${posStat.win_rate}%胜 (均分${posStat.avg_rating})`
-                : `📊 车队总场次 ${member.games || 0}局 (${member.win_rate || 0}%胜 · 均分${member.avg_rating || 0})`;
-              squadPoolStripHtml = `<div style="font-size:10.5px;color:${cursedMatch ? "#fca5a5" : sigMatch ? "#86efac" : "#fde68a"};background:${cursedMatch ? "rgba(220,38,38,0.16)" : sigMatch ? "rgba(34,197,94,0.14)" : "rgba(198,164,104,0.1)"};padding:4px 7px;border-radius:4px;border-left:2px solid ${cursedMatch ? "#ef4444" : sigMatch ? "#4ade80" : "var(--gold)"};line-height:1.45;"><b>${escapeHtml(statusTxt)}</b> <span class="bp-src-tag">[已复盘对局]</span>${habitFix ? `<br/><span style="color:var(--muted);">💊 个人防毒瘤军规：${escapeHtml(habitFix)}</span>` : ""}</div>`;
+                ? `该玩家 ${rg.pos}号位历史 ${posStat.games}局 ${posStat.win_rate}%胜 (均分${posStat.avg_rating})`
+                : `车队总场次 ${member.games || 0}局 (${member.win_rate || 0}%胜 · 均分${member.avg_rating || 0})`;
+              squadPoolStripHtml = `<div style="font-size:10.5px;color:${cursedMatch ? "var(--red-light)" : "var(--gold-light)"};background:${cursedMatch ? "rgba(185,74,61,0.16)" : "rgba(198,164,104,0.12)"};padding:4px 7px;border-radius:2px;border-left:2px solid ${cursedMatch ? "var(--red)" : "var(--gold)"};line-height:1.45;"><b>${escapeHtml(statusTxt)}</b> <span class="bp-src-tag">[已复盘对局]</span>${habitFix ? `<br/><span style="color:var(--muted);">个人复盘规训：${escapeHtml(habitFix)}</span>` : ""}</div>`;
             }
             return `
               <article class="pregame-role-card">
@@ -18029,35 +18073,35 @@ function renderPregamePlanOutput(plan) {
                 ${squadPoolStripHtml}
                 ${
                   rg.pos_playstyle
-                    ? `<div style="font-size:11px;color:#d6e4f0;line-height:1.55;background:rgba(15,23,42,0.45);padding:5px 7px;border-radius:4px;border-left:2px solid #60a5fa;">
-                        <b style="color:#93c5fd;">🎯 ${rg.pos}号位专属打法：</b>${escapeHtml(rg.pos_playstyle)}
+                    ? `<div style="font-size:11px;color:var(--text);line-height:1.55;background:var(--panel-2);padding:5px 7px;border-radius:2px;border-left:2px solid var(--gold);">
+                        <b style="color:var(--gold-light);">${rg.pos}号位专属打法：</b>${escapeHtml(rg.pos_playstyle)}
                       </div>`
                     : ""
                 }
                 <div style="font-size:11px;color:var(--muted);line-height:1.6;">
-                  <b style="color:var(--gold);display:block;margin-bottom:2px;">🛠️ 关键出装顺序：</b>
+                  <b style="color:var(--gold);display:block;margin-bottom:2px;">关键出装顺序：</b>
                   ${escapeHtml((rg.recommended_items || []).join(" → "))}
                 </div>
                 <div style="font-size:11px;color:var(--muted);line-height:1.6;">
-                  <b style="color:var(--green-light);display:block;margin-bottom:2px;">🤝 最佳队友技能配合：</b>
+                  <b style="color:var(--gold-light);display:block;margin-bottom:2px;">最佳队友技能配合：</b>
                   ${escapeHtml(rg.partner_synergy || "")}
                 </div>
                 ${
                   counters.length > 0
-                    ? `<div style="font-size:11px;color:#bbf7d0;line-height:1.5;background:rgba(20,40,28,0.4);padding:5px 7px;border-radius:4px;">
-                        <b style="color:#86efac;">⚔️ 你克制敌方谁：</b>${escapeHtml(counters[0])}
+                    ? `<div style="font-size:11px;color:var(--gold-light);line-height:1.5;background:rgba(198,164,104,0.08);padding:5px 7px;border-radius:2px;border-left:2px solid var(--gold);">
+                        <b>你克制敌方谁：</b>${escapeHtml(counters[0])}
                       </div>`
                     : ""
                 }
                 ${
                   counteredBy.length > 0
-                    ? `<div style="font-size:11px;color:#fecaca;line-height:1.5;background:rgba(45,20,22,0.4);padding:5px 7px;border-radius:4px;">
-                        <b style="color:#fca5a5;">🛡️ 敌方谁克你 &amp; 解法：</b>${escapeHtml(counteredBy[0])}
+                    ? `<div style="font-size:11px;color:var(--red-light);line-height:1.5;background:rgba(185,74,61,0.12);padding:5px 7px;border-radius:2px;border-left:2px solid var(--red);">
+                        <b>敌方谁克你 &amp; 解法：</b>${escapeHtml(counteredBy[0])}
                       </div>`
                     : ""
                 }
                 <div style="font-size:11px;color:#e5dec9;background:#161814;border-left:2px solid var(--gold);padding:6px 8px;line-height:1.55;margin-top:auto;">
-                  <b>🚫 位置禁忌 / 铁律：</b>${escapeHtml(grokRoleTip || rg.pos_taboo || rg.golden_rule || "")}
+                  <b>位置禁忌 / 铁律：</b>${escapeHtml(grokRoleTip || rg.pos_taboo || rg.golden_rule || "")}
                 </div>
               </article>
             `;
