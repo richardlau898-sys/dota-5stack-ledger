@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex" />
   <meta name="color-scheme" content="dark" />
   <title>刀塔账房 · 五黑战后复盘与赛前作战室</title>
-  <link rel="stylesheet" href="/styles.6227743b.css" />
+  <link rel="stylesheet" href="/styles.c56e3e61.css" />
 </head>
 <body>
   <div id="ws-app-shell" class="ws-app-shell">
@@ -36,15 +36,15 @@
       <!-- 核心工作台切换 -->
       <nav class="ws-sidebar-primary workspace-nav" aria-label="核心功能切换">
         <button type="button" id="nav-mode-postgame" class="ws-nav-btn active" data-ws-mode="postgame" title="单局录像级深度复盘">
-          <span class="ws-nav-icon">📊</span>
+          <span class="ws-nav-icon">◆</span>
           <span class="ws-nav-label">单局复盘 · 笔记阅读</span>
         </button>
         <button type="button" id="nav-mode-home" class="ws-nav-btn" data-ws-mode="home" title="五黑跨局英雄池体检与惯犯总账">
-          <span class="ws-nav-icon">🏆</span>
+          <span class="ws-nav-icon">◈</span>
           <span class="ws-nav-label">五黑车队 · 跨局总账</span>
         </button>
         <button type="button" id="nav-mode-pregame" class="ws-nav-btn" data-ws-mode="pregame" title="赛前五黑 BP 锦囊与连招推演">
-          <span class="ws-nav-icon">⚔️</span>
+          <span class="ws-nav-icon">▸</span>
           <span class="ws-nav-label">赛前锦囊 · BP 作战室</span>
         </button>
       </nav>
@@ -69,8 +69,8 @@
 
         <div class="ws-sidebar-filter-bar" role="tablist" aria-label="侧边栏战局筛选">
           <button type="button" class="ws-sfilter-chip is-active" data-ws-sfilter="all">全部</button>
-          <button type="button" class="ws-sfilter-chip" data-ws-sfilter="analyzed">✅ 已复盘</button>
-          <button type="button" class="ws-sfilter-chip" data-ws-sfilter="party">👥 五黑</button>
+          <button type="button" class="ws-sfilter-chip" data-ws-sfilter="analyzed">已复盘</button>
+          <button type="button" class="ws-sfilter-chip" data-ws-sfilter="party">五黑</button>
           <button type="button" class="ws-sfilter-chip" data-ws-sfilter="win">胜</button>
           <button type="button" class="ws-sfilter-chip" data-ws-sfilter="loss">负</button>
         </div>
@@ -93,7 +93,7 @@
           <div id="ws-sidebar-account-name" class="ws-account-name">主视角玩家</div>
           <div id="llm-status-pill" class="model-status connected ws-account-email">读取模型状态中...</div>
         </div>
-        <button type="button" id="btn-open-settings" class="ws-icon-btn" title="车队花名册与大模型设置">⚙️</button>
+        <button type="button" id="btn-open-settings" class="ws-icon-btn" title="车队花名册与大模型设置">◈</button>
       </div>
     </aside>
 
@@ -127,7 +127,7 @@
         <div class="ws-location-right">
           <span id="current-player-badge" class="ws-local-badge status-pill connected">主视角加载中...</span>
           <button type="button" id="btn-back-to-home" class="ws-cmd-btn back-home-btn" title="打开五黑车队跨局总账与英雄池体检">
-            🏆 跨局总账
+            ◆ 跨局总账
           </button>
         </div>
       </header>
@@ -139,19 +139,19 @@
             ■ 内容核心总结 &amp; 个人卷宗
           </button>
           <button type="button" class="ws-view-tab" data-postgame-tab="timeline" role="tab" aria-selected="false">
-            ⏱️ 实时小地图 &amp; 时间轴沙盘
+            ▸ 实时小地图 &amp; 时间轴沙盘
           </button>
           <button type="button" class="ws-view-tab" data-postgame-tab="phases" role="tab" aria-selected="false">
-            ⚔️ 阵容 BP · 三阶段 · 生死团现场
+            ▸ 阵容 BP · 三阶段 · 生死团现场
           </button>
           <button type="button" class="ws-view-tab" data-postgame-tab="microscope" role="tab" aria-selected="false">
-            🔬 十三维战术显微镜
+            ▸ 十三维战术显微镜
           </button>
           <button type="button" class="ws-view-tab" data-postgame-tab="players" role="tab" aria-selected="false">
-            🗂️ 十人装备按键与六维雷达
+            ▸ 十人装备按键与六维雷达
           </button>
           <button type="button" class="ws-view-tab" data-postgame-tab="all" role="tab" aria-selected="false">
-            📜 全卷同屏
+            ▸ 全卷同屏
           </button>
         </div>
         <div class="ws-view-actions">
@@ -163,7 +163,7 @@
               <option value="radiant">天辉阵营</option>
             </select>
           </label>
-          <button type="button" id="btn-toggle-tone-mode" class="ws-cmd-btn" data-tone-mode="coach" title="切换复盘语气：默认教练模式（只陈述客观事实与建议），手动开启毒舌模式后显示海报与犀利评语">🎓 教练模式</button>
+          <button type="button" id="btn-toggle-tone-mode" class="ws-cmd-btn" data-tone-mode="coach" title="切换复盘语气：默认教练模式（只陈述客观事实与建议），手动开启毒舌模式后显示海报与犀利评语">教练模式</button>
           <button type="button" id="btn-request-parse" class="ws-cmd-btn" hidden>请求录像解析</button>
           <div id="ws-mobile-actions-menu" class="ws-mobile-actions-menu">
             <button
@@ -175,11 +175,11 @@
               title="展开/收起复盘操作菜单"
             >⋯ 操作菜单</button>
             <div id="ws-mobile-actions-drawer" class="ws-mobile-actions-drawer">
-              <button type="button" id="btn-voice-broadcast" class="ws-cmd-btn" title="中文语音播报本局复盘">🔊 播报</button>
-              <button type="button" id="btn-export-pdf" class="ws-cmd-btn" title="全屏结构化报告 &amp; 下载 PDF">📄 PDF报告</button>
-              <button type="button" id="btn-hero-share-link" class="ws-cmd-btn" title="复制本局公开分享链接">🔗 分享</button>
-              <button type="button" id="btn-open-share-poster-2" class="ws-cmd-btn" title="导出群聊庆功/处刑海报" hidden>🖼️ 海报</button>
-              <button type="button" id="btn-trigger-grok" class="ws-cmd-btn primary" title="呼叫 AI 教练生成深度判词">🧠 Grok 判词</button>
+              <button type="button" id="btn-voice-broadcast" class="ws-cmd-btn" title="中文语音播报本局复盘">播报</button>
+              <button type="button" id="btn-export-pdf" class="ws-cmd-btn" title="全屏结构化报告 &amp; 下载 PDF">PDF报告</button>
+              <button type="button" id="btn-hero-share-link" class="ws-cmd-btn" title="复制本局公开分享链接">分享</button>
+              <button type="button" id="btn-open-share-poster-2" class="ws-cmd-btn" title="导出群聊庆功/处刑海报" hidden>海报</button>
+              <button type="button" id="btn-trigger-grok" class="ws-cmd-btn primary" title="呼叫 AI 教练生成深度判词">Grok 判词</button>
             </div>
           </div>
         </div>
@@ -193,7 +193,7 @@
     <div id="home-workspace" class="home-workspace">
       <section class="home-hero-banner" aria-labelledby="home-hero-heading">
         <div class="home-hero-left">
-          <div class="match-meta">DOTA 2 5-STACK FORENSICS HUB · 录像级赛后算账与赛前作战大厅</div>
+          <div class="match-meta">录像级赛后算账与赛前作战大厅</div>
           <h2 id="home-hero-heading" class="home-hero-title" tabindex="-1">选择一局比赛记录，开启十二维录像级算账复盘</h2>
           <p class="home-hero-desc">
             告别一进页面就被密密麻麻的数据淹没。在这里先浏览近期战绩账本，点击任意一局比赛即可进入该局的
@@ -206,13 +206,13 @@
         <div class="home-hero-right">
           <div class="home-quick-actions home-hero-actions">
             <button type="button" id="btn-home-open-latest" class="button primary">
-              📊 查看最新已复盘比赛 →
+              查看最新已复盘比赛 →
             </button>
             <button type="button" id="btn-home-go-pregame" class="button secondary">
-              ⚔️ 进入赛前五黑 BP 锦囊
+              进入赛前五黑 BP 锦囊
             </button>
             <button type="button" id="btn-home-scroll-ledger" class="button secondary">
-              🏆 展开五黑跨局惯犯总账 ↓
+              展开五黑跨局惯犯总账 ↓
             </button>
           </div>
         </div>
@@ -222,21 +222,21 @@
       <section class="home-matches-section" aria-labelledby="home-matches-heading">
         <div class="home-matches-header">
           <div>
-            <h3 id="home-matches-heading">📋 最近比赛记录（点击任意比赛卡片进入单局深度复盘）</h3>
-            <p class="section-caption">带「✅ 已生成 AI 复盘」的比赛点击即可秒开完整报告；带「⚡ 待 AI 分析」的比赛点击后可按需一键启动录像解析</p>
+            <h3 id="home-matches-heading">最近比赛记录（点击任意比赛卡片进入单局深度复盘）</h3>
+            <p class="section-caption">带「已生成 AI 复盘」的比赛点击即可秒开完整报告；带「待 AI 分析」的比赛点击后可按需一键启动录像解析</p>
           </div>
           <div class="home-filter-tabs" role="tablist" aria-label="筛选比赛记录">
             <button type="button" class="filter-chip active" data-home-filter="all">全部比赛</button>
-            <button type="button" class="filter-chip" data-home-filter="analyzed">✅ 已生成 AI 复盘</button>
-            <button type="button" class="filter-chip" data-home-filter="party">👥 五黑/多排局</button>
-            <button type="button" class="filter-chip" data-home-filter="win">🏆 获胜局</button>
-            <button type="button" class="filter-chip" data-home-filter="loss">💀 落败局</button>
+            <button type="button" class="filter-chip" data-home-filter="analyzed">已生成 AI 复盘</button>
+            <button type="button" class="filter-chip" data-home-filter="party">五黑/多排局</button>
+            <button type="button" class="filter-chip" data-home-filter="win">获胜局</button>
+            <button type="button" class="filter-chip" data-home-filter="loss">落败局</button>
             <button
               type="button"
               id="btn-home-filter-scroll-ledger"
               class="filter-chip"
               style="border-color:rgba(240,199,110,0.55);color:#f0c76e;"
-            >🎯 跨局英雄池体检 &amp; 毒瘤习性诊断书 ↓</button>
+            >跨局英雄池体检 &amp; 毒瘤习性诊断书 ↓</button>
           </div>
         </div>
         <div id="home-matches-grid" class="home-matches-grid" role="list" aria-label="首页最近比赛卡片网格">
@@ -249,7 +249,7 @@
         <summary class="squad-ledger-summary">
           <div class="squad-ledger-summary-left">
             <span class="status-pill connected" id="squad-ledger-badge">跨比赛历史档案</span>
-            <strong>🎯 五黑个人跨局《英雄池体检 &amp; 毒瘤习性诊断书》 · 1–5号位适岗矩阵 · 真命绝活 vs 永久Ban冥币榜</strong>
+            <strong>五黑个人跨局《英雄池体检 &amp; 毒瘤习性诊断书》 · 1–5号位适岗矩阵 · 真命绝活 vs 永久Ban冥币榜</strong>
             <span class="section-caption">（自动审计谁打辅助爱出输出装抢经济、谁换到中单/三号位必崩盘、谁最爱单带被抓，支持一键生成生涯体检海报）</span>
           </div>
           <span class="squad-ledger-summary-arrow">收起/展开历史总账 ▾</span>
@@ -267,7 +267,7 @@
     <div id="pregame-workspace" class="pregame-workspace" hidden>
       <section class="pregame-header-banner">
         <div>
-          <div class="match-meta">PRE-GAME 5-STACK LIVE TACTICAL ROOM · 选完英雄10秒内发进语音群</div>
+          <div class="match-meta">选完英雄10秒内发进语音群</div>
           <h2 id="pregame-title" class="match-headline" tabindex="-1">五黑赛前作战室 · 选完人这把怎么配合、前中后期干什么</h2>
           <p class="section-caption">点选你们五黑刚刚选好的 1~5 号位英雄（可选填入对面英雄），立即生成核心 Combo 口令、三路对线重点、前中后期节奏与每人推荐出装</p>
         </div>
@@ -275,8 +275,8 @@
           <button type="button" id="btn-pregame-preset-last" class="button secondary" title="一键填入最近一把五黑的1-5号位阵容">套用最近五黑阵容</button>
           <button type="button" id="btn-pregame-preset-best" class="button secondary" title="一键填入车队高胜率绝活体系">套用车队绝活体系</button>
           <button type="button" id="btn-pregame-clear" class="button secondary">清空重选</button>
-          <button type="button" id="btn-pregame-copy-brief" class="button secondary">📋 复制赛前作战简报</button>
-          <button type="button" id="btn-pregame-grok" class="button primary">🧠 呼叫 AI 教练深度推演本局战术</button>
+          <button type="button" id="btn-pregame-copy-brief" class="button secondary">复制赛前作战简报</button>
+          <button type="button" id="btn-pregame-grok" class="button primary">呼叫 AI 教练深度推演本局战术</button>
         </div>
       </section>
 
@@ -285,7 +285,7 @@
         <div class="pregame-slots-panel">
           <div class="pregame-side-box own">
             <div class="pregame-side-head">
-              <h3>🟢 本方五黑 1~5 号位阵容（点击槽位切换正在选人的位置）</h3>
+              <h3>● 本方五黑 1~5 号位阵容（点击槽位切换正在选人的位置）</h3>
               <span>已自动绑定车队常驻成员</span>
             </div>
             <div id="pregame-own-slots" class="pregame-slots-grid"></div>
@@ -293,7 +293,7 @@
 
           <div class="pregame-side-box enemy">
             <div class="pregame-side-head">
-              <h3>🔴 敌方 1~5 号位阵容（可选填，填入后自动计算克制与团战集火优先级）</h3>
+              <h3>● 敌方 1~5 号位阵容（可选填，填入后自动计算克制与团战集火优先级）</h3>
               <span>点击槽位后从右侧点选敌方英雄</span>
             </div>
             <div id="pregame-enemy-slots" class="pregame-slots-grid"></div>
@@ -325,12 +325,12 @@
     <!-- 按需 AI 分析门控面板：当用户点击一局尚未分析的比赛时呈现，只有用户点击按钮才执行 AI 复盘分析 -->
     <section id="on-demand-analysis-gate" class="on-demand-gate" hidden aria-labelledby="gate-title">
       <div class="gate-inner">
-        <div class="gate-badge">🤖 按需 AI 录像级复盘 · 不浪费算力，点哪局算哪局</div>
+        <div class="gate-badge">按需 AI 录像级复盘 · 不浪费算力，点哪局算哪局</div>
         <h2 id="gate-title" class="gate-headline">比赛 #-- 未复盘</h2>
         <p id="gate-summary" class="gate-desc">该局尚未复盘。点击下方按钮（需车队口令）即可拉取该局录像数据并生成复盘报告。</p>
         <div class="gate-actions">
           <button type="button" id="btn-confirm-analyze-match" class="button primary gate-primary-btn">
-            🔐 验证车队口令并执行本局复盘
+            验证车队口令并执行本局复盘
           </button>
         </div>
       </div>
@@ -353,12 +353,12 @@
       <nav class="postgame-jump-nav" aria-label="赛后复盘模块快速跳转">
         <span class="jump-nav-label">快速跳转视图：</span>
         <a href="#verdict-and-blame-section" id="jump-chip-verdict" class="jump-chip" data-jump-postgame-tab="summary">■ 核心总结 &amp; 1~5号位个人卷宗</a>
-        <a href="#charts-hub-section" class="jump-chip" data-jump-postgame-tab="timeline">⏱️ 实时小地图 &amp; 时间轴沙盘</a>
+        <a href="#charts-hub-section" class="jump-chip" data-jump-postgame-tab="timeline">▸ 实时小地图 &amp; 时间轴沙盘</a>
         <a href="#draft-combo-section" class="jump-chip" data-jump-postgame-tab="phases">① 阵容BP与配合</a>
         <a href="#phase-review-section" class="jump-chip" data-jump-postgame-tab="phases">③ 前·中·后期三阶段</a>
-        <a href="#windows-section" class="jump-chip highlight" data-jump-postgame-tab="phases">⚔️ 三大生死团秒级第一现场</a>
-        <a href="#tactical-microscope-section" class="jump-chip" data-jump-postgame-tab="microscope">🔬 十三维战术显微镜</a>
-        <a href="#players-forensics-section" class="jump-chip" data-jump-postgame-tab="players">🗂️ 十人装备按键与六维雷达</a>
+        <a href="#windows-section" class="jump-chip highlight" data-jump-postgame-tab="phases">▸ 三大生死团秒级第一现场</a>
+        <a href="#tactical-microscope-section" class="jump-chip" data-jump-postgame-tab="microscope">▸ 十三维战术显微镜</a>
+        <a href="#players-forensics-section" class="jump-chip" data-jump-postgame-tab="players">▸ 十人装备按键与六维雷达</a>
       </nav>
     </section>
 
@@ -408,19 +408,19 @@
       <div id="verdict-cards-switcher" class="verdict-cards-switcher" role="tablist" aria-label="切换本局核心焦点人物卡"></div>
       <div id="verdict-grid-3col" class="verdict-grid verdict-grid-3col">
         <article id="mvp-card" class="verdict-card mvp-theme" aria-labelledby="mvp-card-title">
-          <div id="mvp-card-label" class="verdict-card-label">👑 全场头号功臣 · MVP</div>
+          <div id="mvp-card-label" class="verdict-card-label">◆ 全场功臣 · MVP</div>
           <h3 id="mvp-card-title" class="sr-only">全场 MVP</h3>
           <div id="mvp-card-body"></div>
         </article>
 
         <article id="culprit-card" class="verdict-card culprit-theme" aria-labelledby="culprit-card-title">
-          <div id="culprit-card-label" class="verdict-card-label">⚠️ 本局主要问题焦点</div>
+          <div id="culprit-card-label" class="verdict-card-label">◆ 本局主要问题焦点</div>
           <h3 id="culprit-card-title" class="sr-only">次席核心焦点</h3>
           <div id="culprit-card-body"></div>
         </article>
 
         <article id="third-verdict-card" class="verdict-card shortcoming-theme" aria-labelledby="third-card-title">
-          <div id="third-verdict-card-label" class="verdict-card-label">🔍 次要问题与可优化细节</div>
+          <div id="third-verdict-card-label" class="verdict-card-label">◆ 次要问题与可优化细节</div>
           <h3 id="third-card-title" class="sr-only">第三核心焦点</h3>
           <div id="third-verdict-card-body"></div>
         </article>
@@ -457,25 +457,25 @@
     <section id="windows-section" class="windows-section" aria-labelledby="windows-heading">
       <div class="section-heading">
         <div>
-          <h2 id="windows-heading">⚔️ 生死团战秒级剧本还原 &amp; 崩盘/决胜第一现场</h2>
+          <h2 id="windows-heading">生死团战秒级剧本还原 &amp; 崩盘/决胜第一现场</h2>
           <p class="section-caption">自动锁定本局胜负转折权重最大的 3 波生死团，按秒还原谁先手破雾、谁变蛋被打碎/憋死BKB、谁在野区0伤害独刷，以及团战后 90 秒连锁破塔/丢盾铁证</p>
         </div>
         <div class="microscope-header-controls">
           <div class="team-tab-group" role="group" aria-label="生死团战筛选">
-            <button type="button" class="team-tab active" data-tf-filter="top3">🚨 三大生死团第一现场 (Top 3)</button>
-            <button type="button" class="team-tab" data-tf-filter="all">📋 全部关键团战</button>
+            <button type="button" class="team-tab active" data-tf-filter="top3">三大生死团第一现场 (Top 3)</button>
+            <button type="button" class="team-tab" data-tf-filter="all">全部关键团战</button>
           </div>
         </div>
       </div>
       <div id="key-windows-grid" class="windows-grid"></div>
     </section>
 
-    <!-- 模块四（十三维核心）：🔬 录像级战术显微镜 -->
+    <!-- 模块四（十三维核心）：录像级战术显微镜 -->
     <section id="tactical-microscope-section" class="tactical-microscope-section" aria-labelledby="tactical-microscope-heading">
       <div class="section-heading">
         <div>
-          <h2 id="tactical-microscope-heading">④ 🔬 录像级十三维战术显微镜 · 大招审判 / 出装处刑台 / 伤害含金量&amp;加点叠层 / 憋死救命装 / 单带侦探社 / 承伤防装 / 眼位沙盘 / 堆野开雾 / 对线 / TP / 经济 / 1v1宿敌对位 / 买活死&amp;中立附魔</h2>
-          <p class="section-caption">全量拆解录像底层日志：谁只打肉盾刷假伤害？谁前9级0级眩晕奇葩加点？谁漏出克制装/憋大件断档？谁身怀 BKB/推推却 0 按键暴毙？谁在对方没开雾的情况下单带白给？</p>
+          <h2 id="tactical-microscope-heading">④ 录像级十三维战术显微镜</h2>
+          <p class="section-caption">全量拆解录像底层日志：大招兑现、出装路线与克制装、伤害含金量与加点叠层、救命装按键、地图空间与团战外阵亡、承伤防装、眼位博弈、堆野开雾、对线细节、TP支援、经济结构、1v1对位、买活与中立附魔</p>
         </div>
         <div class="microscope-header-controls">
           <div class="team-tab-group" role="group" aria-label="显微镜阵营切换">
@@ -486,67 +486,67 @@
       </div>
 
       <div class="micro-mobile-picker-row">
-        <label for="micro-mobile-select">🔬 快速切换 13 项法医维度：</label>
+        <label for="micro-mobile-select">快速切换 13 项战术维度：</label>
         <select id="micro-mobile-select" class="micro-mobile-select" aria-label="手机端快速切换战术显微镜维度">
-          <option value="hero_ult">🎯 1. 英雄绝活与大招审判</option>
-          <option value="itemization">🎒 2. 全员出装路线与克制装处刑台</option>
-          <option value="damage_quality">🔥 3. 伤害含金量·加点路线与叠层审判</option>
-          <option value="unpressed_saves">💀 4. 憋死BKB/救命装与0技能秒躺</option>
-          <option value="map_space">🧭 5. 地图空间与团战外阵亡记录</option>
-          <option value="damage_received">🛡️ 6. 承伤来源拆解与防装审计</option>
-          <option value="vision">👁️ 7. 眼位博弈·满时长神眼与黑图真空期</option>
-          <option value="stack_smoke">🌾 8. 辅助堆野 &amp; 开雾找节奏</option>
-          <option value="laning">🌱 9. 对线拉野·走门·莲花·经验符</option>
-          <option value="tp_save">🆘 10. TP 救人及时性与缺席抓包</option>
-          <option value="econ_pings">💰 11. 经济来源结构 &amp; 信号/暂停互动</option>
-          <option value="role_mirror">⚔️ 12. 同位置1v1宿敌对位 &amp; 全球百分位</option>
-          <option value="macro_neutrals">🐉 13. 买活死尸检·掉鸡·肉山魔晶 &amp; 中立附魔</option>
-          <option value="all">📑 同屏展开全部 13 项</option>
+          <option value="hero_ult">1. 英雄绝活与大招审判</option>
+          <option value="itemization">2. 全员出装路线与克制装处刑台</option>
+          <option value="damage_quality">3. 伤害含金量·加点路线与叠层审判</option>
+          <option value="unpressed_saves">4. 憋死BKB/救命装与0技能秒躺</option>
+          <option value="map_space">5. 地图空间与团战外阵亡记录</option>
+          <option value="damage_received">6. 承伤来源拆解与防装审计</option>
+          <option value="vision">7. 眼位博弈·满时长神眼与黑图真空期</option>
+          <option value="stack_smoke">8. 辅助堆野 &amp; 开雾找节奏</option>
+          <option value="laning">9. 对线拉野·走门·莲花·经验符</option>
+          <option value="tp_save">10. TP 救人及时性与缺席抓包</option>
+          <option value="econ_pings">11. 经济来源结构 &amp; 信号/暂停互动</option>
+          <option value="role_mirror">12. 同位置1v1宿敌对位 &amp; 全球百分位</option>
+          <option value="macro_neutrals">13. 买活死尸检·掉鸡·肉山魔晶 &amp; 中立附魔</option>
+          <option value="all">同屏展开全部 13 项</option>
         </select>
       </div>
 
       <div id="tactical-microscope-tabs" class="microscope-tabs-bar" role="tablist" aria-label="战术显微镜十三大维度">
         <button type="button" class="microscope-tab-btn active" data-micro-tab="hero_ult" role="tab" aria-selected="true">
-          🎯 1. 英雄绝活与大招审判
+          1. 英雄绝活与大招审判
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="itemization" role="tab" aria-selected="false">
-          🎒 2. 全员出装路线与克制装处刑台
+          2. 全员出装路线与克制装处刑台
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="damage_quality" role="tab" aria-selected="false">
-          🔥 3. 伤害含金量·加点路线与叠层审判
+          3. 伤害含金量·加点路线与叠层审判
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="unpressed_saves" role="tab" aria-selected="false">
-          💀 4. 憋死BKB/救命装与0技能秒躺
+          4. 憋死BKB/救命装与0技能秒躺
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="map_space" role="tab" aria-selected="false">
-          🧭 5. 地图空间与团战外阵亡记录
+          5. 地图空间与团战外阵亡记录
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="damage_received" role="tab" aria-selected="false">
-          🛡️ 6. 承伤来源拆解与防装审计
+          6. 承伤来源拆解与防装审计
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="vision" role="tab" aria-selected="false">
-          👁️ 7. 眼位博弈·满时长神眼与黑图真空期
+          7. 眼位博弈·满时长神眼与黑图真空期
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="stack_smoke" role="tab" aria-selected="false">
-          🌾 8. 辅助堆野 &amp; 开雾找节奏
+          8. 辅助堆野 &amp; 开雾找节奏
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="laning" role="tab" aria-selected="false">
-          🌱 9. 对线拉野·走门·莲花·经验符
+          9. 对线拉野·走门·莲花·经验符
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="tp_save" role="tab" aria-selected="false">
-          🆘 10. TP 救人及时性与缺席抓包
+          10. TP 救人及时性与缺席抓包
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="econ_pings" role="tab" aria-selected="false">
-          💰 11. 经济来源结构 &amp; 信号/暂停互动
+          11. 经济来源结构 &amp; 信号/暂停互动
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="role_mirror" role="tab" aria-selected="false">
-          ⚔️ 12. 同位置1v1宿敌对位 &amp; 全球百分位
+          12. 同位置1v1宿敌对位 &amp; 全球百分位
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="macro_neutrals" role="tab" aria-selected="false">
-          🐉 13. 买活死尸检·掉鸡·肉山魔晶 &amp; 中立附魔
+          13. 买活死尸检·掉鸡·肉山魔晶 &amp; 中立附魔
         </button>
         <button type="button" class="microscope-tab-btn" data-micro-tab="all" role="tab" aria-selected="false">
-          📑 同屏展开全部 13 项
+          同屏展开全部 13 项
         </button>
       </div>
 
@@ -557,7 +557,7 @@
     <section id="charts-hub-section" class="charts-hub-section" aria-labelledby="charts-hub-heading">
       <div class="section-heading">
         <div>
-          <h2 id="charts-hub-heading">⑤ ⏱️ 逐分钟比赛时间轴回放器 &amp; 全局战术图表中心</h2>
+          <h2 id="charts-hub-heading">⑤ 逐分钟比赛时间轴回放器 &amp; 全局战术图表中心</h2>
           <p class="section-caption">拖动下方分钟滑块（00:00 → 终局），实时回放任意一分钟的十人经济排位、正反补、最近购买、击杀掉塔战报，并支持与 2D 战术小地图联动</p>
         </div>
       </div>
@@ -566,18 +566,18 @@
       <article id="minute-scrubber-box" class="chart-box minute-scrubber-box" aria-labelledby="scrubber-title">
         <div class="scrubber-top-bar">
           <div>
-            <h3 id="scrubber-title">⏱️ 时间轴回放沙盘 · 拖动滑块或点击播放复盘任意时刻十人经济、最近购买与团战细节（示意位置，非真实走位）</h3>
+            <h3 id="scrubber-title">时间轴回放沙盘 · 拖动滑块或点击播放复盘任意时刻十人经济、最近购买与团战细节（示意位置，非真实走位）</h3>
             <p class="chart-sub">支持按秒拖动（00:00 → 终局）与自动连播，真实点（眼位、阵亡点、前10分钟热力图）实心展示，合成点半透明标注为示意位置，非真实走位</p>
           </div>
           <div class="scrubber-controls">
             <button type="button" id="btn-scrub-autoplay" class="button primary" style="padding:5px 14px;font-weight:700;" title="自动按秒回放小地图示意位置（非真实走位）、团战交火、泉水读秒与最近购买">▶ 播放回放</button>
             <button type="button" id="btn-scrub-speed" class="button secondary" style="padding:4px 10px;" title="切换时间轴播放倍速 (1x 逐秒 / 2x / 5x)">1x 逐秒</button>
-            <button type="button" id="btn-scrub-prev" class="button secondary" style="padding:4px 9px;" title="后退 1 分钟">⏪ -1分</button>
+            <button type="button" id="btn-scrub-prev" class="button secondary" style="padding:4px 9px;" title="后退 1 分钟">◀◀ -1分</button>
             <button type="button" id="btn-scrub-prev-15s" class="button secondary" style="padding:4px 9px;" title="后退 15 秒">◀ -15秒</button>
-            <span id="scrubber-time-badge" class="status-pill connected" style="font-size:14px;padding:4px 12px;font-variant-numeric:tabular-nums;">⏱️ 15:00</span>
+            <span id="scrubber-time-badge" class="status-pill connected" style="font-size:14px;padding:4px 12px;font-variant-numeric:tabular-nums;">15:00</span>
             <button type="button" id="btn-scrub-next-15s" class="button secondary" style="padding:4px 9px;" title="前进 15 秒">+15秒 ▶</button>
-            <button type="button" id="btn-scrub-next" class="button secondary" style="padding:4px 9px;" title="前进 1 分钟">+1分 ⏩</button>
-            <button type="button" id="btn-scrub-sync-map" class="button secondary" style="padding:4px 10px;" title="在下方2D小地图高亮显示该时刻前后的眼位">🗺️ 同步定位小地图眼位</button>
+            <button type="button" id="btn-scrub-next" class="button secondary" style="padding:4px 9px;" title="前进 1 分钟">+1分 ▶▶</button>
+            <button type="button" id="btn-scrub-sync-map" class="button secondary" style="padding:4px 10px;" title="在下方2D小地图高亮显示该时刻前后的眼位">同步定位小地图眼位</button>
           </div>
         </div>
         <div class="scrubber-slider-row">
@@ -699,6 +699,11 @@
     </section>
     </div>
     </div>
+          <footer class="site-footer">
+            <span>刀塔账房 · 五黑战后复盘与赛前作战室</span>
+            <span>·</span>
+            <span>Dota 2 是 Valve 公司的商标，本站为玩家自用工具，与 Valve 无关。</span>
+          </footer>
         </main>
       </div>
     </div>
@@ -714,7 +719,7 @@
 
       <div class="dialog-body">
         <section class="dialog-block" aria-labelledby="team-token-title">
-          <h3 id="team-token-title">🔐 车队口令 (TEAM_TOKEN)</h3>
+          <h3 id="team-token-title">车队口令 (TEAM_TOKEN)</h3>
           <p class="dialog-hint">执行新比赛复盘、修改花名册、生成 Grok 判词与原画海报时需校验车队口令（保存在本地浏览器）：</p>
           <div class="form-row-2">
             <label class="field" style="grid-column: 1 / -1;">
@@ -768,33 +773,33 @@
   <dialog id="share-poster-dialog" class="settings-dialog share-poster-dialog" closedby="any" aria-labelledby="poster-dialog-title">
     <div class="dialog-inner">
       <div class="dialog-header">
-        <h2 id="poster-dialog-title">📜 群聊处刑/庆功表彰书 &amp; 高清战报卡片导出</h2>
+        <h2 id="poster-dialog-title">群聊表彰书 &amp; 高清战报卡片导出</h2>
         <button type="button" id="btn-close-poster-dialog" class="text-button" aria-label="关闭战报窗口">关闭 ✕</button>
       </div>
       <div class="dialog-body">
         <div class="poster-actions-row">
-          <button type="button" id="btn-generate-nano-poster" class="button primary" style="background:linear-gradient(135deg,#c9983a 0%,#9e6918 100%);color:#0f110e;font-weight:800;border-color:#e5bd68;">🍌 用 Nano Banana 生成 AI 超燃/处刑原画海报</button>
-          <button type="button" id="btn-download-poster-png" class="button primary">🖼️ 下载高清 PNG 战报长图</button>
-          <button type="button" id="btn-copy-verdict-text" class="button secondary">📋 一键复制群聊文字战报</button>
-          <button type="button" id="btn-modal-share-link" class="button secondary">🔗 仅复制本局分享链接</button>
-          <button type="button" id="btn-modal-export-pdf" class="button secondary">📊 全屏结构化报告 / PDF</button>
+          <button type="button" id="btn-generate-nano-poster" class="button primary" style="background:linear-gradient(135deg,#c9983a 0%,#9e6918 100%);color:#0f110e;font-weight:800;border-color:#e5bd68;">用 Nano Banana 生成 AI 原画海报</button>
+          <button type="button" id="btn-download-poster-png" class="button primary">下载高清 PNG 战报长图</button>
+          <button type="button" id="btn-copy-verdict-text" class="button secondary">一键复制群聊文字战报</button>
+          <button type="button" id="btn-modal-share-link" class="button secondary">仅复制本局分享链接</button>
+          <button type="button" id="btn-modal-export-pdf" class="button secondary">全屏结构化报告 / PDF</button>
         </div>
 
         <!-- Nano Banana 2.1 AI 战报原画定制工作台 -->
-        <div id="nano-poster-studio-bar" class="nano-poster-studio-bar" style="background:#151813;border:1px solid #35392d;border-radius:6px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;">
+        <div id="nano-poster-studio-bar" class="nano-poster-studio-bar" style="background:#151813;border:1px solid #35392d;border-radius:3px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;">
           <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;">
             <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1;">
               <label style="font-size:12px;color:var(--gold-light);font-weight:700;display:flex;align-items:center;gap:5px;">
-                <span>👑 英雄饰品外观：</span>
-                <select id="select-nano-cosmetic" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
+                <span>英雄饰品外观：</span>
+                <select id="select-nano-cosmetic" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:2px;font-size:12px;">
                   <option value="arcana">👑 顶配至宝 + 不朽神装 (如至宝剑圣·剑心之遗+龙魂刀)</option>
                   <option value="arcana_red">🔥 至宝二阶段·赤红烈焰形态 (狂暴杀神配色)</option>
                   <option value="classic">🛡️ 原版默认造型</option>
                 </select>
               </label>
               <label style="font-size:12px;color:var(--gold-light);font-weight:700;display:flex;align-items:center;gap:5px;">
-                <span>🎨 构图剧本：</span>
-                <select id="select-nano-poster-style" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
+                <span>构图剧本：</span>
+                <select id="select-nano-poster-style" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:2px;font-size:12px;">
                   <option value="auto">✨ 智能按本局位置&amp;表现定制 (MVP独尊 / 破阵功臣 / 孤胆院长 / 毒舌调侃剧本)</option>
                   <option value="epic">👑 胜局首功 MVP 独尊C位 (2倍前景仰拍 · 斩杀猎物)</option>
                   <option value="win_co_carry">⚔️ 3/4/5号位先手开团 &amp; 破阵功臣 (跳刀大招/诡计之雾)</option>
@@ -808,15 +813,15 @@
                 </select>
               </label>
               <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;">
-                <span>🖼️ 导出样式：</span>
-                <select id="select-nano-layout" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
+                <span>导出样式：</span>
+                <select id="select-nano-layout" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:2px;font-size:12px;">
                   <option value="pure">🖼️ 纯享无字原画 (100% 原图直出 · 零文字遮挡)</option>
                   <option value="dossier">📜 合成战报长图版 (原画 + 底部数据卷宗)</option>
                 </select>
               </label>
               <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;">
-                <span>⚙️ 引擎：</span>
-                <select id="select-nano-poster-engine" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:4px;font-size:12px;">
+                <span>引擎：</span>
+                <select id="select-nano-poster-engine" style="background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:4px 8px;border-radius:2px;font-size:12px;">
                   <option value="auto">🍌 Google Nano Banana 2.1</option>
                   <option value="grok">⚡ xAI Grok Imagine 2.0 (备用引擎)</option>
                 </select>
@@ -824,8 +829,8 @@
             </div>
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-            <input id="input-nano-custom-scene" type="text" placeholder="✍️ 可选填自定义画面细节（如：至宝剑圣开启青色龙魂无敌斩，把破晓辰星、痛苦女王和水晶室女全砍翻在脚下）..." style="flex:1;min-width:260px;background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:5px 10px;border-radius:4px;font-size:12px;" />
-            <span id="nano-poster-status-badge" style="font-size:11.5px;color:#a5a296;">💡 已默认启用【至宝神装 + MVP 霸气C位 + 纯享无字原图】</span>
+            <input id="input-nano-custom-scene" type="text" placeholder="可选填自定义画面细节（如：至宝剑圣开启青色龙魂无敌斩）..." style="flex:1;min-width:260px;background:#0f110e;color:#ebe6d8;border:1px solid #3d4234;padding:5px 10px;border-radius:2px;font-size:12px;" />
+            <span id="nano-poster-status-badge" style="font-size:11.5px;color:#a5a296;">已默认启用【至宝神装 + MVP 霸气C位 + 纯享无字原图】</span>
           </div>
         </div>
         <div class="poster-split-grid">
@@ -849,7 +854,7 @@
     <div class="fs-report-shell">
       <header class="fs-report-toolbar">
         <div class="fs-toolbar-left">
-          <span class="fs-report-badge">STRUCTURED DOSSIER</span>
+          <span class="fs-report-badge">结构化复盘卷宗</span>
           <h2 id="fs-report-top-title" class="fs-toolbar-title">Dota 2 录像级结构化赛后复盘报告</h2>
           <label class="fs-persp-switch">
             <span>审计视角：</span>
@@ -861,16 +866,16 @@
         </div>
         <div class="fs-toolbar-actions">
           <button type="button" id="btn-fs-download-pdf" class="button primary" title="直接生成并下载多页 PDF 报告文件到电脑/手机，无需调起浏览器打印弹窗">
-            ⬇️ 直接下载 PDF 报告 (.pdf)
+            ↓ 直接下载 PDF 报告 (.pdf)
           </button>
           <button type="button" id="btn-fs-download-html" class="button secondary" title="直接下载单文件独立全屏报告 (.html)，发到微信/QQ双击即可离线全屏阅读">
-            ⬇️ 下载独立全屏报告 (.html)
+            ↓ 下载独立全屏报告 (.html)
           </button>
           <button type="button" id="btn-fs-download-png" class="button secondary" title="将整份六章结构化报告直接导出为一张高清长图 (.png) 发进微信群">
-            🖼️ 下载全景报告长图 (.png)
+            ↓ 下载全景报告长图 (.png)
           </button>
           <button type="button" id="btn-fs-copy-link" class="button secondary" title="复制直接打开本全屏结构化报告的公开分享链接">
-            🔗 复制全屏报告链接
+            ↗ 复制全屏报告链接
           </button>
           <button type="button" id="btn-fs-close" class="button secondary" aria-label="关闭全屏结构化报告">
             ✕ 返回主工作台
@@ -886,40 +891,34 @@
 
   <div id="toast-banner" class="toast-banner" role="status" aria-live="polite" hidden></div>
 
-  <footer class="site-footer">
-    <span>刀塔账房 · 五黑战后复盘与赛前作战室</span>
-    <span>·</span>
-    <span>有据复盘，数据来自 OpenDota 录像解析与 AI 教练</span>
-  </footer>
-
   <!-- 手机端底部拇指快捷导航栏（仅 <= 768px 显示） -->
   <nav id="mobile-bottom-nav" class="mobile-bottom-nav" aria-label="手机端底部快捷章节导航">
     <button type="button" class="m-bnav-btn" data-mnav-target="home">
-      <span class="m-bnav-icon">🏠</span>
+      <span class="m-bnav-icon">◆</span>
       <span class="m-bnav-txt">大厅</span>
     </button>
     <button type="button" class="m-bnav-btn active" data-mnav-target="verdict-and-blame-section">
-      <span class="m-bnav-icon">⚖️</span>
+      <span class="m-bnav-icon">■</span>
       <span class="m-bnav-txt">问题</span>
     </button>
     <button type="button" class="m-bnav-btn" data-mnav-target="windows-section">
-      <span class="m-bnav-icon">⚔️</span>
+      <span class="m-bnav-icon">▸</span>
       <span class="m-bnav-txt">团战</span>
     </button>
     <button type="button" class="m-bnav-btn" data-mnav-target="tactical-microscope-section">
-      <span class="m-bnav-icon">🔬</span>
+      <span class="m-bnav-icon">◈</span>
       <span class="m-bnav-txt">显微镜</span>
     </button>
     <button type="button" class="m-bnav-btn" data-mnav-target="charts-hub-section">
-      <span class="m-bnav-icon">📈</span>
+      <span class="m-bnav-icon">▸</span>
       <span class="m-bnav-txt">沙盘</span>
     </button>
     <button type="button" class="m-bnav-btn" data-mnav-target="players-forensics-section">
-      <span class="m-bnav-icon">👤</span>
+      <span class="m-bnav-icon">▣</span>
       <span class="m-bnav-txt">卷宗</span>
     </button>
   </nav>
 
-  <script src="/app.e52c67fb.js" defer></script>
+  <script src="/app.0bb89c72.js" defer></script>
 </body>
 </html>
