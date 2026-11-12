@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r4.1"
+ENGINE_VERSION = "2026.11.r4.2"
 SITE_NAME = "刀塔账房"
 SITE_SUBTITLE = "五黑战后复盘与赛前作战室"
 
@@ -1517,6 +1517,7 @@ def analyze_match_data(
                 "personaname": persona,
                 "friend_tag": friend_tag,
                 "is_me": is_me,
+                "party_size": int(p["party_size"]) if p.get("party_size") is not None else None,
                 "rank": get_rank_name(p.get("rank_tier")),
                 "hero_id": hid,
                 "hero_name": hinfo["full_zh"],
