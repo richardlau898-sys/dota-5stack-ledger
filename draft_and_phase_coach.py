@@ -3030,11 +3030,15 @@ def build_squad_history_ledger(
             })
 
             df_obj = rep.get("deep_forensics") or {}
-            unpressed_rows = ((df_obj.get("unpressed_saves_by_side") or {}).get(f_side) or {}).get("player_rows") or []
+            df_avail = isinstance(df_obj, dict) and df_obj.get("available") is not False
+            raw_us = ((df_obj.get("unpressed_saves_by_side") or {}).get(f_side) or {}) if df_avail else {}
+            unpressed_rows = (raw_us.get("player_rows") or []) if raw_us.get("available") is not False else []
             unpressed_by_pos = {int(r.get("pos") or 0): r for r in unpressed_rows}
-            space_rows = ((df_obj.get("map_space_by_side") or {}).get(f_side) or {}).get("player_space_rows") or []
+            raw_sp = ((df_obj.get("map_space_by_side") or {}).get(f_side) or {}) if df_avail else {}
+            space_rows = (raw_sp.get("player_space_rows") or []) if raw_sp.get("available") is not False else []
             space_by_pos = {int(r.get("pos") or 0): r for r in space_rows}
-            item_rows = ((df_obj.get("itemization_audit_by_side") or {}).get(f_side) or {}).get("player_item_rows") or []
+            raw_it = ((df_obj.get("itemization_audit_by_side") or {}).get(f_side) or {}) if df_avail else {}
+            item_rows = (raw_it.get("player_item_rows") or []) if raw_it.get("available") is not False else []
             item_by_pos = {int(r.get("pos") or 0): r for r in item_rows}
 
             for p in own_list:

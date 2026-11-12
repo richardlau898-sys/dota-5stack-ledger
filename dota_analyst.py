@@ -52,7 +52,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CACHE_DIR = BASE_DIR / ".cache"
 ROSTER_FILE = BASE_DIR / "roster.json"
 REPORTS_DIR = BASE_DIR / "reports"
-ENGINE_VERSION = "2026.11.r4.2"
+ENGINE_VERSION = "2026.11.t3.2"
 SITE_NAME = "刀塔账房"
 SITE_SUBTITLE = "五黑战后复盘与赛前作战室"
 
@@ -1757,10 +1757,13 @@ def analyze_match_data(
         npc_to_hid=npc_to_id,
     )
 
+    df_avail = deep_forensics.get("available") is not False
     for side_key, team_list in (("radiant", radiant_report), ("dire", dire_report)):
-        dq_side_rows = ((deep_forensics.get("damage_quality_and_build_by_side") or {}).get(side_key) or {}).get("player_rows") or []
+        raw_dq = ((deep_forensics.get("damage_quality_and_build_by_side") or {}).get(side_key) or {}) if df_avail else {}
+        dq_side_rows = (raw_dq.get("player_rows") or []) if raw_dq.get("available") is not False else []
         dq_by_pos = {int(r.get("pos") or 0): r for r in dq_side_rows}
-        nc_side_rows = ((deep_forensics.get("macro_objectives_by_side") or {}).get(side_key) or {}).get("neutral_craft_rows") or []
+        raw_nc = ((deep_forensics.get("macro_objectives_by_side") or {}).get(side_key) or {}) if df_avail else {}
+        nc_side_rows = (raw_nc.get("neutral_craft_rows") or []) if raw_nc.get("available") is not False else []
         nc_by_pos = {int(r.get("pos") or 0): r for r in nc_side_rows}
         team_mid_gold = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("gold_gain") or 0) for tp in team_list) or 1
         team_mid_hdmg = sum(max(0, mid_by_slot.get(tp["player_slot"], {}).get("hero_damage_gain") or 0) for tp in team_list) or 1
@@ -2164,24 +2167,48 @@ def extract_report_part(report: Dict[str, Any], part: str) -> Dict[str, Any]:
         out["top3_replay_moments"] = report.get("top3_replay_moments")
         if "phase_reviews" in report:
             out["phase_reviews"] = report.get("phase_reviews")
-        slim_unpressed = {}
-        for sk, sv in (df.get("unpressed_saves_by_side") or {}).items():
-            if isinstance(sv, dict):
-                slim_unpressed[sk] = {
-                    "evidence": sv.get("evidence"),
-                    "incidents": (sv.get("incidents") or [])[:3],
-                }
-        slim_ss = {}
-        for sk, sv in (df.get("stacking_and_smoke_by_side") or {}).items():
-            if isinstance(sv, dict):
-                slim_ss[sk] = {
-                    "evidence": sv.get("evidence"),
-                    "own_smoke_uses": sv.get("own_smoke_uses"),
-                    "smoke_total_uses": sv.get("smoke_total_uses"),
-                    "total_stacks": sv.get("total_stacks"),
-                    "total_team_stacks": sv.get("total_team_stacks"),
-                    "smoke_events": sv.get("smoke_events") or [],
-                }
+        raw_unpressed = df.get("unpressed_saves_by_side") or {}
+        slim_unpressed: Dict[str, Any] = {}
+        if isinstance(raw_unpressed, dict):
+            if "available" in raw_unpressed:
+                slim_unpressed["available"] = raw_unpressed.get("available")
+            for sk, sv in raw_unpressed.items():
+                if sk == "available":
+                    continue
+                if isinstance(sv, dict):
+                    if sv.get("available") is False:
+                        slim_unpressed[sk] = {
+                            "available": False,
+                            "evidence": sv.get("evidence"),
+                        }
+                    else:
+                        slim_unpressed[sk] = {
+                            "evidence": sv.get("evidence"),
+                            "incidents": (sv.get("incidents") or [])[:3],
+                        }
+        raw_ss = df.get("stacking_and_smoke_by_side") or {}
+        slim_ss: Dict[str, Any] = {}
+        if isinstance(raw_ss, dict):
+            if "available" in raw_ss:
+                slim_ss["available"] = raw_ss.get("available")
+            for sk, sv in raw_ss.items():
+                if sk == "available":
+                    continue
+                if isinstance(sv, dict):
+                    if sv.get("available") is False:
+                        slim_ss[sk] = {
+                            "available": False,
+                            "evidence": sv.get("evidence"),
+                        }
+                    else:
+                        slim_ss[sk] = {
+                            "evidence": sv.get("evidence"),
+                            "own_smoke_uses": sv.get("own_smoke_uses"),
+                            "smoke_total_uses": sv.get("smoke_total_uses"),
+                            "total_stacks": sv.get("total_stacks"),
+                            "total_team_stacks": sv.get("total_team_stacks"),
+                            "smoke_events": sv.get("smoke_events") or [],
+                        }
         out["deep_forensics"] = {
             "available": df.get("available"),
             "evidence": df.get("evidence"),

@@ -2532,7 +2532,7 @@ def _collect_ground_truth_tokens(
         raw_phases = rep_obj.get("phases_data") or []
         phases_iter = raw_phases if isinstance(raw_phases, list) else list(raw_phases.values())
         for pd in phases_iter:
-            if not isinstance(pd, dict):
+            if not isinstance(pd, dict) or pd.get("available") is False:
                 continue
             for ev in (pd.get("events") or []):
                 if isinstance(ev, dict):
@@ -2585,26 +2585,32 @@ def _collect_ground_truth_tokens(
                 _add_event_time_str(tf.get("time"))
 
         df = rep_obj.get("deep_forensics") or {}
-        if isinstance(df, dict):
-            for tf in (df.get("teamfight_forensics") or []):
-                if isinstance(tf, dict):
-                    _add_event_sec(tf.get("start_sec"))
-                    _add_event_sec(tf.get("end_sec"))
-                    _add_event_time_str(tf.get("time_range"))
-            for side_ms in (df.get("map_space_by_side") or {}).values():
-                if isinstance(side_ms, dict):
-                    for sev in (side_ms.get("solo_pickoff_events") or []):
-                        if isinstance(sev, dict):
-                            _add_event_sec(sev.get("time_sec") if sev.get("time_sec") is not None else sev.get("time"))
-                            _add_event_time_str(sev.get("time_str"))
-            for side_mo in (df.get("macro_objectives_by_side") or {}).values():
-                if isinstance(side_mo, dict):
-                    for rev in (side_mo.get("roshan_events") or []):
-                        if isinstance(rev, dict):
-                            _add_event_sec(rev.get("time_sec") if rev.get("time_sec") is not None else rev.get("time"))
-                            _add_event_time_str(rev.get("time_str"))
-                        else:
-                            _add_event_time_str(rev)
+        if isinstance(df, dict) and df.get("available") is not False:
+            raw_tfs = df.get("teamfight_forensics")
+            if isinstance(raw_tfs, list):
+                for tf in raw_tfs:
+                    if isinstance(tf, dict):
+                        _add_event_sec(tf.get("start_sec"))
+                        _add_event_sec(tf.get("end_sec"))
+                        _add_event_time_str(tf.get("time_range"))
+            raw_ms_root = df.get("map_space_by_side") or {}
+            if isinstance(raw_ms_root, dict) and raw_ms_root.get("available") is not False:
+                for side_ms in raw_ms_root.values():
+                    if isinstance(side_ms, dict) and side_ms.get("available") is not False:
+                        for sev in (side_ms.get("solo_pickoff_events") or []):
+                            if isinstance(sev, dict):
+                                _add_event_sec(sev.get("time_sec") if sev.get("time_sec") is not None else sev.get("time"))
+                                _add_event_time_str(sev.get("time_str"))
+            raw_mo_root = df.get("macro_objectives_by_side") or {}
+            if isinstance(raw_mo_root, dict) and raw_mo_root.get("available") is not False:
+                for side_mo in raw_mo_root.values():
+                    if isinstance(side_mo, dict) and side_mo.get("available") is not False:
+                        for rev in (side_mo.get("roshan_events") or []):
+                            if isinstance(rev, dict):
+                                _add_event_sec(rev.get("time_sec") if rev.get("time_sec") is not None else rev.get("time"))
+                                _add_event_time_str(rev.get("time_str"))
+                            else:
+                                _add_event_time_str(rev)
 
         # 4. 地图目标时间线（防御塔、兵营、肉山、魔方）与关键录像节点
         for list_k in ("objective_markers", "roshan_and_tower_timeline", "top3_replay_moments"):
@@ -2862,7 +2868,9 @@ def _compute_player_role_duty_audit(
     obs = int(p.get("obs_placed") or 0)
     sen = int(p.get("sen_placed") or 0)
 
-    ms = ((df.get("map_space_by_side") or {}).get(focus_side)) or {}
+    raw_ms_root = (df.get("map_space_by_side") or {}) if df.get("available") is not False else {}
+    raw_ms_side = raw_ms_root.get(focus_side) if isinstance(raw_ms_root, dict) and raw_ms_root.get("available") is not False else None
+    ms = raw_ms_side if (isinstance(raw_ms_side, dict) and raw_ms_side.get("available") is not False) else {}
     solo_events = [
         ev for ev in (ms.get("solo_pickoff_events") or [])
         if int(ev.get("pos") or 0) == pos or ev.get("hero_short_zh") == hero
@@ -2991,7 +2999,7 @@ def call_llm_coach_review(
     phases_list = raw_phases if isinstance(raw_phases, list) else list(raw_phases.values())
     phases_compact = []
     for pd in phases_list:
-        if not isinstance(pd, dict):
+        if not isinstance(pd, dict) or pd.get("available") is False:
             continue
         p_own = [
             {
@@ -3077,9 +3085,13 @@ def call_llm_coach_review(
             return s
         return val
 
-    raw_lanes = df.get("lane_matchups") or []
+    raw_lanes = df.get("lane_matchups")
     lanes_compact = []
-    if isinstance(raw_lanes, list):
+    if (
+        df.get("available") is not False
+        and not (isinstance(raw_lanes, dict) and raw_lanes.get("available") is False)
+        and isinstance(raw_lanes, list)
+    ):
         for lm in raw_lanes:
             if not isinstance(lm, dict):
                 continue
@@ -3108,7 +3120,17 @@ def call_llm_coach_review(
                 ],
             })
 
-    raw_macro = (df.get("macro_objectives_by_side") or {}).get(focus_side) or {}
+    raw_macro_root = (df.get("macro_objectives_by_side") or {}) if df.get("available") is not False else {}
+    raw_macro_side = (
+        raw_macro_root.get(focus_side)
+        if isinstance(raw_macro_root, dict) and raw_macro_root.get("available") is not False
+        else None
+    )
+    raw_macro = (
+        raw_macro_side
+        if isinstance(raw_macro_side, dict) and raw_macro_side.get("available") is not False
+        else {}
+    )
     macro_compact = {
         k: v
         for k, v in raw_macro.items()
@@ -4058,7 +4080,8 @@ def build_dota_poster_art_prompt(
     nemesis_zh_list = [f"{v.get('hero_short_zh')}×{v.get('count', 1)}" for v in killed_by_heroes if v.get("hero_short_zh")]
 
     # Signature ult / spells
-    exec_audit = p.get("hero_execution_audit") or {}
+    raw_exec_audit = p.get("hero_execution_audit") or {}
+    exec_audit = raw_exec_audit if raw_exec_audit.get("available") is not False else {}
     ults = exec_audit.get("ult_audits") or []
     ult_zh = ults[0].get("ability_zh", "") if ults else ""
     ult_casts = ults[0].get("casts", 0) if ults else 0
@@ -4095,7 +4118,17 @@ def build_dota_poster_art_prompt(
     hdmg_share = float(p.get("hero_damage_share_pct") or 0.0)
     deaths_cnt = int(p.get("deaths") or 0)
 
-    unpressed_side = (df.get("unpressed_saves_by_side") or {}).get(raw_side) or {}
+    raw_unpressed_root = (df.get("unpressed_saves_by_side") or {}) if df.get("available") is not False else {}
+    raw_unpressed_side = (
+        raw_unpressed_root.get(raw_side)
+        if isinstance(raw_unpressed_root, dict) and raw_unpressed_root.get("available") is not False
+        else None
+    )
+    unpressed_side = (
+        raw_unpressed_side
+        if isinstance(raw_unpressed_side, dict) and raw_unpressed_side.get("available") is not False
+        else {}
+    )
     unpressed_events = [
         ev for ev in (unpressed_side.get("events") or [])
         if int(ev.get("pos") or 0) == pos or ev.get("hero_short_zh") == hero_zh
