@@ -475,7 +475,12 @@ def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
     da = report.get("draft_analysis") or {}
     hmm = da.get("hero_matchup_matrix")
     df = report.get("deep_forensics") or {}
-    lms = df.get("lane_matchups") or []
+    raw_lms = df.get("lane_matchups")
+    lms_unavail = (
+        df.get("available") is False
+        or (isinstance(raw_lms, dict) and raw_lms.get("available") is False)
+    )
+    lms = raw_lms if (not lms_unavail and isinstance(raw_lms, list)) else []
     has_v70_matrix = (
         isinstance(hmm, list)
         and len(hmm) >= 5
@@ -483,7 +488,8 @@ def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
         and "counter_ledger" in hmm[0]
     )
     has_v70_lanes = (
-        not lms
+        lms_unavail
+        or not lms
         or (isinstance(lms[0], dict) and "lane_chemistry_by_side" in lms[0])
     )
     if has_v70_matrix and has_v70_lanes:
@@ -512,6 +518,8 @@ def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
                 rad_by_pos = {int(p.get("pos") or 0): p for p in rad}
                 dire_by_pos = {int(p.get("pos") or 0): p for p in dire}
                 for ln in lms:
+                    if not isinstance(ln, dict):
+                        continue
                     lnum = int(ln.get("lane_id") or 2)
                     r_lp = [rad_by_pos.get(int(h.get("pos") or 0), h) for h in (ln.get("radiant_heroes") or [])]
                     d_lp = [dire_by_pos.get(int(h.get("pos") or 0), h) for h in (ln.get("dire_heroes") or [])]
