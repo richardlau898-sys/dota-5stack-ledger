@@ -1482,7 +1482,9 @@ async function initApp() {
   }
 
   try {
-    const res = await fetch(`/api/init?account_id=${encodeURIComponent(state.accountId)}`);
+    const res = await fetch(`/api/init?account_id=${encodeURIComponent(state.accountId)}`, {
+      headers: getTeamTokenHeaders(),
+    });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || "初始化失败");
 
@@ -2356,16 +2358,35 @@ function bindEvents() {
 
   const saveTokenBtn = document.getElementById("btn-save-team-token");
   if (saveTokenBtn) {
-    saveTokenBtn.addEventListener("click", () => {
+    saveTokenBtn.addEventListener("click", async () => {
       const tokenVal = document.getElementById("input-team-token")?.value.trim() || "";
       if (tokenVal) {
         localStorage.setItem(TEAM_TOKEN_STORAGE_KEY, tokenVal);
-        showToast("🔐 车队口令已保存在本地浏览器");
+        showToast("🔐 车队口令已保存在本地浏览器，正在刷新比赛记录...");
+        dialog?.close();
+        try {
+          const res = await fetch(`/api/init?account_id=${encodeURIComponent(state.accountId)}`, {
+            headers: getTeamTokenHeaders(),
+          });
+          const data = await res.json();
+          if (data && data.ok) {
+            state.roster = data.roster || state.roster;
+            state.profileData = data.profile || state.profileData;
+            state.squadLedger = data.squad_ledger || state.squadLedger;
+            renderHeaderStatus();
+            renderRecentMatchesStrip(data.recent_matches || state.profileData?.recent_matches || []);
+            renderSquadLedgerSection(state.squadLedger);
+            renderHomeWorkspace();
+            renderSidebarMatches();
+          }
+        } catch {
+          // ignore refresh warning
+        }
       } else {
         localStorage.removeItem(TEAM_TOKEN_STORAGE_KEY);
         showToast("已清除本地保存的车队口令");
+        dialog?.close();
       }
-      dialog?.close();
     });
   }
 }
@@ -2506,11 +2527,28 @@ function saveLocalAnalyzedMatch(report) {
     const culpritPlayer = report.mvp?.culprit_player || {};
     const mvpHero = mvpPlayer.hero_short_zh || mvpPlayer.hero_name || "";
     const culpritHero = culpritPlayer.hero_short_zh || culpritPlayer.hero_name || "";
+    const ownList =
+      (side === "radiant" ? report.radiant_pos_1_to_5 : report.dire_pos_1_to_5) || [];
+    const meP = ownList.find((x) => x && x.is_me) || null;
+    const myHero = meP ? meP.hero_short_zh || meP.hero_name || null : null;
+    const myHeroImg = meP ? meP.hero_img || null : null;
+    const myKda = meP
+      ? meP.kda || `${meP.kills ?? 0}/${meP.deaths ?? 0}/${meP.assists ?? 0}`
+      : null;
+    const myPartySize = meP?.party_size ?? report.party_size ?? null;
+    const myPartyLabel =
+      report.party_label ||
+      (myPartySize != null ? (Number(myPartySize) >= 2 ? `${myPartySize}人黑` : "单排") : null);
     obj[String(mid)] = {
       match_id: mid,
       won,
       score,
       side_zh: sideZh,
+      my_hero: myHero,
+      my_hero_img: myHeroImg,
+      my_kda: myKda,
+      party_size: myPartySize,
+      party_label: myPartyLabel,
       mvp_hero: mvpHero,
       mvp_contrib_pct: mvpPlayer.contrib_share_pct ?? null,
       no_clear_culprit: isSideNoClearCulprit(report, side),
@@ -2851,7 +2889,7 @@ function renderSidebarMatches() {
   if (state.currentReport && state.currentReport.match_id) {
     const cr = state.currentReport;
     const { side, own } = getOwnAndOppPlayers(cr);
-    const focusP = own.find((x) => x.is_me) || own[0] || {};
+    const focusP = own.find((x) => x.is_me) || null;
     const crWon =
       (side === "radiant" && Boolean(cr.radiant_win)) ||
       (side === "dire" && !cr.radiant_win);
@@ -2859,13 +2897,13 @@ function renderSidebarMatches() {
       match_id: Number(cr.match_id),
       won: crWon,
       is_analyzed: true,
-      hero_short_zh: focusP.hero_short_zh || focusP.hero_name || "本局视角",
-      hero_icon: focusP.hero_icon || "",
-      hero_img: focusP.hero_img || "",
-      kda: `${focusP.kills ?? 0}/${focusP.deaths ?? 0}/${focusP.assists ?? 0}`,
+      hero_short_zh: focusP ? focusP.hero_short_zh || focusP.hero_name || "无数据" : "无数据",
+      hero_icon: focusP?.hero_icon || "",
+      hero_img: focusP?.hero_img || "",
+      kda: focusP ? focusP.kda || `${focusP.kills ?? 0}/${focusP.deaths ?? 0}/${focusP.assists ?? 0}` : null,
       duration_str: cr.duration_str || "",
       start_time: cr.start_time ?? null,
-      party_size: cr.party_size ?? null,
+      party_size: focusP?.party_size ?? cr.party_size ?? null,
       party_label: cr.party_label || "",
     });
   }
@@ -2878,17 +2916,19 @@ function renderSidebarMatches() {
   analyzedArr.forEach((am) => {
     const mid = Number(am.match_id);
     if (mid && !combinedMap.has(mid)) {
-      const heroMeta = (state.heroesCatalog || []).find(
-        (h) => h.short_zh === am.my_hero || h.name_zh === am.my_hero || h.short_zh === am.mvp_hero
-      );
+      const heroMeta = am.my_hero
+        ? (state.heroesCatalog || []).find(
+            (h) => h.short_zh === am.my_hero || h.name_zh === am.my_hero
+          )
+        : null;
       combinedMap.set(mid, {
         match_id: mid,
         won: Boolean(am.won),
         is_analyzed: true,
-        hero_short_zh: am.my_hero || am.mvp_hero || "历史复盘",
+        hero_short_zh: am.my_hero || "无数据",
         hero_icon: heroMeta?.icon || "",
         hero_img: am.my_hero_img || heroMeta?.img || "",
-        kda: am.my_kda || (am.score ? `比分 ${am.score}` : "-"),
+        kda: am.my_kda || null,
         duration_str: am.duration_str || "",
         start_time: am.start_time ?? null,
         party_size: am.party_size ?? null,
@@ -2904,9 +2944,12 @@ function renderSidebarMatches() {
   const sFilter = state.wsSidebarFilter || "all";
   const filtered = allMatches.filter((m) => {
     const mid = Number(m.match_id);
+    const archM = analyzedMap.get(mid);
     const isWin = m.won !== undefined ? Boolean(m.won) : m.result === "胜利";
-    const isAnalyzed = Boolean(m.is_analyzed || analyzedMap.has(mid));
-    const isParty = Number(m.party_size || 1) >= 2 || String(m.party_label || "").includes("黑");
+    const isAnalyzed = Boolean(m.is_analyzed || archM);
+    const effPSize = m.party_size ?? archM?.party_size ?? null;
+    const effPLabel = m.party_label || archM?.party_label || "";
+    const isParty = (effPSize != null && Number(effPSize) >= 2) || String(effPLabel).includes("黑");
     if (sFilter === "analyzed") return isAnalyzed;
     if (sFilter === "party") return isParty;
     if (sFilter === "win") return isWin;
@@ -2930,12 +2973,17 @@ function renderSidebarMatches() {
       const isWin = m.won !== undefined ? Boolean(m.won) : m.result === "胜利";
       const arch = analyzedMap.get(mid);
       const isAnalyzed = Boolean(m.is_analyzed || arch);
-      const heroShort = m.hero_short_zh || m.hero_name || arch?.my_hero || arch?.mvp_hero || "未知英雄";
+      const heroShort = m.hero_short_zh || m.hero_name || arch?.my_hero || "无数据";
       const rawHeroImg = m.hero_img || arch?.my_hero_img || "";
       const heroImg = rawHeroImg.includes("/dota_react/heroes/") && !rawHeroImg.includes("/heroes/icons/")
         ? rawHeroImg.replace("/dota_react/heroes/", "/dota_react/heroes/icons/")
         : rawHeroImg;
-      const partyLabel = m.party_label || (Number(m.party_size || 1) >= 2 ? `${m.party_size}人黑` : "单排");
+      const effPartySize = m.party_size ?? arch?.party_size ?? null;
+      const partyLabel =
+        m.party_label ||
+        arch?.party_label ||
+        (effPartySize != null ? (Number(effPartySize) >= 2 ? `${effPartySize}人黑` : "单排") : "无数据");
+      const kdaText = m.kda || arch?.my_kda || "无数据";
       const durText = m.duration_str || m.duration || arch?.duration_str || "";
       const timeStr =
         formatMatchStartTime(m, { short: true }) ||
@@ -2981,7 +3029,7 @@ function renderSidebarMatches() {
             </div>
           </div>
           <div class="ws-match-row-mid">
-            <span class="ws-match-kda-text">KDA <b>${escapeHtml(m.kda || "0/0/0")}</b></span>
+            <span class="ws-match-kda-text">KDA <b>${escapeHtml(kdaText)}</b></span>
             ${durText ? `<span>· ${escapeHtml(durText)}</span>` : ""}
             ${timeStr ? `<span class="ws-match-time">· ${escapeHtml(timeStr)}</span>` : ""}
           </div>
@@ -3065,7 +3113,9 @@ async function handleSmartQuery(raw) {
   }
   showToast("正在解析玩家 ID 并拉取最近比赛...");
   try {
-    const res = await fetch(`/api/player?query=${encodeURIComponent(raw)}`);
+    const res = await fetch(`/api/player?query=${encodeURIComponent(raw)}`, {
+      headers: getTeamTokenHeaders(),
+    });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || "无法识别该玩家");
     state.accountId = data.account_id;

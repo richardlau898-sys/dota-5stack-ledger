@@ -2764,10 +2764,20 @@ def build_squad_history_ledger(
 
     rdir = Path(reports_dir)
     main_aid = int(roster.get("main_account_id") or 0)
+    roster_members_init = dota_analyst.iter_roster_accounts(roster)
     roster_member_by_aid = {
         acc_id: m
-        for m in dota_analyst.iter_roster_accounts(roster)
+        for m in roster_members_init
         for acc_id in m["account_ids"]
+    }
+    main_aids = {main_aid} if main_aid else set()
+    for m_init in roster_members_init:
+        if m_init.get("is_main") or (main_aid and main_aid in m_init["account_ids"]):
+            main_aids.update(int(x) for x in m_init["account_ids"])
+    recent_by_mid = {
+        int(rm["match_id"]): rm
+        for rm in (recent_matches or [])
+        if isinstance(rm, dict) and rm.get("match_id")
     }
 
     analyzed_matches_summary = []
@@ -2867,7 +2877,7 @@ def build_squad_history_ledger(
                     "rating_score_100": sc_p,
                     "blame_share_pct": float(r.get("blame_share_pct") or 0.0),
                     "contrib_share_pct": float(r.get("contrib_share_pct") or 0.0),
-                    "is_me": bool(r.get("account_id") is not None and int(r["account_id"]) == main_aid),
+                    "is_me": bool(r.get("account_id") is not None and int(r["account_id"]) in main_aids),
                 })
 
             rep_sources.append({
@@ -2944,10 +2954,49 @@ def build_squad_history_ledger(
             is_parsed_rep = bool(rep.get("is_parsed"))
             mvp_rep_obj = rep.get("mvp") or {}
             match_no_clear = bool((not is_parsed_rep) or won or mvp_rep_obj.get("no_clear_culprit"))
-            me_p = next((x for x in own_list if x.get("is_me") or int(x.get("account_id") or 0) == main_aid), None) or own_list[0]
+            me_p = next(
+                (
+                    x
+                    for x in own_list
+                    if x.get("is_me")
+                    or (x.get("account_id") is not None and int(x.get("account_id") or 0) in main_aids)
+                ),
+                None,
+            )
+            my_hero = (me_p.get("hero_short_zh") or me_p.get("hero_name") or None) if me_p else None
+            my_hero_img = (me_p.get("hero_img") or None) if me_p else None
+            my_kda = (
+                (
+                    me_p.get("kda")
+                    or f"{int(me_p.get('kills') or 0)}/{int(me_p.get('deaths') or 0)}/{int(me_p.get('assists') or 0)}"
+                )
+                if me_p
+                else None
+            )
+            rm_meta = recent_by_mid.get(int(mid)) or {}
+            raw_psize = (
+                rm_meta.get("party_size")
+                if rm_meta.get("party_size") is not None
+                else (me_p.get("party_size") if (me_p and me_p.get("party_size") is not None) else rep.get("party_size"))
+            )
+            if raw_psize is not None:
+                eff_party_size = int(raw_psize)
+            else:
+                roster_own_cnt = sum(
+                    1
+                    for x in own_list
+                    if x.get("account_id") is not None and int(x.get("account_id") or 0) in roster_member_by_aid
+                )
+                eff_party_size = roster_own_cnt if roster_own_cnt >= 2 else None
+            eff_party_label = (
+                (f"{eff_party_size}人黑" if eff_party_size >= 2 else "单排")
+                if eff_party_size is not None
+                else None
+            )
+            eff_start_time = rep.get("start_time") if rep.get("start_time") is not None else rm_meta.get("start_time")
             analyzed_matches_summary.append({
                 "match_id": mid,
-                "start_time": rep.get("start_time"),
+                "start_time": eff_start_time,
                 "duration_str": rep.get("duration_str") or "",
                 "score": rep.get("score") or "",
                 "side_zh": "天辉" if f_side == "radiant" else "夜魇",
@@ -2956,8 +3005,13 @@ def build_squad_history_ledger(
                 "no_clear_culprit": match_no_clear,
                 "has_grok": bool(gc.get("title")),
                 "grok_title": gc.get("title") or (rep.get("match_narrative") or {}).get("headline") or "",
-                "my_grok_score": int(round(_eff_score(me_p))),
-                "my_grok_share_pct": round(_eff_share(me_p), 1) if (won or is_parsed_rep) else None,
+                "my_hero": my_hero,
+                "my_hero_img": my_hero_img,
+                "my_kda": my_kda,
+                "party_size": eff_party_size,
+                "party_label": eff_party_label,
+                "my_grok_score": int(round(_eff_score(me_p))) if me_p else None,
+                "my_grok_share_pct": (round(_eff_share(me_p), 1) if (won or is_parsed_rep) else None) if me_p else None,
                 "mvp_hero": mvp_p.get("hero_short_zh") or "",
                 "mvp_img": mvp_p.get("hero_img") or "",
                 "mvp_player": mvp_p.get("personaname") or "",
@@ -3604,17 +3658,31 @@ def build_squad_history_ledger(
     for m in roster_members_all:
         if m["canonical_id"] == main_canon_aid:
             main_all_aids.update(int(x) for x in m["account_ids"])
+    main_pm_by_mid: Dict[int, Dict[str, Any]] = {}
     for pm in pm_rows:
         if isinstance(pm, dict) and pm.get("match_id") and (not main_all_aids or int(pm.get("account_id") or 0) in main_all_aids):
+            mid_pm = int(pm["match_id"])
+            if mid_pm not in main_pm_by_mid:
+                main_pm_by_mid[mid_pm] = pm
             slot_val = int(pm.get("player_slot") or 0)
             rad_w = bool(pm.get("radiant_win"))
             won_pm = bool(pm["won"]) if pm.get("won") is not None else (rad_w if slot_val < 128 else (not rad_w))
             tilt_rows.append({
-                "match_id": int(pm["match_id"]),
+                "match_id": mid_pm,
                 "start_time": int(pm.get("start_time") or 0),
                 "duration": int(pm.get("duration") or 0),
                 "won": won_pm,
             })
+    for am_item in analyzed_matches_summary:
+        pm_meta = main_pm_by_mid.get(int(am_item.get("match_id") or 0))
+        if not pm_meta:
+            continue
+        if am_item.get("start_time") is None and pm_meta.get("start_time"):
+            am_item["start_time"] = int(pm_meta["start_time"])
+        if am_item.get("party_size") is None and pm_meta.get("party_size") is not None:
+            ps_val = int(pm_meta["party_size"])
+            am_item["party_size"] = ps_val
+            am_item["party_label"] = f"{ps_val}人黑" if ps_val >= 2 else "单排"
     for rm in recent_matches or []:
         if isinstance(rm, dict) and rm.get("match_id"):
             raw_dur = rm.get("duration_sec") if rm.get("duration_sec") is not None else rm.get("duration")
@@ -3746,6 +3814,7 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
     import json
     from pathlib import Path
     import cloud_store
+    import dota_analyst
 
     rdir = Path(reports_dir)
     tmp_rdir = Path("/tmp/dota_reports")
@@ -3776,6 +3845,7 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
     main_aid = int((roster or {}).get("main_account_id") or 0)
     players_cnt = len((roster or {}).get("players") or {})
     sig_payload = {
+        "engine_version": dota_analyst.ENGINE_VERSION,
         "files": files,
         "cloud_url": cur_url,
         "cloud_ids": cloud_ids,

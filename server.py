@@ -151,7 +151,12 @@ def fetch_recent_matches_formatted(
 
     now_ts = time.time()
     cached = _RECENT_MATCHES_CACHE.get(account_id)
-    if cached and (now_ts - cached.get("ts", 0) < 120) and cached.get("items"):
+    if (
+        cached
+        and (now_ts - cached.get("ts", 0) < 120)
+        and cached.get("items")
+        and (not allow_network or cached.get("from_network"))
+    ):
         out_cached = cached["items"]
         for item in out_cached:
             item["is_analyzed"] = is_match_already_analyzed(item.get("match_id"))
@@ -162,10 +167,12 @@ def fetch_recent_matches_formatted(
     tmp_recent_cache_file = TMP_REPORTS_DIR / f"recent_matches_{account_id}.json"
 
     raw_list = None
+    fetched_from_network = False
     if allow_network:
         try:
             raw_list = api_get(f"/players/{account_id}/recentMatches")
             if isinstance(raw_list, list) and raw_list:
+                fetched_from_network = True
                 try:
                     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                     recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
@@ -240,47 +247,66 @@ def fetch_recent_matches_formatted(
 
             for mid in sorted(by_mid.keys(), reverse=True)[:limit]:
                 m_rows = by_mid[mid]
-                me_r = (
-                    next((r for r in m_rows if r.get("account_id") in target_aids), None)
+                me_r = next((r for r in m_rows if r.get("account_id") in target_aids), None)
+                ref_r = (
+                    me_r
                     or next((r for r in m_rows if r.get("account_id") in all_roster_aids), None)
                     or m_rows[0]
                 )
-                hid = int(me_r.get("hero_id") or 0)
-                hinfo = hero_map.get(hid) or {}
-                won = bool(me_r.get("won"))
-                k = int(me_r.get("kills") or 0)
-                d = int(me_r.get("deaths") or 0)
-                a = int(me_r.get("assists") or 0)
-                dur_sec = int(round(float(me_r.get("duration_min") or 0.0) * 60))
+                won = bool(ref_r.get("won"))
+                dur_sec = int(round(float(ref_r.get("duration_min") or 0.0) * 60))
                 dur_str = format_duration(dur_sec)
-                psize = max(
-                    1,
-                    sum(
-                        1
-                        for r in m_rows
-                        if r.get("side") == me_r.get("side") and r.get("account_id") in all_roster_aids
-                    ),
+                roster_side_cnt = sum(
+                    1
+                    for r in m_rows
+                    if r.get("side") == ref_r.get("side") and r.get("account_id") in all_roster_aids
                 )
+                psize = roster_side_cnt if roster_side_cnt >= 2 else None
+                if me_r is not None:
+                    hid = int(me_r.get("hero_id") or 0)
+                    hinfo = hero_map.get(hid) or {}
+                    k = int(me_r.get("kills") or 0)
+                    d = int(me_r.get("deaths") or 0)
+                    a = int(me_r.get("assists") or 0)
+                    hero_name_val = get_hero_name(hid)
+                    hero_short_val = me_r.get("hero_short_zh") or hinfo.get("short_zh") or hero_name_val
+                    hero_img_val = hinfo.get("img") or ""
+                    hero_icon_val = hinfo.get("icon") or ""
+                    kda_val = f"{k}/{d}/{a}"
+                    gpm_val = int(me_r.get("gpm") or 0)
+                    xpm_val = int(me_r.get("xpm") or 0)
+                else:
+                    hid = 0
+                    k = None
+                    d = None
+                    a = None
+                    hero_name_val = ""
+                    hero_short_val = "无数据"
+                    hero_img_val = ""
+                    hero_icon_val = ""
+                    kda_val = None
+                    gpm_val = None
+                    xpm_val = None
                 out.append({
                     "match_id": mid,
                     "start_time": None,
                     "won": won,
                     "result": "胜利" if won else "失败",
                     "hero_id": hid,
-                    "hero_name": get_hero_name(hid),
-                    "hero_short_zh": me_r.get("hero_short_zh") or hinfo.get("short_zh") or get_hero_name(hid),
-                    "hero_img": hinfo.get("img") or "",
-                    "hero_icon": hinfo.get("icon") or "",
+                    "hero_name": hero_name_val,
+                    "hero_short_zh": hero_short_val,
+                    "hero_img": hero_img_val,
+                    "hero_icon": hero_icon_val,
                     "kills": k,
                     "deaths": d,
                     "assists": a,
-                    "kda": f"{k}/{d}/{a}",
-                    "gpm": int(me_r.get("gpm") or 0),
-                    "xpm": int(me_r.get("xpm") or 0),
+                    "kda": kda_val,
+                    "gpm": gpm_val,
+                    "xpm": xpm_val,
                     "duration": dur_str,
                     "duration_str": dur_str,
                     "party_size": psize,
-                    "party_label": f"{psize}人黑" if psize > 1 else "单排",
+                    "party_label": f"{psize}人黑" if (psize and psize > 1) else "无数据",
                     "is_parsed": True,
                     "is_analyzed": True,
                     "mode_str": "全英雄选择",
@@ -288,6 +314,8 @@ def fetch_recent_matches_formatted(
 
     if not out and REPORTS_DIR.exists():
         # Synthesize fallback list from local analyzed match_*.json files when Supabase is unconfigured
+        roster = load_roster()
+        all_roster_aids = {int(aid) for m in iter_roster_accounts(roster) for aid in m["account_ids"]}
         for mf in sorted(REPORTS_DIR.glob("match_*.json"), reverse=True)[:limit]:
             try:
                 rep = json.loads(mf.read_text(encoding="utf-8"))
@@ -295,28 +323,48 @@ def fetch_recent_matches_formatted(
                 if not mid:
                     continue
                 all_p = (rep.get("radiant_pos_1_to_5") or []) + (rep.get("dire_pos_1_to_5") or [])
-                me_p = next((p for p in all_p if p.get("is_me")), None) or (all_p[0] if all_p else {})
+                me_p = next(
+                    (
+                        p
+                        for p in all_p
+                        if p.get("is_me")
+                        or (account_id and p.get("account_id") is not None and int(p.get("account_id") or 0) == int(account_id))
+                    ),
+                    None,
+                )
+                f_side_rep = rep.get("focus_side") or "dire"
+                own_p_rep = (rep.get("radiant_pos_1_to_5") if f_side_rep == "radiant" else rep.get("dire_pos_1_to_5")) or []
+                roster_cnt_rep = sum(
+                    1
+                    for p in own_p_rep
+                    if p.get("account_id") is not None and int(p.get("account_id") or 0) in all_roster_aids
+                )
+                psize_rep = (
+                    int(me_p["party_size"])
+                    if (me_p and me_p.get("party_size") is not None)
+                    else (roster_cnt_rep if roster_cnt_rep >= 2 else None)
+                )
                 won = bool(rep.get("user_won", rep.get("radiant_win")))
                 out.append({
                     "match_id": mid,
                     "start_time": rep.get("start_time"),
                     "won": won,
                     "result": "胜利" if won else "失败",
-                    "hero_id": me_p.get("hero_id", 0),
-                    "hero_name": me_p.get("hero_name", ""),
-                    "hero_short_zh": me_p.get("hero_short_zh", "未知英雄"),
-                    "hero_img": me_p.get("hero_img", ""),
-                    "hero_icon": me_p.get("hero_icon", ""),
-                    "kills": me_p.get("kills", 0),
-                    "deaths": me_p.get("deaths", 0),
-                    "assists": me_p.get("assists", 0),
-                    "kda": me_p.get("kda", "0/0/0"),
-                    "gpm": me_p.get("gpm", 0),
-                    "xpm": me_p.get("xpm", 0),
+                    "hero_id": me_p.get("hero_id", 0) if me_p else 0,
+                    "hero_name": me_p.get("hero_name", "") if me_p else "",
+                    "hero_short_zh": (me_p.get("hero_short_zh") or "无数据") if me_p else "无数据",
+                    "hero_img": me_p.get("hero_img", "") if me_p else "",
+                    "hero_icon": me_p.get("hero_icon", "") if me_p else "",
+                    "kills": me_p.get("kills") if me_p else None,
+                    "deaths": me_p.get("deaths") if me_p else None,
+                    "assists": me_p.get("assists") if me_p else None,
+                    "kda": me_p.get("kda") if me_p else None,
+                    "gpm": me_p.get("gpm") if me_p else None,
+                    "xpm": me_p.get("xpm") if me_p else None,
                     "duration": rep.get("duration_str", ""),
                     "duration_str": rep.get("duration_str", ""),
-                    "party_size": 5,
-                    "party_label": "5人黑",
+                    "party_size": psize_rep,
+                    "party_label": (f"{psize_rep}人黑" if psize_rep >= 2 else "单排") if psize_rep is not None else "无数据",
                     "is_parsed": bool(rep.get("is_parsed", True)),
                     "is_analyzed": True,
                     "mode_str": rep.get("mode_str", "全英雄选择"),
@@ -325,7 +373,11 @@ def fetch_recent_matches_formatted(
                 pass
 
     if out:
-        _RECENT_MATCHES_CACHE[account_id] = {"ts": now_ts, "items": out}
+        _RECENT_MATCHES_CACHE[account_id] = {
+            "ts": now_ts,
+            "items": out,
+            "from_network": fetched_from_network,
+        }
     return out
 
 
