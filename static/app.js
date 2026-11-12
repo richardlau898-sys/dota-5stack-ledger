@@ -3417,9 +3417,21 @@ async function triggerGrokReview({ force = true } = {}) {
     }
 
     if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
-    if (finalData.report) {
-      if (Number(finalData.report.match_id || reqMatchId) !== reqMatchId) return;
-      state.currentReport = finalData.report;
+    let updatedReport = finalData.report || null;
+    if (!updatedReport && finalData.status === "completed") {
+      const aidParam = state.accountId ? `?account_id=${encodeURIComponent(state.accountId)}` : "";
+      const repRes = await fetch(`/api/match/${encodeURIComponent(reqMatchId)}${aidParam}`, {
+        headers: getTeamTokenHeaders(),
+      });
+      if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
+      const repJson = await repRes.json();
+      if (repJson && repJson.ok && repJson.report) {
+        updatedReport = repJson.report;
+      }
+    }
+    if (updatedReport) {
+      if (Number(updatedReport.match_id || reqMatchId) !== reqMatchId) return;
+      state.currentReport = updatedReport;
       saveLocalAnalyzedMatch(state.currentReport);
       renderFullMatchReport(state.currentReport);
       showToast(`✅ ${getCoachModelDisplayName(state.currentReport)} 五人深度研判与三幕长段复盘已生成并持久化缓存！`);
