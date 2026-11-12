@@ -17,7 +17,18 @@ from typing import Any, Dict, List, Optional, Set
 
 BASE_DIR = Path(__file__).resolve().parent
 REPORTS_DIR = BASE_DIR / "reports"
-TMP_REPORTS_DIR = Path("/tmp/dota_reports")
+_DEFAULT_TMP_REPORTS_DIR = Path("/tmp/dota_reports")
+TMP_REPORTS_DIR = Path((os.environ.get("DOTA_TMP_DIR") or "").strip() or "/tmp/dota_reports")
+_INIT_TMP_REPORTS_DIR = TMP_REPORTS_DIR
+
+
+def get_tmp_reports_dir() -> Path:
+    if TMP_REPORTS_DIR != _INIT_TMP_REPORTS_DIR:
+        return Path(TMP_REPORTS_DIR)
+    env_dir = (os.environ.get("DOTA_TMP_DIR") or "").strip()
+    if env_dir:
+        return Path(env_dir)
+    return _DEFAULT_TMP_REPORTS_DIR
 
 
 def _load_env_vars() -> Dict[str, str]:
@@ -434,8 +445,9 @@ def cloud_fetch_match_report(match_id: int, persist_tmp: bool = True) -> Optiona
         _CLOUD_IDS_CACHE["ids"].add(int(match_id))
         if persist_tmp:
             try:
-                TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-                (TMP_REPORTS_DIR / f"match_{int(match_id)}.json").write_text(
+                tmp_dir = get_tmp_reports_dir()
+                tmp_dir.mkdir(parents=True, exist_ok=True)
+                (tmp_dir / f"match_{int(match_id)}.json").write_text(
                     json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8"
                 )
             except Exception:
@@ -875,7 +887,7 @@ def cloud_fetch_player_goals(cfg: Optional[Dict[str, str]] = None) -> Dict[str, 
         _PLAYER_GOALS_CACHE["goals"] = dict(out)
         return out
 
-    local_file = TMP_REPORTS_DIR / "player_goals.json"
+    local_file = get_tmp_reports_dir() / "player_goals.json"
     if local_file.exists():
         try:
             data = json.loads(local_file.read_text(encoding="utf-8"))
@@ -973,8 +985,9 @@ def cloud_upsert_player_goal(
 
     # Local dev / test fallback when Supabase credentials are not configured
     try:
-        TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-        local_file = TMP_REPORTS_DIR / "player_goals.json"
+        tmp_dir = get_tmp_reports_dir()
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+        local_file = tmp_dir / "player_goals.json"
         cur_local: Dict[str, Any] = {}
         if local_file.exists():
             try:

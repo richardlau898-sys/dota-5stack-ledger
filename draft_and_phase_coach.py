@@ -125,8 +125,10 @@ def load_squad_hero_pool_and_against_stats() -> Tuple[Dict[int, Dict[str, Any]],
     if not squad_pool or not against_map:
         need_pool = not bool(squad_pool)
         need_against = not bool(against_map)
+        import cloud_store
+
         seen_mids = set()
-        for scan_dir in (Path("/tmp/dota_reports"), _REPO_ROOT / "reports"):
+        for scan_dir in (cloud_store.get_tmp_reports_dir(), _REPO_ROOT / "reports"):
             if not scan_dir.exists():
                 continue
             for rep_p in sorted(scan_dir.glob("match_*.json")):
@@ -2785,8 +2787,10 @@ def build_squad_history_ledger(
     member_stats: Dict[str, Dict[str, Any]] = {}
     duo_buckets: Dict[str, Dict[str, Any]] = {}
 
+    import cloud_store
+
     candidate_paths: Dict[str, Path] = {}
-    tmp_rdir = Path("/tmp/dota_reports")
+    tmp_rdir = cloud_store.get_tmp_reports_dir()
     scan_dirs = (rdir, tmp_rdir) if rdir.resolve() == dota_analyst.REPORTS_DIR.resolve() else (rdir,)
     for scan_dir in scan_dirs:
         if scan_dir.exists():
@@ -3817,7 +3821,7 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
     import dota_analyst
 
     rdir = Path(reports_dir)
-    tmp_rdir = Path("/tmp/dota_reports")
+    tmp_rdir = cloud_store.get_tmp_reports_dir()
     files = []
     for scan_dir in (rdir, tmp_rdir):
         if scan_dir.exists():
@@ -3839,7 +3843,7 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
     pm_cache_cnt = len(pm_cache_rows) if isinstance(pm_cache_rows, list) else 0
     local_pm_path = Path(__file__).resolve().parent / ".cache" / "player_matches_history.json"
     local_pm_mtime = int(local_pm_path.stat().st_mtime_ns) if local_pm_path.exists() else 0
-    local_goals_path = Path("/tmp/dota_reports/player_goals.json")
+    local_goals_path = tmp_rdir / "player_goals.json"
     local_goals_mtime = int(local_goals_path.stat().st_mtime_ns) if local_goals_path.exists() else 0
     goals_cache_obj = cloud_store._PLAYER_GOALS_CACHE.get("goals")
     main_aid = int((roster or {}).get("main_account_id") or 0)
@@ -3860,11 +3864,12 @@ def _ledger_dir_signature(reports_dir: Any, roster: Dict[str, Any]) -> str:
 
 def _ledger_cache_file_path(reports_dir: Any) -> Any:
     from pathlib import Path
+    import cloud_store
 
     rdir = Path(reports_dir).resolve()
     repo_reports = (Path(__file__).resolve().parent / "reports").resolve()
     if rdir == repo_reports:
-        return Path("/tmp/dota_reports/squad_ledger.json")
+        return cloud_store.get_tmp_reports_dir() / "squad_ledger.json"
     return rdir / "squad_ledger.json"
 
 

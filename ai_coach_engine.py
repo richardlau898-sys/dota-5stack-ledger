@@ -3667,7 +3667,9 @@ def call_llm_coach_review(
                 with open(cache_path, "w", encoding="utf-8") as cf:
                     json.dump(structured, cf, ensure_ascii=False, indent=2)
             except OSError:
-                tmp_dir = "/tmp/dota_reports"
+                import cloud_store
+
+                tmp_dir = str(cloud_store.get_tmp_reports_dir())
                 os.makedirs(tmp_dir, exist_ok=True)
                 cache_path = os.path.join(tmp_dir, f"coaching-{mid}-{focus_side}.json")
                 with open(cache_path, "w", encoding="utf-8") as cf:
@@ -4469,8 +4471,10 @@ def call_nano_banana_poster_art(
     cache_hash = hashlib.md5(f"{mid}:{slot_key}:{style_mode}:{cosmetic_mode}:{provider_tag}:{custom_scene.strip()}".encode("utf-8")).hexdigest()[:12]
     cache_filename = f"poster_art_{mid}_{slot_key}_{cache_hash}.json"
 
+    import cloud_store
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    cache_dirs = [os.path.join(base_dir, "reports", "poster_art"), "/tmp/dota_reports/poster_art"]
+    cache_dirs = [os.path.join(base_dir, "reports", "poster_art"), str(cloud_store.get_tmp_reports_dir() / "poster_art")]
 
     if not force:
         for cdir in cache_dirs:

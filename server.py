@@ -124,7 +124,18 @@ def resolve_player_input(raw_input: str) -> int:
     return normalize_account_id(steam64_txt.strip())
 
 
-TMP_REPORTS_DIR = Path("/tmp/dota_reports")
+_DEFAULT_TMP_REPORTS_DIR = Path("/tmp/dota_reports")
+TMP_REPORTS_DIR = Path((os.environ.get("DOTA_TMP_DIR") or "").strip() or "/tmp/dota_reports")
+_INIT_TMP_REPORTS_DIR = TMP_REPORTS_DIR
+
+
+def _get_tmp_reports_dir() -> Path:
+    if TMP_REPORTS_DIR != _INIT_TMP_REPORTS_DIR:
+        return Path(TMP_REPORTS_DIR)
+    env_dir = (os.environ.get("DOTA_TMP_DIR") or "").strip()
+    if env_dir:
+        return Path(env_dir)
+    return _DEFAULT_TMP_REPORTS_DIR
 
 
 def is_match_already_analyzed(match_id: Any) -> bool:
@@ -133,7 +144,7 @@ def is_match_already_analyzed(match_id: Any) -> bool:
     mid = int(match_id)
     if (
         (REPORTS_DIR / f"match_{mid}.json").exists()
-        or (TMP_REPORTS_DIR / f"match_{mid}.json").exists()
+        or (_get_tmp_reports_dir() / f"match_{mid}.json").exists()
     ):
         return True
     return mid in get_cloud_analyzed_match_ids()
@@ -163,8 +174,9 @@ def fetch_recent_matches_formatted(
         return out_cached[:limit]
 
     hero_map, _ = get_hero_constants_map(allow_network=allow_network)
+    tmp_rdir = _get_tmp_reports_dir()
     recent_cache_file = REPORTS_DIR / f"recent_matches_{account_id}.json"
-    tmp_recent_cache_file = TMP_REPORTS_DIR / f"recent_matches_{account_id}.json"
+    tmp_recent_cache_file = tmp_rdir / f"recent_matches_{account_id}.json"
 
     raw_list = None
     fetched_from_network = False
@@ -177,7 +189,7 @@ def fetch_recent_matches_formatted(
                     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                     recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
                 except OSError:
-                    TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                    tmp_rdir.mkdir(parents=True, exist_ok=True)
                     tmp_recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
         except Exception:
             raw_list = None
@@ -404,7 +416,7 @@ def _hydrate_grok_from_caches(
         return report
 
     side = report.get("focus_side") or "dire"
-    for cdir in (TMP_REPORTS_DIR, REPORTS_DIR):
+    for cdir in (_get_tmp_reports_dir(), REPORTS_DIR):
         for s_candidate in (side, "radiant", "dire"):
             cf = cdir / f"coaching-{match_id}-{s_candidate}.json"
             if cf.exists():
@@ -456,7 +468,7 @@ def _ensure_grok_coaching(
                 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                 json_cache.write_text(rep_txt, encoding="utf-8")
             except OSError:
-                TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                _get_tmp_reports_dir().mkdir(parents=True, exist_ok=True)
                 tmp_json_cache.write_text(rep_txt, encoding="utf-8")
             try:
                 cloud_save_match_report(match_id, report)
@@ -597,9 +609,10 @@ def get_or_build_match_report(
     md_cache = REPORTS_DIR / f"match_{match_id}.md"
     raw_cache = REPORTS_DIR / f"raw_{match_id}.json"
 
-    tmp_json_cache = TMP_REPORTS_DIR / f"match_{match_id}.json"
-    tmp_md_cache = TMP_REPORTS_DIR / f"match_{match_id}.md"
-    tmp_raw_cache = TMP_REPORTS_DIR / f"raw_{match_id}.json"
+    tmp_rdir = _get_tmp_reports_dir()
+    tmp_json_cache = tmp_rdir / f"match_{match_id}.json"
+    tmp_md_cache = tmp_rdir / f"match_{match_id}.md"
+    tmp_raw_cache = tmp_rdir / f"raw_{match_id}.json"
 
     # R1-1: 不带口令的只读模式（allow_build=False）严格只读已有报告，零写入、零 OpenDota 请求、不拦非花名册/匿名读取
     if not allow_build:
@@ -718,7 +731,7 @@ def get_or_build_match_report(
                     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                     raw_cache.write_text(raw_txt, encoding="utf-8")
                 except OSError:
-                    TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                    tmp_rdir.mkdir(parents=True, exist_ok=True)
                     tmp_raw_cache.write_text(raw_txt, encoding="utf-8")
                 try:
                     cloud_save_raw_match(match_id, raw_match)
@@ -764,7 +777,7 @@ def get_or_build_match_report(
         json_cache.write_text(rep_txt, encoding="utf-8")
         md_cache.write_text(md_text, encoding="utf-8")
     except OSError:
-        TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        tmp_rdir.mkdir(parents=True, exist_ok=True)
         tmp_json_cache.write_text(rep_txt, encoding="utf-8")
         tmp_md_cache.write_text(md_text, encoding="utf-8")
 
@@ -1461,7 +1474,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
 
                 # Fast-path: load existing match report from local/tmp disk in 0ms without blocking on OpenDota parse polling
                 report = None
-                for jc_fast in (TMP_REPORTS_DIR / f"match_{mid}.json", REPORTS_DIR / f"match_{mid}.json"):
+                for jc_fast in (_get_tmp_reports_dir() / f"match_{mid}.json", REPORTS_DIR / f"match_{mid}.json"):
                     if jc_fast.exists():
                         try:
                             cand_rep = json.loads(jc_fast.read_text(encoding="utf-8"))
