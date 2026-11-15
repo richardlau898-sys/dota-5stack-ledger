@@ -125,6 +125,14 @@ def resolve_player_input(raw_input: str) -> int:
     return normalize_account_id(steam64_txt.strip())
 
 
+def _normalize_optional_account_param(raw_val: Any) -> str:
+    """Normalize JS sentinel strings ('null'/'undefined'/'none') to '' while keeping real vanity/ID inputs."""
+    s = str(raw_val or "").strip()
+    if s.lower() in ("null", "undefined", "none"):
+        return ""
+    return s
+
+
 TMP_REPORTS_DIR = Path("/tmp/dota_reports")
 
 
@@ -1185,7 +1193,9 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 return
 
             if path in ("/api/recent", "/api/player"):
-                raw_q = (qs.get("query") or qs.get("q") or qs.get("account_id") or [""])[0].strip()
+                raw_q = _normalize_optional_account_param(
+                    (qs.get("query") or qs.get("q") or qs.get("account_id") or [""])[0]
+                )
                 roster = load_roster()
                 if raw_q and not re.fullmatch(r"\d+", raw_q):
                     if not has_token:
@@ -1239,7 +1249,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 if force or analyze_now:
                     if not self._require_team_token():
                         return
-                aid_str = (qs.get("account_id") or [""])[0].strip()
+                aid_str = _normalize_optional_account_param((qs.get("account_id") or [""])[0])
                 if aid_str and not re.fullmatch(r"\d+", aid_str):
                     if not has_token:
                         self._send_json(

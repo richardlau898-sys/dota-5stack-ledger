@@ -13,6 +13,8 @@ import builtins
 import io
 import json
 import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 import urllib.error
@@ -23,7 +25,10 @@ from unittest.mock import patch
 
 import ai_coach_engine
 import cloud_store
+import draft_and_phase_coach
 import server
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 class _TestableHandler(server.DotaAnalystHandler):
@@ -301,6 +306,286 @@ class TestT31SecurityHardening(unittest.TestCase):
                     h_num.do_GET()
                     self.assertEqual(h_num.resp_status, 200)
                     self.assertEqual(len(outbound_calls), 0)
+
+    def test_4_unauthenticated_share_link_and_sentinel_account_id_return_200(self):
+        """分享链接与未登录前端传入 account_id=null/undefined/'' 时返回 200；真实 Steam 短名仍返回 401 且零外网请求"""
+        outbound_calls = []
+
+        def spy_urlopen(req, *args, **kwargs):
+            outbound_calls.append(req)
+            raise AssertionError("Unauthenticated request must NOT make any outbound HTTP call")
+
+        analyzed_mid = 9083213997
+        src_rep = REPO_ROOT / "reports" / f"match_{analyzed_mid}.json"
+        self.assertTrue(src_rep.is_file(), f"Missing fixture report: {src_rep}")
+        expected_main_id = int(server.load_roster().get("main_account_id") or 0)
+        self.assertGreater(expected_main_id, 0)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tpath = Path(tmpdir)
+            rep_dir = tpath / "reports"
+            tmp_rep_dir = tpath / "tmp_reports"
+            rep_dir.mkdir(parents=True, exist_ok=True)
+            tmp_rep_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src_rep, rep_dir / f"match_{analyzed_mid}.json")
+
+            server._RECENT_MATCHES_CACHE.clear()
+            draft_and_phase_coach._LEDGER_MEM_CACHE.clear()
+            env_clean = {k: v for k, v in os.environ.items() if not k.startswith("SUPABASE_")}
+            env_clean["TEAM_TOKEN"] = "configured_team_secret_token_xyz"
+
+            with patch.dict(os.environ, env_clean, clear=True), \
+                 patch.object(server, "REPORTS_DIR", rep_dir), \
+                 patch.object(server, "TMP_REPORTS_DIR", tmp_rep_dir), \
+                 patch.object(cloud_store, "TMP_REPORTS_DIR", tmp_rep_dir), \
+                 patch.object(cloud_store, "get_cloud_config", return_value={"supabase_url": "", "supabase_key": "", "supabase_bucket": "dota-reports"}), \
+                 patch.object(urllib.request, "urlopen", side_effect=spy_urlopen):
+
+                # 1) Passive share link /api/match/<id>?account_id=null|undefined|''&part=summary -> 200
+                for q_aid in ("null", "undefined", "None", ""):
+                    url_path = f"/api/match/{analyzed_mid}?account_id={q_aid}&part=summary"
+                    h = _TestableHandler("GET", url_path)
+                    h.do_GET()
+                    body = json.loads(h.wfile.getvalue().decode("utf-8"))
+                    self.assertEqual(
+                        h.resp_status,
+                        200,
+                        f"Expected 200 for {url_path}, got {h.resp_status}: {body}",
+                    )
+                    self.assertTrue(body.get("ok"), f"Expected ok=True for {url_path}: {body}")
+                    self.assertEqual(body.get("part"), "summary")
+                    self.assertEqual(body.get("report", {}).get("match_id"), analyzed_mid)
+                    self.assertEqual(len(outbound_calls), 0)
+
+                # 2) Real non-numeric vanity name on /api/match without token -> 401 with 0 outbound calls
+                h_match_vanity = _TestableHandler(
+                    "GET", f"/api/match/{analyzed_mid}?account_id=gabe_vanity_name&part=summary"
+                )
+                h_match_vanity.do_GET()
+                body_mv = json.loads(h_match_vanity.wfile.getvalue().decode("utf-8"))
+                self.assertEqual(h_match_vanity.resp_status, 401)
+                self.assertEqual(body_mv.get("error_code"), "AUTH_REQUIRED")
+                self.assertTrue(body_mv.get("need_team_token"))
+                self.assertEqual(len(outbound_calls), 0)
+
+                # 3) /api/recent?account_id=null and /api/player?query=null -> 200 with default main_account_id
+                for url_path in (
+                    "/api/recent?account_id=null",
+                    "/api/recent?account_id=undefined",
+                    "/api/player?query=null",
+                ):
+                    h_def = _TestableHandler("GET", url_path)
+                    h_def.do_GET()
+                    body_def = json.loads(h_def.wfile.getvalue().decode("utf-8"))
+                    self.assertEqual(
+                        h_def.resp_status,
+                        200,
+                        f"Expected 200 for {url_path}, got {h_def.resp_status}: {body_def}",
+                    )
+                    self.assertTrue(body_def.get("ok"), f"Expected ok=True for {url_path}: {body_def}")
+                    self.assertEqual(body_def.get("account_id"), expected_main_id)
+                    self.assertEqual(len(outbound_calls), 0)
+
+                # 4) Real non-numeric vanity name on /api/player and /api/recent without token -> 401 with 0 outbound calls
+                for url_path in (
+                    "/api/player?query=gabe_vanity_name",
+                    "/api/recent?account_id=gabe_vanity_name",
+                ):
+                    h_van = _TestableHandler("GET", url_path)
+                    h_van.do_GET()
+                    body_van = json.loads(h_van.wfile.getvalue().decode("utf-8"))
+                    self.assertEqual(
+                        h_van.resp_status,
+                        401,
+                        f"Expected 401 for {url_path}, got {h_van.resp_status}: {body_van}",
+                    )
+                    self.assertEqual(body_van.get("error_code"), "AUTH_REQUIRED")
+                    self.assertTrue(body_van.get("need_team_token"))
+                    self.assertEqual(len(outbound_calls), 0)
+
+    def test_5_frontend_share_link_no_null_account_id_and_no_401_modal(self):
+        """前端未登录分享链接不拼接 account_id=null，且只读加载遇到 401 绝不弹出设置口令弹窗"""
+        node_script = r"""
+const fs = require("fs");
+const vm = require("vm");
+
+let code = fs.readFileSync("static/app.js", "utf8");
+code = code.replace(/document\.addEventListener\(\s*["']DOMContentLoaded["'][\s\S]*$/, "");
+code += "\nglobalThis.__state = state;\n";
+
+const elements = {};
+function getEl(id) {
+  if (!elements[id]) {
+    elements[id] = {
+      id,
+      innerHTML: "",
+      textContent: "",
+      value: "",
+      options: [],
+      files: [],
+      hidden: false,
+      disabled: false,
+      open: false,
+      style: {},
+      dataset: {},
+      classList: {
+        _set: new Set(),
+        add(...cls) { cls.forEach((c) => this._set.add(c)); },
+        remove(...cls) { cls.forEach((c) => this._set.delete(c)); },
+        toggle(c, force) {
+          if (force === undefined) {
+            if (this._set.has(c)) { this._set.delete(c); return false; }
+            this._set.add(c); return true;
+          }
+          if (force) this._set.add(c); else this._set.delete(c);
+          return Boolean(force);
+        },
+        contains(c) { return this._set.has(c); }
+      },
+      setAttribute(k, v) { this[k] = v; },
+      getAttribute(k) { return this[k] || null; },
+      addEventListener() {},
+      removeEventListener() {},
+      querySelector() { return null; },
+      querySelectorAll() { return []; },
+      showModal() { this.open = true; },
+      close() { this.open = false; },
+      focus() {},
+      scrollTo() {},
+    };
+  }
+  return elements[id];
+}
+
+const fetchCalls = [];
+let mockStatus = 401;
+let mockBody = { ok: false, need_team_token: true, error_code: "AUTH_REQUIRED", error: "需要口令" };
+async function mockFetch(url, opts) {
+  fetchCalls.push({ url: String(url), opts: opts || {} });
+  return {
+    status: mockStatus,
+    ok: mockStatus >= 200 && mockStatus < 300,
+    text: async () => JSON.stringify(mockBody),
+    json: async () => mockBody,
+  };
+}
+
+const sandbox = {
+  window: {
+    location: { search: "?match=9083213997", pathname: "/", href: "http://localhost/?match=9083213997" },
+    history: { pushState() {}, replaceState() {} },
+    addEventListener() {},
+    removeEventListener() {},
+    scrollTo() {},
+  },
+  document: {
+    getElementById: (id) => getEl(id),
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    createElement: (tag) => getEl("created_" + tag + "_" + Math.random()),
+    body: getEl("body"),
+  },
+  localStorage: {
+    _store: {},
+    getItem(k) { return this._store[k] || null; },
+    setItem(k, v) { this._store[k] = String(v); },
+    removeItem(k) { delete this._store[k]; },
+  },
+  sessionStorage: {
+    _store: {},
+    getItem(k) { return this._store[k] || null; },
+    setItem(k, v) { this._store[k] = String(v); },
+    removeItem(k) { delete this._store[k]; },
+  },
+  Intl,
+  Date,
+  Math,
+  Number,
+  String,
+  Boolean,
+  Array,
+  Object,
+  Set,
+  Map,
+  RegExp,
+  Error,
+  Promise,
+  JSON,
+  URLSearchParams,
+  URIError,
+  encodeURIComponent,
+  decodeURIComponent,
+  parseInt,
+  parseFloat,
+  isNaN,
+  isFinite,
+  console: { log() {}, warn() {}, error() {} },
+  fetch: mockFetch,
+  setTimeout: () => 1,
+  clearTimeout: () => {},
+  setInterval: () => 1,
+  clearInterval: () => {},
+  requestAnimationFrame: (fn) => fn(),
+};
+sandbox.window.document = sandbox.document;
+sandbox.globalThis = sandbox;
+vm.createContext(sandbox);
+vm.runInContext(code, sandbox);
+
+(async () => {
+  if (typeof sandbox.formatAccountIdParam !== "function") {
+    throw new Error("Missing formatAccountIdParam helper");
+  }
+  for (const [inp, exp] of [[null, ""], [undefined, ""], ["", ""], ["null", ""], ["undefined", ""], ["86080912", "86080912"], [86080912, "86080912"]]) {
+    const got = sandbox.formatAccountIdParam(inp);
+    if (got !== exp) {
+      throw new Error(`formatAccountIdParam(${String(inp)}) returned ${JSON.stringify(got)}, expected ${JSON.stringify(exp)}`);
+    }
+  }
+
+  // Passive share link load with state.accountId = null must NOT send account_id=null and must NOT open settings-dialog on 401
+  sandbox.__state.accountId = null;
+  getEl("settings-dialog").open = false;
+  mockStatus = 401;
+  mockBody = { ok: false, need_team_token: true, error_code: "AUTH_REQUIRED", error: "需要口令" };
+  await sandbox.loadMatchReport(9083213997, { analyzeNow: false, switchToPostgame: true, fromPopState: true });
+
+  if (fetchCalls.length !== 1) {
+    throw new Error("Expected 1 fetch call, got " + fetchCalls.length);
+  }
+  const passiveUrl = fetchCalls[0].url;
+  if (passiveUrl.includes("account_id=null") || passiveUrl.includes("account_id=undefined")) {
+    throw new Error("Passive share-link URL leaked sentinel account_id: " + passiveUrl);
+  }
+  if (!passiveUrl.includes("account_id=&part=summary")) {
+    throw new Error("Expected account_id=&part=summary in passive URL, got: " + passiveUrl);
+  }
+  if (getEl("settings-dialog").open) {
+    throw new Error("settings-dialog opened on passive read-only share-link load!");
+  }
+
+  // Active analyzeNow: true on 401 SHOULD still open settings-dialog
+  await sandbox.loadMatchReport(9083213997, { analyzeNow: true });
+  if (!getEl("settings-dialog").open) {
+    throw new Error("settings-dialog did NOT open on active analyzeNow=true 401");
+  }
+})().catch((err) => {
+  console.error(err && err.stack ? err.stack : String(err));
+  process.exit(1);
+});
+"""
+        proc = subprocess.run(
+            ["node", "-e", node_script],
+            cwd=str(REPO_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        self.assertEqual(
+            proc.returncode,
+            0,
+            f"Frontend share-link test failed:\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}",
+        )
 
 
 if __name__ == "__main__":
