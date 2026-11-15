@@ -1,0 +1,56 @@
+name: M0 Replay Parser Benchmark
+
+on:
+  push:
+    branches: ["*"]
+    paths:
+      - "tools/replay_lab/gha_m0_bench.py"
+      - "tools/replay_lab/ParseCli.java"
+      - ".github/workflows/m0_replay_bench.yml"
+  workflow_dispatch:
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Temurin JDK 21 and Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Ensure GNU time, bzip2, and zstd are installed
+        run: |
+          if ! command -v /usr/bin/time >/dev/null 2>&1 || ! command -v bzip2 >/dev/null 2>&1 || ! command -v zstd >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y time bzip2 zstd
+          fi
+          /usr/bin/time --version | head -n 1
+          bzip2 --version </dev/null 2>&1 | head -n 1
+          zstd --version
+          mvn -version
+
+      - name: Clone and build odota/parser + ParseCli
+        run: |
+          rm -rf /tmp/m0_gha_parser
+          git clone --depth 1 https://github.com/odota/parser.git /tmp/m0_gha_parser
+          git -C /tmp/m0_gha_parser rev-parse HEAD
+          mvn -q -f /tmp/m0_gha_parser/pom.xml package -DskipTests
+          mkdir -p /tmp/m0_gha_parser/cli_classes
+          javac -proc:none -cp /tmp/m0_gha_parser/target/stats-0.1.0.jar -d /tmp/m0_gha_parser/cli_classes tools/replay_lab/ParseCli.java
+
+      - name: Run anonymous replay benchmark
+        run: python3 tools/replay_lab/gha_m0_bench.py
+
+      - name: Clean up temporary files
+        if: always()
+        run: rm -rf /tmp/m0_gha /tmp/m0_gha_parser
