@@ -19,6 +19,8 @@
 | `9085834639` | `2026-11-11T15:56:51+00:00` | `3.80d` | 3 人 | `patch=60` (7.41) | `2567s` (`42m47s`) | `v22` |
 | `9083213997` | `2026-11-09T15:12:11+00:00` | 推算 `5.83d` (`11-09 15:12Z -> 11-15 11:06Z`) | 5 人（5 黑） | `patch=60` (7.41) | `2481s` (`41m21s`) | `v22` |
 
+> 注：`9083213997` 因开赛距探测时刻超过 `5.0d` 未进入附录 3 的 `<=5d` 探针列表；其 `5 人（5 黑）` 与 `v22`（`version=22`）由本地直接查询 OpenDota `/api/matches/9083213997` 实测确认（完整响应未贴入附录 2–3）。
+
 ### 1.2 `odota/parser` 构建方式与关键格式发现
 - **构建方式选择：从源码构建（非 Docker）**。本地 macOS 宿主机无 Docker 与系统 JVM，采用在临时目录安装便携式 Temurin OpenJDK `21.0.13+9` 与 Apache Maven `3.9.9`（CI 上使用 Maven `3.9.15`），克隆 `https://github.com/odota/parser.git`（实测 commit `67945be040de92d0ba9cdedc77434886d4f736be`）执行 `mvn -q package -DskipTests` 生成 `target/stats-0.1.0.jar`（`29,090,157` 字节），并通过 `tools/replay_lab/ParseCli.java`（仅 27 行，调用 `new opendota.Parse(is, os, false)`）将本地 `.dem` 直接流式解析为 JSONL 文件。该方式同样直接复用于 GitHub Actions `ubuntu-latest`（免容器构建开销，全流程 1 分 51 秒完成）。
 - **【实测】重要发现：Valve CDN 实际下发 `Zstandard` 而非 `Bzip2`**：
@@ -45,11 +47,11 @@
 | `9087090072` | `54,071,426 B` (`51.57 MiB`) | `91,934,749 B` (`87.68 MiB`) | `52,966,593 B` (`50.51 MiB`) | `2,156,386 B` (`2.06 MiB`) | `526,678 B` (`514.33 KiB`) | `146,572 B` (`143.14 KiB`) | `107,641 B` (`105.12 KiB`) |
 | `9085834639` | `52,132,535 B` (`49.72 MiB`) | `88,942,221 B` (`84.82 MiB`) | `43,807,456 B` (`41.78 MiB`) | `1,811,562 B` (`1.73 MiB`) | `517,093 B` (`504.97 KiB`) | `139,414 B` (`136.15 KiB`) | `101,970 B` (`99.58 KiB`) |
 | `9083213997` | `54,316,047 B` (`51.80 MiB`) | `96,843,120 B` (`92.36 MiB`) | `48,143,894 B` (`45.91 MiB`) | `1,943,499 B` (`1.85 MiB`) | `489,973 B` (`478.49 KiB`) | `132,751 B` (`129.64 KiB`) | `97,092 B` (`94.82 KiB`) |
-| **3 场算术均值** | `53,506,669 B` (`51.03 MiB`) | `92,573,363 B` (`88.29 MiB`) | `48,305,981 B` (`46.07 MiB`) | `1,970,482 B` (`1.88 MiB`) | `511,248 B` (`499.27 KiB`) | `139,579 B` (`136.31 KiB`) | `102,234 B` (`99.84 KiB`) |
+| **3 场算术均值** | `53,506,669 B` (`51.03 MiB`) | `92,573,363 B` (`88.28 MiB`) | `48,305,981 B` (`46.07 MiB`) | `1,970,482 B` (`1.88 MiB`) | `511,248 B` (`499.27 KiB`) | `139,579 B` (`136.31 KiB`) | `102,234 B` (`99.84 KiB`) |
 
 ### 2.3 解析输出主要事件类型与条数【实测】
 
-三场总行数分别为 `210,452`（`9087090072`）、`175,988`（`9085834639`）、`222,945`（`9083213997`）。各关键事件条数如下（全部 60+ 种事件完整计数见附录 2 原始 JSON 输出）：
+三场总行数分别为 `210,452`（`9087090072`）、`175,988`（`9085834639`）、`222,945`（`9083213997`）。各关键事件条数如下（按场分别为 `68` / `61` / `57` 种、去重合计 `69` 种事件，完整计数见附录 2 原始 JSON 输出）：
 
 | 事件 `type` | `9087090072` | `9085834639` | `9083213997` | 用途说明（M1–M3 相关） |
 |---|---|---|---|---|
@@ -196,7 +198,7 @@
 4. [`tools/replay_lab/run_local_m0.py`](../tools/replay_lab/run_local_m0.py)：3 场本地全流程基准与 OpenDota 坐标交叉核对脚本。
 5. [`tools/replay_lab/check_retention_and_volume.py`](../tools/replay_lab/check_retention_and_volume.py)：Valve HTTP `HEAD` 保留期探针与 28 天场次统计脚本。
 6. [`tools/replay_lab/gha_m0_bench.py`](../tools/replay_lab/gha_m0_bench.py) & [`.github/workflows/m0_replay_bench.yml`](../.github/workflows/m0_replay_bench.yml)：公开仓库匿名 GitHub Actions 基准脚本与工作流。
-7. [`tools/replay_lab/sample_9083213997_excerpt.jsonl`](../tools/replay_lab/sample_9083213997_excerpt.jsonl)：**来自比赛号 `9083213997`（`patch=60`，5-stack）的真实未修改 JSONL 样本**，共 **`181` 行**（`68,246` 字节，满足 `<= 200` 行），包含：`interval` (`80`)、`pings` (`15`)、`obs` (`15`)、`DOTA_COMBATLOG_DEATH` (`15`)、`obs_left` (`15`)、`DOTA_COMBATLOG_ITEM` (`10`)、`DOTA_COMBATLOG_DAMAGE` (`10`)、`DOTA_COMBATLOG_MODIFIER_ADD` (`8`，含开雾与 TP)、`DOTA_COMBATLOG_MODIFIER_REMOVE` (`7`)、`DOTA_COMBATLOG_ABILITY` (`6`)；已校验 `0` 条 `epilogue`、`0` 条 `chat`、`0` 玩家昵称、`0` Steam/Account ID。
+7. [`tools/replay_lab/sample_9083213997_excerpt.jsonl`](../tools/replay_lab/sample_9083213997_excerpt.jsonl)：**来自比赛号 `9083213997`（`patch=60`，5-stack）的真实未修改 JSONL 样本**，共 **`181` 行**（`68,246` 字节，满足 `<= 200` 行），包含：`interval` (`80`)、`pings` (`15`)、`obs` (`15`)、`DOTA_COMBATLOG_DEATH` (`15`)、`obs_left` (`15`)、`DOTA_COMBATLOG_ITEM` (`10`)、`DOTA_COMBATLOG_DAMAGE` (`10`)、`DOTA_COMBATLOG_MODIFIER_ADD` (`8`，含 `modifier_smoke_of_deceit` 开雾状态)、`DOTA_COMBATLOG_MODIFIER_REMOVE` (`7`)、`DOTA_COMBATLOG_ABILITY` (`6`)；已校验 `0` 条 `epilogue`、`0` 条 `chat`、`0` 玩家昵称、`0` Steam/Account ID。
 
 ### 7.2 等待 Richard 在 M0 检查点拍板的问题与建议
 - **待补充项**：请在 Supabase 后台确认生产项目实际所在组织/套餐（Free 还是 Pro）与 Storage 当前配额及已用空间，以核对第 6.2 节的 `~11.1 MiB/月`（纯 1Hz 精简时间轴）vs `~156.6 MiB/月`（含全量 `jsonl.gz`）是否均远在免费额度内。
