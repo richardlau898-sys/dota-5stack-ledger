@@ -2,7 +2,7 @@ name: M0 Replay Parser Benchmark
 
 on:
   push:
-    branches: ["*"]
+    branches: ["**"]
     paths:
       - "tools/replay_lab/gha_m0_bench.py"
       - "tools/replay_lab/ParseCli.java"
