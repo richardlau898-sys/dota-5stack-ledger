@@ -560,16 +560,39 @@ def _supabase_fetch_llm_task(task_id: str, cfg: Optional[Dict[str, str]] = None)
     return None
 
 
+import re
+
+_LLM_TASK_ID_RE = re.compile(r"^llm-\d+-(radiant|dire)-\d+\Z")
+_MAX_LLM_TASK_ID_LEN = 80
+
+
+def is_valid_llm_task_id(task_id: Any) -> bool:
+    if not isinstance(task_id, str) or not task_id or len(task_id) > _MAX_LLM_TASK_ID_LEN:
+        return False
+    return bool(_LLM_TASK_ID_RE.fullmatch(task_id))
+
+
+def _resolve_safe_task_file(task_id: str) -> Optional[Path]:
+    if not is_valid_llm_task_id(task_id):
+        return None
+    tasks_root = (TMP_REPORTS_DIR / "tasks").resolve()
+    candidate = (tasks_root / f"{task_id}.json").resolve()
+    if candidate.parent != tasks_root:
+        return None
+    return candidate
+
+
 def cloud_save_llm_task(task_id: str, task_obj: Dict[str, Any]) -> bool:
-    if not task_id or not isinstance(task_obj, dict):
+    if not is_valid_llm_task_id(task_id) or not isinstance(task_obj, dict):
         return False
     _LLM_TASKS_MEM[task_id] = dict(task_obj)
     try:
-        tasks_dir = TMP_REPORTS_DIR / "tasks"
-        tasks_dir.mkdir(parents=True, exist_ok=True)
-        (tasks_dir / f"{task_id}.json").write_text(
-            json.dumps(task_obj, ensure_ascii=False), encoding="utf-8"
-        )
+        target = _resolve_safe_task_file(task_id)
+        if target is not None:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(
+                json.dumps(task_obj, ensure_ascii=False), encoding="utf-8"
+            )
     except Exception:
         pass
     cfg = get_cloud_config()
@@ -577,7 +600,7 @@ def cloud_save_llm_task(task_id: str, task_obj: Dict[str, Any]) -> bool:
 
 
 def cloud_load_llm_task(task_id: str) -> Optional[Dict[str, Any]]:
-    if not task_id:
+    if not is_valid_llm_task_id(task_id):
         return None
     cfg = get_cloud_config()
     remote = _supabase_fetch_llm_task(task_id, cfg)
@@ -587,8 +610,8 @@ def cloud_load_llm_task(task_id: str) -> Optional[Dict[str, Any]]:
     if task_id in _LLM_TASKS_MEM:
         return _LLM_TASKS_MEM[task_id]
     try:
-        p = TMP_REPORTS_DIR / "tasks" / f"{task_id}.json"
-        if p.exists():
+        p = _resolve_safe_task_file(task_id)
+        if p is not None and p.is_file():
             data = json.loads(p.read_text(encoding="utf-8"))
             if isinstance(data, dict):
                 _LLM_TASKS_MEM[task_id] = data

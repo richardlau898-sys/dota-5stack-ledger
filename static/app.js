@@ -1482,7 +1482,7 @@ async function initApp() {
   }
 
   try {
-    const res = await fetch(`/api/init?account_id=${encodeURIComponent(state.accountId)}`, {
+    const res = await fetch(`/api/init?account_id=${formatAccountIdParam(state.accountId)}`, {
       headers: getTeamTokenHeaders(),
     });
     const data = await res.json();
@@ -2365,7 +2365,7 @@ function bindEvents() {
         showToast("🔐 车队口令已保存在本地浏览器，正在刷新比赛记录...");
         dialog?.close();
         try {
-          const res = await fetch(`/api/init?account_id=${encodeURIComponent(state.accountId)}`, {
+          const res = await fetch(`/api/init?account_id=${formatAccountIdParam(state.accountId)}`, {
             headers: getTeamTokenHeaders(),
           });
           const data = await res.json();
@@ -2392,6 +2392,13 @@ function bindEvents() {
 }
 
 const TEAM_TOKEN_STORAGE_KEY = "dota_ledger_team_token";
+
+function formatAccountIdParam(aid) {
+  if (aid === null || aid === undefined) return "";
+  const s = String(aid).trim();
+  if (!s || s.toLowerCase() === "null" || s.toLowerCase() === "undefined") return "";
+  return encodeURIComponent(s);
+}
 
 function getStoredTeamToken() {
   try {
@@ -3196,7 +3203,7 @@ async function loadMatchReport(
     const flags = `${partFlag}${forceRefresh ? "&refresh=1&skip_llm=1" : ""}${
       analyzeNow && !forceRefresh ? "&analyze=1&skip_llm=1" : ""
     }`;
-    const url = `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
+    const url = `/api/match/${encodeURIComponent(matchId)}?account_id=${formatAccountIdParam(
       state.accountId
     )}${flags}`;
     const res = await fetch(url, {
@@ -3211,7 +3218,7 @@ async function loadMatchReport(
     } catch {
       throw new Error(`服务端响应超时或异常 (${res.status})，请稍后重试`);
     }
-    if (promptTeamTokenOn401(res, data)) {
+    if ((analyzeNow || forceRefresh) && promptTeamTokenOn401(res, data)) {
       const confirmBtn = document.getElementById("btn-confirm-analyze-match");
       if (confirmBtn) {
         confirmBtn.disabled = false;
@@ -3317,7 +3324,7 @@ function scheduleAutoReplayParsePoll(matchId, attempt = 1) {
     }
     try {
       const res = await fetch(
-        `/api/match/${encodeURIComponent(matchId)}?account_id=${encodeURIComponent(
+        `/api/match/${encodeURIComponent(matchId)}?account_id=${formatAccountIdParam(
           state.accountId
         )}&refresh=1&analyze=1&skip_llm=1`,
         { headers: getTeamTokenHeaders() }
@@ -3417,9 +3424,22 @@ async function triggerGrokReview({ force = true } = {}) {
     }
 
     if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
-    if (finalData.report) {
-      if (Number(finalData.report.match_id || reqMatchId) !== reqMatchId) return;
-      state.currentReport = finalData.report;
+    let updatedReport = finalData.report || null;
+    if (!updatedReport && finalData.status === "completed") {
+      const aidVal = formatAccountIdParam(state.accountId);
+      const aidParam = aidVal ? `?account_id=${aidVal}` : "";
+      const repRes = await fetch(`/api/match/${encodeURIComponent(reqMatchId)}${aidParam}`, {
+        headers: getTeamTokenHeaders(),
+      });
+      if (Number(state.currentMatchId) !== reqMatchId || state.pendingMatchId) return;
+      const repJson = await repRes.json();
+      if (repJson && repJson.ok && repJson.report) {
+        updatedReport = repJson.report;
+      }
+    }
+    if (updatedReport) {
+      if (Number(updatedReport.match_id || reqMatchId) !== reqMatchId) return;
+      state.currentReport = updatedReport;
       saveLocalAnalyzedMatch(state.currentReport);
       renderFullMatchReport(state.currentReport);
       showToast(`✅ ${getCoachModelDisplayName(state.currentReport)} 五人深度研判与三幕长段复盘已生成并持久化缓存！`);
@@ -3656,8 +3676,8 @@ async function ensureReportPartLoaded(partName) {
   const p = (async () => {
     try {
       const res = await fetch(
-        `/api/match/${encodeURIComponent(reqMid)}?part=${encodeURIComponent(partName)}&account_id=${encodeURIComponent(
-          state.accountId || ""
+        `/api/match/${encodeURIComponent(reqMid)}?part=${encodeURIComponent(partName)}&account_id=${formatAccountIdParam(
+          state.accountId
         )}`
       );
       const data = await res.json();

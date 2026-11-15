@@ -91,21 +91,23 @@ class TestR12NoErrorLeak(unittest.TestCase):
         with patch.object(server, "cloud_save_llm_task", side_effect=fake_save), patch.object(
             server, "cloud_load_llm_task", side_effect=fake_load
         ), patch.object(server, "call_llm_coach_review", side_effect=RuntimeError(raw_exc_msg)):
-            res_state = server._execute_llm_review_task("task-exc-1", 9083213997, "radiant", {"match_id": 9083213997})
+            valid_tid_1 = "llm-9083213997-radiant-1001"
+            valid_tid_2 = "llm-9083213997-radiant-1002"
+            res_state = server._execute_llm_review_task(valid_tid_1, 9083213997, "radiant", {"match_id": 9083213997})
             self.assertEqual(res_state.get("status"), "failed")
             self.assertNotIn("invalid literal", str(res_state.get("error") or ""))
             self.assertNotIn("Traceback", str(res_state.get("error") or ""))
             self.assertNotIn("/Users/", str(res_state.get("error") or ""))
 
             # Even if an old task in storage has raw traceback in "error", /api/llm_review_status strips it
-            saved_tasks["task-legacy-leak"] = {
-                "task_id": "task-legacy-leak",
+            saved_tasks[valid_tid_2] = {
+                "task_id": valid_tid_2,
                 "match_id": 9083213997,
                 "side": "radiant",
                 "status": "failed",
                 "error": raw_exc_msg,
             }
-            for tid in ("task-exc-1", "task-legacy-leak"):
+            for tid in (valid_tid_1, valid_tid_2):
                 h = _TestableHandler("GET", f"/api/llm_review_status?task_id={tid}")
                 h.do_GET()
                 self.assertEqual(h.resp_status, 200)
