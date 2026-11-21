@@ -69,6 +69,7 @@ from dota_analyst import (
     strip_report_cdn_urls_to_keys,
 )
 from dota_constants_zh import get_hero_name, get_mode_and_lobby, sanitize_report_mixed_english
+import hero_builds_store
 from draft_and_phase_coach import (
     build_pregame_strategy_plan,
     build_squad_history_ledger,
@@ -1011,6 +1012,47 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_public_json(self, data: Any, max_age: int = 600) -> None:
+        """公开、可缓存的 JSON（英雄攻略数据，所有人看到的都一样）。"""
+        body = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        use_gzip = self._accepts_gzip() and len(body) >= 512
+        if use_gzip:
+            body = gzip.compress(body, compresslevel=6)
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        if use_gzip:
+            self.send_header("Content-Encoding", "gzip")
+            self.send_header("Vary", "Accept-Encoding")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", f"public, max-age={max_age}, s-maxage={max_age * 3}")
+        self.send_header("X-Robots-Tag", "noindex")
+        self.send_header("Content-Security-Policy-Report-Only", CSP_REPORT_ONLY_VALUE)
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _serve_hero_builds(self, path: str) -> None:
+        """GET /api/hero_builds（索引）与 /api/hero_builds/<hero_id>（单个英雄）。公开数据，不需要口令。"""
+        rest = path[len("/api/hero_builds"):].strip("/")
+        if rest and not re.fullmatch(r"[0-9]{1,4}", rest):
+            self._send_json({"ok": False, "error": "英雄编号格式不正确"}, status=400)
+            return
+        try:
+            bundle, is_stale = hero_builds_store.get_bundle()
+        except hero_builds_store.HeroBuildsUnavailable:
+            self._send_json(
+                {"ok": False, "error": "英雄攻略数据暂时取不到。数据每 6 小时自动更新一次，请稍后再试。"},
+                status=503,
+            )
+            return
+        if not rest:
+            self._send_public_json({"ok": True, "stale": is_stale, "index": bundle["index"]})
+            return
+        hero = bundle["heroes"].get(str(int(rest)))
+        if not isinstance(hero, dict):
+            self._send_json({"ok": False, "error": "没有这个英雄的攻略数据"}, status=404)
+            return
+        self._send_public_json({"ok": True, "stale": is_stale, "hero": hero})
+
     def _read_json_body(self) -> Dict[str, Any]:
         length = int(self.headers.get("Content-Length") or 0)
         if length <= 0:
@@ -1068,6 +1110,10 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 self.send_response(204)
                 self.send_header("Cache-Control", "public, max-age=86400")
                 self.end_headers()
+                return
+
+            if path == "/api/hero_builds" or path.startswith("/api/hero_builds/"):
+                self._serve_hero_builds(path)
                 return
 
             if path == "/api/match_icons":
@@ -1222,7 +1268,9 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             # 静态文件服务 (支持 /, /pregame, 以及公开分享链接 /match/<id>)
             is_html_route = path in ("/", "", "/pregame", "/pregame.html") or path.startswith("/match/")
             is_hashed_asset = False
-            if is_html_route:
+            if path in ("/heroes", "/heroes/"):
+                file_path = STATIC_DIR / "heroes.html"
+            elif is_html_route:
                 file_path = STATIC_DIR / "index.html"
             else:
                 rel = path.lstrip("/")

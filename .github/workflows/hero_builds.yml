@@ -1,0 +1,69 @@
+name: Hero builds data
+
+# 英雄攻略页的数据：每 6 小时抓一批当前版本神话段以上的天梯比赛，汇总后发布到
+# Release "hero-builds-data"，网站从那里读取。日志里只打印计数，不打印比赛数据。
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "tools/hero_builds/**"
+      - ".github/workflows/hero_builds.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hero-builds
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Restore match cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .hero_cache
+          key: hero-builds-cache-${{ github.run_id }}
+          restore-keys: hero-builds-cache-
+
+      - name: Download reference data (OpenDota constants, Valve official Chinese data, patch notes)
+        run: python3 tools/hero_builds/fetch_constants.py --out .hero_const
+
+      - name: Collect new matches
+        run: >
+          python3 tools/hero_builds/collect.py --cache .hero_cache
+          --max-matches 450 --min-rank 70 --per-min 50 --day-reserve 300 --keep 30000
+
+      - name: Save match cache
+        if: always() && hashFiles('.hero_cache/matches/*.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .hero_cache
+          key: hero-builds-cache-${{ github.run_id }}
+
+      - name: Build bundle
+        run: python3 tools/hero_builds/build.py --cache .hero_cache --const .hero_const --bundle out/hero_builds.json.gz
+
+      - name: Publish to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view hero-builds-data >/dev/null 2>&1; then
+            gh release create hero-builds-data --prerelease --latest=false \
+              --title "英雄攻略数据（自动生成）" \
+              --notes "由 .github/workflows/hero_builds.yml 每 6 小时自动更新，供网站的英雄攻略页读取。请不要手动修改或删除。"
+          fi
+          gh release upload hero-builds-data out/hero_builds.json.gz --clobber
