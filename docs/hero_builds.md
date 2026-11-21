@@ -21,7 +21,7 @@
 
 1. 从 Actions 缓存取回已抓过的比赛（只保留当前版本，最多 30,000 场，超出时删最早的）。
 2. `tools/hero_builds/fetch_constants.py`：更新常量、官方中文数据和更新日志。
-3. `tools/hero_builds/collect.py`：抓最多 450 场新比赛。按 OpenDota 返回头里的剩余额度限速（免费额度为每分钟 60 次、每天 3,000 次），每天至少留 300 次不用。
+3. `tools/hero_builds/collect.py`：抓最多 450 场新比赛。按 OpenDota 返回头里的剩余额度限速（免费额度为每分钟 60 次、每天 3,000 次），每天至少留 300 次不用。最多抓 22 分钟：到时间、或剩余额度降到保留线时正常停下，已抓到的比赛照常进入汇总，不会让整次运行失败（整个任务的上限是 40 分钟；第一次运行抓 450 场用了 24 分钟）。
 4. `tools/hero_builds/build.py`：汇总成一个 gzip JSON。
 5. 上传到本仓库的 Release `hero-builds-data`（标为预发布，不会成为"最新版本"）。
 

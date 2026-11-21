@@ -6,7 +6,11 @@ Stdlib only. Rate-limited to stay well under OpenDota's free limits
 Raw match JSON is cached on disk so reruns only fetch new matches.
 
 Usage:
-  python3 collect.py --cache DIR --max-matches 1000 --min-rank 70 --day-reserve 1200
+  python3 collect.py --cache DIR --max-matches 1000 --min-rank 70 --day-reserve 1200 --max-minutes 22
+
+Running out of time (--max-minutes) or reaching the daily reserve (--day-reserve) is a normal
+stop: whatever was collected so far stays in the cache and the script exits 0, so a scheduled
+job can still build and publish.
 """
 import argparse
 import json
@@ -22,6 +26,10 @@ RANKED_LOBBY = 7
 ALL_PICK_MODES = {22}  # ranked All Pick; excludes Turbo (23) and others
 
 
+class QuotaReserveReached(SystemExit):
+    """OpenDota's remaining daily quota has fallen to the reserve we keep for the website."""
+
+
 class Limiter:
     def __init__(self, per_min: int, day_reserve: int):
         self.gap = 60.0 / per_min
@@ -35,7 +43,7 @@ class Limiter:
         if wait > 0:
             time.sleep(wait)
         if self.day_left is not None and self.day_left <= self.day_reserve:
-            raise SystemExit(f"stop: daily quota reserve reached (remaining {self.day_left})")
+            raise QuotaReserveReached(f"daily quota reserve reached (remaining {self.day_left})")
         req = urllib.request.Request(API + path, headers={"User-Agent": UA, "Accept": "application/json"})
         for attempt in range(4):
             self.last = time.time()
@@ -97,10 +105,24 @@ def main() -> int:
     ap.add_argument("--per-min", type=int, default=50)
     ap.add_argument("--day-reserve", type=int, default=1200, help="stop when daily quota left falls to this")
     ap.add_argument("--keep", type=int, default=30000, help="keep at most this many cached matches (newest first)")
+    ap.add_argument("--max-minutes", type=float, default=0,
+                    help="stop fetching after this many minutes (0 = no limit); a rate-limit wait in progress "
+                         "can run up to about a minute past it")
     args = ap.parse_args()
 
     os.makedirs(os.path.join(args.cache, "matches"), exist_ok=True)
     lim = Limiter(args.per_min, args.day_reserve)
+    deadline = time.monotonic() + args.max_minutes * 60 if args.max_minutes > 0 else None
+    try:
+        return _collect(args, lim, deadline)
+    except QuotaReserveReached as stop:
+        print(f"stop: {stop}; keeping what was collected", flush=True)
+        return 0
+
+
+def _collect(args, lim, deadline) -> int:
+    def out_of_time() -> bool:
+        return deadline is not None and time.monotonic() >= deadline
 
     patches = lim.get("/constants/patch")
     latest = max(patches, key=lambda p: p["id"])
@@ -116,7 +138,11 @@ def main() -> int:
     kept = 0
     cursor = None
     seen_old = 0
-    while fetched < args.max_matches:
+    timed_out = False
+    while fetched < args.max_matches and not timed_out:
+        if out_of_time():
+            timed_out = True
+            break
         q = f"/publicMatches?min_rank={args.min_rank}" + (f"&less_than_match_id={cursor}" if cursor else "")
         page = lim.get(q)
         if not page:
@@ -133,6 +159,9 @@ def main() -> int:
             mid = int(m["match_id"])
             if mid in have:
                 continue
+            if out_of_time():
+                timed_out = True
+                break
             try:
                 detail = lim.get(f"/matches/{mid}")
             except Exception as e:  # keep going on single-match failures
@@ -169,6 +198,8 @@ def main() -> int:
         if seen_old > 300:
             print("reached matches older than the patch; stopping", flush=True)
             break
+    if timed_out:
+        print(f"stop: time budget of {args.max_minutes:g} minutes reached; keeping what was collected", flush=True)
     print(f"done: kept {kept} new matches for {patch_name}; total cached {len(have)}; api calls {lim.calls}; day left {lim.day_left}", flush=True)
     return 0
 
