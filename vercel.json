@@ -60,6 +60,10 @@
       "destination": "/static/$1"
     },
     {
+      "source": "/heroes",
+      "destination": "/static/heroes.html"
+    },
+    {
       "source": "/match/(.*)",
       "destination": "/static/index.html"
     },
