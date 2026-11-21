@@ -6,13 +6,16 @@
 全部离线运行。
 """
 import collections
+import contextlib
 import gzip
 import io
+import itertools
 import json
 import os
 import pathlib
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 import urllib.error
@@ -160,6 +163,72 @@ class TestCollector(unittest.TestCase):
             removed = hb_collect.prune_cache(tmp, 61, keep=2)
             self.assertEqual(removed, 2)
             self.assertEqual(sorted(os.listdir(tmp)), ["2.json", "4.json"])
+
+    @staticmethod
+    def _fake_opendota(day_left="2500"):
+        """Answers the three OpenDota calls collect.py makes, without any network."""
+        patch_list = [{"id": 61, "name": "7.42", "date": "2026-11-18T21:28:07.019Z"}]
+        public = [{"match_id": 9100000000 + i, "start_time": 1795280000, "lobby_type": 7, "game_mode": 22,
+                   "avg_rank_tier": 75, "duration": 2400} for i in range(3)]
+        player = {"player_slot": 0, "hero_id": 8, "ability_upgrades_arr": [5028], "level": 1}
+
+        def opener(req, timeout=None):
+            url = req.full_url
+            if url.endswith("/constants/patch"):
+                body = patch_list
+            elif "/publicMatches" in url:
+                # first page has 3 matches; asking for older matches returns an empty page
+                body = [] if "less_than_match_id" in url else public
+            else:
+                mid = int(url.rsplit("/", 1)[1])
+                body = {"match_id": mid, "patch": 61, "start_time": 1795280000, "duration": 2400,
+                        "radiant_win": True, "players": [dict(player) for _ in range(10)]}
+            return _FakeResponse(json.dumps(body).encode("utf-8"),
+                                 {"x-rate-limit-remaining-day": day_left, "x-rate-limit-remaining-minute": "50"})
+        return opener
+
+    def _run_main(self, argv, opener, monotonic_values=None):
+        out = io.StringIO()
+        patches = [patch.object(hb_collect.urllib.request, "urlopen", side_effect=opener),
+                   patch.object(hb_collect.time, "sleep", lambda s: None),
+                   patch.object(sys, "argv", ["collect.py"] + argv)]
+        if monotonic_values is not None:
+            patches.append(patch.object(hb_collect.time, "monotonic", side_effect=monotonic_values))
+        with contextlib.ExitStack() as stack, contextlib.redirect_stdout(out):
+            for p in patches:
+                stack.enter_context(p)
+            code = hb_collect.main()
+        return code, out.getvalue()
+
+    def test_time_budget_stops_cleanly_and_keeps_what_was_collected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            # deadline set at t=0 (10 minutes); the page and the first match are fetched in time,
+            # then the clock jumps past the deadline before the second match.
+            clock = itertools.chain([0, 0, 0], itertools.repeat(10_000))
+            code, out = self._run_main(["--cache", tmp, "--max-matches", "100", "--max-minutes", "10",
+                                        "--per-min", "6000"], self._fake_opendota(), clock)
+            saved = os.listdir(os.path.join(tmp, "matches"))
+        self.assertEqual(code, 0)
+        self.assertEqual(len(saved), 1)
+        self.assertIn("time budget of 10 minutes reached", out)
+
+    def test_without_a_time_budget_everything_is_collected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            code, out = self._run_main(["--cache", tmp, "--max-matches", "100", "--per-min", "6000"],
+                                       self._fake_opendota())
+            saved = os.listdir(os.path.join(tmp, "matches"))
+        self.assertEqual(code, 0)
+        self.assertEqual(len(saved), 3)
+        self.assertNotIn("time budget", out)
+
+    def test_daily_reserve_is_a_clean_stop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            code, out = self._run_main(["--cache", tmp, "--day-reserve", "1200", "--per-min", "6000"],
+                                       self._fake_opendota(day_left="1100"))
+            saved = os.listdir(os.path.join(tmp, "matches"))
+        self.assertEqual(code, 0)
+        self.assertEqual(saved, [])
+        self.assertIn("daily quota reserve reached", out)
 
     def test_limiter_stops_before_using_the_daily_reserve(self):
         lim = hb_collect.Limiter(per_min=6000, day_reserve=1200)

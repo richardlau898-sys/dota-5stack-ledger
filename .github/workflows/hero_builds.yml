@@ -46,6 +46,7 @@ jobs:
         run: >
           python3 tools/hero_builds/collect.py --cache .hero_cache
           --max-matches 450 --min-rank 70 --per-min 50 --day-reserve 300 --keep 30000
+          --max-minutes 22
 
       - name: Save match cache
         if: always() && hashFiles('.hero_cache/matches/*.json') != ''
