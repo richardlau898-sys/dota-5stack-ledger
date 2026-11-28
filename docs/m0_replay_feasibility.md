@@ -185,7 +185,7 @@
 > **状态**：**`做不到`** —— 当前运行环境无法观测、获取或截图 `dota-5stack-ledger` 生产 Supabase 项目的当前套餐及 Storage 已用/剩余额度，严格按规则拒绝猜测 Free/Pro 或编造配额数字。精确阻塞原因如下：
 > 1. **浏览器后台未登录**：访问 `https://supabase.com/dashboard` 会被重定向至 `https://supabase.com/dashboard/sign-in?returnTo=%2Forg`，无法截取 Dashboard 的 Billing / Storage Quota 页面。
 > 2. **本地仓库与环境无生产 Supabase 凭据**：本地工作区仅存在 `.env.local`（不含任何 `SUPABASE_URL` / `SUPABASE_*` 键值），当前进程环境变量亦无 `SUPABASE_*`，`cloud_store.py` 仅在运行期读取外部注入的 env/secrets，且本机未安装 `vercel` CLI（`command not found: vercel`），无法反查 Vercel 生产环境变量中的项目 ref。
-> 3. **现有 `supabase_mcp` 会话未绑定生产项目**：当前连接的 MCP 组织 `qievxrnxhflosdwjleah`（`plan: pro`）下仅可见项目 `keen` 与 `mp4`，两者 `public` schema 中均不存在本项目的 `dota_match_reports`、`match_players` 或 `dota_llm_tasks` 表。
+> 3. **现有 `supabase_mcp` 会话未绑定生产项目**：当前会话能看到的 Supabase 项目里都不存在本项目的 `dota_match_reports`、`match_players` 或 `dota_llm_tasks` 表，无法从这里查到生产项目的套餐与额度。
 
 ---
 
