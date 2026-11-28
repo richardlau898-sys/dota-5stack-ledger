@@ -85,9 +85,13 @@ class TestP3SupabaseSingleSource(unittest.TestCase):
 
             with patch.object(server, "REPORTS_DIR", empty_path), \
                  patch.object(server, "TMP_REPORTS_DIR", tmp_path), \
+                 patch.object(cloud_store, "TMP_REPORTS_DIR", tmp_path), \
                  patch.object(cloud_store, "cloud_fetch_match_report", return_value=stale_rep), \
                  patch.object(cloud_store, "cloud_fetch_raw_match", return_value=raw_match), \
-                 patch.object(cloud_store, "cloud_save_match_report", return_value=True):
+                 patch.object(cloud_store, "cloud_save_match_report", return_value=True), \
+                 patch.object(server, "cloud_fetch_match_report", return_value=stale_rep), \
+                 patch.object(server, "cloud_fetch_raw_match", return_value=raw_match), \
+                 patch.object(server, "cloud_save_match_report", return_value=True):
                 rebuilt = server.get_or_build_match_report(sample_mid, allow_build=True)
                 self.assertIsNotNone(rebuilt)
                 self.assertEqual(rebuilt.get("engine_version"), dota_analyst.ENGINE_VERSION)

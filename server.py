@@ -70,6 +70,7 @@ from dota_analyst import (
     strip_report_cdn_urls_to_keys,
 )
 from dota_constants_zh import get_hero_name, get_mode_and_lobby, sanitize_report_mixed_english
+import hero_builds_store
 from draft_and_phase_coach import (
     build_pregame_strategy_plan,
     build_squad_history_ledger,
@@ -133,7 +134,18 @@ def _normalize_optional_account_param(raw_val: Any) -> str:
     return s
 
 
-TMP_REPORTS_DIR = Path("/tmp/dota_reports")
+_DEFAULT_TMP_REPORTS_DIR = Path("/tmp/dota_reports")
+TMP_REPORTS_DIR = Path((os.environ.get("DOTA_TMP_DIR") or "").strip() or "/tmp/dota_reports")
+_INIT_TMP_REPORTS_DIR = TMP_REPORTS_DIR
+
+
+def _get_tmp_reports_dir() -> Path:
+    if TMP_REPORTS_DIR != _INIT_TMP_REPORTS_DIR:
+        return Path(TMP_REPORTS_DIR)
+    env_dir = (os.environ.get("DOTA_TMP_DIR") or "").strip()
+    if env_dir:
+        return Path(env_dir)
+    return _DEFAULT_TMP_REPORTS_DIR
 
 
 def is_match_already_analyzed(match_id: Any) -> bool:
@@ -142,7 +154,7 @@ def is_match_already_analyzed(match_id: Any) -> bool:
     mid = int(match_id)
     if (
         (REPORTS_DIR / f"match_{mid}.json").exists()
-        or (TMP_REPORTS_DIR / f"match_{mid}.json").exists()
+        or (_get_tmp_reports_dir() / f"match_{mid}.json").exists()
     ):
         return True
     return mid in get_cloud_analyzed_match_ids()
@@ -172,8 +184,9 @@ def fetch_recent_matches_formatted(
         return out_cached[:limit]
 
     hero_map, _ = get_hero_constants_map(allow_network=allow_network)
+    tmp_rdir = _get_tmp_reports_dir()
     recent_cache_file = REPORTS_DIR / f"recent_matches_{account_id}.json"
-    tmp_recent_cache_file = TMP_REPORTS_DIR / f"recent_matches_{account_id}.json"
+    tmp_recent_cache_file = tmp_rdir / f"recent_matches_{account_id}.json"
 
     raw_list = None
     fetched_from_network = False
@@ -186,7 +199,7 @@ def fetch_recent_matches_formatted(
                     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                     recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
                 except OSError:
-                    TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                    tmp_rdir.mkdir(parents=True, exist_ok=True)
                     tmp_recent_cache_file.write_text(json.dumps(raw_list, ensure_ascii=False), encoding="utf-8")
         except Exception:
             raw_list = None
@@ -413,7 +426,7 @@ def _hydrate_grok_from_caches(
         return report
 
     side = report.get("focus_side") or "dire"
-    for cdir in (TMP_REPORTS_DIR, REPORTS_DIR):
+    for cdir in (_get_tmp_reports_dir(), REPORTS_DIR):
         for s_candidate in (side, "radiant", "dire"):
             cf = cdir / f"coaching-{match_id}-{s_candidate}.json"
             if cf.exists():
@@ -465,7 +478,7 @@ def _ensure_grok_coaching(
                 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                 json_cache.write_text(rep_txt, encoding="utf-8")
             except OSError:
-                TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                _get_tmp_reports_dir().mkdir(parents=True, exist_ok=True)
                 tmp_json_cache.write_text(rep_txt, encoding="utf-8")
             try:
                 cloud_save_match_report(match_id, report)
@@ -484,7 +497,12 @@ def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
     da = report.get("draft_analysis") or {}
     hmm = da.get("hero_matchup_matrix")
     df = report.get("deep_forensics") or {}
-    lms = df.get("lane_matchups") or []
+    raw_lms = df.get("lane_matchups")
+    lms_unavail = (
+        df.get("available") is False
+        or (isinstance(raw_lms, dict) and raw_lms.get("available") is False)
+    )
+    lms = raw_lms if (not lms_unavail and isinstance(raw_lms, list)) else []
     has_v70_matrix = (
         isinstance(hmm, list)
         and len(hmm) >= 5
@@ -492,7 +510,8 @@ def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
         and "counter_ledger" in hmm[0]
     )
     has_v70_lanes = (
-        not lms
+        lms_unavail
+        or not lms
         or (isinstance(lms[0], dict) and "lane_chemistry_by_side" in lms[0])
     )
     if has_v70_matrix and has_v70_lanes:
@@ -521,6 +540,8 @@ def _ensure_v69_hero_matchup_matrix(report: Dict[str, Any]) -> Dict[str, Any]:
                 rad_by_pos = {int(p.get("pos") or 0): p for p in rad}
                 dire_by_pos = {int(p.get("pos") or 0): p for p in dire}
                 for ln in lms:
+                    if not isinstance(ln, dict):
+                        continue
                     lnum = int(ln.get("lane_id") or 2)
                     r_lp = [rad_by_pos.get(int(h.get("pos") or 0), h) for h in (ln.get("radiant_heroes") or [])]
                     d_lp = [dire_by_pos.get(int(h.get("pos") or 0), h) for h in (ln.get("dire_heroes") or [])]
@@ -606,9 +627,10 @@ def get_or_build_match_report(
     md_cache = REPORTS_DIR / f"match_{match_id}.md"
     raw_cache = REPORTS_DIR / f"raw_{match_id}.json"
 
-    tmp_json_cache = TMP_REPORTS_DIR / f"match_{match_id}.json"
-    tmp_md_cache = TMP_REPORTS_DIR / f"match_{match_id}.md"
-    tmp_raw_cache = TMP_REPORTS_DIR / f"raw_{match_id}.json"
+    tmp_rdir = _get_tmp_reports_dir()
+    tmp_json_cache = tmp_rdir / f"match_{match_id}.json"
+    tmp_md_cache = tmp_rdir / f"match_{match_id}.md"
+    tmp_raw_cache = tmp_rdir / f"raw_{match_id}.json"
 
     # R1-1: 不带口令的只读模式（allow_build=False）严格只读已有报告，零写入、零 OpenDota 请求、不拦非花名册/匿名读取
     if not allow_build:
@@ -727,7 +749,7 @@ def get_or_build_match_report(
                     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
                     raw_cache.write_text(raw_txt, encoding="utf-8")
                 except OSError:
-                    TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+                    tmp_rdir.mkdir(parents=True, exist_ok=True)
                     tmp_raw_cache.write_text(raw_txt, encoding="utf-8")
                 try:
                     cloud_save_raw_match(match_id, raw_match)
@@ -773,7 +795,7 @@ def get_or_build_match_report(
         json_cache.write_text(rep_txt, encoding="utf-8")
         md_cache.write_text(md_text, encoding="utf-8")
     except OSError:
-        TMP_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        tmp_rdir.mkdir(parents=True, exist_ok=True)
         tmp_json_cache.write_text(rep_txt, encoding="utf-8")
         tmp_md_cache.write_text(md_text, encoding="utf-8")
 
@@ -1077,6 +1099,47 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_public_json(self, data: Any, max_age: int = 600) -> None:
+        """公开、可缓存的 JSON（英雄攻略数据，所有人看到的都一样）。"""
+        body = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        use_gzip = self._accepts_gzip() and len(body) >= 512
+        if use_gzip:
+            body = gzip.compress(body, compresslevel=6)
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        if use_gzip:
+            self.send_header("Content-Encoding", "gzip")
+            self.send_header("Vary", "Accept-Encoding")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", f"public, max-age={max_age}, s-maxage={max_age * 3}")
+        self.send_header("X-Robots-Tag", "noindex")
+        self.send_header("Content-Security-Policy-Report-Only", CSP_REPORT_ONLY_VALUE)
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _serve_hero_builds(self, path: str) -> None:
+        """GET /api/hero_builds（索引）与 /api/hero_builds/<hero_id>（单个英雄）。公开数据，不需要口令。"""
+        rest = path[len("/api/hero_builds"):].strip("/")
+        if rest and not re.fullmatch(r"[0-9]{1,4}", rest):
+            self._send_json({"ok": False, "error": "英雄编号格式不正确"}, status=400)
+            return
+        try:
+            bundle, is_stale = hero_builds_store.get_bundle()
+        except hero_builds_store.HeroBuildsUnavailable:
+            self._send_json(
+                {"ok": False, "error": "英雄攻略数据暂时取不到。数据每 6 小时自动更新一次，请稍后再试。"},
+                status=503,
+            )
+            return
+        if not rest:
+            self._send_public_json({"ok": True, "stale": is_stale, "index": bundle["index"]})
+            return
+        hero = bundle["heroes"].get(str(int(rest)))
+        if not isinstance(hero, dict):
+            self._send_json({"ok": False, "error": "没有这个英雄的攻略数据"}, status=404)
+            return
+        self._send_public_json({"ok": True, "stale": is_stale, "hero": hero})
+
     def _read_json_body(self) -> Dict[str, Any]:
         length = int(self.headers.get("Content-Length") or 0)
         if length <= 0:
@@ -1134,6 +1197,10 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
                 self.send_response(204)
                 self.send_header("Cache-Control", "public, max-age=86400")
                 self.end_headers()
+                return
+
+            if path == "/api/hero_builds" or path.startswith("/api/hero_builds/"):
+                self._serve_hero_builds(path)
                 return
 
             if path == "/api/match_icons":
@@ -1353,7 +1420,9 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
             # 静态文件服务 (支持 /, /pregame, 以及公开分享链接 /match/<id>)
             is_html_route = path in ("/", "", "/pregame", "/pregame.html") or path.startswith("/match/")
             is_hashed_asset = False
-            if is_html_route:
+            if path in ("/heroes", "/heroes/"):
+                file_path = STATIC_DIR / "heroes.html"
+            elif is_html_route:
                 file_path = STATIC_DIR / "index.html"
             else:
                 rel = path.lstrip("/")
@@ -1594,7 +1663,7 @@ class DotaAnalystHandler(BaseHTTPRequestHandler):
 
                 # Fast-path: load existing match report from local/tmp disk in 0ms without blocking on OpenDota parse polling
                 report = None
-                for jc_fast in (TMP_REPORTS_DIR / f"match_{mid}.json", REPORTS_DIR / f"match_{mid}.json"):
+                for jc_fast in (_get_tmp_reports_dir() / f"match_{mid}.json", REPORTS_DIR / f"match_{mid}.json"):
                     if jc_fast.exists():
                         try:
                             cand_rep = json.loads(jc_fast.read_text(encoding="utf-8"))

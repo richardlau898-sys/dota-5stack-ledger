@@ -19,3 +19,8 @@ node_modules/
 .env*
 .cache/player_matches_history.json
 .cache/opendota_sync_state.json
+
+# 英雄攻略页本地运行时的缓存与输出
+.hero_cache/
+.hero_const/
+.hero_out/

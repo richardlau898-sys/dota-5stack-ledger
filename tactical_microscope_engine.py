@@ -355,6 +355,7 @@ def build_tactical_microscope(
             "role_mirror_by_side": _unavail_by_side("inferred"),
             "macro_objectives_by_side": _unavail_by_side("inferred"),
             "minute_snapshots": {
+                "available": False,
                 "format": "columnar_v1",
                 "minutes": [],
                 "radiant_gold_adv": [],

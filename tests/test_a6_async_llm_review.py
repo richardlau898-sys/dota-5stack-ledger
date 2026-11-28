@@ -67,6 +67,8 @@ class TestA6AsyncLlmReview(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmpdir, \
              patch.object(server, "REPORTS_DIR", Path(tmpdir)), \
+             patch.object(server, "TMP_REPORTS_DIR", Path(tmpdir)), \
+             patch.object(cloud_store, "TMP_REPORTS_DIR", Path(tmpdir)), \
              patch.object(cloud_store, "_supabase_upsert_llm_task", side_effect=fake_supabase_upsert_task), \
              patch.object(cloud_store, "_supabase_fetch_llm_task", side_effect=fake_supabase_fetch_task), \
              patch.object(server, "call_llm_coach_review", return_value={"ok": True, "structured": fake_structured}), \
