@@ -316,11 +316,10 @@ def build_team_metrics_by_side(match: Dict[str, Any], report_dict: Dict[str, Any
                         })
 
         # (D) 开雾效果（仅读取团战记录中的 item_uses.smoke_of_deceit，按 R2-1 规则绝不按购买时间窗口推断）
-        df_ss = (
-            ((report_dict.get("deep_forensics") or {}).get("stacking_and_smoke_by_side") or {})
-            .get(side, {})
-        )
-        if df_ss:
+        df_root = report_dict.get("deep_forensics") or {}
+        df_ss_root = (df_root.get("stacking_and_smoke_by_side") or {}) if df_root.get("available") is not False else {}
+        df_ss = df_ss_root.get(side, {}) if isinstance(df_ss_root, dict) and df_ss_root.get("available") is not False else {}
+        if isinstance(df_ss, dict) and df_ss and df_ss.get("available") is not False:
             smoke_windows = [
                 {**sw, "evidence": "inferred"} if isinstance(sw, dict) else sw
                 for sw in (df_ss.get("smoke_events") or [])
@@ -577,7 +576,17 @@ def build_next_game_top3_fixes_by_side(
             })
 
         # 3. 团队级：视野断档期（场上假眼 <= 1 颗）阵亡 (inferred)
-        vis_side = ((df.get("support_vision_by_side") or {}).get(side)) or {}
+        raw_vis_root = (df.get("support_vision_by_side") or {}) if df.get("available") is not False else {}
+        raw_vis_side = (
+            raw_vis_root.get(side)
+            if isinstance(raw_vis_root, dict) and raw_vis_root.get("available") is not False
+            else None
+        )
+        vis_side = (
+            raw_vis_side
+            if isinstance(raw_vis_side, dict) and raw_vis_side.get("available") is not False
+            else {}
+        )
         for bw in vis_side.get("blackout_windows") or []:
             if not isinstance(bw, dict):
                 continue

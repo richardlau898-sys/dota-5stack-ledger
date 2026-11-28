@@ -3507,7 +3507,10 @@ function hydrateReportData(report) {
   const df = report.deep_forensics;
   if (df && typeof df === "object") {
     const ms = df.minute_snapshots;
-    if (ms && !Array.isArray(ms) && ms.format === "columnar_v1") {
+    if (ms && !Array.isArray(ms) && ms.available === false) {
+      df.minute_snapshots_columnar = ms;
+      df.minute_snapshots = [];
+    } else if (ms && !Array.isArray(ms) && ms.format === "columnar_v1") {
       const minutes = Array.isArray(ms.minutes) ? ms.minutes : [];
       const gAdvArr = Array.isArray(ms.radiant_gold_adv) ? ms.radiant_gold_adv : [];
       const xAdvArr = Array.isArray(ms.radiant_xp_adv) ? ms.radiant_xp_adv : [];
@@ -3597,8 +3600,14 @@ function hydrateReportData(report) {
       ["radiant", "radiant_pos_1_to_5"],
       ["dire", "dire_pos_1_to_5"],
     ]) {
-      const dqRows = df.damage_quality_and_build_by_side?.[sideKey]?.player_rows || [];
-      const ncRows = df.macro_objectives_by_side?.[sideKey]?.neutral_craft_rows || [];
+      const dqSide = df.available === false || df.damage_quality_and_build_by_side?.available === false
+        ? null
+        : df.damage_quality_and_build_by_side?.[sideKey];
+      const ncSide = df.available === false || df.macro_objectives_by_side?.available === false
+        ? null
+        : df.macro_objectives_by_side?.[sideKey];
+      const dqRows = dqSide?.available === false ? [] : dqSide?.player_rows || [];
+      const ncRows = ncSide?.available === false ? [] : ncSide?.neutral_craft_rows || [];
       const dqByPos = new Map(dqRows.map((r) => [Number(r.pos || 0), r]));
       const ncByPos = new Map(ncRows.map((r) => [Number(r.pos || 0), r]));
       for (const p of report[listKey] || []) {
@@ -4203,32 +4212,47 @@ function renderKeyNumbersFactCheckSection(report) {
   }
 
   // Fact 2: Unpressed BKB / Defensive Items Audit
-  const unpressedBlock = report.deep_forensics?.unpressed_saves_by_side?.[side];
-  const unpressedEvents = unpressedBlock?.incidents || [];
-  if (unpressedEvents.length === 0) {
+  const unpressedRoot = report.deep_forensics?.unpressed_saves_by_side;
+  const unpressedBlock = unpressedRoot?.[side];
+  if (
+    report.is_parsed === false ||
+    report.deep_forensics?.available === false ||
+    unpressedRoot?.available === false ||
+    unpressedBlock?.available === false
+  ) {
     factCards.push({
-      status: "verified",
-      badge: "✅ 救命装纪律达标",
-      title: `全队团战 BKB / 保命装 0 次憋死记录`,
-      detail: `经核查本局全部阵亡帧，本方五人在阵亡前均已合理开启保命装或处于冷却中，未出现“揣着绿灯 BKB/魔棒/推推暴毙”的低级失误。`,
+      status: "warning",
+      badge: "⏳ 保命装与按键审计",
+      title: "需要先解析录像",
+      detail: "团战未按 BKB / 保命装与 0 技能阵亡记录依赖录像底层战斗日志，需要先解析录像。",
     });
   } else {
-    const worstEv = unpressedEvents[0];
-    const itemsStr = Array.isArray(worstEv.unpressed_items) && worstEv.unpressed_items.length
-      ? worstEv.unpressed_items.join("、")
-      : "保命装/技能";
-    factCards.push({
-      status: "danger",
-      badge: `🚨 憋死罪证 (${unpressedEvents.length}次)`,
-      title: `${worstEv.pos ? `${worstEv.pos}号位 ` : ""}${
-        worstEv.hero_short_zh || "核心"
-      } 团战未按保命装或0技能阵亡`,
-      detail:
-        worstEv.detail ||
-        `全队本局共发生 ${unpressedEvents.length} 次团战未按保命装或 0 技能阵亡记录。代表性一幕：${
-          worstEv.time_range || ""
-        } ${worstEv.hero_short_zh || ""}（${itemsStr}）。`,
-    });
+    const unpressedEvents = unpressedBlock?.incidents || [];
+    if (unpressedEvents.length === 0) {
+      factCards.push({
+        status: "verified",
+        badge: "✅ 救命装纪律达标",
+        title: `全队团战 BKB / 保命装 0 次憋死记录`,
+        detail: `经核查本局全部阵亡帧，本方五人在阵亡前均已合理开启保命装或处于冷却中，未出现“揣着绿灯 BKB/魔棒/推推暴毙”的低级失误。`,
+      });
+    } else {
+      const worstEv = unpressedEvents[0];
+      const itemsStr = Array.isArray(worstEv.unpressed_items) && worstEv.unpressed_items.length
+        ? worstEv.unpressed_items.join("、")
+        : "保命装/技能";
+      factCards.push({
+        status: "danger",
+        badge: `🚨 憋死罪证 (${unpressedEvents.length}次)`,
+        title: `${worstEv.pos ? `${worstEv.pos}号位 ` : ""}${
+          worstEv.hero_short_zh || "核心"
+        } 团战未按保命装或0技能阵亡`,
+        detail:
+          worstEv.detail ||
+          `全队本局共发生 ${unpressedEvents.length} 次团战未按保命装或 0 技能阵亡记录。代表性一幕：${
+            worstEv.time_range || ""
+          } ${worstEv.hero_short_zh || ""}（${itemsStr}）。`,
+      });
+    }
   }
 
   // Fact 3: Laning (10m) -> Midgame (25m) Economy & Tower Conversion
@@ -4242,28 +4266,46 @@ function renderKeyNumbersFactCheckSection(report) {
     title: `全队建筑总伤害 ${totalTowerDmg.toLocaleString()} · 头号拆迁 ${
       topPusher?.hero_short_zh || "-"
     } (${Number(topPusher?.tower_damage || 0).toLocaleString()})`,
-    detail: `对线期(10m) ${laneRev?.verdict_tag || "均势博弈"} → 中期(10-25m) ${
-      midRev?.verdict_tag || "抱团拉扯"
-    }。${
-      totalTowerDmg >= 6500
-        ? "赢团后迅速将人头优势转化为外塔与高地建筑压制。"
-        : "中期赢团或刷钱后推塔节奏偏慢，需提高拿塔与控盾转化率。"
-    }`,
+    detail:
+      report.is_parsed === false
+        ? `分阶段经济走势需要先解析录像。当前仅基于终局建筑总伤害（${totalTowerDmg.toLocaleString()}）核查推进转化。`
+        : `对线期(10m) ${laneRev?.verdict_tag || "均势博弈"} → 中期(10-25m) ${
+            midRev?.verdict_tag || "抱团拉扯"
+          }。${
+            totalTowerDmg >= 6500
+              ? "赢团后迅速将人头优势转化为外塔与高地建筑压制。"
+              : "中期赢团或刷钱后推塔节奏偏慢，需提高拿塔与控盾转化率。"
+          }`,
   });
 
   // Fact 4: Vision & Smoke Gank Efficiency
-  const totalObs = sortedOwn.reduce((s, p) => s + (p.obs_placed || 0), 0);
-  const totalSen = sortedOwn.reduce((s, p) => s + (p.sen_placed || 0), 0);
-  const totalDewards = sortedOwn.reduce((s, p) => s + (p.obs_destroyed || 0), 0);
-  const ss = report.deep_forensics?.stacking_and_smoke_by_side?.[side];
-  const smokeCnt = ss?.own_smoke_uses ?? ss?.smoke_total_uses ?? (ss?.smoke_events || []).length;
-  const stackCnt = ss?.total_stacks ?? ss?.total_team_stacks ?? 0;
-  factCards.push({
-    status: totalDewards >= 4 || smokeCnt >= 2 ? "verified" : "warning",
-    badge: totalDewards >= 4 ? "✅ 视野与诡计之雾" : "⚠️ 视野与开雾核查",
-    title: `插眼 ${totalObs}假 / ${totalSen}真 · 排眼 ${totalDewards} 颗 · 开雾 ${smokeCnt} 次 / 堆野 ${stackCnt} 组`,
-    detail: `本方辅助与核心合计布下 ${totalObs} 颗观察者守卫并反掉敌方 ${totalDewards} 颗假眼，全队累计发起 ${smokeCnt} 波诡计之雾找节奏、屯野 ${stackCnt} 组。`,
-  });
+  const ssRoot = report.deep_forensics?.stacking_and_smoke_by_side;
+  const ss = ssRoot?.[side];
+  if (
+    report.is_parsed === false ||
+    report.deep_forensics?.available === false ||
+    ssRoot?.available === false ||
+    ss?.available === false
+  ) {
+    factCards.push({
+      status: "warning",
+      badge: "⏳ 视野与开雾审计",
+      title: "需要先解析录像",
+      detail: "插眼排眼明细、诡计之雾进攻次数与辅助屯野组数需要先解析录像。",
+    });
+  } else {
+    const totalObs = sortedOwn.reduce((s, p) => s + (p.obs_placed || 0), 0);
+    const totalSen = sortedOwn.reduce((s, p) => s + (p.sen_placed || 0), 0);
+    const totalDewards = sortedOwn.reduce((s, p) => s + (p.obs_destroyed || 0), 0);
+    const smokeCnt = ss?.own_smoke_uses ?? ss?.smoke_total_uses ?? (ss?.smoke_events || []).length;
+    const stackCnt = ss?.total_stacks ?? ss?.total_team_stacks ?? 0;
+    factCards.push({
+      status: totalDewards >= 4 || smokeCnt >= 2 ? "verified" : "warning",
+      badge: totalDewards >= 4 ? "✅ 视野与诡计之雾" : "⚠️ 视野与开雾核查",
+      title: `插眼 ${totalObs}假 / ${totalSen}真 · 排眼 ${totalDewards} 颗 · 开雾 ${smokeCnt} 次 / 堆野 ${stackCnt} 组`,
+      detail: `本方辅助与核心合计布下 ${totalObs} 颗观察者守卫并反掉敌方 ${totalDewards} 颗假眼，全队累计发起 ${smokeCnt} 波诡计之雾找节奏、屯野 ${stackCnt} 组。`,
+    });
+  }
 
   // Fact 5: #1 Turning Point Teamfight + 1-Click Jump to Minimap Scrubber
   const tfs = Array.isArray(report.key_teamfights) ? report.key_teamfights : [];
@@ -4670,9 +4712,16 @@ function renderDraftAndComboSection(report) {
     .join("");
 
   const rawPicksOrder = report.deep_forensics?.picks_order;
-  const picksOnly = (Array.isArray(rawPicksOrder) ? rawPicksOrder : []).filter((pb) => pb.is_pick);
-  const picksHtml =
-    picksOnly.length > 0
+  const picksUnavailable =
+    report.is_parsed === false ||
+    report.deep_forensics?.available === false ||
+    rawPicksOrder?.available === false;
+  const picksOnly = (!picksUnavailable && Array.isArray(rawPicksOrder) ? rawPicksOrder : []).filter(
+    (pb) => pb.is_pick
+  );
+  const picksHtml = picksUnavailable
+    ? `<div class="empty-state compact" style="margin-top: 14px;">需要先解析录像</div>`
+    : picksOnly.length > 0
       ? `
       <div class="combos-header-bar" style="margin-top: 14px;">
         <h3>BP 选人先后手顺序还原 (1~10手点选博弈)</h3>
@@ -5368,7 +5417,11 @@ function renderTacticalMicroscopeSection(report) {
  * Tab 3: 🔥 伤害含金量（切敌方1/2号位双核 vs 刮前排肉盾假伤害）· 1~18级加点天赋路线与永久 Buff 叠层审判
  */
 function renderMicroDamageQualityAndBuildPane(report, df, targetSide, targetSideZh) {
-  const dq = df.damage_quality_and_build_by_side?.[targetSide];
+  const dqRoot = df.damage_quality_and_build_by_side;
+  const dq = dqRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || dqRoot?.available === false || dq?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!dq) {
     return `<div class="empty-state compact">当前比赛暂无伤害含金量与加点路线审计数据</div>`;
   }
@@ -5627,7 +5680,11 @@ function renderMicroDamageQualityAndBuildPane(report, df, targetSide, targetSide
  * Tab 2: 🎒 全员出装路线与「蠢装/漏出克制装/憋大件断档」处刑台
  */
 function renderMicroItemizationPane(report, df, targetSide, targetSideZh) {
-  const ia = df.itemization_audit_by_side?.[targetSide];
+  const iaRoot = df.itemization_audit_by_side;
+  const ia = iaRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || iaRoot?.available === false || ia?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!ia) {
     return `<div class="empty-state compact">当前比赛暂无全员出装路线与克制装审计数据</div>`;
   }
@@ -5771,8 +5828,17 @@ function renderMicroItemizationPane(report, df, targetSide, targetSideZh) {
 }
 
 function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, otherSide, otherSideZh) {
-  const execData = df.hero_execution_by_side?.[targetSide];
-  const oppExecData = df.hero_execution_by_side?.[otherSide];
+  const execRoot = df.hero_execution_by_side;
+  const execData = execRoot?.[targetSide];
+  if (
+    report?.is_parsed === false ||
+    df.available === false ||
+    execRoot?.available === false ||
+    execData?.available === false
+  ) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
+  const oppExecData = execRoot?.[otherSide];
   const players = Array.isArray(execData) ? execData : execData?.players || [];
   const oppPlayers = Array.isArray(oppExecData) ? oppExecData : oppExecData?.players || [];
   if (!players.length) {
@@ -6065,7 +6131,11 @@ function renderMicroHeroExecutionPane(report, df, targetSide, targetSideZh, othe
 }
 
 function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
-  const vis = df.support_vision_by_side?.[targetSide];
+  const visRoot = df.support_vision_by_side;
+  const vis = visRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || visRoot?.available === false || vis?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!vis) {
     return `<div class="empty-state compact">当前比赛暂无辅助眼位显微镜数据</div>`;
   }
@@ -6346,7 +6416,11 @@ function renderMicroSupportVisionPane(report, df, targetSide, targetSideZh) {
 }
 
 function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
-  const ss = df.stacking_and_smoke_by_side?.[targetSide];
+  const ssRoot = df.stacking_and_smoke_by_side;
+  const ss = ssRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || ssRoot?.available === false || ss?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!ss) {
     return `<div class="empty-state compact">当前比赛暂无堆野与开雾找节奏数据</div>`;
   }
@@ -6492,7 +6566,11 @@ function renderMicroStackAndSmokePane(report, df, targetSide, targetSideZh) {
 }
 
 function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, otherSideZh) {
-  const lm = df.laning_mechanics_by_side?.[targetSide];
+  const lmRoot = df.laning_mechanics_by_side;
+  const lm = lmRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || lmRoot?.available === false || lm?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!lm) {
     return `<div class="empty-state compact">当前比赛暂无对线细节显微镜数据</div>`;
   }
@@ -6580,9 +6658,12 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
   const oppLamp = lm.opp_lamp_total ?? lm.lamp_opp_count ?? 0;
 
   // Relocated 3-lane 10m matchup cards so all laning analysis lives cleanly in Tab 4
-  const lanes = Array.isArray(df.lane_matchups) ? df.lane_matchups : [];
+  const rawLanes = df.lane_matchups;
+  const lanes = !rawLanes || rawLanes.available === false ? [] : Array.isArray(rawLanes) ? rawLanes : [];
   const lanesHtml =
-    lanes.length > 0
+    rawLanes?.available === false
+      ? `<div class="empty-state compact">需要先解析录像</div>`
+      : lanes.length > 0
       ? `
       <div class="lane-matchups-grid">
         ${lanes
@@ -6712,7 +6793,11 @@ function renderMicroLaningMechanicsPane(report, df, targetSide, targetSideZh, ot
 }
 
 function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
-  const tp = df.tp_rotation_by_side?.[targetSide];
+  const tpRoot = df.tp_rotation_by_side;
+  const tp = tpRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || tpRoot?.available === false || tp?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!tp) {
     return `<div class="empty-state compact">当前比赛暂无 TP 救人与团战缺席抓包数据</div>`;
   }
@@ -6836,7 +6921,11 @@ function renderMicroTpRotationPane(report, df, targetSide, targetSideZh) {
  * Tab 2: 💀 憋死 BKB / 救命装与团战 0 技能秒躺法医尸检
  */
 function renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh) {
-  const us = df.unpressed_saves_by_side?.[targetSide];
+  const usRoot = df.unpressed_saves_by_side;
+  const us = usRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || usRoot?.available === false || us?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!us) {
     return `<div class="empty-state compact">当前比赛暂无憋死 BKB / 救命装与团战 0 技能秒躺数据</div>`;
   }
@@ -6944,7 +7033,11 @@ function renderMicroUnpressedSavesPane(report, df, targetSide, targetSideZh) {
  * Tab 5: 🧭 地图空间与团战外阵亡记录
  */
 function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
-  const ms = df.map_space_by_side?.[targetSide];
+  const msRoot = df.map_space_by_side;
+  const ms = msRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || msRoot?.available === false || ms?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!ms) {
     return `<div class="empty-state compact">当前比赛暂无地图空间与团战外阵亡数据</div>`;
   }
@@ -7060,7 +7153,11 @@ function renderMicroMapSpacePane(report, df, targetSide, targetSideZh) {
  * Tab 4: 🛡️ 承伤来源拆解与防装合规审计
  */
 function renderMicroDamageReceivedPane(report, df, targetSide, targetSideZh) {
-  const dr = df.damage_received_by_side?.[targetSide];
+  const drRoot = df.damage_received_by_side;
+  const dr = drRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || drRoot?.available === false || dr?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!dr) {
     return `<div class="empty-state compact">当前比赛暂无承伤来源拆解与防装审计数据</div>`;
   }
@@ -7131,7 +7228,11 @@ function renderMicroDamageReceivedPane(report, df, targetSide, targetSideZh) {
  * Tab 9: 💰 经济来源结构拆解 & 局内信号/暂停/公屏互动档案
  */
 function renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh) {
-  const ep = df.economy_and_pings_by_side?.[targetSide];
+  const epRoot = df.economy_and_pings_by_side;
+  const ep = epRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || epRoot?.available === false || ep?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!ep) {
     return `<div class="empty-state compact">当前比赛暂无经济来源结构与信号互动数据</div>`;
   }
@@ -7204,7 +7305,11 @@ function renderMicroEconomyAndPingsPane(report, df, targetSide, targetSideZh) {
  * Tab 10: ⚔️ 1~5号位同位置宿敌 1v1 正面对位审判 & OpenDota 全球同英雄百分位标尺
  */
 function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSideZh) {
-  const rm = df.role_mirror_by_side?.[targetSide];
+  const rmRoot = df.role_mirror_by_side;
+  const rm = rmRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || rmRoot?.available === false || rm?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!rm) {
     return `<div class="empty-state compact">当前比赛暂无 1~5 号位同位置宿敌 1v1 对位数据</div>`;
   }
@@ -7430,7 +7535,11 @@ function renderMicroRoleMirrorPane(report, df, targetSide, targetSideZh, otherSi
  * Tab 11: 🐉 买活死 (Dieback) 尸检 · 信使惨案 · 肉山魔晶时间轴 & Dota 2 中立装备附魔审计
  */
 function renderMicroMacroObjectivesPane(report, df, targetSide, targetSideZh) {
-  const mo = df.macro_objectives_by_side?.[targetSide];
+  const moRoot = df.macro_objectives_by_side;
+  const mo = moRoot?.[targetSide];
+  if (report?.is_parsed === false || df.available === false || moRoot?.available === false || mo?.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   if (!mo) {
     return `<div class="empty-state compact">当前比赛暂无买活死尸检与中立装备附魔数据</div>`;
   }
@@ -8448,24 +8557,46 @@ function analyzePlayerPhaseAndRoleContext(p, report) {
     });
   });
 
-  const ms = df.map_space_by_side?.[side] || {};
+  const dfOk = df.available !== false && report.is_parsed !== false;
+  const ms =
+    dfOk && df.map_space_by_side?.available !== false && df.map_space_by_side?.[side]?.available !== false
+      ? df.map_space_by_side?.[side] || {}
+      : {};
   const soloEvents = (ms.solo_pickoff_events || []).filter(
     (ev) => ev.hero_short_zh === p.hero_short_zh || Number(ev.pos) === Number(p.pos)
   );
-  const lm = df.laning_mechanics_by_side?.[side] || {};
+  const lm =
+    dfOk &&
+    df.laning_mechanics_by_side?.available !== false &&
+    df.laning_mechanics_by_side?.[side]?.available !== false
+      ? df.laning_mechanics_by_side?.[side] || {}
+      : {};
   const pullRow = (lm.pulling_rows || lm.pull_rows || []).find(
     (r) => r.hero_short_zh === p.hero_short_zh || Number(r.pos) === Number(p.pos)
   );
   const interactRow = (lm.map_interact_rows || []).find(
     (r) => r.hero_short_zh === p.hero_short_zh || Number(r.pos) === Number(p.pos)
   );
-  const tpRow = (df.tp_rotation_by_side?.[side]?.player_tp_rows || []).find(
+  const tpSide =
+    dfOk && df.tp_rotation_by_side?.available !== false && df.tp_rotation_by_side?.[side]?.available !== false
+      ? df.tp_rotation_by_side?.[side]
+      : null;
+  const tpRow = (tpSide?.player_tp_rows || []).find(
     (r) => r.hero_short_zh === p.hero_short_zh || Number(r.pos) === Number(p.pos)
   );
-  const mirrorRow = (df.role_mirror_by_side?.[side]?.mirror_rows || []).find(
+  const rmSide =
+    dfOk && df.role_mirror_by_side?.available !== false && df.role_mirror_by_side?.[side]?.available !== false
+      ? df.role_mirror_by_side?.[side]
+      : null;
+  const mirrorRow = (rmSide?.mirror_rows || []).find(
     (r) => r.own_hero === p.hero_short_zh || Number(r.pos) === Number(p.pos)
   );
-  const itemAudit = df.itemization_audit_by_side?.[side] || {};
+  const itemAudit =
+    dfOk &&
+    df.itemization_audit_by_side?.available !== false &&
+    df.itemization_audit_by_side?.[side]?.available !== false
+      ? df.itemization_audit_by_side?.[side] || {}
+      : {};
   const counterItemsBuilt = [];
   (itemAudit.team_counter_checks || []).forEach((chk) => {
     if (chk.our_response && String(chk.our_response).includes(p.hero_short_zh)) {
@@ -8474,7 +8605,10 @@ function analyzePlayerPhaseAndRoleContext(p, report) {
   });
 
   // Find which lane the player was in during 0-10m
-  const lanes = Array.isArray(df.lane_matchups) ? df.lane_matchups : [];
+  const lanes =
+    dfOk && df.lane_matchups?.available !== false && Array.isArray(df.lane_matchups)
+      ? df.lane_matchups
+      : [];
   const myLane = lanes.find((ln) => {
     const arr = side === "dire" ? ln.dire_heroes : ln.radiant_heroes;
     return (arr || []).some((h) => h.hero_short_zh === p.hero_short_zh || Number(h.pos) === Number(p.pos));
@@ -9806,13 +9940,21 @@ function buildPlayerChronologyStoryHtml(p, report, roleType, sharePct) {
   const lateMajorItems = filterMajorItems(lateP?.items_bought, 3)
     .map((it) => `${it.zh_name || it.key}(${it.time_str})`)
     .join("、");
-  const ultAudit = (p.hero_execution_audit?.ult_audits || [])[0];
+  const ultAudit =
+    p.hero_execution_audit?.available === false
+      ? null
+      : (p.hero_execution_audit?.ult_audits || [])[0];
   const ultSummary = ultAudit
     ? `招牌大招【${ultAudit.ability_zh}】全场释放 <b>${ultAudit.casts ?? 0} 次</b>`
     : p.stuns_sec != null && Number(p.stuns_sec) > 0
     ? `全场贡献 <b>${p.stuns_sec} 秒硬控</b>`
     : `全场交出 <b>KDA ${escapeHtml(p.kda)}</b>`;
-  const mo = df.macro_objectives_by_side?.[side] || {};
+  const mo =
+    df.available === false ||
+    df.macro_objectives_by_side?.available === false ||
+    df.macro_objectives_by_side?.[side]?.available === false
+      ? {}
+      : df.macro_objectives_by_side?.[side] || {};
   const aegisTaken = (mo.roshan_events || []).some((r) => String(r).includes(heroShort));
   const lateSoloList = soloEvents.filter((ev) => {
     const m = parseInt(String(ev.time_str || "0").split(":")[0], 10);
@@ -11029,7 +11171,8 @@ function toggleScrubberAutoplay() {
     return;
   }
   if (!state.currentReport) return;
-  const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+  const rawSnaps = state.currentReport.deep_forensics?.minute_snapshots;
+  const snaps = Array.isArray(rawSnaps) ? rawSnaps : [];
   if (!snaps.length) return;
   const maxMin = snaps.length - 1;
   const maxSec = maxMin * 60;
@@ -11047,7 +11190,8 @@ function toggleScrubberAutoplay() {
       stopScrubberAutoplay();
       return;
     }
-    const curSnaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+    const curRawSnaps = state.currentReport.deep_forensics?.minute_snapshots;
+    const curSnaps = Array.isArray(curRawSnaps) ? curRawSnaps : [];
     const curMaxSec = Math.max(0, (curSnaps.length - 1) * 60);
     if ((state.scrubberSecond || 0) >= curMaxSec) {
       stopScrubberAutoplay();
@@ -11059,7 +11203,8 @@ function toggleScrubberAutoplay() {
 
 function setScrubberSecond(secVal) {
   if (!state.currentReport) return;
-  const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+  const rawSnaps = state.currentReport.deep_forensics?.minute_snapshots;
+  const snaps = Array.isArray(rawSnaps) ? rawSnaps : [];
   if (!snaps.length) return;
   const maxMin = snaps.length - 1;
   const maxSec = maxMin * 60;
@@ -11088,7 +11233,8 @@ function setScrubberSecond(secVal) {
 
 function setScrubberMinute(minuteIdx) {
   if (!state.currentReport) return;
-  const snaps = state.currentReport.deep_forensics?.minute_snapshots || [];
+  const rawSnaps = state.currentReport.deep_forensics?.minute_snapshots;
+  const snaps = Array.isArray(rawSnaps) ? rawSnaps : [];
   if (!snaps.length) return;
   const clamped = Math.max(0, Math.min(snaps.length - 1, Number(minuteIdx || 0)));
   setScrubberSecond(Math.round(clamped * 60));
@@ -11142,7 +11288,18 @@ function renderMinuteScrubber(report) {
   const contentEl = document.getElementById("minute-scrubber-content");
   if (!box || !contentEl) return;
 
-  const snaps = report.deep_forensics?.minute_snapshots || [];
+  const rawSnaps = report.deep_forensics?.minute_snapshots;
+  if (
+    report.is_parsed === false ||
+    report.deep_forensics?.available === false ||
+    rawSnaps?.available === false ||
+    report.deep_forensics?.minute_snapshots_columnar?.available === false
+  ) {
+    if (jumpsEl) jumpsEl.innerHTML = "";
+    contentEl.innerHTML = `<div class="empty-state compact">需要先解析录像</div>`;
+    return;
+  }
+  const snaps = Array.isArray(rawSnaps) ? rawSnaps : [];
   if (!snaps.length) {
     contentEl.innerHTML = `<div class="empty-state compact">当前比赛暂未生成逐分钟时间轴快照</div>`;
     return;
@@ -11238,7 +11395,8 @@ function renderMinuteScrubberSnapshot(report, valOrMin, isSecMode = false) {
   const curLabelEl = document.getElementById("scrubber-cur-label");
   if (!contentEl) return;
 
-  const snaps = report.deep_forensics?.minute_snapshots || [];
+  const rawSnaps = report.deep_forensics?.minute_snapshots;
+  const snaps = Array.isArray(rawSnaps) ? rawSnaps : [];
   if (!snaps.length) return;
   const maxMin = snaps.length - 1;
   const maxSec = maxMin * 60;
@@ -12092,7 +12250,9 @@ function renderAdvChart(report) {
   const goldAdv = report.radiant_gold_adv || [];
   const xpAdv = report.radiant_xp_adv || [];
   if (goldAdv.length < 2) {
-    container.innerHTML = `<div class="empty-state">该比赛暂未生成分钟级经济差曲线（可点击上方“请求录像解析”）</div>`;
+    container.innerHTML = `<div class="empty-state">${
+      report.is_parsed === false ? "需要先解析录像" : "该比赛暂未生成分钟级经济差曲线（可点击上方“请求录像解析”）"
+    }</div>`;
     if (cpStrip) cpStrip.innerHTML = "";
     return;
   }
@@ -12224,7 +12384,9 @@ function renderNetWorthChart(report) {
     (p) => Array.isArray(p.networth_t) && p.networth_t.length > 1
   );
   if (withSeries.length === 0) {
-    container.innerHTML = `<div class="empty-state">暂无分钟级个人净资产序列数据</div>`;
+    container.innerHTML = `<div class="empty-state">${
+      report.is_parsed === false ? "需要先解析录像" : "暂无分钟级个人净资产序列数据"
+    }</div>`;
     if (legendEl) legendEl.innerHTML = "";
     return;
   }
@@ -12334,6 +12496,12 @@ function renderMinimap(report) {
   const svgContainer = document.getElementById("minimap-svg-container");
   const sideContainer = document.getElementById("minimap-stats-side");
   if (!svgContainer || !sideContainer) return;
+
+  if (report.is_parsed === false || report.deep_forensics?.available === false) {
+    svgContainer.innerHTML = `<div class="empty-state compact">需要先解析录像</div>`;
+    sideContainer.innerHTML = `<div class="empty-state compact">需要先解析录像</div>`;
+    return;
+  }
 
   const { side, sideZh, own, opp } = getOwnAndOppPlayers(report);
   const visionData = report.vision_and_map_data || {};
@@ -12625,9 +12793,12 @@ function renderDamageMatrix(report) {
  */
 function buildPhaseSpecificDeepAuditHtml(activePd, report) {
   if (!activePd || !report) return "";
+  const df = report.deep_forensics || {};
+  if (report.is_parsed === false || activePd.available === false || df.available === false) {
+    return `<div class="empty-state compact">需要先解析录像</div>`;
+  }
   const { side, sideZh, own } = getOwnAndOppPlayers(report);
   const oppZh = side === "radiant" ? "夜魇" : "天辉";
-  const df = report.deep_forensics || {};
   const phaseKey = activePd.key;
 
   const LANE_BULLY_HEROES = new Set([
@@ -13295,6 +13466,16 @@ function renderPhaseSection(report) {
 
   const rawPhases = report.phases_data || [];
   const phasesList = Array.isArray(rawPhases) ? rawPhases : Object.values(rawPhases);
+  if (
+    report.is_parsed === false ||
+    rawPhases?.available === false ||
+    (phasesList.length > 0 && phasesList.every((pd) => pd && pd.available === false))
+  ) {
+    tabsBar.innerHTML = "";
+    if (roadmapBox) roadmapBox.innerHTML = "";
+    panelBox.innerHTML = `<div class="empty-state compact">需要先解析录像</div>`;
+    return;
+  }
   if (phasesList.length === 0) {
     tabsBar.innerHTML = "";
     if (roadmapBox) roadmapBox.innerHTML = "";
@@ -14700,7 +14881,11 @@ function renderSingleForensicCard(p, { grokPlayer, isTopCulprit, isMvp }) {
   const dmgPerGold = p.net_worth ? (p.hero_damage / p.net_worth).toFixed(2) : "0.00";
 
   // Merge micro execution headline badges inline into the top bar to save a full horizontal row
-  const inlineMicroBadgesHtml = (p.hero_execution_audit?.headline_badges || [])
+  const inlineMicroBadgesHtml = (
+    p.hero_execution_audit?.available === false
+      ? []
+      : p.hero_execution_audit?.headline_badges || []
+  )
     .map((b) => {
       const txt = typeof b === "string" ? b : b?.text || "";
       const tone = typeof b === "object" && b !== null ? b.tone : "";
@@ -16033,13 +16218,26 @@ function renderFocusFireMatrix(report) {
   const { side, sideZh, oppZh } = getOwnAndOppPlayers(report);
   const oppSide = side === "radiant" ? "dire" : "radiant";
   const ffRoot = report.deep_forensics?.focus_fire_matrix;
-  if (!ffRoot) {
-    container.innerHTML = `<div class="empty-state compact">暂无录像级 5v5 集火流向矩阵数据</div>`;
+  if (
+    report.is_parsed === false ||
+    report.deep_forensics?.available === false ||
+    !ffRoot ||
+    ffRoot.available === false
+  ) {
+    container.innerHTML = `<div class="empty-state compact">${
+      report.is_parsed === false || report.deep_forensics?.available === false || ffRoot?.available === false
+        ? "需要先解析录像"
+        : "暂无录像级 5v5 集火流向矩阵数据"
+    }</div>`;
     return;
   }
 
   const activeSideKey = state.focusMatrixSide === "opp" ? oppSide : side;
   const mat = ffRoot[activeSideKey];
+  if (mat?.available === false) {
+    container.innerHTML = `<div class="empty-state compact">需要先解析录像</div>`;
+    return;
+  }
   if (!mat || !Array.isArray(mat.rows) || mat.rows.length === 0) {
     container.innerHTML = `<div class="empty-state compact">暂无该阵营集火伤害分布记录</div>`;
     return;
@@ -16192,26 +16390,73 @@ function openSharePosterDialog(report) {
   const fmtShareOrNa = (val) => (val == null ? "无数据" : `${Number(val).toFixed(1)}%`);
 
   const df = report.deep_forensics || {};
-  const rawExec = df.hero_execution_by_side?.[side];
-  const microExec = Array.isArray(rawExec)
-    ? rawExec
-        .map((x) => {
-          const u = (x.ult_audits || [])[0];
-          return u
-            ? `${x.hero_short_zh}《${u.ability_zh}》释放${u.casts ?? 0}次(命中${u.hits ?? 0}${u.unit_label || "人次"})`
-            : "";
-        })
-        .filter(Boolean)
-        .join("；")
-    : rawExec?.summary || "";
-  const microSaves = df.unpressed_saves_by_side?.[side]?.side_verdict || "";
-  const microSpace = df.map_space_by_side?.[side]?.side_verdict || "";
-  const microVis = df.support_vision_by_side?.[side]?.posture_verdict || "";
-  const microStack = df.stacking_and_smoke_by_side?.[side]?.stack_verdict || "";
-  const microSmoke = df.stacking_and_smoke_by_side?.[side]?.smoke_verdict || "";
-  const microTp = df.tp_rotation_by_side?.[side]?.tp_verdict || "";
-  const microMirror = df.role_mirror_by_side?.[side]?.side_verdict || "";
-  const microMacro = df.macro_objectives_by_side?.[side]?.side_verdict || "";
+  const dfShareOk = df.available !== false && report.is_parsed !== false;
+  const rawExec =
+    dfShareOk && df.hero_execution_by_side?.available !== false
+      ? df.hero_execution_by_side?.[side]
+      : null;
+  const microExec =
+    rawExec?.available === false
+      ? ""
+      : Array.isArray(rawExec)
+      ? rawExec
+          .map((x) => {
+            const u = (x.ult_audits || [])[0];
+            return u
+              ? `${x.hero_short_zh}《${u.ability_zh}》释放${u.casts ?? 0}次(命中${u.hits ?? 0}${u.unit_label || "人次"})`
+              : "";
+          })
+          .filter(Boolean)
+          .join("；")
+      : rawExec?.summary || "";
+  const microSaves =
+    dfShareOk &&
+    df.unpressed_saves_by_side?.available !== false &&
+    df.unpressed_saves_by_side?.[side]?.available !== false
+      ? df.unpressed_saves_by_side?.[side]?.side_verdict || ""
+      : "";
+  const microSpace =
+    dfShareOk &&
+    df.map_space_by_side?.available !== false &&
+    df.map_space_by_side?.[side]?.available !== false
+      ? df.map_space_by_side?.[side]?.side_verdict || ""
+      : "";
+  const microVis =
+    dfShareOk &&
+    df.support_vision_by_side?.available !== false &&
+    df.support_vision_by_side?.[side]?.available !== false
+      ? df.support_vision_by_side?.[side]?.posture_verdict || ""
+      : "";
+  const microStack =
+    dfShareOk &&
+    df.stacking_and_smoke_by_side?.available !== false &&
+    df.stacking_and_smoke_by_side?.[side]?.available !== false
+      ? df.stacking_and_smoke_by_side?.[side]?.stack_verdict || ""
+      : "";
+  const microSmoke =
+    dfShareOk &&
+    df.stacking_and_smoke_by_side?.available !== false &&
+    df.stacking_and_smoke_by_side?.[side]?.available !== false
+      ? df.stacking_and_smoke_by_side?.[side]?.smoke_verdict || ""
+      : "";
+  const microTp =
+    dfShareOk &&
+    df.tp_rotation_by_side?.available !== false &&
+    df.tp_rotation_by_side?.[side]?.available !== false
+      ? df.tp_rotation_by_side?.[side]?.tp_verdict || ""
+      : "";
+  const microMirror =
+    dfShareOk &&
+    df.role_mirror_by_side?.available !== false &&
+    df.role_mirror_by_side?.[side]?.available !== false
+      ? df.role_mirror_by_side?.[side]?.side_verdict || ""
+      : "";
+  const microMacro =
+    dfShareOk &&
+    df.macro_objectives_by_side?.available !== false &&
+    df.macro_objectives_by_side?.[side]?.available !== false
+      ? df.macro_objectives_by_side?.[side]?.side_verdict || ""
+      : "";
   const shareUrl = getPublicShareUrl(report.match_id);
 
   const lines = won
@@ -17117,7 +17362,12 @@ function drawNanoBananaIllustratedPosterCanvas(ctxInfo, artData, loadedImg) {
   const nemList = ((p.killed_by_breakdown?.heroes || []).slice(0, 3))
     .map((v) => `${v.hero_short_zh}×${v.count}`)
     .join(" · ");
-  const execBadges = ((p.hero_execution_audit?.headline_badges || []).slice(0, 2))
+  const execBadges = (
+    (p.hero_execution_audit?.available === false
+      ? []
+      : p.hero_execution_audit?.headline_badges || []
+    ).slice(0, 2)
+  )
     .map((b) => (typeof b === "string" ? b : b?.text || ""))
     .filter(Boolean)
     .join(" ｜ ");
