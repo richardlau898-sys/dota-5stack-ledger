@@ -38,10 +38,16 @@ jobs:
         run: python3 tools/check_engine_version.py
 
       - name: Run unit tests
+        env:
+          PYTHONPATH: tools/no_network_site:.
+          DOTA_TMP_DIR: ${{ runner.temp }}/dota_test_reports
         run: python3 -m unittest discover -s tests -v
 
       - name: Check frontend syntax
         run: node --check static/app.js
 
       - name: Run healthcheck audit
+        env:
+          PYTHONPATH: tools/no_network_site:.
+          DOTA_TMP_DIR: ${{ runner.temp }}/dota_test_reports
         run: python3 healthcheck_audit.py
